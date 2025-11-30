@@ -6,7 +6,6 @@ import cz.phsoft.hokej.models.services.PlayerService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/players")
@@ -21,13 +20,13 @@ public class PlayerController {
         this.playerMapper = playerMapper;
     }
 
-    // GET all
+    // GET all players
     @GetMapping
     public List<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers()
                 .stream()
                 .map(playerMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // GET by ID
@@ -36,25 +35,33 @@ public class PlayerController {
         return playerMapper.toDTO(playerService.getPlayerById(id));
     }
 
-    // POST create
+    // CREATE new player
     @PostMapping
-    public PlayerDTO createPlayer(@RequestBody PlayerDTO playerDTO) {
+    public PlayerDTO createPlayer(@RequestBody PlayerDTO dto) {
         return playerMapper.toDTO(
-                playerService.createPlayer(playerMapper.toEntity(playerDTO))
+                playerService.createPlayer(playerMapper.toEntity(dto))
         );
     }
 
-    // PUT update
+    // UPDATE player
     @PutMapping("/{id}")
-    public PlayerDTO updatePlayer(@PathVariable Long id, @RequestBody PlayerDTO playerDTO) {
-        return playerMapper.toDTO(
-                playerService.updatePlayer(id, playerMapper.toEntity(playerDTO))
-        );
+    public PlayerDTO updatePlayer(@PathVariable Long id, @RequestBody PlayerDTO dto) {
+
+        // Map DTO → Entity (bez hesla)
+        var newEntity = playerMapper.toEntity(dto);
+
+        // Update uloženého hráče
+        var updated = playerService.updatePlayer(id, newEntity);
+
+        return playerMapper.toDTO(updated);
     }
 
-    // DELETE
+    // DELETE player
     @DeleteMapping("/{id}")
     public void deletePlayer(@PathVariable Long id) {
         playerService.deletePlayer(id);
     }
+
+    
+
 }

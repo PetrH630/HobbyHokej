@@ -9,20 +9,17 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface PlayerMapper {
 
-            // Entity → DTO
-        @Mapping(source = "id", target = "id")
-        @Mapping(target = "fullName", ignore = true) // fullName se generuje v DTO
+        // Entity → DTO (heslo se neposílá)
+        @Mapping(target = "fullName", ignore = true) // generuje se v DTO
         PlayerDTO toDTO(PlayerEntity entity);
 
-        // DTO → Entity
-        @Mapping(source = "id", target = "id")
+        // DTO → Entity (heslo se mapuje, pokud existuje)
         PlayerEntity toEntity(PlayerDTO dto);
 
-        // Aktualizace DTO (ignorujeme fullName)
+        // Aktualizace existujícího DTO (ignorujeme fullName)
         @Mapping(target = "fullName", ignore = true)
         void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
 
-        // Aktualizace Entity
-        @Mapping(source = "id", target = "id")
+        // Aktualizace existující Entity (heslo se mapuje, fullName není pole v Entity)
         void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
-    }
+}

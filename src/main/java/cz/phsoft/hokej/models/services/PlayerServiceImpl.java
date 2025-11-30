@@ -2,11 +2,9 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.models.services.PlayerService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -30,14 +28,25 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public PlayerEntity createPlayer(PlayerEntity player) {
+        // Můžeš tu přidat kontrolu jedinečného e-mailu nebo validace
         return playerRepository.save(player);
     }
 
     @Override
     public PlayerEntity updatePlayer(Long id, PlayerEntity newData) {
         PlayerEntity existing = getPlayerById(id);
+
         existing.setName(newData.getName());
         existing.setSurname(newData.getSurname());
+        existing.setEmail(newData.getEmail());
+        existing.setPhone(newData.getPhone());
+        existing.setType(newData.getType());
+
+        // Heslo měníme jen pokud je nové poskytnuto
+        if (newData.getPlayerPassword() != null && !newData.getPlayerPassword().isBlank()) {
+            existing.setPlayerPassword(newData.getPlayerPassword());
+        }
+
         return playerRepository.save(existing);
     }
 

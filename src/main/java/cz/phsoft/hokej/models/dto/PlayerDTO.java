@@ -1,64 +1,58 @@
 package cz.phsoft.hokej.models.dto;
 
+import cz.phsoft.hokej.data.enums.PlayerType;
+
 public class PlayerDTO {
 
     private Long id;
     private String name;
     private String surname;
     private String fullName;
+    private String email;
+    private String phone;
+    private PlayerType type;
 
-    public PlayerDTO() {
-    }
+    public PlayerDTO() {}
 
-    public PlayerDTO(Long id, String name, String surname) {
+    public PlayerDTO(Long id, String name, String surname, String email, String phone, PlayerType type) {
         this.id = id;
         this.name = name;
         this.surname = surname;
-        updateFullName();
+        this.email = email;
+        this.phone = phone;
+        this.type = type;
+        this.fullName = name + " " + surname;
     }
 
-    // --- Gettery a settery ---
+    // --- Gettery a Settery ---
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
+    public String getName() { return name; }
     public void setName(String name) {
         this.name = name;
         updateFullName();
     }
 
-    public String getSurname() {
-        return surname;
-    }
-
+    public String getSurname() { return surname; }
     public void setSurname(String surname) {
         this.surname = surname;
         updateFullName();
     }
 
-    public String getFullName() {
-        return fullName;
-    }
+    public String getFullName() { return fullName; }
 
-    // fullName je readonly → žádný setter
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public PlayerType getType() { return type; }
+    public void setType(PlayerType type) { this.type = type; }
+
     private void updateFullName() {
-        if (name != null && surname != null) {
-            this.fullName = name + " " + surname;
-        } else if (name != null) {
-            this.fullName = name;
-        } else if (surname != null) {
-            this.fullName = surname;
-        } else {
-            this.fullName = "";
-        }
+        this.fullName = (name != null ? name : "") + " " + (surname != null ? surname : "");
     }
 }
