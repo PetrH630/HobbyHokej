@@ -1,31 +1,31 @@
 package cz.phsoft.hokej.security;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import cz.phsoft.hokej.data.entities.UserEntity;
+import cz.phsoft.hokej.data.repositories.UserRepository;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.userdetails.User;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final PlayerRepository playerRepository;
+    private final UserRepository repo;
 
-    public CustomUserDetailsService(PlayerRepository playerRepository) {
-        this.playerRepository = playerRepository;
+    public CustomUserDetailsService(UserRepository repo) {
+        this.repo = repo;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        PlayerEntity player = playerRepository.findByEmail(email)
+
+        UserEntity user = repo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
         return User.builder()
-                .username(player.getEmail())
-                .password(player.getPlayerPassword())
-                .disabled(!player.isEnabled())
-                .authorities("ROLE_" + player.getRole().name())
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getRole()) // ADMIN, USER
+                .disabled(!user.isEnabled())
                 .build();
     }
 }
+

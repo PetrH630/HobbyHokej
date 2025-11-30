@@ -1,12 +1,10 @@
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.models.dto.LoginRequest;
 import cz.phsoft.hokej.models.dto.LoginResponse;
 import cz.phsoft.hokej.models.dto.RegisterRequest;
 import cz.phsoft.hokej.models.dto.RegisterResponse;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.Role;
-import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.security.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;

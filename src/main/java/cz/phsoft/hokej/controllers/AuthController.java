@@ -2,49 +2,38 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.LoginRequest;
 import cz.phsoft.hokej.models.dto.LoginResponse;
-import cz.phsoft.hokej.models.dto.RegisterRequest;
-import cz.phsoft.hokej.models.dto.RegisterResponse;
-import cz.phsoft.hokej.models.dto.RegistrationDTO;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.models.services.AuthService;
+import cz.phsoft.hokej.models.services.UserService;
 import cz.phsoft.hokej.security.JwtTokenProvider;
 import org.springframework.http.ResponseEntity;
-import cz.phsoft.hokej.data.enums.PlayerType;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
 
-    public AuthController(AuthService authService, JwtTokenProvider tokenProvider) {
-        this.authService = authService;
+    public AuthController(AuthenticationManager authenticationManager,
+                          JwtTokenProvider tokenProvider) {
+        this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
     }
 
-    // --- REGISTRACE ---
-    @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegistrationDTO req) {
-        // Vytvoření RegisterRequest přes parametrizovaný konstruktor
-        RegisterRequest request = new RegisterRequest(
-                req.getName(),
-                req.getSurname(),
-                req.getEmail(),
-                req.getPhone(),
-                req.getPassword(),
-                PlayerType.BASIC // Změň podle potřeby na VIP/STANDARD
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
+
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        req.getEmail(),
+                        req.getPassword()
+                )
         );
 
-        RegisterResponse response = authService.register(request);
-        return ResponseEntity.ok(response);
-    }
+        String token = tokenProvider.generateToken(auth);
 
-    // --- LOGIN ---
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        LoginResponse response = authService.login(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new LoginResponse(req.getEmail(), token));
     }
 }
