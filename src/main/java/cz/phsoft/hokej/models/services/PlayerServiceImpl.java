@@ -2,6 +2,8 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.data.enums.Role;
+import cz.phsoft.hokej.data.enums.PlayerType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,12 +25,11 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public PlayerEntity getPlayerById(Long id) {
         return playerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Hráč nenalezen: " + id));
+                .orElseThrow(() -> new RuntimeException("Player not found: " + id));
     }
 
     @Override
     public PlayerEntity createPlayer(PlayerEntity player) {
-        // Můžeš tu přidat kontrolu jedinečného e-mailu nebo validace
         return playerRepository.save(player);
     }
 
@@ -41,8 +42,8 @@ public class PlayerServiceImpl implements PlayerService {
         existing.setEmail(newData.getEmail());
         existing.setPhone(newData.getPhone());
         existing.setType(newData.getType());
+        existing.setRole(newData.getRole());
 
-        // Heslo měníme jen pokud je nové poskytnuto
         if (newData.getPlayerPassword() != null && !newData.getPlayerPassword().isBlank()) {
             existing.setPlayerPassword(newData.getPlayerPassword());
         }

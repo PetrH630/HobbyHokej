@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.PlayerType;
+import cz.phsoft.hokej.data.enums.Role;
 import jakarta.persistence.*;
 
 @Entity
@@ -29,25 +30,25 @@ public class PlayerEntity {
     @Column(nullable = false)
     private PlayerType type; // VIP, STANDARD, BASIC
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role; // PLAYER, MANAGER, ADMIN
+
     private String fullName;
+
+    private boolean enabled = false; // false = čeká na schválení
 
     public PlayerEntity() {}
 
-    // Gettery a Settery
+    // Gettery a Settery + updateFullName
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
-    public void setName(String name) {
-        this.name = name;
-        updateFullName();
-    }
+    public void setName(String name) { this.name = name; updateFullName(); }
 
     public String getSurname() { return surname; }
-    public void setSurname(String surname) {
-        this.surname = surname;
-        updateFullName();
-    }
+    public void setSurname(String surname) { this.surname = surname; updateFullName(); }
 
     public String getFullName() { return fullName; }
 
@@ -63,7 +64,11 @@ public class PlayerEntity {
     public PlayerType getType() { return type; }
     public void setType(PlayerType type) { this.type = type; }
 
-    private void updateFullName() {
-        this.fullName = name + " " + surname;
-    }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+    private void updateFullName() { this.fullName = name + " " + surname; }
 }
