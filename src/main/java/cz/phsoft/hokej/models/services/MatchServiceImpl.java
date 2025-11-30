@@ -32,7 +32,14 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     public List<MatchDTO> getUpcomingMatches() {
-        return matchRepository.findByDateAfterOrderByDateAsc(LocalDateTime.now())
+        return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
+                .stream()
+                .map(matchMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<MatchDTO> getPastMatches() {
+        return matchRepository.findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime.now())
                 .stream()
                 .map(matchMapper::toDTO)
                 .collect(Collectors.toList());
@@ -40,7 +47,7 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     public MatchDTO getNextMatch() {
-        return matchRepository.findByDateAfterOrderByDateAsc(LocalDateTime.now())
+        return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
                 .stream()
                 .findFirst()
                 .map(matchMapper::toDTO)

@@ -10,12 +10,12 @@ import org.mapstruct.MappingTarget;
 public interface PlayerMapper {
 
             // Entity → DTO
-        @Mapping(source = "playerId", target = "id")
+        @Mapping(source = "id", target = "id")
         @Mapping(target = "fullName", ignore = true) // fullName se generuje v DTO
         PlayerDTO toDTO(PlayerEntity entity);
 
         // DTO → Entity
-        @Mapping(source = "id", target = "playerId")
+        @Mapping(source = "id", target = "id")
         PlayerEntity toEntity(PlayerDTO dto);
 
         // Aktualizace DTO (ignorujeme fullName)
@@ -23,6 +23,6 @@ public interface PlayerMapper {
         void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
 
         // Aktualizace Entity
-        @Mapping(source = "id", target = "playerId")
+        @Mapping(source = "id", target = "id")
         void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
     }

@@ -5,6 +5,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable()) // vypnout CSRF pro testování
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // všechno volně
+        return http.build();
+    }
+}
+
+/*
 @Configuration
 public class SecurityConfig {
 
@@ -20,3 +34,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+*/

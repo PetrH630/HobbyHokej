@@ -7,6 +7,7 @@ import java.util.List;
 public interface MatchService {
     List<MatchDTO> getAllMatches();
     List<MatchDTO> getUpcomingMatches();
+    List<MatchDTO> getPastMatches();
     MatchDTO getNextMatch();
     MatchDTO getMatchById(Long id);
     MatchDTO createMatch(MatchDTO dto);

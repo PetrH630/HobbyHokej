@@ -30,6 +30,12 @@ public class MatchController {
         return matchService.getUpcomingMatches();
     }
 
+    // prošlé zápasy
+    @GetMapping("/past")
+    public List<MatchDTO> getPastMatches() {
+        return matchService.getPastMatches();
+    }
+
     // první aktuální zápas
     @GetMapping("/next")
     public MatchDTO getNextMatch() {

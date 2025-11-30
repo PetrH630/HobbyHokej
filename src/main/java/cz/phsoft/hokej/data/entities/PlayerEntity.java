@@ -7,7 +7,7 @@ public class PlayerEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long playerId;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
@@ -20,8 +20,8 @@ public class PlayerEntity {
     public PlayerEntity() {}
 
     // Gettery a settery
-    public Long getPlayerId() { return playerId; }
-    public void setPlayerId(Long playerId) { this.playerId = playerId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; updateFullName(); }

@@ -9,7 +9,7 @@ public class MatchEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long matchId;
+    private Long id;
 
     @Column(nullable = false)
     private LocalDateTime dateTime;
@@ -22,8 +22,8 @@ public class MatchEntity {
     public MatchEntity() {}
 
     // Gettery a settery
-    public Long getMatchId() { return matchId; }
-    public void setMatchId(Long matchId) { this.matchId = matchId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public LocalDateTime getDateTime() { return dateTime; }
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
