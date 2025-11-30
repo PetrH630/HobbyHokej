@@ -6,22 +6,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "matches")
 public class MatchEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long matchId;
 
-    @Column(nullable = false, unique = true)
-    private LocalDateTime datumCas;
+    @Column(nullable = false)
+    private LocalDateTime date;
 
-    @ManyToMany
-    @JoinTable(
-            name = "match_player",
-            joinColumns = @JoinColumn(name = "match_id"),
-            inverseJoinColumns = @JoinColumn(name = "player_id")
-    )
-    private Set<PlayerEntity> players = new HashSet<>();
+    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL)
+    private Set<MatchRegistrationEntity> registrations = new HashSet<>();
 
     public Long getMatchId() {
         return matchId;
@@ -31,19 +27,19 @@ public class MatchEntity {
         this.matchId = matchId;
     }
 
-    public LocalDateTime getDatumCas() {
-        return datumCas;
+    public LocalDateTime getDate() {
+        return date;
     }
 
-    public void setDatumCas(LocalDateTime datumCas) {
-        this.datumCas = datumCas;
+    public void setDate(LocalDateTime date) {
+        this.date = date;
     }
 
-    public Set<PlayerEntity> getPlayers() {
-        return players;
+    public Set<MatchRegistrationEntity> getRegistrations() {
+        return registrations;
     }
 
-    public void setPlayers(Set<PlayerEntity> players) {
-        this.players = players;
+    public void setRegistrations(Set<MatchRegistrationEntity> registrations) {
+        this.registrations = registrations;
     }
 }
