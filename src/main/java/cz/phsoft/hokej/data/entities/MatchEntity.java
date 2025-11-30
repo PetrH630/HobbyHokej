@@ -2,8 +2,6 @@ package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "matches")
@@ -14,32 +12,25 @@ public class MatchEntity {
     private Long matchId;
 
     @Column(nullable = false)
-    private LocalDateTime date;
+    private LocalDateTime dateTime;
 
-    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL)
-    private Set<MatchRegistrationEntity> registrations = new HashSet<>();
+    @Column(nullable = false)
+    private String location;
 
-    public Long getMatchId() {
-        return matchId;
-    }
+    private String description;
 
-    public void setMatchId(Long matchId) {
-        this.matchId = matchId;
-    }
+    public MatchEntity() {}
 
-    public LocalDateTime getDate() {
-        return date;
-    }
+    // Gettery a settery
+    public Long getMatchId() { return matchId; }
+    public void setMatchId(Long matchId) { this.matchId = matchId; }
 
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
-    public Set<MatchRegistrationEntity> getRegistrations() {
-        return registrations;
-    }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 
-    public void setRegistrations(Set<MatchRegistrationEntity> registrations) {
-        this.registrations = registrations;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

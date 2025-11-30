@@ -1,8 +1,6 @@
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 public class PlayerEntity {
@@ -17,48 +15,31 @@ public class PlayerEntity {
     @Column(nullable = false)
     private String surname;
 
-    private String fullName = name + " " + surname;
+    private String fullName;
 
-    @ManyToMany(mappedBy = "players")
-    private Set<MatchEntity> matches = new HashSet<>();
+    public PlayerEntity() {}
 
-    public Long getPlayerId() {
-        return playerId;
-    }
+    // Gettery a settery
+    public Long getPlayerId() { return playerId; }
+    public void setPlayerId(Long playerId) { this.playerId = playerId; }
 
-    public void setPlayerId(Long playerId) {
-        this.playerId = playerId;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; updateFullName(); }
 
-    public String getName() {
-        return name;
-    }
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; updateFullName(); }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getFullName() { return fullName; }
 
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public Set<MatchEntity> getMatches() {
-        return matches;
-    }
-
-    public void setMatches(Set<MatchEntity> matches) {
-        this.matches = matches;
+    private void updateFullName() {
+        if (name != null && surname != null) {
+            this.fullName = name + " " + surname;
+        } else if (name != null) {
+            this.fullName = name;
+        } else if (surname != null) {
+            this.fullName = surname;
+        } else {
+            this.fullName = "";
+        }
     }
 }
