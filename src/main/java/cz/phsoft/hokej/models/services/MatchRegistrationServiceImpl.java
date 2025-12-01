@@ -56,7 +56,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return registrationRepository.findByMatchId(matchId);
     }
 
-    // --- pomocná metoda ---
+        // --- pomocná metoda ---
     private MatchRegistrationEntity saveStatus(Long matchId, Long playerId, PlayerMatchStatus status,
                                                ExcuseReason excuseReason, String note) {
 
@@ -75,4 +75,16 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         return registrationRepository.save(registration);
     }
+    @Override
+    public List<MatchRegistrationEntity> getAllRegistrations() {
+        return registrationRepository.findAll();
+    }
+
+    @Override
+    public List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId) {
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Player not found"));
+        return registrationRepository.findByPlayer(player);
+    }
+
 }

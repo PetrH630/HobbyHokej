@@ -4,6 +4,7 @@ import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "player_entity")
 public class PlayerEntity {
 
     @Id
@@ -23,7 +24,17 @@ public class PlayerEntity {
     private String fullName;
 
 
-    public PlayerEntity() {}
+    public PlayerEntity() {
+        this.type = PlayerType.BASIC;
+    }
+
+    public PlayerEntity(String name, String surname, PlayerType type) {
+        this.name = name;
+        this.surname = surname;
+        this.type = type;
+        this.fullName = name + " " + surname;
+
+    }
 
     // Gettery a Settery + updateFullName
     public Long getId() { return id; }

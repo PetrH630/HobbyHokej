@@ -1,7 +1,6 @@
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.PlayerType;
-import cz.phsoft.hokej.data.enums.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 

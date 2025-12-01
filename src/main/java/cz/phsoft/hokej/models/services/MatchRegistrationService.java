@@ -19,4 +19,8 @@ public interface MatchRegistrationService {
 
     // Seznam všech registrací pro zápas
     List<MatchRegistrationEntity> getRegistrationsForMatch(Long matchId);
+
+    List<MatchRegistrationEntity> getAllRegistrations();
+
+    List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId);
 }

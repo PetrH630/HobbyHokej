@@ -38,9 +38,15 @@ public class MatchController {
     }
 
     // první aktuální zápas
-    @GetMapping("/next")
+    @GetMapping("/dalsi")
     public MatchDTO getNextMatch() {
         return matchService.getNextMatch();
+    }
+
+    // POST přidat zápas
+    @PostMapping
+    public MatchDTO createMatch(@Valid @RequestBody MatchDTO dto) {
+        return matchService.createMatch(dto);
     }
 
     // GET podle ID
@@ -49,11 +55,7 @@ public class MatchController {
         return matchService.getMatchById(id);
     }
 
-    // POST přidat zápas
-    @PostMapping
-    public MatchDTO createMatch(@Valid @RequestBody MatchDTO dto) {
-        return matchService.createMatch(dto);
-    }
+
 
     // PUT editovat zápas
     @PutMapping("/{id}")

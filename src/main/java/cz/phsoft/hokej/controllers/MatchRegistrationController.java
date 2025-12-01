@@ -34,6 +34,7 @@ public class MatchRegistrationController {
         return service.excusePlayer(matchId, playerId, note, reason);
     }
 
+    // --- Dotazy ---
     @GetMapping("/last-status")
     public MatchRegistrationEntity lastStatus(@RequestParam Long matchId, @RequestParam Long playerId) {
         return service.getLastStatus(matchId, playerId);
@@ -42,5 +43,16 @@ public class MatchRegistrationController {
     @GetMapping("/for-match")
     public List<MatchRegistrationEntity> forMatch(@RequestParam Long matchId) {
         return service.getRegistrationsForMatch(matchId);
+    }
+
+    // --- Nové endpointy ---
+    @GetMapping("/all")
+    public List<MatchRegistrationEntity> getAllRegistrations() {
+        return service.getAllRegistrations();
+    }
+
+    @GetMapping("/for-player")
+    public List<MatchRegistrationEntity> forPlayer(@RequestParam Long playerId) {
+        return service.getRegistrationsForPlayer(playerId);
     }
 }

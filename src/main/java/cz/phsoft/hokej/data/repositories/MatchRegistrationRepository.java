@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.data.repositories;
 
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,5 +18,6 @@ import java.util.Optional;
         List<MatchRegistrationEntity> findByMatchId(Long matchId);
 
         // Volitelně: všechny registrace pro určitého hráče
-        List<MatchRegistrationEntity> findByPlayerId(Long playerId);
+        List<MatchRegistrationEntity> findByPlayer(PlayerEntity player);
+
     }

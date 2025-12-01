@@ -15,6 +15,7 @@ public class MatchRegistrationDTO {
     @NotNull(message = "ID hráče je povinné.")
     @Positive(message = "ID hráče musí být kladné.")
     private Long playerId;
+
     private PlayerMatchStatus status;
     private ExcuseReason excuseReason; // pouze pokud status = EXCUSED
     private String excuseNote;

@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.models.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +12,7 @@ public class MatchDTO {
 
     private Long id;
     @NotNull(message = "Datum a čas zápasu je povinné.")
-    // @FutureOrPresent(message = "Datum zápasu musí být dnešní nebo budoucí.")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateTime;
 
     @NotBlank(message = "Místo zápasu je povinné.")
