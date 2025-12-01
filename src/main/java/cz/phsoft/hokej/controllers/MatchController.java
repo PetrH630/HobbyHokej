@@ -25,6 +25,12 @@ public class MatchController {
         return matchService.getAllMatches();
     }
 
+    // první aktuální zápas
+    @GetMapping("/next")
+    public MatchDTO getNextMatch() {
+        return matchService.getNextMatch();
+    }
+
     // aktuální zápasy (bez prošlých dat)
     @GetMapping("/upcoming")
     public List<MatchDTO> getUpcomingMatches() {
@@ -37,11 +43,6 @@ public class MatchController {
         return matchService.getPastMatches();
     }
 
-    // první aktuální zápas
-    @GetMapping("/dalsi")
-    public MatchDTO getNextMatch() {
-        return matchService.getNextMatch();
-    }
 
     // POST přidat zápas
     @PostMapping
@@ -54,7 +55,6 @@ public class MatchController {
     public MatchDTO getMatch(@PathVariable Long id) {
         return matchService.getMatchById(id);
     }
-
 
 
     // PUT editovat zápas
