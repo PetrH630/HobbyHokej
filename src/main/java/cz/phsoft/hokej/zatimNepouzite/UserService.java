@@ -1,3 +1,4 @@
+/*
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.UserEntity;
@@ -11,3 +12,4 @@ public interface UserService {
     List<UserEntity> getAllUsers();
     void deleteUser(Long id);
 }
+*/

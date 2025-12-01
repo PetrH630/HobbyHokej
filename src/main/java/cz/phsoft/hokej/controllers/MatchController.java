@@ -3,6 +3,7 @@ package cz.phsoft.hokej.controllers;
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
 import cz.phsoft.hokej.models.services.MatchService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,13 +51,13 @@ public class MatchController {
 
     // POST přidat zápas
     @PostMapping
-    public MatchDTO createMatch(@RequestBody MatchDTO dto) {
+    public MatchDTO createMatch(@Valid @RequestBody MatchDTO dto) {
         return matchService.createMatch(dto);
     }
 
     // PUT editovat zápas
     @PutMapping("/{id}")
-    public MatchDTO updateMatch(@PathVariable Long id, @RequestBody MatchDTO dto) {
+    public MatchDTO updateMatch(@PathVariable Long id, @Valid @RequestBody MatchDTO dto) {
         return matchService.updateMatch(id, dto);
     }
 

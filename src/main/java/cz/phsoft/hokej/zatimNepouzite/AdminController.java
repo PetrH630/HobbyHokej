@@ -1,3 +1,4 @@
+/*
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
@@ -36,3 +37,4 @@ public class AdminController {
         return playerRepository.save(player);
     }
 }
+*/

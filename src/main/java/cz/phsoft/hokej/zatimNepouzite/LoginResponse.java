@@ -1,4 +1,6 @@
+/*
 package cz.phsoft.hokej.models.dto;
+
 
 public class LoginResponse {
     private String email;
@@ -12,3 +14,4 @@ public class LoginResponse {
     public String getEmail() { return email; }
     public String getToken() { return token; }
 }
+*/

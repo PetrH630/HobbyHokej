@@ -1,3 +1,4 @@
+/*
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.PlayerType;
@@ -27,3 +28,4 @@ public class RegisterRequest {
     public String getPassword() { return password; }
     public PlayerType getType() { return type; }
 }
+*/

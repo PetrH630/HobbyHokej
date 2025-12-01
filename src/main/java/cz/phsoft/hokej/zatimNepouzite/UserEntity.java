@@ -1,3 +1,4 @@
+/*
 package cz.phsoft.hokej.data.entities;
 
 
@@ -49,3 +50,4 @@ public class UserEntity {
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }
+*/

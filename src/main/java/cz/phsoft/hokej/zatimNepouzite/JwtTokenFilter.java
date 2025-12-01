@@ -1,3 +1,4 @@
+/*
 package cz.phsoft.hokej.security;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,3 +41,4 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
+*/

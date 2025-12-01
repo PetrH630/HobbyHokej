@@ -1,11 +1,24 @@
 package cz.phsoft.hokej.models.dto;
 
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDateTime;
 
 public class MatchDTO {
+
     private Long id;
+    @NotNull(message = "Datum a čas zápasu je povinné.")
+    // @FutureOrPresent(message = "Datum zápasu musí být dnešní nebo budoucí.")
     private LocalDateTime dateTime;
+
+    @NotBlank(message = "Místo zápasu je povinné.")
+    @Size(min = 3, max = 100)
     private String location;
+
+    @Size(max = 255, message = "Popis může mít max 255 znaků.")
     private String description;
 
     // gettery a settery

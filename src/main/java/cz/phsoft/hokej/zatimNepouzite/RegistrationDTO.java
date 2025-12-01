@@ -1,3 +1,4 @@
+/*
 package cz.phsoft.hokej.models.dto;
 
 public class RegistrationDTO {
@@ -47,3 +48,4 @@ public class RegistrationDTO {
         this.password = password;
     }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package cz.phsoft.hokej.security;
 
 import io.jsonwebtoken.*;
@@ -42,3 +43,4 @@ public class JwtTokenProvider {
         }
     }
 }
+*/

@@ -1,0 +1,5 @@
+Get-ChildItem -Recurse -File -Include *.java |
+    ForEach-Object {
+        "`n`n# Soubor: $($_.FullName)`n`n" | Out-File vsechny_soubory.txt -Append -Encoding UTF8
+        Get-Content $_ | Out-File vsechny_soubory.txt -Append -Encoding UTF8
+    }

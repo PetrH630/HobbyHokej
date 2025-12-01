@@ -22,7 +22,6 @@ public class PlayerController {
     }
 
     // GET all players
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers()
@@ -48,7 +47,7 @@ public class PlayerController {
     // UPDATE player
     @PutMapping("/{id}")
     public PlayerDTO updatePlayer(@PathVariable Long id, @RequestBody PlayerDTO dto) {
-
+/*
         // Map DTO → Entity (bez hesla)
         var newEntity = playerMapper.toEntity(dto);
 
@@ -56,6 +55,11 @@ public class PlayerController {
         var updated = playerService.updatePlayer(id, newEntity);
 
         return playerMapper.toDTO(updated);
+  */
+        var entity = playerService.getPlayerById(id);
+        playerMapper.updatePlayerEntity(dto, entity);
+        return playerMapper.toDTO(entity);
+
     }
 
     // DELETE player

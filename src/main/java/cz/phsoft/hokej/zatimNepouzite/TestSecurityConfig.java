@@ -1,4 +1,6 @@
+/*
 package cz.phsoft.hokej.config;
+
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,3 +25,4 @@ public class TestSecurityConfig {
         };
     }
 }
+*/

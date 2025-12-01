@@ -2,10 +2,18 @@ package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class MatchRegistrationDTO {
     private Long id; // volitelné, při GET
+
+    @NotNull(message = "ID zápasu je povinné.")
+    @Positive(message = "ID zápasu musí být kladné.")
     private Long matchId;
+
+    @NotNull(message = "ID hráče je povinné.")
+    @Positive(message = "ID hráče musí být kladné.")
     private Long playerId;
     private PlayerMatchStatus status;
     private ExcuseReason excuseReason; // pouze pokud status = EXCUSED

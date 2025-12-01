@@ -1,3 +1,4 @@
+/*
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.LoginRequest;
@@ -37,3 +38,4 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponse(req.getEmail(), token));
     }
 }
+*/

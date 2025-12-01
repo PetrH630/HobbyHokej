@@ -1,4 +1,5 @@
-package cz.phsoft.hokej.services.impl;
+/*
+package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.UserEntity;
 import cz.phsoft.hokej.data.repositories.UserRepository;
@@ -39,3 +40,4 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 }
+*/

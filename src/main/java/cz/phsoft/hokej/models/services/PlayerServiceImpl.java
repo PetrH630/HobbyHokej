@@ -39,15 +39,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         existing.setName(newData.getName());
         existing.setSurname(newData.getSurname());
-        existing.setEmail(newData.getEmail());
-        existing.setPhone(newData.getPhone());
         existing.setType(newData.getType());
-        existing.setRole(newData.getRole());
-
-        if (newData.getPlayerPassword() != null && !newData.getPlayerPassword().isBlank()) {
-            existing.setPlayerPassword(newData.getPlayerPassword());
-        }
-
         return playerRepository.save(existing);
     }
 

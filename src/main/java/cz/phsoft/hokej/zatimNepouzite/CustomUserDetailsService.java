@@ -1,3 +1,4 @@
+/*
 package cz.phsoft.hokej.security;
 
 import cz.phsoft.hokej.data.entities.UserEntity;
@@ -29,3 +30,4 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 }
 
+*/
