@@ -2,10 +2,13 @@ package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-public class MatchRegistrationDTO {
+import java.time.LocalDateTime;
+
+public class MatchRegistrationHistoryDTO {
     private Long id; // volitelné, při GET
 
     @NotNull(message = "ID zápasu je povinné.")
@@ -20,10 +23,16 @@ public class MatchRegistrationDTO {
     private ExcuseReason excuseReason; // pouze pokud status = EXCUSED
     private String excuseNote;
 
-    @NotNull
+    private LocalDateTime createdAt;
+
     private String createdBy; // "user" nebo "system"
 
-    public MatchRegistrationDTO() {}
+    @NotNull
+    private String changedBy; // "user" nebo "system"
+
+    private LocalDateTime changedAt;
+
+    public MatchRegistrationHistoryDTO() {}
 
     // Gettery a settery
     public Long getId() { return id; }
@@ -45,7 +54,15 @@ public class MatchRegistrationDTO {
     public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
 
     public String getCreatedBy() { return createdBy; }
-
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getChangedBy() { return changedBy; }
+    public void setChangedBy(String changedBy) { this.changedBy = changedBy; }
+
+    public LocalDateTime getChangedAt() { return changedAt; }
+    public void setChangedAt(LocalDateTime changedAt) { this.changedAt = changedAt; }
 }
 

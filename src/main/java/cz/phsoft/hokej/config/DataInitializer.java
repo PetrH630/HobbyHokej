@@ -1,4 +1,6 @@
+/*
 package cz.phsoft.hokej.config;
+
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
@@ -73,10 +75,11 @@ public class DataInitializer {
             reg.setPlayer(player);
             reg.setStatus(PlayerMatchStatus.REGISTERED);
             reg.setTimestamp(LocalDateTime.now());
-            reg.setCreatedBy("system");
+            reg.setCreatedBy("user");
 
             matchRegistrationRepository.save(reg);
         }
     }
 
 }
+*/

@@ -33,4 +33,6 @@ public interface MatchRegistrationService {
 
     void recalcStatusesForMatch(Long matchId);
 
+
+
 }

@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.MatchDTO;
+import cz.phsoft.hokej.models.dto.MatchDetailDTO;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
 import cz.phsoft.hokej.models.services.MatchService;
 import jakarta.validation.Valid;
@@ -17,6 +18,12 @@ public class MatchController {
 
     public MatchController(MatchService matchService) {
         this.matchService = matchService;
+    }
+
+    // detail zápasu
+    @GetMapping("/matchDetail/{id}")
+    public MatchDetailDTO getMatchDetail(@PathVariable Long id) {
+        return matchService.getMatchDetail(id);
     }
 
     // všechny zápasy

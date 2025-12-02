@@ -1,0 +1,66 @@
+package cz.phsoft.hokej.models.dto;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class MatchDetailDTO {
+    private Long id;
+    private LocalDateTime dateTime;
+    private int maxPlayers;
+    private int inGamePlayers;
+    private int outGamePlayers;
+    private int waitingPlayers;
+    private int noActionPlayers;
+    private double pricePerRegisteredPlayer;
+    private int remainingSlots;
+
+    private List<String> registeredPlayers;
+    private List<String> reservedPlayers;
+    private List<String> unregisteredPlayers;
+    private List<String> excusedPlayers;
+    private List<String> noResponsePlayers;
+
+    // Gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
+    public int getMaxPlayers() { return maxPlayers; }
+    public void setMaxPlayers(int maxPlayers) { this.maxPlayers = maxPlayers; }
+
+    public double getPricePerRegisteredPlayer() { return pricePerRegisteredPlayer; }
+    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) { this.pricePerRegisteredPlayer = pricePerRegisteredPlayer; }
+
+    public int getRemainingSlots() { return remainingSlots; }
+    public void setRemainingSlots(int remainingSlots) { this.remainingSlots = remainingSlots; }
+
+    public List<String> getRegisteredPlayers() { return registeredPlayers; }
+    public void setRegisteredPlayers(List<String> registeredPlayers) { this.registeredPlayers = registeredPlayers; }
+
+    public List<String> getReservedPlayers() { return reservedPlayers; }
+    public void setReservedPlayers(List<String> reservedPlayers) { this.reservedPlayers = reservedPlayers; }
+
+    public List<String> getUnregisteredPlayers() { return unregisteredPlayers; }
+    public void setUnregisteredPlayers(List<String> unregisteredPlayers) { this.unregisteredPlayers = unregisteredPlayers; }
+
+    public List<String> getExcusedPlayers() { return excusedPlayers; }
+    public void setExcusedPlayers(List<String> excusedPlayers) { this.excusedPlayers = excusedPlayers; }
+
+    public int getInGamePlayers() { return inGamePlayers;  }
+    public void setInGamePlayers(int inGamePlayers) { this.inGamePlayers = inGamePlayers; }
+
+    public int getOutGamePlayers() { return outGamePlayers; }
+    public void setOutGamePlayers(int outGamePlayers) { this.outGamePlayers = outGamePlayers; }
+
+    public int getNoActionPlayers() { return noActionPlayers; }
+    public void setNoActionPlayers(int noActionPlayers) { this.noActionPlayers = noActionPlayers; }
+
+    public int getWaitingPlayers() { return waitingPlayers; }
+    public void setWaitingPlayers(int waitingPlayers) { this.waitingPlayers = waitingPlayers; }
+
+    public List<String> getNoResponsePlayers() { return noResponsePlayers; }
+
+    public void setNoResponsePlayers(List<String> noResponsePlayers) { this.noResponsePlayers = noResponsePlayers; }
+}

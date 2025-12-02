@@ -30,11 +30,20 @@ public class MatchRegistrationHistoryEntity {
 
     private String excuseNote;
 
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false, updatable = false)
+    private String createdBy; // "user" nebo "system"
+
     @Column(nullable = false)
     private String changedBy;
 
     @Column(nullable = false)
-    private LocalDateTime changedAt;
+    private LocalDateTime changedAt = LocalDateTime.now();
+
+    @Column(name = "registration_order")
+    private Integer registrationOrder;
 
 
 
@@ -59,9 +68,18 @@ public class MatchRegistrationHistoryEntity {
     public String getExcuseNote() { return excuseNote; }
     public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
 
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
     public String getChangedBy() { return changedBy; }
     public void setChangedBy(String changedBy) { this.changedBy = changedBy; }
 
     public LocalDateTime getChangedAt() { return changedAt; }
     public void setChangedAt(LocalDateTime changedAt) { this.changedAt = changedAt; }
+
+    public Integer getRegistrationOrder() { return registrationOrder; }
+    public void setRegistrationOrder(Integer registrationOrder) { this.registrationOrder = registrationOrder; }
 }
