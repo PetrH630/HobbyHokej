@@ -22,6 +22,9 @@ public class MatchEntity {
     @Column(nullable = false)
     private Integer maxPlayers;
 
+    @Column(nullable = false)
+    private Integer price;
+
     public MatchEntity() {}
 
     // Gettery a settery
@@ -40,4 +43,12 @@ public class MatchEntity {
     public Integer getMaxPlayers() { return maxPlayers; }
 
     public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
 }

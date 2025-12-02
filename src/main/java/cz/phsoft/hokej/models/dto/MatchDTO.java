@@ -25,6 +25,9 @@ public class MatchDTO {
     @NotNull(message = "Maximální počet hráčů je povinný")
     private Integer maxPlayers;
 
+    @NotNull(message = "Cena je povinná")
+    private Integer price;
+
     // gettery a settery
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -40,4 +43,12 @@ public class MatchDTO {
 
     public Integer getMaxPlayers() { return maxPlayers; }
     public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
 }

@@ -11,6 +11,7 @@ import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.DuplicateRegistrationException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -126,6 +127,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     // CORE METHOD – jediné místo validací + ukládání
     // --------------------------------------------------
 
+
+    @Transactional
     private MatchRegistrationEntity saveStatus(Long matchId,
                                                Long playerId,
                                                ExcuseReason excuseReason,
@@ -144,22 +147,39 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 ? forcedStatus
                 : determineStatus(matchId, match);
 
-        // --- Ochrana proti duplicitnímu zápisu ---
-        boolean exists = registrationRepository
-                .findByPlayerIdAndMatchId(playerId, matchId)
-                .stream()
-                .anyMatch(r -> r.getStatus() == status);
+        // --- Najdeme aktuální záznam hráče pro tento zápas ---
+        MatchRegistrationEntity current = registrationRepository
+                .findTopByPlayerIdAndMatchIdOrderByTimestampDesc(playerId, matchId)
+                .orElse(null);
 
-        if (exists) {
-            throw new DuplicateRegistrationException(
-                    "Registrace se stejným statusem již existuje pro hráče " +
-                            player.getFullName() + " na zápas " + match.getDateTime()
-            );
+        if (current != null) {
+            if (current.getStatus() == status) {
+                // Duplicitní stav – vyhodíme chybu
+                throw new DuplicateRegistrationException(
+                        "Registrace se stejným statusem již existuje pro hráče " +
+                                player.getFullName() + " na zápas " + match.getDateTime()
+                );
+            } else {
+                // Starý stav přesuneme do historie
+                MatchRegistrationHistoryEntity hist = new MatchRegistrationHistoryEntity();
+                hist.setPlayer(current.getPlayer());
+                hist.setMatch(current.getMatch());
+                hist.setStatus(current.getStatus());
+                hist.setExcuseReason(current.getExcuseReason());
+                hist.setExcuseNote(current.getExcuseNote());
+                hist.setChangedAt(LocalDateTime.now());
+                hist.setChangedBy("system");
+
+                registrationHistoryRepository.save(hist);
+
+                // Odstraníme starý záznam z hlavní tabulky
+                registrationRepository.delete(current);
+            }
         }
 
         String createdBy = "user".equalsIgnoreCase(actionBy) ? "user" : "system";
 
-        // --- Uložíme registraci ---
+        // --- Uložíme nový záznam ---
         MatchRegistrationEntity reg = new MatchRegistrationEntity();
         reg.setMatch(match);
         reg.setPlayer(player);
@@ -169,21 +189,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         reg.setTimestamp(LocalDateTime.now());
         reg.setCreatedBy(createdBy);
 
-        reg = registrationRepository.save(reg);
-
-        // --- Historie ---
-        MatchRegistrationHistoryEntity hist = new MatchRegistrationHistoryEntity();
-        hist.setRegistration(reg);
-        hist.setStatus(status);
-        hist.setExcuseReason(excuseReason);
-        hist.setExcuseNote(note);
-        hist.setChangedAt(LocalDateTime.now());
-        hist.setChangedBy(createdBy);
-
-        registrationHistoryRepository.save(hist);
-
-        return reg;
+        return registrationRepository.save(reg);
     }
+
+
 
 
     // Určí REGISTERED/RESERVED podle počtu hráčů

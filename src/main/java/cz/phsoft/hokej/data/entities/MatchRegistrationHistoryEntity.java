@@ -14,8 +14,12 @@ public class MatchRegistrationHistoryEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "registration_id", nullable = false)
-    private MatchRegistrationEntity registration;
+    @JoinColumn(name = "match_id", nullable = false)
+    private MatchEntity match;
+
+    @ManyToOne
+    @JoinColumn(name = "player_id", nullable = false)
+    private PlayerEntity player;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -32,14 +36,19 @@ public class MatchRegistrationHistoryEntity {
     @Column(nullable = false)
     private LocalDateTime changedAt;
 
+
+
     public MatchRegistrationHistoryEntity() {}
 
     // --- Gettery a settery ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public MatchRegistrationEntity getRegistration() { return registration; }
-    public void setRegistration(MatchRegistrationEntity registration) { this.registration = registration; }
+    public MatchEntity getMatch() { return match; }
+    public void setMatch(MatchEntity match) { this.match = match; }
+
+    public PlayerEntity getPlayer() { return player; }
+    public void setPlayer(PlayerEntity player) { this.player = player; }
 
     public PlayerMatchStatus getStatus() { return status; }
     public void setStatus(PlayerMatchStatus status) { this.status = status; }
