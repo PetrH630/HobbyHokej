@@ -19,6 +19,9 @@ public class MatchEntity {
 
     private String description;
 
+    @Column(nullable = false)
+    private Integer maxPlayers;
+
     public MatchEntity() {}
 
     // Gettery a settery
@@ -33,4 +36,8 @@ public class MatchEntity {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public Integer getMaxPlayers() { return maxPlayers; }
+
+    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 }

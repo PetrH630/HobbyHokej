@@ -1,7 +1,9 @@
 package cz.phsoft.hokej.data.entities;
+
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,29 +34,75 @@ public class MatchRegistrationEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
 
-    public MatchRegistrationEntity() {}
+    private String createdBy; // "user" nebo "system"
+
+    public MatchRegistrationEntity() {
+    }
 
     // Gettery a Settery
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public MatchEntity getMatch() { return match; }
-    public void setMatch(MatchEntity match) { this.match = match; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public PlayerEntity getPlayer() { return player; }
-    public void setPlayer(PlayerEntity player) { this.player = player; }
+    public MatchEntity getMatch() {
+        return match;
+    }
 
-    public PlayerMatchStatus getStatus() { return status; }
-    public void setStatus(PlayerMatchStatus status) { this.status = status; }
+    public void setMatch(MatchEntity match) {
+        this.match = match;
+    }
 
-    public ExcuseReason getExcuseReason() { return excuseReason; }
-    public void setExcuseReason(ExcuseReason excuseReason) { this.excuseReason = excuseReason; }
+    public PlayerEntity getPlayer() {
+        return player;
+    }
 
-    public String getExcuseNote() { return excuseNote; }
-    public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
+    public void setPlayer(PlayerEntity player) {
+        this.player = player;
+    }
 
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+    public PlayerMatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerMatchStatus status) {
+        this.status = status;
+    }
+
+    public ExcuseReason getExcuseReason() {
+        return excuseReason;
+    }
+
+    public void setExcuseReason(ExcuseReason excuseReason) {
+        this.excuseReason = excuseReason;
+    }
+
+    public String getExcuseNote() {
+        return excuseNote;
+    }
+
+    public void setExcuseNote(String excuseNote) {
+        this.excuseNote = excuseNote;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 }
 
 

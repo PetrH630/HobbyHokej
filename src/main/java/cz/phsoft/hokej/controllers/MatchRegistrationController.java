@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +46,11 @@ public class MatchRegistrationController {
         return service.getRegistrationsForMatch(matchId);
     }
 
-    // --- Nové endpointy ---
+    @GetMapping("/no-response/{matchId}")
+    public List<PlayerEntity> getNoResponse(@PathVariable Long matchId) {
+        return service.getNoResponsePlayers(matchId);
+    }
+
     @GetMapping("/all")
     public List<MatchRegistrationEntity> getAllRegistrations() {
         return service.getAllRegistrations();
@@ -55,4 +60,6 @@ public class MatchRegistrationController {
     public List<MatchRegistrationEntity> forPlayer(@RequestParam Long playerId) {
         return service.getRegistrationsForPlayer(playerId);
     }
+
+
 }

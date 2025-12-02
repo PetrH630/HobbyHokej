@@ -1,6 +1,8 @@
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+
 import java.util.List;
 
 public interface MatchRegistrationService {
@@ -23,4 +25,9 @@ public interface MatchRegistrationService {
     List<MatchRegistrationEntity> getAllRegistrations();
 
     List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId);
+
+    // Získat hráče co se vůbec nevyjádřil
+    List<PlayerEntity> getNoResponsePlayers(Long matchId);
+
+
 }

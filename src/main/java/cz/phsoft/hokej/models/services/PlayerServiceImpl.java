@@ -2,8 +2,6 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.data.enums.Role;
-import cz.phsoft.hokej.data.enums.PlayerType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -51,6 +51,7 @@ public class DataInitializer {
             match.setDateTime(startDate.plusWeeks(i));
             match.setLocation("Ostravice");
             match.setDescription(""); // prázdný popis
+            match.setMaxPlayers(12);
             matchRepository.save(match);
         }
     }

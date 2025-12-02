@@ -19,6 +19,7 @@ public class MatchRegistrationDTO {
     private PlayerMatchStatus status;
     private ExcuseReason excuseReason; // pouze pokud status = EXCUSED
     private String excuseNote;
+    private String createdBy; // "user" nebo "system"
 
     public MatchRegistrationDTO() {}
 
@@ -40,5 +41,9 @@ public class MatchRegistrationDTO {
 
     public String getExcuseNote() { return excuseNote; }
     public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
+
+    public String getCreatedBy() { return createdBy; }
+
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 }
 

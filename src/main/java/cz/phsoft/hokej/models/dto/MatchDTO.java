@@ -22,6 +22,9 @@ public class MatchDTO {
     @Size(max = 255, message = "Popis může mít max 255 znaků.")
     private String description;
 
+    @NotNull(message = "Maximální počet hráčů je povinný")
+    private Integer maxPlayers;
+
     // gettery a settery
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -34,4 +37,7 @@ public class MatchDTO {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public Integer getMaxPlayers() { return maxPlayers; }
+    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 }
