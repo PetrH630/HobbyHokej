@@ -11,13 +11,15 @@ public interface MatchRegistrationService {
     MatchRegistrationEntity registerPlayer(Long matchId, Long playerId);
 
     // Odhlásit hráče
-    MatchRegistrationEntity unregisterPlayer(Long matchId, Long playerId);
+    MatchRegistrationEntity unregisterPlayer(Long matchId, Long playerId, String note, String reason);
 
     // Omluvit hráče s důvodem
     MatchRegistrationEntity excusePlayer(Long matchId, Long playerId, String note, String reason);
 
     // Získat poslední status hráče u zápasu
     MatchRegistrationEntity getLastStatus(Long matchId, Long playerId);
+
+    List<MatchRegistrationEntity> getLastStatusesForMatch(Long matchId);
 
     // Seznam všech registrací pro zápas
     List<MatchRegistrationEntity> getRegistrationsForMatch(Long matchId);
@@ -29,5 +31,6 @@ public interface MatchRegistrationService {
     // Získat hráče co se vůbec nevyjádřil
     List<PlayerEntity> getNoResponsePlayers(Long matchId);
 
+    void recalcStatusesForMatch(Long matchId);
 
 }

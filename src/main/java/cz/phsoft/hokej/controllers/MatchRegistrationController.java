@@ -24,8 +24,9 @@ public class MatchRegistrationController {
     }
 
     @PostMapping("/unregister")
-    public MatchRegistrationEntity unregister(@RequestParam Long matchId, @RequestParam Long playerId) {
-        return service.unregisterPlayer(matchId, playerId);
+    public MatchRegistrationEntity unregister(@RequestParam Long matchId, @RequestParam Long playerId,  @RequestParam String reason,
+                                              @RequestParam(required = false) String note) {
+        return service.unregisterPlayer(matchId, playerId, note, reason);
     }
 
     @PostMapping("/excuse")
@@ -34,8 +35,16 @@ public class MatchRegistrationController {
                                           @RequestParam(required = false) String note) {
         return service.excusePlayer(matchId, playerId, note, reason);
     }
+    @GetMapping("/all")
+    public List<MatchRegistrationEntity> getAllRegistrations() {
+        return service.getAllRegistrations();
+    }
 
-    // --- Dotazy ---
+    @GetMapping("/for-player")
+    public List<MatchRegistrationEntity> forPlayer(@RequestParam Long playerId) {
+        return service.getRegistrationsForPlayer(playerId);
+    }
+
     @GetMapping("/last-status")
     public MatchRegistrationEntity lastStatus(@RequestParam Long matchId, @RequestParam Long playerId) {
         return service.getLastStatus(matchId, playerId);
@@ -51,15 +60,11 @@ public class MatchRegistrationController {
         return service.getNoResponsePlayers(matchId);
     }
 
-    @GetMapping("/all")
-    public List<MatchRegistrationEntity> getAllRegistrations() {
-        return service.getAllRegistrations();
+    @GetMapping("/last-statuses/{matchId}")
+    public List<MatchRegistrationEntity> lastStatusesForMatch(@PathVariable Long matchId) {
+        return service.getLastStatusesForMatch(matchId);
     }
 
-    @GetMapping("/for-player")
-    public List<MatchRegistrationEntity> forPlayer(@RequestParam Long playerId) {
-        return service.getRegistrationsForPlayer(playerId);
-    }
 
 
 }

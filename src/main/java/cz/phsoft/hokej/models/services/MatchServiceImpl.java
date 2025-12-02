@@ -4,7 +4,6 @@ import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
-import cz.phsoft.hokej.models.services.MatchService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,10 +15,14 @@ public class MatchServiceImpl implements MatchService {
 
     private final MatchRepository matchRepository;
     private final MatchMapper matchMapper;
+    private final MatchRegistrationService registrationService;
 
-    public MatchServiceImpl(MatchRepository matchRepository, MatchMapper matchMapper) {
+    public MatchServiceImpl(MatchRepository matchRepository,
+                            MatchMapper matchMapper,
+                            MatchRegistrationService registrationService) {
         this.matchRepository = matchRepository;
         this.matchMapper = matchMapper;
+        this.registrationService = registrationService;
     }
 
     @Override
@@ -70,12 +73,23 @@ public class MatchServiceImpl implements MatchService {
     public MatchDTO updateMatch(Long id, MatchDTO dto) {
         MatchEntity entity = matchRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Match not found: " + id));
+
+        int oldMaxPlayers = entity.getMaxPlayers(); // uložíme starou hodnotu
         matchMapper.updateEntity(dto, entity);
-        return matchMapper.toDTO(matchRepository.save(entity));
+        MatchEntity saved = matchRepository.save(entity);
+
+        // pokud se změnila kapacita, přepočítáme statusy hráčů
+        if (saved.getMaxPlayers() != oldMaxPlayers) {
+            registrationService.recalcStatusesForMatch(saved.getId());
+        }
+
+        return matchMapper.toDTO(saved);
     }
 
     @Override
     public void deleteMatch(Long id) {
         matchRepository.deleteById(id);
     }
+
+
 }
