@@ -2,12 +2,15 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationHistoryEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationHistoryRepository;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.DuplicateRegistrationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,35 +22,54 @@ import java.util.stream.Collectors;
 public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     private final MatchRegistrationRepository registrationRepository;
+    private final MatchRegistrationHistoryRepository registrationHistoryRepository;
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
 
-    public MatchRegistrationServiceImpl(MatchRegistrationRepository registrationRepository,
-                                        MatchRepository matchRepository,
-                                        PlayerRepository playerRepository) {
+    public MatchRegistrationServiceImpl(
+            MatchRegistrationRepository registrationRepository,
+            MatchRegistrationHistoryRepository registrationHistoryRepository,
+            MatchRepository matchRepository,
+            PlayerRepository playerRepository) {
+
         this.registrationRepository = registrationRepository;
+        this.registrationHistoryRepository = registrationHistoryRepository;
         this.matchRepository = matchRepository;
         this.playerRepository = playerRepository;
     }
 
+    // --------------------------------------------------
+    // PUBLIC SERVICE METHODS (čisté, bez try/catch)
+    // --------------------------------------------------
+
     @Override
     public MatchRegistrationEntity registerPlayer(Long matchId, Long playerId) {
-        MatchRegistrationEntity reg = saveStatus(matchId, playerId, null, null, "user", null);
-        recalcStatusesForMatch(matchId); // po registraci přepočítat statusy
+        MatchRegistrationEntity reg =
+                saveStatus(matchId, playerId, null, null, "user", null);
+
+        recalcStatusesForMatch(matchId);
+
         return reg;
     }
 
     @Override
     public MatchRegistrationEntity unregisterPlayer(Long matchId, Long playerId, String note, String reason) {
+
         ExcuseReason excuseReason = ExcuseReason.valueOf(reason.toUpperCase());
-        MatchRegistrationEntity reg = saveStatus(matchId, playerId, excuseReason, note, "user", PlayerMatchStatus.UNREGISTERED);
-        recalcStatusesForMatch(matchId); // po odhlášení přepočítat statusy
+
+        MatchRegistrationEntity reg =
+                saveStatus(matchId, playerId, excuseReason, note, "user", PlayerMatchStatus.UNREGISTERED);
+
+        recalcStatusesForMatch(matchId);
+
         return reg;
     }
 
     @Override
     public MatchRegistrationEntity excusePlayer(Long matchId, Long playerId, String note, String reason) {
+
         ExcuseReason excuseReason = ExcuseReason.valueOf(reason.toUpperCase());
+
         return saveStatus(matchId, playerId, excuseReason, note, "user", PlayerMatchStatus.EXCUSED);
     }
 
@@ -60,12 +82,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     @Override
     public List<MatchRegistrationEntity> getLastStatusesForMatch(Long matchId) {
-        // Získáme všechny hráče
-        List<PlayerEntity> allPlayers = playerRepository.findAll();
-        // Vrátíme seznam posledních registrací pouze pro hráče, kteří mají registraci na daný zápas
-        return allPlayers.stream()
-                .map(player -> getLastStatus(matchId, player.getId()))
-                .filter(status -> status != null) // ignorujeme hráče bez registrace
+
+        return playerRepository.findAll().stream()
+                .map(p -> getLastStatus(matchId, p.getId()))
+                .filter(r -> r != null)
                 .collect(Collectors.toList());
     }
 
@@ -83,24 +103,29 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     public List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId) {
         PlayerEntity player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new RuntimeException("Player not found"));
+
         return registrationRepository.findByPlayer(player);
     }
 
     @Override
     public List<PlayerEntity> getNoResponsePlayers(Long matchId) {
-        List<PlayerEntity> allPlayers = playerRepository.findAll();
-        List<MatchRegistrationEntity> registrations = registrationRepository.findByMatchId(matchId);
 
-        Set<Long> respondedPlayerIds = registrations.stream()
+        List<PlayerEntity> allPlayers = playerRepository.findAll();
+
+        Set<Long> respondedIds = registrationRepository.findByMatchId(matchId).stream()
                 .map(r -> r.getPlayer().getId())
                 .collect(Collectors.toSet());
 
         return allPlayers.stream()
-                .filter(p -> !respondedPlayerIds.contains(p.getId()))
-                .toList();
+                .filter(p -> !respondedIds.contains(p.getId()))
+                .collect(Collectors.toList());
     }
 
-    // --- interní metoda pro ukládání statusu hráče ---
+
+    // --------------------------------------------------
+    // CORE METHOD – jediné místo validací + ukládání
+    // --------------------------------------------------
+
     private MatchRegistrationEntity saveStatus(Long matchId,
                                                Long playerId,
                                                ExcuseReason excuseReason,
@@ -114,77 +139,109 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         PlayerEntity player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new RuntimeException("Player not found"));
 
-        PlayerMatchStatus status;
-        if (forcedStatus != null) {
-            status = forcedStatus;
-        } else {
-            long registeredCount = registrationRepository.findByMatchId(matchId).stream()
-                    .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
-                    .count();
+        // Při registraci určujeme REGISTERED / RESERVED
+        PlayerMatchStatus status = (forcedStatus != null)
+                ? forcedStatus
+                : determineStatus(matchId, match);
 
-            status = registeredCount < match.getMaxPlayers()
-                    ? PlayerMatchStatus.REGISTERED
-                    : PlayerMatchStatus.RESERVED;
+        // --- Ochrana proti duplicitnímu zápisu ---
+        boolean exists = registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .stream()
+                .anyMatch(r -> r.getStatus() == status);
+
+        if (exists) {
+            throw new DuplicateRegistrationException(
+                    "Registrace se stejným statusem již existuje pro hráče " +
+                            player.getFullName() + " na zápas " + match.getDateTime()
+            );
         }
 
-        String createdBy = "system";
-        if ("user".equalsIgnoreCase(actionBy)) {
-            createdBy = "user";
-        }
+        String createdBy = "user".equalsIgnoreCase(actionBy) ? "user" : "system";
 
-        MatchRegistrationEntity registration = new MatchRegistrationEntity();
-        registration.setMatch(match);
-        registration.setPlayer(player);
-        registration.setStatus(status);
-        registration.setExcuseReason(excuseReason);
-        registration.setExcuseNote(note);
-        registration.setTimestamp(LocalDateTime.now());
-        registration.setCreatedBy(createdBy);
+        // --- Uložíme registraci ---
+        MatchRegistrationEntity reg = new MatchRegistrationEntity();
+        reg.setMatch(match);
+        reg.setPlayer(player);
+        reg.setStatus(status);
+        reg.setExcuseReason(excuseReason);
+        reg.setExcuseNote(note);
+        reg.setTimestamp(LocalDateTime.now());
+        reg.setCreatedBy(createdBy);
 
-        return registrationRepository.save(registration);
+        reg = registrationRepository.save(reg);
+
+        // --- Historie ---
+        MatchRegistrationHistoryEntity hist = new MatchRegistrationHistoryEntity();
+        hist.setRegistration(reg);
+        hist.setStatus(status);
+        hist.setExcuseReason(excuseReason);
+        hist.setExcuseNote(note);
+        hist.setChangedAt(LocalDateTime.now());
+        hist.setChangedBy(createdBy);
+
+        registrationHistoryRepository.save(hist);
+
+        return reg;
     }
 
-    // --- přepočítání statusů pro všechny hráče zápasu ---
+
+    // Určí REGISTERED/RESERVED podle počtu hráčů
+    private PlayerMatchStatus determineStatus(Long matchId, MatchEntity match) {
+        long registeredCount = registrationRepository.findByMatchId(matchId).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                .count();
+
+        return registeredCount < match.getMaxPlayers()
+                ? PlayerMatchStatus.REGISTERED
+                : PlayerMatchStatus.RESERVED;
+    }
+
+
+    // --------------------------------------------------
+    // PŘEPOČET STATUSŮ – pokud někdo odpadne/změní se pořadí
+    // --------------------------------------------------
+
     public void recalcStatusesForMatch(Long matchId) {
+
         MatchEntity match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Match not found"));
 
         int maxPlayers = match.getMaxPlayers();
 
-// Vezmeme poslední registrace všech hráčů pro zápas
-        List<MatchRegistrationEntity> lastRegs = registrationRepository.findByMatchId(matchId).stream()
+        var latest = registrationRepository.findByMatchId(matchId).stream()
                 .collect(Collectors.groupingBy(r -> r.getPlayer().getId(),
                         Collectors.collectingAndThen(
-                                Collectors.maxBy((r1, r2) -> r1.getTimestamp().compareTo(r2.getTimestamp())),
+                                Collectors.maxBy((a, b) -> a.getTimestamp().compareTo(b.getTimestamp())),
                                 opt -> opt.orElse(null)
-                        )))
-                .values().stream()
-                .filter(r -> r != null)
-                .collect(Collectors.toList());
+                        )));
 
-// Oddělíme hráče, kteří jsou aktivně REGISTERED nebo RESERVED
-        List<MatchRegistrationEntity> activePlayers = lastRegs.stream()
+        // Aktivní statusy (REGISTERED/RESERVED)
+        List<MatchRegistrationEntity> active = latest.values().stream()
+                .filter(r -> r != null)
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED
                         || r.getStatus() == PlayerMatchStatus.RESERVED)
-                .sorted((r1, r2) -> r1.getTimestamp().compareTo(r2.getTimestamp()))
-                .collect(Collectors.toList());
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .toList();
 
-        for (int i = 0; i < activePlayers.size(); i++) {
-            MatchRegistrationEntity oldReg = activePlayers.get(i);
-            PlayerMatchStatus newStatus = i < maxPlayers ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+        // Nové statusy dle pořadí
+        for (int i = 0; i < active.size(); i++) {
 
-            if (oldReg.getStatus() != newStatus) {
-                MatchRegistrationEntity newReg = new MatchRegistrationEntity();
-                newReg.setMatch(match);
-                newReg.setPlayer(oldReg.getPlayer());
-                newReg.setStatus(newStatus);
-                newReg.setExcuseReason(null);
-                newReg.setExcuseNote(null);
-                newReg.setTimestamp(LocalDateTime.now());
-                newReg.setCreatedBy("system");
+            PlayerMatchStatus newStatus =
+                    (i < maxPlayers) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
 
-                registrationRepository.save(newReg);
+            MatchRegistrationEntity old = active.get(i);
 
+            if (old.getStatus() != newStatus) {
+
+                MatchRegistrationEntity reg = new MatchRegistrationEntity();
+                reg.setMatch(match);
+                reg.setPlayer(old.getPlayer());
+                reg.setStatus(newStatus);
+                reg.setTimestamp(LocalDateTime.now());
+                reg.setCreatedBy("system");
+
+                registrationRepository.save(reg);
             }
         }
     }

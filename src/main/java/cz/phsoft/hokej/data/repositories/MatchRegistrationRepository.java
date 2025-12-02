@@ -20,4 +20,7 @@ import java.util.Optional;
         // Volitelně: všechny registrace pro určitého hráče
         List<MatchRegistrationEntity> findByPlayer(PlayerEntity player);
 
+        // --- Nová metoda pro hledání konkrétní registrace ---
+        Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
+
     }
