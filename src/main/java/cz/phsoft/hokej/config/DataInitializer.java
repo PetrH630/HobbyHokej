@@ -64,8 +64,9 @@ public class DataInitializer {
                 .orElseThrow(() -> new RuntimeException("Match with id 3 not found"));
 
         for (long playerId = 1; playerId <= 6; playerId++) {
+            final long pid = playerId;
             PlayerEntity player = playerRepository.findById(playerId)
-                    .orElseThrow(() -> new RuntimeException("Player with id " + playerId + " not found"));
+                    .orElseThrow(() -> new RuntimeException("Player with id " + pid + " not found"));
 
             MatchRegistrationEntity reg = new MatchRegistrationEntity();
             reg.setMatch(match3);
