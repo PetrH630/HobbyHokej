@@ -2,6 +2,7 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.JerseyColor;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +20,9 @@ public class MatchRegistrationController {
     }
 
     @PostMapping("/register")
-    public MatchRegistrationEntity register(@RequestParam Long matchId, @RequestParam Long playerId) {
-        return service.registerPlayer(matchId, playerId);
+    public MatchRegistrationEntity register(@RequestParam Long matchId, @RequestParam Long playerId,
+                                            @RequestParam JerseyColor jerseyColor, @RequestParam String adminNote) {
+        return service.registerPlayer(matchId, playerId, jerseyColor,adminNote);
     }
 
     @PostMapping("/unregister")
