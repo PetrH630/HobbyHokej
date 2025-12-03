@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.data.entities;
 
+import cz.phsoft.hokej.data.enums.JerseyColor;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.persistence.*;
 
@@ -23,16 +24,19 @@ public class PlayerEntity {
 
     private String fullName;
 
+    @Enumerated(EnumType.STRING)
+    private JerseyColor jerseyColor;
 
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
     }
 
-    public PlayerEntity(String name, String surname, PlayerType type) {
+    public PlayerEntity(String name, String surname, PlayerType type, JerseyColor jerseyColor) {
         this.name = name;
         this.surname = surname;
         this.type = type;
         this.fullName = name + " " + surname;
+        this.jerseyColor = jerseyColor;
 
     }
 
@@ -52,4 +56,8 @@ public class PlayerEntity {
     public void setType(PlayerType type) { this.type = type; }
 
     private void updateFullName() { this.fullName = name + " " + surname; }
+
+    public JerseyColor getJerseyColor() { return jerseyColor; }
+
+    public void setJerseyColor(JerseyColor jerseyColor) { this.jerseyColor = jerseyColor; }
 }

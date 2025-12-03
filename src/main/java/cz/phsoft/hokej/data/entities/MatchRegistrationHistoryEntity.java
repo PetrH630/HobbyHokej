@@ -45,6 +45,7 @@ public class MatchRegistrationHistoryEntity {
     @Column(name = "registration_order")
     private Integer registrationOrder;
 
+    private String AdminNote;
 
 
     public MatchRegistrationHistoryEntity() {}

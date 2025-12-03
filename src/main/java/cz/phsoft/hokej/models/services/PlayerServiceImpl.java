@@ -38,6 +38,7 @@ public class PlayerServiceImpl implements PlayerService {
         existing.setName(newData.getName());
         existing.setSurname(newData.getSurname());
         existing.setType(newData.getType());
+        existing.setJerseyColor((newData.getJerseyColor()));
         return playerRepository.save(existing);
     }
 

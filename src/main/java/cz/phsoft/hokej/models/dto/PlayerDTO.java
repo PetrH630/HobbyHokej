@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.models.dto;
 
+import cz.phsoft.hokej.data.enums.JerseyColor;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -19,17 +20,20 @@ public class PlayerDTO {
 
     private String fullName; // derived
     private PlayerType type; // not null, default BASIC
+    private JerseyColor jerseyColor;
+
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
    }
 
-    public PlayerDTO(Long id, String name, String surname, PlayerType type) {
+    public PlayerDTO(Long id, String name, String surname, PlayerType type, JerseyColor jerseyColor) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.type = type != null ? type : PlayerType.BASIC;
         this.updateFullName();
+        this.jerseyColor = jerseyColor;
     }
 
     // --- Gettery a Settery ---
@@ -48,7 +52,9 @@ public class PlayerDTO {
     public PlayerType getType() { return type; }
     public void setType(PlayerType type) { this.type = type != null ? type : PlayerType.BASIC; }
 
-    private void updateFullName() {
-    this.fullName = name + " " + surname;
-    }
+    private void updateFullName() { this.fullName = name + " " + surname; }
+
+    public JerseyColor getJerseyColor() { return jerseyColor; }
+
+    public void setJerseyColor(JerseyColor jerseyColor) { this.jerseyColor = jerseyColor; }
 }
