@@ -1,9 +1,12 @@
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.JerseyColor;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+
+import java.time.chrono.JapaneseChronology;
 
 public class MatchRegistrationDTO {
     private Long id; // volitelné, při GET
@@ -19,6 +22,8 @@ public class MatchRegistrationDTO {
     private PlayerMatchStatus status;
     private ExcuseReason excuseReason; // pouze pokud status = EXCUSED
     private String excuseNote;
+    private String adminNote;
+    private JerseyColor jerseyColor;
 
     @NotNull
     private String createdBy; // "user" nebo "system"
@@ -44,8 +49,13 @@ public class MatchRegistrationDTO {
     public String getExcuseNote() { return excuseNote; }
     public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
 
-    public String getCreatedBy() { return createdBy; }
+    public String getAdminNote() { return adminNote; }
+    public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
 
+    public JerseyColor getJerseyColor() { return jerseyColor; }
+    public void setJerseyColor(JerseyColor jerseyColor) { this.jerseyColor = jerseyColor; }
+
+    public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 }
 

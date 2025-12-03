@@ -2,6 +2,7 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.JerseyColor;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,12 @@ public class MatchRegistrationEntity {
     private ExcuseReason excuseReason;
 
     private String excuseNote;
+
+    private String adminNote;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "jersey_color")
+    private JerseyColor jerseyColor;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
@@ -103,6 +110,22 @@ public class MatchRegistrationEntity {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public JerseyColor getJerseyColor() {
+        return jerseyColor;
+    }
+
+    public void setJerseyColor(JerseyColor jerseyColor) {
+        this.jerseyColor = jerseyColor;
     }
 }
 
