@@ -3,21 +3,39 @@ package cz.phsoft.hokej.models.dto.mappers;
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
+@Mapper(componentModel = "spring")
 public interface MatchRegistrationMapper {
-    // DTO → Entity
-    @Mapping(source = "matchId", target = "match.matchId")
-    @Mapping(source = "playerId", target = "player.playerId")
-    MatchRegistrationEntity toEntity(MatchRegistrationDTO dto, MatchEntity match, PlayerEntity player);
 
-    // Entity → DTO
-    @Mapping(source = "match.matchId", target = "matchId")
-    @Mapping(source = "player.playerId", target = "playerId")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "match", source = "match")
+    @Mapping(target = "player", source = "player")
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "excuseReason", source = "excuseReason")
+    @Mapping(target = "excuseNote", source = "note")
+    @Mapping(target = "jerseyColor", source = "jerseyColor")
+    @Mapping(target = "adminNote", source = "adminNote")
+    @Mapping(target = "createdBy", source = "createdBy")
+    @Mapping(target = "timestamp", expression = "java(java.time.LocalDateTime.now())")
+    MatchRegistrationEntity toEntity(
+            MatchEntity match,
+            PlayerEntity player,
+            PlayerMatchStatus status,
+            ExcuseReason excuseReason,
+            String note,
+            JerseyColor jerseyColor,
+            String adminNote,
+            String createdBy
+    );
+
+    // entity → DTO (volitelné)
+    @Mapping(target = "matchId", source = "match.id")
+    @Mapping(target = "playerId", source = "player.id")
     MatchRegistrationDTO toDTO(MatchRegistrationEntity entity);
-
-    // Aktualizace Entity
-    void updateEntity(MatchRegistrationDTO dto, @MappingTarget MatchRegistrationEntity entity);
 }

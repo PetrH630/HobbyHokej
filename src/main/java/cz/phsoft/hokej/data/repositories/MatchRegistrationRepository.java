@@ -12,13 +12,13 @@ import java.util.Optional;
     public interface MatchRegistrationRepository extends JpaRepository<MatchRegistrationEntity, Long> {
 
         // Vrátí poslední status pro daného hráče a zápas
-        Optional<MatchRegistrationEntity> findTopByPlayerIdAndMatchIdOrderByTimestampDesc(Long playerId, Long matchId);
+        Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
 
         // Volitelně: všechny registrace pro určitý zápas
         List<MatchRegistrationEntity> findByMatchId(Long matchId);
 
         // Volitelně: všechny registrace pro určitého hráče
-        List<MatchRegistrationEntity> findByPlayer(PlayerEntity player);
+        List<MatchRegistrationEntity> findByPlayerId(Long playerId);
 
         // --- Nová metoda pro hledání konkrétní registrace ---
         Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);

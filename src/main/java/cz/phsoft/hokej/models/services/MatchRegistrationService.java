@@ -7,41 +7,35 @@ import cz.phsoft.hokej.data.enums.JerseyColor;
 
 import java.util.List;
 
-    public interface MatchRegistrationService {
+public interface MatchRegistrationService {
 
 
-        // Přihlásit hráče s volitelnou barvou dresu a poznámkou admina
-        MatchRegistrationEntity registerPlayer(Long matchId, Long playerId, JerseyColor jerseyColor, String adminNote);
+    // Přihlásit hráče s volitelnou barvou dresu a poznámkou admina
+    MatchRegistrationEntity registerPlayer(Long matchId, Long playerId, JerseyColor jerseyColor, String adminNote);
 
-        // Odhlásit hráče
-        MatchRegistrationEntity unregisterPlayer(Long matchId, Long playerId, String note, String reason);
+    // Odhlásit hráče
+    MatchRegistrationEntity unregisterPlayer(Long matchId, Long playerId, String note, String reason);
 
-        // Omluvit hráče s důvodem
-        MatchRegistrationEntity excusePlayer(Long matchId, Long playerId, String note, String reason);
+    // Omluvit hráče s důvodem
+    MatchRegistrationEntity excusePlayer(Long matchId, Long playerId, String note, String reason);
 
-        // Získat poslední status hráče u zápasu
-        MatchRegistrationEntity getLastStatus(Long matchId, Long playerId);
+    // Seznam všech registrací pro zápas
+    List<MatchRegistrationEntity> getRegistrationsForMatch(Long matchId);
 
-        // Získat poslední statusy všech hráčů u zápasu
-        List<MatchRegistrationEntity> getLastStatusesForMatch(Long matchId);
+    // Seznam všech registrací
+    List<MatchRegistrationEntity> getAllRegistrations();
 
-        // Seznam všech registrací pro zápas
-        List<MatchRegistrationEntity> getRegistrationsForMatch(Long matchId);
+    // Seznam registrací pro konkrétního hráče
+    List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId);
 
-        // Seznam všech registrací
-        List<MatchRegistrationEntity> getAllRegistrations();
+    // Získat hráče, kteří se vůbec nevyjádřili k zápasu
+    List<PlayerEntity> getNoResponsePlayers(Long matchId);
 
-        // Seznam registrací pro konkrétního hráče
-        List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId);
-
-        // Získat hráče, kteří se vůbec nevyjádřili k zápasu
-        List<PlayerEntity> getNoResponsePlayers(Long matchId);
-
-        // Přepočet statusů REGISTERED / RESERVED podle kapacity
-        void recalcStatusesForMatch(Long matchId);
+    // Přepočet statusů REGISTERED / RESERVED podle kapacity
+    void recalcStatusesForMatch(Long matchId);
 
 
-    }
+}
 
 
 

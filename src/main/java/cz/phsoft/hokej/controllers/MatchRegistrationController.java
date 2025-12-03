@@ -21,7 +21,8 @@ public class MatchRegistrationController {
 
     @PostMapping("/register")
     public MatchRegistrationEntity register(@RequestParam Long matchId, @RequestParam Long playerId,
-                                            @RequestParam JerseyColor jerseyColor, @RequestParam String adminNote) {
+                                            @RequestParam (required = false) JerseyColor jerseyColor,
+                                            @RequestParam (required = false) String adminNote) {
         return service.registerPlayer(matchId, playerId, jerseyColor,adminNote);
     }
 
@@ -47,10 +48,7 @@ public class MatchRegistrationController {
         return service.getRegistrationsForPlayer(playerId);
     }
 
-    @GetMapping("/last-status")
-    public MatchRegistrationEntity lastStatus(@RequestParam Long matchId, @RequestParam Long playerId) {
-        return service.getLastStatus(matchId, playerId);
-    }
+
 
     @GetMapping("/for-match")
     public List<MatchRegistrationEntity> forMatch(@RequestParam Long matchId) {
@@ -62,11 +60,4 @@ public class MatchRegistrationController {
         return service.getNoResponsePlayers(matchId);
     }
 
-    @GetMapping("/last-statuses/{matchId}")
-    public List<MatchRegistrationEntity> lastStatusesForMatch(@PathVariable Long matchId) {
-        return service.getLastStatusesForMatch(matchId);
-    }
-
-
-
-}
+   }

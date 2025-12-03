@@ -1,3 +1,5 @@
+/*
+
 package cz.phsoft.hokej.config;
 
 
@@ -92,3 +94,4 @@ public class DataInitializer {
     }
 
 }
+*/

@@ -38,7 +38,7 @@ public class MatchRegistrationEntity {
     @Column(name = "jersey_color")
     private JerseyColor jerseyColor;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     @Column(nullable = false, updatable = false)
