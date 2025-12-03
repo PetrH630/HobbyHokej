@@ -1,4 +1,4 @@
-Po vytvoření databáze v databázi vytvořit trigery:
+Po vytvoření databáze v databázi vytvořit trigery pro historii registrací:
 SQL:
 
 CREATE TABLE IF NOT EXISTS match_registration_history (
@@ -70,4 +70,34 @@ END$$
 
 DELIMITER ;
 
+------
+
+Trigger pro player_activity_period
+----
+
+
+DELIMITER $$
+
+-- AFTER INSERT
+CREATE TRIGGER trg_update_player_status_after_insert
+AFTER INSERT ON player_activity_period
+FOR EACH ROW
+BEGIN
+    UPDATE player_entity
+    SET is_active = CASE
+        -- pokud hráč nemá žádný záznam → aktivní
+        WHEN (SELECT COUNT(*) FROM player_active_periods p WHERE p.player_id = NEW.player_id) = 0 THEN 1
+        -- pokud existuje interval obsahující NOW() → aktivní
+        WHEN EXISTS (
+            SELECT 1
+            FROM player_active_periods p
+            WHERE p.player_id = NEW.player_id
+              AND NOW() BETWEEN p.active_from AND p.active_to
+        ) THEN 1
+        ELSE 0
+    END
+    WHERE id = NEW.player_id;
+END $$
+
+DELIMITER ;
 

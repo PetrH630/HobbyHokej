@@ -22,16 +22,19 @@ public class MatchServiceImpl implements MatchService {
     private final MatchRepository matchRepository;
     private final MatchMapper matchMapper;
     private final MatchRegistrationService registrationService;
-    private final PlayerRepository playerRepository;   // ← DOPLNĚNO !!!
+    private final PlayerRepository playerRepository;
+    private final PlayerInactivityService playerInactivityService;
 
     public MatchServiceImpl(MatchRepository matchRepository,
                             MatchMapper matchMapper,
                             MatchRegistrationService registrationService,
-                            PlayerRepository playerRepository) { // ← DOPLNĚNO !!!
+                            PlayerRepository playerRepository,
+                            PlayerInactivityService playerInactivityService) { // ← DOPLNĚNO !!!
         this.matchRepository = matchRepository;
         this.matchMapper = matchMapper;
         this.registrationService = registrationService;
-        this.playerRepository = playerRepository;       // ← DOPLNĚNO !!!
+        this.playerRepository = playerRepository;
+        this.playerInactivityService = playerInactivityService;
     }
 
     @Override
@@ -197,5 +200,17 @@ public class MatchServiceImpl implements MatchService {
 
         return dto;
     }
+
+    public List<MatchEntity> getAvailableMatchesForPlayer(Long playerId) {
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Player not found"));
+
+        List<MatchEntity> allMatches = matchRepository.findAll();
+
+        return allMatches.stream()
+                .filter(match -> playerInactivityService.isActive(player, match.getDateTime()))
+                .collect(Collectors.toList());
+    }
+
 
 }

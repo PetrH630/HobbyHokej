@@ -2,7 +2,11 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.JerseyColor;
 import cz.phsoft.hokej.data.enums.PlayerType;
+
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "player_entity")
@@ -30,34 +34,62 @@ public class PlayerEntity {
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
     }
-
     public PlayerEntity(String name, String surname, PlayerType type, JerseyColor jerseyColor) {
         this.name = name;
         this.surname = surname;
         this.type = type;
         this.fullName = name + " " + surname;
         this.jerseyColor = jerseyColor;
-
     }
 
     // Gettery a Settery + updateFullName
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; updateFullName(); }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getSurname() { return surname; }
-    public void setSurname(String surname) { this.surname = surname; updateFullName(); }
+    public String getName() {
+        return name;
+    }
 
-    public String getFullName() { return fullName; }
+    public void setName(String name) {
+        this.name = name;
+        updateFullName();
+    }
 
-    public PlayerType getType() { return type; }
-    public void setType(PlayerType type) { this.type = type; }
+    public String getSurname() {
+        return surname;
+    }
 
-    private void updateFullName() { this.fullName = name + " " + surname; }
+    public void setSurname(String surname) {
+        this.surname = surname;
+        updateFullName();
+    }
 
-    public JerseyColor getJerseyColor() { return jerseyColor; }
+    public String getFullName() {
+        return fullName;
+    }
 
-    public void setJerseyColor(JerseyColor jerseyColor) { this.jerseyColor = jerseyColor; }
+    public PlayerType getType() {
+        return type;
+    }
+
+    public void setType(PlayerType type) {
+        this.type = type;
+    }
+
+    private void updateFullName() {
+        this.fullName = name + " " + surname;
+    }
+
+    public JerseyColor getJerseyColor() {
+        return jerseyColor;
+    }
+
+    public void setJerseyColor(JerseyColor jerseyColor) {
+        this.jerseyColor = jerseyColor;
+    }
 }
