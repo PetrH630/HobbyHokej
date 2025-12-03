@@ -41,7 +41,7 @@ public class MatchRegistrationEntity {
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = true)
     private String createdBy; // "user" nebo "system"
 
     public MatchRegistrationEntity() {

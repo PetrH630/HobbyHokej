@@ -216,17 +216,20 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 // Pokud ještě místo zbývá, nastav REGISTERED
                 if (reg.getStatus() != PlayerMatchStatus.REGISTERED) {
                     reg.setStatus(PlayerMatchStatus.REGISTERED);
-                    reg.setCreatedBy("system");
+                    reg.setCreatedBy("system"); // označit systémovou změnu
+                    // timestamp necháváme původní
                     registrationRepository.save(reg);
                 }
             } else {
                 // Přebyteční hráči mají status RESERVED
                 if (reg.getStatus() != PlayerMatchStatus.RESERVED) {
                     reg.setStatus(PlayerMatchStatus.RESERVED);
-                    reg.setCreatedBy("system");
+                    reg.setCreatedBy("system"); // označit systémovou změnu
+                    // timestamp necháváme původní
                     registrationRepository.save(reg);
                 }
             }
         }
     }
+
 }
