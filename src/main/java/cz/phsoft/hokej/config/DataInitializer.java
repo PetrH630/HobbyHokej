@@ -64,7 +64,7 @@ public class DataInitializer {
 
         // --- 5 zápasů, každý pátek od 21.11.2025 ---
         LocalDateTime startDate = LocalDateTime.of(2025, 11, 21, 18, 45);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             MatchEntity match = new MatchEntity();
             match.setDateTime(startDate.plusWeeks(i));
             match.setLocation("Ostravice");

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "player_inactivity_period")
-public class PlayerInactivityPeriod {
+public class PlayerInactivityPeriodEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,12 +16,11 @@ public class PlayerInactivityPeriod {
     @JoinColumn(name = "player_id", nullable = false)
     private PlayerEntity player;
 
-    @Column(nullable = false)
+    @Column(name = "inactive_from", nullable = false)
     private LocalDateTime inactiveFrom;
 
-    @Column(nullable = false)
+    @Column(name = "inactive_to", nullable = false)
     private LocalDateTime inactiveTo;
-
 
     public Long getId() {
         return id;

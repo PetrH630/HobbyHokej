@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.controllers;
 
+import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.MatchDetailDTO;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
@@ -75,4 +76,10 @@ public class MatchController {
     public void deleteMatch(@PathVariable Long id) {
         matchService.deleteMatch(id);
     }
+    // dostupné zápasy pro hráče - byl active
+    @GetMapping("/available-matches-for-player/{id}")
+    public List<MatchEntity> getAvailableMatchesForPlayer(@PathVariable Long id) {
+        return matchService.getAvailableMatchesForPlayer(id);
+    }
+
 }

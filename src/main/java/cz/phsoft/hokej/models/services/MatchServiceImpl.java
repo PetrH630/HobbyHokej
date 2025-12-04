@@ -23,18 +23,18 @@ public class MatchServiceImpl implements MatchService {
     private final MatchMapper matchMapper;
     private final MatchRegistrationService registrationService;
     private final PlayerRepository playerRepository;
-    private final PlayerInactivityService playerInactivityService;
+    private final PlayerInactivityPeriodService playerInactivityPeriodService;
 
     public MatchServiceImpl(MatchRepository matchRepository,
                             MatchMapper matchMapper,
                             MatchRegistrationService registrationService,
                             PlayerRepository playerRepository,
-                            PlayerInactivityService playerInactivityService) { // ← DOPLNĚNO !!!
+                            PlayerInactivityPeriodService playerInactivityPeriodService) { // ← DOPLNĚNO !!!
         this.matchRepository = matchRepository;
         this.matchMapper = matchMapper;
         this.registrationService = registrationService;
         this.playerRepository = playerRepository;
-        this.playerInactivityService = playerInactivityService;
+        this.playerInactivityPeriodService = playerInactivityPeriodService;
     }
 
     @Override
@@ -208,7 +208,7 @@ public class MatchServiceImpl implements MatchService {
         List<MatchEntity> allMatches = matchRepository.findAll();
 
         return allMatches.stream()
-                .filter(match -> playerInactivityService.isActive(player, match.getDateTime()))
+                .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
                 .collect(Collectors.toList());
     }
 
