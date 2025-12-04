@@ -1,0 +1,2421 @@
+﻿
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\config\DataInitializer.java
+
+
+package cz.phsoft.hokej.config;
+
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.PlayerType;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Component
+public class DataInitializer {
+
+
+    private final PlayerRepository playerRepository;
+    private final MatchRepository matchRepository;
+    private final MatchRegistrationRepository matchRegistrationRepository;
+
+    public DataInitializer(PlayerRepository playerRepository,
+                           MatchRepository matchRepository,
+                           MatchRegistrationRepository matchRegistrationRepository) {
+        this.playerRepository = playerRepository;
+        this.matchRepository = matchRepository;
+        this.matchRegistrationRepository = matchRegistrationRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        // --- 10 hrĂˇÄŤĹŻ ---
+        List<PlayerEntity> players = List.of(
+                new PlayerEntity("Petr", "Hlista", PlayerType.VIP, JerseyColor.DARK),
+                new PlayerEntity("LaÄŹa", "BraĹľina", PlayerType.VIP, JerseyColor.LIGHT),
+                new PlayerEntity("David", "PodsednĂ­k", PlayerType.VIP, JerseyColor.LIGHT),
+                new PlayerEntity("VlastĂ­k", "PstruĹľĂ­", PlayerType.VIP, JerseyColor.LIGHT),
+                new PlayerEntity("Otakar", "ZĂˇĹˇkodnĂ˝", PlayerType.VIP, JerseyColor.LIGHT),
+                new PlayerEntity("Jarda", "MenĹˇĂ­k", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("LuboĹˇ", "NovĂˇk", PlayerType.STANDARD, JerseyColor.LIGHT),
+                new PlayerEntity("LukĂˇĹˇ", "NovĂˇk", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("Martin", "ÄŚermĂˇk", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("Pavel", "EliĂˇĹˇ", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("StaĹa", "Jurok", PlayerType.BASIC, JerseyColor.DARK),
+                new PlayerEntity("Michal", "Pyszko", PlayerType.BASIC, JerseyColor.DARK),
+                new PlayerEntity("Jenda", "KaluĹľa", PlayerType.STANDARD, JerseyColor.LIGHT),
+                new PlayerEntity("TomĂˇĹˇ", "Faldyna", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("Martin", "Faldyna", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("Lola", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("LukĂˇĹˇ", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("Martin", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("Radim", "MaliĹˇ", PlayerType.STANDARD, JerseyColor.DARK),
+                new PlayerEntity("LaÄŹa", "Pavlica", PlayerType.STANDARD, JerseyColor.DARK)
+
+        );
+        playerRepository.saveAll(players);
+
+        // --- 5 zĂˇpasĹŻ, kaĹľdĂ˝ pĂˇtek od 21.11.2025 ---
+        LocalDateTime startDate = LocalDateTime.of(2025, 11, 21, 18, 45);
+        for (int i = 0; i < 5; i++) {
+            MatchEntity match = new MatchEntity();
+            match.setDateTime(startDate.plusWeeks(i));
+            match.setLocation("Ostravice");
+            match.setDescription("");
+            match.setMaxPlayers(12);
+            match.setPrice(2200);
+            matchRepository.save(match);
+        }
+      // --- VytvoĹ™enĂ­ registracĂ­ 6 hrĂˇÄŤĹŻ (id 1-6) na zĂˇpas id 3 ---
+        MatchEntity match3 = matchRepository.findById(3L)
+                .orElseThrow(() -> new RuntimeException("Match with id 3 not found"));
+
+        for (long playerId = 1; playerId <= 6; playerId++) {
+            final long pid = playerId;
+            PlayerEntity player = playerRepository.findById(playerId)
+                    .orElseThrow(() -> new RuntimeException("Player with id " + pid + " not found"));
+
+            MatchRegistrationEntity reg = new MatchRegistrationEntity();
+            reg.setMatch(match3);
+            reg.setPlayer(player);
+            reg.setStatus(PlayerMatchStatus.REGISTERED);
+            reg.setTimestamp(LocalDateTime.now());
+            reg.setCreatedBy("user");
+
+            matchRegistrationRepository.save(reg);
+        }
+    }
+
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\config\SecurityConfig.java
+
+
+package cz.phsoft.hokej.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+/* - POVOLENO VĹ E PRO TESTOVĂNĂŤ V POSTMAN */
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable()) // vypnout CSRF pro testovĂˇnĂ­
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // vĹˇechno volnÄ›
+        return http.build();
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\controllers\MatchController.java
+
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.MatchDTO;
+import cz.phsoft.hokej.models.dto.MatchDetailDTO;
+import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
+import cz.phsoft.hokej.models.services.MatchService;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/matches")
+@CrossOrigin(origins = "*")
+public class MatchController {
+
+    private final MatchService matchService;
+
+    public MatchController(MatchService matchService) {
+        this.matchService = matchService;
+    }
+
+    // detail zĂˇpasu
+    @GetMapping("/matchDetail/{id}")
+    public MatchDetailDTO getMatchDetail(@PathVariable Long id) {
+        return matchService.getMatchDetail(id);
+    }
+
+    // vĹˇechny zĂˇpasy
+    @GetMapping
+    public List<MatchDTO> getAllMatches() {
+        return matchService.getAllMatches();
+    }
+
+    // prvnĂ­ aktuĂˇlnĂ­ zĂˇpas
+    @GetMapping("/next")
+    public MatchDTO getNextMatch() {
+        return matchService.getNextMatch();
+    }
+
+    // aktuĂˇlnĂ­ zĂˇpasy (bez proĹˇlĂ˝ch dat)
+    @GetMapping("/upcoming")
+    public List<MatchDTO> getUpcomingMatches() {
+        return matchService.getUpcomingMatches();
+    }
+
+    // proĹˇlĂ© zĂˇpasy
+    @GetMapping("/past")
+    public List<MatchDTO> getPastMatches() {
+        return matchService.getPastMatches();
+    }
+
+
+    // POST pĹ™idat zĂˇpas
+    @PostMapping
+    public MatchDTO createMatch(@Valid @RequestBody MatchDTO dto) {
+        return matchService.createMatch(dto);
+    }
+
+    // GET podle ID
+    @GetMapping("/{id}")
+    public MatchDTO getMatch(@PathVariable Long id) {
+        return matchService.getMatchById(id);
+    }
+
+
+    // PUT editovat zĂˇpas
+    @PutMapping("/{id}")
+    public MatchDTO updateMatch(@PathVariable Long id, @Valid @RequestBody MatchDTO dto) {
+        return matchService.updateMatch(id, dto);
+    }
+
+    // DELETE smazat zĂˇpas
+    @DeleteMapping("/{id}")
+    public void deleteMatch(@PathVariable Long id) {
+        matchService.deleteMatch(id);
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\controllers\MatchRegistrationController.java
+
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/registrations")
+@CrossOrigin(origins = "*")
+public class MatchRegistrationController {
+
+    private final MatchRegistrationService service;
+
+    public MatchRegistrationController(MatchRegistrationService service) {
+        this.service = service;
+    }
+
+    @PostMapping("/register")
+    public MatchRegistrationEntity register(@RequestParam Long matchId, @RequestParam Long playerId,
+                                            @RequestParam JerseyColor jerseyColor, @RequestParam String adminNote) {
+        return service.registerPlayer(matchId, playerId, jerseyColor,adminNote);
+    }
+
+    @PostMapping("/unregister")
+    public MatchRegistrationEntity unregister(@RequestParam Long matchId, @RequestParam Long playerId,  @RequestParam String reason,
+                                              @RequestParam(required = false) String note) {
+        return service.unregisterPlayer(matchId, playerId, note, reason);
+    }
+
+    @PostMapping("/excuse")
+    public MatchRegistrationEntity excuse(@RequestParam Long matchId, @RequestParam Long playerId,
+                                          @RequestParam String reason,
+                                          @RequestParam(required = false) String note) {
+        return service.excusePlayer(matchId, playerId, note, reason);
+    }
+    @GetMapping("/all")
+    public List<MatchRegistrationEntity> getAllRegistrations() {
+        return service.getAllRegistrations();
+    }
+
+    @GetMapping("/for-player")
+    public List<MatchRegistrationEntity> forPlayer(@RequestParam Long playerId) {
+        return service.getRegistrationsForPlayer(playerId);
+    }
+
+    @GetMapping("/last-status")
+    public MatchRegistrationEntity lastStatus(@RequestParam Long matchId, @RequestParam Long playerId) {
+        return service.getLastStatus(matchId, playerId);
+    }
+
+    @GetMapping("/for-match")
+    public List<MatchRegistrationEntity> forMatch(@RequestParam Long matchId) {
+        return service.getRegistrationsForMatch(matchId);
+    }
+
+    @GetMapping("/no-response/{matchId}")
+    public List<PlayerEntity> getNoResponse(@PathVariable Long matchId) {
+        return service.getNoResponsePlayers(matchId);
+    }
+
+    @GetMapping("/last-statuses/{matchId}")
+    public List<MatchRegistrationEntity> lastStatusesForMatch(@PathVariable Long matchId) {
+        return service.getLastStatusesForMatch(matchId);
+    }
+
+
+
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\controllers\PlayerController.java
+
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import cz.phsoft.hokej.models.services.PlayerService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/players")
+@CrossOrigin(origins = "*")
+public class PlayerController {
+
+    private final PlayerService playerService;
+    private final PlayerMapper playerMapper;
+
+    public PlayerController(PlayerService playerService, PlayerMapper playerMapper) {
+        this.playerService = playerService;
+        this.playerMapper = playerMapper;
+    }
+
+    // GET all players
+    @GetMapping
+    public List<PlayerDTO> getAllPlayers() {
+        return playerService.getAllPlayers()
+                .stream()
+                .map(playerMapper::toDTO)
+                .toList();
+    }
+
+    // GET by ID
+    @GetMapping("/{id}")
+    public PlayerDTO getPlayer(@PathVariable Long id) {
+        return playerMapper.toDTO(playerService.getPlayerById(id));
+    }
+
+    // CREATE new player
+    @PostMapping
+    public PlayerDTO createPlayer(@RequestBody PlayerDTO dto) {
+        return playerMapper.toDTO(
+                playerService.createPlayer(playerMapper.toEntity(dto))
+        );
+    }
+
+    // UPDATE player
+    @PutMapping("/{id}")
+    public PlayerDTO updatePlayer(@PathVariable Long id, @RequestBody PlayerDTO dto) {
+
+        // Map DTO â†’ Entity (bez hesla)
+        var newEntity = playerMapper.toEntity(dto);
+
+        // Update uloĹľenĂ©ho hrĂˇÄŤe
+        var updated = playerService.updatePlayer(id, newEntity);
+
+        return playerMapper.toDTO(updated);
+    }
+
+    // DELETE player
+    @DeleteMapping("/{id}")
+    public void deletePlayer(@PathVariable Long id) {
+        playerService.deletePlayer(id);
+    }
+
+    
+
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\entities\MatchEntity.java
+
+
+package cz.phsoft.hokej.data.entities;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "matches")
+public class MatchEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private LocalDateTime dateTime;
+
+    @Column(nullable = false)
+    private String location;
+
+    private String description;
+
+    @Column(nullable = false)
+    private Integer maxPlayers;
+
+    @Column(nullable = false)
+    private Integer price;
+
+    public MatchEntity() {}
+
+    // Gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Integer getMaxPlayers() { return maxPlayers; }
+
+    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\entities\MatchRegistrationEntity.java
+
+
+package cz.phsoft.hokej.data.entities;
+
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.JerseyColor;
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "match_registrations")
+public class MatchRegistrationEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "match_id", nullable = false)
+    private MatchEntity match;
+
+    @ManyToOne
+    @JoinColumn(name = "player_id", nullable = false)
+    private PlayerEntity player;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PlayerMatchStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private ExcuseReason excuseReason;
+
+    private String excuseNote;
+
+    private String adminNote;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "jersey_color")
+    private JerseyColor jerseyColor;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime timestamp = LocalDateTime.now();
+
+    @Column(nullable = false, updatable = false)
+    private String createdBy; // "user" nebo "system"
+
+    public MatchRegistrationEntity() {
+    }
+
+    // Gettery a Settery
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public MatchEntity getMatch() {
+        return match;
+    }
+
+    public void setMatch(MatchEntity match) {
+        this.match = match;
+    }
+
+    public PlayerEntity getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(PlayerEntity player) {
+        this.player = player;
+    }
+
+    public PlayerMatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerMatchStatus status) {
+        this.status = status;
+    }
+
+    public ExcuseReason getExcuseReason() {
+        return excuseReason;
+    }
+
+    public void setExcuseReason(ExcuseReason excuseReason) {
+        this.excuseReason = excuseReason;
+    }
+
+    public String getExcuseNote() {
+        return excuseNote;
+    }
+
+    public void setExcuseNote(String excuseNote) {
+        this.excuseNote = excuseNote;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public JerseyColor getJerseyColor() {
+        return jerseyColor;
+    }
+
+    public void setJerseyColor(JerseyColor jerseyColor) {
+        this.jerseyColor = jerseyColor;
+    }
+}
+
+
+
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\entities\MatchRegistrationHistoryEntity.java
+
+
+package cz.phsoft.hokej.data.entities;
+
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.JerseyColor;
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "match_registration_history")
+public class MatchRegistrationHistoryEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // ID z pĹŻvodnĂ­ hlavnĂ­ tabulky
+    @Column(name = "match_registration_id", nullable = false)
+    private Long matchRegistrationId;
+
+    @Column(name = "match_id", nullable = false)
+    private Long matchId;
+
+    @Column(name = "player_id", nullable = false)
+    private Long playerId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PlayerMatchStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "excuse_reason")
+    private ExcuseReason excuseReason;
+
+    @Column(name = "excuse_note")
+    private String excuseNote;
+
+    @Column(name = "admin_note")
+    private String adminNote;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "jersey_color")
+    private JerseyColor jerseyColor;
+
+    @Column(name = "original_timestamp", nullable = false)
+    private LocalDateTime originalTimestamp;
+
+    @Column(name = "created_by", nullable = false)
+    private String createdBy;
+
+    @Column(nullable = false)
+    private String action; // INSERT / UPDATE / DELETE
+
+    @Column(name = "changed_at", nullable = false)
+    private LocalDateTime changedAt;
+
+    public MatchRegistrationHistoryEntity() {
+    }
+
+    // Gettery a settery
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getMatchRegistrationId() {
+        return matchRegistrationId;
+    }
+
+    public void setMatchRegistrationId(Long matchRegistrationId) {
+        this.matchRegistrationId = matchRegistrationId;
+    }
+
+    public Long getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
+    }
+
+    public Long getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
+    public PlayerMatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerMatchStatus status) {
+        this.status = status;
+    }
+
+    public ExcuseReason getExcuseReason() {
+        return excuseReason;
+    }
+
+    public void setExcuseReason(ExcuseReason excuseReason) {
+        this.excuseReason = excuseReason;
+    }
+
+    public String getExcuseNote() {
+        return excuseNote;
+    }
+
+    public void setExcuseNote(String excuseNote) {
+        this.excuseNote = excuseNote;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public JerseyColor getJerseyColor() {
+        return jerseyColor;
+    }
+
+    public void setJerseyColor(JerseyColor jerseyColor) {
+        this.jerseyColor = jerseyColor;
+    }
+
+    public LocalDateTime getOriginalTimestamp() {
+        return originalTimestamp;
+    }
+
+    public void setOriginalTimestamp(LocalDateTime originalTimestamp) {
+        this.originalTimestamp = originalTimestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public LocalDateTime getChangedAt() {
+        return changedAt;
+    }
+
+    public void setChangedAt(LocalDateTime changedAt) {
+        this.changedAt = changedAt;
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\entities\PlayerEntity.java
+
+
+package cz.phsoft.hokej.data.entities;
+
+import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.PlayerType;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "player_entity")
+public class PlayerEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String surname;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PlayerType type; // VIP, STANDARD, BASIC
+
+    private String fullName;
+
+    @Enumerated(EnumType.STRING)
+    private JerseyColor jerseyColor;
+
+    public PlayerEntity() {
+        this.type = PlayerType.BASIC;
+    }
+
+    public PlayerEntity(String name, String surname, PlayerType type, JerseyColor jerseyColor) {
+        this.name = name;
+        this.surname = surname;
+        this.type = type;
+        this.fullName = name + " " + surname;
+        this.jerseyColor = jerseyColor;
+
+    }
+
+    // Gettery a Settery + updateFullName
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; updateFullName(); }
+
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; updateFullName(); }
+
+    public String getFullName() { return fullName; }
+
+    public PlayerType getType() { return type; }
+    public void setType(PlayerType type) { this.type = type; }
+
+    private void updateFullName() { this.fullName = name + " " + surname; }
+
+    public JerseyColor getJerseyColor() { return jerseyColor; }
+
+    public void setJerseyColor(JerseyColor jerseyColor) { this.jerseyColor = jerseyColor; }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\enums\ExcuseReason.java
+
+
+package cz.phsoft.hokej.data.enums;
+
+public enum ExcuseReason {
+    NEMOC,
+    PRACE,
+    JINE
+}
+
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\enums\JerseyColor.java
+
+
+package cz.phsoft.hokej.data.enums;
+
+public enum JerseyColor {
+    DARK,
+    LIGHT
+
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\enums\PlayerMatchStatus.java
+
+
+package cz.phsoft.hokej.data.enums;
+
+public enum PlayerMatchStatus {
+    REGISTERED,
+    UNREGISTERED,
+    EXCUSED,  // omluven
+    RESERVED // nĂˇhradnĂ­k
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\enums\PlayerType.java
+
+
+package cz.phsoft.hokej.data.enums;
+
+public enum PlayerType {
+    VIP,
+    STANDARD,
+    BASIC
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\enums\Role.java
+
+
+package cz.phsoft.hokej.data.enums;
+
+public enum Role {
+    ROLE_PLAYER,
+    ROLE_MANAGER,
+    ROLE_ADMIN
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\repositories\MatchRegistrationHistoryRepository.java
+
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationHistoryEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface MatchRegistrationHistoryRepository extends JpaRepository<MatchRegistrationHistoryEntity, Long> {
+
+    // ZĂ­skat kompletnĂ­ historii registrace podle ID pĹŻvodnĂ­ho zĂˇznamu
+    List<MatchRegistrationHistoryEntity> findByMatchRegistrationIdOrderByChangedAtDesc(Long matchRegistrationId);
+
+    // Historie pro konkrĂ©tnĂ­ zĂˇpas
+    List<MatchRegistrationHistoryEntity> findByMatchIdOrderByChangedAtDesc(Long matchId);
+
+    // Historie zmÄ›n hrĂˇÄŤe
+    List<MatchRegistrationHistoryEntity> findByPlayerIdOrderByChangedAtDesc(Long playerId);
+
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\repositories\MatchRegistrationRepository.java
+
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+    @Repository
+    public interface MatchRegistrationRepository extends JpaRepository<MatchRegistrationEntity, Long> {
+
+        // VrĂˇtĂ­ poslednĂ­ status pro danĂ©ho hrĂˇÄŤe a zĂˇpas
+        Optional<MatchRegistrationEntity> findTopByPlayerIdAndMatchIdOrderByTimestampDesc(Long playerId, Long matchId);
+
+        // VolitelnÄ›: vĹˇechny registrace pro urÄŤitĂ˝ zĂˇpas
+        List<MatchRegistrationEntity> findByMatchId(Long matchId);
+
+        // VolitelnÄ›: vĹˇechny registrace pro urÄŤitĂ©ho hrĂˇÄŤe
+        List<MatchRegistrationEntity> findByPlayer(PlayerEntity player);
+
+        // --- NovĂˇ metoda pro hledĂˇnĂ­ konkrĂ©tnĂ­ registrace ---
+        Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
+
+    }
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\repositories\MatchRepository.java
+
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
+    List<MatchEntity> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
+    List<MatchEntity> findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime dateTime);
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\data\repositories\PlayerRepository.java
+
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
+    Optional<PlayerEntity> findById(Long id);
+
+    List<PlayerEntity> findByIdNotIn(List<Long> ids);
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\exceptions\ApiError.java
+
+
+package cz.phsoft.hokej.exceptions;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDateTime;
+
+public class ApiError {
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime timestamp;
+    private int status;
+    private String error;
+    private String message;
+    private String path;
+
+    public ApiError(int status, String error, String message, String path) {
+        this.timestamp = LocalDateTime.now();
+        this.status = status;
+        this.error = error;
+        this.message = message;
+        this.path = path;
+    }
+
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public int getStatus() { return status; }
+    public String getError() { return error; }
+    public String getMessage() { return message; }
+    public String getPath() { return path; }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\exceptions\DuplicateRegistrationException.java
+
+
+package cz.phsoft.hokej.exceptions;
+
+public class DuplicateRegistrationException extends RuntimeException {
+
+    public DuplicateRegistrationException(String message) {
+        super(message);
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\exceptions\GlobalExceptionHandler.java
+
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+
+import jakarta.servlet.http.HttpServletRequest;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    private ResponseEntity<cz.phsoft.hokej.exceptions.ApiError> buildError(HttpStatus status, String message, String path) {
+        cz.phsoft.hokej.exceptions.ApiError error = new cz.phsoft.hokej.exceptions.ApiError(
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                path
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    // 1) DuplicateRegistrationException â†’ 400
+    @ExceptionHandler(DuplicateRegistrationException.class)
+    public ResponseEntity<cz.phsoft.hokej.exceptions.ApiError> handleDuplicateRegistration(
+            DuplicateRegistrationException ex,
+            HttpServletRequest request) {
+
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
+    }
+
+    // 2) Validace DTO â†’ 400
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<cz.phsoft.hokej.exceptions.ApiError> handleValidation(MethodArgumentNotValidException ex,
+                                                                                HttpServletRequest request) {
+
+        String msg = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .findFirst()
+                .orElse("Validation failed");
+
+        return buildError(HttpStatus.BAD_REQUEST, msg, request.getRequestURI());
+    }
+
+    // 3) LibovolnĂˇ jinĂˇ neoÄŤekĂˇvanĂˇ vyjĂ­mka â†’ 500
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<cz.phsoft.hokej.exceptions.ApiError> handleAll(Exception ex, HttpServletRequest request) {
+
+        ex.printStackTrace(); // nebo logger
+
+        return buildError(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
+
+
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\dto\mappers\MatchMapper.java
+
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.models.dto.MatchDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+
+@Mapper(componentModel = "spring")
+public interface MatchMapper {
+
+    MatchDTO toDTO(MatchEntity entity);
+
+    MatchEntity toEntity(MatchDTO dto);
+
+    void updateEntity(MatchDTO dto, @MappingTarget MatchEntity entity);
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\dto\mappers\MatchRegistrationMapper.java
+
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+public interface MatchRegistrationMapper {
+    // DTO â†’ Entity
+    @Mapping(source = "matchId", target = "match.matchId")
+    @Mapping(source = "playerId", target = "player.playerId")
+    MatchRegistrationEntity toEntity(MatchRegistrationDTO dto, MatchEntity match, PlayerEntity player);
+
+    // Entity â†’ DTO
+    @Mapping(source = "match.matchId", target = "matchId")
+    @Mapping(source = "player.playerId", target = "playerId")
+    MatchRegistrationDTO toDTO(MatchRegistrationEntity entity);
+
+    // Aktualizace Entity
+    void updateEntity(MatchRegistrationDTO dto, @MappingTarget MatchRegistrationEntity entity);
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\dto\mappers\PlayerMapper.java
+
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+@Mapper(componentModel = "spring")
+public interface PlayerMapper {
+
+        // Entity â†’ DTO (heslo se neposĂ­lĂˇ)
+        @Mapping(target = "fullName", ignore = true) // generuje se v DTO
+        PlayerDTO toDTO(PlayerEntity entity);
+
+        // DTO â†’ Entity (heslo se mapuje, pokud existuje)
+        PlayerEntity toEntity(PlayerDTO dto);
+
+        // Aktualizace existujĂ­cĂ­ho DTO (ignorujeme fullName)
+        @Mapping(target = "fullName", ignore = true)
+        void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
+
+        // Aktualizace existujĂ­cĂ­ Entity (heslo se mapuje, fullName nenĂ­ pole v Entity)
+        void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\dto\MatchDetailDTO.java
+
+
+package cz.phsoft.hokej.models.dto;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class MatchDetailDTO {
+    private Long id;
+    private LocalDateTime dateTime;
+    private int maxPlayers;
+    private int inGamePlayers;
+    private int outGamePlayers;
+    private int waitingPlayers;
+    private int noActionPlayers;
+    private double pricePerRegisteredPlayer;
+    private int remainingSlots;
+
+    private List<String> registeredPlayers;
+    private List<String> reservedPlayers;
+    private List<String> unregisteredPlayers;
+    private List<String> excusedPlayers;
+    private List<String> noResponsePlayers;
+
+    // Gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
+    public int getMaxPlayers() { return maxPlayers; }
+    public void setMaxPlayers(int maxPlayers) { this.maxPlayers = maxPlayers; }
+
+    public double getPricePerRegisteredPlayer() { return pricePerRegisteredPlayer; }
+    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) { this.pricePerRegisteredPlayer = pricePerRegisteredPlayer; }
+
+    public int getRemainingSlots() { return remainingSlots; }
+    public void setRemainingSlots(int remainingSlots) { this.remainingSlots = remainingSlots; }
+
+    public List<String> getRegisteredPlayers() { return registeredPlayers; }
+    public void setRegisteredPlayers(List<String> registeredPlayers) { this.registeredPlayers = registeredPlayers; }
+
+    public List<String> getReservedPlayers() { return reservedPlayers; }
+    public void setReservedPlayers(List<String> reservedPlayers) { this.reservedPlayers = reservedPlayers; }
+
+    public List<String> getUnregisteredPlayers() { return unregisteredPlayers; }
+    public void setUnregisteredPlayers(List<String> unregisteredPlayers) { this.unregisteredPlayers = unregisteredPlayers; }
+
+    public List<String> getExcusedPlayers() { return excusedPlayers; }
+    public void setExcusedPlayers(List<String> excusedPlayers) { this.excusedPlayers = excusedPlayers; }
+
+    public int getInGamePlayers() { return inGamePlayers;  }
+    public void setInGamePlayers(int inGamePlayers) { this.inGamePlayers = inGamePlayers; }
+
+    public int getOutGamePlayers() { return outGamePlayers; }
+    public void setOutGamePlayers(int outGamePlayers) { this.outGamePlayers = outGamePlayers; }
+
+    public int getNoActionPlayers() { return noActionPlayers; }
+    public void setNoActionPlayers(int noActionPlayers) { this.noActionPlayers = noActionPlayers; }
+
+    public int getWaitingPlayers() { return waitingPlayers; }
+    public void setWaitingPlayers(int waitingPlayers) { this.waitingPlayers = waitingPlayers; }
+
+    public List<String> getNoResponsePlayers() { return noResponsePlayers; }
+
+    public void setNoResponsePlayers(List<String> noResponsePlayers) { this.noResponsePlayers = noResponsePlayers; }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\dto\MatchDTO.java
+
+
+package cz.phsoft.hokej.models.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
+
+public class MatchDTO {
+
+    private Long id;
+    @NotNull(message = "Datum a ÄŤas zĂˇpasu je povinnĂ©.")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime dateTime;
+
+    @NotBlank(message = "MĂ­sto zĂˇpasu je povinnĂ©.")
+    @Size(min = 3, max = 100)
+    private String location;
+
+    @Size(max = 255, message = "Popis mĹŻĹľe mĂ­t max 255 znakĹŻ.")
+    private String description;
+
+    @NotNull(message = "MaximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ je povinnĂ˝")
+    private Integer maxPlayers;
+
+    @NotNull(message = "Cena je povinnĂˇ")
+    private Integer price;
+
+    // gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Integer getMaxPlayers() { return maxPlayers; }
+    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\dto\MatchRegistrationDTO.java
+
+
+package cz.phsoft.hokej.models.dto;
+
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+import java.time.chrono.JapaneseChronology;
+
+public class MatchRegistrationDTO {
+    private Long id; // volitelnĂ©, pĹ™i GET
+
+    @NotNull(message = "ID zĂˇpasu je povinnĂ©.")
+    @Positive(message = "ID zĂˇpasu musĂ­ bĂ˝t kladnĂ©.")
+    private Long matchId;
+
+    @NotNull(message = "ID hrĂˇÄŤe je povinnĂ©.")
+    @Positive(message = "ID hrĂˇÄŤe musĂ­ bĂ˝t kladnĂ©.")
+    private Long playerId;
+
+    private PlayerMatchStatus status;
+    private ExcuseReason excuseReason; // pouze pokud status = EXCUSED
+    private String excuseNote;
+    private String adminNote;
+    private JerseyColor jerseyColor;
+
+    @NotNull
+    private String createdBy; // "user" nebo "system"
+
+    public MatchRegistrationDTO() {}
+
+    // Gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getMatchId() { return matchId; }
+    public void setMatchId(Long matchId) { this.matchId = matchId; }
+
+    public Long getPlayerId() { return playerId; }
+    public void setPlayerId(Long playerId) { this.playerId = playerId; }
+
+    public PlayerMatchStatus getStatus() { return status; }
+    public void setStatus(PlayerMatchStatus status) { this.status = status; }
+
+    public ExcuseReason getExcuseReason() { return excuseReason; }
+    public void setExcuseReason(ExcuseReason excuseReason) { this.excuseReason = excuseReason; }
+
+    public String getExcuseNote() { return excuseNote; }
+    public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
+
+    public String getAdminNote() { return adminNote; }
+    public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
+
+    public JerseyColor getJerseyColor() { return jerseyColor; }
+    public void setJerseyColor(JerseyColor jerseyColor) { this.jerseyColor = jerseyColor; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+}
+
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\dto\MatchRegistrationHistoryDTO.java
+
+
+package cz.phsoft.hokej.models.dto;
+
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.JerseyColor;
+
+import java.time.LocalDateTime;
+
+public class MatchRegistrationHistoryDTO {
+
+    private Long id;
+    private Long matchRegistrationId;
+    private Long matchId;
+    private Long playerId;
+
+    private PlayerMatchStatus status;
+    private ExcuseReason excuseReason;
+    private String excuseNote;
+    private String adminNote;
+    private JerseyColor jerseyColor;
+
+    private LocalDateTime originalTimestamp;
+    private String createdBy;
+
+    private String action;       // INSERT / UPDATE / DELETE
+    private LocalDateTime changedAt;
+
+    public MatchRegistrationHistoryDTO() {
+    }
+
+    // Gettery a settery
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getMatchRegistrationId() {
+        return matchRegistrationId;
+    }
+
+    public void setMatchRegistrationId(Long matchRegistrationId) {
+        this.matchRegistrationId = matchRegistrationId;
+    }
+
+    public Long getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
+    }
+
+    public Long getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
+    public PlayerMatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerMatchStatus status) {
+        this.status = status;
+    }
+
+    public ExcuseReason getExcuseReason() {
+        return excuseReason;
+    }
+
+    public void setExcuseReason(ExcuseReason excuseReason) {
+        this.excuseReason = excuseReason;
+    }
+
+    public String getExcuseNote() {
+        return excuseNote;
+    }
+
+    public void setExcuseNote(String excuseNote) {
+        this.excuseNote = excuseNote;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public JerseyColor getJerseyColor() {
+        return jerseyColor;
+    }
+
+    public void setJerseyColor(JerseyColor jerseyColor) {
+        this.jerseyColor = jerseyColor;
+    }
+
+    public LocalDateTime getOriginalTimestamp() {
+        return originalTimestamp;
+    }
+
+    public void setOriginalTimestamp(LocalDateTime originalTimestamp) {
+        this.originalTimestamp = originalTimestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public LocalDateTime getChangedAt() {
+        return changedAt;
+    }
+
+    public void setChangedAt(LocalDateTime changedAt) {
+        this.changedAt = changedAt;
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\dto\PlayerDTO.java
+
+
+package cz.phsoft.hokej.models.dto;
+
+import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.PlayerType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public class PlayerDTO {
+
+
+    private Long id; // autogenerated, nullable pĹ™i create
+
+    @NotBlank(message = "KĹ™estnĂ­ jmĂ©no je povinnĂ©.")
+    @Size(min = 2, max = 50)
+    private String name; // not null
+
+    @NotBlank(message = "PĹ™Ă­jmenĂ­ je povinnĂ©.")
+    @Size(min = 2, max = 50)
+    private String surname; // not null
+
+    private String fullName; // derived
+    private PlayerType type; // not null, default BASIC
+    private JerseyColor jerseyColor;
+
+
+    public PlayerDTO() {
+        this.type = PlayerType.BASIC;
+   }
+
+    public PlayerDTO(Long id, String name, String surname, PlayerType type, JerseyColor jerseyColor) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.type = type != null ? type : PlayerType.BASIC;
+        this.updateFullName();
+        this.jerseyColor = jerseyColor;
+    }
+
+    // --- Gettery a Settery ---
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; updateFullName(); }
+
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; updateFullName(); }
+
+    public String getFullName() { return fullName; }
+
+    public PlayerType getType() { return type; }
+    public void setType(PlayerType type) { this.type = type != null ? type : PlayerType.BASIC; }
+
+    private void updateFullName() { this.fullName = name + " " + surname; }
+
+    public JerseyColor getJerseyColor() { return jerseyColor; }
+
+    public void setJerseyColor(JerseyColor jerseyColor) { this.jerseyColor = jerseyColor; }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationHistoryService.java
+
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO;
+
+import java.util.List;
+
+public interface MatchRegistrationHistoryService {
+    MatchRegistrationHistoryDTO save(MatchRegistrationHistoryDTO dto);
+
+    List<MatchRegistrationHistoryDTO> getHistoryForRegistration(Long registrationId);
+
+    void delete(Long id);
+
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationHistoryServiceImpl.java
+
+
+package cz.phsoft.hokej.models.services.impl;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationHistoryEntity;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationHistoryRepository;
+import cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO;
+import cz.phsoft.hokej.models.services.MatchRegistrationHistoryService;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class MatchRegistrationHistoryServiceImpl implements MatchRegistrationHistoryService {
+
+    private final MatchRegistrationHistoryRepository repository;
+
+    public MatchRegistrationHistoryServiceImpl(MatchRegistrationHistoryRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    @Transactional
+    public MatchRegistrationHistoryDTO save(MatchRegistrationHistoryDTO dto) {
+
+        // PĹ™evod DTO â†’ Entity manuĂˇlnÄ›
+        MatchRegistrationHistoryEntity entity = new MatchRegistrationHistoryEntity();
+        entity.setMatchRegistrationId(dto.getMatchRegistrationId());
+        entity.setMatchId(dto.getMatchId());
+        entity.setPlayerId(dto.getPlayerId());
+        entity.setStatus(dto.getStatus());
+        entity.setExcuseReason(dto.getExcuseReason());
+        entity.setExcuseNote(dto.getExcuseNote());
+        entity.setAdminNote(dto.getAdminNote());
+        entity.setJerseyColor(dto.getJerseyColor());
+        entity.setOriginalTimestamp(dto.getOriginalTimestamp() != null ? dto.getOriginalTimestamp() : LocalDateTime.now());
+        entity.setCreatedBy(dto.getCreatedBy() != null ? dto.getCreatedBy() : "system");
+        entity.setAction(dto.getAction() != null ? dto.getAction() : "INSERT");
+        entity.setChangedAt(LocalDateTime.now());
+
+        MatchRegistrationHistoryEntity saved = repository.save(entity);
+
+        // PĹ™evod Entity â†’ DTO manuĂˇlnÄ›
+        MatchRegistrationHistoryDTO result = new MatchRegistrationHistoryDTO();
+        result.setId(saved.getId());
+        result.setMatchRegistrationId(saved.getMatchRegistrationId());
+        result.setMatchId(saved.getMatchId());
+        result.setPlayerId(saved.getPlayerId());
+        result.setStatus(saved.getStatus());
+        result.setExcuseReason(saved.getExcuseReason());
+        result.setExcuseNote(saved.getExcuseNote());
+        result.setAdminNote(saved.getAdminNote());
+        result.setJerseyColor(saved.getJerseyColor());
+        result.setOriginalTimestamp(saved.getOriginalTimestamp());
+        result.setCreatedBy(saved.getCreatedBy());
+        result.setAction(saved.getAction());
+        result.setChangedAt(saved.getChangedAt());
+
+        return result;
+    }
+
+    @Override
+    public List<MatchRegistrationHistoryDTO> getHistoryForRegistration(Long registrationId) {
+        return repository.findByMatchRegistrationIdOrderByChangedAtDesc(registrationId)
+                .stream()
+                .map(e -> {
+                    MatchRegistrationHistoryDTO dto = new MatchRegistrationHistoryDTO();
+                    dto.setId(e.getId());
+                    dto.setMatchRegistrationId(e.getMatchRegistrationId());
+                    dto.setMatchId(e.getMatchId());
+                    dto.setPlayerId(e.getPlayerId());
+                    dto.setStatus(e.getStatus());
+                    dto.setExcuseReason(e.getExcuseReason());
+                    dto.setExcuseNote(e.getExcuseNote());
+                    dto.setAdminNote(e.getAdminNote());
+                    dto.setJerseyColor(e.getJerseyColor());
+                    dto.setOriginalTimestamp(e.getOriginalTimestamp());
+                    dto.setCreatedBy(e.getCreatedBy());
+                    dto.setAction(e.getAction());
+                    dto.setChangedAt(e.getChangedAt());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationService.java
+
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.JerseyColor;
+
+
+import java.util.List;
+
+    public interface MatchRegistrationService {
+
+
+        // PĹ™ihlĂˇsit hrĂˇÄŤe s volitelnou barvou dresu a poznĂˇmkou admina
+        MatchRegistrationEntity registerPlayer(Long matchId, Long playerId, JerseyColor jerseyColor, String adminNote);
+
+        // OdhlĂˇsit hrĂˇÄŤe
+        MatchRegistrationEntity unregisterPlayer(Long matchId, Long playerId, String note, String reason);
+
+        // Omluvit hrĂˇÄŤe s dĹŻvodem
+        MatchRegistrationEntity excusePlayer(Long matchId, Long playerId, String note, String reason);
+
+        // ZĂ­skat poslednĂ­ status hrĂˇÄŤe u zĂˇpasu
+        MatchRegistrationEntity getLastStatus(Long matchId, Long playerId);
+
+        // ZĂ­skat poslednĂ­ statusy vĹˇech hrĂˇÄŤĹŻ u zĂˇpasu
+        List<MatchRegistrationEntity> getLastStatusesForMatch(Long matchId);
+
+        // Seznam vĹˇech registracĂ­ pro zĂˇpas
+        List<MatchRegistrationEntity> getRegistrationsForMatch(Long matchId);
+
+        // Seznam vĹˇech registracĂ­
+        List<MatchRegistrationEntity> getAllRegistrations();
+
+        // Seznam registracĂ­ pro konkrĂ©tnĂ­ho hrĂˇÄŤe
+        List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId);
+
+        // ZĂ­skat hrĂˇÄŤe, kteĹ™Ă­ se vĹŻbec nevyjĂˇdĹ™ili k zĂˇpasu
+        List<PlayerEntity> getNoResponsePlayers(Long matchId);
+
+        // PĹ™epoÄŤet statusĹŻ REGISTERED / RESERVED podle kapacity
+        void recalcStatusesForMatch(Long matchId);
+
+
+    }
+
+
+
+
+
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationServiceImpl.java
+
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.DuplicateRegistrationException;
+import cz.phsoft.hokej.models.dto.mappers.MatchRegistrationMapper;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+public class MatchRegistrationServiceImpl implements MatchRegistrationService {
+
+    private final MatchRegistrationRepository registrationRepository;
+    private final MatchRepository matchRepository;
+    private final PlayerRepository playerRepository;
+    private final MatchRegistrationMapper matchRegistrationMapper;
+
+    public MatchRegistrationServiceImpl(
+            MatchRegistrationRepository registrationRepository,
+            MatchRepository matchRepository,
+            PlayerRepository playerRepository,
+            MatchRegistrationMapper matchRegistrationMapper) {
+
+        this.registrationRepository = registrationRepository;
+        this.matchRepository = matchRepository;
+        this.playerRepository = playerRepository;
+        this.matchRegistrationMapper = matchRegistrationMapper;
+    }
+
+    // ---------------------------------------------------------------------
+    // REGISTRACE
+    // ---------------------------------------------------------------------
+    @Override
+    @Transactional
+    public MatchRegistrationEntity registerPlayer(Long matchId, Long playerId, JerseyColor jerseyColor, String adminNote) {
+
+        MatchRegistrationEntity current = registrationRepository
+                .findTopByPlayerIdAndMatchIdOrderByTimestampDesc(playerId, matchId)
+                .orElse(null);
+
+        if (current != null) {
+            throw new DuplicateRegistrationException("HrĂˇÄŤ jiĹľ mĂˇ registraci k zĂˇpasu");
+        }
+
+        return saveStatus(matchId, playerId, null, null,
+                PlayerMatchStatus.REGISTERED, jerseyColor, adminNote, "user");
+    }
+
+    @Override
+    @Transactional
+    public MatchRegistrationEntity unregisterPlayer(Long matchId, Long playerId, String note, String reason) {
+        MatchRegistrationEntity current = registrationRepository
+                .findTopByPlayerIdAndMatchIdOrderByTimestampDesc(playerId, matchId)
+                .orElseThrow(() -> new RuntimeException("HrĂˇÄŤ nemĂˇ registraci k zĂˇpasu"));
+
+        current.setStatus(PlayerMatchStatus.UNREGISTERED);
+        current.setExcuseNote(note);
+        current.setExcuseReason(ExcuseReason.valueOf(reason.toUpperCase()));
+        current.setTimestamp(LocalDateTime.now());
+        current.setCreatedBy("user");
+
+        return registrationRepository.save(current);
+    }
+
+    @Override
+    @Transactional
+    public MatchRegistrationEntity excusePlayer(Long matchId, Long playerId, String note, String reason) {
+
+        MatchRegistrationEntity current = registrationRepository
+                .findTopByPlayerIdAndMatchIdOrderByTimestampDesc(playerId, matchId)
+                .orElse(null);
+
+        if (current != null) {
+            throw new DuplicateRegistrationException("HrĂˇÄŤ jiĹľ mĂˇ registraci, nelze omluvit");
+        }
+
+        return saveStatus(matchId, playerId,
+                ExcuseReason.valueOf(reason.toUpperCase()), note,
+                PlayerMatchStatus.EXCUSED, null, null, "user");
+    }
+
+    // ---------------------------------------------------------------------
+    // ZĂŤSKĂVĂNĂŤ REGISTRACĂŤ
+    // ---------------------------------------------------------------------
+    @Override
+    public MatchRegistrationEntity getLastStatus(Long matchId, Long playerId) {
+        return registrationRepository
+                .findTopByPlayerIdAndMatchIdOrderByTimestampDesc(playerId, matchId)
+                .orElse(null);
+    }
+
+    @Override
+    public List<MatchRegistrationEntity> getLastStatusesForMatch(Long matchId) {
+        return playerRepository.findAll().stream()
+                .map(p -> getLastStatus(matchId, p.getId()))
+                .filter(r -> r != null)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MatchRegistrationEntity> getRegistrationsForMatch(Long matchId) {
+        return registrationRepository.findByMatchId(matchId);
+    }
+
+    @Override
+    public List<MatchRegistrationEntity> getAllRegistrations() {
+        return registrationRepository.findAll();
+    }
+
+    @Override
+    public List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId) {
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Player not found"));
+        return registrationRepository.findByPlayer(player);
+    }
+
+    @Override
+    public List<PlayerEntity> getNoResponsePlayers(Long matchId) {
+        List<PlayerEntity> allPlayers = playerRepository.findAll();
+        Set<Long> respondedIds = registrationRepository.findByMatchId(matchId)
+                .stream()
+                .map(r -> r.getPlayer().getId())
+                .collect(Collectors.toSet());
+
+        return allPlayers.stream()
+                .filter(p -> !respondedIds.contains(p.getId()))
+                .collect(Collectors.toList());
+    }
+
+    // ---------------------------------------------------------------------
+    // CORE SAVE â€“ pĹ™es mapper
+    // ---------------------------------------------------------------------
+    @Transactional
+    private MatchRegistrationEntity saveStatus(Long matchId,
+                                               Long playerId,
+                                               ExcuseReason excuseReason,
+                                               String note,
+                                               PlayerMatchStatus status,
+                                               JerseyColor jerseyColor,
+                                               String adminNote,
+                                               String createdBy) {
+
+        MatchEntity match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found"));
+
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Player not found"));
+
+        PlayerMatchStatus finalStatus = (status != null)
+                ? status
+                : determineStatus(matchId, match);
+
+        MatchRegistrationEntity reg =
+                matchRegistrationMapper.toEntity(
+                        match,
+                        player,
+                        finalStatus,
+                        excuseReason,
+                        note,
+                        jerseyColor,
+                        adminNote,
+                        createdBy
+                );
+
+        return registrationRepository.save(reg);
+    }
+
+    // ---------------------------------------------------------------------
+    // Status REGISTERED / RESERVED
+    // ---------------------------------------------------------------------
+    private PlayerMatchStatus determineStatus(Long matchId, MatchEntity match) {
+        long registeredCount = registrationRepository.findByMatchId(matchId).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                .count();
+
+        return registeredCount < match.getMaxPlayers()
+                ? PlayerMatchStatus.REGISTERED
+                : PlayerMatchStatus.RESERVED;
+    }
+
+    // ---------------------------------------------------------------------
+    // Recalculate statuses
+    // ---------------------------------------------------------------------
+    @Transactional
+    public void recalcStatusesForMatch(Long matchId) {
+        MatchEntity match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found"));
+
+        int maxPlayers = match.getMaxPlayers();
+
+        var latest = registrationRepository.findByMatchId(matchId).stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.getPlayer().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy((a, b) -> a.getTimestamp().compareTo(b.getTimestamp())),
+                                opt -> opt.orElse(null)
+                        )));
+
+        List<MatchRegistrationEntity> active = latest.values().stream()
+                .filter(r -> r != null)
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED
+                        || r.getStatus() == PlayerMatchStatus.RESERVED)
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .toList();
+
+        for (int i = 0; i < active.size(); i++) {
+            PlayerMatchStatus newStatus = (i < maxPlayers)
+                    ? PlayerMatchStatus.REGISTERED
+                    : PlayerMatchStatus.RESERVED;
+
+            MatchRegistrationEntity old = active.get(i);
+
+            if (old.getStatus() != newStatus) {
+                old.setStatus(newStatus);
+                old.setTimestamp(LocalDateTime.now());
+                old.setCreatedBy("system");
+                registrationRepository.save(old);
+            }
+        }
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\services\MatchService.java
+
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.models.dto.MatchDTO;
+import cz.phsoft.hokej.models.dto.MatchDetailDTO;
+
+import java.util.List;
+
+public interface MatchService {
+    List<MatchDTO> getAllMatches();
+    List<MatchDTO> getUpcomingMatches();
+    List<MatchDTO> getPastMatches();
+    MatchDTO getNextMatch();
+    MatchDTO getMatchById(Long id);
+    MatchDTO createMatch(MatchDTO dto);
+    MatchDTO updateMatch(Long id, MatchDTO dto);
+    void deleteMatch(Long id);
+    MatchDetailDTO getMatchDetail(Long id);
+
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\services\MatchServiceImpl.java
+
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.models.dto.MatchDTO;
+import cz.phsoft.hokej.models.dto.MatchDetailDTO;
+import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+public class MatchServiceImpl implements MatchService {
+
+    private final MatchRepository matchRepository;
+    private final MatchMapper matchMapper;
+    private final MatchRegistrationService registrationService;
+    private final PlayerRepository playerRepository;   // â† DOPLNÄšNO !!!
+
+    public MatchServiceImpl(MatchRepository matchRepository,
+                            MatchMapper matchMapper,
+                            MatchRegistrationService registrationService,
+                            PlayerRepository playerRepository) { // â† DOPLNÄšNO !!!
+        this.matchRepository = matchRepository;
+        this.matchMapper = matchMapper;
+        this.registrationService = registrationService;
+        this.playerRepository = playerRepository;       // â† DOPLNÄšNO !!!
+    }
+
+    @Override
+    public List<MatchDTO> getAllMatches() {
+        return matchRepository.findAll()
+                .stream()
+                .map(matchMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MatchDTO> getUpcomingMatches() {
+        return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
+                .stream()
+                .map(matchMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<MatchDTO> getPastMatches() {
+        return matchRepository.findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime.now())
+                .stream()
+                .map(matchMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public MatchDTO getNextMatch() {
+        return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
+                .stream()
+                .findFirst()
+                .map(matchMapper::toDTO)
+                .orElse(null);
+    }
+
+    @Override
+    public MatchDTO getMatchById(Long id) {
+        return matchMapper.toDTO(matchRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Match not found: " + id)));
+    }
+
+    @Override
+    public MatchDTO createMatch(MatchDTO dto) {
+        MatchEntity entity = matchMapper.toEntity(dto);
+        return matchMapper.toDTO(matchRepository.save(entity));
+    }
+
+    @Override
+    public MatchDTO updateMatch(Long id, MatchDTO dto) {
+        MatchEntity entity = matchRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Match not found: " + id));
+
+        int oldMaxPlayers = entity.getMaxPlayers();
+        matchMapper.updateEntity(dto, entity);
+        MatchEntity saved = matchRepository.save(entity);
+
+        if (saved.getMaxPlayers() != oldMaxPlayers) {
+            registrationService.recalcStatusesForMatch(saved.getId());
+        }
+
+        return matchMapper.toDTO(saved);
+    }
+
+    @Override
+    public void deleteMatch(Long id) {
+        matchRepository.deleteById(id);
+    }
+
+    // -------------------------------------------------------------------------
+    // --------------------------- MATCH DETAIL --------------------------------
+    // -------------------------------------------------------------------------
+
+    @Override
+    public MatchDetailDTO getMatchDetail(Long id) {
+
+        MatchEntity match = matchRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ZĂˇpas nenalezen"));
+
+        List<MatchRegistrationEntity> registrations = registrationService.getRegistrationsForMatch(id);
+
+        // --- 1) ROZDÄšLENĂŤ PODLE STATUSĹ® ---
+        List<MatchRegistrationEntity> registered = registrations.stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                .toList();
+
+        List<MatchRegistrationEntity> reserved = registrations.stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.RESERVED)
+                .toList();
+
+        List<MatchRegistrationEntity> unregistered = registrations.stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.UNREGISTERED)
+                .toList();
+
+        List<MatchRegistrationEntity> excused = registrations.stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.EXCUSED)
+                .toList();
+
+        // --- 2) NO-RESPONSE HRĂÄŚI PĹĂŤMO ZDE ---
+        List<PlayerEntity> allPlayers = playerRepository.findAll();
+
+        Set<Long> respondedIds = registrations.stream()
+                .map(r -> r.getPlayer().getId())
+                .collect(Collectors.toSet());
+
+        List<PlayerEntity> noResponsePlayers = allPlayers.stream()
+                .filter(p -> !respondedIds.contains(p.getId()))
+                .toList();
+
+        // --- 3) POÄŚTY ---
+        int inGamePlayers = registered.size();
+        int outGamePlayers = unregistered.size() + excused.size();
+        int waitingPlayers = reserved.size();
+        int noActionPlayers = noResponsePlayers.size();
+
+        int remainingSlots = match.getMaxPlayers() - inGamePlayers;
+
+        double pricePerRegistered = inGamePlayers > 0
+                ? match.getPrice() / (double) inGamePlayers
+                : 0;
+
+        // --- 4) DTO ---
+        MatchDetailDTO dto = new MatchDetailDTO();
+        dto.setId(match.getId());
+        dto.setDateTime(match.getDateTime());
+        dto.setMaxPlayers(match.getMaxPlayers());
+
+        dto.setInGamePlayers(inGamePlayers);
+        dto.setOutGamePlayers(outGamePlayers);
+        dto.setWaitingPlayers(waitingPlayers);
+        dto.setNoActionPlayers(noActionPlayers);
+
+        dto.setPricePerRegisteredPlayer(pricePerRegistered);
+        dto.setRemainingSlots(remainingSlots);
+
+        dto.setRegisteredPlayers(
+                registered.stream()
+                        .map(r -> r.getPlayer().getName() + " " + r.getPlayer().getSurname())
+                        .toList()
+        );
+
+        dto.setReservedPlayers(
+                reserved.stream()
+                        .map(r -> r.getPlayer().getName() + " " + r.getPlayer().getSurname())
+                        .toList()
+        );
+
+        dto.setUnregisteredPlayers(
+                unregistered.stream()
+                        .map(r -> r.getPlayer().getName() + " " + r.getPlayer().getSurname())
+                        .toList()
+        );
+
+        dto.setExcusedPlayers(
+                excused.stream()
+                        .map(r -> r.getPlayer().getName() + " " + r.getPlayer().getSurname())
+                        .toList()
+        );
+
+        dto.setNoResponsePlayers(
+                noResponsePlayers.stream()
+                        .map(p -> p.getName() + " " + p.getSurname())
+                        .toList()
+        );
+
+        return dto;
+    }
+
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\services\PlayerService.java
+
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import java.util.List;
+
+
+public interface PlayerService {
+    List<PlayerEntity> getAllPlayers();
+    PlayerEntity getPlayerById(Long id);
+    PlayerEntity createPlayer(PlayerEntity player);
+    PlayerEntity updatePlayer(Long id, PlayerEntity player);
+    void deletePlayer(Long id);
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\models\services\PlayerServiceImpl.java
+
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class PlayerServiceImpl implements PlayerService {
+
+    private final PlayerRepository playerRepository;
+
+    public PlayerServiceImpl(PlayerRepository playerRepository) {
+        this.playerRepository = playerRepository;
+    }
+
+    @Override
+    public List<PlayerEntity> getAllPlayers() {
+        return playerRepository.findAll();
+    }
+
+    @Override
+    public PlayerEntity getPlayerById(Long id) {
+        return playerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Player not found: " + id));
+    }
+
+    @Override
+    public PlayerEntity createPlayer(PlayerEntity player) {
+        return playerRepository.save(player);
+    }
+
+    @Override
+    public PlayerEntity updatePlayer(Long id, PlayerEntity newData) {
+        PlayerEntity existing = getPlayerById(id);
+
+        existing.setName(newData.getName());
+        existing.setSurname(newData.getSurname());
+        existing.setType(newData.getType());
+        existing.setJerseyColor((newData.getJerseyColor()));
+        return playerRepository.save(existing);
+    }
+
+    @Override
+    public void deletePlayer(Long id) {
+        playerRepository.deleteById(id);
+    }
+}
+
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\src\main\java\cz\phsoft\hokej\StaraGardaApplication.java
+
+
+package cz.phsoft.hokej;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+@SpringBootApplication
+@EnableJpaRepositories // <-- PĹ™idĂˇnĂ­m tohoto Ĺ™Ăˇdku "aktivujeme" JPA v naĹˇem Spring Boot projektu
+public class StaraGardaApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(StaraGardaApplication.class, args);
+
+
+        }
+    }
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\target\generated-sources\annotations\cz\phsoft\hokej\models\dto\mappers\MatchMapperImpl.java
+
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.models.dto.MatchDTO;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2025-12-03T11:03:07+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 19.0.2 (Amazon.com Inc.)"
+)
+@Component
+public class MatchMapperImpl implements MatchMapper {
+
+    @Override
+    public MatchDTO toDTO(MatchEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
+
+        MatchDTO matchDTO = new MatchDTO();
+
+        matchDTO.setId( entity.getId() );
+        matchDTO.setDateTime( entity.getDateTime() );
+        matchDTO.setLocation( entity.getLocation() );
+        matchDTO.setDescription( entity.getDescription() );
+        matchDTO.setMaxPlayers( entity.getMaxPlayers() );
+        matchDTO.setPrice( entity.getPrice() );
+
+        return matchDTO;
+    }
+
+    @Override
+    public MatchEntity toEntity(MatchDTO dto) {
+        if ( dto == null ) {
+            return null;
+        }
+
+        MatchEntity matchEntity = new MatchEntity();
+
+        matchEntity.setId( dto.getId() );
+        matchEntity.setDateTime( dto.getDateTime() );
+        matchEntity.setLocation( dto.getLocation() );
+        matchEntity.setDescription( dto.getDescription() );
+        matchEntity.setMaxPlayers( dto.getMaxPlayers() );
+        matchEntity.setPrice( dto.getPrice() );
+
+        return matchEntity;
+    }
+
+    @Override
+    public void updateEntity(MatchDTO dto, MatchEntity entity) {
+        if ( dto == null ) {
+            return;
+        }
+
+        entity.setId( dto.getId() );
+        entity.setDateTime( dto.getDateTime() );
+        entity.setLocation( dto.getLocation() );
+        entity.setDescription( dto.getDescription() );
+        entity.setMaxPlayers( dto.getMaxPlayers() );
+        entity.setPrice( dto.getPrice() );
+    }
+}
+
+
+# Soubor: C:\Projekty Práce\StaraGarda\target\generated-sources\annotations\cz\phsoft\hokej\models\dto\mappers\PlayerMapperImpl.java
+
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2025-12-03T11:03:07+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 19.0.2 (Amazon.com Inc.)"
+)
+@Component
+public class PlayerMapperImpl implements PlayerMapper {
+
+    @Override
+    public PlayerDTO toDTO(PlayerEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
+
+        PlayerDTO playerDTO = new PlayerDTO();
+
+        playerDTO.setId( entity.getId() );
+        playerDTO.setName( entity.getName() );
+        playerDTO.setSurname( entity.getSurname() );
+        playerDTO.setType( entity.getType() );
+        playerDTO.setJerseyColor( entity.getJerseyColor() );
+
+        return playerDTO;
+    }
+
+    @Override
+    public PlayerEntity toEntity(PlayerDTO dto) {
+        if ( dto == null ) {
+            return null;
+        }
+
+        PlayerEntity playerEntity = new PlayerEntity();
+
+        playerEntity.setId( dto.getId() );
+        playerEntity.setName( dto.getName() );
+        playerEntity.setSurname( dto.getSurname() );
+        playerEntity.setType( dto.getType() );
+        playerEntity.setJerseyColor( dto.getJerseyColor() );
+
+        return playerEntity;
+    }
+
+    @Override
+    public void updatePlayerDTO(PlayerDTO source, PlayerDTO target) {
+        if ( source == null ) {
+            return;
+        }
+
+        target.setId( source.getId() );
+        target.setName( source.getName() );
+        target.setSurname( source.getSurname() );
+        target.setType( source.getType() );
+        target.setJerseyColor( source.getJerseyColor() );
+    }
+
+    @Override
+    public void updatePlayerEntity(PlayerDTO source, PlayerEntity target) {
+        if ( source == null ) {
+            return;
+        }
+
+        target.setId( source.getId() );
+        target.setName( source.getName() );
+        target.setSurname( source.getSurname() );
+        target.setType( source.getType() );
+        target.setJerseyColor( source.getJerseyColor() );
+    }
+}
