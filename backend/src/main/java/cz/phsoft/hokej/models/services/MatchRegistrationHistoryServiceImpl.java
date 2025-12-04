@@ -1,4 +1,4 @@
-package cz.phsoft.hokej.models.services.impl;
+package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchRegistrationHistoryEntity;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationHistoryRepository;

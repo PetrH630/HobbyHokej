@@ -3,7 +3,6 @@ package cz.phsoft.hokej.controllers;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.services.PlayerService;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

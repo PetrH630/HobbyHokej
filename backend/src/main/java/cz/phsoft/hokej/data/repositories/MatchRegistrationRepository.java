@@ -1,7 +1,6 @@
 package cz.phsoft.hokej.data.repositories;
 
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

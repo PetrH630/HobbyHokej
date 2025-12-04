@@ -3,7 +3,6 @@ package cz.phsoft.hokej.controllers;
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.MatchDetailDTO;
-import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
 import cz.phsoft.hokej.models.services.MatchService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;

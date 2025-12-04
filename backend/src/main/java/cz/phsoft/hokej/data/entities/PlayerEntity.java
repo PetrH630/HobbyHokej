@@ -5,9 +5,6 @@ import cz.phsoft.hokej.data.enums.PlayerType;
 
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Table(name = "player_entity")
 public class PlayerEntity {

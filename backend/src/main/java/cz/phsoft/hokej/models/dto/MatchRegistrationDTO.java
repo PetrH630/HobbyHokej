@@ -6,8 +6,6 @@ import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-import java.time.chrono.JapaneseChronology;
-
 public class MatchRegistrationDTO {
     private Long id; // volitelné, při GET
 
