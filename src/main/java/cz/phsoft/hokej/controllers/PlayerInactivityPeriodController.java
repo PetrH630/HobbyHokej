@@ -27,7 +27,7 @@ public class PlayerInactivityPeriodController {
     // ----------------------------------------------------------
     // GET ALL
     // ----------------------------------------------------------
-    @GetMapping
+    @GetMapping("/All")
     public List<PlayerInactivityPeriodDTO> getAll() {
         return service.getAll()
                 .stream()

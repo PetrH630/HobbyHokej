@@ -77,7 +77,7 @@ public class MatchController {
         matchService.deleteMatch(id);
     }
     // dostupné zápasy pro hráče - byl active
-    @GetMapping("/available-matches-for-player/{id}")
+    @GetMapping("/available-for-player/{id}")
     public List<MatchEntity> getAvailableMatchesForPlayer(@PathVariable Long id) {
         return matchService.getAvailableMatchesForPlayer(id);
     }

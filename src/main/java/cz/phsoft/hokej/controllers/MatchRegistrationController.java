@@ -43,15 +43,15 @@ public class MatchRegistrationController {
         return service.getAllRegistrations();
     }
 
-    @GetMapping("/for-player")
-    public List<MatchRegistrationEntity> forPlayer(@RequestParam Long playerId) {
+    @GetMapping("/for-player/{playerId}")
+    public List<MatchRegistrationEntity> forPlayer(@PathVariable Long playerId) {
         return service.getRegistrationsForPlayer(playerId);
     }
 
 
 
-    @GetMapping("/for-match")
-    public List<MatchRegistrationEntity> forMatch(@RequestParam Long matchId) {
+    @GetMapping("/for-match/{matchId}")
+    public List<MatchRegistrationEntity> forMatch(@PathVariable Long matchId) {
         return service.getRegistrationsForMatch(matchId);
     }
 

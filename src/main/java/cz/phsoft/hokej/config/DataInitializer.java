@@ -57,7 +57,8 @@ public class DataInitializer {
                 new PlayerEntity("Lukáš", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
                 new PlayerEntity("Martin", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
                 new PlayerEntity("Radim", "Mališ", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Laďa", "Pavlica", PlayerType.STANDARD, JerseyColor.DARK)
+                new PlayerEntity("Laďa", "Pavlica", PlayerType.STANDARD, JerseyColor.LIGHT)
+                new PlayerEntity("Vlaďa", "Menšík", PlayerType.STANDARD, JerseyColor.DARK)
 
         );
         playerRepository.saveAll(players);

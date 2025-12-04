@@ -1,0 +1,64 @@
+----------------------
+MATCH
+@RequestMapping("/api/matches")
+GET
+/api/matches                    - všechny zápasy
+/api/matches/matchDetail/{id}   - detail zápasu
+/api/matches/next               - první aktuální zápas
+/api/matches/upcoming           - nadcházející zápasy
+/api/matches/past               - uplynulé zápasy
+/{id}                           - zápas dle id zápasu
+/api/matches/available-for-player/{id} - zápasy kde hráč není Neaktivní - id_player
+
+POST
+@PostMapping - /api/matches         - přidat zápas
+@PutMapping  - /api/matches/{id}    - editovat zápas
+@DeleteMapping - /api/matches/{id}  - smazat zápas
+
+----------------------
+PLAYER
+
+@RequestMapping("/api/players")
+
+GET
+/api/players        - všichni hráči
+/api/players/{id}   - hráč dle id
+
+POST
+@PostMapping - /api/players        - vytvoří hráče
+@PutMapping  - /api/players/{id}   - editovat hráče s id
+@DeleteMapping - /api/players/{id} - vymaže hráče s id
+
+----------------------
+REGISTRACE - MatchRegistration
+@RequestMapping("/api/registrations")
+
+GET
+/api/registrations/all                      - všechny registrace
+/api/registrations/for-player/{playerId}    - všechny registrace dle id hráče
+/api/registrations/for-match/{matchId}      - všechny registrace dle id zápasu
+/api/registrations//no-response/{matchId}   - seznam hráčů, kteří nereagovali
+
+POST
+@PostMapping - /api/registrations/register      - vytvoří registraci dle id zápasu a id hráče
+@PostMapping - /api/registrations/unregister    - vytvoří záznam o zrušení registrace (odregistrování)
+                                                  dle id zápasu a id hráče
+@PostMapping - /api/registrations/excuse        - vytvoří záznam o omluvení se ze zápasu
+
+--------------------------
+
+AKTIVNÍ / NEAKTIVNÍ HRÁČ - PlayerInactivity
+@RequestMapping("/api/inactivity")
+
+GET
+/api/inactivity/All                 - všechny záznamy s obdobím neaktivního hráče
+/api/inactivity/{id}                - záznam dle id neaktivity
+/api/inactivity/player/{playerId}   - záznamy dle id hráče
+
+POST
+@PostMapping - /api/inactivity  - vytvoří záznam s periodou neaktivity hráče
+@PutMapping  - /api/inactivity/{id}   - edituje záznam s periodou neaktivity hráče
+@DeleteMapping - /api/inactivity/{id} - smaže záznam
+
+
+
