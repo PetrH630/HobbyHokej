@@ -1,7 +1,4 @@
-/*
-
 package cz.phsoft.hokej.config;
-
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
@@ -20,8 +17,6 @@ import java.util.List;
 
 @Component
 public class DataInitializer {
-
-
     private final PlayerRepository playerRepository;
     private final MatchRepository matchRepository;
     private final MatchRegistrationRepository matchRegistrationRepository;
@@ -36,6 +31,13 @@ public class DataInitializer {
 
     @PostConstruct
     public void init() {
+        // Pokud existuje alespoň 1 hráč, znamená to, že DB už byla inicializovaná
+        if (playerRepository.count() > 0) {
+            System.out.println("Data already initialized – skipping DataInitializer.");
+            return;
+        }
+        System.out.println("Initializing default data...");
+
         // --- 10 hráčů ---
         List<PlayerEntity> players = List.of(
                 new PlayerEntity("Petr", "Hlista", PlayerType.VIP, JerseyColor.DARK),
@@ -57,7 +59,7 @@ public class DataInitializer {
                 new PlayerEntity("Lukáš", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
                 new PlayerEntity("Martin", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
                 new PlayerEntity("Radim", "Mališ", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Laďa", "Pavlica", PlayerType.STANDARD, JerseyColor.LIGHT)
+                new PlayerEntity("Laďa", "Pavlica", PlayerType.STANDARD, JerseyColor.LIGHT),
                 new PlayerEntity("Vlaďa", "Menšík", PlayerType.STANDARD, JerseyColor.DARK)
 
         );
@@ -89,10 +91,7 @@ public class DataInitializer {
             reg.setStatus(PlayerMatchStatus.REGISTERED);
             reg.setTimestamp(LocalDateTime.now());
             reg.setCreatedBy("user");
-
             matchRegistrationRepository.save(reg);
         }
     }
-
 }
-*/

@@ -3,6 +3,9 @@ package cz.phsoft.hokej.data.entities;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * třída pro vkládání Entity zápasu do db
+ */
 @Entity
 @Table(name = "matches")
 public class MatchEntity {
@@ -19,6 +22,7 @@ public class MatchEntity {
 
     private String description;
 
+    // maximální počet hráčů - využívá se pro ověření kapacity při přihlášení
     @Column(nullable = false)
     private Integer maxPlayers;
 
@@ -44,11 +48,7 @@ public class MatchEntity {
 
     public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 
-    public Integer getPrice() {
-        return price;
-    }
+    public Integer getPrice() { return price; }
 
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
+    public void setPrice(Integer price) { this.price = price; }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MatchRegistrationHistoryRepository extends JpaRepository<MatchRegistrationHistoryEntity, Long> {
 
-    // Získat kompletní historii registrace podle ID původního záznamu
+    // všechny registrace na zápas
     List<MatchRegistrationHistoryEntity> findByMatchRegistrationIdOrderByChangedAtDesc(Long matchRegistrationId);
 
     // Historie pro konkrétní zápas

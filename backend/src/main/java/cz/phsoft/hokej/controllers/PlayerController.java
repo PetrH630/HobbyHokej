@@ -20,7 +20,7 @@ public class PlayerController {
         this.playerMapper = playerMapper;
     }
 
-    // GET all players
+    // všichni hráči
     @GetMapping
     public List<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers()
@@ -29,13 +29,13 @@ public class PlayerController {
                 .toList();
     }
 
-    // GET by ID
+    // hráč dle id
     @GetMapping("/{id}")
     public PlayerDTO getPlayer(@PathVariable Long id) {
         return playerMapper.toDTO(playerService.getPlayerById(id));
     }
 
-    // CREATE new player
+    // vytvoření hráče
     @PostMapping
     public PlayerDTO createPlayer(@RequestBody PlayerDTO dto) {
         return playerMapper.toDTO(
@@ -43,20 +43,20 @@ public class PlayerController {
         );
     }
 
-    // UPDATE player
+    // aktualizace hráče dle id hráče
     @PutMapping("/{id}")
     public PlayerDTO updatePlayer(@PathVariable Long id, @RequestBody PlayerDTO dto) {
 
-        // Map DTO → Entity (bez hesla)
+        // načte hráče z dto
         var newEntity = playerMapper.toEntity(dto);
 
-        // Update uloženého hráče
+        // změní hráče
         var updated = playerService.updatePlayer(id, newEntity);
-
+        // vrátí hráče
         return playerMapper.toDTO(updated);
     }
 
-    // DELETE player
+    // odstraní hráče
     @DeleteMapping("/{id}")
     public void deletePlayer(@PathVariable Long id) {
         playerService.deletePlayer(id);

@@ -9,6 +9,7 @@ GET
 /api/matches/past               - uplynulé zápasy
 /{id}                           - zápas dle id zápasu
 /api/matches/available-for-player/{id} - zápasy kde hráč není Neaktivní - id_player
+/api/matches/player/{playerId}/upcoming - zápasy pro aktivního hráče dle id s filtrování upcoming dle typuHráče (vše, 2, 1)
 
 POST
 @PostMapping - /api/matches         - přidat zápas

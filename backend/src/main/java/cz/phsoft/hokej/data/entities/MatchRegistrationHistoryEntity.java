@@ -43,6 +43,7 @@ public class MatchRegistrationHistoryEntity {
     @Column(name = "jersey_color")
     private JerseyColor jerseyColor;
 
+    // původní timestamp
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
@@ -59,6 +60,7 @@ public class MatchRegistrationHistoryEntity {
     }
 
     // Gettery a settery
+
 
     public Long getId() {
         return id;

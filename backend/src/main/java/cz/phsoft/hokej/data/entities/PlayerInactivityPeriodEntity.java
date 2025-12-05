@@ -16,9 +16,11 @@ public class PlayerInactivityPeriodEntity {
     @JoinColumn(name = "player_id", nullable = false)
     private PlayerEntity player;
 
+    // neaktivní od
     @Column(name = "inactive_from", nullable = false)
     private LocalDateTime inactiveFrom;
 
+    // neaktivní do
     @Column(name = "inactive_to", nullable = false)
     private LocalDateTime inactiveTo;
 

@@ -7,6 +7,9 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * třída reprezentuje registracei hráče k zápasu
+ */
 @Entity
 @Table(name = "match_registrations")
 public class MatchRegistrationEntity {
@@ -32,15 +35,19 @@ public class MatchRegistrationEntity {
 
     private String excuseNote;
 
+    // admin může vložit poznámku, např. když se někdo zaregistruje a poté nepříjde
     private String adminNote;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "jersey_color")
     private JerseyColor jerseyColor;
 
+    // datčas vytvoření registrace - musí se měnit aby nebyl hráč i po zrušení registrace
+    // v pořadí před hráči kteří se registrovali po zrušení registrace
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
+    // systém automaticky vytváří reserved/registered dle kapacity - maxPlayers
     @Column(nullable = false, updatable = true)
     private String createdBy; // "user" nebo "system"
 
@@ -48,6 +55,8 @@ public class MatchRegistrationEntity {
     }
 
     // Gettery a Settery
+
+
     public Long getId() {
         return id;
     }
@@ -96,22 +105,6 @@ public class MatchRegistrationEntity {
         this.excuseNote = excuseNote;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
     public String getAdminNote() {
         return adminNote;
     }
@@ -126,6 +119,22 @@ public class MatchRegistrationEntity {
 
     public void setJerseyColor(JerseyColor jerseyColor) {
         this.jerseyColor = jerseyColor;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }
 

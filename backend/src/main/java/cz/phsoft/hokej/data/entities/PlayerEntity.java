@@ -19,6 +19,7 @@ public class PlayerEntity {
     @Column(nullable = false)
     private String surname;
 
+    // pro zobrazení next/upcoming zápasů (Dodělat metodu)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerType type; // VIP, STANDARD, BASIC

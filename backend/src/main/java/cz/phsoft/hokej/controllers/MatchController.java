@@ -32,19 +32,25 @@ public class MatchController {
         return matchService.getAllMatches();
     }
 
-    // první aktuální zápas
+    // nadcházející zápas
     @GetMapping("/next")
     public MatchDTO getNextMatch() {
         return matchService.getNextMatch();
     }
 
-    // aktuální zápasy (bez prošlých dat)
+    // všechny nadcházející zápasy
     @GetMapping("/upcoming")
     public List<MatchDTO> getUpcomingMatches() {
         return matchService.getUpcomingMatches();
     }
 
-    // prošlé zápasy
+    @GetMapping("/player/{playerId}/upcoming")
+    public List<MatchEntity> getPlayerUpcomingMatches(@PathVariable Long playerId) {
+        return matchService.getUpcomingMatchesForPlayer(playerId);
+    }
+
+
+    // už uskutečněné zápasy
     @GetMapping("/past")
     public List<MatchDTO> getPastMatches() {
         return matchService.getPastMatches();
@@ -57,20 +63,20 @@ public class MatchController {
         return matchService.createMatch(dto);
     }
 
-    // GET podle ID
+    // GET získá zápas podle ID
     @GetMapping("/{id}")
     public MatchDTO getMatch(@PathVariable Long id) {
         return matchService.getMatchById(id);
     }
 
 
-    // PUT editovat zápas
+    // PUT editovat zápas podle id
     @PutMapping("/{id}")
     public MatchDTO updateMatch(@PathVariable Long id, @Valid @RequestBody MatchDTO dto) {
         return matchService.updateMatch(id, dto);
     }
 
-    // DELETE smazat zápas
+    // DELETE smazat zápas podle id
     @DeleteMapping("/{id}")
     public void deleteMatch(@PathVariable Long id) {
         matchService.deleteMatch(id);
