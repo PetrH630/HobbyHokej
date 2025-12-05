@@ -1,6 +1,8 @@
 package cz.phsoft.hokej.data.repositories;
 
+import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,5 +23,7 @@ import java.util.Optional;
 
         // --- Nová metoda pro hledání konkrétní registrace ---
         Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
+
+        long countByMatchAndStatus(MatchEntity match, PlayerMatchStatus status);
 
     }

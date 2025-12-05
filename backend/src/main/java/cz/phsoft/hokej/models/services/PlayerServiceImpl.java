@@ -3,7 +3,6 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import org.springframework.stereotype.Service;
-import cz.phsoft.hokej.models.services.SmsService;
 
 import java.util.List;
 
@@ -11,11 +10,11 @@ import java.util.List;
 public class PlayerServiceImpl implements PlayerService {
 
     private final PlayerRepository playerRepository;
-    private final SmsService smsService;
 
-    public PlayerServiceImpl(PlayerRepository playerRepository, SmsService smsService) {
+
+    public PlayerServiceImpl(PlayerRepository playerRepository) {
         this.playerRepository = playerRepository;
-        this.smsService = smsService;
+
     }
 
     @Override
@@ -32,9 +31,6 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public PlayerEntity createPlayer(PlayerEntity player) {
         PlayerEntity savedPlayer = playerRepository.save(player);
-
-        // odeslání jen na testovací číslo
-        smsService.sendSms("Testovací zpráva: hráč " + savedPlayer.getName() + " byl zaregistrován.");
 
         return savedPlayer;
     }

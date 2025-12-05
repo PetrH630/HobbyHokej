@@ -19,6 +19,7 @@ public class PlayerDTO {
     private String surname; // not null
 
     private String fullName; // derived
+    private String phoneNumber;
     private PlayerType type; // not null, default BASIC
     private JerseyColor jerseyColor;
 
@@ -55,6 +56,8 @@ public class PlayerDTO {
     private void updateFullName() { this.fullName = name + " " + surname; }
 
     public JerseyColor getJerseyColor() { return jerseyColor; }
-
     public void setJerseyColor(JerseyColor jerseyColor) { this.jerseyColor = jerseyColor; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 }

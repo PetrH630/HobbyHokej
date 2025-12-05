@@ -34,7 +34,6 @@ public interface MatchRegistrationService {
     // Přepočet statusů REGISTERED / RESERVED podle kapacity
     void recalcStatusesForMatch(Long matchId);
 
-
 }
 
 

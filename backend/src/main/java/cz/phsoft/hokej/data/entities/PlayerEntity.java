@@ -25,18 +25,19 @@ public class PlayerEntity {
     private PlayerType type; // VIP, STANDARD, BASIC
 
     private String fullName;
-
+    private String phoneNumber;
     @Enumerated(EnumType.STRING)
     private JerseyColor jerseyColor;
 
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
     }
-    public PlayerEntity(String name, String surname, PlayerType type, JerseyColor jerseyColor) {
+    public PlayerEntity(String name, String surname, PlayerType type, String phoneNumber, JerseyColor jerseyColor) {
         this.name = name;
         this.surname = surname;
         this.type = type;
         this.fullName = name + " " + surname;
+        this.phoneNumber = phoneNumber;
         this.jerseyColor = jerseyColor;
     }
 
@@ -83,10 +84,12 @@ public class PlayerEntity {
         this.fullName = name + " " + surname;
     }
 
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
     public JerseyColor getJerseyColor() {
         return jerseyColor;
     }
-
     public void setJerseyColor(JerseyColor jerseyColor) {
         this.jerseyColor = jerseyColor;
     }

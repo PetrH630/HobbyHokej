@@ -40,32 +40,32 @@ public class DataInitializer {
 
         // --- 10 hráčů ---
         List<PlayerEntity> players = List.of(
-                new PlayerEntity("Petr", "Hlista", PlayerType.VIP, JerseyColor.DARK),
-                new PlayerEntity("Laďa", "Bražina", PlayerType.VIP, JerseyColor.LIGHT),
-                new PlayerEntity("David", "Podsedník", PlayerType.VIP, JerseyColor.LIGHT),
-                new PlayerEntity("Vlastík", "Pstruží", PlayerType.VIP, JerseyColor.LIGHT),
-                new PlayerEntity("Otakar", "Záškodný", PlayerType.VIP, JerseyColor.LIGHT),
-                new PlayerEntity("Jarda", "Menšík", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Luboš", "Novák", PlayerType.STANDARD, JerseyColor.LIGHT),
-                new PlayerEntity("Lukáš", "Novák", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Martin", "Čermák", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Pavel", "Eliáš", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Staňa", "Jurok", PlayerType.BASIC, JerseyColor.DARK),
-                new PlayerEntity("Michal", "Pyszko", PlayerType.BASIC, JerseyColor.DARK),
-                new PlayerEntity("Jenda", "Kaluža", PlayerType.STANDARD, JerseyColor.LIGHT),
-                new PlayerEntity("Tomáš", "Faldyna", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Martin", "Faldyna", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Lola", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Lukáš", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Martin", "Dorda", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Radim", "Mališ", PlayerType.STANDARD, JerseyColor.DARK),
-                new PlayerEntity("Laďa", "Pavlica", PlayerType.STANDARD, JerseyColor.LIGHT),
-                new PlayerEntity("Vlaďa", "Menšík", PlayerType.STANDARD, JerseyColor.DARK)
+                new PlayerEntity("Petr", "Hlista", PlayerType.VIP, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Laďa", "Bražina", PlayerType.VIP, "+420776609956" ,JerseyColor.LIGHT),
+                new PlayerEntity("David", "Podsedník", PlayerType.VIP, "+420776609956" ,JerseyColor.LIGHT),
+                new PlayerEntity("Vlastík", "Pstruží", PlayerType.VIP, "+420776609956" ,JerseyColor.LIGHT),
+                new PlayerEntity("Otakar", "Záškodný", PlayerType.VIP, "+420776609956" ,JerseyColor.LIGHT),
+                new PlayerEntity("Jarda", "Menšík", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Luboš", "Novák", PlayerType.STANDARD, "+420776609956" ,JerseyColor.LIGHT),
+                new PlayerEntity("Lukáš", "Novák", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Martin", "Čermák", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Pavel", "Eliáš", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Staňa", "Jurok", PlayerType.BASIC, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Michal", "Pyszko", PlayerType.BASIC, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Jenda", "Kaluža", PlayerType.STANDARD, "+420776609956" ,JerseyColor.LIGHT),
+                new PlayerEntity("Tomáš", "Faldyna", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Martin", "Faldyna", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Lola", "Dorda", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Lukáš", "Dorda", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Martin", "Dorda", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Radim", "Mališ", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK),
+                new PlayerEntity("Laďa", "Pavlica", PlayerType.STANDARD, "+420776609956" ,JerseyColor.LIGHT),
+                new PlayerEntity("Vlaďa", "Menšík", PlayerType.STANDARD, "+420776609956" ,JerseyColor.DARK)
 
         );
         playerRepository.saveAll(players);
 
-        // --- 5 zápasů, každý pátek od 21.11.2025 ---
+        // --- 10 zápasů, každý pátek od 21.11.2025 ---
         LocalDateTime startDate = LocalDateTime.of(2025, 11, 21, 18, 45);
         for (int i = 0; i < 10; i++) {
             MatchEntity match = new MatchEntity();
