@@ -6,6 +6,7 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -91,10 +92,10 @@ public class SmsSchedulerService {
         for (MatchEntity match : matchesInThreeDays) {
 
             // použijeme tvůj existující helper
-            List<PlayerEntity> noResponsePlayers =
+            List<PlayerDTO> noResponsePlayers =
                     matchRegistrationService.getNoResponsePlayers(match.getId());
 
-            for (PlayerEntity player : noResponsePlayers) {
+            for (PlayerDTO player : noResponsePlayers) {
 
                 String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
 

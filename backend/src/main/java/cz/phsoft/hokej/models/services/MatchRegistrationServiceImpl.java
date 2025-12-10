@@ -9,10 +9,17 @@ import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.DuplicateRegistrationException;
+import cz.phsoft.hokej.exceptions.MatchNotFoundException;
+import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.exceptions.RegistrationNotFoundException;
+import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.mappers.MatchRegistrationMapper;
+import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
-
 import cz.phsoft.hokej.models.services.sms.SmsService;
+
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -26,291 +33,197 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
     private final MatchRegistrationMapper matchRegistrationMapper;
+    private final PlayerMapper playerMapper;
     private final SmsService smsService;
     private final SmsMessageBuilder smsMessageBuilder;
-
 
     public MatchRegistrationServiceImpl(
             MatchRegistrationRepository registrationRepository,
             MatchRepository matchRepository,
             PlayerRepository playerRepository,
             MatchRegistrationMapper matchRegistrationMapper,
+            PlayerMapper playerMapper,
             SmsService smsService,
-            SmsMessageBuilder smsMessageBuilder)  {
-
+            SmsMessageBuilder smsMessageBuilder) {
         this.registrationRepository = registrationRepository;
         this.matchRepository = matchRepository;
         this.playerRepository = playerRepository;
         this.matchRegistrationMapper = matchRegistrationMapper;
+        this.playerMapper = playerMapper;
         this.smsService = smsService;
         this.smsMessageBuilder = smsMessageBuilder;
     }
 
-    // HELPERS
-    private boolean isSlotAvailable(Long matchId) {
-        MatchEntity match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+    private MatchEntity getMatchOrThrow(Long matchId) {
+        return matchRepository.findById(matchId)
+                .orElseThrow(() -> new MatchNotFoundException(matchId));
+    }
 
+    private PlayerEntity getPlayerOrThrow(Long playerId) {
+        return playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+    }
+
+    private boolean isSlotAvailable(Long matchId) {
         long registeredCount = registrationRepository.findByMatchId(matchId).stream()
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
                 .count();
-
-        return registeredCount < match.getMaxPlayers();
+        return registeredCount < getMatchOrThrow(matchId).getMaxPlayers();
     }
 
-
-    // CREATE REGISTRATION
-    private MatchRegistrationEntity createRegistrationWithSlotCheck(Long matchId, Long playerId,
-                                                                    JerseyColor jerseyColor, String adminNote,
-                                                                    String excuseReason, String note) {
-
-        PlayerMatchStatus status;
-
-        if (excuseReason != null) {
-            status = PlayerMatchStatus.EXCUSED;
-        } else {
-            status = isSlotAvailable(matchId) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
-        }
-
-        MatchRegistrationEntity registration = new MatchRegistrationEntity();
-
-        registration.setMatch(matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Zápas nenalezen.")));
-
-        registration.setPlayer(playerRepository.findById(playerId)
-                .orElseThrow(() -> new RuntimeException("Hráč nenalezen.")));
-
-        registration.setStatus(status);
-        registration.setTimestamp(LocalDateTime.now());
-        registration.setCreatedBy("user");
-
-        if (jerseyColor != null) registration.setJerseyColor(jerseyColor);
-        if (adminNote != null) registration.setAdminNote(adminNote);
-        if (excuseReason != null) registration.setExcuseReason(ExcuseReason.valueOf(excuseReason.toUpperCase()));
-        if (note != null) registration.setExcuseNote(note);
-
-        return registrationRepository.save(registration);
-    }
-
-
-    // REGISTER PLAYER
-    @Override
-    @Transactional
-    public MatchRegistrationEntity registerPlayer(Long matchId, Long playerId, JerseyColor jerseyColor, String adminNote) {
-
-        MatchRegistrationEntity registration = registrationRepository
-                .findByPlayerIdAndMatchId(playerId, matchId)
-                .orElse(null);
-
-        if (registration == null) {
-
-            MatchRegistrationEntity registered = createRegistrationWithSlotCheck(
-                    matchId, playerId, jerseyColor, adminNote, null, null
-            );
-
-            sendRegistrationSms(registered);
-            return registered;
-        }
-
-        if (registration.getStatus() == PlayerMatchStatus.UNREGISTERED
-                || registration.getStatus() == PlayerMatchStatus.EXCUSED) {
-
-            PlayerMatchStatus newStatus =
-                    isSlotAvailable(matchId) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
-
-            registration.setStatus(newStatus);
-
-            if (jerseyColor != null) registration.setJerseyColor(jerseyColor);
-
-            registration.setAdminNote(null);
-            registration.setExcuseNote(null);
-            registration.setExcuseReason(null);
-
-            registration.setTimestamp(LocalDateTime.now());
-            registration.setCreatedBy("user");
-
-            MatchRegistrationEntity created = registrationRepository.save(registration);
-
-            sendRegistrationSms(created);
-            return created;
-        }
-
-        throw new RuntimeException("Hráč již má aktivní registraci.");
-    }
-
-
-    // EXCUSE PLAYER
-    @Override
-    @Transactional
-    public MatchRegistrationEntity excusePlayer(Long matchId, Long playerId, String note, String reason) {
-
-        if (registrationRepository.existsByPlayerIdAndMatchId(playerId, matchId)) {
-            throw new RuntimeException("Hráč již má registraci, použijte odhlášení.");
-        }
-
-        MatchRegistrationEntity excused = createRegistrationWithSlotCheck(
-                matchId, playerId, null, null, reason, note
-        );
-
-        sendRegistrationSms(excused);
-        return excused;
-    }
-
-
-    // UNREGISTER PLAYER
-    @Override
-    @Transactional
-    public MatchRegistrationEntity unregisterPlayer(Long matchId, Long playerId, String note, String reason) {
-
-        MatchRegistrationEntity registration = registrationRepository
-                .findByPlayerIdAndMatchId(playerId, matchId)
-                .orElseThrow(() -> new RuntimeException("Hráč nemá registraci."));
-
-        registration.setStatus(PlayerMatchStatus.UNREGISTERED);
-        registration.setExcuseNote(note);
-
-        if (reason != null && !reason.isBlank()) {
-            registration.setExcuseReason(ExcuseReason.valueOf(reason.toUpperCase()));
-        }
-
-        registration.setTimestamp(LocalDateTime.now());
-        registration.setCreatedBy("user");
-
-        recalcStatusesForMatch(matchId);
-
-        MatchRegistrationEntity unregistered = registrationRepository.save(registration);
-
-        sendRegistrationSms(unregistered);
-        return unregistered;
-    }
-
-
-    @Override
-    public List<MatchRegistrationEntity> getRegistrationsForMatch(Long matchId) {
-        return registrationRepository.findByMatchId(matchId);
-    }
-
-    @Override
-    public List<MatchRegistrationEntity> getAllRegistrations() {
-        return registrationRepository.findAll();
-    }
-
-    @Override
-    public List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId) {
-        return registrationRepository.findByPlayerId(playerId);
-    }
-
-    @Override
-    public List<PlayerEntity> getNoResponsePlayers(Long matchId) {
-        List<PlayerEntity> allPlayers = playerRepository.findAll();
-
-        List<Long> responded = registrationRepository.findByMatchId(matchId).stream()
-                .map(reg -> reg.getPlayer().getId())
-                .toList();
-
-        return allPlayers.stream()
-                .filter(p -> !responded.contains(p.getId()))
-                .toList();
-    }
-
-
-    // RECALC
-    @Override
-    @Transactional
-    public void recalcStatusesForMatch(Long matchId) {
-
-        MatchEntity match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Zápas nenalezen."));
-
-        int maxPlayers = match.getMaxPlayers();
-
-        List<MatchRegistrationEntity> registrations = registrationRepository.findByMatchId(matchId).stream()
-                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED
-                        || r.getStatus() == PlayerMatchStatus.RESERVED)
-                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
-                .toList();
-
-        for (int i = 0; i < registrations.size(); i++) {
-
-            MatchRegistrationEntity reg = registrations.get(i);
-
-            if (i < maxPlayers) {
-                if (reg.getStatus() != PlayerMatchStatus.REGISTERED) {
-                    reg.setStatus(PlayerMatchStatus.REGISTERED);
-                    reg.setCreatedBy("system");
-                    registrationRepository.save(reg);
-                }
-            } else {
-                if (reg.getStatus() != PlayerMatchStatus.RESERVED) {
-                    reg.setStatus(PlayerMatchStatus.RESERVED);
-                    reg.setCreatedBy("system");
-                    registrationRepository.save(reg);
-                }
-            }
-        }
-    }
-
-
-    // SEND SMS -------------------------------------------------------------
-    private void sendRegistrationSms(MatchRegistrationEntity registration) {
-        if (registration == null || registration.getMatch() == null || registration.getPlayer() == null) {
-            return;
-        }
-
-        String smsMsg = smsMessageBuilder.buildMessageRegistration(registration);
-
+    private void sendSms(MatchRegistrationEntity registration, String message) {
+        if (registration == null || registration.getPlayer() == null) return;
         try {
-            smsService.sendSms(registration.getPlayer().getPhoneNumber(), smsMsg);
-            System.out.println("SMS odeslána hráči " + registration.getPlayer().getFullName() + ": " + smsMsg);
+            smsService.sendSms(registration.getPlayer().getPhoneNumber(), message);
         } catch (Exception e) {
             System.err.println("Chyba SMS: " + e.getMessage());
         }
     }
 
+    private MatchRegistrationEntity updateRegistrationStatus(
+            MatchRegistrationEntity registration, PlayerMatchStatus status, String updatedBy) {
+
+        registration.setStatus(status);
+        registration.setCreatedBy(updatedBy);
+        registration.setTimestamp(LocalDateTime.now());
+        return registrationRepository.save(registration);
+    }
+
+    // -------------------- REGISTRATION --------------------
+
+    @Transactional
+    @Override
+    public MatchRegistrationDTO upsertRegistration(
+            Long matchId,
+            Long playerId,
+            JerseyColor jerseyColor,
+            String adminNote,
+            ExcuseReason excuseReason,
+            String excuseNote,
+            boolean unregister) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        MatchRegistrationEntity registration = registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElse(null);
+
+        PlayerMatchStatus newStatus;
+
+        if (unregister) {
+            if (registration == null) throw new RegistrationNotFoundException(matchId, playerId);
+            registration.setExcuseReason(null);
+            newStatus = PlayerMatchStatus.UNREGISTERED;
+        } else if (excuseReason != null) {
+            if (registration != null && registration.getStatus() != PlayerMatchStatus.UNREGISTERED) {
+                throw new DuplicateRegistrationException(matchId, playerId);
+            }
+            registration.setExcuseReason(excuseReason);
+            newStatus = PlayerMatchStatus.EXCUSED;
+        } else {
+            newStatus = isSlotAvailable(matchId) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+            if (registration != null) registration.setExcuseReason(null);
+        }
+
+        if (registration == null) {
+            registration = new MatchRegistrationEntity();
+            registration.setMatch(match);
+            registration.setPlayer(player);
+        }
+
+        registration.setStatus(newStatus);
+        registration.setTimestamp(LocalDateTime.now());
+        registration.setCreatedBy("user");
+
+        if (jerseyColor != null) registration.setJerseyColor(jerseyColor);
+        if (adminNote != null) registration.setAdminNote(adminNote);
+        if (excuseReason != null) registration.setExcuseReason(excuseReason);
+
+        registration = registrationRepository.save(registration);
+
+        if (unregister) recalcStatusesForMatch(matchId);
+
+        sendSms(registration, smsMessageBuilder.buildMessageRegistration(registration));
+
+        // 🔥 mapping už zde
+        return matchRegistrationMapper.toDTO(registration);
+    }
+
+    // -------------------- FETCH --------------------
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
+        return matchRegistrationMapper.toDTOList(registrationRepository.findByMatchId(matchId));
+    }
+
+    @Override
+    public List<MatchRegistrationDTO> getAllRegistrations() {
+        return matchRegistrationMapper.toDTOList(registrationRepository.findAll());
+    }
+
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId) {
+        return matchRegistrationMapper.toDTOList(registrationRepository.findByPlayerId(playerId));
+    }
+
+    @Override
+    public List<PlayerDTO> getNoResponsePlayers(Long matchId) {
+        List<Long> responded = registrationRepository.findByMatchId(matchId).stream()
+                .map(r -> r.getPlayer().getId())
+                .toList();
+
+        List<PlayerEntity> noResponsePlayers = playerRepository.findAll().stream()
+                .filter(p -> !responded.contains(p.getId()))
+                .toList();
+
+        return noResponsePlayers.stream()
+                .map(playerMapper::toDTO)
+                .toList();
+    }
+
+
+
+    // -------------------- RECALC --------------------
+    @Override
+    @Transactional
+    public void recalcStatusesForMatch(Long matchId) {
+        MatchEntity match = getMatchOrThrow(matchId);
+        int maxPlayers = match.getMaxPlayers();
+
+        List<MatchRegistrationEntity> regs = registrationRepository.findByMatchId(matchId).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED
+                        || r.getStatus() == PlayerMatchStatus.RESERVED)
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .toList();
+
+        for (int i = 0; i < regs.size(); i++) {
+            MatchRegistrationEntity reg = regs.get(i);
+            PlayerMatchStatus newStatus = (i < maxPlayers) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+            if (reg.getStatus() != newStatus) updateRegistrationStatus(reg, newStatus, "system");
+        }
+    }
+
+    // -------------------- SMS --------------------
+    @Transactional
+    public void sendSmsToRegisteredPlayers(Long matchId) {
+        registrationRepository.findByMatchId(matchId).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                .forEach(r -> sendSms(r, smsMessageBuilder.buildMessageFinal(r)));
+    }
+
     public void sendNoResponseSmsForMatch(Long matchId) {
-        MatchEntity match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Zápas nenalezen."));
+        var match = getMatchOrThrow(matchId);
 
-        List<PlayerEntity> noResponsePlayers = getNoResponsePlayers(matchId);
-
-        for (PlayerEntity player : noResponsePlayers) {
+        getNoResponsePlayers(matchId).forEach(player -> {
             String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
 
             try {
                 smsService.sendSms(player.getPhoneNumber(), smsMsg);
-                System.out.println("SMS odeslána hráči " + player.getFullName() + ": " + smsMsg);
             } catch (Exception e) {
-                System.err.println("Chyba SMS pro hráče " + player.getFullName() + ": " + e.getMessage());
+                System.err.println("Chyba SMS pro hráče "
+                        + player.getFullName() + ": " + e.getMessage());
             }
-        }
+        });
     }
-
-    @Transactional
-    public void sendSmsToRegisteredPlayers(Long matchId) {
-        // načtení zápasu
-        MatchEntity match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Zápas nenalezen."));
-
-        // získání všech registrací pro zápas, které mají status REGISTERED
-        List<MatchRegistrationEntity> registeredPlayers = registrationRepository
-                .findByMatchId(matchId).stream()
-                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
-                .toList();
-
-        // posílání SMS
-        for (MatchRegistrationEntity registration : registeredPlayers) {
-            PlayerEntity player = registration.getPlayer();
-            String smsMsg = smsMessageBuilder.buildMessageFinal(registration);
-
-            try {
-                smsService.sendSms(player.getPhoneNumber(), smsMsg);
-                System.out.println("SMS odeslána hráči " + player.getFullName() + ": " + smsMsg);
-            } catch (Exception e) {
-                System.err.println("Chyba SMS pro hráče " + player.getFullName() + ": " + e.getMessage());
-            }
-        }
-    }
-
-
 
 }

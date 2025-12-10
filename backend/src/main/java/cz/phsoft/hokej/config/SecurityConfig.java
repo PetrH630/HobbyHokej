@@ -20,6 +20,7 @@ public class SecurityConfig {
 
     public SecurityConfig(CustomUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
+
     }
 
     @Bean
@@ -51,7 +52,7 @@ public class SecurityConfig {
                             // MATCH
                             .requestMatchers("/api/matches").hasAnyRole("ADMIN","MANAGER")
                             .requestMatchers("/api/matches/upcoming", "/api/matches/past").hasAnyRole("ADMIN","MANAGER")
-                            .requestMatchers("/api/matches/**").authenticated() // ostatní zápasy pro přihlášené
+                            .requestMatchers("/api/matches/**").authenticated()
 
                             // PLAYER
                             .requestMatchers("/api/players").hasAnyRole("ADMIN","MANAGER")
@@ -76,7 +77,7 @@ public class SecurityConfig {
                             .loginPage("/login")
                             .permitAll()
                     )
-                    .httpBasic(httpBasic -> {}); // aktivace Basic Auth
+                    .httpBasic(httpBasic -> {}); // 🔥 JSON 403
         }
 
         return http.build();

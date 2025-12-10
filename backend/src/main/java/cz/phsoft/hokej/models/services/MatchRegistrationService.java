@@ -1,42 +1,33 @@
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.JerseyColor;
-
+import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
 
 import java.util.List;
 
 public interface MatchRegistrationService {
 
+    // 🔥 Vrací DTO místo entity
+    MatchRegistrationDTO upsertRegistration(
+            Long matchId,
+            Long playerId,
+            JerseyColor jerseyColor,
+            String adminNote,
+            ExcuseReason excuseReason,
+            String excuseNote,
+            boolean unregister
+    );
 
-    // Přihlásit hráče s volitelnou barvou dresu a poznámkou admina
-    MatchRegistrationEntity registerPlayer(Long matchId, Long playerId, JerseyColor jerseyColor, String adminNote);
+    List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId);
 
-    // Odhlásit hráče
-    MatchRegistrationEntity unregisterPlayer(Long matchId, Long playerId, String note, String reason);
+    List<MatchRegistrationDTO> getAllRegistrations();
 
-    // Omluvit hráče s důvodem
-    MatchRegistrationEntity excusePlayer(Long matchId, Long playerId, String note, String reason);
+    List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId);
 
-    // Seznam všech registrací pro zápas
-    List<MatchRegistrationEntity> getRegistrationsForMatch(Long matchId);
+    List<PlayerDTO> getNoResponsePlayers(Long matchId);
 
-    // Seznam všech registrací
-    List<MatchRegistrationEntity> getAllRegistrations();
-
-    // Seznam registrací pro konkrétního hráče
-    List<MatchRegistrationEntity> getRegistrationsForPlayer(Long playerId);
-
-    // Získat hráče, kteří se vůbec nevyjádřili k zápasu
-    List<PlayerEntity> getNoResponsePlayers(Long matchId);
-
-    // Přepočet statusů REGISTERED / RESERVED podle kapacity
     void recalcStatusesForMatch(Long matchId);
-
 }
-
-
-
-
-

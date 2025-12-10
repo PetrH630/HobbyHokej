@@ -1,8 +1,7 @@
 package cz.phsoft.hokej.exceptions;
 
 public class DuplicateRegistrationException extends RuntimeException {
-
-    public DuplicateRegistrationException(String message) {
-        super(message);
+    public DuplicateRegistrationException(Long matchId, Long playerId) {
+        super("Hráč " + playerId + " již má aktivní registraci na zápas " + matchId);
     }
 }

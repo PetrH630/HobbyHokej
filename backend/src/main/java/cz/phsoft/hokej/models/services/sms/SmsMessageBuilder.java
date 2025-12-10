@@ -1,14 +1,13 @@
 package cz.phsoft.hokej.models.services.sms;
 
+import cz.phsoft.hokej.models.dto.PlayerDTO;
 import org.springframework.stereotype.Component;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Component
 public class SmsMessageBuilder {
@@ -21,8 +20,8 @@ public class SmsMessageBuilder {
     }
 
     // --------------------------
-// zpráva po registraci/odhlášení/omluvení
-// --------------------------
+    // zpráva po registraci/odhlášení/omluvení
+    // --------------------------
     public String buildMessageRegistration(MatchRegistrationEntity registration) {
         PlayerMatchStatus status = registration.getStatus();
         String statusText = switch (status) {
@@ -51,25 +50,25 @@ public class SmsMessageBuilder {
     }
 
     // --------------------------
-// zpráva pro hráče, kteří ještě nereagovali
-// --------------------------
-    public String buildMessageNoResponse(PlayerEntity player, MatchEntity match) {
+    // zpráva pro hráče, kteří ještě nereagovali
+    // --------------------------
+    public String buildMessageNoResponse(PlayerDTO player, MatchEntity match) {
         Long registeredCount = matchRegistrationRepository
                 .countByMatchAndStatus(match, PlayerMatchStatus.REGISTERED);
 
         StringBuilder sb = new StringBuilder();
         sb.append("app_hokej - upozornění: zápas ")
                 .append(match.getDateTime().format(dateFormatter))
-                .append(" Volných míst: ")
-                .append((match.getMaxPlayers()) - (registeredCount))
-                .append(". Ještě jste nereagoval ");
+                .append(" - volná místa: ")
+                .append(match.getMaxPlayers() - registeredCount)
+                .append(". Ještě jste nereagoval.");
 
         return sb.toString();
     }
 
     // --------------------------
-// finální připomínka pro přihlášené hráče v den zápasu
-// --------------------------
+    // finální připomínka pro přihlášené hráče v den zápasu
+    // --------------------------
     public String buildMessageFinal(MatchRegistrationEntity registration) {
         MatchEntity match = registration.getMatch();
         Long registeredCount = matchRegistrationRepository
@@ -85,6 +84,4 @@ public class SmsMessageBuilder {
 
         return sb.toString();
     }
-
-
 }

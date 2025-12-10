@@ -1,13 +1,12 @@
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
-import cz.phsoft.hokej.data.enums.JerseyColor;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.mappers.MatchRegistrationMapper;
+import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import cz.phsoft.hokej.security.PlayerSecurity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -17,68 +16,55 @@ import java.util.List;
 public class MatchRegistrationController {
 
     private final MatchRegistrationService service;
-    private final MatchRegistrationMapper matchRegistrationMapper;
-    private final PlayerMapper playerMapper;
+    private final PlayerSecurity playerSecurity;
 
     public MatchRegistrationController(MatchRegistrationService service,
-                                       MatchRegistrationMapper matchRegistrationMapper,
-                                       PlayerMapper playerMapper) {
+                                       PlayerSecurity playerSecurity) {
         this.service = service;
-        this.matchRegistrationMapper = matchRegistrationMapper;
-        this.playerMapper = playerMapper;
+        this.playerSecurity = playerSecurity;
     }
 
-    // vytvoření registrace hráče - id hráče k id zápasu
-    @PostMapping("/register")
-    public MatchRegistrationDTO register(@RequestParam Long matchId, @RequestParam Long playerId,
-                                         @RequestParam(required = false) JerseyColor jerseyColor,
-                                         @RequestParam(required = false) String adminNote) {
-        MatchRegistrationEntity entity = service.registerPlayer(matchId, playerId, jerseyColor, adminNote);
-        return matchRegistrationMapper.toDTO(entity);
+    // -----------------------------------------------------
+    // 🔥 JEDINÝ UNIVERZÁLNÍ ENDPOINT PRO REGISTRACE
+    // -----------------------------------------------------
+    @PostMapping("/upsert")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #request.playerId)")
+    public MatchRegistrationDTO upsert(@RequestBody MatchRegistrationRequest request) {
+        return service.upsertRegistration(
+                request.getMatchId(),
+                request.getPlayerId(),
+                request.getJerseyColor(),
+                request.getAdminNote(),
+                request.getExcuseReason(),
+                request.getExcuseNote(),
+                request.isUnregister()
+        );
     }
 
-    // zrušení registrace hráče k zápasu - změna statutu na unregistered
-    @PostMapping("/unregister")
-    public MatchRegistrationDTO unregister(@RequestParam Long matchId,
-                                           @RequestParam Long playerId,
-                                           @RequestParam String reason,
-                                           @RequestParam(required = false) String note) {
-        MatchRegistrationEntity entity = service.unregisterPlayer(matchId, playerId, note, reason);
-        return matchRegistrationMapper.toDTO(entity);
-    }
+    // -----------------------------------------------------
+    // GET ENDPOINTY
+    // -----------------------------------------------------
 
-    // omluvení hráče ze zápasu - jen pokud ještě neměl registraci
-    @PostMapping("/excuse")
-    public MatchRegistrationDTO excuse(@RequestParam Long matchId,
-                                       @RequestParam Long playerId,
-                                       @RequestParam String reason,
-                                       @RequestParam(required = false) String note) {
-        MatchRegistrationEntity entity = service.excusePlayer(matchId, playerId, note, reason);
-        return matchRegistrationMapper.toDTO(entity);
-    }
-
-    // všechny registrace
     @GetMapping("/all")
     public List<MatchRegistrationDTO> getAllRegistrations() {
-        return matchRegistrationMapper.toDTOList(service.getAllRegistrations());
+        return service.getAllRegistrations();
     }
 
-    // všechny registace k hráči dle id hráče
     @GetMapping("/for-player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #playerId)")
     public List<MatchRegistrationDTO> forPlayer(@PathVariable Long playerId) {
-        return matchRegistrationMapper.toDTOList(service.getRegistrationsForPlayer(playerId));
+        return service.getRegistrationsForPlayer(playerId);
     }
 
-    // všechny registrace k zápasu dle id zápasu
     @GetMapping("/for-match/{matchId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<MatchRegistrationDTO> forMatch(@PathVariable Long matchId) {
-        return matchRegistrationMapper.toDTOList(service.getRegistrationsForMatch(matchId));
+        return service.getRegistrationsForMatch(matchId);
     }
 
-    // všichni hráči co se ani neregistrovali, neodhlásili, neomluvili - bez reakce
     @GetMapping("/no-response/{matchId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerDTO> getNoResponse(@PathVariable Long matchId) {
-        return playerMapper.toDTOList(service.getNoResponsePlayers(matchId));
+        return service.getNoResponsePlayers(matchId);
     }
-
 }

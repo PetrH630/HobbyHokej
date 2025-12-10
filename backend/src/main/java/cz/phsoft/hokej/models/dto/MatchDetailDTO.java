@@ -14,53 +14,123 @@ public class MatchDetailDTO {
     private double pricePerRegisteredPlayer;
     private int remainingSlots;
 
-    private List<String> registeredPlayers;
-    private List<String> reservedPlayers;
-    private List<String> unregisteredPlayers;
-    private List<String> excusedPlayers;
-    private List<String> noResponsePlayers;
+    List<PlayerDTO> registeredPlayers;
+    List<PlayerDTO> reservedPlayers;
+    List<PlayerDTO> unregisteredPlayers;
+    List<PlayerDTO> excusedPlayers;
+    List<PlayerDTO> noResponsePlayers;
 
     // Gettery a settery
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
 
-    public LocalDateTime getDateTime() { return dateTime; }
-    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+    public Long getId() {
+        return id;
+    }
 
-    public int getMaxPlayers() { return maxPlayers; }
-    public void setMaxPlayers(int maxPlayers) { this.maxPlayers = maxPlayers; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public double getPricePerRegisteredPlayer() { return pricePerRegisteredPlayer; }
-    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) { this.pricePerRegisteredPlayer = pricePerRegisteredPlayer; }
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
 
-    public int getRemainingSlots() { return remainingSlots; }
-    public void setRemainingSlots(int remainingSlots) { this.remainingSlots = remainingSlots; }
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
 
-    public List<String> getRegisteredPlayers() { return registeredPlayers; }
-    public void setRegisteredPlayers(List<String> registeredPlayers) { this.registeredPlayers = registeredPlayers; }
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
 
-    public List<String> getReservedPlayers() { return reservedPlayers; }
-    public void setReservedPlayers(List<String> reservedPlayers) { this.reservedPlayers = reservedPlayers; }
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
 
-    public List<String> getUnregisteredPlayers() { return unregisteredPlayers; }
-    public void setUnregisteredPlayers(List<String> unregisteredPlayers) { this.unregisteredPlayers = unregisteredPlayers; }
+    public int getInGamePlayers() {
+        return inGamePlayers;
+    }
 
-    public List<String> getExcusedPlayers() { return excusedPlayers; }
-    public void setExcusedPlayers(List<String> excusedPlayers) { this.excusedPlayers = excusedPlayers; }
+    public void setInGamePlayers(int inGamePlayers) {
+        this.inGamePlayers = inGamePlayers;
+    }
 
-    public int getInGamePlayers() { return inGamePlayers;  }
-    public void setInGamePlayers(int inGamePlayers) { this.inGamePlayers = inGamePlayers; }
+    public int getOutGamePlayers() {
+        return outGamePlayers;
+    }
 
-    public int getOutGamePlayers() { return outGamePlayers; }
-    public void setOutGamePlayers(int outGamePlayers) { this.outGamePlayers = outGamePlayers; }
+    public void setOutGamePlayers(int outGamePlayers) {
+        this.outGamePlayers = outGamePlayers;
+    }
 
-    public int getNoActionPlayers() { return noActionPlayers; }
-    public void setNoActionPlayers(int noActionPlayers) { this.noActionPlayers = noActionPlayers; }
+    public int getWaitingPlayers() {
+        return waitingPlayers;
+    }
 
-    public int getWaitingPlayers() { return waitingPlayers; }
-    public void setWaitingPlayers(int waitingPlayers) { this.waitingPlayers = waitingPlayers; }
+    public void setWaitingPlayers(int waitingPlayers) {
+        this.waitingPlayers = waitingPlayers;
+    }
 
-    public List<String> getNoResponsePlayers() { return noResponsePlayers; }
+    public int getNoActionPlayers() {
+        return noActionPlayers;
+    }
 
-    public void setNoResponsePlayers(List<String> noResponsePlayers) { this.noResponsePlayers = noResponsePlayers; }
+    public void setNoActionPlayers(int noActionPlayers) {
+        this.noActionPlayers = noActionPlayers;
+    }
+
+    public double getPricePerRegisteredPlayer() {
+        return pricePerRegisteredPlayer;
+    }
+
+    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) {
+        this.pricePerRegisteredPlayer = pricePerRegisteredPlayer;
+    }
+
+    public int getRemainingSlots() {
+        return remainingSlots;
+    }
+
+    public void setRemainingSlots(int remainingSlots) {
+        this.remainingSlots = remainingSlots;
+    }
+
+    public List<PlayerDTO> getRegisteredPlayers() {
+        return registeredPlayers;
+    }
+
+    public void setRegisteredPlayers(List<PlayerDTO> registeredPlayers) {
+        this.registeredPlayers = registeredPlayers;
+    }
+
+    public List<PlayerDTO> getReservedPlayers() {
+        return reservedPlayers;
+    }
+
+    public void setReservedPlayers(List<PlayerDTO> reservedPlayers) {
+        this.reservedPlayers = reservedPlayers;
+    }
+
+    public List<PlayerDTO> getUnregisteredPlayers() {
+        return unregisteredPlayers;
+    }
+
+    public void setUnregisteredPlayers(List<PlayerDTO> unregisteredPlayers) {
+        this.unregisteredPlayers = unregisteredPlayers;
+    }
+
+    public List<PlayerDTO> getExcusedPlayers() {
+        return excusedPlayers;
+    }
+
+    public void setExcusedPlayers(List<PlayerDTO> excusedPlayers) {
+        this.excusedPlayers = excusedPlayers;
+    }
+
+    public List<PlayerDTO> getNoResponsePlayers() {
+        return noResponsePlayers;
+    }
+
+    public void setNoResponsePlayers(List<PlayerDTO> noResponsePlayers) {
+        this.noResponsePlayers = noResponsePlayers;
+    }
 }

@@ -26,6 +26,8 @@ public class MatchRegistrationDTO {
     @NotNull
     private String createdBy; // "user" nebo "system"
 
+    private PlayerDTO playerDTO;
+
     public MatchRegistrationDTO() {}
 
     // Gettery a settery
