@@ -6,6 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface PlayerMapper {
 
@@ -22,4 +24,8 @@ public interface PlayerMapper {
 
         // Aktualizace existující Entity (heslo se mapuje, fullName není pole v Entity)
         void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
+
+    List<PlayerDTO> toDTOList(List<PlayerEntity> players);
+
+
 }
