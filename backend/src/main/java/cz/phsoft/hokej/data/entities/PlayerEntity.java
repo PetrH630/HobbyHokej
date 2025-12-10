@@ -2,7 +2,6 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.JerseyColor;
 import cz.phsoft.hokej.data.enums.PlayerType;
-
 import jakarta.persistence.*;
 
 @Entity
@@ -19,19 +18,26 @@ public class PlayerEntity {
     @Column(nullable = false)
     private String surname;
 
-    // pro zobrazení next/upcoming zápasů (Dodělat metodu)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerType type; // VIP, STANDARD, BASIC
 
     private String fullName;
     private String phoneNumber;
+
     @Enumerated(EnumType.STRING)
     private JerseyColor jerseyColor;
 
+    // Many-to-One: každý hráč patří jednomu uživateli
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private AppUserEntity user;
+
+    // ----------------- Konstruktor -----------------
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
     }
+
     public PlayerEntity(String name, String surname, PlayerType type, String phoneNumber, JerseyColor jerseyColor) {
         this.name = name;
         this.surname = surname;
@@ -41,7 +47,7 @@ public class PlayerEntity {
         this.jerseyColor = jerseyColor;
     }
 
-    // Gettery a Settery + updateFullName
+    // ----------------- Gettery a Settery -----------------
     public Long getId() {
         return id;
     }
@@ -84,13 +90,27 @@ public class PlayerEntity {
         this.fullName = name + " " + surname;
     }
 
-    public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
     public JerseyColor getJerseyColor() {
         return jerseyColor;
     }
+
     public void setJerseyColor(JerseyColor jerseyColor) {
         this.jerseyColor = jerseyColor;
+    }
+
+    public AppUserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(AppUserEntity user) {
+        this.user = user;
     }
 }

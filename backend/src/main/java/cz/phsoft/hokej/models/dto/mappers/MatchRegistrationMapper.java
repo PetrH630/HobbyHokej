@@ -10,6 +10,8 @@ import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface MatchRegistrationMapper {
 
@@ -38,4 +40,6 @@ public interface MatchRegistrationMapper {
     @Mapping(target = "matchId", source = "match.id")
     @Mapping(target = "playerId", source = "player.id")
     MatchRegistrationDTO toDTO(MatchRegistrationEntity entity);
+
+    List<MatchRegistrationDTO> toDTOList(List<MatchRegistrationEntity> entities);
 }

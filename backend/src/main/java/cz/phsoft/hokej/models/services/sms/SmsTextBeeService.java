@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+// textbee - free s omezením na 50 sms / den
 @Service
 public class SmsTextBeeService implements SmsService {
 
