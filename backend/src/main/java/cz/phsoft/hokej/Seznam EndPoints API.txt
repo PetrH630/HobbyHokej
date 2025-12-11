@@ -42,8 +42,7 @@ GET
 
 POST
 @PostMapping - /api/registrations/upsert      - vytvoří registrace dle id zápasu a id hráče
-@PostMapping - /api/registrations/upsert    - vytvoří záznam o zrušení registrace (odregistrování)
-                                                 dle id zápasu a id hráče
+@PostMapping - /api/registrations/upsert    - vytvoří záznam o zrušení registrace (odregistrování) dle id zápasu a id hráče
 @PostMapping - /api/registrations/upsert        - vytvoří záznam o omluvení se ze zápasu
 
 --------------------------

@@ -41,7 +41,6 @@ public class MatchDetailDTO {
     public int getMaxPlayers() {
         return maxPlayers;
     }
-
     public void setMaxPlayers(int maxPlayers) {
         this.maxPlayers = maxPlayers;
     }
@@ -49,13 +48,8 @@ public class MatchDetailDTO {
     public int getInGamePlayers() {
         return inGamePlayers;
     }
-
     public void setInGamePlayers(int inGamePlayers) {
         this.inGamePlayers = inGamePlayers;
-    }
-
-    public int getOutGamePlayers() {
-        return outGamePlayers;
     }
 
     public void setOutGamePlayers(int outGamePlayers) {
@@ -65,7 +59,6 @@ public class MatchDetailDTO {
     public int getWaitingPlayers() {
         return waitingPlayers;
     }
-
     public void setWaitingPlayers(int waitingPlayers) {
         this.waitingPlayers = waitingPlayers;
     }
@@ -73,7 +66,6 @@ public class MatchDetailDTO {
     public int getNoActionPlayers() {
         return noActionPlayers;
     }
-
     public void setNoActionPlayers(int noActionPlayers) {
         this.noActionPlayers = noActionPlayers;
     }
@@ -81,7 +73,6 @@ public class MatchDetailDTO {
     public double getPricePerRegisteredPlayer() {
         return pricePerRegisteredPlayer;
     }
-
     public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) {
         this.pricePerRegisteredPlayer = pricePerRegisteredPlayer;
     }
@@ -89,7 +80,6 @@ public class MatchDetailDTO {
     public int getRemainingSlots() {
         return remainingSlots;
     }
-
     public void setRemainingSlots(int remainingSlots) {
         this.remainingSlots = remainingSlots;
     }
@@ -97,7 +87,6 @@ public class MatchDetailDTO {
     public List<PlayerDTO> getRegisteredPlayers() {
         return registeredPlayers;
     }
-
     public void setRegisteredPlayers(List<PlayerDTO> registeredPlayers) {
         this.registeredPlayers = registeredPlayers;
     }
@@ -105,7 +94,6 @@ public class MatchDetailDTO {
     public List<PlayerDTO> getReservedPlayers() {
         return reservedPlayers;
     }
-
     public void setReservedPlayers(List<PlayerDTO> reservedPlayers) {
         this.reservedPlayers = reservedPlayers;
     }
@@ -121,7 +109,6 @@ public class MatchDetailDTO {
     public List<PlayerDTO> getExcusedPlayers() {
         return excusedPlayers;
     }
-
     public void setExcusedPlayers(List<PlayerDTO> excusedPlayers) {
         this.excusedPlayers = excusedPlayers;
     }
@@ -129,7 +116,6 @@ public class MatchDetailDTO {
     public List<PlayerDTO> getNoResponsePlayers() {
         return noResponsePlayers;
     }
-
     public void setNoResponsePlayers(List<PlayerDTO> noResponsePlayers) {
         this.noResponsePlayers = noResponsePlayers;
     }
