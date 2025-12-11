@@ -3,6 +3,7 @@ package cz.phsoft.hokej.controllers;
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
 import cz.phsoft.hokej.models.services.PlayerInactivityPeriodService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,12 +21,14 @@ public class PlayerInactivityPeriodController {
 
     // všechny záznamy o neaktivitě hráčů
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerInactivityPeriodDTO> getAll() {
         return service.getAll();
     }
 
     // neaktivita hráčů dle id neaktivity
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<PlayerInactivityPeriodDTO> getById(@PathVariable Long id) {
         PlayerInactivityPeriodDTO dto = service.getById(id);
         return ResponseEntity.ok(dto);
@@ -33,12 +36,14 @@ public class PlayerInactivityPeriodController {
 
     // získá záznamy o periodě neaktivity dle id hráče
     @GetMapping("/player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerInactivityPeriodDTO> getByPlayer(@PathVariable Long playerId) {
         return service.getByPlayer(playerId);
     }
 
     // vytvoří záznam o neaktivitě hráče
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlayerInactivityPeriodDTO> create(@RequestBody PlayerInactivityPeriodDTO dto) {
         PlayerInactivityPeriodDTO created = service.create(dto);
         return ResponseEntity.ok(created);
@@ -46,6 +51,7 @@ public class PlayerInactivityPeriodController {
 
     // změní záznam o neaktivitě hráče dle id
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlayerInactivityPeriodDTO> update(
             @PathVariable Long id,
             @RequestBody PlayerInactivityPeriodDTO dto) {
@@ -56,6 +62,7 @@ public class PlayerInactivityPeriodController {
 
     // vymaže záznam o neaktivitě hráče dle id záznamu
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
