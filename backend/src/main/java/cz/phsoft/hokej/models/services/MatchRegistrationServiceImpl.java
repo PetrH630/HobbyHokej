@@ -19,6 +19,8 @@ import cz.phsoft.hokej.models.dto.mappers.MatchRegistrationMapper;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
 import cz.phsoft.hokej.models.services.sms.SmsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ import java.util.List;
 @Service
 public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
+    Logger logger = LoggerFactory.getLogger(MatchServiceImpl.class);
     private final MatchRegistrationRepository registrationRepository;
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
@@ -104,6 +107,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             String excuseNote,
             boolean unregister) {
 
+        // TEST: pošli ERROR zprávu pro otestování emailu
+        logger.error("Test ERROR zpráva pro email");
+
         MatchEntity match = getMatchOrThrow(matchId);
         PlayerEntity player = getPlayerOrThrow(playerId);
 
@@ -148,7 +154,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         sendSms(registration, smsMessageBuilder.buildMessageRegistration(registration));
 
-        // 🔥 mapping už zde
+
+
         return matchRegistrationMapper.toDTO(registration);
     }
 
