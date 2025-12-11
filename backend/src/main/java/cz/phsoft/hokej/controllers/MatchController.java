@@ -70,6 +70,7 @@ public class MatchController {
 
     // Vytvoření zápasu
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public MatchDTO createMatch(@Valid @RequestBody MatchDTO dto) {
         return matchService.createMatch(dto);
     }
@@ -90,7 +91,7 @@ public class MatchController {
 
     // Smazání zápasu
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteMatch(@PathVariable Long id) {
         matchService.deleteMatch(id);
     }

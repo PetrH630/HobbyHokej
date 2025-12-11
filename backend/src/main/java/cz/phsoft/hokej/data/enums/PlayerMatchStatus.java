@@ -4,5 +4,6 @@ public enum PlayerMatchStatus {
     REGISTERED,
     UNREGISTERED,
     EXCUSED,  // omluven
-    RESERVED // náhradník
+    RESERVED, // náhradník
+
 }

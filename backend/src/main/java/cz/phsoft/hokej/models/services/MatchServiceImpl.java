@@ -114,7 +114,45 @@ public class MatchServiceImpl implements MatchService {
 
         MatchEntity match = findMatchOrThrow(id);
 
-        // Registrace jako DTO (service vrací DTOy)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdminOrManager = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") ||
+                        a.getAuthority().equals("ROLE_MANAGER"));
+
+        // pokud není admin/manager, zjisti vlastněné hráče a jejich statusy
+        if (!isAdminOrManager && auth != null && auth.isAuthenticated()) {
+            Object principal = auth.getPrincipal();
+            if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+
+                // získat ID hráčů patřících aktuálnímu přihlášenému uživateli
+                List<PlayerEntity> ownedPlayers = playerRepository.findAll().stream()
+                        .filter(p -> p.getUser() != null && p.getUser().getEmail().equals(userDetails.getUsername()))
+                        .toList();
+
+                // zjisti registrace těchto hráčů u zápasu
+                List<MatchRegistrationDTO> registrations = registrationService.getRegistrationsForMatch(id);
+
+                boolean hasRestrictedPlayer = ownedPlayers.stream()
+                        .anyMatch(p -> {
+                            // 1) NO_RESPONSE = hráč není registrován na zápas
+                            boolean noResponse = registrations.stream()
+                                    .noneMatch(r -> r.getPlayerId().equals(p.getId()));
+
+                            // 2) INACTIVITY = hráč je v období neaktivity
+                            boolean inactiveForMatch = !playerInactivityPeriodService.isActive(p, match.getDateTime());
+
+                            return noResponse || inactiveForMatch;
+                        });
+
+                if (hasRestrictedPlayer) {
+                    throw new org.springframework.security.access.AccessDeniedException(
+                            "Nemáte přístup k detailu tohoto zápasu."
+                    );
+                }
+            }
+        }
+
+        // --- původní logika pro registrace ---
         List<MatchRegistrationDTO> registrations = registrationService.getRegistrationsForMatch(id);
 
         List<MatchRegistrationDTO> registered = registrations.stream()
@@ -133,7 +171,6 @@ public class MatchServiceImpl implements MatchService {
                 .filter(r -> r.getStatus() == PlayerMatchStatus.EXCUSED)
                 .toList();
 
-        // --- 2) NO-RESPONSE HRÁČI PŘÍMO ZDE ---
         List<PlayerEntity> allPlayers = playerRepository.findAll();
 
         Set<Long> respondedIds = registrations.stream()
@@ -144,18 +181,14 @@ public class MatchServiceImpl implements MatchService {
                 .filter(p -> !respondedIds.contains(p.getId()))
                 .toList();
 
-        // počty hráčů - stats
         int inGamePlayers = registered.size();
         int outGamePlayers = unregistered.size() + excused.size();
         int waitingPlayers = reserved.size();
         int noActionPlayers = noResponsePlayers.size();
 
         int remainingSlots = match.getMaxPlayers() - inGamePlayers;
-        double pricePerRegistered = inGamePlayers > 0
-                ? match.getPrice() / (double) inGamePlayers
-                : 0;
+        double pricePerRegistered = inGamePlayers > 0 ? match.getPrice() / (double) inGamePlayers : 0;
 
-        // naplnění DTO — nyní používáme PlayerDTO (mapované přes playerMapper)
         MatchDetailDTO dto = new MatchDetailDTO();
         dto.setId(match.getId());
         dto.setDateTime(match.getDateTime());
@@ -169,7 +202,6 @@ public class MatchServiceImpl implements MatchService {
         dto.setPricePerRegisteredPlayer(pricePerRegistered);
         dto.setRemainingSlots(remainingSlots);
 
-        // pomocná lambda: z MatchRegistrationDTO -> PlayerDTO (pokud hráč existuje)
         List<PlayerDTO> registeredPlayers = registered.stream()
                 .map(r -> playerRepository.findById(r.getPlayerId()))
                 .filter(java.util.Optional::isPresent)
@@ -202,22 +234,14 @@ public class MatchServiceImpl implements MatchService {
         dto.setReservedPlayers(reservedPlayers);
         dto.setUnregisteredPlayers(unregisteredPlayers);
         dto.setExcusedPlayers(excusedPlayers);
-        dto.setNoResponsePlayers(noResponsePlayerDTOs);
 
-        // ověření pro nezobrazení seznamu no-response player v detailu zápasu
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        boolean isAdminOrManager = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") ||
-                        a.getAuthority().equals("ROLE_MANAGER"));
-
-        // pokud nemá roli ADMIN/MANAGER → pole noResponsePlayers neukazuj
-        if (!isAdminOrManager) {
-            dto.setNoResponsePlayers(null); // nebo Collections.emptyList()
-        }
+        // pouze admin/manager uvidí no-response hráče
+        dto.setNoResponsePlayers(isAdminOrManager ? noResponsePlayerDTOs : null);
 
         return dto;
     }
+
+
 
     public List<MatchEntity> getAvailableMatchesForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
