@@ -1,14 +1,17 @@
-package cz.phsoft.hokej.models.services;
-
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
 import cz.phsoft.hokej.data.repositories.PlayerInactivityPeriodRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerInactivityPeriodMapper;
-import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
+import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
+import cz.phsoft.hokej.models.services.PlayerInactivityPeriodService;
+
 import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
 
 @Service
 public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriodService {
@@ -26,29 +29,35 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     }
 
     @Override
-    public List<PlayerInactivityPeriodEntity> getAll() {
-        return inactivityRepository.findAll();
+    public List<PlayerInactivityPeriodDTO> getAll() {
+        return inactivityRepository.findAll()
+                .stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public PlayerInactivityPeriodEntity getById(Long id) {
-        return inactivityRepository.findById(id)
+    public PlayerInactivityPeriodDTO getById(Long id) {
+        PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Období neaktivity s ID " + id + " neexistuje."
                 ));
+        return mapper.toDTO(entity);
     }
 
     @Override
-    public List<PlayerInactivityPeriodEntity> getByPlayer(Long playerId) {
+    public List<PlayerInactivityPeriodDTO> getByPlayer(Long playerId) {
         PlayerEntity player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new RuntimeException("Player not found"));
 
-        return inactivityRepository.findByPlayerOrderByInactiveFromAsc(player);
+        return inactivityRepository.findByPlayerOrderByInactiveFromAsc(player)
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
     }
 
-
     @Override
-    public PlayerInactivityPeriodEntity create(PlayerInactivityPeriodDTO dto) {
+    public PlayerInactivityPeriodDTO create(PlayerInactivityPeriodDTO dto) {
         PlayerEntity player = playerRepository.findById(dto.getPlayerId())
                 .orElseThrow(() -> new IllegalArgumentException("Hráč s ID " + dto.getPlayerId() + " neexistuje."));
 
@@ -70,12 +79,13 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         }
 
         PlayerInactivityPeriodEntity entity = mapper.toEntity(dto, player);
-        return inactivityRepository.save(entity);
+        return mapper.toDTO(inactivityRepository.save(entity));
     }
 
     @Override
-    public PlayerInactivityPeriodEntity update(Long id, PlayerInactivityPeriodDTO dto) {
-        PlayerInactivityPeriodEntity entity = getById(id);
+    public PlayerInactivityPeriodDTO update(Long id, PlayerInactivityPeriodDTO dto) {
+        PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Období neaktivity s ID " + id + " neexistuje."));
 
         if (dto.getInactiveFrom() == null || dto.getInactiveTo() == null) {
             throw new IllegalArgumentException("Datum od a do nesmí být null.");
@@ -95,22 +105,20 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
             throw new IllegalStateException("Upravené období se překrývá s jiným obdobím neaktivity hráče.");
         }
 
-        // update entity z DTO
         mapper.updateEntityFromDto(dto, entity);
-        return inactivityRepository.save(entity);
+        return mapper.toDTO(inactivityRepository.save(entity));
     }
 
     @Override
     public void delete(Long id) {
-        PlayerInactivityPeriodEntity entity = getById(id);
+        PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Období neaktivity s ID " + id + " neexistuje."));
         inactivityRepository.delete(entity);
     }
-
 
     // true = aktivní, false = neaktivní
     public boolean isActive(PlayerEntity player, LocalDateTime dateTime) {
         return !inactivityRepository.existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
                 player, dateTime, dateTime);
     }
-
 }

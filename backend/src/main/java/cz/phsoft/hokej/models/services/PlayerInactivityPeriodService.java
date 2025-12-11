@@ -9,15 +9,15 @@ import java.util.List;
 
 public interface PlayerInactivityPeriodService {
 
-    List<PlayerInactivityPeriodEntity> getAll();
+    List<PlayerInactivityPeriodDTO> getAll();
 
-    PlayerInactivityPeriodEntity getById(Long id);
+    PlayerInactivityPeriodDTO getById(Long id);
 
-    List<PlayerInactivityPeriodEntity> getByPlayer(Long playerId);
+    List<PlayerInactivityPeriodDTO> getByPlayer(Long playerId);
 
-    PlayerInactivityPeriodEntity create(PlayerInactivityPeriodDTO dto);
+    PlayerInactivityPeriodDTO create(PlayerInactivityPeriodDTO dto);
 
-    PlayerInactivityPeriodEntity update(Long id, PlayerInactivityPeriodDTO dto);
+    PlayerInactivityPeriodDTO update(Long id, PlayerInactivityPeriodDTO dto);
 
     void delete(Long id);
 
