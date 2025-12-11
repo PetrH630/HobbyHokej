@@ -6,6 +6,7 @@ import cz.phsoft.hokej.models.dto.MatchDetailDTO;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
 import cz.phsoft.hokej.models.services.MatchService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,17 +33,20 @@ public class MatchController {
 
     // Všechny zápasy
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<MatchDTO> getAllMatches() {
         return matchService.getAllMatches();
     }
 
     // Nadcházející zápas
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/next")
     public MatchDTO getNextMatch() {
         return matchService.getNextMatch();
     }
 
     // Všechny nadcházející zápasy
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #playerId)")
     @GetMapping("/upcoming")
     public List<MatchDTO> getUpcomingMatches() {
         return matchService.getUpcomingMatches();
@@ -50,6 +54,7 @@ public class MatchController {
 
     // Nadcházející zápasy pro konkrétního hráče (pouze DTO)
     @GetMapping("/player/{playerId}/upcoming")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #playerId)")
     public List<MatchDTO> getPlayerUpcomingMatches(@PathVariable Long playerId) {
         List<MatchEntity> entities = matchService.getUpcomingMatchesForPlayer(playerId);
         return entities.stream()
@@ -71,24 +76,28 @@ public class MatchController {
 
     // Získání zápasu podle ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public MatchDTO getMatch(@PathVariable Long id) {
         return matchService.getMatchById(id);
     }
 
     // Editace zápasu
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public MatchDTO updateMatch(@PathVariable Long id, @Valid @RequestBody MatchDTO dto) {
         return matchService.updateMatch(id, dto);
     }
 
     // Smazání zápasu
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public void deleteMatch(@PathVariable Long id) {
         matchService.deleteMatch(id);
     }
 
     // Dostupné zápasy pro hráče
     @GetMapping("/available-for-player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #playerId)")
     public List<MatchDTO> getAvailableMatchesForPlayer(@PathVariable Long playerId) {
         return matchService.getAvailableMatchesForPlayer(playerId)
                 .stream()

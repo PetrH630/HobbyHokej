@@ -12,6 +12,8 @@ import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -201,6 +203,18 @@ public class MatchServiceImpl implements MatchService {
         dto.setUnregisteredPlayers(unregisteredPlayers);
         dto.setExcusedPlayers(excusedPlayers);
         dto.setNoResponsePlayers(noResponsePlayerDTOs);
+
+        // ověření pro nezobrazení seznamu no-response player v detailu zápasu
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdminOrManager = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") ||
+                        a.getAuthority().equals("ROLE_MANAGER"));
+
+        // pokud nemá roli ADMIN/MANAGER → pole noResponsePlayers neukazuj
+        if (!isAdminOrManager) {
+            dto.setNoResponsePlayers(null); // nebo Collections.emptyList()
+        }
 
         return dto;
     }

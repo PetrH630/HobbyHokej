@@ -81,12 +81,14 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     private MatchRegistrationEntity updateRegistrationStatus(
-            MatchRegistrationEntity registration, PlayerMatchStatus status, String updatedBy) {
+            MatchRegistrationEntity registration, PlayerMatchStatus status, String updatedBy, boolean updateTimestamp) {
 
-        registration.setStatus(status);
+        registration.setStatus(PlayerMatchStatus.valueOf(status.name()));
         registration.setCreatedBy(updatedBy);
-        registration.setTimestamp(LocalDateTime.now());
-        return registrationRepository.save(registration);
+        if (updateTimestamp) {
+            registration.setTimestamp(LocalDateTime.now());
+        }
+        return registrationRepository.saveAndFlush(registration);
     }
 
     // -------------------- REGISTRATION --------------------
@@ -199,7 +201,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         for (int i = 0; i < regs.size(); i++) {
             MatchRegistrationEntity reg = regs.get(i);
             PlayerMatchStatus newStatus = (i < maxPlayers) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
-            if (reg.getStatus() != newStatus) updateRegistrationStatus(reg, newStatus, "system");
+            if (reg.getStatus() != newStatus) updateRegistrationStatus(reg, newStatus, "system", false);
         }
     }
 

@@ -41,10 +41,10 @@ GET
 /api/registrations//no-response/{matchId}   - seznam hráčů, kteří nereagovali   - Admin, Manager
 
 POST
-@PostMapping - /api/registrations/register      - vytvoří registrace dle id zápasu a id hráče
-@PostMapping - /api/registrations/unregister    - vytvoří záznam o zrušení registrace (odregistrování)
-                                                  dle id zápasu a id hráče
-@PostMapping - /api/registrations/excuse        - vytvoří záznam o omluvení se ze zápasu
+@PostMapping - /api/registrations/upsert      - vytvoří registrace dle id zápasu a id hráče
+@PostMapping - /api/registrations/upsert    - vytvoří záznam o zrušení registrace (odregistrování)
+                                                 dle id zápasu a id hráče
+@PostMapping - /api/registrations/upsert        - vytvoří záznam o omluvení se ze zápasu
 
 --------------------------
 
