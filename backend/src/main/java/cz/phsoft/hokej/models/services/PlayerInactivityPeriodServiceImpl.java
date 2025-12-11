@@ -1,3 +1,5 @@
+package cz.phsoft.hokej.models.services;
+
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
 import cz.phsoft.hokej.data.repositories.PlayerInactivityPeriodRepository;
@@ -8,10 +10,11 @@ import cz.phsoft.hokej.models.services.PlayerInactivityPeriodService;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-
 
 @Service
 public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriodService {
@@ -30,10 +33,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
 
     @Override
     public List<PlayerInactivityPeriodDTO> getAll() {
-        return inactivityRepository.findAll()
-                .stream()
+        return inactivityRepository.findAll().stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -56,19 +58,16 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
                 .toList();
     }
 
+    // --- TRANSACTIONAL pro zápis dat ---
     @Override
+    @Transactional
     public PlayerInactivityPeriodDTO create(PlayerInactivityPeriodDTO dto) {
         PlayerEntity player = playerRepository.findById(dto.getPlayerId())
                 .orElseThrow(() -> new IllegalArgumentException("Hráč s ID " + dto.getPlayerId() + " neexistuje."));
 
-        if (dto.getInactiveFrom() == null || dto.getInactiveTo() == null) {
-            throw new IllegalArgumentException("Datum od a do nesmí být null.");
-        }
-        if (!dto.getInactiveFrom().isBefore(dto.getInactiveTo())) {
-            throw new IllegalArgumentException("inactiveFrom musí být před inactiveTo.");
-        }
+        validateDates(dto);
 
-        // kontrola překryvu
+        // kontrola překryvu existujících období
         boolean overlaps = !inactivityRepository
                 .findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
                         player, dto.getInactiveFrom(), dto.getInactiveTo()
@@ -83,16 +82,12 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     }
 
     @Override
+    @Transactional
     public PlayerInactivityPeriodDTO update(Long id, PlayerInactivityPeriodDTO dto) {
         PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Období neaktivity s ID " + id + " neexistuje."));
 
-        if (dto.getInactiveFrom() == null || dto.getInactiveTo() == null) {
-            throw new IllegalArgumentException("Datum od a do nesmí být null.");
-        }
-        if (!dto.getInactiveFrom().isBefore(dto.getInactiveTo())) {
-            throw new IllegalArgumentException("inactiveFrom musí být před inactiveTo.");
-        }
+        validateDates(dto);
 
         // kontrola překryvu, ignoruje aktuální záznam
         boolean overlaps = inactivityRepository
@@ -110,15 +105,26 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Období neaktivity s ID " + id + " neexistuje."));
         inactivityRepository.delete(entity);
     }
 
-    // true = aktivní, false = neaktivní
+    // --- true = aktivní, false = neaktivní ---
     public boolean isActive(PlayerEntity player, LocalDateTime dateTime) {
         return !inactivityRepository.existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
                 player, dateTime, dateTime);
+    }
+
+    // --- privátní metoda pro validaci dat ---
+    private void validateDates(PlayerInactivityPeriodDTO dto) {
+        if (dto.getInactiveFrom() == null || dto.getInactiveTo() == null) {
+            throw new IllegalArgumentException("Datum od a do nesmí být null.");
+        }
+        if (!dto.getInactiveFrom().isBefore(dto.getInactiveTo())) {
+            throw new IllegalArgumentException("inactiveFrom musí být před inactiveTo.");
+        }
     }
 }

@@ -11,4 +11,6 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
 
     List<PlayerEntity> findByIdNotIn(List<Long> ids);
     boolean existsByNameAndSurname(String name, String surname);
+
+    Optional<PlayerEntity> findByNameAndSurname(String name, String surname);
 }

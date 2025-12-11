@@ -32,7 +32,7 @@ public class SmsMessageBuilder {
         };
 
         Long registeredCount = matchRegistrationRepository
-                .countByMatchAndStatus(registration.getMatch(), PlayerMatchStatus.REGISTERED);
+                .countByMatchIdAndStatus(registration.getMatch().getId(), PlayerMatchStatus.REGISTERED);
 
         StringBuilder sb = new StringBuilder();
         sb.append("app_hokej - datum: ")
@@ -54,7 +54,7 @@ public class SmsMessageBuilder {
     // --------------------------
     public String buildMessageNoResponse(PlayerDTO player, MatchEntity match) {
         Long registeredCount = matchRegistrationRepository
-                .countByMatchAndStatus(match, PlayerMatchStatus.REGISTERED);
+                .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
 
         StringBuilder sb = new StringBuilder();
         sb.append("app_hokej - upozornění: zápas ")
@@ -72,7 +72,7 @@ public class SmsMessageBuilder {
     public String buildMessageFinal(MatchRegistrationEntity registration) {
         MatchEntity match = registration.getMatch();
         Long registeredCount = matchRegistrationRepository
-                .countByMatchAndStatus(match, PlayerMatchStatus.REGISTERED);
+                .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
 
         double pricePerPlayer = match.getPrice() / Math.max(registeredCount, 1);
 

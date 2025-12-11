@@ -67,11 +67,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
     }
 
-    private boolean isSlotAvailable(Long matchId) {
-        long registeredCount = registrationRepository.findByMatchId(matchId).stream()
-                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
-                .count();
-        return registeredCount < getMatchOrThrow(matchId).getMaxPlayers();
+    private boolean isSlotAvailable(MatchEntity match) {
+        long registeredCount = registrationRepository.countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
+        return registeredCount < match.getMaxPlayers();
     }
 
     private void sendSms(MatchRegistrationEntity registration, String message) {
@@ -126,11 +124,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         } else if (excuseReason != null) {
             if (registration != null && registration.getStatus() != PlayerMatchStatus.UNREGISTERED) {
                 throw new DuplicateRegistrationException(matchId, playerId);
+
             }
             registration.setExcuseReason(excuseReason);
             newStatus = PlayerMatchStatus.EXCUSED;
         } else {
-            newStatus = isSlotAvailable(matchId) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+            newStatus = isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
             if (registration != null) registration.setExcuseReason(null);
         }
 
@@ -231,6 +230,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             } catch (Exception e) {
                 System.err.println("Chyba SMS pro hráče "
                         + player.getFullName() + ": " + e.getMessage());
+                logger.error("Chyba při odeslání SMS hráči {}: {}", player.getFullName(), e.getMessage());
             }
         });
     }

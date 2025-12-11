@@ -24,6 +24,5 @@ import java.util.Optional;
         // --- Nová metoda pro hledání konkrétní registrace ---
         Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
 
-        long countByMatchAndStatus(MatchEntity match, PlayerMatchStatus status);
-
+        long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
     }
