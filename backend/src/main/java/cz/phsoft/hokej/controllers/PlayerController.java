@@ -14,52 +14,43 @@ import java.util.List;
 public class PlayerController {
 
     private final PlayerService playerService;
-    private final PlayerMapper playerMapper;
 
-    public PlayerController(PlayerService playerService, PlayerMapper playerMapper) {
+    public PlayerController(PlayerService playerService) {
         this.playerService = playerService;
-        this.playerMapper = playerMapper;
     }
 
     // všichni hráči
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerDTO> getAllPlayers() {
-        return playerService.getAllPlayers()
-                .stream()
-                .map(playerMapper::toDTO)
-                .toList();
+        return playerService.getAllPlayers();
     }
 
     // hráč dle id
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(principal, #id)")
-    public PlayerDTO getPlayer(@PathVariable Long id) {
-        return playerMapper.toDTO(playerService.getPlayerById(id));
+    public PlayerDTO getPlayerById(@PathVariable Long id) {
+        return playerService.getPlayerById(id);
     }
 
     // vytvoření hráče
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     @PostMapping
-    public PlayerDTO createPlayer(@RequestBody PlayerDTO dto) {
-        return playerMapper.toDTO(
-                playerService.createPlayer(playerMapper.toEntity(dto))
-        );
+    public PlayerDTO createPlayer(@RequestBody PlayerDTO playerDTO) {
+        return playerService.createPlayer(playerDTO);
+
     }
 
     // aktualizace hráče dle id hráče
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     @PutMapping("/{id}")
     public PlayerDTO updatePlayer(@PathVariable Long id, @RequestBody PlayerDTO dto) {
-
-        // načte hráče z dto
-        var newEntity = playerMapper.toEntity(dto);
-
-        // změní hráče
-        var updated = playerService.updatePlayer(id, newEntity);
-        // vrátí hráče
-        return playerMapper.toDTO(updated);
+        return playerService.updatePlayer(id, dto);
     }
 
     // odstraní hráče
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deletePlayer(@PathVariable Long id) {
         playerService.deletePlayer(id);

@@ -242,35 +242,47 @@ public class MatchServiceImpl implements MatchService {
     }
 
 
-
-    public List<MatchEntity> getAvailableMatchesForPlayer(Long playerId) {
+    @Override
+    public List<MatchDTO> getAvailableMatchesForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
 
-        List<MatchEntity> allMatches = matchRepository.findAll();
-
-        return allMatches.stream()
+        return matchRepository.findAll().stream()
                 .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
-                .collect(Collectors.toList());
+                .map(matchMapper::toDTO)
+                .toList();
     }
 
-    public List<MatchEntity> getUpcomingMatchesForPlayer(Long playerId) {
-        PlayerEntity player = findPlayerOrThrow(playerId);
+    @Override
+    public List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId) {
 
+        PlayerEntity player = findPlayerOrThrow(playerId);
         PlayerType type = player.getType();
 
-        LocalDateTime now = LocalDateTime.now();
+        // 1) Nejbližší nadcházející zápasy podle data
+        List<MatchEntity> upcomingAll =
+                matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
 
-        List<MatchEntity> upcoming = matchRepository.findByDateTimeAfterOrderByDateTimeAsc(now);
+        List<MatchEntity> limited = switch (type) {
+            case VIP -> upcomingAll; // VIP vidí vše
 
-        List<MatchEntity> activeMatches = upcoming.stream()
+            case STANDARD -> upcomingAll.stream()
+                    .limit(2) // pouze 2 nejbližší termíny
+                    .toList();
+
+            case BASIC -> upcomingAll.isEmpty()
+                    ? List.of()
+                    : List.of(upcomingAll.get(0)); // BASIC vidí jen 1 nejbližší termín
+        };
+
+        // 2) Až nyní filtrujeme podle aktivity hráče (inactivity period)
+        List<MatchEntity> activeOnly = limited.stream()
                 .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
                 .toList();
 
-        return switch (type) {
-            case VIP -> activeMatches;
-            case STANDARD -> activeMatches.stream().limit(2).toList();
-            case BASIC -> activeMatches.isEmpty() ? List.of() : List.of(activeMatches.get(0));
-        };
+        // 3) Převedení na DTO
+        return activeOnly.stream()
+                .map(matchMapper::toDTO)
+                .toList();
     }
 
     private PlayerEntity findPlayerOrThrow(Long playerId) {

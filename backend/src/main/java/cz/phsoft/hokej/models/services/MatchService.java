@@ -16,6 +16,6 @@ public interface MatchService {
     MatchDTO updateMatch(Long id, MatchDTO dto);
     void deleteMatch(Long id);
     MatchDetailDTO getMatchDetail(Long id);
-    List<MatchEntity> getAvailableMatchesForPlayer(Long playerId);
-    List<MatchEntity> getUpcomingMatchesForPlayer(Long playerId);
+    List<MatchDTO> getAvailableMatchesForPlayer(Long playerId);
+    List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId);
 }
