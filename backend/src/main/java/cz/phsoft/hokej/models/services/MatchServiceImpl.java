@@ -8,10 +8,7 @@ import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.MatchNotFoundException;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.models.dto.MatchDTO;
-import cz.phsoft.hokej.models.dto.MatchDetailDTO;
-import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.*;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import org.springframework.security.core.Authentication;
@@ -108,8 +105,17 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public void deleteMatch(Long id) {
-        matchRepository.deleteById(id);
+    public SuccessResponseDTO deleteMatch(Long id) {
+        MatchEntity match = findMatchOrThrow(id);
+
+        // 2) Pokud existuje, smažeme ho
+        matchRepository.delete(match);
+
+        return new SuccessResponseDTO(
+                "Zápas " + match.getId() + match.getDateTime() + " byl úspěšně smazán",
+                id,
+                LocalDateTime.now().toString()
+        );
     }
 
     @Override

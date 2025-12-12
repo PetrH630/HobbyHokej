@@ -1,9 +1,8 @@
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 
 import java.util.List;
@@ -14,7 +13,7 @@ public interface MatchRegistrationService {
     MatchRegistrationDTO upsertRegistration(
             Long matchId,
             Long playerId,
-            JerseyColor jerseyColor,
+            Team jerseyColor,
             String adminNote,
             ExcuseReason excuseReason,
             String excuseNote,

@@ -2,8 +2,10 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.MatchDetailDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.services.MatchService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -88,8 +90,9 @@ public class MatchController {
     // Smazání zápasu
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteMatch(@PathVariable Long id) {
-        matchService.deleteMatch(id);
+    public ResponseEntity<SuccessResponseDTO> deleteMatch(@PathVariable Long id) {
+        SuccessResponseDTO response = matchService.deleteMatch(id);
+        return ResponseEntity.ok(response);
     }
 
     // Dostupné zápasy pro hráče

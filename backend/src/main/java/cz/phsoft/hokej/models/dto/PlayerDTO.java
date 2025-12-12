@@ -1,6 +1,6 @@
 package cz.phsoft.hokej.models.dto;
 
-import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -17,24 +17,25 @@ public class PlayerDTO {
     @NotBlank(message = "Příjmení je povinné.")
     @Size(min = 2, max = 50)
     private String surname; // not null
-
+    private String nickName;
     private String fullName; // derived
     private String phoneNumber;
     private PlayerType type; // not null, default BASIC
-    private JerseyColor jerseyColor;
+    private Team team;
 
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
    }
 
-    public PlayerDTO(Long id, String name, String surname, PlayerType type, JerseyColor jerseyColor) {
+    public PlayerDTO(Long id, String name, String surname, String nickName, PlayerType type, Team team) {
         this.id = id;
         this.name = name;
         this.surname = surname;
+        this.nickName = nickName;
         this.type = type != null ? type : PlayerType.BASIC;
         this.updateFullName();
-        this.jerseyColor = jerseyColor;
+        this.team = team;
     }
 
     // --- Gettery a Settery ---
@@ -48,6 +49,10 @@ public class PlayerDTO {
     public String getSurname() { return surname; }
     public void setSurname(String surname) { this.surname = surname; updateFullName(); }
 
+    public String getNickName() { return nickName; }
+
+    public void setNickName(String nickName) { this.nickName = nickName; }
+
     public String getFullName() { return fullName; }
 
     public PlayerType getType() { return type; }
@@ -55,8 +60,8 @@ public class PlayerDTO {
 
     private void updateFullName() { this.fullName = name + " " + surname; }
 
-    public JerseyColor getJerseyColor() { return jerseyColor; }
-    public void setJerseyColor(JerseyColor jerseyColor) { this.jerseyColor = jerseyColor; }
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }

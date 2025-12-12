@@ -2,7 +2,7 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.Team;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -41,7 +41,7 @@ public class MatchRegistrationHistoryEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "jersey_color")
-    private JerseyColor jerseyColor;
+    private Team jerseyColor;
 
     // původní timestamp
     @Column(name = "original_timestamp", nullable = false)
@@ -126,11 +126,11 @@ public class MatchRegistrationHistoryEntity {
         this.adminNote = adminNote;
     }
 
-    public JerseyColor getJerseyColor() {
+    public Team getJerseyColor() {
         return jerseyColor;
     }
 
-    public void setJerseyColor(JerseyColor jerseyColor) {
+    public void setJerseyColor(Team jerseyColor) {
         this.jerseyColor = jerseyColor;
     }
 

@@ -11,13 +11,17 @@ public class ApiError {
     private String error;
     private String message;
     private String path;
+    private String clientIp; // ← nově
+    private String errorCode;
 
-    public ApiError(int status, String error, String message, String path) {
+    public ApiError(int status, String error, String message, String path, String clientIp) {
         this.timestamp = LocalDateTime.now();
         this.status = status;
         this.error = error;
         this.message = message;
         this.path = path;
+        this.clientIp = clientIp;
+
     }
 
     public LocalDateTime getTimestamp() { return timestamp; }
@@ -25,4 +29,6 @@ public class ApiError {
     public String getError() { return error; }
     public String getMessage() { return message; }
     public String getPath() { return path; }
+    public String getClientIp() { return clientIp; }
+    public String getErrorCode() { return errorCode; }
 }

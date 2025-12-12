@@ -2,7 +2,7 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.Team;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -40,7 +40,7 @@ public class MatchRegistrationEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "jersey_color")
-    private JerseyColor jerseyColor;
+    private Team jerseyColor;
 
     // datčas vytvoření registrace - musí se měnit aby nebyl hráč i po zrušení registrace
     // v pořadí před hráči kteří se registrovali po zrušení registrace
@@ -113,11 +113,11 @@ public class MatchRegistrationEntity {
         this.adminNote = adminNote;
     }
 
-    public JerseyColor getJerseyColor() {
+    public Team getJerseyColor() {
         return jerseyColor;
     }
 
-    public void setJerseyColor(JerseyColor jerseyColor) {
+    public void setJerseyColor(Team jerseyColor) {
         this.jerseyColor = jerseyColor;
     }
 

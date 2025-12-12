@@ -3,13 +3,15 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -60,7 +62,7 @@ public class PlayerServiceImpl implements PlayerService {
         existing.setName(dto.getName());
         existing.setSurname(dto.getSurname());
         existing.setType(dto.getType());
-        existing.setJerseyColor(dto.getJerseyColor());
+        existing.setTeam(dto.getTeam());
 
         PlayerEntity saved = playerRepository.save(existing);
         return playerMapper.toDTO(saved);
@@ -68,8 +70,16 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     @Transactional
-    public void deletePlayer(Long id) {
-        playerRepository.deleteById(id);
+    public SuccessResponseDTO deletePlayer(Long id) {
+        PlayerEntity player = findPlayerOrThrow(id);
+        playerRepository.delete(player);
+
+        return new SuccessResponseDTO(
+                "Hráč " + player.getFullName() + " byl úspěšně smazán",
+                id,
+                LocalDateTime.now().toString()
+        );
+
     }
 
     // --- privátní metoda pro kontrolu duplicity jména a příjmení ---

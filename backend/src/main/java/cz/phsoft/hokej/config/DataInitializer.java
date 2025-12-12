@@ -4,7 +4,7 @@ import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.enums.Role;
@@ -15,6 +15,8 @@ import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,15 +29,18 @@ public class DataInitializer {
     private final MatchRepository matchRepository;
     private final MatchRegistrationRepository matchRegistrationRepository;
     private final AppUserRepository appUserRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     public DataInitializer(PlayerRepository playerRepository,
                            MatchRepository matchRepository,
                            MatchRegistrationRepository matchRegistrationRepository,
-                           AppUserRepository appUserRepository) {
+                           AppUserRepository appUserRepository,
+                           JdbcTemplate jdbcTemplate) {
         this.playerRepository = playerRepository;
         this.matchRepository = matchRepository;
         this.matchRegistrationRepository = matchRegistrationRepository;
         this.appUserRepository = appUserRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @PostConstruct
@@ -49,16 +54,16 @@ public class DataInitializer {
 
         // --- Seznam hráčů ---
         List<PlayerEntity> players = new ArrayList<>(List.of(
-                new PlayerEntity("Petr", "Hlista", PlayerType.VIP, "+420776609956", JerseyColor.DARK),
-                new PlayerEntity("Laďa", "Bražina", PlayerType.VIP, "+420776609956", JerseyColor.LIGHT),
-                new PlayerEntity("David", "Podsedník", PlayerType.VIP, "+420776609956", JerseyColor.LIGHT),
-                new PlayerEntity("Vlastík", "Pstruží", PlayerType.VIP, "+420776609956", JerseyColor.LIGHT),
-                new PlayerEntity("Otakar", "Záškodný", PlayerType.VIP, "+420776609956", JerseyColor.LIGHT),
-                new PlayerEntity("Jarda", "Menšík", PlayerType.STANDARD, "+420776609956", JerseyColor.DARK),
-                new PlayerEntity("Luboš", "Novák", PlayerType.STANDARD, "+420776609956", JerseyColor.LIGHT),
-                new PlayerEntity("Lukáš", "Novák", PlayerType.STANDARD, "+420776609956", JerseyColor.DARK),
-                new PlayerEntity("Martin", "Čermák", PlayerType.STANDARD, "+420776609956", JerseyColor.DARK),
-                new PlayerEntity("Pavel", "Eliáš", PlayerType.STANDARD, "+420776609956", JerseyColor.DARK)
+                new PlayerEntity("Hráč_1", "Jedna", "", PlayerType.VIP, "+420776609956", Team.DARK),
+                new PlayerEntity("Hráč_2", "Dva", "", PlayerType.VIP, "+420776609956", Team.LIGHT),
+                new PlayerEntity("Hráč_3", "Tři", "", PlayerType.VIP, "+420776609956", Team.LIGHT),
+                new PlayerEntity("Hráč_4", "Čtyři", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT),
+                new PlayerEntity("Hráč_5", "Pět", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT),
+                new PlayerEntity("Hráč_6", "Šest", "", PlayerType.STANDARD, "+420776609956", Team.DARK),
+                new PlayerEntity("Hráč_7", "Sedm", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT),
+                new PlayerEntity("Hráč_8", "Osum", "", PlayerType.BASIC, "+420776609956", Team.DARK),
+                new PlayerEntity("Hráč_9", "Devět", "", PlayerType.BASIC, "+420776609956", Team.DARK),
+                new PlayerEntity("Hráč_10", "Deset", "", PlayerType.BASIC, "+420776609956", Team.DARK)
                 // ... případně další hráči
         ));
 
@@ -145,7 +150,73 @@ public class DataInitializer {
             System.out.println("Admin user already exists – skipping.");
         }
 
+        // --- vytvoření triggeru ---
+        try {
+            jdbcTemplate.execute("""
+                           CREATE TRIGGER trg_match_reg_insert
+                           AFTER INSERT ON match_registrations
+                           FOR EACH ROW
+                           BEGIN
+                               INSERT INTO match_registration_history
+                               (match_registration_id, match_id, player_id, status, excuse_reason,
+                                excuse_note, admin_note, jersey_color, original_timestamp, created_by,
+                                action, changed_at)
+                               VALUES
+                               (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
+                                NEW.excuse_note, NEW.admin_note, NEW.jersey_color, NEW.timestamp, NEW.created_by,
+                                'INSERT', NOW());
+                           END
+                    """);
+            System.out.println("Trigger created successfully.");
+        } catch (Exception e) {
+            System.out.println("Trigger already exists or error: " + e.getMessage());
+        }
+
+        try {
+            jdbcTemplate.execute("""
+                    CREATE TRIGGER trg_match_reg_update
+                    AFTER UPDATE ON match_registrations
+                    FOR EACH ROW
+                    BEGIN
+                        INSERT INTO match_registration_history
+                        (match_registration_id, match_id, player_id, status, excuse_reason,
+                         excuse_note, admin_note, jersey_color, original_timestamp, created_by,
+                         action, changed_at)
+                        VALUES
+                        (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
+                         NEW.excuse_note, NEW.admin_note, NEW.jersey_color, NEW.timestamp, NEW.created_by,
+                         'UPDATE', NOW());
+                    END
+                    """);
+            System.out.println("Trigger created successfully.");
+        } catch (Exception e) {
+            System.out.println("Trigger already exists or error: " + e.getMessage());
+        }
+
+        try {
+            jdbcTemplate.execute("""
+        CREATE TRIGGER trg_match_reg_delete
+        AFTER DELETE ON match_registrations
+        FOR EACH ROW
+                BEGIN
+        INSERT INTO match_registration_history
+                (match_registration_id, match_id, player_id, status, excuse_reason,
+                        excuse_note, admin_note, jersey_color, original_timestamp, created_by,
+                        action, changed_at)
+        VALUES
+                (OLD.id, OLD.match_id, OLD.player_id, OLD.status, OLD.excuse_reason,
+                        OLD.excuse_note, OLD.admin_note, OLD.jersey_color, OLD.timestamp, OLD.created_by,
+                        'DELETE', NOW());
+        END
+        """);
+            System.out.println("Trigger created successfully.");
+                } catch (Exception e) {
+                    System.out.println("Trigger already exists or error: " + e.getMessage());
+                }
+        
         System.out.println("Data initialization completed.");
+    
+
     }
 }
 

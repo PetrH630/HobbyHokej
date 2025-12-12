@@ -1,8 +1,10 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.services.PlayerService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +31,7 @@ public class PlayerController {
     // hráč dle id
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(principal, #id)")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #id)")
     public PlayerDTO getPlayerById(@PathVariable Long id) {
         return playerService.getPlayerById(id);
     }
@@ -52,8 +54,9 @@ public class PlayerController {
     // odstraní hráče
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public void deletePlayer(@PathVariable Long id) {
-        playerService.deletePlayer(id);
+    public ResponseEntity<SuccessResponseDTO> deletePlayer(@PathVariable Long id) {
+        SuccessResponseDTO response = playerService.deletePlayer(id);
+        return ResponseEntity.ok(response);
     }
 
 

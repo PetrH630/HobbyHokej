@@ -1,6 +1,6 @@
 package cz.phsoft.hokej.data.entities;
 
-import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.persistence.*;
 
@@ -18,6 +18,8 @@ public class PlayerEntity {
     @Column(nullable = false)
     private String surname;
 
+    private String nickName;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerType type; // VIP, STANDARD, BASIC
@@ -26,7 +28,7 @@ public class PlayerEntity {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    private JerseyColor jerseyColor;
+    private Team team;
 
     // Many-to-One: každý hráč patří jednomu uživateli
     @ManyToOne
@@ -38,13 +40,14 @@ public class PlayerEntity {
         this.type = PlayerType.BASIC;
     }
 
-    public PlayerEntity(String name, String surname, PlayerType type, String phoneNumber, JerseyColor jerseyColor) {
+    public PlayerEntity(String name, String surname, String nickName, PlayerType type, String phoneNumber, Team team) {
         this.name = name;
         this.surname = surname;
+        this.nickName = nickName;
         this.type = type;
         this.fullName = name + " " + surname;
         this.phoneNumber = phoneNumber;
-        this.jerseyColor = jerseyColor;
+        this.team = team;
     }
 
     // ----------------- Gettery a Settery -----------------
@@ -74,6 +77,9 @@ public class PlayerEntity {
         updateFullName();
     }
 
+    public String getNickname() { return nickName;}
+    public void setNickname(String nickName) { this.nickName = nickName; }
+
     public String getFullName() {
         return fullName;
     }
@@ -81,7 +87,6 @@ public class PlayerEntity {
     public PlayerType getType() {
         return type;
     }
-
     public void setType(PlayerType type) {
         this.type = type;
     }
@@ -93,23 +98,20 @@ public class PlayerEntity {
     public String getPhoneNumber() {
         return phoneNumber;
     }
-
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
-    public JerseyColor getJerseyColor() {
-        return jerseyColor;
+    public Team getTeam() {
+        return team;
     }
-
-    public void setJerseyColor(JerseyColor jerseyColor) {
-        this.jerseyColor = jerseyColor;
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
     public AppUserEntity getUser() {
         return user;
     }
-
     public void setUser(AppUserEntity user) {
         this.user = user;
     }

@@ -4,7 +4,7 @@ import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
@@ -99,7 +99,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     public MatchRegistrationDTO upsertRegistration(
             Long matchId,
             Long playerId,
-            JerseyColor jerseyColor,
+            Team jerseyColor,
             String adminNote,
             ExcuseReason excuseReason,
             String excuseNote,
@@ -117,26 +117,45 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         PlayerMatchStatus newStatus;
 
+        // UNREGISTER: lze pouze když hráč má aktuálně REGISTERED
         if (unregister) {
-            if (registration == null) throw new RegistrationNotFoundException(matchId, playerId);
+            if (registration == null || registration.getStatus() != PlayerMatchStatus.REGISTERED) {
+                throw new RegistrationNotFoundException(matchId, playerId);
+            }
             registration.setExcuseReason(null);
             newStatus = PlayerMatchStatus.UNREGISTERED;
-        } else if (excuseReason != null) {
-            if (registration != null && registration.getStatus() != PlayerMatchStatus.UNREGISTERED) {
-                throw new DuplicateRegistrationException(matchId, playerId);
 
+            // EXCUSE: lze vytvořit pouze pokud hráč NEMÁ status REGISTERED
+        } else if (excuseReason != null) {
+            if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
+                throw new DuplicateRegistrationException(matchId, playerId);
+            }
+            // pokud neexistuje, vytvoříme pozici; pokud existuje a není REGISTERED, povolíme EXCUSED
+            if (registration == null) {
+                registration = new MatchRegistrationEntity();
+                registration.setMatch(match);
+                registration.setPlayer(player);
             }
             registration.setExcuseReason(excuseReason);
             newStatus = PlayerMatchStatus.EXCUSED;
-        } else {
-            newStatus = isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
-            if (registration != null) registration.setExcuseReason(null);
-        }
 
-        if (registration == null) {
-            registration = new MatchRegistrationEntity();
-            registration.setMatch(match);
-            registration.setPlayer(player);
+            // REGISTER / RESERVE: lze vytvořit pokud hráč NEMÁ status REGISTERED (tedy i když má EXCUSED)
+        } else {
+            // pokud už je registrován, nepovolíme duplicitu
+            if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
+                throw new DuplicateRegistrationException(matchId, playerId);
+            }
+
+            newStatus = isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+
+            if (registration == null) {
+                registration = new MatchRegistrationEntity();
+                registration.setMatch(match);
+                registration.setPlayer(player);
+            } else {
+                // při přechodu na register/reserve zrušíme případnou výmluvu
+                registration.setExcuseReason(null);
+            }
         }
 
         registration.setStatus(newStatus);
@@ -145,6 +164,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         if (jerseyColor != null) registration.setJerseyColor(jerseyColor);
         if (adminNote != null) registration.setAdminNote(adminNote);
+        // excuseReason už jsme nastavili výše (pokud to byl EXCUSED případ)
         if (excuseReason != null) registration.setExcuseReason(excuseReason);
 
         registration = registrationRepository.save(registration);
@@ -153,10 +173,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         sendSms(registration, smsMessageBuilder.buildMessageRegistration(registration));
 
-
-
         return matchRegistrationMapper.toDTO(registration);
     }
+
 
     // -------------------- FETCH --------------------
     @Override

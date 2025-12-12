@@ -4,7 +4,7 @@ import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.data.enums.JerseyColor;
+import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import org.mapstruct.Mapper;
@@ -31,7 +31,7 @@ public interface MatchRegistrationMapper {
             PlayerMatchStatus status,
             ExcuseReason excuseReason,
             String note,
-            JerseyColor jerseyColor,
+            Team jerseyColor,
             String adminNote,
             String createdBy
     );

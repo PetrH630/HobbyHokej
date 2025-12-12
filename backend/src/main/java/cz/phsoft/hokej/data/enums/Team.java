@@ -1,6 +1,6 @@
 package cz.phsoft.hokej.data.enums;
 
-public enum JerseyColor {
+public enum Team {
     DARK,
     LIGHT
 
