@@ -56,22 +56,18 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         this.smsService = smsService;
         this.smsMessageBuilder = smsMessageBuilder;
     }
-
     private MatchEntity getMatchOrThrow(Long matchId) {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
     }
-
     private PlayerEntity getPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
     }
-
     private boolean isSlotAvailable(MatchEntity match) {
         long registeredCount = registrationRepository.countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
         return registeredCount < match.getMaxPlayers();
     }
-
     private void sendSms(MatchRegistrationEntity registration, String message) {
         if (registration == null || registration.getPlayer() == null) return;
         try {
@@ -80,7 +76,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             System.err.println("Chyba SMS: " + e.getMessage());
         }
     }
-
     private MatchRegistrationEntity updateRegistrationStatus(
             MatchRegistrationEntity registration, PlayerMatchStatus status, String updatedBy, boolean updateTimestamp) {
 
@@ -91,9 +86,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         }
         return registrationRepository.saveAndFlush(registration);
     }
-
     // -------------------- REGISTRATION --------------------
-
     @Transactional
     @Override
     public MatchRegistrationDTO upsertRegistration(
@@ -175,8 +168,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         return matchRegistrationMapper.toDTO(registration);
     }
-
-
     // -------------------- FETCH --------------------
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
@@ -207,9 +198,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 .map(playerMapper::toDTO)
                 .toList();
     }
-
-
-
     // -------------------- RECALC --------------------
     @Override
     @Transactional
@@ -253,5 +241,4 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             }
         });
     }
-
 }

@@ -1,10 +1,13 @@
 package cz.phsoft.hokej.models.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class MatchDetailDTO {
     private Long id;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;
     private int maxPlayers;
     private int inGamePlayers;
@@ -22,14 +25,10 @@ public class MatchDetailDTO {
 
     // Gettery a settery
 
-    public Long getId() {
-        return id;
-    }
-
+    public Long getId() {       return id;    }
     public void setId(Long id) {
         this.id = id;
     }
-
     public LocalDateTime getDateTime() {
         return dateTime;
     }
@@ -105,7 +104,6 @@ public class MatchDetailDTO {
     public void setUnregisteredPlayers(List<PlayerDTO> unregisteredPlayers) {
         this.unregisteredPlayers = unregisteredPlayers;
     }
-
     public List<PlayerDTO> getExcusedPlayers() {
         return excusedPlayers;
     }

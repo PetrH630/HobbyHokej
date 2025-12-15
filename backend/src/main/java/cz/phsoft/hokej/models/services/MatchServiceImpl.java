@@ -228,6 +228,10 @@ public class MatchServiceImpl implements MatchService {
     }
 
 
+
+
+
+
     @Override
     public List<MatchDTO> getAvailableMatchesForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
@@ -236,6 +240,34 @@ public class MatchServiceImpl implements MatchService {
         return matchRepository.findAll().stream()
                 .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
                 .map(matchMapper::toDTO)
+                .toList();
+    }
+
+    public Long getPlayerIdByEmail(String email) {
+        return playerRepository.findByUserEmail(email)
+                .map(PlayerEntity::getId)
+                .orElseThrow(() -> new RuntimeException("Hráč s emailem " + email + " nenalezen"));
+    }
+
+    @Override
+    public List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId) {
+        PlayerEntity player = findPlayerOrThrow(playerId);
+        PlayerType type = player.getType();
+
+        // 1) Nejbližší nadcházející zápasy podle data
+        List<MatchEntity> upcomingAll = matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
+
+        // 2) Omezení podle typu hráče
+        List<MatchEntity> limited = switch (type) {
+            case VIP -> upcomingAll;
+            case STANDARD -> upcomingAll.stream().limit(2).toList();
+            case BASIC -> upcomingAll.isEmpty() ? List.of() : List.of(upcomingAll.get(0));
+        };
+
+        // 3) Filtrování podle aktivity hráče a mapování na MatchOverviewDTO
+        return limited.stream()
+                .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
+                .map(this::toOverviewDTO)   // mapujeme přímo ve službě
                 .toList();
     }
 
@@ -269,4 +301,31 @@ public class MatchServiceImpl implements MatchService {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
     }
+
+    private MatchOverviewDTO toOverviewDTO(MatchEntity match) {
+        MatchOverviewDTO dto = new MatchOverviewDTO();
+        dto.setId(match.getId());
+        dto.setDateTime(match.getDateTime());
+        dto.setLocation(match.getLocation());
+        dto.setDescription(match.getDescription());
+        dto.setPrice(match.getPrice());
+        dto.setMaxPlayers(match.getMaxPlayers());
+
+        // počet registrovaných hráčů
+        int inGamePlayers = registrationService.getRegistrationsForMatch(match.getId()).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                .mapToInt(r -> 1)
+                .sum();
+        dto.setInGamePlayers(inGamePlayers);
+
+        // cena na registrovaného hráče
+        double pricePerPlayer = inGamePlayers > 0 && match.getPrice() != null
+                ? match.getPrice() / (double) inGamePlayers
+                : 0;
+        dto.setPricePerRegisteredPlayer(pricePerPlayer);
+
+        return dto;
+    }
+
+
 }

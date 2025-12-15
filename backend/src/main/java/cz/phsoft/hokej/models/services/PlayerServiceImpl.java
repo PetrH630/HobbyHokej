@@ -79,7 +79,6 @@ public class PlayerServiceImpl implements PlayerService {
                 id,
                 LocalDateTime.now().toString()
         );
-
     }
 
     // --- privátní metoda pro kontrolu duplicity jména a příjmení ---
@@ -91,8 +90,7 @@ public class PlayerServiceImpl implements PlayerService {
                 throw new RuntimeException("Hráč se jménem " + name + " " + surname + " již existuje.");
             }
         }
-        }
-
+    }
 
     private PlayerEntity findPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)

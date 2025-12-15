@@ -12,7 +12,6 @@ public class ApiError {
     private String message;
     private String path;
     private String clientIp; // ← nově
-    private String errorCode;
 
     public ApiError(int status, String error, String message, String path, String clientIp) {
         this.timestamp = LocalDateTime.now();
@@ -21,7 +20,6 @@ public class ApiError {
         this.message = message;
         this.path = path;
         this.clientIp = clientIp;
-
     }
 
     public LocalDateTime getTimestamp() { return timestamp; }
@@ -30,5 +28,4 @@ public class ApiError {
     public String getMessage() { return message; }
     public String getPath() { return path; }
     public String getClientIp() { return clientIp; }
-    public String getErrorCode() { return errorCode; }
 }

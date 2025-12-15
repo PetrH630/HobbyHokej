@@ -6,11 +6,7 @@ import cz.phsoft.hokej.data.repositories.PlayerInactivityPeriodRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.models.dto.mappers.PlayerInactivityPeriodMapper;
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
-import cz.phsoft.hokej.models.services.PlayerInactivityPeriodService;
-
 import java.util.List;
-import java.util.stream.Collectors;
-
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

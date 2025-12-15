@@ -2,15 +2,28 @@ package cz.phsoft.hokej.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+
+
+import java.util.List;
 
 @Configuration
-@EnableMethodSecurity // aktivuje @PreAuthorize
+@EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
@@ -20,14 +33,15 @@ public class SecurityConfig {
 
     public SecurityConfig(CustomUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
-
     }
 
+    // Password encoder
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // Authentication provider
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -36,50 +50,75 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    // AuthenticationManager
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    // Security filter chain
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
+
+        http.csrf(csrf -> csrf.disable())
+                .cors(cors -> {});
 
         if (isTestMode) {
-            // --- Testovací režim: všechno volně pro Postman ---
-            http
-                    .csrf(csrf -> csrf.disable())
-                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            // 🔹 Test mode - všechno povoleno a HTTP Basic pro Postman
+            http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                    .httpBasic();
         } else {
-            // --- Produkční režim: autentizace + role + Basic Auth + FormLogin ---
-            http
-                    .csrf(csrf -> csrf.disable())
-                    .authorizeHttpRequests(auth -> auth
-                            // MATCH
+            // 🔹 Produkce - REST login přes CustomJsonLoginFilter
+            http.authorizeHttpRequests(auth -> auth
                             .requestMatchers("/api/matches").hasAnyRole("ADMIN","MANAGER")
                             .requestMatchers("/api/matches/upcoming", "/api/matches/past").hasAnyRole("ADMIN","MANAGER")
                             .requestMatchers("/api/matches/**").authenticated()
-
-                            // PLAYER
                             .requestMatchers("/api/players").hasAnyRole("ADMIN","MANAGER")
                             .requestMatchers("/api/players/**").authenticated()
-
-                            // REGISTRATIONS
                             .requestMatchers("/api/registrations/all",
                                     "/api/registrations/for-match/**",
-                                    "/api/registrations/no-response/**")
-                            .hasAnyRole("ADMIN","MANAGER")
+                                    "/api/registrations/no-response/**").hasAnyRole("ADMIN","MANAGER")
                             .requestMatchers("/api/registrations/**").authenticated()
-
-                            // INACTIVITY
                             .requestMatchers("/api/inactivity/All",
-                                    "/api/inactivity/**")
-                            .hasAnyRole("ADMIN","MANAGER")
+                                    "/api/inactivity/**").hasAnyRole("ADMIN","MANAGER")
                             .requestMatchers("/api/inactivity/player/**").authenticated()
-
                             .anyRequest().authenticated()
                     )
-                    .formLogin(form -> form
-                            .loginPage("/login")
-                            .permitAll()
+                    // 🔴 TADY PŘESNĚ
+                    .sessionManagement(sm ->
+                            sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     )
-                    .httpBasic(httpBasic -> {}); // 🔥 JSON 403
+                    // 🔴 a TEPRVE PAK login filter
+                    .addFilterAt(
+                            new CustomJsonLoginFilter("/api/login", authManager),
+                            UsernamePasswordAuthenticationFilter.class
+                    )
+                    .logout(logout -> logout
+                            .logoutUrl("/logout")
+                            .deleteCookies("JSESSIONID")
+                            .logoutSuccessHandler((request, response, auth) -> {
+                                response.setContentType("application/json");
+                                response.setCharacterEncoding("UTF-8");
+                                response.getWriter().write("{\"status\":\"ok\",\"message\":\"Odhlášeno\"}");
+                            })
+                    );
         }
 
         return http.build();
+    }
+
+
+    // CORS pro React dev server a cookies
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

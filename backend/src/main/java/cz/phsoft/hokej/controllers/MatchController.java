@@ -2,11 +2,13 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.MatchDetailDTO;
+import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.services.MatchService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,6 +53,27 @@ public class MatchController {
     public List<MatchDTO> getUpcomingMatches() {
         return matchService.getUpcomingMatches();
     }
+
+    // Nadcházející zápasy pro přihlášeného hráče
+    @GetMapping("/me/upcoming")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchDTO> getUpcomingMatchesForMe(Authentication authentication) {
+        // z UserDetails získáme username
+        String email = authentication.getName();
+        // najdeme hráče podle emailu
+        Long playerId = matchService.getPlayerIdByEmail(email); // metoda si vytvoříme ve službě
+        return matchService.getUpcomingMatchesForPlayer(playerId);
+    }
+
+    @GetMapping("/me/upcoming-overview")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchOverviewDTO> getUpcomingMatchesOverviewForMe(Authentication authentication) {
+        String email = authentication.getName();
+        Long playerId = matchService.getPlayerIdByEmail(email);
+        return matchService.getUpcomingMatchesOverviewForPlayer(playerId);
+    }
+
+
 
     // Nadcházející zápasy pro konkrétního hráče
     @GetMapping("/player/{playerId}/upcoming")
