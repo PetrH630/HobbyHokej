@@ -12,7 +12,7 @@ public class MatchDTO {
 
     private Long id;
     @NotNull(message = "Datum a čas zápasu je povinné.")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;
 
     @NotBlank(message = "Místo zápasu je povinné.")

@@ -45,14 +45,14 @@ public class MatchServiceImpl implements MatchService {
         this.playerInactivityPeriodService = playerInactivityPeriodService;
         this.playerMapper = playerMapper;
     }
-
+    // metoda pro získání všech zápasů
     @Override
     public List<MatchDTO> getAllMatches() {
         return matchRepository.findAll().stream()
                 .map(matchMapper::toDTO)
                 .toList();
     }
-
+    // metoda pro získání všech nadcházejících zápasů
     @Override
     public List<MatchDTO> getUpcomingMatches() {
         return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
@@ -60,14 +60,14 @@ public class MatchServiceImpl implements MatchService {
                 .map(matchMapper::toDTO)
                 .toList();
     }
-
+    // metoda pro získání uplynulých zápasů
     public List<MatchDTO> getPastMatches() {
         return matchRepository.findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime.now())
                 .stream()
                 .map(matchMapper::toDTO)
                 .toList();
     }
-
+    // metoda pro získání prvního nadcházejícího zápasu
     @Override
     public MatchDTO getNextMatch() {
         return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
@@ -76,18 +76,20 @@ public class MatchServiceImpl implements MatchService {
                 .map(matchMapper::toDTO)
                 .orElse(null);
     }
-
+    // metoda pro zápas dle ID
     @Override
     public MatchDTO getMatchById(Long id) {
         return matchMapper.toDTO(findMatchOrThrow(id));
     }
 
+    // metoda pro vytvoření zápasu
     @Override
     public MatchDTO createMatch(MatchDTO dto) {
         MatchEntity entity = matchMapper.toEntity(dto);
         return matchMapper.toDTO(matchRepository.save(entity));
     }
 
+    // metoda pro úpravu zápasu
     @Override
     public MatchDTO updateMatch(Long id, MatchDTO dto) {
         MatchEntity match = findMatchOrThrow(id);
@@ -104,6 +106,7 @@ public class MatchServiceImpl implements MatchService {
         return matchMapper.toDTO(saved);
     }
 
+    // metoda pro odstranění zápasu
     @Override
     public SuccessResponseDTO deleteMatch(Long id) {
         MatchEntity match = findMatchOrThrow(id);
@@ -118,6 +121,7 @@ public class MatchServiceImpl implements MatchService {
         );
     }
 
+    // metoda pro detail zápasu - omezen výpis pro ADMIN, MANAGER, PLAYER
     @Override
     public MatchDetailDTO getMatchDetail(Long id) {
         MatchEntity match = findMatchOrThrow(id);
@@ -126,14 +130,14 @@ public class MatchServiceImpl implements MatchService {
         boolean isAdminOrManager = auth != null && auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals(ROLE_ADMIN) || a.getAuthority().equals(ROLE_MANAGER));
 
-        // --- oddělena logika přístupu hráče do privátní metody ---
+        // oddělena logika přístupu hráče do privátní metody
         checkAccessForPlayer(match, auth);
 
-        // --- sběr statistik hráčů přes privátní metodu ---
+        // sběr statistik hráčů přes privátní metodu
         return collectPlayerStatus(match, isAdminOrManager);
     }
 
-    // --- privátní metoda pro kontrolu přístupu hráče ---
+    // privátní metoda pro kontrolu přístupu hráče - jen pokud byl registrován na zápas
     private void checkAccessForPlayer(MatchEntity match, Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) return;
 
@@ -168,7 +172,7 @@ public class MatchServiceImpl implements MatchService {
         }
     }
 
-    // --- privátní metoda pro sběr statistik hráčů ---
+    // privátní metoda pro sběr statistik hráčů
     private MatchDetailDTO collectPlayerStatus(MatchEntity match, boolean isAdminOrManager) {
         List<MatchRegistrationDTO> registrations = registrationService.getRegistrationsForMatch(match.getId());
 
@@ -228,10 +232,7 @@ public class MatchServiceImpl implements MatchService {
     }
 
 
-
-
-
-
+    // dostupné zápasy pro hráče - byl nebo je aktivní
     @Override
     public List<MatchDTO> getAvailableMatchesForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
@@ -243,12 +244,14 @@ public class MatchServiceImpl implements MatchService {
                 .toList();
     }
 
+    // získání hráče dle emailu
     public Long getPlayerIdByEmail(String email) {
         return playerRepository.findByUserEmail(email)
                 .map(PlayerEntity::getId)
                 .orElseThrow(() -> new RuntimeException("Hráč s emailem " + email + " nenalezen"));
     }
 
+    // náhled nadcházejících zápasu pro hráče - dle PlayerType
     @Override
     public List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
@@ -270,7 +273,7 @@ public class MatchServiceImpl implements MatchService {
                 .map(this::toOverviewDTO)   // mapujeme přímo ve službě
                 .toList();
     }
-
+    // nadcházející zápasy pro hráče
     @Override
     public List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
@@ -320,8 +323,7 @@ public class MatchServiceImpl implements MatchService {
 
         // cena na registrovaného hráče
         double pricePerPlayer = inGamePlayers > 0 && match.getPrice() != null
-                ? match.getPrice() / (double) inGamePlayers
-                : 0;
+                ? match.getPrice() / (double) inGamePlayers : 0;
         dto.setPricePerRegisteredPlayer(pricePerPlayer);
 
         return dto;

@@ -24,7 +24,6 @@ public class MatchController {
 
     public MatchController(MatchService matchService) {
         this.matchService = matchService;
-
     }
 
     // Detail zápasu
@@ -61,7 +60,7 @@ public class MatchController {
         // z UserDetails získáme username
         String email = authentication.getName();
         // najdeme hráče podle emailu
-        Long playerId = matchService.getPlayerIdByEmail(email); // metoda si vytvoříme ve službě
+        Long playerId = matchService.getPlayerIdByEmail(email);
         return matchService.getUpcomingMatchesForPlayer(playerId);
     }
 
@@ -73,14 +72,11 @@ public class MatchController {
         return matchService.getUpcomingMatchesOverviewForPlayer(playerId);
     }
 
-
-
     // Nadcházející zápasy pro konkrétního hráče
     @GetMapping("/player/{playerId}/upcoming")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #playerId)")
     public List<MatchDTO> getUpcomingMatchesForPlayer(@PathVariable Long playerId) {
         return matchService.getUpcomingMatchesForPlayer(playerId);
-
     }
 
     // Už uskutečněné zápasy

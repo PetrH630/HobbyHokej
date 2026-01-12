@@ -84,11 +84,11 @@ public class SecurityConfig {
                             .requestMatchers("/api/inactivity/player/**").authenticated()
                             .anyRequest().authenticated()
                     )
-                    // 🔴 TADY PŘESNĚ
+                    //  TADY PŘESNĚ
                     .sessionManagement(sm ->
                             sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     )
-                    // 🔴 a TEPRVE PAK login filter
+                    //  a TEPRVE PAK login filter
                     .addFilterAt(
                             new CustomJsonLoginFilter("/api/login", authManager),
                             UsernamePasswordAuthenticationFilter.class
@@ -106,7 +106,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     // CORS pro React dev server a cookies
     @Bean
