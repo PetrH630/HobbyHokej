@@ -73,6 +73,7 @@ public class SecurityConfig {
             http
                     .authenticationProvider(authenticationProvider())
                     .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/api/auth/register").permitAll()
                             .requestMatchers("/api/login").permitAll()
                             .requestMatchers("/api/logout").permitAll()
                             .requestMatchers("/api/matches").hasAnyRole("ADMIN", "MANAGER")
