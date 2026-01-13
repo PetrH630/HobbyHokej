@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -35,7 +36,8 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
             String password = null;
 
 // Podporujeme x-www-form-urlencoded
-            if ("application/x-www-form-urlencoded".equals(request.getContentType())) {
+            if (request.getContentType() != null &&
+                    request.getContentType().contains("application/x-www-form-urlencoded")) {
                 email = request.getParameter("username");
                 password = request.getParameter("password");
             }
@@ -49,6 +51,9 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                 password = json.get("password");
             }
 
+            if (email == null || password == null || email.isBlank() || password.isBlank()) {
+                throw new BadCredentialsException("Chybí přihlašovací údaje");
+            }
 
             UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(email, password);
             setDetails(request, authRequest);

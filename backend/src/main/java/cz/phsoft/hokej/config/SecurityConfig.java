@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 
 import java.util.List;
@@ -61,26 +61,31 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
 
         http.csrf(csrf -> csrf.disable())
-                .cors(cors -> {});
+                .cors(cors -> {
+                });
 
         if (isTestMode) {
-            // 🔹 Test mode - všechno povoleno a HTTP Basic pro Postman
+            // Test mode - všechno povoleno a HTTP Basic pro Postman
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .httpBasic();
         } else {
-            // 🔹 Produkce - REST login přes CustomJsonLoginFilter
-            http.authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/matches").hasAnyRole("ADMIN","MANAGER")
-                            .requestMatchers("/api/matches/upcoming", "/api/matches/past").hasAnyRole("ADMIN","MANAGER")
+            // Produkce - REST login přes CustomJsonLoginFilter
+            http
+                    .authenticationProvider(authenticationProvider())
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/api/login").permitAll()
+                            .requestMatchers("/api/logout").permitAll()
+                            .requestMatchers("/api/matches").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/matches/upcoming", "/api/matches/past").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/matches/**").authenticated()
-                            .requestMatchers("/api/players").hasAnyRole("ADMIN","MANAGER")
+                            .requestMatchers("/api/players").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/players/**").authenticated()
                             .requestMatchers("/api/registrations/all",
                                     "/api/registrations/for-match/**",
-                                    "/api/registrations/no-response/**").hasAnyRole("ADMIN","MANAGER")
+                                    "/api/registrations/no-response/**").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/registrations/**").authenticated()
                             .requestMatchers("/api/inactivity/All",
-                                    "/api/inactivity/**").hasAnyRole("ADMIN","MANAGER")
+                                    "/api/inactivity/**").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/inactivity/player/**").authenticated()
                             .anyRequest().authenticated()
                     )
@@ -94,7 +99,7 @@ public class SecurityConfig {
                             UsernamePasswordAuthenticationFilter.class
                     )
                     .logout(logout -> logout
-                            .logoutUrl("/logout")
+                            .logoutUrl("/api/logout")
                             .deleteCookies("JSESSIONID")
                             .logoutSuccessHandler((request, response, auth) -> {
                                 response.setContentType("application/json");

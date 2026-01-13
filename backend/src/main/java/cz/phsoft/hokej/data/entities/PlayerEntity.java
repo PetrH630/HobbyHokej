@@ -31,7 +31,7 @@ public class PlayerEntity {
     private Team team;
 
     // Many-to-One: každý hráč patří jednomu uživateli
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private AppUserEntity user;
 

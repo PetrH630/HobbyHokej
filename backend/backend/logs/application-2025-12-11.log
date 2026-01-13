@@ -1,0 +1,128 @@
+2025-12-11 20:16:19 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-12-11 20:16:19 [main] INFO  c.p.h.c.MatchControllerTest - Starting MatchControllerTest using Java 19.0.2 with PID 9784 (started by petrh in C:\Projekty Práce\StaraGarda\backend)
+2025-12-11 20:16:19 [main] INFO  c.p.h.c.MatchControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-12-11 20:16:22 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-11 20:16:22 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 224 ms. Found 6 JPA repository interfaces.
+2025-12-11 20:16:26 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+2025-12-11 20:16:26 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-auto-1"]
+2025-12-11 20:16:26 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-12-11 20:16:26 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-12-11 20:16:26 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-12-11 20:16:26 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 7374 ms
+2025-12-11 20:16:27 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-11 20:16:28 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2025-12-11 20:16:28 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-12-11 20:16:28 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2025-12-11 20:16:29 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-11 20:16:29 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-12-11 20:16:29 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@76b642aa
+2025-12-11 20:16:29 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-12-11 20:16:33 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-11 20:16:33 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-11 20:16:36 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-11 20:16:38 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@299022a9, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7dfbdcfe, org.springframework.security.web.context.SecurityContextHolderFilter@50dfceff, org.springframework.security.web.header.HeaderWriterFilter@2d7fe300, org.springframework.web.filter.CorsFilter@3f6bfcbe, org.springframework.security.web.authentication.logout.LogoutFilter@1dade178, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@1ccf1819, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@3c739a9b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@4d4f6121, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2845fd12, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1f6c0e8a, org.springframework.security.web.access.ExceptionTranslationFilter@74a46f81, org.springframework.security.web.access.intercept.AuthorizationFilter@1bf8ea44]
+2025-12-11 20:16:40 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring TestDispatcherServlet ''
+2025-12-11 20:16:40 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2025-12-11 20:16:40 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2025-12-11 20:16:40 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-auto-1"]
+2025-12-11 20:16:41 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 62520 (http) with context path ''
+2025-12-11 20:16:41 [main] INFO  c.p.h.c.MatchControllerTest - Started MatchControllerTest in 23.123 seconds (process running for 26.298)
+2025-12-11 20:16:50 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-12-11 20:16:50 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-12-11 20:16:50 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-12-11 20:19:33 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-12-11 20:19:33 [main] INFO  c.p.h.c.MatchControllerTest - Starting MatchControllerTest using Java 19.0.2 with PID 2464 (started by petrh in C:\Projekty Práce\StaraGarda\backend)
+2025-12-11 20:19:33 [main] INFO  c.p.h.c.MatchControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-12-11 20:19:36 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-11 20:19:36 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 179 ms. Found 6 JPA repository interfaces.
+2025-12-11 20:19:39 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+2025-12-11 20:19:39 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-auto-1"]
+2025-12-11 20:19:39 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-12-11 20:19:39 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-12-11 20:19:39 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-12-11 20:19:39 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 6185 ms
+2025-12-11 20:19:40 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-11 20:19:40 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2025-12-11 20:19:41 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-12-11 20:19:41 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2025-12-11 20:19:42 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-11 20:19:42 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-12-11 20:19:42 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@3291d9c2
+2025-12-11 20:19:42 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-12-11 20:19:45 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-11 20:19:45 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-11 20:19:48 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-11 20:19:49 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7c75f3a8, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4d099a37, org.springframework.security.web.context.SecurityContextHolderFilter@2a90c15e, org.springframework.security.web.header.HeaderWriterFilter@26ab3c1b, org.springframework.web.filter.CorsFilter@398a27e, org.springframework.security.web.authentication.logout.LogoutFilter@139862ca, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@5679e464, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@3759ea4d, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@324c3ed5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@7f5ba1bf, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7beb2bc2, org.springframework.security.web.access.ExceptionTranslationFilter@5a429813, org.springframework.security.web.access.intercept.AuthorizationFilter@6c366d3]
+2025-12-11 20:19:51 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring TestDispatcherServlet ''
+2025-12-11 20:19:51 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2025-12-11 20:19:51 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2025-12-11 20:19:51 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-auto-1"]
+2025-12-11 20:19:51 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 62626 (http) with context path ''
+2025-12-11 20:19:51 [main] INFO  c.p.h.c.MatchControllerTest - Started MatchControllerTest in 19.202 seconds (process running for 23.628)
+2025-12-11 20:19:53 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-12-11 20:19:53 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-12-11 20:19:53 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-12-11 20:25:22 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-12-11 20:25:22 [main] INFO  c.p.h.c.MatchControllerTest - Starting MatchControllerTest using Java 19.0.2 with PID 14956 (started by petrh in C:\Projekty Práce\StaraGarda\backend)
+2025-12-11 20:25:22 [main] INFO  c.p.h.c.MatchControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-12-11 20:25:24 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-11 20:25:24 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 168 ms. Found 6 JPA repository interfaces.
+2025-12-11 20:25:28 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+2025-12-11 20:25:28 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-auto-1"]
+2025-12-11 20:25:28 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-12-11 20:25:28 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-12-11 20:25:28 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-12-11 20:25:28 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 6021 ms
+2025-12-11 20:25:29 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-11 20:25:29 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2025-12-11 20:25:29 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-12-11 20:25:29 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2025-12-11 20:25:30 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-11 20:25:30 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-12-11 20:25:30 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@76b642aa
+2025-12-11 20:25:30 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-12-11 20:25:34 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-11 20:25:34 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-11 20:25:37 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-11 20:25:38 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7dfbdcfe, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@3f6bfcbe, org.springframework.security.web.context.SecurityContextHolderFilter@26a5007, org.springframework.security.web.header.HeaderWriterFilter@75375bb0, org.springframework.web.filter.CorsFilter@1f6c0e8a, org.springframework.security.web.authentication.logout.LogoutFilter@561494af, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@4a6ac443, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@299022a9, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2845fd12, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@6c366d3, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@37c1e2a4, org.springframework.security.web.access.ExceptionTranslationFilter@247added, org.springframework.security.web.access.intercept.AuthorizationFilter@1ccf1819]
+2025-12-11 20:25:39 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring TestDispatcherServlet ''
+2025-12-11 20:25:39 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2025-12-11 20:25:39 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2025-12-11 20:25:39 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-auto-1"]
+2025-12-11 20:25:39 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 62795 (http) with context path ''
+2025-12-11 20:25:39 [main] INFO  c.p.h.c.MatchControllerTest - Started MatchControllerTest in 18.602 seconds (process running for 21.203)
+2025-12-11 20:25:42 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-12-11 20:25:42 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-12-11 20:25:42 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-12-11 20:34:52 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-12-11 20:34:52 [main] INFO  c.p.h.c.MatchControllerTest - Starting MatchControllerTest using Java 19.0.2 with PID 14596 (started by petrh in C:\Projekty Práce\StaraGarda\backend)
+2025-12-11 20:34:52 [main] INFO  c.p.h.c.MatchControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-12-11 20:34:54 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-11 20:34:55 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 192 ms. Found 6 JPA repository interfaces.
+2025-12-11 20:34:58 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+2025-12-11 20:34:58 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-auto-1"]
+2025-12-11 20:34:58 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-12-11 20:34:58 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-12-11 20:34:58 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-12-11 20:34:58 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 6071 ms
+2025-12-11 20:34:59 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-11 20:34:59 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2025-12-11 20:34:59 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-12-11 20:35:00 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2025-12-11 20:35:00 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-11 20:35:00 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-12-11 20:35:01 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@6c2dd88b
+2025-12-11 20:35:01 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-12-11 20:35:03 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-11 20:35:03 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-11 20:35:06 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-11 20:35:07 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@6354a50a, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@15c48119, org.springframework.security.web.context.SecurityContextHolderFilter@1f6c0e8a, org.springframework.security.web.header.HeaderWriterFilter@299022a9, org.springframework.web.filter.CorsFilter@2cb09f00, org.springframework.security.web.authentication.logout.LogoutFilter@6a7db16e, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@2eb6e166, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@57b4fc1e, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@14fed48e, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@749054a3, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5c14c284, org.springframework.security.web.access.ExceptionTranslationFilter@113a7d12, org.springframework.security.web.access.intercept.AuthorizationFilter@3b6b9981]
+2025-12-11 20:35:08 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring TestDispatcherServlet ''
+2025-12-11 20:35:08 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2025-12-11 20:35:08 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2025-12-11 20:35:08 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-auto-1"]
+2025-12-11 20:35:08 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 63139 (http) with context path ''
+2025-12-11 20:35:08 [main] INFO  c.p.h.c.MatchControllerTest - Started MatchControllerTest in 17.756 seconds (process running for 22.084)
+2025-12-11 20:35:11 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-12-11 20:35:11 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-12-11 20:35:11 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
