@@ -1,6 +1,8 @@
 package cz.phsoft.hokej.models.services;
 
+import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
@@ -12,16 +14,19 @@ import cz.phsoft.hokej.models.dto.PlayerDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
 
     private final PlayerRepository playerRepository;
     private final PlayerMapper playerMapper;
+    private final AppUserRepository appUserRepository;
 
-    public PlayerServiceImpl(PlayerRepository playerRepository, PlayerMapper playerMapper) {
+    public PlayerServiceImpl(PlayerRepository playerRepository, PlayerMapper playerMapper, AppUserRepository appUserRepository) {
         this.playerRepository = playerRepository;
         this.playerMapper = playerMapper;
+        this.appUserRepository = appUserRepository;
     }
 
     @Override
@@ -38,6 +43,7 @@ public class PlayerServiceImpl implements PlayerService {
         return playerMapper.toDTO(player);
     }
 
+
     // --- TRANSACTIONAL pro zápis dat ---
     @Override
     @Transactional
@@ -48,6 +54,28 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerEntity saved = playerRepository.save(entity);
         return playerMapper.toDTO(saved);
     }
+
+    @Override
+    public PlayerDTO createPlayerForUser(PlayerDTO dto, String userEmail) {
+        AppUserEntity user = appUserRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        PlayerEntity player = playerMapper.toEntity(dto);
+        player.setUser(user); // přiřazení hráče k uživateli
+
+        PlayerEntity saved = playerRepository.save(player);
+        return playerMapper.toDTO(saved);
+    }
+
+    @Override
+    public List<PlayerDTO> getPlayersByUser(String email) {
+        AppUserEntity user = appUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getPlayers().stream()
+                .map(playerMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     @Transactional

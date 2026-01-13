@@ -273,7 +273,7 @@ public class MatchServiceImpl implements MatchService {
                 .map(this::toOverviewDTO)   // mapujeme přímo ve službě
                 .toList();
     }
-    // nadcházející zápasy pro hráče
+    // nadcházející zápas
     @Override
     public List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);

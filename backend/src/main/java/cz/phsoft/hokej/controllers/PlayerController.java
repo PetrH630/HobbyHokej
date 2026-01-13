@@ -6,6 +6,7 @@ import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.services.PlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,12 +37,27 @@ public class PlayerController {
         return playerService.getPlayerById(id);
     }
 
-    // vytvoření hráče
+    /*
+    /// vytvoření hráče
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     @PostMapping
     public PlayerDTO createPlayer(@RequestBody PlayerDTO playerDTO) {
         return playerService.createPlayer(playerDTO);
+    }
+    */
 
+    @PostMapping("/me")
+    @PreAuthorize("isAuthenticated()") // každý přihlášený uživatel
+    public PlayerDTO createMyPlayer(@RequestBody PlayerDTO playerDTO, Authentication authentication) {
+        String email = authentication.getName(); // email přihlášeného uživatele
+        return playerService.createPlayerForUser(playerDTO, email);
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public List<PlayerDTO> getMyPlayers(Authentication authentication) {
+        String email = authentication.getName();
+        return playerService.getPlayersByUser(email);
     }
 
     // aktualizace hráče dle id hráče

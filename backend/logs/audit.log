@@ -13,3 +13,31 @@
 2026-01-13 12:05:16 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START AppUserServiceImpl.register(..) at 2026-01-13T12:05:16.772621200 with args [cz.phsoft.hokej.models.dto.RegisterUserDTO@65936099]
 2026-01-13 12:05:31 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START AppUserServiceImpl.register(..) at 2026-01-13T12:05:31.843972 with args [cz.phsoft.hokej.models.dto.RegisterUserDTO@6465126b]
 2026-01-13 12:05:32 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END register - userId=null playerId=null returned [null] at 2026-01-13T12:05:32.288286600
+2026-01-13 12:46:04 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-13T12:46:04.721438 with args [player1@example.com]
+2026-01-13 12:46:04 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@24fc756b] at 2026-01-13T12:46:04.774437100
+2026-01-13 12:46:37 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START PlayerServiceImpl.getPlayersByUser(..) at 2026-01-13T12:46:37.537927200 with args [player1@example.com]
+2026-01-13 12:46:37 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getPlayersByUser - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.PlayerDTO@66b0f952]] at 2026-01-13T12:46:37.548333600
+2026-01-13 12:47:00 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START PlayerServiceImpl.getPlayersByUser(..) at 2026-01-13T12:47:00.644238200 with args [player5@example.com]
+2026-01-13 12:47:00 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END getPlayersByUser - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.PlayerDTO@6a3498d8]] at 2026-01-13T12:47:00.654239
+2026-01-13 12:47:06 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-13T12:47:06.657018200 with args [player5@example.com]
+2026-01-13 12:47:06 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@421100ab] at 2026-01-13T12:47:06.667023100
+2026-01-13 12:48:09 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-13T12:48:09.135717100 with args [Hráč11@example.com]
+2026-01-13 12:48:09 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@27d26e28] at 2026-01-13T12:48:09.157715600
+2026-01-13 12:48:15 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START PlayerServiceImpl.getPlayersByUser(..) at 2026-01-13T12:48:15.104181400 with args [Hráč11@example.com]
+2026-01-13 12:48:15 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getPlayersByUser - userId=null playerId=null returned [[]] at 2026-01-13T12:48:15.110183700
+2026-01-13 12:49:46 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START PlayerServiceImpl.createPlayerForUser(..) at 2026-01-13T12:49:46.253475700 with args [cz.phsoft.hokej.models.dto.PlayerDTO@66c38d9d, Hráč11@example.com]
+2026-01-13 12:49:46 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END createPlayerForUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.PlayerDTO@56ffe3e0] at 2026-01-13T12:49:46.367381900
+2026-01-13 12:49:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-13T12:49:52.818096100 with args [Hráč11@example.com]
+2026-01-13 12:49:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@67d34ebc] at 2026-01-13T12:49:52.826335100
+2026-01-13 12:49:58 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START PlayerServiceImpl.getPlayersByUser(..) at 2026-01-13T12:49:58.146863100 with args [Hráč11@example.com]
+2026-01-13 12:49:58 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END getPlayersByUser - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.PlayerDTO@2db05191]] at 2026-01-13T12:49:58.156861500
+2026-01-13 12:50:31 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START PlayerServiceImpl.createPlayerForUser(..) at 2026-01-13T12:50:31.689620400 with args [cz.phsoft.hokej.models.dto.PlayerDTO@2c7cef29, Hráč11@example.com]
+2026-01-13 12:50:31 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END createPlayerForUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.PlayerDTO@69819aa5] at 2026-01-13T12:50:31.710587200
+2026-01-13 12:50:37 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-13T12:50:37.298486800 with args [Hráč11@example.com]
+2026-01-13 12:50:37 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@1cd0b8f4] at 2026-01-13T12:50:37.306486500
+2026-01-13 12:50:43 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START PlayerServiceImpl.getPlayersByUser(..) at 2026-01-13T12:50:43.751478 with args [Hráč11@example.com]
+2026-01-13 12:50:43 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getPlayersByUser - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.PlayerDTO@1bae066f, cz.phsoft.hokej.models.dto.PlayerDTO@2b5af02d]] at 2026-01-13T12:50:43.759737100
+2026-01-13 14:02:57 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-13T14:02:57.496723100 with args [Hráč11@example.com]
+2026-01-13 14:02:57 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@7fae2989] at 2026-01-13T14:02:57.530479300
+2026-01-13 14:03:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START PlayerServiceImpl.getPlayersByUser(..) at 2026-01-13T14:03:05.231138700 with args [Hráč11@example.com]
+2026-01-13 14:03:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END getPlayersByUser - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.PlayerDTO@2605166, cz.phsoft.hokej.models.dto.PlayerDTO@63de42ed]] at 2026-01-13T14:03:05.242140

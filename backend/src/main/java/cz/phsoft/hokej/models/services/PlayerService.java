@@ -11,6 +11,8 @@ public interface PlayerService {
     List<PlayerDTO> getAllPlayers();
     PlayerDTO getPlayerById(Long id);
     PlayerDTO createPlayer(PlayerDTO player);
+    PlayerDTO createPlayerForUser(PlayerDTO dto, String userEmail);
     PlayerDTO updatePlayer(Long id, PlayerDTO player);
     SuccessResponseDTO deletePlayer(Long id);
+    public List<PlayerDTO> getPlayersByUser(String email);
 }

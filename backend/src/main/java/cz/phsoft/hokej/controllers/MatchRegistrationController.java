@@ -1,9 +1,11 @@
 package cz.phsoft.hokej.controllers;
 
+import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import cz.phsoft.hokej.security.CurrentPlayerContext;
 import cz.phsoft.hokej.security.PlayerSecurity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,20 +18,21 @@ import java.util.List;
 public class MatchRegistrationController {
 
     private final MatchRegistrationService service;
-    private final PlayerSecurity playerSecurity;
 
-    public MatchRegistrationController(MatchRegistrationService service,
-                                       PlayerSecurity playerSecurity) {
+    public MatchRegistrationController(MatchRegistrationService service) {
         this.service = service;
-        this.playerSecurity = playerSecurity;
-    }
 
+    }
     // -----------------------------------------------------
     // 🔥 JEDINÝ UNIVERZÁLNÍ ENDPOINT PRO REGISTRACE
     // -----------------------------------------------------
     @PostMapping("/upsert")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #request.playerId)")
+    @PreAuthorize("isAuthenticated()")
     public MatchRegistrationDTO upsert(@RequestBody MatchRegistrationRequest request) {
+        PlayerEntity currentPlayer = CurrentPlayerContext.get();
+        if (currentPlayer == null) {
+            throw new RuntimeException("No current player selected");
+        }
         return service.upsertRegistration(
                 request.getMatchId(),
                 request.getPlayerId(),
@@ -46,14 +49,19 @@ public class MatchRegistrationController {
     // -----------------------------------------------------
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<MatchRegistrationDTO> getAllRegistrations() {
         return service.getAllRegistrations();
     }
 
-    @GetMapping("/for-player/{playerId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #playerId)")
-    public List<MatchRegistrationDTO> forPlayer(@PathVariable Long playerId) {
-        return service.getRegistrationsForPlayer(playerId);
+    @GetMapping("/for-current-player")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchRegistrationDTO> forCurrentPlayer() {
+        PlayerEntity currentPlayer = CurrentPlayerContext.get();
+        if (currentPlayer == null) {
+            throw new RuntimeException("No current player selected");
+        }
+        return service.getRegistrationsForPlayer(currentPlayer.getId());
     }
 
     @GetMapping("/for-match/{matchId}")
