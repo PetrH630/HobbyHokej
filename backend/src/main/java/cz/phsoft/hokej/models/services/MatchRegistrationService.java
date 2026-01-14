@@ -13,7 +13,7 @@ public interface MatchRegistrationService {
     MatchRegistrationDTO upsertRegistration(
             Long matchId,
             Long playerId,
-            Team jerseyColor,
+            Team team,
             String adminNote,
             ExcuseReason excuseReason,
             String excuseNote,

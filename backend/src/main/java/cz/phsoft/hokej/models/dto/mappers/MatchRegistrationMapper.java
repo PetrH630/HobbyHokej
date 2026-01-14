@@ -21,7 +21,7 @@ public interface MatchRegistrationMapper {
     @Mapping(target = "status", source = "status")
     @Mapping(target = "excuseReason", source = "excuseReason")
     @Mapping(target = "excuseNote", source = "note")
-    @Mapping(target = "jerseyColor", source = "jerseyColor")
+    @Mapping(target = "team", source = "team")
     @Mapping(target = "adminNote", source = "adminNote")
     @Mapping(target = "createdBy", source = "createdBy")
     @Mapping(target = "timestamp", expression = "java(java.time.LocalDateTime.now())")
@@ -31,7 +31,7 @@ public interface MatchRegistrationMapper {
             PlayerMatchStatus status,
             ExcuseReason excuseReason,
             String note,
-            Team jerseyColor,
+            Team team,
             String adminNote,
             String createdBy
     );

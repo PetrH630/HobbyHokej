@@ -5,8 +5,7 @@ import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
-import cz.phsoft.hokej.security.CurrentPlayerContext;
-import cz.phsoft.hokej.security.PlayerSecurity;
+import cz.phsoft.hokej.security.CurrentPlayerService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -18,25 +17,28 @@ import java.util.List;
 public class MatchRegistrationController {
 
     private final MatchRegistrationService service;
+    private final CurrentPlayerService currentPlayerService;
 
-    public MatchRegistrationController(MatchRegistrationService service) {
+    public MatchRegistrationController(MatchRegistrationService service,
+                                       CurrentPlayerService currentPlayerService) {
         this.service = service;
-
+        this.currentPlayerService = currentPlayerService;
     }
+
     // -----------------------------------------------------
     // 🔥 JEDINÝ UNIVERZÁLNÍ ENDPOINT PRO REGISTRACE
     // -----------------------------------------------------
     @PostMapping("/upsert")
     @PreAuthorize("isAuthenticated()")
     public MatchRegistrationDTO upsert(@RequestBody MatchRegistrationRequest request) {
-        PlayerEntity currentPlayer = CurrentPlayerContext.get();
-        if (currentPlayer == null) {
-            throw new RuntimeException("No current player selected");
-        }
+        // automaticky bere vybraného hráče
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+
         return service.upsertRegistration(
                 request.getMatchId(),
-                request.getPlayerId(),
-                request.getJerseyColor(),
+                currentPlayerId, // vždy aktuální hráč
+                request.getTeam(),
                 request.getAdminNote(),
                 request.getExcuseReason(),
                 request.getExcuseNote(),
@@ -57,11 +59,9 @@ public class MatchRegistrationController {
     @GetMapping("/for-current-player")
     @PreAuthorize("isAuthenticated()")
     public List<MatchRegistrationDTO> forCurrentPlayer() {
-        PlayerEntity currentPlayer = CurrentPlayerContext.get();
-        if (currentPlayer == null) {
-            throw new RuntimeException("No current player selected");
-        }
-        return service.getRegistrationsForPlayer(currentPlayer.getId());
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return service.getRegistrationsForPlayer(currentPlayerId);
     }
 
     @GetMapping("/for-match/{matchId}")

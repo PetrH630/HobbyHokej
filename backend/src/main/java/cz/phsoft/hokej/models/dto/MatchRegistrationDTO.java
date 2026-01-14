@@ -21,7 +21,7 @@ public class MatchRegistrationDTO {
     private ExcuseReason excuseReason; // pouze pokud status = EXCUSED
     private String excuseNote;
     private String adminNote;
-    private Team jerseyColor;
+    private Team team;
 
     @NotNull
     private String createdBy; // "user" nebo "system"
@@ -52,8 +52,8 @@ public class MatchRegistrationDTO {
     public String getAdminNote() { return adminNote; }
     public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
 
-    public Team getJerseyColor() { return jerseyColor; }
-    public void setJerseyColor(Team jerseyColor) { this.jerseyColor = jerseyColor; }
+    public Team getTeam() { return team; }
+    public void setTeam (Team team) { this.team = team; }
 
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }

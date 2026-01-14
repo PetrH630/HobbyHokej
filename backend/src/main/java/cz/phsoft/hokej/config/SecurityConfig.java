@@ -103,6 +103,7 @@ public class SecurityConfig {
                             .logoutUrl("/api/logout")
                             .deleteCookies("JSESSIONID")
                             .logoutSuccessHandler((request, response, auth) -> {
+                                request.getSession().removeAttribute("CURRENT_PLAYER_ID");
                                 response.setContentType("application/json");
                                 response.setCharacterEncoding("UTF-8");
                                 response.getWriter().write("{\"status\":\"ok\",\"message\":\"Odhlášeno\"}");

@@ -92,7 +92,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     public MatchRegistrationDTO upsertRegistration(
             Long matchId,
             Long playerId,
-            Team jerseyColor,
+            Team team,
             String adminNote,
             ExcuseReason excuseReason,
             String excuseNote,
@@ -155,7 +155,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         registration.setTimestamp(LocalDateTime.now());
         registration.setCreatedBy("user");
 
-        if (jerseyColor != null) registration.setJerseyColor(jerseyColor);
+        if (team != null) registration.setTeam(team);
         if (adminNote != null) registration.setAdminNote(adminNote);
         // excuseReason už jsme nastavili výše (pokud to byl EXCUSED případ)
         if (excuseReason != null) registration.setExcuseReason(excuseReason);

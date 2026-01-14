@@ -14,7 +14,7 @@ public class MatchRegistrationRequest {
     @Positive
     private Long playerId;
 
-    private Team jerseyColor;
+    private Team team;
     private ExcuseReason excuseReason;
     private String excuseNote;
     private String adminNote;
@@ -22,7 +22,7 @@ public class MatchRegistrationRequest {
 
     public Long getMatchId() { return matchId; }
     public Long getPlayerId() { return playerId; }
-    public Team getJerseyColor() { return jerseyColor; }
+    public Team getTeam() { return team; }
     public ExcuseReason getExcuseReason() { return excuseReason; }
     public String getExcuseNote() { return excuseNote; }
     public String getAdminNote() { return adminNote; }

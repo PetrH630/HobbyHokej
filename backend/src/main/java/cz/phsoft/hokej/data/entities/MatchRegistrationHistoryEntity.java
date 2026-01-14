@@ -40,8 +40,8 @@ public class MatchRegistrationHistoryEntity {
     private String adminNote;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "jersey_color")
-    private Team jerseyColor;
+    @Column(name = "team")
+    private Team team;
 
     // původní timestamp
     @Column(name = "original_timestamp", nullable = false)
@@ -126,12 +126,12 @@ public class MatchRegistrationHistoryEntity {
         this.adminNote = adminNote;
     }
 
-    public Team getJerseyColor() {
-        return jerseyColor;
+    public Team getTeam() {
+        return team;
     }
 
-    public void setJerseyColor(Team jerseyColor) {
-        this.jerseyColor = jerseyColor;
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
     public LocalDateTime getOriginalTimestamp() {

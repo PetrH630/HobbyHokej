@@ -39,8 +39,8 @@ public class MatchRegistrationEntity {
     private String adminNote;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "jersey_color")
-    private Team jerseyColor;
+    @Column(name = "team")
+    private Team team;
 
     // datčas vytvoření registrace - musí se měnit aby nebyl hráč i po zrušení registrace
     // v pořadí před hráči kteří se registrovali po zrušení registrace
@@ -113,12 +113,12 @@ public class MatchRegistrationEntity {
         this.adminNote = adminNote;
     }
 
-    public Team getJerseyColor() {
-        return jerseyColor;
+    public Team getTeam() {
+        return team;
     }
 
-    public void setJerseyColor(Team jerseyColor) {
-        this.jerseyColor = jerseyColor;
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
     public LocalDateTime getTimestamp() {
