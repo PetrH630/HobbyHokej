@@ -4,6 +4,7 @@ import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.services.PlayerService;
+import cz.phsoft.hokej.security.CurrentPlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -17,9 +18,11 @@ import java.util.List;
 public class PlayerController {
 
     private final PlayerService playerService;
+    private final CurrentPlayerService currentPlayerService;
 
-    public PlayerController(PlayerService playerService) {
+    public PlayerController(PlayerService playerService, CurrentPlayerService currentPlayerService) {
         this.playerService = playerService;
+        this.currentPlayerService = currentPlayerService;
     }
 
     // všichni hráči
@@ -31,8 +34,8 @@ public class PlayerController {
 
     // hráč dle id
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or @playerSecurity.isOwner(authentication, #id)")
+    @GetMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public PlayerDTO getPlayerById(@PathVariable Long id) {
         return playerService.getPlayerById(id);
     }
@@ -61,15 +64,19 @@ public class PlayerController {
     }
 
     // aktualizace hráče dle id hráče
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    @PutMapping("/{id}")
-    public PlayerDTO updatePlayer(@PathVariable Long id, @RequestBody PlayerDTO dto) {
-        return playerService.updatePlayer(id, dto);
+    @PutMapping("/me")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or isAuthenticated()")
+    public PlayerDTO updatePlayer(@RequestBody PlayerDTO dto) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+
+        return playerService.updatePlayer(currentPlayerId, dto);
     }
+
 
     // odstraní hráče
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/{id}")
     public ResponseEntity<SuccessResponseDTO> deletePlayer(@PathVariable Long id) {
         SuccessResponseDTO response = playerService.deletePlayer(id);
         return ResponseEntity.ok(response);

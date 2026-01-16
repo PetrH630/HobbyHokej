@@ -20,14 +20,14 @@ public class PlayerInactivityPeriodController {
     }
 
     // všechny záznamy o neaktivitě hráčů
-    @GetMapping("/all")
+    @GetMapping("/admin/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerInactivityPeriodDTO> getAll() {
         return service.getAll();
     }
 
     // neaktivita hráčů dle id neaktivity
-    @GetMapping("/{id}")
+    @GetMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<PlayerInactivityPeriodDTO> getById(@PathVariable Long id) {
         PlayerInactivityPeriodDTO dto = service.getById(id);
@@ -35,7 +35,7 @@ public class PlayerInactivityPeriodController {
     }
 
     // získá záznamy o periodě neaktivity dle id hráče
-    @GetMapping("/player/{playerId}")
+    @GetMapping("/admin/player/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerInactivityPeriodDTO> getByPlayer(@PathVariable Long playerId) {
         return service.getByPlayer(playerId);
@@ -50,7 +50,7 @@ public class PlayerInactivityPeriodController {
     }
 
     // změní záznam o neaktivitě hráče dle id
-    @PutMapping("/{id}")
+    @PutMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlayerInactivityPeriodDTO> update(
             @PathVariable Long id,
@@ -61,7 +61,7 @@ public class PlayerInactivityPeriodController {
     }
 
     // vymaže záznam o neaktivitě hráče dle id záznamu
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

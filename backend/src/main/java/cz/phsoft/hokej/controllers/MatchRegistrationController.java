@@ -28,7 +28,7 @@ public class MatchRegistrationController {
     // -----------------------------------------------------
     // 🔥 JEDINÝ UNIVERZÁLNÍ ENDPOINT PRO REGISTRACE
     // -----------------------------------------------------
-    @PostMapping("/upsert")
+    @PostMapping("/me/upsert")
     @PreAuthorize("isAuthenticated()")
     public MatchRegistrationDTO upsert(@RequestBody MatchRegistrationRequest request) {
         // automaticky bere vybraného hráče
@@ -50,13 +50,13 @@ public class MatchRegistrationController {
     // GET ENDPOINTY
     // -----------------------------------------------------
 
-    @GetMapping("/all")
+    @GetMapping("/admin/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<MatchRegistrationDTO> getAllRegistrations() {
         return service.getAllRegistrations();
     }
 
-    @GetMapping("/for-current-player")
+    @GetMapping("/me/for-current-player")
     @PreAuthorize("isAuthenticated()")
     public List<MatchRegistrationDTO> forCurrentPlayer() {
         currentPlayerService.requireCurrentPlayer();
@@ -64,13 +64,18 @@ public class MatchRegistrationController {
         return service.getRegistrationsForPlayer(currentPlayerId);
     }
 
-    @GetMapping("/for-match/{matchId}")
+    @GetMapping("/admin/for-match/{matchId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<MatchRegistrationDTO> forMatch(@PathVariable Long matchId) {
         return service.getRegistrationsForMatch(matchId);
     }
 
-    @GetMapping("/no-response/{matchId}")
+    @GetMapping("/admin/for-player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchRegistrationDTO> forPlayer(@PathVariable Long playerId) {
+        return service.getRegistrationsForPlayer(playerId);
+    }
+    @GetMapping("/admin/no-response/{matchId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerDTO> getNoResponse(@PathVariable Long matchId) {
         return service.getNoResponsePlayers(matchId);

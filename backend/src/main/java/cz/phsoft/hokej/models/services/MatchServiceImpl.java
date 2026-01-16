@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -231,7 +232,6 @@ public class MatchServiceImpl implements MatchService {
         return dto;
     }
 
-
     // dostupné zápasy pro hráče - byl nebo je aktivní
     @Override
     public List<MatchDTO> getAvailableMatchesForPlayer(Long playerId) {
@@ -250,6 +250,7 @@ public class MatchServiceImpl implements MatchService {
                 .map(PlayerEntity::getId)
                 .orElseThrow(() -> new RuntimeException("Hráč s emailem " + email + " nenalezen"));
     }
+
 
     // náhled nadcházejících zápasu pro hráče - dle PlayerType
     @Override
@@ -270,9 +271,10 @@ public class MatchServiceImpl implements MatchService {
         // 3) Filtrování podle aktivity hráče a mapování na MatchOverviewDTO
         return limited.stream()
                 .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
-                .map(this::toOverviewDTO)   // mapujeme přímo ve službě
+                .map(match -> toOverviewDTO(match, playerId))
                 .toList();
     }
+
     // nadcházející zápas
     @Override
     public List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId) {
@@ -295,6 +297,7 @@ public class MatchServiceImpl implements MatchService {
                 .toList();
     }
 
+    // pomocné metody
     private PlayerEntity findPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
@@ -314,6 +317,7 @@ public class MatchServiceImpl implements MatchService {
         dto.setPrice(match.getPrice());
         dto.setMaxPlayers(match.getMaxPlayers());
 
+
         // počet registrovaných hráčů
         int inGamePlayers = registrationService.getRegistrationsForMatch(match.getId()).stream()
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
@@ -326,8 +330,87 @@ public class MatchServiceImpl implements MatchService {
                 ? match.getPrice() / (double) inGamePlayers : 0;
         dto.setPricePerRegisteredPlayer(pricePerPlayer);
 
+
+
         return dto;
     }
+
+    private MatchOverviewDTO toOverviewDTO(MatchEntity match, Long playerId) {
+
+        MatchOverviewDTO dto = toOverviewDTO(match); // ← znovupoužití tvé původní metody
+
+        PlayerMatchStatus status = registrationService
+                .getRegistrationsForMatch(match.getId()).stream()
+                .filter(r -> r.getPlayerId().equals(playerId))
+                .map(MatchRegistrationDTO::getStatus)
+                .findFirst()
+                .filter(s ->
+                        s == PlayerMatchStatus.REGISTERED ||
+                                s == PlayerMatchStatus.UNREGISTERED ||
+                                s == PlayerMatchStatus.EXCUSED ||
+                                s == PlayerMatchStatus.RESERVED
+                )
+                .orElse(PlayerMatchStatus.NO_RESPONSE);
+
+        dto.setStatus(status);
+        return dto;
+    }
+
+    @Override
+    public List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId) {
+        PlayerEntity player = findPlayerOrThrow(playerId);
+
+        // Vezmeme dostupné zápasy jako entity (bez DTO)
+        List<MatchEntity> availableMatches = matchRepository.findAll().stream()
+                .filter(match -> match.getDateTime().isBefore(LocalDateTime.now()) || match.getDateTime().isEqual(LocalDateTime.now()))
+                .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
+                .toList();
+
+        if (availableMatches.isEmpty()) {
+            return List.of();
+        }
+
+        // Všechny ID zápasů
+        List<Long> matchIds = availableMatches.stream()
+                .map(MatchEntity::getId)
+                .toList();
+
+        // Jeden jediný dotaz na všechny registrace
+        List<MatchRegistrationDTO> allRegistrations =
+                registrationService.getRegistrationsForMatches(matchIds);
+
+        // Mapa: matchId -> (playerId -> status)
+        var statusMap = allRegistrations.stream()
+                .collect(Collectors.groupingBy(
+                        MatchRegistrationDTO::getMatchId,
+                        Collectors.toMap(
+                                MatchRegistrationDTO::getPlayerId,
+                                MatchRegistrationDTO::getStatus,
+                                (a, b) -> a
+                        )
+                ));
+
+        // Mapování na MatchOverviewDTO + nastavení statusu
+        return availableMatches.stream()
+                .map(match -> {
+                    MatchOverviewDTO overview = toOverviewDTO(match);
+
+                    PlayerMatchStatus status = Optional.ofNullable(statusMap.get(match.getId()))
+                            .map(m -> m.get(playerId))
+                            .filter(s ->
+                                    s == PlayerMatchStatus.REGISTERED ||
+                                            s == PlayerMatchStatus.UNREGISTERED ||
+                                            s == PlayerMatchStatus.EXCUSED ||
+                                            s == PlayerMatchStatus.RESERVED
+                            )
+                            .orElse(PlayerMatchStatus.NO_RESPONSE);
+
+                    overview.setStatus(status);
+                    return overview;
+                })
+                .toList();
+    }
+
 
 
 }

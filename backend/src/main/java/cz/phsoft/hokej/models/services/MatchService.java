@@ -22,6 +22,7 @@ public interface MatchService {
     List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId);
     Long getPlayerIdByEmail(String email);
     List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId);
+    public List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId);
 
 
 }

@@ -25,4 +25,6 @@ import java.util.Optional;
         Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
 
         long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
+
+        List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
     }

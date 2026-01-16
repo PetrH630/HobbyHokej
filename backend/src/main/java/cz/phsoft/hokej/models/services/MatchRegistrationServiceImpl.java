@@ -175,6 +175,17 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     @Override
+    public List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds) {
+        if (matchIds == null || matchIds.isEmpty()) {
+            return List.of();
+        }
+
+        return matchRegistrationMapper.toDTOList(
+                registrationRepository.findByMatchIdIn(matchIds)
+        );
+    }
+
+    @Override
     public List<MatchRegistrationDTO> getAllRegistrations() {
         return matchRegistrationMapper.toDTOList(registrationRepository.findAll());
     }

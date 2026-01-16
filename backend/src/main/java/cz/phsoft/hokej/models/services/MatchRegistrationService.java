@@ -22,6 +22,8 @@ public interface MatchRegistrationService {
 
     List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId);
 
+    List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds);
+
     List<MatchRegistrationDTO> getAllRegistrations();
 
     List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId);

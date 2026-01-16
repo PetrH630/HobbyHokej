@@ -1,20 +1,45 @@
+
+AuthController
+@RequestMapping("/api/auth")
+@PostMapping
+/api/auth/register     - registrace uživatele
+@GetMapping
+/api/auth/me           - zobrazení aktuálního uživatele (getCurrentUser)
+
+-------------------------
+SecurityConfig
+/api/login              - login uživatele
+/api/logout             - odhlášení uživatele
+
+-------------------------
+CurrentPlayerController
+@RequestMapping("/api/current-player")
+@PostMapping
+/api/current-player/{playerId}"     - nastavení aktuálního hráče uživateli - isAuthenticated
+/api/current-player/auto-select"    - auto nastavení aktuálního hráče uživateli (pokud má jen jednoho hráče) - isAuthenticated
+
+@GetMapping
+/api/current-player                 - získání aktuálního hráče  - isAuthenticated
+/api/current-player/my-players      - seznam hráčů uživatele    - isAuthenticated
 ----------------------
 MATCH
 @RequestMapping("/api/matches")
 GET
 /api/matches                    - všechny zápasy        - Admin, Manager
-/api/matches/matchDetail/{id}   - detail zápasu
-/api/matches/next               - první aktuální zápas
-/api/matches/upcoming           - nadcházející zápasy   - Admin, Manager
-/api/matches/past               - uplynulé zápasy       - Admin, Manager
-/{id}                           - zápas dle id zápasu
-/api/matches/available-for-player/{id} - zápasy kde hráč není Neaktivní - id_player
-/api/matches/player/{playerId}/upcoming - zápasy pro aktivního hráče dle id s filtrování upcoming dle typuHráče (vše, 2, 1)
+/api/matches/matchDetail/{id}   - detail zápasu         - isAuthenticated
+/api/matches/next               - první aktuální zápas  - isAuthenticated
+/api/matches/admin/upcoming     - nadcházející zápasy   - Admin, Manager
+/api/matches/me/upcoming        - nadcházející zápasy   - isAuthenticated
+/api/matches/me/upcoming-overview - nadcházející zápasy hráče - přehled - isAuthenticated
+/api/matches/me/all-passed      - uplynulé zápasy hráče - přehled - isAuthenticated
+/api/matches/admin/past         - uplynulé zápasy       - Admin, Manager
+/api/matches/admin/{id}        - zápas dle id zápasu   - Admin, Manager
+/api/matches/admin/available-for-player/{player id} - zápasy kde hráč není Neaktivní - Admin, Manager
 
 POST
-@PostMapping - /api/matches         - přidat zápas      - Admin, Manager
-@PutMapping  - /api/matches/{id}    - editovat zápas    - Admin, Manager
-@DeleteMapping - /api/matches/{id}  - smazat zápas      - Admin, Manager
+@PostMapping - /api/matches/         - přidat zápas      - Admin, Manager
+@PutMapping  - /api/matches/admin/{id}    - editovat zápas    - Admin, Manager
+@DeleteMapping - /api/matches/admin/{id}  - smazat zápas      - Admin
 
 ----------------------
 PLAYER
@@ -22,28 +47,31 @@ PLAYER
 @RequestMapping("/api/players")
 
 GET
-/api/players        - všichni hráči     - Admin, Manager
-/api/players/{id}   - hráč dle id
+/api/players                - všichni hráči     - Admin, Manager
+/api/players/admin/{id}     - hráč dle id       - Admin, Manager
+/api/players/me             - hráči uživatele   - isAuthenticated
 
 POST
-@PostMapping - /api/players        - vytvoří hráče
-@PutMapping  - /api/players/{id}   - editovat hráče s id
-@DeleteMapping - /api/players/{id} - vymaže hráče s id      - Admin, Manager
+@PostMapping - /api/players/me              - vytvoří hráče - isAuthenticated
+@PutMapping  - /api/players/me              - editovat hráče - Admin, Manager, isAuthenticated
+DODĚLAT PRO ADMINA - @PutMapping  - /api/players/me              - editovat hráče - Admin, Manager, isAuthenticated
+NEJDE - CIZÍ KLÍČ - @DeleteMapping - /api/players/admin/{id}    - vymaže hráče s id      - Admin
 
 ----------------------
 REGISTRACE - MatchRegistration
 @RequestMapping("/api/registrations")
 
 GET
-/api/registrations/all                      - všechny registrace                - Admin, Manager
-/api/registrations/for-player/{playerId}    - všechny registrace dle id hráče
-/api/registrations/for-match/{matchId}      - všechny registrace dle id zápasu  - Admin, Manager
-/api/registrations//no-response/{matchId}   - seznam hráčů, kteří nereagovali   - Admin, Manager
+/api/registrations/admin/all                    - všechny registrace                - Admin, Manager
+/api/registrations/me/for-current-player        - všechny registrace dle id hráče   - isAuthenticated
+/api/registrations/admin/for-player/{playerId}  - všechny registrace dle id hráče   - isAuthenticated
+/api/registrations/admin/for-match/{matchId}    - všechny registrace dle id zápasu  - Admin, Manager
+/api/registrations/admin/no-response/{matchId}  - seznam hráčů, kteří nereagovali   - Admin, Manager
 
 POST
-@PostMapping - /api/registrations/upsert      - vytvoří registrace dle id zápasu a id hráče
-@PostMapping - /api/registrations/upsert    - vytvoří záznam o zrušení registrace (odregistrování) dle id zápasu a id hráče
-@PostMapping - /api/registrations/upsert        - vytvoří záznam o omluvení se ze zápasu
+@PostMapping - /api/registrations/me/upsert        - vytvoří registrace dle id zápasu a id hráče    - isAuthenticated
+@PostMapping - /api/registrations/me/upsert        - vytvoří záznam o zrušení registrace (odregistrování) dle id zápasu a id hráče - isAuthenticated
+@PostMapping - /api/registrations/me/upsert        - vytvoří záznam o omluvení se ze zápasu     - isAuthenticated
 
 --------------------------
 
@@ -51,14 +79,14 @@ AKTIVNÍ / NEAKTIVNÍ HRÁČ - PlayerInactivity
 @RequestMapping("/api/inactivity")
 
 GET
-/api/inactivity/All                 - všechny záznamy s obdobím neaktivního hráče - Admin, Manager
-/api/inactivity/{id}                - záznam dle id neaktivity                    - Admin, Manager
-/api/inactivity/player/{playerId}   - záznamy dle id hráče
+/api/inactivity/admin/all                 - všechny záznamy s obdobím neaktivního hráče - Admin, Manager
+/api/inactivity/admin/{id}                - záznam dle id neaktivity                    - Admin, Manager
+/api/inactivity/admin/player/{playerId}   - záznamy dle id hráče
 
 POST
-@PostMapping - /api/inactivity  - vytvoří záznam s periodou neaktivity hráče        - Admin, Manager
-@PutMapping  - /api/inactivity/{id}   - edituje záznam s periodou neaktivity hráče  - Admin, Manager
-@DeleteMapping - /api/inactivity/{id} - smaže záznam                                - Admin, Manager
+@PostMapping - /api/inactivity              - vytvoří záznam s periodou neaktivity hráče  - Admin, Manager
+@PutMapping  - /api/inactivity/admin/{id}   - edituje záznam s periodou neaktivity hráče  - Admin, Manager
+@DeleteMapping - /api/inactivity/admin/{id} - smaže záznam                                - Admin, Manager
 
 
 

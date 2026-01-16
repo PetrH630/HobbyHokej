@@ -83,7 +83,8 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerEntity existing = findPlayerOrThrow(id);
 
         // pokud se jméno/příjmení mění, ověř duplicitu
-        if (!existing.getName().equals(dto.getName()) || !existing.getSurname().equals(dto.getSurname())) {
+        if (!existing.getName().equals(dto.getName())
+                || !existing.getSurname().equals(dto.getSurname())) {
             checkDuplicateNameSurname(dto.getName(), dto.getSurname(), id);
         }
 
