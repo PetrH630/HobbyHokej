@@ -9,6 +9,8 @@ import cz.phsoft.hokej.models.dto.mappers.AppUserMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AppUserServiceImpl implements AppUserService {
 
@@ -49,4 +51,31 @@ public class AppUserServiceImpl implements AppUserService {
         // ← využití mapperu
         return appUserMapper.toDto(user);
     }
+
+    @Override
+    public List<AppUserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(appUserMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public void changePassword(String email, String oldPassword, String newPassword, String newPasswordConfirm) {
+        if (!newPassword.equals(newPasswordConfirm)) {
+            throw new IllegalArgumentException("Nová hesla se neshodují");
+        }
+
+        AppUserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+
+        // Ověření starého hesla
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Staré heslo je nesprávné");
+        }
+
+        // Nastavení nového hesla
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
 }

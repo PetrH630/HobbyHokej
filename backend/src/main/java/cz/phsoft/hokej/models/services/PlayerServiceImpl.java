@@ -90,6 +90,8 @@ public class PlayerServiceImpl implements PlayerService {
 
         existing.setName(dto.getName());
         existing.setSurname(dto.getSurname());
+        existing.setNickname(dto.getNickName());
+        existing.setPhoneNumber(dto.getPhoneNumber());
         existing.setType(dto.getType());
         existing.setTeam(dto.getTeam());
 

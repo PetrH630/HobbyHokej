@@ -37,4 +37,5 @@ public class AuthController {
         AppUserDTO dto = appUserService.getCurrentUser(authentication.getName());
         return ResponseEntity.ok(dto);
     }
+
 }

@@ -8,6 +8,7 @@ import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.services.PlayerService;
 import cz.phsoft.hokej.security.CurrentPlayerService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,7 @@ public class CurrentPlayerController {
     // -----------------------------------------------------
     @PostMapping("/{playerId}")
     @PreAuthorize("isAuthenticated()")
-    public void setCurrentPlayer(@PathVariable Long playerId,
+    public ResponseEntity<String> setCurrentPlayer(@PathVariable Long playerId,
                                  Authentication auth,
                                  HttpSession session) {
 
@@ -54,7 +55,7 @@ public class CurrentPlayerController {
         }
 
         currentPlayerService.setCurrentPlayerId(player.getId());
-        System.out.println("Aktuální hráč nastaven na ID: " + player.getId());
+        return ResponseEntity.ok("Aktuální hráč nastaven na ID: " + player.getId());
     }
 
     // -----------------------------------------------------
@@ -63,7 +64,7 @@ public class CurrentPlayerController {
     // -----------------------------------------------------
     @PostMapping("/auto-select")
     @PreAuthorize("isAuthenticated()")
-    public void autoSelectCurrentPlayer(Authentication auth) {
+    public ResponseEntity<String> autoSelectCurrentPlayer(Authentication auth) {
         AppUserEntity user = appUserRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -72,9 +73,9 @@ public class CurrentPlayerController {
         if (players.size() == 1) {
             PlayerDTO player = players.get(0);
             currentPlayerService.setCurrentPlayerId(player.getId());
-            System.out.println("Automaticky vybrán hráč ID: " + player.getId());
+            return ResponseEntity.ok("Automaticky nastaven hráč nastaven na ID: " + player.getId());
         } else {
-            System.out.println("Uživatel má více hráčů, výběr nutný ručně");
+            return ResponseEntity.ok("Uživatel má více hráčů, výběr nutný ručně");
         }
     }
 

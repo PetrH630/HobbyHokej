@@ -22,6 +22,14 @@ CurrentPlayerController
 /api/current-player                 - získání aktuálního hráče  - isAuthenticated
 /api/current-player/my-players      - seznam hráčů uživatele    - isAuthenticated
 ----------------------
+AppUserController
+@RequestMapping("/api/users")
+@GetMapping("/me") - aktuálně přihlášený uživatel - isAuthenticated
+@PostMapping("/me/change-password") - změna hesla - isAuthenticated
+/api/users - seznam uživatelů - Admin
+
+
+
 MATCH
 @RequestMapping("/api/matches")
 GET
@@ -50,11 +58,12 @@ GET
 /api/players                - všichni hráči     - Admin, Manager
 /api/players/admin/{id}     - hráč dle id       - Admin, Manager
 /api/players/me             - hráči uživatele   - isAuthenticated
+??? -- /api/players/admin/{userId} - hráči dle id uživatele   - Admin
 
 POST
 @PostMapping - /api/players/me              - vytvoří hráče - isAuthenticated
-@PutMapping  - /api/players/me              - editovat hráče - Admin, Manager, isAuthenticated
-DODĚLAT PRO ADMINA - @PutMapping  - /api/players/me              - editovat hráče - Admin, Manager, isAuthenticated
+@PutMapping  - /api/players/me              - editovat hráče - isAuthenticated
+@PutMapping  - /api/players//admin/{id}     - editovat hráče dle id - Admin
 NEJDE - CIZÍ KLÍČ - @DeleteMapping - /api/players/admin/{id}    - vymaže hráče s id      - Admin
 
 ----------------------

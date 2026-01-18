@@ -48,7 +48,7 @@ public class PlayerController {
         return playerService.createPlayer(playerDTO);
     }
     */
-
+    // vytvoření hráče pro přihlášeného uživatele
     @PostMapping("/me")
     @PreAuthorize("isAuthenticated()") // každý přihlášený uživatel
     public PlayerDTO createMyPlayer(@RequestBody PlayerDTO playerDTO, Authentication authentication) {
@@ -56,6 +56,7 @@ public class PlayerController {
         return playerService.createPlayerForUser(playerDTO, email);
     }
 
+    // získání hráčů přihlášeného uživatele
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public List<PlayerDTO> getMyPlayers(Authentication authentication) {
@@ -63,14 +64,22 @@ public class PlayerController {
         return playerService.getPlayersByUser(email);
     }
 
-    // aktualizace hráče dle id hráče
+    // úprava hráče přihlášeného uživatele
     @PutMapping("/me")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public PlayerDTO updatePlayer(@RequestBody PlayerDTO dto) {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
 
         return playerService.updatePlayer(currentPlayerId, dto);
+    }
+
+    // úprava hráče administrátorem dle id hráče
+    @PutMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public PlayerDTO upatePlayerAdmin(@PathVariable Long id,  @RequestBody PlayerDTO dto) {
+
+        return playerService.updatePlayer(id, dto);
     }
 
 

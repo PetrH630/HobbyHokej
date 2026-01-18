@@ -12,17 +12,25 @@ import java.util.List;
 public interface PlayerMapper {
 
         // Entity → DTO (heslo se neposílá)
+        @Mapping(source = "nickname", target = "nickName")
         @Mapping(target = "fullName", ignore = true) // generuje se v DTO
         PlayerDTO toDTO(PlayerEntity entity);
 
         // DTO → Entity (heslo se mapuje, pokud existuje)
+        @Mapping(source = "nickName", target = "nickname")   // KLÍČOVÉ
+        @Mapping(target = "fullName", ignore = true)         // generuje si Entity sama
+        @Mapping(target = "user", ignore = true)             // nastavuješ v service
         PlayerEntity toEntity(PlayerDTO dto);
 
         // Aktualizace existujícího DTO (ignorujeme fullName)
         @Mapping(target = "fullName", ignore = true)
+        @Mapping(target = "id", ignore = true)
         void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
 
         // Aktualizace existující Entity (heslo se mapuje, fullName není pole v Entity)
+        @Mapping(source = "nickName", target = "nickname")   // i tady je důležité
+        @Mapping(target = "fullName", ignore = true)
+        @Mapping(target = "user", ignore = true)
         void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
 
     List<PlayerDTO> toDTOList(List<PlayerEntity> players);
