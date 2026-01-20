@@ -29,6 +29,10 @@ public class AppUserEntity {
     @Column(nullable = false)
     private Role role;
 
+    @Column(nullable = false)
+    private boolean enabled = false; // výchozí hodnota false
+
+
     // One-to-Many: jeden uživatel → více hráčů
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PlayerEntity> players;
@@ -59,6 +63,10 @@ public class AppUserEntity {
     public Role getRole() {return role;}
 
     public void setRole(Role role) {this.role = role;}
+
+    public boolean isEnabled() {    return enabled;    }
+
+    public void setEnabled(boolean enabled) {  this.enabled = enabled;    }
 
     public Set<PlayerEntity> getPlayers() {return players;}
 

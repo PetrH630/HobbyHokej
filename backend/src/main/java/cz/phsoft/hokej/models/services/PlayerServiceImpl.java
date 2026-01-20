@@ -5,6 +5,8 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.DuplicateNameSurnameException;
+import cz.phsoft.hokej.exceptions.InvalidPlayerStatusException;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
@@ -57,6 +59,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Transactional
     public PlayerDTO createPlayerForUser(PlayerDTO dto, String userEmail) {
         AppUserEntity user = appUserRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -77,7 +80,6 @@ public class PlayerServiceImpl implements PlayerService {
                 .map(playerMapper::toDTO)
                 .collect(Collectors.toList());
     }
-
 
     @Override
     @Transactional
@@ -121,7 +123,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         if (duplicateOpt.isPresent()) {
             if (ignoreId == null || !duplicateOpt.get().getId().equals(ignoreId)) {
-                throw new RuntimeException("Hráč se jménem " + name + " " + surname + " již existuje.");
+                throw new DuplicateNameSurnameException("Hráč se jménem " + name + " " + surname + " již existuje.");
             }
         }
     }
@@ -130,4 +132,41 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
     }
+
+    @Override
+    @Transactional
+    public SuccessResponseDTO approvePlayer(Long id) {
+        PlayerEntity player = findPlayerOrThrow(id);
+
+        if (player.getStatus() == PlayerStatus.APPROVED) {
+            throw new InvalidPlayerStatusException("Hráč už je schválen.");
+        }
+        player.setStatus(PlayerStatus.APPROVED);
+        playerRepository.save(player);
+        return new SuccessResponseDTO(
+                "Hráč " + player.getFullName() + " byl úspěšně aktivován",
+                id,
+                LocalDateTime.now().toString()
+        );
+    }
+
+    @Override
+    @Transactional
+    public SuccessResponseDTO rejectPlayer(Long id) {
+        PlayerEntity player = findPlayerOrThrow(id);
+
+        if (player.getStatus() == PlayerStatus.REJECTED) {
+            throw new InvalidPlayerStatusException("Hráč už je zamítnut.");
+        }
+        player.setStatus(PlayerStatus.REJECTED);
+        playerRepository.save(player);
+
+        return new SuccessResponseDTO(
+                "Hráč " + player.getFullName() + " byl úspěšně zamítnut",
+                id,
+                LocalDateTime.now().toString()
+        );
+    }
+
+
 }

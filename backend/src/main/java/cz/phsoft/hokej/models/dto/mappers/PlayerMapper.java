@@ -20,6 +20,10 @@ public interface PlayerMapper {
         @Mapping(source = "nickName", target = "nickname")   // KLÍČOVÉ
         @Mapping(target = "fullName", ignore = true)         // generuje si Entity sama
         @Mapping(target = "user", ignore = true)             // nastavuješ v service
+        @Mapping(
+                target = "status",
+                expression = "java(dto.getStatus() != null ? dto.getStatus() : cz.phsoft.hokej.data.enums.PlayerStatus.PENDING)"
+        )
         PlayerEntity toEntity(PlayerDTO dto);
 
         // Aktualizace existujícího DTO (ignorujeme fullName)
@@ -31,6 +35,10 @@ public interface PlayerMapper {
         @Mapping(source = "nickName", target = "nickname")   // i tady je důležité
         @Mapping(target = "fullName", ignore = true)
         @Mapping(target = "user", ignore = true)
+        @Mapping(
+                target = "status",
+                expression = "java(source.getStatus() != null ? source.getStatus() : target.getStatus())"
+        )
         void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
 
     List<PlayerDTO> toDTOList(List<PlayerEntity> players);

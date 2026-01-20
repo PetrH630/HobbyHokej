@@ -76,6 +76,7 @@ public class DataInitializer {
             admin.setEmail("admin@example.com");
             admin.setPassword(encoder.encode("Administrator123"));
             admin.setRole(Role.ROLE_ADMIN);
+            admin.setEnabled(true);
             appUserRepository.save(admin);
             System.out.println("Default admin user created.");
         } else {
@@ -95,15 +96,23 @@ public class DataInitializer {
             user.setSurname("Číslo_" + playerCounter);
             user.setEmail(email);
             user.setPassword(encoder.encode(password));
+
             switch (playerCounter){
                 case 1:
                     user.setRole(Role.ROLE_ADMIN);
+                    System.out.println("Nastavena role: admin");
+                    break;
                 case 2:
                     user.setRole(Role.ROLE_MANAGER);
+                    System.out.println("Nastavena role: manager");
+                    break;
                 default:
                     user.setRole(Role.ROLE_PLAYER);
+                    System.out.println("Nastavena role: player");
             }
+            user.setEnabled(true);
             // přiřadit hráče k uživateli
+            System.out.println("Vytvářím uživatele č. " + playerCounter);
             player.setUser(user);
 
             // uložit uživatele (cascade uloží i hráče, pokud je správně nastaven)

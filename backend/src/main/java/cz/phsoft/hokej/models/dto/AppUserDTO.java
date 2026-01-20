@@ -14,6 +14,7 @@ public class AppUserDTO {
     private String surname;
     private String email;
     private Role role;
+    private boolean enabled;
     private Set<PlayerDTO> players; // jednostranné
 
 
@@ -56,6 +57,10 @@ public class AppUserDTO {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    public boolean isEnabled() { return enabled; }
+
+    public void setEnabled(boolean enabled) { this.enabled = enabled;}
 
     public Set<PlayerDTO> getPlayers() {
         return players;

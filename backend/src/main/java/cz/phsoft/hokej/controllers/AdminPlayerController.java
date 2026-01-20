@@ -64,17 +64,17 @@ public class AdminPlayerController {
     // SCHVÁLENÍ HRÁČE
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/approve/{id}")
-    public PlayerDTO approvePlayer(@PathVariable Long id, @RequestBody PlayerDTO dto ) {
-        dto.setStatus(PlayerStatus.APPROVED);
-        return playerService.updatePlayer(id, dto);
+    public ResponseEntity<SuccessResponseDTO> approvePlayer(@PathVariable Long id) {
+        SuccessResponseDTO response = playerService.approvePlayer(id);
+        return ResponseEntity.ok(response);
 
     }
     // ZAMÍTNUTÍ HRÁČE
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/reject/{id}")
-    public PlayerDTO rejectPlayer(@PathVariable Long id, @RequestBody PlayerDTO dto ) {
-        dto.setStatus(PlayerStatus.REJECTED);
-        return playerService.updatePlayer(id, dto);
+    public ResponseEntity<SuccessResponseDTO> rejectPlayer(@PathVariable Long id) {
+        SuccessResponseDTO response = playerService.rejectPlayer(id);
+        return ResponseEntity.ok(response);
 
     }
 

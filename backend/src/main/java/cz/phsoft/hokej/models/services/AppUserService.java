@@ -24,4 +24,5 @@ public interface AppUserService {
 
     void updateUser(String email, AppUserDTO dto);
 
+    boolean activateUser(String token);
 }

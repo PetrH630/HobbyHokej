@@ -15,4 +15,6 @@ public interface PlayerService {
     PlayerDTO updatePlayer(Long id, PlayerDTO player);
     SuccessResponseDTO deletePlayer(Long id);
     public List<PlayerDTO> getPlayersByUser(String email);
+    SuccessResponseDTO approvePlayer (Long id);
+    SuccessResponseDTO rejectPlayer (Long id);
 }

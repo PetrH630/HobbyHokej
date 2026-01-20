@@ -32,6 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .roles(user.getRole().name().replace("ROLE_", "")) // "ADMIN", "PLAYER", ...
+                .disabled(!user.isEnabled()) // neaktivní - nelze se příhlásit
                 .build();
     }
 }
