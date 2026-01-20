@@ -36,10 +36,25 @@ public class AppUserServiceImpl implements AppUserService {
         }
 
         AppUserEntity user = new AppUserEntity();
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.ROLE_PLAYER);
 
+        userRepository.save(user);
+    }
+
+    @Override
+    public void updateUser(String email, AppUserDTO dto) {
+
+        AppUserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+
+        // Nastavení nového hesla
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        user.setEmail(dto.getEmail());
         userRepository.save(user);
     }
 
@@ -49,13 +64,13 @@ public class AppUserServiceImpl implements AppUserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // ← využití mapperu
-        return appUserMapper.toDto(user);
+        return appUserMapper.toDTO(user);
     }
 
     @Override
     public List<AppUserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(appUserMapper::toDto)
+                .map(appUserMapper::toDTO)
                 .toList();
     }
 
@@ -77,5 +92,17 @@ public class AppUserServiceImpl implements AppUserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
+    // reset hesla
+    @Override
+    public void resetPassword(Long userId) {
+        AppUserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+
+        // Nastavení nového hesla na "Player123"
+        user.setPassword(passwordEncoder.encode("Player123"));
+        userRepository.save(user);
+    }
+
 
 }

@@ -38,6 +38,26 @@ public class AppUserController {
         return ResponseEntity.ok("Heslo úspěšně změněno");
     }
 
+    // Změna přihlášeného uživatele
+    @PutMapping("/me/update")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> updateUser(Authentication authentication,
+                                                 @RequestBody AppUserDTO dto) {
+        String email = authentication.getName();
+        appUserService.updateUser(email, dto);
+
+        return ResponseEntity.ok("uživatel byl změněn");
+    }
+
+
+    // reset hesla uživatele
+    @PostMapping("/{id}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> resetPassword(@PathVariable Long id) {
+        appUserService.resetPassword(id);
+        return ResponseEntity.ok("Heslo resetováno na 'Player123'");
+    }
+
     // Seznam všech uživatelů – jen ADMIN
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")

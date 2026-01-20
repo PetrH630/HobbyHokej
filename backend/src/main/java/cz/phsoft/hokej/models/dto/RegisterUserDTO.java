@@ -6,7 +6,15 @@ import jakarta.validation.constraints.Size;
 
 public class RegisterUserDTO {
 
-    @NotBlank
+    @NotBlank(message = "Křestní jméno je povinné.")
+    @Size(min = 2, max = 50)
+    private String name; // not null
+
+    @NotBlank(message = "Příjmení je povinné.")
+    @Size(min = 2, max = 50)
+    private String surname;
+
+    @NotBlank(message = "email je povinný.")
     @Email
     private String email;
 
@@ -16,6 +24,23 @@ public class RegisterUserDTO {
 
     @NotBlank
     private String passwordConfirm;
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
 
     public String getEmail() {
         return email;

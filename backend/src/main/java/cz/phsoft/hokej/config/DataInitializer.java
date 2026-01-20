@@ -74,6 +74,8 @@ public class DataInitializer {
         // --- Default admin ---
         if (appUserRepository.findByEmail("admin@example.com").isEmpty()) {
             AppUserEntity admin = new AppUserEntity();
+            admin.setName("admin");
+            admin.setSurname("admin");
             admin.setEmail("admin@example.com");
             admin.setPassword(encoder.encode("Administrator123"));
             admin.setRole(Role.ROLE_ADMIN);
@@ -92,6 +94,8 @@ public class DataInitializer {
             String password = "Player123";
 
             AppUserEntity user = new AppUserEntity();
+            user.setName("Hráč" + playerCounter);
+            user.setSurname("Číslo_" + playerCounter);
             user.setEmail(email);
             user.setPassword(encoder.encode(password));
             switch (playerCounter){

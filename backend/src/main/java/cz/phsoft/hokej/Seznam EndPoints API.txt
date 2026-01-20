@@ -21,13 +21,14 @@ CurrentPlayerController
 @GetMapping
 /api/current-player                 - získání aktuálního hráče  - isAuthenticated
 /api/current-player/my-players      - seznam hráčů uživatele    - isAuthenticated
+
 ----------------------
 AppUserController
 @RequestMapping("/api/users")
 @GetMapping("/me") - aktuálně přihlášený uživatel - isAuthenticated
 @PostMapping("/me/change-password") - změna hesla - isAuthenticated
-/api/users - seznam uživatelů - Admin
-
+@GetMapping("/api/users") - seznam uživatelů - Admin
+@PostMapping("/{id}/reset-password") - reset hesla na Player123 - Admin
 
 
 MATCH

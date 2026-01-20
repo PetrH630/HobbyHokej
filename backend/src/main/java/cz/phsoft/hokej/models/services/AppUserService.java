@@ -20,4 +20,8 @@ public interface AppUserService {
 
     void changePassword(String email, String oldPassword, String newPassword, String newPasswordConfirm);
 
+    void resetPassword(Long userId);
+
+    void updateUser(String email, AppUserDTO dto);
+
 }

@@ -55,10 +55,12 @@ public class PlayerDTO {
 
     public String getFullName() { return fullName; }
 
+    private void updateFullName() { this.fullName = name + " " + surname; }
+
     public PlayerType getType() { return type; }
     public void setType(PlayerType type) { this.type = type != null ? type : PlayerType.BASIC; }
 
-    private void updateFullName() { this.fullName = name + " " + surname; }
+
 
     public Team getTeam() { return team; }
     public void setTeam(Team team) { this.team = team; }
