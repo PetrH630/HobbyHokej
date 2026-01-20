@@ -149,6 +149,11 @@ public class DataInitializer {
             reg.setMatch(match3);
             reg.setPlayer(player);
             reg.setStatus(PlayerMatchStatus.REGISTERED);
+            if (playerId <=3){
+                reg.setTeam(Team.DARK);
+            }else {
+                reg.setTeam(Team.LIGHT);
+            }
             reg.setTimestamp(LocalDateTime.now());
             reg.setCreatedBy("user");
             matchRegistrationRepository.save(reg);

@@ -1,6 +1,8 @@
 package cz.phsoft.hokej.exceptions;
 
-public class PlayerNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class PlayerNotFoundException extends BusinessException {
     public PlayerNotFoundException(Long playerId) {
-        super("Hráč s ID " + playerId + " nenalezen.");}
+        super("Hráč s ID " + playerId + " nenalezen.", HttpStatus.NOT_FOUND);}
 }

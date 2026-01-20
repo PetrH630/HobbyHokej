@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import cz.phsoft.hokej.exceptions.AccountNotActivatedException;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,7 +27,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         AppUserEntity user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Uživatel nenalezen"));
+
+        if (!user.isEnabled()) { // nebo podle status == PENDING
+            throw new AccountNotActivatedException();
+        }
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())

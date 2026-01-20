@@ -97,7 +97,15 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
 
         Map<String, Object> result = new HashMap<>();
         result.put("status", "error");
-        result.put("message", "Neplatné přihlašovací údaje");
+
+        // Rozlišení neaktivovaného účtu
+        if (failed.getCause() instanceof cz.phsoft.hokej.exceptions.AccountNotActivatedException) {
+            result.put("message", failed.getCause().getMessage()); // např. "Účet není aktivován. Zkontrolujte email."
+        } else if (failed instanceof BadCredentialsException) {
+            result.put("message", "Neplatné přihlašovací údaje");
+        } else {
+            result.put("message", "Chyba při přihlášení");
+        }
 
         objectMapper.writeValue(response.getWriter(), result);
     }

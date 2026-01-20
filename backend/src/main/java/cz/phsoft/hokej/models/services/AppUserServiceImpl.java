@@ -5,6 +5,7 @@ import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
+import cz.phsoft.hokej.exceptions.UserAlreadyExistsException;
 import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import cz.phsoft.hokej.models.dto.mappers.AppUserMapper;
@@ -44,7 +45,7 @@ public class AppUserServiceImpl implements AppUserService {
         }
 
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Uživatel s tímto emailem již existuje");
+            throw new UserAlreadyExistsException("Uživatel s tímto emailem již existuje");
         }
 
         AppUserEntity user = new AppUserEntity();

@@ -3,32 +3,33 @@ import { logout, getCurrentUser } from "../api/auth";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { AiOutlineClose } from "react-icons/ai";
 import { NavLink, useLocation } from "react-router-dom";
+import "./Navbar.css"
 
 const Navbar = () => {
 
     const [showMenu, setShowMenu] = useState(false);
-    const [email, setEmail] = useState("nepřihlášen"); // 👈 VÝCHOZÍ STAV
+    const [fullName, setFullName] = useState("nepřihlášen"); // Výchozí stav
     const location = useLocation(); // sleduje změnu stránky (login → /)
+
 
     const closeMenu = () => {
         if (window.innerWidth < 700) setShowMenu(false);
     };
 
-    // 🔹 Funkce pro načtení aktuálního uživatele
+    // Funkce pro načtení aktuálního uživatele
     const loadUser = async () => {
         try {
             const user = await getCurrentUser();
-            if (user?.email) {
-                setEmail(user.email);
+            if (user?.name && user?.surname) {
+                setFullName(`${user.name} ${user.surname}`);
             } else {
-                setEmail("nepřihlášen");
+                setFullName("nepřihlášen");
             }
         } catch (err) {
-            setEmail("nepřihlášen");
+            setFullName("nepřihlášen");
         }
     };
 
-    // 🔹 Spustí se:
     // - při prvním načtení
     // - pokaždé, když se změní stránka (např. po loginu redirect na "/")
     useEffect(() => {
@@ -59,14 +60,6 @@ const Navbar = () => {
                 {/* Menu */}
                 <div className={`nav-list ${showMenu ? "show" : "hide"}`}>
                     <ul>
-                        <li>
-                            <NavLink to="/" className={({ isActive }) =>
-                                isActive ? "activeLink" : "nonactiveLink"
-                            } onClick={closeMenu}>
-                                Domů
-                            </NavLink>
-                        </li>
-
                         <li>
                             <NavLink to="/matches" className={({ isActive }) =>
                                 isActive ? "activeLink" : "nonactiveLink"
@@ -103,7 +96,7 @@ const Navbar = () => {
 
                 {/* PRAVÁ STRANA - UŽIVATEL */}
                 <div className="d-flex align-items-center gap-3">
-                    <span className="navbar-text">👤 {email}</span>
+                    <span className="navbar-text">👤 {fullName}</span>
 
                     <button className="btn btn-outline-danger" onClick={logout}>
                         Odhlásit

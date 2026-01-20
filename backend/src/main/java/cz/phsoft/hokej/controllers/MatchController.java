@@ -37,7 +37,7 @@ public class MatchController {
         return matchService.getMatchDetail(id);
     }
 
-    // Nadcházející zápas
+    // Nadcházející zápas - NEPOUŽÍVAT - NENÍ TAM PLAYER TYPE
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/next")
     public MatchDTO getNextMatch() {

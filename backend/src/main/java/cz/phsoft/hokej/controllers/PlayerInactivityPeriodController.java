@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/inactivity")
+@RequestMapping("/api/inactivity/Admin")
 @CrossOrigin(origins = "*")
 public class PlayerInactivityPeriodController {
 
@@ -20,14 +20,14 @@ public class PlayerInactivityPeriodController {
     }
 
     // všechny záznamy o neaktivitě hráčů
-    @GetMapping("/admin/all")
+    @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerInactivityPeriodDTO> getAll() {
         return service.getAll();
     }
 
     // neaktivita hráčů dle id neaktivity
-    @GetMapping("/admin/{id}")
+    @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<PlayerInactivityPeriodDTO> getById(@PathVariable Long id) {
         PlayerInactivityPeriodDTO dto = service.getById(id);
@@ -35,7 +35,7 @@ public class PlayerInactivityPeriodController {
     }
 
     // získá záznamy o periodě neaktivity dle id hráče
-    @GetMapping("/admin/player/{playerId}")
+    @GetMapping("/player/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerInactivityPeriodDTO> getByPlayer(@PathVariable Long playerId) {
         return service.getByPlayer(playerId);
@@ -50,7 +50,7 @@ public class PlayerInactivityPeriodController {
     }
 
     // změní záznam o neaktivitě hráče dle id
-    @PutMapping("/admin/{id}")
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlayerInactivityPeriodDTO> update(
             @PathVariable Long id,
@@ -61,7 +61,7 @@ public class PlayerInactivityPeriodController {
     }
 
     // vymaže záznam o neaktivitě hráče dle id záznamu
-    @DeleteMapping("/admin/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

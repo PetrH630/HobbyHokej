@@ -2,6 +2,7 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import cz.phsoft.hokej.security.CurrentPlayerService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,4 +44,24 @@ public class AdminMatchRegistrationController {
     public List<PlayerDTO> getNoResponse(@PathVariable Long matchId) {
         return service.getNoResponsePlayers(matchId);
     }
+
+
+    // UNIVERZÁLNÍ ENDPOINT PRO REGISTRACE - za hráče
+
+
+    @PostMapping("/upsert/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO upsert(@PathVariable Long playerId, @RequestBody MatchRegistrationRequest request) {
+
+        return service.upsertRegistration(
+                request.getMatchId(),
+                request.getPlayerId(), // vybraný hráč
+                request.getTeam(),
+                request.getAdminNote(),
+                request.getExcuseReason(),
+                request.getExcuseNote(),
+                request.isUnregister()
+        );
+    }
+
 }

@@ -40,3 +40,21 @@ export const login = async (email, password) => {
     // posíláme JSON
     return api.post("/api/login", { email, password });
 };
+
+export const register = async (data) => {
+    const response = await fetch("http://localhost:8080/api/auth/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        // načteme JSON z response
+        const errorData = await response.json(); // ← tady definujeme proměnnou
+        throw new Error(errorData.message);       // použijeme správně
+    }
+
+    return response.json();
+};

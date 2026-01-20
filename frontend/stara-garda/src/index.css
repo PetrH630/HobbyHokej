@@ -1,68 +1,80 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
+html,
 body {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  /* odstraní horizontální scroll */
+}
+
+.layout {
   display: flex;
-  place-items: center;
-  min-width: 320px;
+  flex-direction: column;
   min-height: 100vh;
+  /* aby footer byl vždy dole */
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.content {
+  flex: 1;
+  /* zabere volné místo mezi headerem a footerem */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.container {
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px 16px;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+footer {
+  background: #222;
+  color: #0a0101;
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.inner {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
+
+}
+
+ul {
+  list-style-position: inside;
+  /* odrážka uvnitř */
+  padding-left: 1.2em;
+  /* prostor mezi okrajem a textem */
+  margin: 0.5em 0;
+  /* mezera nad a pod seznamem */
+  text-align: left;
+  /* aby text nebyl na středu */
+}
+
+li {
+  margin-bottom: 0.5em;
+  /* mezera mezi položkami */
+  line-height: 1.5em;
+  /* více vzduchu mezi řádky textu */
+}
+
+.slider {
+  height: 50vh;
+  /*border: 2px solid #0a0101;*/
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
 }
