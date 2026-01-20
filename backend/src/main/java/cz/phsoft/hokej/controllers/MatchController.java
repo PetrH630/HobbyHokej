@@ -37,25 +37,11 @@ public class MatchController {
         return matchService.getMatchDetail(id);
     }
 
-    // Všechny zápasy
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchDTO> getAllMatches() {
-        return matchService.getAllMatches();
-    }
-
     // Nadcházející zápas
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/next")
     public MatchDTO getNextMatch() {
         return matchService.getNextMatch();
-    }
-
-    // Všechny nadcházející zápasy
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    @GetMapping("/admin/upcoming")
-    public List<MatchDTO> getUpcomingMatches() {
-        return matchService.getUpcomingMatches();
     }
 
     // Nadcházející zápasy pro přihlášeného hráče
@@ -83,47 +69,7 @@ public class MatchController {
         return matchService.getAllPassedMatchesForPlayer(currentPlayerId);
     }
 
-    // Už uskutečněné zápasy
-    @GetMapping("/admin/past")
-    public List<MatchDTO> getPastMatches() {
-        return matchService.getPastMatches();
-    }
 
-    // Vytvoření zápasu
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public MatchDTO createMatch(@Valid @RequestBody MatchDTO matchDTO) {
-        return matchService.createMatch(matchDTO);
-    }
-
-    // Získání zápasu podle ID
-    @GetMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public MatchDTO getMatch(@PathVariable Long id) {
-        return matchService.getMatchById(id);
-    }
-
-    // Editace zápasu
-    @PutMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public MatchDTO updateMatch(@PathVariable Long id, @Valid @RequestBody MatchDTO dto) {
-        return matchService.updateMatch(id, dto);
-    }
-
-    // Smazání zápasu
-    @DeleteMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponseDTO> deleteMatch(@PathVariable Long id) {
-        SuccessResponseDTO response = matchService.deleteMatch(id);
-        return ResponseEntity.ok(response);
-    }
-
-    // Dostupné zápasy pro hráče
-    @GetMapping("/admin/available-for-player/{playerId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchDTO> getAvailableMatchesForPlayer(@PathVariable Long playerId) {
-        return matchService.getAvailableMatchesForPlayer(playerId);
-    }
 
 
 

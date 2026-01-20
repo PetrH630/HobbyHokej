@@ -2,6 +2,7 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
@@ -63,6 +64,7 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerEntity player = playerMapper.toEntity(dto);
         player.setUser(user); // přiřazení hráče k uživateli
 
+
         PlayerEntity saved = playerRepository.save(player);
         return playerMapper.toDTO(saved);
     }
@@ -94,6 +96,7 @@ public class PlayerServiceImpl implements PlayerService {
         existing.setPhoneNumber(dto.getPhoneNumber());
         existing.setType(dto.getType());
         existing.setTeam(dto.getTeam());
+        existing.setStatus(dto.getStatus());
 
         PlayerEntity saved = playerRepository.save(existing);
         return playerMapper.toDTO(saved);

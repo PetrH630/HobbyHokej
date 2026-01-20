@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState(""); // 🔹 změněno z username na email
+    const [email, setEmail] = useState(""); // změněno z username na email
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);

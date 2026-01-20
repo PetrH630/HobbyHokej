@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.data.entities;
 
+import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.persistence.*;
@@ -30,6 +31,10 @@ public class PlayerEntity {
     @Enumerated(EnumType.STRING)
     private Team team;
 
+    @Enumerated(EnumType.STRING)
+    private PlayerStatus status = PlayerStatus.PENDING;
+
+
     // Many-to-One: každý hráč patří jednomu uživateli
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -40,7 +45,7 @@ public class PlayerEntity {
         this.type = PlayerType.BASIC;
     }
 
-    public PlayerEntity(String name, String surname, String nickName, PlayerType type, String phoneNumber, Team team) {
+    public PlayerEntity(String name, String surname, String nickName, PlayerType type, String phoneNumber, Team team, PlayerStatus status) {
         this.name = name;
         this.surname = surname;
         this.nickName = nickName;
@@ -48,6 +53,7 @@ public class PlayerEntity {
         this.fullName = name + " " + surname;
         this.phoneNumber = phoneNumber;
         this.team = team;
+        this.status = status;
     }
 
     // ----------------- Gettery a Settery -----------------
@@ -114,5 +120,21 @@ public class PlayerEntity {
     }
     public void setUser(AppUserEntity user) {
         this.user = user;
+    }
+
+    public PlayerStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerStatus status) {
+        this.status = status;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 }

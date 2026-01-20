@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.models.dto;
 
+import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.validation.constraints.NotBlank;
@@ -22,13 +23,14 @@ public class PlayerDTO {
     private String phoneNumber;
     private PlayerType type; // not null, default BASIC
     private Team team;
+    private PlayerStatus status;
 
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
    }
 
-    public PlayerDTO(Long id, String name, String surname, String nickName, PlayerType type, Team team) {
+    public PlayerDTO(Long id, String name, String surname, String nickName, PlayerType type, Team team, PlayerStatus status) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -36,6 +38,7 @@ public class PlayerDTO {
         this.type = type != null ? type : PlayerType.BASIC;
         this.updateFullName();
         this.team = team;
+        this.status = status != null ? status : PlayerStatus.PENDING;
     }
 
     // --- Gettery a Settery ---
@@ -60,11 +63,13 @@ public class PlayerDTO {
     public PlayerType getType() { return type; }
     public void setType(PlayerType type) { this.type = type != null ? type : PlayerType.BASIC; }
 
-
-
     public Team getTeam() { return team; }
     public void setTeam(Team team) { this.team = team; }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public PlayerStatus getStatus() { return status; }
+    public void setStatus(PlayerStatus status) { this.status = status != null ? status : PlayerStatus.PENDING;
+    }
 }

@@ -25,9 +25,10 @@ public class MatchRegistrationController {
         this.currentPlayerService = currentPlayerService;
     }
 
-    // -----------------------------------------------------
-    // 🔥 JEDINÝ UNIVERZÁLNÍ ENDPOINT PRO REGISTRACE
-    // -----------------------------------------------------
+
+    // UNIVERZÁLNÍ ENDPOINT PRO REGISTRACE
+
+
     @PostMapping("/me/upsert")
     @PreAuthorize("isAuthenticated()")
     public MatchRegistrationDTO upsert(@RequestBody MatchRegistrationRequest request) {
@@ -46,16 +47,7 @@ public class MatchRegistrationController {
         );
     }
 
-    // -----------------------------------------------------
-    // GET ENDPOINTY
-    // -----------------------------------------------------
-
-    @GetMapping("/admin/all")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchRegistrationDTO> getAllRegistrations() {
-        return service.getAllRegistrations();
-    }
-
+    // registrace na zápasy přihlášeného hráče
     @GetMapping("/me/for-current-player")
     @PreAuthorize("isAuthenticated()")
     public List<MatchRegistrationDTO> forCurrentPlayer() {
@@ -64,20 +56,5 @@ public class MatchRegistrationController {
         return service.getRegistrationsForPlayer(currentPlayerId);
     }
 
-    @GetMapping("/admin/for-match/{matchId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchRegistrationDTO> forMatch(@PathVariable Long matchId) {
-        return service.getRegistrationsForMatch(matchId);
-    }
 
-    @GetMapping("/admin/for-player/{playerId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchRegistrationDTO> forPlayer(@PathVariable Long playerId) {
-        return service.getRegistrationsForPlayer(playerId);
-    }
-    @GetMapping("/admin/no-response/{matchId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<PlayerDTO> getNoResponse(@PathVariable Long matchId) {
-        return service.getNoResponsePlayers(matchId);
-    }
 }

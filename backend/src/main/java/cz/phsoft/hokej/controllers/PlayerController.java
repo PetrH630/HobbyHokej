@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.controllers;
 
+import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
@@ -25,29 +26,6 @@ public class PlayerController {
         this.currentPlayerService = currentPlayerService;
     }
 
-    // všichni hráči
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<PlayerDTO> getAllPlayers() {
-        return playerService.getAllPlayers();
-    }
-
-    // hráč dle id
-
-    @GetMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public PlayerDTO getPlayerById(@PathVariable Long id) {
-        return playerService.getPlayerById(id);
-    }
-
-    /*
-    /// vytvoření hráče
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    @PostMapping
-    public PlayerDTO createPlayer(@RequestBody PlayerDTO playerDTO) {
-        return playerService.createPlayer(playerDTO);
-    }
-    */
     // vytvoření hráče pro přihlášeného uživatele
     @PostMapping("/me")
     @PreAuthorize("isAuthenticated()") // každý přihlášený uživatel
@@ -73,23 +51,4 @@ public class PlayerController {
 
         return playerService.updatePlayer(currentPlayerId, dto);
     }
-
-    // úprava hráče administrátorem dle id hráče
-    @PutMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public PlayerDTO upatePlayerAdmin(@PathVariable Long id,  @RequestBody PlayerDTO dto) {
-
-        return playerService.updatePlayer(id, dto);
-    }
-
-
-    // odstraní hráče
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/admin/{id}")
-    public ResponseEntity<SuccessResponseDTO> deletePlayer(@PathVariable Long id) {
-        SuccessResponseDTO response = playerService.deletePlayer(id);
-        return ResponseEntity.ok(response);
-    }
-
-
 }
