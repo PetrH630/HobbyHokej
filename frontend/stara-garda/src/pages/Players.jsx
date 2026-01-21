@@ -4,7 +4,8 @@ import Player from "../components/Player"
 const Players = () => {
 
   return (
-    <div>Player</div>
+    <div><Player /></div>
+    
     
 
   )

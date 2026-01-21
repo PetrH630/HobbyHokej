@@ -1,0 +1,289 @@
+2026-01-14 10:29:07 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-01-14 10:29:07 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Starting StaraGardaApplication using Java 19.0.2 with PID 16080 (C:\Projekty Práce\StaraGarda\backend\target\classes started by petrh in C:\Projekty Práce\StaraGarda)
+2026-01-14 10:29:07 [main] INFO  c.phsoft.hokej.StaraGardaApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-14 10:29:09 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-14 10:29:09 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 209 ms. Found 6 JPA repository interfaces.
+2026-01-14 10:29:12 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-14 10:29:12 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-01-14 10:29:12 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-14 10:29:12 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-01-14 10:29:12 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-14 10:29:12 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 4832 ms
+2026-01-14 10:29:13 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-14 10:29:13 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-01-14 10:29:13 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-14 10:29:13 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2026-01-14 10:29:14 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-14 10:29:14 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-01-14 10:29:14 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@ac4e690
+2026-01-14 10:29:14 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-01-14 10:29:16 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-14 10:29:17 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 10:29:21 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-14 10:29:22 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@69ca71b3, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@371a7fd5, org.springframework.security.web.context.SecurityContextHolderFilter@7c2d4398, org.springframework.security.web.header.HeaderWriterFilter@512319dc, org.springframework.web.filter.CorsFilter@f41db7f, org.springframework.security.web.authentication.logout.LogoutFilter@27bfa57f, cz.phsoft.hokej.config.CustomJsonLoginFilter@4df8f4e9, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7280785f, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@589dd717, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7785430c, org.springframework.security.web.session.SessionManagementFilter@160b7ccd, org.springframework.security.web.access.ExceptionTranslationFilter@198c97d0, org.springframework.security.web.access.intercept.AuthorizationFilter@40ef1198]
+2026-01-14 10:29:23 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-01-14 10:29:23 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-01-14 10:29:23 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Started StaraGardaApplication in 17.445 seconds (process running for 18.75)
+2026-01-14 10:32:18 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-14 10:32:18 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-01-14 10:32:18 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2026-01-14 10:33:49 [http-nio-8080-exec-5] WARN  o.a.c.util.SessionIdGeneratorBase - Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [990] milliseconds.
+2026-01-14 10:57:25 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 10:57:26 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-01-14 10:57:26 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-01-14 11:29:57 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-01-14 11:29:57 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Starting StaraGardaApplication using Java 19.0.2 with PID 15640 (C:\Projekty Práce\StaraGarda\backend\target\classes started by petrh in C:\Projekty Práce\StaraGarda)
+2026-01-14 11:29:57 [main] INFO  c.phsoft.hokej.StaraGardaApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-14 11:30:00 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-14 11:30:00 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 285 ms. Found 6 JPA repository interfaces.
+2026-01-14 11:30:03 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-14 11:30:03 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-01-14 11:30:03 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-14 11:30:03 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-01-14 11:30:03 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-14 11:30:03 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5466 ms
+2026-01-14 11:30:03 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-14 11:30:04 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-01-14 11:30:04 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-14 11:30:04 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2026-01-14 11:30:05 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-14 11:30:05 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-01-14 11:30:05 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@365bfc5f
+2026-01-14 11:30:05 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-01-14 11:30:08 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-14 11:30:08 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 11:30:10 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-14 11:30:11 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@110b6c78, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@e62d757, org.springframework.security.web.context.SecurityContextHolderFilter@6bd5aa8b, org.springframework.security.web.header.HeaderWriterFilter@2c3a2935, org.springframework.web.filter.CorsFilter@597f2d3f, org.springframework.security.web.authentication.logout.LogoutFilter@7e641005, cz.phsoft.hokej.config.CustomJsonLoginFilter@7746330a, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1737acc0, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@30ffc3c0, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3de4f936, org.springframework.security.web.session.SessionManagementFilter@83b39c3, org.springframework.security.web.access.ExceptionTranslationFilter@2100b770, org.springframework.security.web.access.intercept.AuthorizationFilter@63069995]
+2026-01-14 11:30:12 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-01-14 11:30:12 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-01-14 11:30:12 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Started StaraGardaApplication in 16.33 seconds (process running for 17.541)
+2026-01-14 11:30:26 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-14 11:30:26 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-01-14 11:30:26 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 8 ms
+2026-01-14 11:30:34 [http-nio-8080-exec-3] WARN  o.a.c.util.SessionIdGeneratorBase - Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [104] milliseconds.
+2026-01-14 11:39:33 [http-nio-8080-exec-5] WARN  c.p.hokej.security.PlayerSecurity - Neautorizovaný přístup: uživatel player5@example.com není vlastníkem hráče 10
+2026-01-14 11:46:17 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 11:46:17 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-01-14 11:46:17 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-01-14 11:46:32 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-01-14 11:46:32 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Starting StaraGardaApplication using Java 19.0.2 with PID 16720 (C:\Projekty Práce\StaraGarda\backend\target\classes started by petrh in C:\Projekty Práce\StaraGarda)
+2026-01-14 11:46:32 [main] INFO  c.phsoft.hokej.StaraGardaApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-14 11:46:35 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-14 11:46:35 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 294 ms. Found 6 JPA repository interfaces.
+2026-01-14 11:46:38 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-14 11:46:38 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-01-14 11:46:38 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-14 11:46:38 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-01-14 11:46:39 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-14 11:46:39 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 6383 ms
+2026-01-14 11:46:39 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-14 11:46:39 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-01-14 11:46:40 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-14 11:46:40 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2026-01-14 11:46:41 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-14 11:46:41 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-01-14 11:46:41 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@1c6ac73c
+2026-01-14 11:46:41 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-01-14 11:46:44 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-14 11:46:44 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 11:46:47 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-14 11:46:48 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@31620971, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@794cd751, org.springframework.security.web.context.SecurityContextHolderFilter@2ca4b010, org.springframework.security.web.header.HeaderWriterFilter@c32908c, org.springframework.web.filter.CorsFilter@63069995, org.springframework.security.web.authentication.logout.LogoutFilter@4a2c69a6, cz.phsoft.hokej.config.CustomJsonLoginFilter@3003d288, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1f7653ae, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@62f8b2f4, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@110b6c78, org.springframework.security.web.session.SessionManagementFilter@2100b770, org.springframework.security.web.access.ExceptionTranslationFilter@48d6248d, org.springframework.security.web.access.intercept.AuthorizationFilter@615f61ec]
+2026-01-14 11:46:48 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-01-14 11:46:49 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-01-14 11:46:49 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Started StaraGardaApplication in 18.321 seconds (process running for 19.866)
+2026-01-14 11:46:56 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-14 11:46:56 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-01-14 11:46:56 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2026-01-14 11:46:56 [http-nio-8080-exec-2] WARN  o.a.c.util.SessionIdGeneratorBase - Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [110] milliseconds.
+2026-01-14 11:54:09 [http-nio-8080-exec-6] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 11:54:09 [http-nio-8080-exec-6] WARN  o.m.jdbc.message.server.ErrorPacket - Error: 1054-42S22: Unknown column 'team' in 'field list'
+2026-01-14 11:54:09 [http-nio-8080-exec-6] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 1054, SQLState: 42S22
+2026-01-14 11:54:09 [http-nio-8080-exec-6] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - (conn=106) Unknown column 'team' in 'field list'
+2026-01-14 11:54:43 [http-nio-8080-exec-9] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 11:54:43 [http-nio-8080-exec-9] WARN  o.m.jdbc.message.server.ErrorPacket - Error: 1054-42S22: Unknown column 'team' in 'field list'
+2026-01-14 11:54:43 [http-nio-8080-exec-9] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 1054, SQLState: 42S22
+2026-01-14 11:54:43 [http-nio-8080-exec-9] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - (conn=106) Unknown column 'team' in 'field list'
+2026-01-14 11:57:25 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 11:57:25 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-01-14 11:57:25 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-01-14 12:04:47 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-01-14 12:04:47 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Starting StaraGardaApplication using Java 19.0.2 with PID 5424 (C:\Projekty Práce\StaraGarda\backend\target\classes started by petrh in C:\Projekty Práce\StaraGarda)
+2026-01-14 12:04:47 [main] INFO  c.phsoft.hokej.StaraGardaApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-14 12:04:49 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-14 12:04:50 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 253 ms. Found 6 JPA repository interfaces.
+2026-01-14 12:04:52 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-14 12:04:52 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-01-14 12:04:53 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-14 12:04:53 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-01-14 12:04:53 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-14 12:04:53 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5400 ms
+2026-01-14 12:04:53 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-14 12:04:53 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-01-14 12:04:54 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-14 12:04:54 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2026-01-14 12:04:54 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-14 12:04:54 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-01-14 12:04:55 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@365bfc5f
+2026-01-14 12:04:55 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-01-14 12:04:57 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-14 12:04:57 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 12:05:00 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-14 12:05:01 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@597f2d3f, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7746330a, org.springframework.security.web.context.SecurityContextHolderFilter@1737acc0, org.springframework.security.web.header.HeaderWriterFilter@83b39c3, org.springframework.web.filter.CorsFilter@3de4f936, org.springframework.security.web.authentication.logout.LogoutFilter@36c8e1c6, cz.phsoft.hokej.config.CustomJsonLoginFilter@252459b2, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@76b8b6a6, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@47e02a89, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5128efc, org.springframework.security.web.session.SessionManagementFilter@62f8b2f4, org.springframework.security.web.access.ExceptionTranslationFilter@2c3a2935, org.springframework.security.web.access.intercept.AuthorizationFilter@110b6c78]
+2026-01-14 12:05:02 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-01-14 12:05:02 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-01-14 12:05:02 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Started StaraGardaApplication in 16.093 seconds (process running for 17.416)
+2026-01-14 12:05:14 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-14 12:05:14 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-01-14 12:05:14 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2026-01-14 12:05:21 [http-nio-8080-exec-3] WARN  o.a.c.util.SessionIdGeneratorBase - Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [140] milliseconds.
+2026-01-14 12:06:59 [http-nio-8080-exec-2] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 12:06:59 [http-nio-8080-exec-2] WARN  o.m.jdbc.message.server.ErrorPacket - Error: 1054-42S22: Unknown column 'team' in 'field list'
+2026-01-14 12:06:59 [http-nio-8080-exec-2] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 1054, SQLState: 42S22
+2026-01-14 12:06:59 [http-nio-8080-exec-2] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - (conn=120) Unknown column 'team' in 'field list'
+2026-01-14 12:07:05 [http-nio-8080-exec-3] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 12:07:05 [http-nio-8080-exec-3] WARN  o.m.jdbc.message.server.ErrorPacket - Error: 1054-42S22: Unknown column 'team' in 'field list'
+2026-01-14 12:07:05 [http-nio-8080-exec-3] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 1054, SQLState: 42S22
+2026-01-14 12:07:05 [http-nio-8080-exec-3] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - (conn=120) Unknown column 'team' in 'field list'
+2026-01-14 12:07:32 [http-nio-8080-exec-6] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 12:07:32 [http-nio-8080-exec-6] WARN  o.m.jdbc.message.server.ErrorPacket - Error: 1054-42S22: Unknown column 'team' in 'field list'
+2026-01-14 12:07:32 [http-nio-8080-exec-6] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 1054, SQLState: 42S22
+2026-01-14 12:07:32 [http-nio-8080-exec-6] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - (conn=120) Unknown column 'team' in 'field list'
+2026-01-14 12:16:23 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 12:16:23 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-01-14 12:16:23 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-01-14 12:17:23 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-01-14 12:17:23 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Starting StaraGardaApplication using Java 19.0.2 with PID 7880 (C:\Projekty Práce\StaraGarda\backend\target\classes started by petrh in C:\Projekty Práce\StaraGarda)
+2026-01-14 12:17:23 [main] INFO  c.phsoft.hokej.StaraGardaApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-14 12:17:25 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-14 12:17:26 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 243 ms. Found 6 JPA repository interfaces.
+2026-01-14 12:17:29 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-14 12:17:29 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-01-14 12:17:29 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-14 12:17:29 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-01-14 12:17:29 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-14 12:17:29 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5369 ms
+2026-01-14 12:17:30 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-14 12:17:30 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-01-14 12:17:30 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-14 12:17:30 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2026-01-14 12:17:31 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-14 12:17:31 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-01-14 12:17:32 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@365bfc5f
+2026-01-14 12:17:32 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-01-14 12:17:35 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-14 12:17:35 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 12:17:38 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-14 12:17:38 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@597f2d3f, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7746330a, org.springframework.security.web.context.SecurityContextHolderFilter@1737acc0, org.springframework.security.web.header.HeaderWriterFilter@83b39c3, org.springframework.web.filter.CorsFilter@3de4f936, org.springframework.security.web.authentication.logout.LogoutFilter@36c8e1c6, cz.phsoft.hokej.config.CustomJsonLoginFilter@252459b2, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@76b8b6a6, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@47e02a89, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5128efc, org.springframework.security.web.session.SessionManagementFilter@62f8b2f4, org.springframework.security.web.access.ExceptionTranslationFilter@2c3a2935, org.springframework.security.web.access.intercept.AuthorizationFilter@110b6c78]
+2026-01-14 12:17:39 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-01-14 12:17:39 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-01-14 12:17:39 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Started StaraGardaApplication in 17.387 seconds (process running for 18.587)
+2026-01-14 12:17:51 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-14 12:17:51 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-01-14 12:17:51 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2026-01-14 12:17:52 [http-nio-8080-exec-2] WARN  o.a.c.util.SessionIdGeneratorBase - Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [145] milliseconds.
+2026-01-14 12:18:43 [http-nio-8080-exec-8] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 12:18:44 [http-nio-8080-exec-8] WARN  o.m.jdbc.message.server.ErrorPacket - Error: 1054-42S22: Unknown column 'team' in 'field list'
+2026-01-14 12:18:44 [http-nio-8080-exec-8] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 1054, SQLState: 42S22
+2026-01-14 12:18:44 [http-nio-8080-exec-8] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - (conn=138) Unknown column 'team' in 'field list'
+2026-01-14 12:24:32 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 12:24:32 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-01-14 12:24:32 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-01-14 12:25:50 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-01-14 12:25:51 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Starting StaraGardaApplication using Java 19.0.2 with PID 8520 (C:\Projekty Práce\StaraGarda\backend\target\classes started by petrh in C:\Projekty Práce\StaraGarda)
+2026-01-14 12:25:51 [main] INFO  c.phsoft.hokej.StaraGardaApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-14 12:25:53 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-14 12:25:53 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 262 ms. Found 6 JPA repository interfaces.
+2026-01-14 12:25:57 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-14 12:25:57 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-01-14 12:25:57 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-14 12:25:57 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-01-14 12:25:57 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-14 12:25:57 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 6029 ms
+2026-01-14 12:25:57 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-14 12:25:58 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-01-14 12:25:58 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-14 12:25:58 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2026-01-14 12:25:59 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-14 12:25:59 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-01-14 12:25:59 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@365bfc5f
+2026-01-14 12:25:59 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-01-14 12:26:02 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-14 12:26:02 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 12:26:04 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-14 12:26:05 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@438a2337, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@593d5f39, org.springframework.security.web.context.SecurityContextHolderFilter@23b4f0a9, org.springframework.security.web.header.HeaderWriterFilter@1737acc0, org.springframework.web.filter.CorsFilter@5e537465, org.springframework.security.web.authentication.logout.LogoutFilter@6d1c15cb, cz.phsoft.hokej.config.CustomJsonLoginFilter@4f27643d, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@56f8ab05, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@652855c4, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5d267575, org.springframework.security.web.session.SessionManagementFilter@76b8b6a6, org.springframework.security.web.access.ExceptionTranslationFilter@6bd5aa8b, org.springframework.security.web.access.intercept.AuthorizationFilter@252459b2]
+2026-01-14 12:26:06 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-01-14 12:26:06 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-01-14 12:26:06 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Started StaraGardaApplication in 16.856 seconds (process running for 18.158)
+2026-01-14 12:26:35 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-14 12:26:35 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-01-14 12:26:35 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2026-01-14 12:26:41 [http-nio-8080-exec-3] WARN  o.a.c.util.SessionIdGeneratorBase - Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [122] milliseconds.
+2026-01-14 12:27:39 [http-nio-8080-exec-8] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 12:29:01 [http-nio-8080-exec-2] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 12:36:36 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 12:36:36 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-01-14 12:36:36 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-01-14 12:37:13 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-01-14 12:37:13 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Starting StaraGardaApplication using Java 19.0.2 with PID 12852 (C:\Projekty Práce\StaraGarda\backend\target\classes started by petrh in C:\Projekty Práce\StaraGarda)
+2026-01-14 12:37:13 [main] INFO  c.phsoft.hokej.StaraGardaApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-14 12:37:15 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-14 12:37:16 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 230 ms. Found 6 JPA repository interfaces.
+2026-01-14 12:37:18 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-14 12:37:18 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-01-14 12:37:18 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-14 12:37:18 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-01-14 12:37:19 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-14 12:37:19 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5170 ms
+2026-01-14 12:37:19 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-14 12:37:19 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-01-14 12:37:19 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-14 12:37:20 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2026-01-14 12:37:20 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-14 12:37:20 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-01-14 12:37:21 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@365bfc5f
+2026-01-14 12:37:21 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-01-14 12:37:23 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-14 12:37:23 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 12:37:26 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-14 12:37:27 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7746330a, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@3de4f936, org.springframework.security.web.context.SecurityContextHolderFilter@30ffc3c0, org.springframework.security.web.header.HeaderWriterFilter@1f7653ae, org.springframework.web.filter.CorsFilter@252459b2, org.springframework.security.web.authentication.logout.LogoutFilter@42014a, cz.phsoft.hokej.config.CustomJsonLoginFilter@5128efc, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@47e02a89, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@6d9bcf19, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@438a2337, org.springframework.security.web.session.SessionManagementFilter@6bd5aa8b, org.springframework.security.web.access.ExceptionTranslationFilter@2ca4b010, org.springframework.security.web.access.intercept.AuthorizationFilter@e62d757]
+2026-01-14 12:37:27 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-01-14 12:37:27 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-01-14 12:37:27 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Started StaraGardaApplication in 15.517 seconds (process running for 16.703)
+2026-01-14 12:38:04 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-14 12:38:04 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-01-14 12:38:04 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2026-01-14 12:38:05 [http-nio-8080-exec-2] WARN  o.a.c.util.SessionIdGeneratorBase - Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [107] milliseconds.
+2026-01-14 12:38:59 [http-nio-8080-exec-8] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 12:39:43 [http-nio-8080-exec-1] ERROR c.p.h.m.services.MatchServiceImpl - Test ERROR zpráva pro email
+2026-01-14 12:44:57 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 12:44:57 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-01-14 12:44:57 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-01-14 19:53:07 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-01-14 19:53:07 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Starting StaraGardaApplication using Java 19.0.2 with PID 6572 (C:\Projekty Práce\StaraGarda\backend\target\classes started by petrh in C:\Projekty Práce\StaraGarda)
+2026-01-14 19:53:07 [main] INFO  c.phsoft.hokej.StaraGardaApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-14 19:53:11 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-14 19:53:11 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 293 ms. Found 6 JPA repository interfaces.
+2026-01-14 19:53:15 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-14 19:53:15 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-01-14 19:53:15 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-14 19:53:15 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-01-14 19:53:16 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-14 19:53:16 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 8697 ms
+2026-01-14 19:53:17 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-14 19:53:17 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-01-14 19:53:17 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-14 19:53:18 [main] INFO  o.h.e.b.internal.EnversServiceImpl - Envers integration enabled? : true
+2026-01-14 19:53:18 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-14 19:53:18 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-01-14 19:53:19 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@365bfc5f
+2026-01-14 19:53:19 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-01-14 19:53:26 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-14 19:53:26 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 19:53:32 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-14 19:53:34 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@e62d757, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@597f2d3f, org.springframework.security.web.context.SecurityContextHolderFilter@3af17313, org.springframework.security.web.header.HeaderWriterFilter@2ca4b010, org.springframework.web.filter.CorsFilter@7746330a, org.springframework.security.web.authentication.logout.LogoutFilter@2ccfd2cb, cz.phsoft.hokej.config.CustomJsonLoginFilter@3de4f936, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@30ffc3c0, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@76b8b6a6, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@252459b2, org.springframework.security.web.session.SessionManagementFilter@1f7653ae, org.springframework.security.web.access.ExceptionTranslationFilter@349469db, org.springframework.security.web.access.intercept.AuthorizationFilter@3003d288]
+2026-01-14 19:53:35 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-01-14 19:53:35 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-01-14 19:53:35 [main] INFO  c.phsoft.hokej.StaraGardaApplication - Started StaraGardaApplication in 32.024 seconds (process running for 56.124)
+2026-01-14 21:10:08 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-14 21:10:08 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-01-14 21:10:08 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

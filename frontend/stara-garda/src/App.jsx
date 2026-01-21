@@ -8,6 +8,8 @@ import RegisterPage from "./pages/RegisterPage";
 import RequireAuth from "./RequireAuth";
 import Matches from "./pages/Matches";
 import Players from "./pages/Players";
+import CreatePlayer from "./pages/CreatePlayer";
+
 import { CurrentPlayerProvider } from "./hooks/useCurrentPlayer";
 
 
@@ -36,7 +38,8 @@ const App = () => (
         <Route index element={<Home />} />
         <Route path="/matches" element={<Matches />} />
         <Route path="/players" element={<Players />} />
-
+        <Route path="/createPlayer" element={<CreatePlayer />} />
+          
 
 
       </Route>

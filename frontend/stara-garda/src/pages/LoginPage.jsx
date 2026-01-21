@@ -19,7 +19,7 @@ const LoginPage = () => {
         try {
             await loginUser(email, password);
             await updateUser();               // načte usera do kontextu
-            navigate("/");                    // přesměruj na domovskou
+            navigate("/Players");             // přesměruj na stránku hráči
         } catch (err) {
             setError(err?.response?.data?.message || "Neplatné přihlášení");
         } finally {
