@@ -1,21 +1,15 @@
-import { useState, useEffect } from "react";
-import { login, checkAuth } from "../api/auth";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { loginUser } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState(""); // změněno z username na email
+    const { updateUser } = useAuth();
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        const verifyAuth = async () => {
-            const isAuth = await checkAuth();
-            if (isAuth) navigate("/");
-        };
-        verifyAuth();
-    }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -23,22 +17,26 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
-            await login(email, password); // 🔹 JSON login
-            navigate("/"); // přesměrování po úspěšném loginu
+            await loginUser(email, password);
+            await updateUser();               // načte usera do kontextu
+            navigate("/");                    // přesměruj na domovskou
         } catch (err) {
-            const msg = err?.response?.data?.message || "Neplatné přihlašovací údaje";
-            setError(msg);
+            setError(err?.response?.data?.message || "Neplatné přihlášení");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container mt-5">
             <div className="row justify-content-center">
-                <div className="col-md-6 col-lg-5">
-                    <div className="card shadow p-4">
-                        <h3 className="text-center mb-4">Přihlášení</h3>
+                <div className="col-12 d-flex justify-content-center">
+                    <div
+                        className="card shadow p-4 mx-auto"
+                        style={{ maxWidth: "420px" }}
+                    >
+                        <h3 className="text-center mb-2">Přihlášení</h3>
+                        <h5 className="text-center mb-4 text-muted">HokejApp</h5>   
 
                         {error && (
                             <div className="alert alert-danger">
@@ -58,7 +56,7 @@ const LoginPage = () => {
                                 />
                             </div>
 
-                            <div className="mb-3">
+                            <div className="mb-4">
                                 <label className="form-label">Heslo</label>
                                 <input
                                     type="password"
@@ -76,11 +74,12 @@ const LoginPage = () => {
                             >
                                 {loading ? "Přihlašuji…" : "Přihlásit se"}
                             </button>
-
-                            {/* ✅ NOVÉ TLAČÍTKO PRO REGISTRACI */}
+                            
+                            
+                            {/*NOVÉ TLAČÍTKO PRO REGISTRACI */}
                             <button
                                 type="button"
-                                className="btn btn-outline-secondary w-100"
+                                className="btn btn-outline-secondary w-100 mt-3"
                                 onClick={() => navigate("/register")}
                             >
                                 Registrovat se

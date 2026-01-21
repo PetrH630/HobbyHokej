@@ -31,18 +31,18 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-            // Podporujeme x-www-form-urlencoded i JSON
+            // x-www-form-urlencoded i JSON
             String email = null;
             String password = null;
 
-// Podporujeme x-www-form-urlencoded
+// x-www-form-urlencoded
             if (request.getContentType() != null &&
                     request.getContentType().contains("application/x-www-form-urlencoded")) {
                 email = request.getParameter("username");
                 password = request.getParameter("password");
             }
 
-// Podporujeme JSON
+// JSON
             if ((email == null || password == null) &&
                     request.getContentType() != null &&
                     request.getContentType().contains("application/json")) {
@@ -64,7 +64,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         }
     }
 
-
+    // Úspěšný login
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult)
@@ -89,6 +89,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         objectMapper.writeValue(response.getWriter(), result);
     }
 
+    // Neúspěšný login
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

@@ -1,8 +1,12 @@
 import React from 'react'
+import Player from "../components/Player"
 
 const Players = () => {
+
   return (
-    <div>Players</div>
+    <div>Player</div>
+    
+
   )
 }
 

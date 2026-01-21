@@ -74,11 +74,9 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public List<PlayerDTO> getPlayersByUser(String email) {
-        AppUserEntity user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getPlayers().stream()
+        return playerRepository.findByUser_EmailOrderByIdAsc(email).stream()
                 .map(playerMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

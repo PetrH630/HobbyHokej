@@ -1,36 +1,20 @@
-import React, { useEffect, useState } from "react";
-
-import axios from "axios";
-import MatchOverview from "../components/MatchOverview"
+import MatchCard from "../components/MatchCard";
+import Player from "../components/Player";
+import { useMatches } from "../hooks/useMatches";
+import { useAuth } from "../hooks/useAuth";
 
 const Home = () => {
-    const [matches, setMatches] = useState([]);
-    const [loading, setLoading] = useState(true);
-    
+    const { matches, loading } = useMatches();
+    const { user } = useAuth();
 
-    useEffect(() => {
-        // Načítáme zápasy pro přihlášeného uživatele
-        axios.get("http://localhost:8080/api/matches/me/upcoming-overview", { withCredentials: true })
-            .then(res => {
-                console.log("MATCHES DATA:", res.data);
-                setMatches(res.data);
-            })
-            .catch(err => {
-                console.error("CHYBA při načítání zápasů:", err);
-            })
-            .finally(() => setLoading(false));
-    }, []);
-
-    if (loading) return <p>Načítám zápasy…</p>;
+    if (loading) return <p>Načítám data…</p>;
 
     return (
-        <div className="container mt-4">
-            <h1>Vítejte ve Stará Garda</h1>
-
-            {matches.length === 0 && <p>Žádné nadcházející zápasy nejsou k dispozici</p>}
-
+        <div>
+           <Player />
+            <h3>Nadcházející zápasy</h3>
             {matches.map(match => (
-                <MatchOverview key={match.id} match={match} />
+                <MatchCard key={match.id} match={match} showPricePerPlayer />
             ))}
         </div>
     );
