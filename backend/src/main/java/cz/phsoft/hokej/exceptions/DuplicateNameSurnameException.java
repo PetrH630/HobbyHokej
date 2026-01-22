@@ -1,7 +1,12 @@
 package cz.phsoft.hokej.exceptions;
 
-public class DuplicateNameSurnameException extends RuntimeException {
-    public DuplicateNameSurnameException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class DuplicateNameSurnameException extends BusinessException {
+    public DuplicateNameSurnameException(String name, String surname) {
+        super(
+                "Hráč se jménem " + name + " " + surname + " již existuje.",
+                HttpStatus.CONFLICT
+        );
     }
 }

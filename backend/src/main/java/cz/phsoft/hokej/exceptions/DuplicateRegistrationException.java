@@ -1,7 +1,10 @@
 package cz.phsoft.hokej.exceptions;
 
-public class DuplicateRegistrationException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class DuplicateRegistrationException extends BusinessException {
     public DuplicateRegistrationException(Long matchId, Long playerId) {
-        super("Hráč " + playerId + " již má aktivní registraci na zápas " + matchId);
+        super("Hráč " + playerId + " již má aktivní registraci na zápas " + matchId,
+                HttpStatus.CONFLICT); // 409
     }
 }

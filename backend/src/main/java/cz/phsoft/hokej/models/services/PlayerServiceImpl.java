@@ -8,6 +8,7 @@ import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.DuplicateNameSurnameException;
 import cz.phsoft.hokej.exceptions.InvalidPlayerStatusException;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.exceptions.UserNotFoundException;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import jakarta.transaction.Transactional;
@@ -62,7 +63,9 @@ public class PlayerServiceImpl implements PlayerService {
     @Transactional
     public PlayerDTO createPlayerForUser(PlayerDTO dto, String userEmail) {
         AppUserEntity user = appUserRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(userEmail));
+
+        checkDuplicateNameSurname(dto.getName(), dto.getSurname(), null);
 
         PlayerEntity player = playerMapper.toEntity(dto);
         player.setUser(user); // přiřazení hráče k uživateli
@@ -121,7 +124,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         if (duplicateOpt.isPresent()) {
             if (ignoreId == null || !duplicateOpt.get().getId().equals(ignoreId)) {
-                throw new DuplicateNameSurnameException("Hráč se jménem " + name + " " + surname + " již existuje.");
+                throw new DuplicateNameSurnameException(name, surname);
             }
         }
     }

@@ -5,7 +5,10 @@ import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
+import cz.phsoft.hokej.exceptions.InvalidOldPasswordException;
+import cz.phsoft.hokej.exceptions.PasswordsDoNotMatchException;
 import cz.phsoft.hokej.exceptions.UserAlreadyExistsException;
+import cz.phsoft.hokej.exceptions.UserNotFoundException;
 import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import cz.phsoft.hokej.models.dto.mappers.AppUserMapper;
@@ -41,7 +44,7 @@ public class AppUserServiceImpl implements AppUserService {
     @Override
     public void register(RegisterUserDTO dto) {
         if (!dto.getPassword().equals(dto.getPasswordConfirm())) {
-            throw new IllegalArgumentException("Hesla se neshodují");
+            throw new PasswordsDoNotMatchException();
         }
 
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
@@ -98,8 +101,7 @@ public class AppUserServiceImpl implements AppUserService {
     @Override
     public void updateUser(String email, AppUserDTO dto) {
 
-        AppUserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+        AppUserEntity user = findUserByEmailOrThrow(email);
 
         // Nastavení nového hesla
         user.setName(dto.getName());
@@ -110,8 +112,7 @@ public class AppUserServiceImpl implements AppUserService {
 
     @Override
     public AppUserDTO getCurrentUser(String email) {
-        AppUserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        AppUserEntity user = findUserByEmailOrThrow(email);
 
         // ← využití mapperu
         return appUserMapper.toDTO(user);
@@ -127,15 +128,14 @@ public class AppUserServiceImpl implements AppUserService {
     @Override
     public void changePassword(String email, String oldPassword, String newPassword, String newPasswordConfirm) {
         if (!newPassword.equals(newPasswordConfirm)) {
-            throw new IllegalArgumentException("Nová hesla se neshodují");
+            throw new PasswordsDoNotMatchException("Nov heslo a potvrzení nového hesla se neshodují");
         }
 
-        AppUserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+        AppUserEntity user = findUserByEmailOrThrow(email);
 
         // Ověření starého hesla
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new IllegalArgumentException("Staré heslo je nesprávné");
+            throw new InvalidOldPasswordException();
         }
 
         // Nastavení nového hesla
@@ -146,12 +146,20 @@ public class AppUserServiceImpl implements AppUserService {
     // reset hesla
     @Override
     public void resetPassword(Long userId) {
-        AppUserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+        AppUserEntity user = findUserByIdOrThrow(userId);
 
         // Nastavení nového hesla na "Player123"
         user.setPassword(passwordEncoder.encode("Player123"));
         userRepository.save(user);
+    }
+    private AppUserEntity findUserByEmailOrThrow(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+    }
+
+    private AppUserEntity findUserByIdOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
 

@@ -248,7 +248,7 @@ public class MatchServiceImpl implements MatchService {
     public Long getPlayerIdByEmail(String email) {
         return playerRepository.findByUserEmail(email)
                 .map(PlayerEntity::getId)
-                .orElseThrow(() -> new RuntimeException("Hráč s emailem " + email + " nenalezen"));
+                .orElseThrow(() -> new PlayerNotFoundException(email));
     }
 
 

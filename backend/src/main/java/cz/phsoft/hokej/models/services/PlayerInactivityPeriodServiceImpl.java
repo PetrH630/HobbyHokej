@@ -4,6 +4,7 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
 import cz.phsoft.hokej.data.repositories.PlayerInactivityPeriodRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.mappers.PlayerInactivityPeriodMapper;
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
 import java.util.List;
@@ -46,7 +47,7 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     @Override
     public List<PlayerInactivityPeriodDTO> getByPlayer(Long playerId) {
         PlayerEntity player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new RuntimeException("Player not found"));
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
 
         return inactivityRepository.findByPlayerOrderByInactiveFromAsc(player)
                 .stream()

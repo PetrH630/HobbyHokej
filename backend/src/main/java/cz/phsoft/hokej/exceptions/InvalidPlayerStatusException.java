@@ -1,7 +1,9 @@
 package cz.phsoft.hokej.exceptions;
 
-public class InvalidPlayerStatusException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class InvalidPlayerStatusException extends BusinessException {
     public InvalidPlayerStatusException(String message) {
-        super(message);
+        super(message, HttpStatus.BAD_REQUEST); // 400
     }
 }
