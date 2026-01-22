@@ -140,7 +140,7 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerEntity player = findPlayerOrThrow(id);
 
         if (player.getStatus() == PlayerStatus.APPROVED) {
-            throw new InvalidPlayerStatusException("Hráč už je schválen.");
+            throw new InvalidPlayerStatusException("BE - Hráč už je schválen.");
         }
         player.setStatus(PlayerStatus.APPROVED);
         playerRepository.save(player);
@@ -157,7 +157,7 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerEntity player = findPlayerOrThrow(id);
 
         if (player.getStatus() == PlayerStatus.REJECTED) {
-            throw new InvalidPlayerStatusException("Hráč už je zamítnut.");
+            throw new InvalidPlayerStatusException("BE - Hráč už je zamítnut.");
         }
         player.setStatus(PlayerStatus.REJECTED);
         playerRepository.save(player);

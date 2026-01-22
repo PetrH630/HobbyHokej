@@ -116,7 +116,7 @@ public class MatchServiceImpl implements MatchService {
         matchRepository.delete(match);
 
         return new SuccessResponseDTO(
-                "Zápas " + match.getId() + match.getDateTime() + " byl úspěšně smazán",
+                "BE - Zápas " + match.getId() + match.getDateTime() + " byl úspěšně smazán",
                 id,
                 LocalDateTime.now().toString()
         );
@@ -168,7 +168,7 @@ public class MatchServiceImpl implements MatchService {
 
         if (hasRestrictedPlayer) {
             throw new org.springframework.security.access.AccessDeniedException(
-                    "Nemáte přístup k detailu tohoto zápasu."
+                    "BE - Nemáte přístup k detailu tohoto zápasu."
             );
         }
     }

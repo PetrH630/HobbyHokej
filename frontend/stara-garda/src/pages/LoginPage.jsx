@@ -35,8 +35,8 @@ const LoginPage = () => {
                         className="card shadow p-4 mx-auto"
                         style={{ maxWidth: "420px" }}
                     >
-                        <h3 className="text-center mb-2">Přihlášení</h3>
-                        <h5 className="text-center mb-4 text-muted">HokejApp</h5>   
+                        <h3 className="text-center mb-2">HokejApp</h3>
+                        <h5 className="text-center mb-4 text-muted">Přihlášení</h5>   
 
                         {error && (
                             <div className="alert alert-danger">

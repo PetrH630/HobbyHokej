@@ -52,7 +52,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
             }
 
             if (email == null || password == null || email.isBlank() || password.isBlank()) {
-                throw new BadCredentialsException("Chybí přihlašovací údaje");
+                throw new BadCredentialsException("BE - Chybí přihlašovací údaje");
             }
 
             UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(email, password);
@@ -103,9 +103,9 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         if (failed.getCause() instanceof cz.phsoft.hokej.exceptions.AccountNotActivatedException) {
             result.put("message", failed.getCause().getMessage()); // např. "Účet není aktivován. Zkontrolujte email."
         } else if (failed instanceof BadCredentialsException) {
-            result.put("message", "Neplatné přihlašovací údaje");
+            result.put("message", "BE - Neplatné přihlašovací údaje");
         } else {
-            result.put("message", "Chyba při přihlášení");
+            result.put("message", "BE - Chyba při přihlášení");
         }
 
         objectMapper.writeValue(response.getWriter(), result);

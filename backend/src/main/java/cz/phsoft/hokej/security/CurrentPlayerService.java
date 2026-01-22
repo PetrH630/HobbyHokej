@@ -28,7 +28,7 @@ public class CurrentPlayerService {
 
         if (player.getStatus() != PlayerStatus.APPROVED) {
             throw new IllegalStateException(
-                    "Nelze zvolit hráče, který není schválen administrátorem."
+                    "BE - Nelze zvolit hráče, který není schválen administrátorem."
             );
         }
 
@@ -37,7 +37,7 @@ public class CurrentPlayerService {
 
     public void requireCurrentPlayer() {
         if (getCurrentPlayerId() == null) {
-            throw new IllegalStateException("Není zvolen aktuální hráč");
+            throw new IllegalStateException("BE - Není zvolen aktuální hráč");
         }
     }
 

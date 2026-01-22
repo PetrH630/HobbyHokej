@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 public class DuplicateNameSurnameException extends BusinessException {
     public DuplicateNameSurnameException(String name, String surname) {
         super(
-                "Hráč se jménem " + name + " " + surname + " již existuje.",
+                "BE - Hráč se jménem " + name + " " + surname + " již existuje.",
                 HttpStatus.CONFLICT
         );
     }

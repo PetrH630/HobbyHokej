@@ -48,7 +48,7 @@ public class AppUserServiceImpl implements AppUserService {
         }
 
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("Uživatel s tímto emailem již existuje");
+            throw new UserAlreadyExistsException("BE - Uživatel s tímto emailem již existuje");
         }
 
         AppUserEntity user = new AppUserEntity();
@@ -128,7 +128,7 @@ public class AppUserServiceImpl implements AppUserService {
     @Override
     public void changePassword(String email, String oldPassword, String newPassword, String newPasswordConfirm) {
         if (!newPassword.equals(newPasswordConfirm)) {
-            throw new PasswordsDoNotMatchException("Nov heslo a potvrzení nového hesla se neshodují");
+            throw new PasswordsDoNotMatchException("BE - Nové heslo a potvrzení nového hesla se neshodují");
         }
 
         AppUserEntity user = findUserByEmailOrThrow(email);

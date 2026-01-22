@@ -4,6 +4,9 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
 import cz.phsoft.hokej.data.repositories.PlayerInactivityPeriodRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.InactivityPeriodNotFoundException;
+import cz.phsoft.hokej.exceptions.InactivityPeriodOverlapException;
+import cz.phsoft.hokej.exceptions.InvalidInactivityPeriodDateException;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.mappers.PlayerInactivityPeriodMapper;
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
@@ -38,9 +41,8 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     @Override
     public PlayerInactivityPeriodDTO getById(Long id) {
         PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Období neaktivity s ID " + id + " neexistuje."
-                ));
+                .orElseThrow(() -> new InactivityPeriodNotFoundException(id));
+
         return mapper.toDTO(entity);
     }
 
@@ -60,7 +62,7 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     @Transactional
     public PlayerInactivityPeriodDTO create(PlayerInactivityPeriodDTO dto) {
         PlayerEntity player = playerRepository.findById(dto.getPlayerId())
-                .orElseThrow(() -> new IllegalArgumentException("Hráč s ID " + dto.getPlayerId() + " neexistuje."));
+                .orElseThrow(() -> new PlayerNotFoundException(dto.getPlayerId()));
 
         validateDates(dto);
 
@@ -71,7 +73,7 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
                 ).isEmpty();
 
         if (overlaps) {
-            throw new IllegalStateException("Nové období se překrývá s existujícím obdobím neaktivity hráče.");
+            throw new InactivityPeriodOverlapException();
         }
 
         PlayerInactivityPeriodEntity entity = mapper.toEntity(dto, player);
@@ -82,7 +84,7 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     @Transactional
     public PlayerInactivityPeriodDTO update(Long id, PlayerInactivityPeriodDTO dto) {
         PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Období neaktivity s ID " + id + " neexistuje."));
+                .orElseThrow(() -> new InactivityPeriodNotFoundException(id));
 
         validateDates(dto);
 
@@ -94,7 +96,7 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
                 .anyMatch(p -> !p.getId().equals(id));
 
         if (overlaps) {
-            throw new IllegalStateException("Upravené období se překrývá s jiným obdobím neaktivity hráče.");
+            throw new InactivityPeriodOverlapException("BE - Upravené období se překrývá s jiným obdobím neaktivity hráče.");
         }
 
         mapper.updateEntityFromDto(dto, entity);
@@ -105,7 +107,7 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     @Transactional
     public void delete(Long id) {
         PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Období neaktivity s ID " + id + " neexistuje."));
+                .orElseThrow(() -> new InactivityPeriodNotFoundException(id));
         inactivityRepository.delete(entity);
     }
 
@@ -118,10 +120,10 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     // --- privátní metoda pro validaci dat ---
     private void validateDates(PlayerInactivityPeriodDTO dto) {
         if (dto.getInactiveFrom() == null || dto.getInactiveTo() == null) {
-            throw new IllegalArgumentException("Datum od a do nesmí být null.");
+            throw new InvalidInactivityPeriodDateException("BE - Datum od a do nesmí být null.");
         }
         if (!dto.getInactiveFrom().isBefore(dto.getInactiveTo())) {
-            throw new IllegalArgumentException("inactiveFrom musí být před inactiveTo.");
+            throw new InvalidInactivityPeriodDateException("BE - Datum 'od' musí být před 'do'.");
         }
     }
 }

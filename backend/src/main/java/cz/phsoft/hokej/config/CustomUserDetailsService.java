@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         AppUserEntity user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Uživatel nenalezen"));
+                .orElseThrow(() -> new UsernameNotFoundException("BE - Uživatel nenalezen"));
 
         if (!user.isEnabled()) { // nebo podle status == PENDING
             throw new AccountNotActivatedException();

@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 public class InvalidOldPasswordException extends BusinessException {
 
     public InvalidOldPasswordException() {
-        super("Staré heslo je nesprávné", HttpStatus.BAD_REQUEST);
+        super("BE - Staré heslo je nesprávné", HttpStatus.BAD_REQUEST);
     }
 }

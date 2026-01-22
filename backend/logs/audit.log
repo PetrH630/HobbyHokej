@@ -128,3 +128,13 @@
 2026-01-22 11:37:02 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END updatePlayer - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.PlayerDTO@7f3bb155] at 2026-01-22T11:37:02.313518500
 2026-01-22 11:37:26 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START PlayerServiceImpl.updatePlayer(..) at 2026-01-22T11:37:26.189667900 with args [4, cz.phsoft.hokej.models.dto.PlayerDTO@2038f63e]
 2026-01-22 11:52:23 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START PlayerServiceImpl.updatePlayer(..) at 2026-01-22T11:52:23.626520800 with args [4, cz.phsoft.hokej.models.dto.PlayerDTO@7c4328e8]
+2026-01-22 12:30:00 [scheduling-1] INFO  AUDIT_LOGGER - START SmsSchedulerService.sendFinalSmsForTodayMatches() at 2026-01-22T12:30:00.039828500 with args []
+2026-01-22 12:30:00 [scheduling-1] INFO  AUDIT_LOGGER - END sendFinalSmsForTodayMatches - userId=null playerId=null returned [null] at 2026-01-22T12:30:00.263979600
+2026-01-22 12:30:38 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-22T12:30:38.223995500 with args [player2@example.com]
+2026-01-22 12:30:38 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@6d7ecde] at 2026-01-22T12:30:38.390237800
+2026-01-22 12:30:40 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START PlayerServiceImpl.getPlayersByUser(..) at 2026-01-22T12:30:40.872881700 with args [player2@example.com]
+2026-01-22 12:30:41 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END getPlayersByUser - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.PlayerDTO@703d59ce]] at 2026-01-22T12:30:41.398198300
+2026-01-22 12:30:41 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START PlayerServiceImpl.getPlayersByUser(..) at 2026-01-22T12:30:41.420200900 with args [player2@example.com]
+2026-01-22 12:30:41 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getPlayersByUser - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.PlayerDTO@400f2f93]] at 2026-01-22T12:30:41.430200500
+2026-01-22 12:30:56 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START PlayerServiceImpl.getPlayerById(..) at 2026-01-22T12:30:56.310630900 with args [2]
+2026-01-22 12:30:56 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END getPlayerById - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.PlayerDTO@7b92986e] at 2026-01-22T12:30:56.317636400

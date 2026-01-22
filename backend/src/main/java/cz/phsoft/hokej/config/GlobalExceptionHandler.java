@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(
                 HttpStatus.CONFLICT.value(),
                 "Conflict",
-                "Záznam porušuje unikátní omezení (pravděpodobně duplicitní hráč).",
+                "BE - Záznam porušuje unikátní omezení (pravděpodobně duplicitní hráč).",
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
