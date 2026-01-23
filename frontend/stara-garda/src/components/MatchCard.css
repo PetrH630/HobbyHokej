@@ -1,0 +1,165 @@
+.match-card {
+    position: relative;
+    padding: 16px;
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
+}
+
+.match-card.clickable {
+    cursor: pointer;
+}
+
+.match-card.clickable:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.match-card--disabled {
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+.match-card--disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.match-card-tooltip {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.match-card--disabled:hover .match-card-tooltip {
+    opacity: 1;
+}
+
+.match-id{
+    font-size: 1.10rem;
+}
+.match-day {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.match-date {
+    font-size: 1.2rem;
+}
+
+/* Ikony pro statuty*/
+.match-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.player-icon{
+    font-size: 1.3rem;
+    margin-right: 15px;
+}
+
+.player-price-icon {
+    font-size: 0.9rem;
+    margin-right: 0px;
+}
+
+.money-icon {
+    font-size: 1.5rem;
+    margin-right: 15px;
+}
+
+/* obecné styly */
+.status-icon {
+    margin-right: 10px;
+    font-size: 1.5rem;
+}
+
+.status-text {
+    margin-top: 10px;
+    margin-right: 20px;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+/* ===== BARVY DLE STATUSU ===== */
+
+/* 🟢 REGISTERED */
+.status-REGISTERED .status-icon {
+    color: #018520;
+   
+}
+
+.status-REGISTERED .status-text {
+    color: #030303;
+}
+
+/* ⚪ UNREGISTERED */
+.status-UNREGISTERED .status-icon {
+    color: #f17108;
+    font-size: 2rem;
+}
+
+.status-UNREGISTERED .status-text {
+    color: #030303;
+       
+}
+
+/* 🟡 EXCUSED */
+.status-EXCUSED .status-icon {
+    color: #ffc107;
+}
+
+.status-EXCUSED .status-text {
+    color: #030303;
+}
+
+/* 🔵 RESERVED */
+.status-RESERVED .status-icon {
+    color: #0d6efd;
+}
+
+.status-RESERVED .status-text {
+    color: #030303;
+}
+
+/* ⚫ NO_RESPONSE */
+.status-NO_RESPONSE .status-icon {
+    color: #ddda0a;
+}
+
+.status-NO_RESPONSE .status-text {
+    color: #030303;
+}
+
+/* 🔴 NO_EXCUSED */
+.status-NO_EXCUSED .status-icon {
+    color: #dc3545;
+}
+
+.status-NO_EXCUSED .status-text {
+    color: #750b16;
+}
+
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 576px) {
+    .match-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}

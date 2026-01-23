@@ -24,15 +24,45 @@
     display: flex;
 
     background-color: #ffffff;
-    border: 1px solid #e0e0e0;
+        border: 2px solid #dee2e6;
+        /* bootstrap gray-300 */
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    
     border-radius: 12px;
 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    
 
     transition:
         transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.player-card--active {
+    border: 3px solid #0d6efd;
+    /* Bootstrap primary */
+    box-shadow: 0 0 0 4px #0e489e;
+    
+}
+
+.player-card-tooltip {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+
+
 /* =========================
    Kolečko u vybraného hráče
    ========================= */
@@ -40,18 +70,18 @@
     position: absolute;
     top: 8px;
     right: 8px;
-    font-size: 10px;
+    font-size: 1.5rem;
 }
 
 /* 🟢 aktivní hráč */
 .active-indicator.active {
-    color: #28a745;
+    color: #1329a1;
     /* zelená */
 }
 
 /* ⚪ neaktivní hráč */
 .active-indicator.inactive {
-    color: #adb5bd;
+    color: #a0a5aa;
     /* šedá */
 }
 /* =========================
@@ -81,6 +111,7 @@
 .player-card.disabled {
     cursor: not-allowed;
     opacity: 0.85;
+    
 }
 
 .player-card.disabled:hover,
@@ -97,8 +128,8 @@
 
 /* 🟢 SCHVÁLENO */
 .player-approved {
-    background-color: #e6f4ea;
-    border-color: #b7dfc5;
+    background-color: #64e98a;
+    border-color: #3da361;
 }
 
 /* 🟠 ČEKÁ */
@@ -163,7 +194,6 @@
     color: #0d6efd;
     margin-right: 6px;
 }
-
 
 /* =========================
    RESPONSIVE

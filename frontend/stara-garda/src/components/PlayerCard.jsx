@@ -4,6 +4,8 @@ import { PhoneIcon } from "../icons";
 import { TeamDarkIcon } from "../icons";
 import { TeamLightIcon } from "../icons";
 import { CurrentPlayerIcon } from "../icons";
+import { PlayerIcon } from "../icons";
+import { formatPhoneNumber } from "../utils/formatPhoneNumber";
 import "./Player.css";
 
 const statusClassMap = {
@@ -18,15 +20,20 @@ const statusTextMap = {
     APPROVED: "schváleno",
 };
 
-const PlayerCard = ({ player, onSelect, isActive }) => {
+const PlayerCard = ({ player, onSelect, isActive, disabledTooltip }) => {
     const statusClass = statusClassMap[player.status] || "";
     const isDarkTeam = player.team === "DARK";
     const isApproved = player.status === "APPROVED";
+    const isRejected = player.status === "REJECTED";
+    
 
     return (
         <div
-            className={`player-card ${statusClass} ${isApproved ? "clickable" : "disabled"
-                }`}
+            className={`player-card 
+                ${statusClass} 
+                ${isApproved ? "clickable" : "disabled"} 
+                ${isActive ? "player-card--active" : ""}
+            `}
             role={isApproved ? "button" : undefined}
             tabIndex={isApproved ? 0 : -1}
             onClick={isApproved ? onSelect : undefined}
@@ -36,21 +43,20 @@ const PlayerCard = ({ player, onSelect, isActive }) => {
                     : undefined
             }
             title={
-                !isApproved
-                    ? "Hráč čeká na schválení administrátorem"
-                    : undefined
+                isApproved
+                    ? undefined : isRejected ? "Hráč nebyl schválen administrátorem" : "Hráč čeká na schválení administrátorem"
             }
         >
             {/* Indikátor aktivního hráče v pravém horním rohu */}
-            <CurrentPlayerIcon
+            <PlayerIcon
                 className={`active-indicator ${isActive ? "active" : "inactive"
                     }`}
             />
 
             <div className="card-body">
-                <h4 className="card-title mb-3 text-center">
+                <h5 className="card-title mb-4 mt-3 text-center">
                     {player.fullName}
-                </h4>
+                </h5>
 
                 <div className="mb-2 text-center">
                     <div
@@ -63,20 +69,25 @@ const PlayerCard = ({ player, onSelect, isActive }) => {
                 </div>
 
                 <RoleGuard roles={["ROLE_ADMIN"]}>
-                    <p className="card-text mb-2">
+                    <p className="card-text text-center mb-2">
                         <strong>Typ:</strong> {player.type}
                     </p>
                 </RoleGuard>
 
-                <p className="card-text mb-2">
+                <p className="card-text text-center mb-2">
                     <strong>Status:</strong>{" "}
                     {statusTextMap[player.status] ?? player.status}
                 </p>
 
-                <p className="card-text mb-2">
-                    <PhoneIcon color="#045ee6ff" /> {player.phoneNumber}
+                <p className="card-text text-center mb-2">
+                    <PhoneIcon color="#045ee6ff" />  +{formatPhoneNumber(player.phoneNumber)}
                 </p>
             </div>
+            {isApproved && (
+                <div className="player-card-tooltip">
+                    {disabledTooltip}
+                </div>
+            )}
         </div>
     );
 };

@@ -4,16 +4,19 @@ import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import App from "./App.jsx";
 
-// Import AuthProvider a BrowserRouter ze správných cest
+
 import { AuthProvider } from "./hooks/useAuth.jsx";
-import { BrowserRouter } from "react-router-dom";
+import { NotificationProvider } from "./context/NotificationContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
       
-     
+      
+      <NotificationProvider>
         <App />
+      </NotificationProvider>
+
       
       
     </AuthProvider>
