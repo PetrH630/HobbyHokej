@@ -1,10 +1,7 @@
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.models.dto.MatchDTO;
-import cz.phsoft.hokej.models.dto.MatchDetailDTO;
-import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.dto.*;
 
 import java.util.List;
 
@@ -23,6 +20,6 @@ public interface MatchService {
     Long getPlayerIdByEmail(String email);
     List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId);
     public List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId);
-
+    MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote);
 
 }

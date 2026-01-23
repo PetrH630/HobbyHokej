@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
@@ -31,4 +32,10 @@ public interface MatchRegistrationService {
     List<PlayerDTO> getNoResponsePlayers(Long matchId);
 
     void recalcStatusesForMatch(Long matchId);
+
+    MatchRegistrationDTO updateStatus(Long matchId, Long playerId, PlayerMatchStatus status);
+
+    MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote);
+
+
 }

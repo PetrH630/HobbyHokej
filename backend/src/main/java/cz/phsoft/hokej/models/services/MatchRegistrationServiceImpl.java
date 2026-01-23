@@ -9,10 +9,7 @@ import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.exceptions.DuplicateRegistrationException;
-import cz.phsoft.hokej.exceptions.MatchNotFoundException;
-import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.exceptions.RegistrationNotFoundException;
+import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.mappers.MatchRegistrationMapper;
@@ -252,4 +249,73 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             }
         });
     }
+
+    @Override
+    @Transactional
+    public MatchRegistrationDTO updateStatus(Long matchId, Long playerId, PlayerMatchStatus status) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        MatchRegistrationEntity registration = registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
+
+        // můžeme případně řešit další pravidla, tady jen prostý update
+        MatchRegistrationEntity updated =
+                updateRegistrationStatus(registration, status, "admin", true);
+
+        return matchRegistrationMapper.toDTO(updated);
+    }
+
+    @Override
+    @Transactional
+    public MatchRegistrationDTO markNoExcused(
+            Long matchId,
+            Long playerId,
+            String adminNote
+    ) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        if (match.getDateTime().isAfter(LocalDateTime.now())) {
+            throw new InvalidPlayerStatusException(
+                    "Status NO_EXCUSED lze nastavit pouze u již proběhlého zápasu."
+            );
+        }
+
+        MatchRegistrationEntity registration = registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
+
+        if (registration.getStatus() != PlayerMatchStatus.REGISTERED) {
+            throw new InvalidPlayerStatusException(
+                    "Status NO_EXCUSED lze nastavit pouze z registrace REGISTERED."
+            );
+        }
+
+        // doménová logika NO_EXCUSED
+        registration.setExcuseReason(null);
+
+        // adminNote – default fallback
+        if (adminNote == null || adminNote.isBlank()) {
+            registration.setAdminNote("Nedostavil se bez omluvy");
+        } else {
+            registration.setAdminNote(adminNote);
+        }
+
+        MatchRegistrationEntity updated =
+                updateRegistrationStatus(
+                        registration,
+                        PlayerMatchStatus.NO_EXCUSED,
+                        "admin",
+                        true
+                );
+
+        return matchRegistrationMapper.toDTO(updated);
+    }
+
+
+
 }

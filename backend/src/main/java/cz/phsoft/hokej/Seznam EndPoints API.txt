@@ -84,6 +84,7 @@ AdminMatchRegistration
 @GetMapping("/for-player/{playerId}")       - všechny registrace dle id hráče   - isAuthenticated
 @GetMapping("/no-response/{matchId}")       - seznam hráčů, kteří nereagovali   - Admin, Manager
 @PostMapping("/upsert/{playerId}")          - vytvoří registrace dle id zápasu a id hráče
+@PostMapping("/matches/{matchId}/players/{playerId}/no-excused") - nastaví u registrace na zápas statut NO_EXCUSED - NEOMLUVEN
 
 
 MatchRegistrationController

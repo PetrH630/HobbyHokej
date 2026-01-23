@@ -4,6 +4,7 @@ import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import cz.phsoft.hokej.models.services.MatchService;
 import cz.phsoft.hokej.security.CurrentPlayerService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +17,14 @@ import java.util.List;
 public class AdminMatchRegistrationController {
     private final MatchRegistrationService service;
     private final CurrentPlayerService currentPlayerService;
+    private final MatchService matchService;
 
     public AdminMatchRegistrationController(MatchRegistrationService service,
-                                       CurrentPlayerService currentPlayerService) {
+                                       CurrentPlayerService currentPlayerService,
+                                            MatchService matchService) {
         this.service = service;
         this.currentPlayerService = currentPlayerService;
+        this.matchService = matchService;
     }
 
     @GetMapping("/all")
@@ -45,9 +49,7 @@ public class AdminMatchRegistrationController {
         return service.getNoResponsePlayers(matchId);
     }
 
-
     // UNIVERZÁLNÍ ENDPOINT PRO REGISTRACE - za hráče
-
 
     @PostMapping("/upsert/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -64,4 +66,14 @@ public class AdminMatchRegistrationController {
         );
     }
 
+    @PostMapping("/matches/{matchId}/players/{playerId}/no-excused")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO markNoExcused(
+            @PathVariable Long matchId,
+            @PathVariable Long playerId,
+            @RequestBody(required = false) String adminNote
+    ) {
+        return matchService.markNoExcused(matchId, playerId, adminNote);
+    }
 }
+
