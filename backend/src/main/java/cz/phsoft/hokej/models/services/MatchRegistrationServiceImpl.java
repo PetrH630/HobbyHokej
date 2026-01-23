@@ -18,12 +18,15 @@ import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
 import cz.phsoft.hokej.models.services.sms.SmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.models.services.NotificationService;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Service
 public class MatchRegistrationServiceImpl implements MatchRegistrationService {
@@ -36,6 +39,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     private final PlayerMapper playerMapper;
     private final SmsService smsService;
     private final SmsMessageBuilder smsMessageBuilder;
+    private final NotificationService notificationService; // NEW
 
     public MatchRegistrationServiceImpl(
             MatchRegistrationRepository registrationRepository,
@@ -44,7 +48,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             MatchRegistrationMapper matchRegistrationMapper,
             PlayerMapper playerMapper,
             SmsService smsService,
-            SmsMessageBuilder smsMessageBuilder) {
+            SmsMessageBuilder smsMessageBuilder,
+            NotificationService notificationService              // NEW
+    ) {
         this.registrationRepository = registrationRepository;
         this.matchRepository = matchRepository;
         this.playerRepository = playerRepository;
@@ -52,7 +58,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         this.playerMapper = playerMapper;
         this.smsService = smsService;
         this.smsMessageBuilder = smsMessageBuilder;
+        this.notificationService = notificationService;           // NEW
     }
+
     private MatchEntity getMatchOrThrow(Long matchId) {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
@@ -161,7 +169,21 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         if (unregister) recalcStatusesForMatch(matchId);
 
-        sendSms(registration, smsMessageBuilder.buildMessageRegistration(registration));
+        // starší verze notifikace
+        // sendSms(registration, smsMessageBuilder.buildMessageRegistration(registration));
+
+        // Odesílání notifikace - sms, email
+        NotificationType notificationType = switch (newStatus) {
+            case REGISTERED -> NotificationType.PLAYER_REGISTERED;
+            case UNREGISTERED -> NotificationType.PLAYER_UNREGISTERED;
+            case EXCUSED -> NotificationType.PLAYER_EXCUSED;
+            case RESERVED -> NotificationType.PLAYER_RESERVED;
+            default -> null;
+        };
+
+        if (notificationType != null) {
+            notificationService.notifyPlayer(player, notificationType, registration);
+        }
 
         return matchRegistrationMapper.toDTO(registration);
     }
@@ -231,7 +253,14 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     public void sendSmsToRegisteredPlayers(Long matchId) {
         registrationRepository.findByMatchId(matchId).stream()
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
-                .forEach(r -> sendSms(r, smsMessageBuilder.buildMessageFinal(r)));
+                .forEach(r -> {
+                    // NEW – respektuj preferenci hráče pro SMS
+                    var player = r.getPlayer();
+                    var ns = player.getNotificationSettings();
+                    if (ns != null && ns.isSmsEnabled()) {
+                        sendSms(r, smsMessageBuilder.buildMessageFinal(r));
+                    }
+                });
     }
 
     public void sendNoResponseSmsForMatch(Long matchId) {
@@ -241,7 +270,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
 
             try {
-                smsService.sendSms(player.getPhoneNumber(), smsMsg);
+                // NEW – respektuj notifyBySms v PlayerDTO (mapované z NotificationSettings)
+                if (player.isNotifyBySms()) {
+                    smsService.sendSms(player.getPhoneNumber(), smsMsg);
+                }
             } catch (Exception e) {
                 System.err.println("Chyba SMS pro hráče "
                         + player.getFullName() + ": " + e.getMessage());

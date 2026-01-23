@@ -3,6 +3,7 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.PlayerStatus;
+import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.DuplicateNameSurnameException;
@@ -14,6 +15,8 @@ import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.services.NotificationService;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,11 +29,18 @@ public class PlayerServiceImpl implements PlayerService {
     private final PlayerRepository playerRepository;
     private final PlayerMapper playerMapper;
     private final AppUserRepository appUserRepository;
+    private final NotificationService notificationService;
 
-    public PlayerServiceImpl(PlayerRepository playerRepository, PlayerMapper playerMapper, AppUserRepository appUserRepository) {
+    public PlayerServiceImpl(
+            PlayerRepository playerRepository,
+            PlayerMapper playerMapper,
+            AppUserRepository appUserRepository,
+            NotificationService notificationService // NEW
+    ) {
         this.playerRepository = playerRepository;
         this.playerMapper = playerMapper;
         this.appUserRepository = appUserRepository;
+        this.notificationService = notificationService; // NEW
     }
 
     @Override
@@ -56,6 +66,9 @@ public class PlayerServiceImpl implements PlayerService {
 
         PlayerEntity entity = playerMapper.toEntity(dto);
         PlayerEntity saved = playerRepository.save(entity);
+
+        // notificationService.notifyPlayer(saved, NotificationType.PLAYER_CREATED, null);
+
         return playerMapper.toDTO(saved);
     }
 
@@ -72,6 +85,9 @@ public class PlayerServiceImpl implements PlayerService {
 
 
         PlayerEntity saved = playerRepository.save(player);
+
+        notificationService.notifyPlayer(saved, NotificationType.PLAYER_CREATED, null);
+
         return playerMapper.toDTO(saved);
     }
 
@@ -102,6 +118,9 @@ public class PlayerServiceImpl implements PlayerService {
         existing.setStatus(dto.getStatus());
 
         PlayerEntity saved = playerRepository.save(existing);
+
+        notificationService.notifyPlayer(saved, NotificationType.PLAYER_UPDATED, null);
+
         return playerMapper.toDTO(saved);
     }
 
@@ -144,6 +163,9 @@ public class PlayerServiceImpl implements PlayerService {
         }
         player.setStatus(PlayerStatus.APPROVED);
         playerRepository.save(player);
+
+        notificationService.notifyPlayer(player, NotificationType.PLAYER_APPROVED, null);
+
         return new SuccessResponseDTO(
                 "Hráč " + player.getFullName() + " byl úspěšně aktivován",
                 id,
@@ -161,6 +183,8 @@ public class PlayerServiceImpl implements PlayerService {
         }
         player.setStatus(PlayerStatus.REJECTED);
         playerRepository.save(player);
+
+        notificationService.notifyPlayer(player, NotificationType.PLAYER_REJECTED, null);
 
         return new SuccessResponseDTO(
                 "Hráč " + player.getFullName() + " byl úspěšně zamítnut",

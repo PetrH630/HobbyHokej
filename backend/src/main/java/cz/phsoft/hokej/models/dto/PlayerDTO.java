@@ -24,13 +24,17 @@ public class PlayerDTO {
     private PlayerType type; // not null, default BASIC
     private Team team;
     private PlayerStatus status;
-
+    private boolean notifyByEmail;
+    private boolean notifyBySms;
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
    }
 
-    public PlayerDTO(Long id, String name, String surname, String nickName, PlayerType type, Team team, PlayerStatus status) {
+    public PlayerDTO(Long id, String name, String surname,
+                     String nickName, PlayerType type,
+                     Team team, PlayerStatus status,
+                     boolean notifyByEmail, boolean notifyBySms) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -39,6 +43,8 @@ public class PlayerDTO {
         this.updateFullName();
         this.team = team;
         this.status = status != null ? status : PlayerStatus.PENDING;
+        this.notifyByEmail = notifyByEmail;
+        this.notifyBySms = notifyBySms;
     }
 
     // --- Gettery a Settery ---
@@ -71,5 +77,20 @@ public class PlayerDTO {
 
     public PlayerStatus getStatus() { return status; }
     public void setStatus(PlayerStatus status) { this.status = status != null ? status : PlayerStatus.PENDING;
+    }
+    public boolean isNotifyByEmail() {
+        return notifyByEmail;
+    }
+
+    public void setNotifyByEmail(boolean notifyByEmail) {
+        this.notifyByEmail = notifyByEmail;
+    }
+
+    public boolean isNotifyBySms() {
+        return notifyBySms;
+    }
+
+    public void setNotifyBySms(boolean notifyBySms) {
+        this.notifyBySms = notifyBySms;
     }
 }

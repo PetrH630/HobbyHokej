@@ -40,6 +40,9 @@ public class PlayerEntity {
     @JoinColumn(name = "user_id")
     private AppUserEntity user;
 
+    @Embedded
+    private NotificationSettings notificationSettings = new NotificationSettings();
+
     // ----------------- Konstruktor -----------------
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
@@ -137,4 +140,12 @@ public class PlayerEntity {
     public void setNickName(String nickName) {
         this.nickName = nickName;
     }
+    public NotificationSettings getNotificationSettings() {
+        return notificationSettings;
+    }
+
+    public void setNotificationSettings(NotificationSettings notificationSettings) {
+        this.notificationSettings = notificationSettings;
+    }
+
 }
