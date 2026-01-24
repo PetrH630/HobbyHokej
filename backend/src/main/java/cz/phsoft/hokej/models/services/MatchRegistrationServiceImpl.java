@@ -146,6 +146,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 registration.setPlayer(player);
             }
             registration.setExcuseReason(excuseReason);
+            registration.setExcuseNote(excuseNote);
             newStatus = PlayerMatchStatus.EXCUSED;
 
             // REGISTER / RESERVE: lze vytvořit pokud hráč NEMÁ status REGISTERED (tedy i když má EXCUSED)
@@ -164,6 +165,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             } else {
                 // při přechodu na register/reserve zrušíme případnou výmluvu
                 registration.setExcuseReason(null);
+                registration.setExcuseNote(null);
             }
         }
 
@@ -178,7 +180,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         registration = registrationRepository.save(registration);
 
-        if (unregister) recalcStatusesForMatch(matchId);
+        if (unregister) {
+            recalcStatusesForMatch(matchId);
+        }
 
         // starší verze notifikace
         // sendSms(registration, smsMessageBuilder.buildMessageRegistration(registration));
