@@ -1,6 +1,10 @@
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +32,12 @@ public class MatchDTO {
     @NotNull(message = "Cena je povinná")
     private Integer price;
 
+    @Enumerated(EnumType.STRING)
+    private MatchStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private MatchCancelReason cancelReason;
+
     // gettery a settery
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -50,5 +60,21 @@ public class MatchDTO {
 
     public void setPrice(Integer price) {
         this.price = price;
+    }
+
+    public MatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MatchStatus status) {
+        this.status = status;
+    }
+
+    public MatchCancelReason getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(MatchCancelReason cancelReason) {
+        this.cancelReason = cancelReason;
     }
 }

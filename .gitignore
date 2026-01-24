@@ -36,3 +36,9 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Environment / secrets ###
+.env
+.env.*
+old-application.properties
+src/main/resources/old-application.properties

@@ -312,6 +312,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         MatchEntity match = getMatchOrThrow(matchId);
         PlayerEntity player = getPlayerOrThrow(playerId);
 
+        if (status == PlayerMatchStatus.NO_EXCUSED) {
+            throw new InvalidPlayerStatusException(
+                    "Status NO_EXCUSED musí být nastaven přes speciální endpoint /logiku."
+            );
+        }
+
         MatchRegistrationEntity registration = registrationRepository
                 .findByPlayerIdAndMatchId(playerId, matchId)
                 .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
@@ -352,6 +358,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         // doménová logika NO_EXCUSED
         registration.setExcuseReason(null);
+        registration.setExcuseNote(null);
 
         // adminNote – default fallback
         if (adminNote == null || adminNote.isBlank()) {

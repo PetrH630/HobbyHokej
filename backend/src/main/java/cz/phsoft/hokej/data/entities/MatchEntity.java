@@ -1,5 +1,7 @@
 package cz.phsoft.hokej.data.entities;
 
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -29,6 +31,12 @@ public class MatchEntity {
     @Column(nullable = false)
     private Integer price;
 
+    @Enumerated(EnumType.STRING)
+    private MatchStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private MatchCancelReason cancelReason;
+
     public MatchEntity() {}
 
     // Gettery a settery
@@ -51,4 +59,20 @@ public class MatchEntity {
     public Integer getPrice() { return price; }
 
     public void setPrice(Integer price) { this.price = price; }
+
+    public MatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MatchStatus status) {
+        this.status = status;
+    }
+
+    public MatchCancelReason getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(MatchCancelReason cancelReason) {
+        this.cancelReason = cancelReason;
+    }
 }

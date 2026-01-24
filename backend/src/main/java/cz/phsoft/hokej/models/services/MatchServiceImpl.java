@@ -185,9 +185,8 @@ public class MatchServiceImpl implements MatchService {
         }
         // UPRAVIT DLE TODO CHECKlIST
         // všichni hráči patřící aktuálnímu uživateli
-        List<PlayerEntity> ownedPlayers = playerRepository.findAll().stream()
-                .filter(p -> p.getUser() != null && p.getUser().getEmail().equals(userDetails.getUsername()))
-                .toList();
+        List<PlayerEntity> ownedPlayers =
+                playerRepository.findByUser_EmailOrderByIdAsc(userDetails.getUsername());
 
         if (ownedPlayers.isEmpty()) {
             throw new org.springframework.security.access.AccessDeniedException(
