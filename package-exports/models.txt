@@ -1,0 +1,3336 @@
+﻿BalĂ­ÄŤek (sloĹľka): models
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models
+
+Seznam souborĹŻ:
+
+AppUserMapper.java
+MatchMapper.java
+MatchRegistrationMapper.java
+PlayerInactivityPeriodMapper.java
+PlayerMapper.java
+MatchRegistrationRequest.java
+AppUserDTO.java
+ChangePasswordDTO.java
+MatchDetailDTO.java
+MatchDTO.java
+MatchOverviewDTO.java
+MatchRegistrationDTO.java
+PlayerDTO.java
+PlayerInactivityPeriodDTO.java
+PlayerSummaryDTO.java
+RegisterUserDTO.java
+SuccessResponseDTO.java
+EmailService.java
+SmsMessageBuilder.java
+SmsSchedulerService.java
+SmsService.java
+SmsServiceImpl.java
+SmsTextBeeService.java
+AppUserService.java
+AppUserServiceImpl.java
+MatchRegistrationService.java
+MatchRegistrationServiceImpl.java
+MatchService.java
+MatchServiceImpl.java
+NotificationService.java
+NotificationServiceImpl.java
+PlayerInactivityPeriodService.java
+PlayerInactivityPeriodServiceImpl.java
+PlayerService.java
+PlayerServiceImpl.java
+
+
+----------
+AppUserMapper.java
+----------
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.PlayerSummaryDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface AppUserMapper {
+    @Mapping(target = "players", source = "players")
+    AppUserDTO toDTO(AppUserEntity entity);
+
+    List<AppUserDTO> toDtoList(List<AppUserEntity> entities);
+
+    @Mapping(source = "nickname", target = "nickName")
+    @Mapping(target = "fullName", ignore = true)
+    PlayerDTO toPlayerDTO(PlayerEntity entity);
+}
+
+
+----------
+MatchMapper.java
+----------
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.models.dto.MatchDTO;
+import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+
+@Mapper(componentModel = "spring")
+public interface MatchMapper {
+
+    MatchDTO toDTO(MatchEntity entity);
+
+    MatchEntity toEntity(MatchDTO dto);
+
+    void updateEntity(MatchDTO dto, @MappingTarget MatchEntity entity);
+}
+
+
+----------
+MatchRegistrationMapper.java
+----------
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface MatchRegistrationMapper {
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "match", source = "match")
+    @Mapping(target = "player", source = "player")
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "excuseReason", source = "excuseReason")
+    @Mapping(target = "excuseNote", source = "note")
+    @Mapping(target = "team", source = "team")
+    @Mapping(target = "adminNote", source = "adminNote")
+    @Mapping(target = "createdBy", source = "createdBy")
+    @Mapping(target = "timestamp", expression = "java(java.time.LocalDateTime.now())")
+    MatchRegistrationEntity toEntity(
+            MatchEntity match,
+            PlayerEntity player,
+            PlayerMatchStatus status,
+            ExcuseReason excuseReason,
+            String note,
+            Team team,
+            String adminNote,
+            String createdBy
+    );
+
+    // entity â†’ DTO (volitelnĂ©)
+    @Mapping(target = "matchId", source = "match.id")
+    @Mapping(target = "playerId", source = "player.id")
+    MatchRegistrationDTO toDTO(MatchRegistrationEntity entity);
+
+    List<MatchRegistrationDTO> toDTOList(List<MatchRegistrationEntity> entities);
+}
+
+
+----------
+PlayerInactivityPeriodMapper.java
+----------
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
+import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
+import org.mapstruct.*;
+
+@Mapper(componentModel = "spring")
+public interface PlayerInactivityPeriodMapper {
+
+    // Entity -> DTO (OK)
+    @Mapping(target = "playerId", source = "player.id")
+    PlayerInactivityPeriodDTO toDTO(PlayerInactivityPeriodEntity entity);
+
+    // DTO -> Entity (player Ĺ™eĹˇĂ­ @ObjectFactory)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "player", ignore = true)
+    PlayerInactivityPeriodEntity toEntity(PlayerInactivityPeriodDTO dto, @Context PlayerEntity player);
+
+    // UPDATE DTO -> existujĂ­cĂ­ entity (bez zmÄ›ny player)
+    @Mapping(target = "player", ignore = true)
+    void updateEntityFromDto(PlayerInactivityPeriodDTO dto, @MappingTarget PlayerInactivityPeriodEntity entity);
+
+    // FACTORY â€“ jedinĂ˝ sprĂˇvnĂ˝ zpĹŻsob, jak nastavit player z @Context
+    @ObjectFactory
+    default PlayerInactivityPeriodEntity createEntity(PlayerInactivityPeriodDTO dto, @Context PlayerEntity player) {
+        PlayerInactivityPeriodEntity entity = new PlayerInactivityPeriodEntity();
+        entity.setPlayer(player);
+        return entity;
+    }
+}
+
+
+----------
+PlayerMapper.java
+----------
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.NotificationSettings;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface PlayerMapper {
+
+    // Entity â†’ DTO (heslo se neposĂ­lĂˇ)
+    @Mapping(source = "nickname", target = "nickName")
+    @Mapping(target = "fullName", ignore = true) // generuje se v DTO
+    @Mapping(source = "notificationSettings.emailEnabled", target = "notifyByEmail")
+    @Mapping(source = "notificationSettings.smsEnabled", target = "notifyBySms")
+    PlayerDTO toDTO(PlayerEntity entity);
+
+    // DTO â†’ Entity (heslo se mapuje, pokud existuje)
+    @Mapping(source = "nickName", target = "nickname")   // KLĂŤÄŚOVĂ‰
+    @Mapping(target = "fullName", ignore = true)         // generuje si Entity sama
+    @Mapping(target = "user", ignore = true)             // nastavujeĹˇ v service
+    @Mapping(
+            target = "status",
+            expression = "java(dto.getStatus() != null ? dto.getStatus() : cz.phsoft.hokej.data.enums.PlayerStatus.PENDING)"
+    )
+    // mapovĂˇnĂ­ do embedded NotificationSettings
+    @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
+    @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")
+    PlayerEntity toEntity(PlayerDTO dto);
+
+    // Aktualizace existujĂ­cĂ­ho DTO (ignorujeme fullName)
+    @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
+
+    // Aktualizace existujĂ­cĂ­ Entity (heslo se mapuje, fullName nenĂ­ pole v Entity)
+    @Mapping(source = "nickName", target = "nickname")   // i tady je dĹŻleĹľitĂ©
+    @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(
+            target = "status",
+            expression = "java(source.getStatus() != null ? source.getStatus() : target.getStatus())"
+    )
+    @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
+    @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")
+    void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
+
+    List<PlayerDTO> toDTOList(List<PlayerEntity> players);
+
+    @AfterMapping
+    default void ensureNotificationSettings(@MappingTarget PlayerEntity entity) {
+        if (entity.getNotificationSettings() == null) {
+            NotificationSettings ns = new NotificationSettings();
+            ns.setEmailEnabled(false);
+            ns.setSmsEnabled(false);
+            entity.setNotificationSettings(ns);
+        }
+    }
+
+}
+
+
+----------
+MatchRegistrationRequest.java
+----------
+
+package cz.phsoft.hokej.models.dto.requests;
+
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.Team;
+import jakarta.validation.constraints.*;
+
+
+public class MatchRegistrationRequest {
+    @NotNull
+    @Positive
+    private Long matchId;
+
+    @NotNull
+    @Positive
+    private Long playerId;
+
+    private Team team;
+    private ExcuseReason excuseReason;
+    private String excuseNote;
+    private String adminNote;
+    private boolean unregister;
+
+    public Long getMatchId() { return matchId; }
+    public Long getPlayerId() { return playerId; }
+    public Team getTeam() { return team; }
+    public ExcuseReason getExcuseReason() { return excuseReason; }
+    public String getExcuseNote() { return excuseNote; }
+    public String getAdminNote() { return adminNote; }
+    public boolean isUnregister() { return unregister; }
+}
+
+
+----------
+AppUserDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+import cz.phsoft.hokej.data.enums.PlayerType;
+import cz.phsoft.hokej.data.enums.Role;
+import cz.phsoft.hokej.data.enums.Team;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import java.util.Set;
+
+public class AppUserDTO {
+    private Long id;
+    private String name; // not null
+    private String surname;
+    private String email;
+    private Role role;
+    private boolean enabled;
+    private Set<PlayerDTO> players; // jednostrannĂ©
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public boolean isEnabled() { return enabled; }
+
+    public void setEnabled(boolean enabled) { this.enabled = enabled;}
+
+    public Set<PlayerDTO> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(Set<PlayerDTO> players) {
+        this.players = players;
+    }
+}
+
+
+----------
+ChangePasswordDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+public class ChangePasswordDTO {
+    private String oldPassword;
+    private String newPassword;
+    private String newPasswordConfirm;
+
+    // gettery a settery
+    public String getOldPassword() { return oldPassword; }
+    public void setOldPassword(String oldPassword) { this.oldPassword = oldPassword; }
+    public String getNewPassword() { return newPassword; }
+    public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
+    public String getNewPasswordConfirm() { return newPasswordConfirm; }
+    public void setNewPasswordConfirm(String newPasswordConfirm) { this.newPasswordConfirm = newPasswordConfirm; }
+}
+
+
+
+----------
+MatchDetailDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class MatchDetailDTO {
+    private Long id;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dateTime;
+    private String location;
+    private String description;
+    private Integer price;
+    private int maxPlayers;
+    private int inGamePlayers;
+    private int outGamePlayers;
+    private int waitingPlayers;
+    private int noActionPlayers;
+    private int noExcusedPlayersSum;
+    private double pricePerRegisteredPlayer;
+    private int remainingSlots;
+    private PlayerMatchStatus status;
+
+    List<PlayerDTO> registeredPlayers;
+    List<PlayerDTO> reservedPlayers;
+    List<PlayerDTO> unregisteredPlayers;
+    List<PlayerDTO> excusedPlayers;
+    List<PlayerDTO> noExcusedPlayers;
+    List<PlayerDTO> noResponsePlayers;
+
+    // Gettery a settery
+
+
+
+    public Long getId() {       return id;    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+
+    public PlayerMatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerMatchStatus status) {
+        this.status = status;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
+
+    public int getInGamePlayers() {
+        return inGamePlayers;
+    }
+    public void setInGamePlayers(int inGamePlayers) {
+        this.inGamePlayers = inGamePlayers;
+    }
+
+    public void setOutGamePlayers(int outGamePlayers) {
+        this.outGamePlayers = outGamePlayers;
+    }
+
+    public int getWaitingPlayers() {
+        return waitingPlayers;
+    }
+    public void setWaitingPlayers(int waitingPlayers) {
+        this.waitingPlayers = waitingPlayers;
+    }
+
+    public int getNoActionPlayers() {
+        return noActionPlayers;
+    }
+    public void setNoActionPlayers(int noActionPlayers) {
+        this.noActionPlayers = noActionPlayers;
+    }
+
+    public double getPricePerRegisteredPlayer() {
+        return pricePerRegisteredPlayer;
+    }
+    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) {
+        this.pricePerRegisteredPlayer = pricePerRegisteredPlayer;
+    }
+
+    public int getRemainingSlots() {
+        return remainingSlots;
+    }
+    public void setRemainingSlots(int remainingSlots) {
+        this.remainingSlots = remainingSlots;
+    }
+
+    public List<PlayerDTO> getRegisteredPlayers() {
+        return registeredPlayers;
+    }
+    public void setRegisteredPlayers(List<PlayerDTO> registeredPlayers) {
+        this.registeredPlayers = registeredPlayers;
+    }
+
+    public List<PlayerDTO> getReservedPlayers() {
+        return reservedPlayers;
+    }
+    public void setReservedPlayers(List<PlayerDTO> reservedPlayers) {
+        this.reservedPlayers = reservedPlayers;
+    }
+
+    public List<PlayerDTO> getUnregisteredPlayers() {
+        return unregisteredPlayers;
+    }
+
+    public void setUnregisteredPlayers(List<PlayerDTO> unregisteredPlayers) {
+        this.unregisteredPlayers = unregisteredPlayers;
+    }
+    public List<PlayerDTO> getExcusedPlayers() {
+        return excusedPlayers;
+    }
+    public void setExcusedPlayers(List<PlayerDTO> excusedPlayers) {
+        this.excusedPlayers = excusedPlayers;
+    }
+
+    public List<PlayerDTO> getNoResponsePlayers() {
+        return noResponsePlayers;
+    }
+    public void setNoResponsePlayers(List<PlayerDTO> noResponsePlayers) {
+        this.noResponsePlayers = noResponsePlayers;
+    }
+
+    public int getOutGamePlayers() {
+        return outGamePlayers;
+    }
+
+    public int getNoExcusedPlayersSum() {
+        return noExcusedPlayersSum;
+    }
+
+    public void setNoExcusedPlayersSum(int noExcusedPlayersSum) {
+        this.noExcusedPlayersSum = noExcusedPlayersSum;
+    }
+
+    public List<PlayerDTO> getNoExcusedPlayers() {
+        return noExcusedPlayers;
+    }
+
+    public void setNoExcusedPlayers(List<PlayerDTO> noExcusedPlayers) {
+        this.noExcusedPlayers = noExcusedPlayers;
+    }
+}
+
+
+----------
+MatchDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
+
+public class MatchDTO {
+
+    private Long id;
+    @NotNull(message = "Datum a ÄŤas zĂˇpasu je povinnĂ©.")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dateTime;
+
+    @NotBlank(message = "MĂ­sto zĂˇpasu je povinnĂ©.")
+    @Size(min = 3, max = 100)
+    private String location;
+
+    @Size(max = 255, message = "Popis mĹŻĹľe mĂ­t max 255 znakĹŻ.")
+    private String description;
+
+    @NotNull(message = "MaximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ je povinnĂ˝")
+    private Integer maxPlayers;
+
+    @NotNull(message = "Cena je povinnĂˇ")
+    private Integer price;
+
+    // gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Integer getMaxPlayers() { return maxPlayers; }
+    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+}
+
+
+----------
+MatchOverviewDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+
+import java.time.LocalDateTime;
+
+public class MatchOverviewDTO {
+
+    private Long id;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dateTime;
+
+    private String location;
+    private String description;
+    private Integer price;
+    private int maxPlayers;
+    private int inGamePlayers;
+    private double pricePerRegisteredPlayer;
+    private PlayerMatchStatus status;
+
+    // Gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Integer getPrice() { return price; }
+    public void setPrice(Integer price) { this.price = price; }
+
+    public int getMaxPlayers() { return maxPlayers; }
+    public void setMaxPlayers(int maxPlayers) { this.maxPlayers = maxPlayers; }
+
+    public int getInGamePlayers() { return inGamePlayers; }
+    public void setInGamePlayers(int inGamePlayers) { this.inGamePlayers = inGamePlayers; }
+
+    public double getPricePerRegisteredPlayer() { return pricePerRegisteredPlayer; }
+    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) { this.pricePerRegisteredPlayer = pricePerRegisteredPlayer; }
+
+    public PlayerMatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerMatchStatus status) {
+        this.status = status;
+    }
+}
+
+
+----------
+MatchRegistrationDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+public class MatchRegistrationDTO {
+    private Long id; // volitelnĂ©, pĹ™i GET
+
+    @NotNull(message = "ID zĂˇpasu je povinnĂ©.")
+    @Positive(message = "ID zĂˇpasu musĂ­ bĂ˝t kladnĂ©.")
+    private Long matchId;
+
+    @NotNull(message = "ID hrĂˇÄŤe je povinnĂ©.")
+    @Positive(message = "ID hrĂˇÄŤe musĂ­ bĂ˝t kladnĂ©.")
+    private Long playerId;
+
+    private PlayerMatchStatus status;
+    private ExcuseReason excuseReason; // pouze pokud status = EXCUSED
+    private String excuseNote;
+    private String adminNote;
+    private Team team;
+
+    @NotNull
+    private String createdBy; // "user" nebo "system"
+
+    private PlayerDTO playerDTO;
+
+    public MatchRegistrationDTO() {}
+
+    // Gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getMatchId() { return matchId; }
+    public void setMatchId(Long matchId) { this.matchId = matchId; }
+
+    public Long getPlayerId() { return playerId; }
+    public void setPlayerId(Long playerId) { this.playerId = playerId; }
+
+    public PlayerMatchStatus getStatus() { return status; }
+    public void setStatus(PlayerMatchStatus status) { this.status = status; }
+
+    public ExcuseReason getExcuseReason() { return excuseReason; }
+    public void setExcuseReason(ExcuseReason excuseReason) { this.excuseReason = excuseReason; }
+
+    public String getExcuseNote() { return excuseNote; }
+    public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
+
+    public String getAdminNote() { return adminNote; }
+    public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
+
+    public Team getTeam() { return team; }
+    public void setTeam (Team team) { this.team = team; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+}
+
+
+
+----------
+PlayerDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+import cz.phsoft.hokej.data.enums.PlayerStatus;
+import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.data.enums.PlayerType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public class PlayerDTO {
+
+
+    private Long id; // autogenerated, nullable pĹ™i create
+
+    @NotBlank(message = "KĹ™estnĂ­ jmĂ©no je povinnĂ©.")
+    @Size(min = 2, max = 50)
+    private String name; // not null
+
+    @NotBlank(message = "PĹ™Ă­jmenĂ­ je povinnĂ©.")
+    @Size(min = 2, max = 50)
+    private String surname; // not null
+    private String nickName;
+    private String fullName; // derived
+    private String phoneNumber;
+    private PlayerType type; // not null, default BASIC
+    private Team team;
+    private PlayerStatus status;
+    private boolean notifyByEmail;
+    private boolean notifyBySms;
+
+    public PlayerDTO() {
+        this.type = PlayerType.BASIC;
+   }
+
+    public PlayerDTO(Long id, String name, String surname,
+                     String nickName, PlayerType type,
+                     Team team, PlayerStatus status,
+                     boolean notifyByEmail, boolean notifyBySms) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.nickName = nickName;
+        this.type = type != null ? type : PlayerType.BASIC;
+        this.updateFullName();
+        this.team = team;
+        this.status = status != null ? status : PlayerStatus.PENDING;
+        this.notifyByEmail = notifyByEmail;
+        this.notifyBySms = notifyBySms;
+    }
+
+    // --- Gettery a Settery ---
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; updateFullName(); }
+
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; updateFullName(); }
+
+    public String getNickName() { return nickName; }
+
+    public void setNickName(String nickName) { this.nickName = nickName; }
+
+    public String getFullName() { return fullName; }
+
+    private void updateFullName() { this.fullName = name + " " + surname; }
+
+    public PlayerType getType() { return type; }
+    public void setType(PlayerType type) { this.type = type != null ? type : PlayerType.BASIC; }
+
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public PlayerStatus getStatus() { return status; }
+    public void setStatus(PlayerStatus status) { this.status = status != null ? status : PlayerStatus.PENDING;
+    }
+    public boolean isNotifyByEmail() {
+        return notifyByEmail;
+    }
+
+    public void setNotifyByEmail(boolean notifyByEmail) {
+        this.notifyByEmail = notifyByEmail;
+    }
+
+    public boolean isNotifyBySms() {
+        return notifyBySms;
+    }
+
+    public void setNotifyBySms(boolean notifyBySms) {
+        this.notifyBySms = notifyBySms;
+    }
+}
+
+
+----------
+PlayerInactivityPeriodDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+import java.time.LocalDateTime;
+
+public class PlayerInactivityPeriodDTO {
+
+    private Long id;
+    private Long playerId;
+    private LocalDateTime inactiveFrom;
+    private LocalDateTime inactiveTo;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
+    public LocalDateTime getInactiveFrom() {
+        return inactiveFrom;
+    }
+
+    public void setInactiveFrom(LocalDateTime inactiveFrom) {
+        this.inactiveFrom = inactiveFrom;
+    }
+
+    public LocalDateTime getInactiveTo() {
+        return inactiveTo;
+    }
+
+    public void setInactiveTo(LocalDateTime inactiveTo) {
+        this.inactiveTo = inactiveTo;
+    }
+}
+
+
+----------
+PlayerSummaryDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+import cz.phsoft.hokej.data.enums.PlayerType;
+import cz.phsoft.hokej.data.enums.Team;
+
+public class PlayerSummaryDTO {
+    private Long id;
+    private String name;
+    private String surname;
+    private String fullName;
+    private String nickName;
+    private PlayerType type;
+    private Team team;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public PlayerType getType() {
+        return type;
+    }
+
+    public void setType(PlayerType type) {
+        this.type = type;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+}
+
+
+----------
+RegisterUserDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public class RegisterUserDTO {
+
+    @NotBlank(message = "KĹ™estnĂ­ jmĂ©no je povinnĂ©.")
+    @Size(min = 2, max = 50)
+    private String name; // not null
+
+    @NotBlank(message = "PĹ™Ă­jmenĂ­ je povinnĂ©.")
+    @Size(min = 2, max = 50)
+    private String surname;
+
+    @NotBlank(message = "email je povinnĂ˝.")
+    @Email
+    private String email;
+
+    @NotBlank
+    @Size(min = 8, max = 64)
+    private String password;
+
+    @NotBlank
+    private String passwordConfirm;
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPasswordConfirm() {
+        return passwordConfirm;
+    }
+
+    public void setPasswordConfirm(String passwordConfirm) {
+        this.passwordConfirm = passwordConfirm;
+    }
+}
+
+
+----------
+SuccessResponseDTO.java
+----------
+
+package cz.phsoft.hokej.models.dto;
+
+public class SuccessResponseDTO {
+    private  String message;
+    private Long id;
+    private String timestamp;
+
+    public SuccessResponseDTO(String message, Long id, String timestamp) {
+        this.message = message;
+        this.id = id;
+        this.timestamp = timestamp;
+    }
+
+    public String getMessage() { return message; }
+    public Long getId() { return id; }
+    public String getTimestamp() { return timestamp; }
+
+}
+
+
+----------
+EmailService.java
+----------
+
+package cz.phsoft.hokej.models.services.email;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+@Service
+public class EmailService {
+    private final JavaMailSender mailSender;
+
+    @Value("${spring.mail.from}")
+    private String fromEmail;
+
+    @Value("${email.enabled:true}")   //
+    private boolean emailEnabled;
+
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
+    // ===== 1) JEDNODUCHĂť TEXTOVĂť EMAIL =====
+    @Async
+    public void sendSimpleEmail(String to, String subject, String text) {
+
+        if (!emailEnabled) {
+            System.out.println("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: " + to);
+            return;
+        }
+
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
+            message.setFrom(fromEmail);
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            // DoporuÄŤeno: logovat do souboru
+            throw new RuntimeException("Chyba pĹ™i odesĂ­lĂˇnĂ­ emailu: " + e.getMessage(), e);
+        }
+    }
+
+    // ===== 2) HTML EMAIL (HEZÄŚĂŤ) =====
+    @Async
+    public void sendHtmlEmail(String to, String subject, String htmlContent) {
+
+        if (!emailEnabled) {
+            System.out.println("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: " + to);
+            return;
+        }
+
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true); // true = HTML
+            helper.setFrom(fromEmail);
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Chyba pĹ™i odesĂ­lĂˇnĂ­ HTML emailu: " + e.getMessage(), e);
+        }
+    }
+    public void sendActivationEmail(String to, String activationLink) {
+        String subject = "PotvrÄŹte svĹŻj ĂşÄŤet";
+        String text = "DobrĂ˝ den,\n\n"
+                + "KliknÄ›te na tento odkaz pro aktivaci ĂşÄŤtu:\n"
+                + activationLink + "\n\n"
+                + "Platnost odkazu: 24 hodin.\n\n"
+                + "DÄ›kujeme!";
+        sendSimpleEmail(to, subject, text);
+    }
+
+    @Async
+    public void sendActivationEmailHTML(String to, String activationLink) {
+        String subject = "PotvrzenĂ­ registrace - App - Hokej StarĂˇ Garda";
+        String html = "<p>DÄ›kujeme za registraci.</p>" +
+                "<p>KliknÄ›te na odkaz pro aktivaci ĂşÄŤtu:</p>" +
+                "<a href=\"" + activationLink + "\">Aktivovat ĂşÄŤet</a>";
+
+        sendHtmlEmail(to, subject, html);
+    }
+
+}
+
+
+
+----------
+SmsMessageBuilder.java
+----------
+
+package cz.phsoft.hokej.models.services.sms;
+
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import org.springframework.stereotype.Component;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+
+import java.time.format.DateTimeFormatter;
+
+@Component
+public class SmsMessageBuilder {
+
+    private final MatchRegistrationRepository matchRegistrationRepository;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public SmsMessageBuilder(MatchRegistrationRepository matchRegistrationRepository) {
+        this.matchRegistrationRepository = matchRegistrationRepository;
+    }
+
+    // --------------------------
+    // zprĂˇva po registraci/odhlĂˇĹˇenĂ­/omluvenĂ­
+    // --------------------------
+    public String buildMessageRegistration(MatchRegistrationEntity registration) {
+        PlayerMatchStatus status = registration.getStatus();
+        String statusText = switch (status) {
+            case REGISTERED -> "pĹ™ihlĂˇsil se k zĂˇpasu";
+            case UNREGISTERED -> "odhlĂˇsil se ze zĂˇpasu";
+            case EXCUSED -> "omluven";
+            default -> "neznĂˇmĂ˝ stav";
+        };
+
+        Long registeredCount = matchRegistrationRepository
+                .countByMatchIdAndStatus(registration.getMatch().getId(), PlayerMatchStatus.REGISTERED);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_hokej - datum: ")
+                .append(registration.getMatch().getDateTime().toLocalDate());
+
+        if (status != PlayerMatchStatus.EXCUSED) {
+            sb.append(", ").append(registeredCount)
+                    .append("/").append(registration.getMatch().getMaxPlayers());
+        }
+
+        sb.append(", hrĂˇÄŤ: ").append(registration.getPlayer().getFullName())
+                .append(", status: ").append(statusText);
+
+        return sb.toString();
+    }
+
+    // --------------------------
+    // zprĂˇva pro hrĂˇÄŤe, kteĹ™Ă­ jeĹˇtÄ› nereagovali
+    // --------------------------
+    public String buildMessageNoResponse(PlayerDTO player, MatchEntity match) {
+        Long registeredCount = matchRegistrationRepository
+                .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_hokej - upozornÄ›nĂ­: zĂˇpas ")
+                .append(match.getDateTime().format(dateFormatter))
+                .append(" - volnĂˇ mĂ­sta: ")
+                .append(match.getMaxPlayers() - registeredCount)
+                .append(". JeĹˇtÄ› jste nereagoval.");
+
+        return sb.toString();
+    }
+
+    // --------------------------
+    // finĂˇlnĂ­ pĹ™ipomĂ­nka pro pĹ™ihlĂˇĹˇenĂ© hrĂˇÄŤe v den zĂˇpasu
+    // --------------------------
+    public String buildMessageFinal(MatchRegistrationEntity registration) {
+        MatchEntity match = registration.getMatch();
+        Long registeredCount = matchRegistrationRepository
+                .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
+
+        double pricePerPlayer = match.getPrice() / Math.max(registeredCount, 1);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_hokej - pĹ™ipomĂ­nka zĂˇpasu ")
+                .append(match.getDateTime().format(dateFormatter))
+                .append(", pĹ™ihlĂˇĹˇeno: ").append(registeredCount).append("/").append(match.getMaxPlayers())
+                .append(", cena na hrĂˇÄŤe: ").append(String.format("%.2f KÄŤ", pricePerPlayer));
+
+        return sb.toString();
+    }
+}
+
+
+----------
+SmsSchedulerService.java
+----------
+
+package cz.phsoft.hokej.models.services.sms;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
+@Service
+public class SmsSchedulerService {
+
+    private final MatchRepository matchRepository;
+    private final MatchRegistrationRepository registrationRepository;
+    private final SmsService smsService;
+    private final SmsMessageBuilder smsMessageBuilder;
+    private final MatchRegistrationService matchRegistrationService;
+
+    public SmsSchedulerService(
+            MatchRepository matchRepository,
+            MatchRegistrationRepository registrationRepository,
+            SmsService smsService,
+            SmsMessageBuilder smsMessageBuilder,
+            MatchRegistrationService matchRegistrationService) {
+
+        this.matchRepository = matchRepository;
+        this.registrationRepository = registrationRepository;
+        this.smsService = smsService;
+        this.smsMessageBuilder = smsMessageBuilder;
+        this.matchRegistrationService = matchRegistrationService;
+    }
+
+    // PoslĂˇnĂ­ SMS v den zĂˇpasu
+    // SpustĂ­ se kaĹľdĂ˝ den v 12:30
+    @Scheduled(cron = "0 30 12 * * *")
+    @Transactional
+    public void sendFinalSmsForTodayMatches() {
+
+        LocalDate today = LocalDate.now();
+
+        // najdeme vĹˇechny dneĹˇnĂ­ zĂˇpasy
+        List<MatchEntity> todaysMatches = matchRepository.findAll().stream()
+                .filter(m -> m.getDateTime().toLocalDate().isEqual(today))
+                .toList();
+
+        for (MatchEntity match : todaysMatches) {
+
+            // naÄŤteme vĹˇechny registrace k danĂ©mu zĂˇpasu (BEZ zmÄ›n entit)
+            List<MatchRegistrationEntity> registrations =
+                    registrationRepository.findByMatchId(match.getId());
+
+            for (MatchRegistrationEntity reg : registrations) {
+
+                // pouĹľijeĹˇ svĹŻj pĹŻvodnĂ­ builder
+                String smsMsg = smsMessageBuilder.buildMessageFinal(reg);
+
+                try {
+                    smsService.sendSms(reg.getPlayer().getPhoneNumber(), smsMsg);
+                    System.out.println("FinĂˇlnĂ­ SMS poslĂˇna hrĂˇÄŤi "
+                            + reg.getPlayer().getFullName() + ": " + smsMsg);
+
+                } catch (Exception e) {
+                    System.err.println("Chyba SMS pro hrĂˇÄŤe "
+                            + reg.getPlayer().getFullName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    // poslĂˇnĂ­ SMS 3 dny pĹ™ed zĂˇpasem - noresponse player
+    @Scheduled(cron = "0 40 14 * * *") // kaĹľdĂ˝ den ve 12:30
+    @Transactional
+    public void sendNoResponseSmsForMatchesIn3Days() {
+
+        LocalDate targetDate = LocalDate.now().plusDays(3);
+
+        // vĹˇechny zĂˇpasy, kterĂ© jsou za 3 dny
+        List<MatchEntity> matchesInThreeDays = matchRepository.findAll().stream()
+                .filter(m -> m.getDateTime().toLocalDate().isEqual(targetDate))
+                .toList();
+
+        for (MatchEntity match : matchesInThreeDays) {
+
+            // pouĹľijeme tvĹŻj existujĂ­cĂ­ helper
+            List<PlayerDTO> noResponsePlayers =
+                    matchRegistrationService.getNoResponsePlayers(match.getId());
+
+            for (PlayerDTO player : noResponsePlayers) {
+
+                String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
+
+                try {
+                    smsService.sendSms(player.getPhoneNumber(), smsMsg);
+                    System.out.println("NORESPONSE SMS poslĂˇna hrĂˇÄŤi "
+                            + player.getFullName() + ": " + smsMsg);
+                } catch (Exception e) {
+                    System.err.println("Chyba NORESPONSE SMS pro hrĂˇÄŤe "
+                            + player.getFullName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+}
+
+
+----------
+SmsService.java
+----------
+
+package cz.phsoft.hokej.models.services.sms;
+
+public interface SmsService {
+    void sendSms(String phoneNumber, String message);
+}
+
+
+----------
+SmsServiceImpl.java
+----------
+
+/* package cz.phsoft.hokej.models.services.sms;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class SmsServiceImpl {
+
+   // private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${textbee.api-url}")
+    private String apiUrl;
+
+    @Value("${textbee.api-key}")
+    private String apiKey;
+
+    // testovacĂ­ ÄŤĂ­slo
+    //private final String testNumber = "+420776609956";
+
+    /**
+     * OdeĹˇle SMS na testovacĂ­ ÄŤĂ­slo.
+     * @param message text zprĂˇvy
+     */
+
+/*
+    public void sendSms(String phoneNumber, String message) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-api-key", apiKey);
+
+        Map<String, Object> body = Map.of(
+                "recipients", List.of(phoneNumber),
+                "message", message
+        );
+
+        HttpEntity<Map<String,Object>> request = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
+            System.out.println("SMS poslĂˇna na testovacĂ­ ÄŤĂ­slo  xxx   : " + response.getBody());
+        } catch (Exception e) {
+            System.err.println("Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS: " + e.getMessage());
+        }
+    }
+
+*/
+
+----------
+SmsTextBeeService.java
+----------
+
+package cz.phsoft.hokej.models.services.sms;
+
+import cz.phsoft.hokej.models.services.sms.SmsService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Map;
+
+// textbee - free s omezenĂ­m na 50 sms / den
+@Service
+public class SmsTextBeeService implements SmsService {
+
+    @Value("${sms.enabled:true}")
+    private boolean smsEnabled;
+
+    @Value("${textbee.api-url}")
+    private String apiUrl;
+
+    @Value("${textbee.api-key}")
+    private String apiKey;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Override
+    public void sendSms(String phoneNumber, String message) {
+        if (!smsEnabled) {
+            System.out.println("SMS disabled, message not sent: " + message);
+            return;
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-api-key", apiKey);
+
+        Map<String, Object> body = Map.of(
+                "recipients", List.of(phoneNumber),
+                "message", message
+        );
+
+        HttpEntity<Map<String,Object>> request = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
+            System.out.println("SMS odeslĂˇna hrĂˇÄŤi: " + phoneNumber + ", response: " + response.getBody());
+        } catch (Exception e) {
+            System.err.println("Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS: " + e.getMessage());
+        }
+    }
+}
+
+
+----------
+AppUserService.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.RegisterUserDTO;
+
+import java.util.List;
+
+public interface AppUserService {
+    /**
+     * Registrace novĂ©ho uĹľivatele
+     *
+     * @param registerUserDTO data pro registraci
+     * @throws IllegalArgumentException pokud email existuje nebo hesla se neshodujĂ­
+     */
+    void register(RegisterUserDTO registerUserDTO);
+
+    AppUserDTO getCurrentUser(String email);
+
+    List<AppUserDTO> getAllUsers();
+
+    void changePassword(String email, String oldPassword, String newPassword, String newPasswordConfirm);
+
+    void resetPassword(Long userId);
+
+    void updateUser(String email, AppUserDTO dto);
+
+    boolean activateUser(String token);
+}
+
+
+----------
+AppUserServiceImpl.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
+import cz.phsoft.hokej.data.enums.Role;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
+import cz.phsoft.hokej.exceptions.InvalidOldPasswordException;
+import cz.phsoft.hokej.exceptions.PasswordsDoNotMatchException;
+import cz.phsoft.hokej.exceptions.UserAlreadyExistsException;
+import cz.phsoft.hokej.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.RegisterUserDTO;
+import cz.phsoft.hokej.models.dto.mappers.AppUserMapper;
+import cz.phsoft.hokej.models.services.email.EmailService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class AppUserServiceImpl implements AppUserService {
+
+    @Value("${app.base-url}")
+    private String baseUrl;
+
+    private final AppUserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final AppUserMapper appUserMapper;
+    private final EmailService emailService;
+    private final EmailVerificationTokenRepository tokenRepository;
+
+    public AppUserServiceImpl(AppUserRepository userRepository,
+                              BCryptPasswordEncoder passwordEncoder, AppUserMapper appUserMapper,
+                              EmailService emailService, EmailVerificationTokenRepository tokenRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.appUserMapper = appUserMapper;
+        this.emailService = emailService;
+        this.tokenRepository = tokenRepository;
+    }
+
+    @Override
+    public void register(RegisterUserDTO dto) {
+        if (!dto.getPassword().equals(dto.getPasswordConfirm())) {
+            throw new PasswordsDoNotMatchException();
+        }
+
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("BE - UĹľivatel s tĂ­mto emailem jiĹľ existuje");
+        }
+
+        AppUserEntity user = new AppUserEntity();
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(Role.ROLE_PLAYER);
+        user.setEnabled(false); // NEaktivnĂ­ pĹ™i registraci
+
+        AppUserEntity savedUser = userRepository.save(user);
+
+        // GenerovĂˇnĂ­ tokenu
+        String token = java.util.UUID.randomUUID().toString();
+        EmailVerificationTokenEntity verificationToken = new EmailVerificationTokenEntity();
+        verificationToken.setToken(token);
+        verificationToken.setUser(savedUser);
+        verificationToken.setExpiresAt(java.time.LocalDateTime.now().plusHours(24));
+
+        tokenRepository.save(verificationToken);
+
+
+        // OdeslĂˇnĂ­ aktivaÄŤnĂ­ho emailu
+        String activationLink = baseUrl + "/api/auth/verify?token=" + token;
+        // Pro test lokĂˇlnÄ›: vypĂ­Ĺˇe odkaz do konzole
+        System.out.println("AktivaÄŤnĂ­ odkaz: " + activationLink);
+
+        emailService.sendActivationEmailHTML(savedUser.getEmail(), activationLink);
+    }
+
+    @Override
+    public boolean activateUser(String token) {
+        EmailVerificationTokenEntity verificationToken = tokenRepository.findByToken(token)
+                .orElse(null);
+
+        if (verificationToken == null || verificationToken.getExpiresAt().isBefore(java.time.LocalDateTime.now())) {
+            return false; // neplatnĂ˝ token nebo vyprĹˇel
+        }
+
+        AppUserEntity user = verificationToken.getUser();
+        user.setEnabled(true); // aktivujeme uĹľivatele
+        userRepository.save(user);
+
+        // Po aktivaci token smaĹľeme (nenĂ­ potĹ™eba jej uchovĂˇvat)
+        tokenRepository.delete(verificationToken);
+
+        return true;
+    }
+
+    @Override
+    public void updateUser(String email, AppUserDTO dto) {
+
+        AppUserEntity user = findUserByEmailOrThrow(email);
+
+        // NastavenĂ­ novĂ©ho hesla
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        user.setEmail(dto.getEmail());
+        userRepository.save(user);
+    }
+
+    @Override
+    public AppUserDTO getCurrentUser(String email) {
+        AppUserEntity user = findUserByEmailOrThrow(email);
+
+        // â† vyuĹľitĂ­ mapperu
+        return appUserMapper.toDTO(user);
+    }
+
+    @Override
+    public List<AppUserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(appUserMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public void changePassword(String email, String oldPassword, String newPassword, String newPasswordConfirm) {
+        if (!newPassword.equals(newPasswordConfirm)) {
+            throw new PasswordsDoNotMatchException("BE - NovĂ© heslo a potvrzenĂ­ novĂ©ho hesla se neshodujĂ­");
+        }
+
+        AppUserEntity user = findUserByEmailOrThrow(email);
+
+        // OvÄ›Ĺ™enĂ­ starĂ©ho hesla
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new InvalidOldPasswordException();
+        }
+
+        // NastavenĂ­ novĂ©ho hesla
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    // reset hesla
+    @Override
+    public void resetPassword(Long userId) {
+        AppUserEntity user = findUserByIdOrThrow(userId);
+
+        // NastavenĂ­ novĂ©ho hesla na "Player123"
+        user.setPassword(passwordEncoder.encode("Player123"));
+        userRepository.save(user);
+    }
+    private AppUserEntity findUserByEmailOrThrow(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+    }
+
+    private AppUserEntity findUserByIdOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+
+}
+
+----------
+MatchRegistrationService.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+
+import java.util.List;
+
+public interface MatchRegistrationService {
+
+    // đź”Ą VracĂ­ DTO mĂ­sto entity
+    MatchRegistrationDTO upsertRegistration(
+            Long matchId,
+            Long playerId,
+            Team team,
+            String adminNote,
+            ExcuseReason excuseReason,
+            String excuseNote,
+            boolean unregister
+    );
+
+    List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId);
+
+    List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds);
+
+    List<MatchRegistrationDTO> getAllRegistrations();
+
+    List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId);
+
+    List<PlayerDTO> getNoResponsePlayers(Long matchId);
+
+    void recalcStatusesForMatch(Long matchId);
+
+    MatchRegistrationDTO updateStatus(Long matchId, Long playerId, PlayerMatchStatus status);
+
+    MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote);
+
+
+}
+
+
+----------
+MatchRegistrationServiceImpl.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.*;
+import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.mappers.MatchRegistrationMapper;
+import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
+import cz.phsoft.hokej.models.services.sms.SmsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.models.services.NotificationService;
+
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+
+@Service
+public class MatchRegistrationServiceImpl implements MatchRegistrationService {
+
+    Logger logger = LoggerFactory.getLogger(MatchServiceImpl.class);
+    private final MatchRegistrationRepository registrationRepository;
+    private final MatchRepository matchRepository;
+    private final PlayerRepository playerRepository;
+    private final MatchRegistrationMapper matchRegistrationMapper;
+    private final PlayerMapper playerMapper;
+    private final SmsService smsService;
+    private final SmsMessageBuilder smsMessageBuilder;
+    private final NotificationService notificationService; // NEW
+
+    public MatchRegistrationServiceImpl(
+            MatchRegistrationRepository registrationRepository,
+            MatchRepository matchRepository,
+            PlayerRepository playerRepository,
+            MatchRegistrationMapper matchRegistrationMapper,
+            PlayerMapper playerMapper,
+            SmsService smsService,
+            SmsMessageBuilder smsMessageBuilder,
+            NotificationService notificationService              // NEW
+    ) {
+        this.registrationRepository = registrationRepository;
+        this.matchRepository = matchRepository;
+        this.playerRepository = playerRepository;
+        this.matchRegistrationMapper = matchRegistrationMapper;
+        this.playerMapper = playerMapper;
+        this.smsService = smsService;
+        this.smsMessageBuilder = smsMessageBuilder;
+        this.notificationService = notificationService;           // NEW
+    }
+
+    private MatchEntity getMatchOrThrow(Long matchId) {
+        return matchRepository.findById(matchId)
+                .orElseThrow(() -> new MatchNotFoundException(matchId));
+    }
+    private PlayerEntity getPlayerOrThrow(Long playerId) {
+        return playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+    }
+    private boolean isSlotAvailable(MatchEntity match) {
+        long registeredCount = registrationRepository.countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
+        return registeredCount < match.getMaxPlayers();
+    }
+    private void sendSms(MatchRegistrationEntity registration, String message) {
+        if (registration == null || registration.getPlayer() == null) return;
+        try {
+            smsService.sendSms(registration.getPlayer().getPhoneNumber(), message);
+        } catch (Exception e) {
+            System.err.println("Chyba SMS: " + e.getMessage());
+        }
+    }
+    private MatchRegistrationEntity updateRegistrationStatus(
+            MatchRegistrationEntity registration, PlayerMatchStatus status, String updatedBy, boolean updateTimestamp) {
+
+        registration.setStatus(PlayerMatchStatus.valueOf(status.name()));
+        registration.setCreatedBy(updatedBy);
+        if (updateTimestamp) {
+            registration.setTimestamp(LocalDateTime.now());
+        }
+        return registrationRepository.saveAndFlush(registration);
+    }
+    // -------------------- REGISTRATION --------------------
+    @Transactional
+    @Override
+    public MatchRegistrationDTO upsertRegistration(
+            Long matchId,
+            Long playerId,
+            Team team,
+            String adminNote,
+            ExcuseReason excuseReason,
+            String excuseNote,
+            boolean unregister) {
+
+        // TEST: poĹˇli ERROR zprĂˇvu pro otestovĂˇnĂ­ emailu
+        logger.error("Test ERROR zprĂˇva pro email");
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        MatchRegistrationEntity registration = registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElse(null);
+
+        PlayerMatchStatus newStatus;
+
+        // UNREGISTER: lze pouze kdyĹľ hrĂˇÄŤ mĂˇ aktuĂˇlnÄ› REGISTERED
+        if (unregister) {
+            if (registration == null || registration.getStatus() != PlayerMatchStatus.REGISTERED) {
+                throw new RegistrationNotFoundException(matchId, playerId);
+            }
+            registration.setExcuseReason(null);
+            newStatus = PlayerMatchStatus.UNREGISTERED;
+
+            // EXCUSE: lze vytvoĹ™it pouze pokud hrĂˇÄŤ NEMĂ status REGISTERED
+        } else if (excuseReason != null) {
+            if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
+                throw new DuplicateRegistrationException(matchId, playerId);
+            }
+            // pokud neexistuje, vytvoĹ™Ă­me pozici; pokud existuje a nenĂ­ REGISTERED, povolĂ­me EXCUSED
+            if (registration == null) {
+                registration = new MatchRegistrationEntity();
+                registration.setMatch(match);
+                registration.setPlayer(player);
+            }
+            registration.setExcuseReason(excuseReason);
+            newStatus = PlayerMatchStatus.EXCUSED;
+
+            // REGISTER / RESERVE: lze vytvoĹ™it pokud hrĂˇÄŤ NEMĂ status REGISTERED (tedy i kdyĹľ mĂˇ EXCUSED)
+        } else {
+            // pokud uĹľ je registrovĂˇn, nepovolĂ­me duplicitu
+            if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
+                throw new DuplicateRegistrationException(matchId, playerId);
+            }
+
+            newStatus = isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+
+            if (registration == null) {
+                registration = new MatchRegistrationEntity();
+                registration.setMatch(match);
+                registration.setPlayer(player);
+            } else {
+                // pĹ™i pĹ™echodu na register/reserve zruĹˇĂ­me pĹ™Ă­padnou vĂ˝mluvu
+                registration.setExcuseReason(null);
+            }
+        }
+
+        registration.setStatus(newStatus);
+        registration.setTimestamp(LocalDateTime.now());
+        registration.setCreatedBy("user");
+
+        if (team != null) registration.setTeam(team);
+        if (adminNote != null) registration.setAdminNote(adminNote);
+        // excuseReason uĹľ jsme nastavili vĂ˝Ĺˇe (pokud to byl EXCUSED pĹ™Ă­pad)
+        if (excuseReason != null) registration.setExcuseReason(excuseReason);
+
+        registration = registrationRepository.save(registration);
+
+        if (unregister) recalcStatusesForMatch(matchId);
+
+        // starĹˇĂ­ verze notifikace
+        // sendSms(registration, smsMessageBuilder.buildMessageRegistration(registration));
+
+        // OdesĂ­lĂˇnĂ­ notifikace - sms, email
+        NotificationType notificationType = switch (newStatus) {
+            case REGISTERED -> NotificationType.PLAYER_REGISTERED;
+            case UNREGISTERED -> NotificationType.PLAYER_UNREGISTERED;
+            case EXCUSED -> NotificationType.PLAYER_EXCUSED;
+            case RESERVED -> NotificationType.PLAYER_RESERVED;
+            default -> null;
+        };
+
+        if (notificationType != null) {
+            notificationService.notifyPlayer(player, notificationType, registration);
+        }
+
+        return matchRegistrationMapper.toDTO(registration);
+    }
+    // -------------------- FETCH --------------------
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
+        return matchRegistrationMapper.toDTOList(registrationRepository.findByMatchId(matchId));
+    }
+
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds) {
+        if (matchIds == null || matchIds.isEmpty()) {
+            return List.of();
+        }
+
+        return matchRegistrationMapper.toDTOList(
+                registrationRepository.findByMatchIdIn(matchIds)
+        );
+    }
+
+    @Override
+    public List<MatchRegistrationDTO> getAllRegistrations() {
+        return matchRegistrationMapper.toDTOList(registrationRepository.findAll());
+    }
+
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId) {
+        return matchRegistrationMapper.toDTOList(registrationRepository.findByPlayerId(playerId));
+    }
+
+    @Override
+    public List<PlayerDTO> getNoResponsePlayers(Long matchId) {
+        List<Long> responded = registrationRepository.findByMatchId(matchId).stream()
+                .map(r -> r.getPlayer().getId())
+                .toList();
+
+        List<PlayerEntity> noResponsePlayers = playerRepository.findAll().stream()
+                .filter(p -> !responded.contains(p.getId()))
+                .toList();
+
+        return noResponsePlayers.stream()
+                .map(playerMapper::toDTO)
+                .toList();
+    }
+    // -------------------- RECALC --------------------
+    @Override
+    @Transactional
+    public void recalcStatusesForMatch(Long matchId) {
+        MatchEntity match = getMatchOrThrow(matchId);
+        int maxPlayers = match.getMaxPlayers();
+
+        List<MatchRegistrationEntity> regs = registrationRepository.findByMatchId(matchId).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED
+                        || r.getStatus() == PlayerMatchStatus.RESERVED)
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .toList();
+
+        for (int i = 0; i < regs.size(); i++) {
+            MatchRegistrationEntity reg = regs.get(i);
+            PlayerMatchStatus newStatus = (i < maxPlayers) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+            if (reg.getStatus() != newStatus) updateRegistrationStatus(reg, newStatus, "system", false);
+        }
+    }
+
+    // -------------------- SMS --------------------
+    @Transactional
+    public void sendSmsToRegisteredPlayers(Long matchId) {
+        registrationRepository.findByMatchId(matchId).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                .forEach(r -> {
+                    // NEW â€“ respektuj preferenci hrĂˇÄŤe pro SMS
+                    var player = r.getPlayer();
+                    var ns = player.getNotificationSettings();
+                    if (ns != null && ns.isSmsEnabled()) {
+                        sendSms(r, smsMessageBuilder.buildMessageFinal(r));
+                    }
+                });
+    }
+
+    public void sendNoResponseSmsForMatch(Long matchId) {
+        var match = getMatchOrThrow(matchId);
+
+        getNoResponsePlayers(matchId).forEach(player -> {
+            String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
+
+            try {
+                // NEW â€“ respektuj notifyBySms v PlayerDTO (mapovanĂ© z NotificationSettings)
+                if (player.isNotifyBySms()) {
+                    smsService.sendSms(player.getPhoneNumber(), smsMsg);
+                }
+            } catch (Exception e) {
+                System.err.println("Chyba SMS pro hrĂˇÄŤe "
+                        + player.getFullName() + ": " + e.getMessage());
+                logger.error("Chyba pĹ™i odeslĂˇnĂ­ SMS hrĂˇÄŤi {}: {}", player.getFullName(), e.getMessage());
+            }
+        });
+    }
+
+    @Override
+    @Transactional
+    public MatchRegistrationDTO updateStatus(Long matchId, Long playerId, PlayerMatchStatus status) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        MatchRegistrationEntity registration = registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
+
+        // mĹŻĹľeme pĹ™Ă­padnÄ› Ĺ™eĹˇit dalĹˇĂ­ pravidla, tady jen prostĂ˝ update
+        MatchRegistrationEntity updated =
+                updateRegistrationStatus(registration, status, "admin", true);
+
+        return matchRegistrationMapper.toDTO(updated);
+    }
+
+    @Override
+    @Transactional
+    public MatchRegistrationDTO markNoExcused(
+            Long matchId,
+            Long playerId,
+            String adminNote
+    ) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        if (match.getDateTime().isAfter(LocalDateTime.now())) {
+            throw new InvalidPlayerStatusException(
+                    "Status NO_EXCUSED lze nastavit pouze u jiĹľ probÄ›hlĂ©ho zĂˇpasu."
+            );
+        }
+
+        MatchRegistrationEntity registration = registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
+
+        if (registration.getStatus() != PlayerMatchStatus.REGISTERED) {
+            throw new InvalidPlayerStatusException(
+                    "Status NO_EXCUSED lze nastavit pouze z registrace REGISTERED."
+            );
+        }
+
+        // domĂ©novĂˇ logika NO_EXCUSED
+        registration.setExcuseReason(null);
+
+        // adminNote â€“ default fallback
+        if (adminNote == null || adminNote.isBlank()) {
+            registration.setAdminNote("Nedostavil se bez omluvy");
+        } else {
+            registration.setAdminNote(adminNote);
+        }
+
+        MatchRegistrationEntity updated =
+                updateRegistrationStatus(
+                        registration,
+                        PlayerMatchStatus.NO_EXCUSED,
+                        "admin",
+                        true
+                );
+
+        return matchRegistrationMapper.toDTO(updated);
+    }
+
+
+
+}
+
+----------
+MatchService.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.models.dto.*;
+
+import java.util.List;
+
+public interface MatchService {
+    List<MatchDTO> getAllMatches();
+    List<MatchDTO> getUpcomingMatches();
+    List<MatchDTO> getPastMatches();
+    MatchDTO getNextMatch();
+    MatchDTO getMatchById(Long id);
+    MatchDTO createMatch(MatchDTO dto);
+    MatchDTO updateMatch(Long id, MatchDTO dto);
+    SuccessResponseDTO deleteMatch(Long id);
+    MatchDetailDTO getMatchDetail(Long id);
+    List<MatchDTO> getAvailableMatchesForPlayer(Long playerId);
+    List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId);
+    Long getPlayerIdByEmail(String email);
+    List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId);
+    List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId);
+    MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote);
+
+}
+
+
+----------
+MatchServiceImpl.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.PlayerType;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.MatchNotFoundException;
+import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.models.dto.*;
+import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
+import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import cz.phsoft.hokej.security.CurrentPlayerService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Service
+public class MatchServiceImpl implements MatchService {
+
+    private final MatchRepository matchRepository;
+    private final MatchMapper matchMapper;
+    private final MatchRegistrationService registrationService;
+    private final PlayerRepository playerRepository;
+    private final PlayerInactivityPeriodService playerInactivityPeriodService;
+    private final PlayerMapper playerMapper;
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    private static final String ROLE_MANAGER = "ROLE_MANAGER";
+    private final CurrentPlayerService currentPlayerService;
+    private static final Logger logger = LoggerFactory.getLogger(MatchServiceImpl.class);
+
+    public MatchServiceImpl(MatchRepository matchRepository,
+                            MatchMapper matchMapper,
+                            MatchRegistrationService registrationService,
+                            PlayerRepository playerRepository,
+                            PlayerInactivityPeriodService playerInactivityPeriodService,
+                            PlayerMapper playerMapper,  CurrentPlayerService currentPlayerService) {
+        this.matchRepository = matchRepository;
+        this.matchMapper = matchMapper;
+        this.registrationService = registrationService;
+        this.playerRepository = playerRepository;
+        this.playerInactivityPeriodService = playerInactivityPeriodService;
+        this.playerMapper = playerMapper;
+        this.currentPlayerService = currentPlayerService;
+    }
+    // metoda pro zĂ­skĂˇnĂ­ vĹˇech zĂˇpasĹŻ
+    @Override
+    public List<MatchDTO> getAllMatches() {
+        return matchRepository.findAll().stream()
+                .map(matchMapper::toDTO)
+                .toList();
+    }
+    // metoda pro zĂ­skĂˇnĂ­ vĹˇech nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ
+    @Override
+    public List<MatchDTO> getUpcomingMatches() {
+        return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
+                .stream()
+                .map(matchMapper::toDTO)
+                .toList();
+    }
+    // metoda pro zĂ­skĂˇnĂ­ uplynulĂ˝ch zĂˇpasĹŻ
+    public List<MatchDTO> getPastMatches() {
+        return matchRepository.findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime.now())
+                .stream()
+                .map(matchMapper::toDTO)
+                .toList();
+    }
+    // metoda pro zĂ­skĂˇnĂ­ prvnĂ­ho nadchĂˇzejĂ­cĂ­ho zĂˇpasu
+    @Override
+    public MatchDTO getNextMatch() {
+        return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
+                .stream()
+                .findFirst()
+                .map(matchMapper::toDTO)
+                .orElse(null);
+    }
+    // metoda pro zĂˇpas dle ID
+    @Override
+    public MatchDTO getMatchById(Long id) {
+        return matchMapper.toDTO(findMatchOrThrow(id));
+    }
+
+    // metoda pro vytvoĹ™enĂ­ zĂˇpasu
+    @Override
+    public MatchDTO createMatch(MatchDTO dto) {
+        MatchEntity entity = matchMapper.toEntity(dto);
+        return matchMapper.toDTO(matchRepository.save(entity));
+    }
+
+    // metoda pro Ăşpravu zĂˇpasu
+    @Override
+    public MatchDTO updateMatch(Long id, MatchDTO dto) {
+        MatchEntity match = findMatchOrThrow(id);
+
+        int oldMaxPlayers = match.getMaxPlayers();
+        matchMapper.updateEntity(dto, match);
+        MatchEntity saved = matchRepository.save(match);
+
+        // PĹ™epoÄŤet registracĂ­ pokud doĹˇlo ke zmÄ›nÄ› maxPlayers
+        if (saved.getMaxPlayers() != oldMaxPlayers) {
+            registrationService.recalcStatusesForMatch(saved.getId());
+        }
+
+        return matchMapper.toDTO(saved);
+    }
+
+    // metoda pro odstranÄ›nĂ­ zĂˇpasu
+    @Override
+    public SuccessResponseDTO deleteMatch(Long id) {
+        MatchEntity match = findMatchOrThrow(id);
+
+        // 2) Pokud existuje, smaĹľeme ho
+        matchRepository.delete(match);
+
+        return new SuccessResponseDTO(
+                "BE - ZĂˇpas " + match.getId() + match.getDateTime() + " byl ĂşspÄ›ĹˇnÄ› smazĂˇn",
+                id,
+                LocalDateTime.now().toString()
+        );
+    }
+
+    // metoda pro detail zĂˇpasu - omezen vĂ˝pis pro ADMIN, MANAGER, PLAYER
+    @Override
+    public MatchDetailDTO getMatchDetail(Long id) {
+        MatchEntity match = findMatchOrThrow(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdminOrManager = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals(ROLE_ADMIN) || a.getAuthority().equals(ROLE_MANAGER));
+
+        // oddÄ›lena logika pĹ™Ă­stupu hrĂˇÄŤe do privĂˇtnĂ­ metody
+        checkAccessForPlayer(match, auth);
+
+        // sbÄ›r statistik hrĂˇÄŤĹŻ pĹ™es privĂˇtnĂ­ metodu
+        MatchDetailDTO dto = collectPlayerStatus(match, isAdminOrManager);
+
+        // đź”ą Zjistit aktuĂˇlnĂ­ho hrĂˇÄŤe (pokud je nastaven)
+        Long currentPlayerId = null;
+        try {
+            currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        } catch (Exception e) {
+            // pokud nenĂ­ vybranĂ˝ aktuĂˇlnĂ­ hrĂˇÄŤ, nechĂˇme currentPlayerId = null â†’ NO_RESPONSE
+            logger.debug("Nebyl nalezen currentPlayerId pro match detail {}", id);
+        }
+
+        // đź”ą UrÄŤit status aktuĂˇlnĂ­ho hrĂˇÄŤe podle seznamĹŻ v DTO
+        PlayerMatchStatus status = resolveStatusForPlayer(dto, currentPlayerId);
+        dto.setStatus(status);
+
+        return dto;
+
+    }
+
+    // privĂˇtnĂ­ metoda pro kontrolu pĹ™Ă­stupu hrĂˇÄŤe - jen pokud byl registrovĂˇn na zĂˇpas
+    private void checkAccessForPlayer(MatchEntity match, Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            // pokud mĂˇĹˇ na controlleru @PreAuthorize("isAuthenticated()"),
+            // klidnÄ› mĹŻĹľeĹˇ jen return; ale vĂ˝jimka je bezpeÄŤnÄ›jĹˇĂ­
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "BE - MusĂ­te bĂ˝t pĹ™ihlĂˇĹˇen."
+            );
+        }
+
+        boolean isAdminOrManager = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals(ROLE_ADMIN) || a.getAuthority().equals(ROLE_MANAGER));
+
+        // Admin/manager vidĂ­ vĹľdy vĹˇe
+        if (isAdminOrManager) return;
+
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails)) {
+            // bezpeÄŤnostnĂ­ fallback
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "BE - NemĂˇte pĹ™Ă­stup k detailu tohoto zĂˇpasu."
+            );
+        }
+
+        // vĹˇichni hrĂˇÄŤi patĹ™Ă­cĂ­ aktuĂˇlnĂ­mu uĹľivateli
+        List<PlayerEntity> ownedPlayers = playerRepository.findAll().stream()
+                .filter(p -> p.getUser() != null && p.getUser().getEmail().equals(userDetails.getUsername()))
+                .toList();
+
+        if (ownedPlayers.isEmpty()) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "BE - NemĂˇte pĹ™iĹ™azenĂ©ho ĹľĂˇdnĂ©ho hrĂˇÄŤe."
+            );
+        }
+
+        var now = LocalDateTime.now();
+        boolean isPastOrNow = !match.getDateTime().isAfter(now); // true = minulĂ˝ nebo prĂˇvÄ› teÄŹ
+        List<Long> ownedPlayerIds = ownedPlayers.stream()
+                .map(PlayerEntity::getId)
+                .toList();
+
+        // vĹˇechny registrace pro tenhle zĂˇpas
+        List<MatchRegistrationDTO> registrations =
+                registrationService.getRegistrationsForMatch(match.getId());
+
+        if (!isPastOrNow) {
+            // đź”ą NADCHĂZEJĂŤCĂŤ ZĂPAS
+            // hrĂˇÄŤ mĂˇ pĹ™Ă­stup, pokud mĂˇ alespoĹ jednoho svĂ©ho hrĂˇÄŤe,
+            // kterĂ˝ je pro datum zĂˇpasu "aktivnĂ­" (inactivity period)
+
+            boolean hasActivePlayerForMatch = ownedPlayers.stream()
+                    .anyMatch(p -> playerInactivityPeriodService.isActive(p, match.getDateTime()));
+
+            if (!hasActivePlayerForMatch) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "BE - NemĂˇte aktivnĂ­ho hrĂˇÄŤe pro tento zĂˇpas."
+                );
+            }
+
+            // ĹľĂˇdnĂˇ podmĂ­nka na status â€“ REGISTERED/NO_RESPONSE/EXCUSEDâ€¦ neĹ™eĹˇĂ­me
+            return;
+        }
+
+        // đź”ą UPLYNULĂť ZĂPAS
+        // pĹ™Ă­stup jen pokud nÄ›kterĂ˝ z hrĂˇÄŤĹŻ mÄ›l status REGISTERED
+        boolean wasRegistered = registrations.stream()
+                .anyMatch(r ->
+                        r.getStatus() == PlayerMatchStatus.REGISTERED
+                                && ownedPlayerIds.contains(r.getPlayerId())
+                );
+
+        if (!wasRegistered) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "BE - K tomuto uplynulĂ©mu zĂˇpasu nemĂˇte oprĂˇvnÄ›nĂ­ (nejste mezi registrovanĂ˝mi hrĂˇÄŤi)."
+            );
+        }
+    }
+
+
+
+    // privĂˇtnĂ­ metoda pro sbÄ›r statistik hrĂˇÄŤĹŻ
+    private MatchDetailDTO collectPlayerStatus(MatchEntity match, boolean isAdminOrManager) {
+        List<MatchRegistrationDTO> registrations = registrationService.getRegistrationsForMatch(match.getId());
+
+        // mapovĂˇnĂ­ status -> hrĂˇÄŤi (z registracĂ­)
+        var statusToPlayersMap = registrations.stream()
+                .map(r -> playerRepository.findById(r.getPlayerId())
+                        .map(playerMapper::toDTO)
+                        .map(dto -> new java.util.AbstractMap.SimpleEntry<>(r.getStatus(), dto))
+                )
+                .filter(java.util.Optional::isPresent)
+                .map(java.util.Optional::get)
+                .collect(Collectors.groupingBy(
+                        java.util.Map.Entry::getKey,
+                        Collectors.mapping(java.util.Map.Entry::getValue, Collectors.toList())
+                ));
+
+        List<PlayerEntity> allPlayers = playerRepository.findAll();
+        Set<Long> respondedIds = registrations.stream()
+                .map(MatchRegistrationDTO::getPlayerId)
+                .collect(Collectors.toSet());
+
+        // hrĂˇÄŤi bez registrace = NO_RESPONSE (pokud to pouĹľĂ­vĂˇĹˇ)
+        List<PlayerDTO> noResponsePlayers = allPlayers.stream()
+                .filter(p -> !respondedIds.contains(p.getId()))
+                .map(playerMapper::toDTO)
+                .toList();
+
+        // âť— TADY byla chyba â€“ tohle pole bylo pĹ™edtĂ­m spoÄŤĂ­tanĂ© stejnÄ› jako noResponsePlayers.
+        // UĹľ ho nepotĹ™ebujeme jako zvlĂˇĹˇtnĂ­ kolekci, NO_EXCUSED bereme z mapy statusĹŻ.
+
+        // --- POÄŚTY HRĂÄŚĹ® ---
+
+        int inGamePlayers =
+                statusToPlayersMap.getOrDefault(PlayerMatchStatus.REGISTERED, List.of()).size();
+
+        int outGamePlayers =
+                statusToPlayersMap.getOrDefault(PlayerMatchStatus.UNREGISTERED, List.of()).size()
+                        + statusToPlayersMap.getOrDefault(PlayerMatchStatus.EXCUSED, List.of()).size()
+                        + statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size(); // â¬…ď¸Ź pĹ™idĂˇno
+
+        int waitingPlayers =
+                statusToPlayersMap.getOrDefault(PlayerMatchStatus.RESERVED, List.of()).size();
+
+        int noExcusedPlayersSum =
+                statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size(); // â¬…ď¸Ź pouĹľĂ­vĂˇme mapu
+
+        int noActionPlayers = noResponsePlayers.size();
+
+        int remainingSlots = match.getMaxPlayers() - inGamePlayers;
+        double pricePerRegistered = inGamePlayers > 0
+                ? match.getPrice() / (double) inGamePlayers
+                : match.getPrice();
+
+        MatchDetailDTO dto = new MatchDetailDTO();
+        dto.setId(match.getId());
+        dto.setDateTime(match.getDateTime());
+        dto.setLocation(match.getLocation());
+        dto.setDescription(match.getDescription());
+        dto.setPrice(match.getPrice());
+        dto.setMaxPlayers(match.getMaxPlayers());
+        dto.setInGamePlayers(inGamePlayers);
+        dto.setOutGamePlayers(outGamePlayers);
+        dto.setWaitingPlayers(waitingPlayers);
+        dto.setNoExcusedPlayersSum(noExcusedPlayersSum);   // â¬…ď¸Ź vyplnÄ›no
+        dto.setNoActionPlayers(noActionPlayers);
+        dto.setPricePerRegisteredPlayer(pricePerRegistered);
+        dto.setRemainingSlots(remainingSlots);
+
+        // hrĂˇÄŤi podle statusĹŻ z mapy
+        dto.setRegisteredPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.REGISTERED, List.of()));
+        dto.setReservedPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.RESERVED, List.of()));
+        dto.setUnregisteredPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.UNREGISTERED, List.of()));
+        dto.setExcusedPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.EXCUSED, List.of()));
+        dto.setNoExcusedPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of())); // â¬…ď¸Ź tady je hlavnĂ­ seznam
+
+        // no-response vidĂ­ jen admin/manager
+        dto.setNoResponsePlayers(isAdminOrManager ? noResponsePlayers : null);
+
+        return dto;
+    }
+
+    private PlayerMatchStatus resolveStatusForPlayer(MatchDetailDTO dto, Long playerId) {
+        if (dto == null || playerId == null) {
+            return PlayerMatchStatus.NO_RESPONSE;
+        }
+
+        if (isIn(dto.getRegisteredPlayers(), playerId)) {
+            return PlayerMatchStatus.REGISTERED;
+        }
+
+        if (isIn(dto.getReservedPlayers(), playerId)) {
+            return PlayerMatchStatus.RESERVED;
+        }
+
+        if (isIn(dto.getExcusedPlayers(), playerId)) {
+            return PlayerMatchStatus.EXCUSED;
+        }
+
+        if (isIn(dto.getUnregisteredPlayers(), playerId)) {
+            return PlayerMatchStatus.UNREGISTERED;
+        }
+
+        if (isIn(dto.getNoExcusedPlayers(), playerId)) {
+            return PlayerMatchStatus.NO_EXCUSED;
+        }
+
+        // hrĂˇÄŤ nenĂ­ v ĹľĂˇdnĂ©m seznamu â†’ ĹľĂˇdnĂˇ registrace
+        return PlayerMatchStatus.NO_RESPONSE;
+    }
+
+    private boolean isIn(List<PlayerDTO> players, Long playerId) {
+        return players != null
+                && players.stream().anyMatch(p -> p.getId().equals(playerId));
+    }
+
+
+    // dostupnĂ© zĂˇpasy pro hrĂˇÄŤe - byl nebo je aktivnĂ­
+    @Override
+    public List<MatchDTO> getAvailableMatchesForPlayer(Long playerId) {
+        PlayerEntity player = findPlayerOrThrow(playerId);
+
+        // Filtrace pĹ™es stream bez mezivĂ˝sledkĹŻ
+        return matchRepository.findAll().stream()
+                .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
+                .map(matchMapper::toDTO)
+                .toList();
+    }
+
+    // zĂ­skĂˇnĂ­ hrĂˇÄŤe dle emailu
+    public Long getPlayerIdByEmail(String email) {
+        return playerRepository.findByUserEmail(email)
+                .map(PlayerEntity::getId)
+                .orElseThrow(() -> new PlayerNotFoundException(email));
+    }
+
+
+    // nĂˇhled nadchĂˇzejĂ­cĂ­ch zĂˇpasu pro hrĂˇÄŤe - dle PlayerType
+    @Override
+    public List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId) {
+        PlayerEntity player = findPlayerOrThrow(playerId);
+        PlayerType type = player.getType();
+
+        // 1) NejbliĹľĹˇĂ­ nadchĂˇzejĂ­cĂ­ zĂˇpasy podle data
+        List<MatchEntity> upcomingAll = matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
+
+        // 2) OmezenĂ­ podle typu hrĂˇÄŤe
+        List<MatchEntity> limited = switch (type) {
+            case VIP -> upcomingAll;
+            case STANDARD -> upcomingAll.stream().limit(2).toList();
+            case BASIC -> upcomingAll.isEmpty() ? List.of() : List.of(upcomingAll.get(0));
+        };
+
+        // 3) FiltrovĂˇnĂ­ podle aktivity hrĂˇÄŤe a mapovĂˇnĂ­ na MatchOverviewDTO
+        return limited.stream()
+                .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
+                .map(match -> toOverviewDTO(match, playerId))
+                .toList();
+    }
+
+    // nadchĂˇzejĂ­cĂ­ zĂˇpas
+    @Override
+    public List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId) {
+        PlayerEntity player = findPlayerOrThrow(playerId);
+        PlayerType type = player.getType();
+
+        // 1) NejbliĹľĹˇĂ­ nadchĂˇzejĂ­cĂ­ zĂˇpasy podle data
+        List<MatchEntity> upcomingAll = matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
+
+        List<MatchEntity> limited = switch (type) {
+            case VIP -> upcomingAll;
+            case STANDARD -> upcomingAll.stream().limit(2).toList();
+            case BASIC -> upcomingAll.isEmpty() ? List.of() : List.of(upcomingAll.get(0));
+        };
+
+        // 2) FiltrovĂˇnĂ­ podle aktivity hrĂˇÄŤe
+        return limited.stream()
+                .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
+                .map(matchMapper::toDTO)
+                .toList();
+    }
+
+    // pomocnĂ© metody
+    private PlayerEntity findPlayerOrThrow(Long playerId) {
+        return playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+    }
+
+    private MatchEntity findMatchOrThrow(Long matchId) {
+        return matchRepository.findById(matchId)
+                .orElseThrow(() -> new MatchNotFoundException(matchId));
+    }
+
+    private MatchOverviewDTO toOverviewDTO(MatchEntity match) {
+        MatchOverviewDTO dto = new MatchOverviewDTO();
+        dto.setId(match.getId());
+        dto.setDateTime(match.getDateTime());
+        dto.setLocation(match.getLocation());
+        dto.setDescription(match.getDescription());
+        dto.setPrice(match.getPrice());
+        dto.setMaxPlayers(match.getMaxPlayers());
+
+
+        // poÄŤet registrovanĂ˝ch hrĂˇÄŤĹŻ
+        int inGamePlayers = registrationService.getRegistrationsForMatch(match.getId()).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                .mapToInt(r -> 1)
+                .sum();
+        dto.setInGamePlayers(inGamePlayers);
+
+        // cena na registrovanĂ©ho hrĂˇÄŤe
+        double pricePerPlayer = inGamePlayers > 0 && match.getPrice() != null
+                ? match.getPrice() / (double) inGamePlayers : match.getPrice();
+        dto.setPricePerRegisteredPlayer(pricePerPlayer);
+
+
+
+        return dto;
+    }
+
+    private MatchOverviewDTO toOverviewDTO(MatchEntity match, Long playerId) {
+
+        MatchOverviewDTO dto = toOverviewDTO(match); // â† znovupouĹľitĂ­ tvĂ© pĹŻvodnĂ­ metody
+
+        PlayerMatchStatus status = registrationService
+                .getRegistrationsForMatch(match.getId()).stream()
+                .filter(r -> r.getPlayerId().equals(playerId))
+                .map(MatchRegistrationDTO::getStatus)
+                .findFirst()
+                .filter(s ->
+                        s == PlayerMatchStatus.REGISTERED ||
+                                s == PlayerMatchStatus.UNREGISTERED ||
+                                s == PlayerMatchStatus.EXCUSED ||
+                                s == PlayerMatchStatus.RESERVED ||
+                                s == PlayerMatchStatus.NO_EXCUSED
+                )
+                .orElse(PlayerMatchStatus.NO_RESPONSE);
+
+        dto.setStatus(status);
+        return dto;
+    }
+
+    @Override
+    public List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId) {
+        PlayerEntity player = findPlayerOrThrow(playerId);
+
+        // Vezmeme dostupnĂ© zĂˇpasy jako entity (bez DTO)
+        List<MatchEntity> availableMatches = matchRepository.findAll().stream()
+                .filter(match -> match.getDateTime().isBefore(LocalDateTime.now()) || match.getDateTime().isEqual(LocalDateTime.now()))
+                .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
+                .toList();
+
+        if (availableMatches.isEmpty()) {
+            return List.of();
+        }
+
+        // VĹˇechny ID zĂˇpasĹŻ
+        List<Long> matchIds = availableMatches.stream()
+                .map(MatchEntity::getId)
+                .toList();
+
+        // Jeden jedinĂ˝ dotaz na vĹˇechny registrace
+        List<MatchRegistrationDTO> allRegistrations =
+                registrationService.getRegistrationsForMatches(matchIds);
+
+        // Mapa: matchId -> (playerId -> status)
+        var statusMap = allRegistrations.stream()
+                .collect(Collectors.groupingBy(
+                        MatchRegistrationDTO::getMatchId,
+                        Collectors.toMap(
+                                MatchRegistrationDTO::getPlayerId,
+                                MatchRegistrationDTO::getStatus,
+                                (a, b) -> a
+                        )
+                ));
+
+        // MapovĂˇnĂ­ na MatchOverviewDTO + nastavenĂ­ statusu
+        return availableMatches.stream()
+                .map(match -> {
+                    MatchOverviewDTO overview = toOverviewDTO(match);
+
+                    PlayerMatchStatus status = Optional.ofNullable(statusMap.get(match.getId()))
+                            .map(m -> m.get(playerId))
+                            .filter(s ->
+                                            s == PlayerMatchStatus.REGISTERED ||
+                                            s == PlayerMatchStatus.UNREGISTERED ||
+                                            s == PlayerMatchStatus.EXCUSED ||
+                                            s == PlayerMatchStatus.RESERVED ||
+                                            s == PlayerMatchStatus.NO_EXCUSED
+                            )
+                            .orElse(PlayerMatchStatus.NO_RESPONSE);
+
+                    overview.setStatus(status);
+                    return overview;
+                })
+                .toList();
+    }
+    @Override
+    public MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote) {
+        // tady jen delegujeĹˇ na RegistrationService
+        // (pĹ™Ă­p. mĹŻĹľeĹˇ pĹ™idat dalĹˇĂ­ validaÄŤnĂ­ logiku na Ăşrovni zĂˇpasu/uĹľivatele)
+        return registrationService.markNoExcused(matchId, playerId, adminNote);
+    }
+
+
+}
+
+
+----------
+NotificationService.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.NotificationType;
+
+public interface NotificationService {
+
+
+    /**
+     * HlavnĂ­ vstupnĂ­ bod pro notifikace hrĂˇÄŤe.
+     *
+     * @param player   konkrĂ©tnĂ­ hrĂˇÄŤ (mĂˇ v sobÄ› usera + NotificationSettings)
+     * @param type     typ notifikace (PLAYER_CREATED, PLAYER_REGISTERED, ...)
+     * @param context  kontextovĂˇ entita â€“ typicky:
+     *                 - MatchRegistrationEntity pro registrace / odhlĂˇĹˇenĂ­ / omluvu
+     *                 - null pro jednoduchĂ© notifikace (vytvoĹ™enĂ­ hrĂˇÄŤe, schvĂˇlenĂ­, ...)
+     */
+    void notifyPlayer(PlayerEntity player,NotificationType type, Object context);
+
+
+}
+
+
+----------
+NotificationServiceImpl.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.NotificationSettings;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.models.services.email.EmailService;
+import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
+import cz.phsoft.hokej.models.services.sms.SmsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+@Service
+public class NotificationServiceImpl implements NotificationService {
+
+    private static final Logger log = LoggerFactory.getLogger(NotificationServiceImpl.class);
+
+    private final EmailService emailService;
+    private final SmsService smsService;
+    private final SmsMessageBuilder smsMessageBuilder;
+
+    public NotificationServiceImpl(
+            EmailService emailService,
+            SmsService smsService,
+            SmsMessageBuilder smsMessageBuilder
+    ) {
+        this.emailService = emailService;
+        this.smsService = smsService;
+        this.smsMessageBuilder = smsMessageBuilder;
+    }
+
+    @Override
+    public void notifyPlayer(PlayerEntity player,
+                             NotificationType type,
+                             Object context) {
+
+        if (player == null) {
+            log.warn("notifyPlayer() called with null player for type {}", type);
+            return;
+        }
+
+        NotificationSettings settings = player.getNotificationSettings();
+        if (settings == null) {
+            // hrĂˇÄŤ nemĂˇ nastavenĂ© preference â€“ nebudeme posĂ­lat nic
+            log.debug("Player {} nemĂˇ NotificationSettings â€“ ĹľĂˇdnĂ© notifikace se neposĂ­lajĂ­", player.getId());
+            return;
+        }
+
+        // ================= EMAIL =================
+        if (settings.isEmailEnabled() && player.getUser() != null) {
+            sendEmail(player, type, context);
+        }
+
+        // ================= SMS =================
+        if (settings.isSmsEnabled() && player.getPhoneNumber() != null) {
+            sendSms(player, type, context);
+        }
+    }
+
+    // ----------------------------------------------------
+    // EMAIL
+    // ----------------------------------------------------
+    private void sendEmail(PlayerEntity player,
+                           NotificationType type,
+                           Object context) {
+
+        if (player.getUser() == null || player.getUser().getEmail() == null) {
+            log.debug("Player {} nemĂˇ email v userovi â€“ email se nepoĹˇle", player.getId());
+            return;
+        }
+
+        String email = player.getUser().getEmail();
+
+        switch (type) {
+
+            case PLAYER_CREATED -> {
+                emailService.sendSimpleEmail(
+                        email,
+                        "HrĂˇÄŤ vytvoĹ™en",
+                        "HrĂˇÄŤ " + player.getFullName() + " byl ĂşspÄ›ĹˇnÄ› vytvoĹ™en."
+                );
+            }
+
+            case PLAYER_UPDATED -> {
+                emailService.sendSimpleEmail(
+                        email,
+                        "HrĂˇÄŤ upraven",
+                        "Ăšdaje hrĂˇÄŤe " + player.getFullName() + " byly aktualizovĂˇny."
+                );
+            }
+
+            case PLAYER_APPROVED -> {
+                emailService.sendSimpleEmail(
+                        email,
+                        "HrĂˇÄŤ schvĂˇlen",
+                        "HrĂˇÄŤ " + player.getFullName() + " byl schvĂˇlen administrĂˇtorem."
+                );
+            }
+
+            case PLAYER_REJECTED -> {
+                emailService.sendSimpleEmail(
+                        email,
+                        "HrĂˇÄŤ zamĂ­tnut",
+                        "HrĂˇÄŤ " + player.getFullName() + " byl zamĂ­tnut administrĂˇtorem."
+                );
+            }
+
+            // USER_UPDATED mĹŻĹľeĹˇ pouĹľĂ­t jinde (napĹ™. v UserService),
+            // tady ho zatĂ­m ignorujeme nebo pĹ™Ă­padnÄ› logujeme:
+            case USER_UPDATED -> {
+                emailService.sendSimpleEmail(
+                        email,
+                        "ĂšÄŤet byl aktualizovĂˇn",
+                        "Ăšdaje vaĹˇeho ĂşÄŤtu byly aktualizovĂˇny."
+                );
+            }
+
+            // ostatnĂ­ typy jsou spĂ­Ĺˇ match-related a smysl dĂˇvajĂ­ pĹ™es SMS,
+            // email pro nÄ› teÄŹ neĹ™eĹˇĂ­me
+            default -> {
+                log.debug("Typ {} nemĂˇ definovanou email notifikaci, nic se neposĂ­lĂˇ", type);
+            }
+        }
+    }
+
+    // ----------------------------------------------------
+    // SMS
+    // ----------------------------------------------------
+    private void sendSms(PlayerEntity player,
+                         NotificationType type,
+                         Object context) {
+
+        String phone = player.getPhoneNumber();
+        if (phone == null || phone.isBlank()) {
+            log.debug("Player {} nemĂˇ telefon â€“ SMS se nepoĹˇle", player.getId());
+            return;
+        }
+
+        switch (type) {
+
+            // registrace / odhlĂˇĹˇenĂ­ / omluva â€“ pouĹľĂ­vajĂ­ MatchRegistrationEntity
+            case PLAYER_REGISTERED,
+                 PLAYER_UNREGISTERED,
+                 PLAYER_EXCUSED -> {
+
+                if (!(context instanceof MatchRegistrationEntity registration)) {
+                    log.warn("NotificationType {} oÄŤekĂˇvĂˇ MatchRegistrationEntity v context, ale dostal {}", type,
+                            (context != null ? context.getClass().getName() : "null"));
+                    return;
+                }
+
+                String msg = smsMessageBuilder.buildMessageRegistration(registration);
+                smsService.sendSms(phone, msg);
+            }
+
+            // rezervace â€“ mĹŻĹľeĹˇ udÄ›lat jednoduchou SMS nebo pĹ™Ă­padnÄ› taky pouĹľĂ­t builder
+            case PLAYER_RESERVED -> {
+                if (context instanceof MatchRegistrationEntity registration) {
+                    // pokud chceĹˇ, mĹŻĹľeĹˇ klidnÄ› pouĹľĂ­t stejnou / upravenou zprĂˇvu
+                    String msg = smsMessageBuilder.buildMessageRegistration(registration);
+                    smsService.sendSms(phone, msg);
+                } else {
+                    String msg = "app_hokej - hrĂˇÄŤ " + player.getFullName() +
+                            " je nynĂ­ v reĹľimu NĂHRADNĂŤKA na zĂˇpas.";
+                    smsService.sendSms(phone, msg);
+                }
+            }
+
+            // USER_UPDATED a â€žÄŤistÄ› hrĂˇÄŤskĂ©â€ś zmÄ›ny pĹ™es SMS obvykle neposĂ­lĂˇme
+            case PLAYER_CREATED,
+                 PLAYER_UPDATED,
+                 PLAYER_APPROVED,
+                 PLAYER_REJECTED,
+                 USER_UPDATED -> {
+                log.debug("Typ {} nemĂˇ definovanou SMS notifikaci, nic se neposĂ­lĂˇ", type);
+            }
+
+            default -> {
+                log.debug("NeznĂˇmĂ˝ NotificationType {} â€“ SMS se neposĂ­lĂˇ", type);
+            }
+        }
+    }
+}
+
+
+----------
+PlayerInactivityPeriodService.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
+import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public interface PlayerInactivityPeriodService {
+
+    List<PlayerInactivityPeriodDTO> getAll();
+
+    PlayerInactivityPeriodDTO getById(Long id);
+
+    List<PlayerInactivityPeriodDTO> getByPlayer(Long playerId);
+
+    PlayerInactivityPeriodDTO create(PlayerInactivityPeriodDTO dto);
+
+    PlayerInactivityPeriodDTO update(Long id, PlayerInactivityPeriodDTO dto);
+
+    void delete(Long id);
+
+    public boolean isActive(PlayerEntity player, LocalDateTime dateTime);
+}
+
+
+----------
+PlayerInactivityPeriodServiceImpl.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
+import cz.phsoft.hokej.data.repositories.PlayerInactivityPeriodRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.InactivityPeriodNotFoundException;
+import cz.phsoft.hokej.exceptions.InactivityPeriodOverlapException;
+import cz.phsoft.hokej.exceptions.InvalidInactivityPeriodDateException;
+import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.models.dto.mappers.PlayerInactivityPeriodMapper;
+import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
+import java.util.List;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+@Service
+public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriodService {
+
+    private final PlayerInactivityPeriodRepository inactivityRepository;
+    private final PlayerRepository playerRepository;
+    private final PlayerInactivityPeriodMapper mapper;
+
+    public PlayerInactivityPeriodServiceImpl(PlayerInactivityPeriodRepository inactivityRepository,
+                                             PlayerRepository playerRepository,
+                                             PlayerInactivityPeriodMapper mapper) {
+        this.inactivityRepository = inactivityRepository;
+        this.playerRepository = playerRepository;
+        this.mapper = mapper;
+    }
+
+    @Override
+    public List<PlayerInactivityPeriodDTO> getAll() {
+        return inactivityRepository.findAll().stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public PlayerInactivityPeriodDTO getById(Long id) {
+        PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
+                .orElseThrow(() -> new InactivityPeriodNotFoundException(id));
+
+        return mapper.toDTO(entity);
+    }
+
+    @Override
+    public List<PlayerInactivityPeriodDTO> getByPlayer(Long playerId) {
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+
+        return inactivityRepository.findByPlayerOrderByInactiveFromAsc(player)
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
+
+    // --- TRANSACTIONAL pro zĂˇpis dat ---
+    @Override
+    @Transactional
+    public PlayerInactivityPeriodDTO create(PlayerInactivityPeriodDTO dto) {
+        PlayerEntity player = playerRepository.findById(dto.getPlayerId())
+                .orElseThrow(() -> new PlayerNotFoundException(dto.getPlayerId()));
+
+        validateDates(dto);
+
+        // kontrola pĹ™ekryvu existujĂ­cĂ­ch obdobĂ­
+        boolean overlaps = !inactivityRepository
+                .findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
+                        player, dto.getInactiveFrom(), dto.getInactiveTo()
+                ).isEmpty();
+
+        if (overlaps) {
+            throw new InactivityPeriodOverlapException();
+        }
+
+        PlayerInactivityPeriodEntity entity = mapper.toEntity(dto, player);
+        return mapper.toDTO(inactivityRepository.save(entity));
+    }
+
+    @Override
+    @Transactional
+    public PlayerInactivityPeriodDTO update(Long id, PlayerInactivityPeriodDTO dto) {
+        PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
+                .orElseThrow(() -> new InactivityPeriodNotFoundException(id));
+
+        validateDates(dto);
+
+        // kontrola pĹ™ekryvu, ignoruje aktuĂˇlnĂ­ zĂˇznam
+        boolean overlaps = inactivityRepository
+                .findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
+                        entity.getPlayer(), dto.getInactiveFrom(), dto.getInactiveTo()
+                ).stream()
+                .anyMatch(p -> !p.getId().equals(id));
+
+        if (overlaps) {
+            throw new InactivityPeriodOverlapException("BE - UpravenĂ© obdobĂ­ se pĹ™ekrĂ˝vĂˇ s jinĂ˝m obdobĂ­m neaktivity hrĂˇÄŤe.");
+        }
+
+        mapper.updateEntityFromDto(dto, entity);
+        return mapper.toDTO(inactivityRepository.save(entity));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        PlayerInactivityPeriodEntity entity = inactivityRepository.findById(id)
+                .orElseThrow(() -> new InactivityPeriodNotFoundException(id));
+        inactivityRepository.delete(entity);
+    }
+
+    // --- true = aktivnĂ­, false = neaktivnĂ­ ---
+    public boolean isActive(PlayerEntity player, LocalDateTime dateTime) {
+        return !inactivityRepository.existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
+                player, dateTime, dateTime);
+    }
+
+    // --- privĂˇtnĂ­ metoda pro validaci dat ---
+    private void validateDates(PlayerInactivityPeriodDTO dto) {
+        if (dto.getInactiveFrom() == null || dto.getInactiveTo() == null) {
+            throw new InvalidInactivityPeriodDateException("BE - Datum od a do nesmĂ­ bĂ˝t null.");
+        }
+        if (!dto.getInactiveFrom().isBefore(dto.getInactiveTo())) {
+            throw new InvalidInactivityPeriodDateException("BE - Datum 'od' musĂ­ bĂ˝t pĹ™ed 'do'.");
+        }
+    }
+}
+
+
+----------
+PlayerService.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+
+import java.util.List;
+
+
+public interface PlayerService {
+    List<PlayerDTO> getAllPlayers();
+    PlayerDTO getPlayerById(Long id);
+    PlayerDTO createPlayer(PlayerDTO player);
+    PlayerDTO createPlayerForUser(PlayerDTO dto, String userEmail);
+    PlayerDTO updatePlayer(Long id, PlayerDTO player);
+    SuccessResponseDTO deletePlayer(Long id);
+    public List<PlayerDTO> getPlayersByUser(String email);
+    SuccessResponseDTO approvePlayer (Long id);
+    SuccessResponseDTO rejectPlayer (Long id);
+}
+
+
+----------
+PlayerServiceImpl.java
+----------
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerStatus;
+import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.DuplicateNameSurnameException;
+import cz.phsoft.hokej.exceptions.InvalidPlayerStatusException;
+import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.services.NotificationService;
+
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class PlayerServiceImpl implements PlayerService {
+
+    private final PlayerRepository playerRepository;
+    private final PlayerMapper playerMapper;
+    private final AppUserRepository appUserRepository;
+    private final NotificationService notificationService;
+
+    public PlayerServiceImpl(
+            PlayerRepository playerRepository,
+            PlayerMapper playerMapper,
+            AppUserRepository appUserRepository,
+            NotificationService notificationService // NEW
+    ) {
+        this.playerRepository = playerRepository;
+        this.playerMapper = playerMapper;
+        this.appUserRepository = appUserRepository;
+        this.notificationService = notificationService; // NEW
+    }
+
+    @Override
+    public List<PlayerDTO> getAllPlayers() {
+        return playerRepository.findAll().stream()
+                .map(playerMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public PlayerDTO getPlayerById(Long id) {
+        PlayerEntity player = playerRepository.findById(id)
+                .orElseThrow(() -> new PlayerNotFoundException(id)); // mĂ­sto RuntimeException
+        return playerMapper.toDTO(player);
+    }
+
+
+    // --- TRANSACTIONAL pro zĂˇpis dat ---
+    @Override
+    @Transactional
+    public PlayerDTO createPlayer(PlayerDTO dto) {
+        checkDuplicateNameSurname(dto.getName(), dto.getSurname(), null);
+
+        PlayerEntity entity = playerMapper.toEntity(dto);
+        PlayerEntity saved = playerRepository.save(entity);
+
+        // notificationService.notifyPlayer(saved, NotificationType.PLAYER_CREATED, null);
+
+        return playerMapper.toDTO(saved);
+    }
+
+    @Override
+    @Transactional
+    public PlayerDTO createPlayerForUser(PlayerDTO dto, String userEmail) {
+        AppUserEntity user = appUserRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(userEmail));
+
+        checkDuplicateNameSurname(dto.getName(), dto.getSurname(), null);
+
+        PlayerEntity player = playerMapper.toEntity(dto);
+        player.setUser(user); // pĹ™iĹ™azenĂ­ hrĂˇÄŤe k uĹľivateli
+
+
+        PlayerEntity saved = playerRepository.save(player);
+
+        notificationService.notifyPlayer(saved, NotificationType.PLAYER_CREATED, null);
+
+        return playerMapper.toDTO(saved);
+    }
+
+    @Override
+    public List<PlayerDTO> getPlayersByUser(String email) {
+        return playerRepository.findByUser_EmailOrderByIdAsc(email).stream()
+                .map(playerMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public PlayerDTO updatePlayer(Long id, PlayerDTO dto) {
+        PlayerEntity existing = findPlayerOrThrow(id);
+
+        // pokud se jmĂ©no/pĹ™Ă­jmenĂ­ mÄ›nĂ­, ovÄ›Ĺ™ duplicitu
+        if (!existing.getName().equals(dto.getName())
+                || !existing.getSurname().equals(dto.getSurname())) {
+            checkDuplicateNameSurname(dto.getName(), dto.getSurname(), id);
+        }
+
+        existing.setName(dto.getName());
+        existing.setSurname(dto.getSurname());
+        existing.setNickname(dto.getNickName());
+        existing.setPhoneNumber(dto.getPhoneNumber());
+        existing.setType(dto.getType());
+        existing.setTeam(dto.getTeam());
+        existing.setStatus(dto.getStatus());
+
+        PlayerEntity saved = playerRepository.save(existing);
+
+        notificationService.notifyPlayer(saved, NotificationType.PLAYER_UPDATED, null);
+
+        return playerMapper.toDTO(saved);
+    }
+
+    @Override
+    @Transactional
+    public SuccessResponseDTO deletePlayer(Long id) {
+        PlayerEntity player = findPlayerOrThrow(id);
+        playerRepository.delete(player);
+
+        return new SuccessResponseDTO(
+                "HrĂˇÄŤ " + player.getFullName() + " byl ĂşspÄ›ĹˇnÄ› smazĂˇn",
+                id,
+                LocalDateTime.now().toString()
+        );
+    }
+
+    // --- privĂˇtnĂ­ metoda pro kontrolu duplicity jmĂ©na a pĹ™Ă­jmenĂ­ ---
+    private void checkDuplicateNameSurname(String name, String surname, Long ignoreId) {
+        Optional<PlayerEntity> duplicateOpt = playerRepository.findByNameAndSurname(name, surname);
+
+        if (duplicateOpt.isPresent()) {
+            if (ignoreId == null || !duplicateOpt.get().getId().equals(ignoreId)) {
+                throw new DuplicateNameSurnameException(name, surname);
+            }
+        }
+    }
+
+    private PlayerEntity findPlayerOrThrow(Long playerId) {
+        return playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+    }
+
+    @Override
+    @Transactional
+    public SuccessResponseDTO approvePlayer(Long id) {
+        PlayerEntity player = findPlayerOrThrow(id);
+
+        if (player.getStatus() == PlayerStatus.APPROVED) {
+            throw new InvalidPlayerStatusException("BE - HrĂˇÄŤ uĹľ je schvĂˇlen.");
+        }
+        player.setStatus(PlayerStatus.APPROVED);
+        playerRepository.save(player);
+
+        notificationService.notifyPlayer(player, NotificationType.PLAYER_APPROVED, null);
+
+        return new SuccessResponseDTO(
+                "HrĂˇÄŤ " + player.getFullName() + " byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn",
+                id,
+                LocalDateTime.now().toString()
+        );
+    }
+
+    @Override
+    @Transactional
+    public SuccessResponseDTO rejectPlayer(Long id) {
+        PlayerEntity player = findPlayerOrThrow(id);
+
+        if (player.getStatus() == PlayerStatus.REJECTED) {
+            throw new InvalidPlayerStatusException("BE - HrĂˇÄŤ uĹľ je zamĂ­tnut.");
+        }
+        player.setStatus(PlayerStatus.REJECTED);
+        playerRepository.save(player);
+
+        notificationService.notifyPlayer(player, NotificationType.PLAYER_REJECTED, null);
+
+        return new SuccessResponseDTO(
+                "HrĂˇÄŤ " + player.getFullName() + " byl ĂşspÄ›ĹˇnÄ› zamĂ­tnut",
+                id,
+                LocalDateTime.now().toString()
+        );
+    }
+
+
+}
+

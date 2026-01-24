@@ -1,10 +1,8 @@
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.services.PlayerService;
-import cz.phsoft.hokej.security.CurrentPlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

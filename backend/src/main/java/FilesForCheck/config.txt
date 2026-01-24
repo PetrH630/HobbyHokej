@@ -1,0 +1,776 @@
+﻿Balíček (složka): config
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\config
+
+Seznam souborů:
+AppConfig.java
+AuditAspect.java
+CustomJsonLoginFilter.java
+CustomUserDetailsService.java
+DataInitializer.java
+GlobalExceptionHandler.java
+SecurityConfig.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\config\AppConfig.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\config\AuditAspect.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+
+@Component
+@Aspect
+public class AuditAspect {
+
+    private static final Logger logger = LoggerFactory.getLogger("AUDIT_LOGGER");
+
+    // Pointcut pro vĹˇechny metody ve sluĹľbĂˇch
+    @Pointcut("within(cz.phsoft.hokej.models.services..*)")
+    public void serviceMethods() {}
+
+    // SpustĂ­ se pĹ™ed metodou
+    @Before("serviceMethods()")
+    public void logBefore(JoinPoint joinPoint) {
+        String methodName = joinPoint.getSignature().toShortString();
+        String args = java.util.Arrays.toString(joinPoint.getArgs());
+        logger.info("START {} at {} with args {}", methodName, LocalDateTime.now(), args);
+    }
+
+    // SpustĂ­ se po ĂşspÄ›ĹˇnĂ©m dokonÄŤenĂ­ metody
+    @AfterReturning(pointcut = "serviceMethods()", returning = "result")
+    public void logAfterReturning(JoinPoint joinPoint, Object result) {
+        String methodName = joinPoint.getSignature().getName();
+        Object[] args = joinPoint.getArgs();
+
+        Long userId = null;
+        Long playerId = null;
+
+        for (Object arg : args) {
+            if (arg instanceof PlayerEntity player) {
+                playerId = player.getId();
+            } else if (arg instanceof MatchRegistrationEntity registration) {
+                playerId = registration.getPlayer().getId();
+            } else if (arg instanceof Long id) {
+                // pokud mĂˇ metoda Long parametry, mĹŻĹľeĹˇ urÄŤit podle poĹ™adĂ­
+                // tĹ™eba prvnĂ­ Long = matchId, druhĂ˝ = playerId
+            }
+        }
+
+        // logovĂˇnĂ­
+        logger.info("END {} - userId={} playerId={} returned [{}] at {}",
+                methodName, userId, playerId, result, LocalDateTime.now());
+    }
+}
+
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\config\CustomJsonLoginFilter.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+// filtr pro REST login
+public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public CustomJsonLoginFilter(String loginUrl, AuthenticationManager authManager) {
+        setFilterProcessesUrl(loginUrl);
+        setAuthenticationManager(authManager);
+    }
+
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        try {
+            // x-www-form-urlencoded i JSON
+            String email = null;
+            String password = null;
+
+// x-www-form-urlencoded
+            if (request.getContentType() != null &&
+                    request.getContentType().contains("application/x-www-form-urlencoded")) {
+                email = request.getParameter("username");
+                password = request.getParameter("password");
+            }
+
+// JSON
+            if ((email == null || password == null) &&
+                    request.getContentType() != null &&
+                    request.getContentType().contains("application/json")) {
+                Map<String, String> json = objectMapper.readValue(request.getInputStream(), Map.class);
+                email = json.get("email");
+                password = json.get("password");
+            }
+
+            if (email == null || password == null || email.isBlank() || password.isBlank()) {
+                throw new BadCredentialsException("BE - ChybĂ­ pĹ™ihlaĹˇovacĂ­ Ăşdaje");
+            }
+
+            UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(email, password);
+            setDetails(request, authRequest);
+
+            return this.getAuthenticationManager().authenticate(authRequest);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // ĂšspÄ›ĹˇnĂ˝ login
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                            FilterChain chain, Authentication authResult)
+            throws IOException, ServletException {
+
+        // UloĹľenĂ­ do SecurityContextHolder
+        SecurityContextHolder.getContext().setAuthentication(authResult);
+
+        // VytvoĹ™enĂ­ session a uloĹľenĂ­ SPRING_SECURITY_CONTEXT
+        request.getSession(true).setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                SecurityContextHolder.getContext()
+        );
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("status", "ok");
+        result.put("user", authResult.getName());
+
+        objectMapper.writeValue(response.getWriter(), result);
+    }
+
+    // NeĂşspÄ›ĹˇnĂ˝ login
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("status", "error");
+
+        // RozliĹˇenĂ­ neaktivovanĂ©ho ĂşÄŤtu
+        if (failed.getCause() instanceof cz.phsoft.hokej.exceptions.AccountNotActivatedException) {
+            result.put("message", failed.getCause().getMessage()); // napĹ™. "ĂšÄŤet nenĂ­ aktivovĂˇn. Zkontrolujte email."
+        } else if (failed instanceof BadCredentialsException) {
+            result.put("message", "BE - NeplatnĂ© pĹ™ihlaĹˇovacĂ­ Ăşdaje");
+        } else {
+            result.put("message", "BE - Chyba pĹ™i pĹ™ihlĂˇĹˇenĂ­");
+        }
+
+        objectMapper.writeValue(response.getWriter(), result);
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\config\CustomUserDetailsService.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.enums.Role;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import cz.phsoft.hokej.exceptions.AccountNotActivatedException;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final AppUserRepository appUserRepository;
+
+    public CustomUserDetailsService(AppUserRepository appUserRepository) {
+        this.appUserRepository = appUserRepository;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        AppUserEntity user = appUserRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("BE - UĹľivatel nenalezen"));
+
+        if (!user.isEnabled()) { // nebo podle status == PENDING
+            throw new AccountNotActivatedException();
+        }
+
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getRole().name().replace("ROLE_", "")) // "ADMIN", "PLAYER", ...
+                .disabled(!user.isEnabled()) // neaktivnĂ­ - nelze se pĹ™Ă­hlĂˇsit
+                .build();
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\config\DataInitializer.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.*;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import jakarta.annotation.PostConstruct;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Component
+public class DataInitializer {
+
+    private final PlayerRepository playerRepository;
+    private final MatchRepository matchRepository;
+    private final MatchRegistrationRepository matchRegistrationRepository;
+    private final AppUserRepository appUserRepository;
+    private final JdbcTemplate jdbcTemplate;
+
+    public DataInitializer(PlayerRepository playerRepository,
+                           MatchRepository matchRepository,
+                           MatchRegistrationRepository matchRegistrationRepository,
+                           AppUserRepository appUserRepository,
+                           JdbcTemplate jdbcTemplate) {
+        this.playerRepository = playerRepository;
+        this.matchRepository = matchRepository;
+        this.matchRegistrationRepository = matchRegistrationRepository;
+        this.appUserRepository = appUserRepository;
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @PostConstruct
+    public void init() {
+        // Pokud existuje alespoĹ 1 hrĂˇÄŤ, DB uĹľ byla inicializovanĂˇ
+        if (playerRepository.count() > 0) {
+            System.out.println("Data already initialized â€“ skipping DataInitializer.");
+            return;
+        }
+        System.out.println("Initializing default data...");
+
+        // --- Seznam hrĂˇÄŤĹŻ ---
+        List<PlayerEntity> players = new ArrayList<>(List.of(
+                new PlayerEntity("HrĂˇÄŤ_1", "Jedna", "", PlayerType.VIP, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
+                new PlayerEntity("HrĂˇÄŤ_2", "Dva", "", PlayerType.VIP, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
+                new PlayerEntity("HrĂˇÄŤ_3", "TĹ™i", "", PlayerType.VIP, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
+                new PlayerEntity("HrĂˇÄŤ_4", "ÄŚtyĹ™i", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
+                new PlayerEntity("HrĂˇÄŤ_5", "PÄ›t", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.PENDING),
+                new PlayerEntity("HrĂˇÄŤ_6", "Ĺ est", "", PlayerType.STANDARD, "+420776609956", Team.DARK, PlayerStatus.PENDING),
+                new PlayerEntity("HrĂˇÄŤ_7", "Sedm", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.PENDING),
+                new PlayerEntity("HrĂˇÄŤ_8", "Osum", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING),
+                new PlayerEntity("HrĂˇÄŤ_9", "DevÄ›t", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING),
+                new PlayerEntity("HrĂˇÄŤ_10", "Deset", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING)
+                // ... pĹ™Ă­padnÄ› dalĹˇĂ­ hrĂˇÄŤi
+        ));
+
+        // --- VytvoĹ™enĂ­ uĹľivatelĹŻ ke kaĹľdĂ©mu hrĂˇÄŤi ---
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        // --- Default admin ---
+        if (appUserRepository.findByEmail("admin@example.com").isEmpty()) {
+            AppUserEntity admin = new AppUserEntity();
+            admin.setName("admin");
+            admin.setSurname("admin");
+            admin.setEmail("admin@example.com");
+            admin.setPassword(encoder.encode("Administrator123"));
+            admin.setRole(Role.ROLE_ADMIN);
+            admin.setEnabled(true);
+            appUserRepository.save(admin);
+            System.out.println("Default admin user created.");
+        } else {
+            System.out.println("Admin user already exists â€“ skipping.");
+        }
+
+        System.out.println("Data initialization completed.");
+
+        int playerCounter = 1;
+        for (PlayerEntity player : players) {
+            // vytvoĹ™enĂ­ uĹľivatele
+            String email = "player" + playerCounter + "@example.com";
+            String password = "Player123";
+
+            AppUserEntity user = new AppUserEntity();
+            user.setName("HrĂˇÄŤ" + playerCounter);
+            user.setSurname("ÄŚĂ­slo_" + playerCounter);
+            user.setEmail(email);
+            user.setPassword(encoder.encode(password));
+
+            switch (playerCounter){
+                case 1:
+                    user.setRole(Role.ROLE_ADMIN);
+                    System.out.println("Nastavena role: admin");
+                    break;
+                case 2:
+                    user.setRole(Role.ROLE_MANAGER);
+                    System.out.println("Nastavena role: manager");
+                    break;
+                default:
+                    user.setRole(Role.ROLE_PLAYER);
+                    System.out.println("Nastavena role: player");
+            }
+            user.setEnabled(true);
+            // pĹ™iĹ™adit hrĂˇÄŤe k uĹľivateli
+            System.out.println("VytvĂˇĹ™Ă­m uĹľivatele ÄŤ. " + playerCounter);
+            player.setUser(user);
+
+            // uloĹľit uĹľivatele (cascade uloĹľĂ­ i hrĂˇÄŤe, pokud je sprĂˇvnÄ› nastaven)
+            appUserRepository.save(user);
+
+            playerCounter++;
+        }
+
+        // --- UloĹľit hrĂˇÄŤe (uĹľ uloĹľen pĹ™i cascade, ale pro jistotu) ---
+        playerRepository.saveAll(players);
+
+        // --- VytvoĹ™enĂ­ zĂˇpasĹŻ ---
+        LocalDateTime startDate = LocalDateTime.of(2025, 11, 21, 18, 45);
+        for (int i = 0; i < 10; i++) {
+            MatchEntity match = new MatchEntity();
+            match.setDateTime(startDate.plusWeeks(i));
+            match.setLocation("Ostravice");
+            match.setDescription("");
+            match.setMaxPlayers(12);
+            match.setPrice(2200);
+            matchRepository.save(match);
+        }
+
+        // --- Registrace hrĂˇÄŤĹŻ na zĂˇpas id 3 ---
+        MatchEntity match3 = matchRepository.findById(3L)
+                .orElseThrow(() -> new RuntimeException("Match with id 3 not found"));
+
+        for (long playerId = 1; playerId <= 6; playerId++) {
+            final long pid = playerId;
+            PlayerEntity player = playerRepository.findById(playerId)
+                    .orElseThrow(() -> new RuntimeException("Player with id " + pid + " not found"));
+
+            MatchRegistrationEntity reg = new MatchRegistrationEntity();
+            reg.setMatch(match3);
+            reg.setPlayer(player);
+            reg.setStatus(PlayerMatchStatus.REGISTERED);
+            if (playerId <=3){
+                reg.setTeam(Team.DARK);
+            }else {
+                reg.setTeam(Team.LIGHT);
+            }
+            reg.setTimestamp(LocalDateTime.now());
+            reg.setCreatedBy("user");
+            matchRegistrationRepository.save(reg);
+        }
+
+        // --- Default admin ---
+        if (appUserRepository.findByEmail("admin@example.com").isEmpty()) {
+            AppUserEntity admin = new AppUserEntity();
+            admin.setEmail("admin@example.com");
+            admin.setPassword(encoder.encode("Administrator123"));
+            admin.setRole(Role.ROLE_ADMIN);
+            appUserRepository.save(admin);
+            System.out.println("Default admin user created.");
+        } else {
+            System.out.println("Admin user already exists â€“ skipping.");
+        }
+
+        // --- vytvoĹ™enĂ­ triggeru ---
+        try {
+            jdbcTemplate.execute("""
+                           CREATE TRIGGER trg_match_reg_insert
+                           AFTER INSERT ON match_registrations
+                           FOR EACH ROW
+                           BEGIN
+                               INSERT INTO match_registration_history
+                               (match_registration_id, match_id, player_id, status, excuse_reason,
+                                excuse_note, admin_note, team, original_timestamp, created_by,
+                                action, changed_at)
+                               VALUES
+                               (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
+                                NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
+                                'INSERT', NOW());
+                           END
+                    """);
+            System.out.println("Trigger created successfully.");
+        } catch (Exception e) {
+            System.out.println("Trigger already exists or error: " + e.getMessage());
+        }
+
+        try {
+            jdbcTemplate.execute("""
+                    CREATE TRIGGER trg_match_reg_update
+                    AFTER UPDATE ON match_registrations
+                    FOR EACH ROW
+                    BEGIN
+                        INSERT INTO match_registration_history
+                        (match_registration_id, match_id, player_id, status, excuse_reason,
+                         excuse_note, admin_note, team, original_timestamp, created_by,
+                         action, changed_at)
+                        VALUES
+                        (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
+                         NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
+                         'UPDATE', NOW());
+                    END
+                    """);
+            System.out.println("Trigger created successfully.");
+        } catch (Exception e) {
+            System.out.println("Trigger already exists or error: " + e.getMessage());
+        }
+
+        try {
+            jdbcTemplate.execute("""
+        CREATE TRIGGER trg_match_reg_delete
+        AFTER DELETE ON match_registrations
+        FOR EACH ROW
+                BEGIN
+        INSERT INTO match_registration_history
+                (match_registration_id, match_id, player_id, status, excuse_reason,
+                        excuse_note, admin_note, team, original_timestamp, created_by,
+                        action, changed_at)
+        VALUES
+                (OLD.id, OLD.match_id, OLD.player_id, OLD.status, OLD.excuse_reason,
+                        OLD.excuse_note, OLD.admin_note, OLD.team, OLD.timestamp, OLD.created_by,
+                        'DELETE', NOW());
+        END
+        """);
+            System.out.println("Trigger created successfully.");
+                } catch (Exception e) {
+                    System.out.println("Trigger already exists or error: " + e.getMessage());
+                }
+        
+        System.out.println("Data initialization completed.");
+    
+
+    }
+}
+
+
+
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\config\GlobalExceptionHandler.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import cz.phsoft.hokej.exceptions.ApiError;
+import cz.phsoft.hokej.exceptions.BusinessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    // 1) VĹˇechny domĂ©novĂ© / business chyby (extends BusinessException)
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiError> handleBusinessException(
+            BusinessException ex,
+            HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                ex.getStatus().value(),
+                ex.getStatus().getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+        return ResponseEntity.status(ex.getStatus()).body(error);
+    }
+
+    // 2) PĹ™Ă­stup odepĹ™en (Spring Security)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex,
+                                                       HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    // 3) ValidaÄŤnĂ­ chyby - ĹˇpatnĂ© vstupy (napĹ™. hesla se neshodujĂ­, ĹˇpatnĂ© datum)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex,
+                                                          HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    // 4) StavovĂ© chyby aplikace - typicky konflikty (napĹ™. nelze zvolit neschvĂˇlenĂ©ho hrĂˇÄŤe)
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiError> handleIllegalState(IllegalStateException ex,
+                                                       HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    // 5) race condition
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrity(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                "BE - ZĂˇznam poruĹˇuje unikĂˇtnĂ­ omezenĂ­ (pravdÄ›podobnÄ› duplicitnĂ­ hrĂˇÄŤ).",
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+
+    // 6) OstatnĂ­ neÄŤekanĂ© chyby (fallback)
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleAll(Exception ex,
+                                              HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\config\SecurityConfig.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.http.SessionCreationPolicy;
+
+
+import java.util.List;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final CustomUserDetailsService userDetailsService;
+
+    @Value("${app.test-mode:false}")
+    private boolean isTestMode;
+
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
+    // Password encoder
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // Authentication provider
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    // AuthenticationManager
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    // Security filter chain
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
+
+        http.csrf(csrf -> csrf.disable())
+                .cors(cors -> {
+                });
+
+        if (isTestMode) {
+            // Test mode - vĹˇechno povoleno a HTTP Basic pro Postman
+            http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                    .httpBasic();
+        } else {
+            // Produkce - REST login pĹ™es CustomJsonLoginFilter
+            http
+                    .authenticationProvider(authenticationProvider())
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/api/auth/register", "/api/auth/verify").permitAll()
+                            .requestMatchers("/api/login").permitAll()
+                            .requestMatchers("/api/logout").permitAll()
+                            .requestMatchers("/api/matches").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/matches/upcoming", "/api/matches/past").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/matches/**").authenticated()
+                            .requestMatchers("/api/players").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/players/**").authenticated()
+                            .requestMatchers("/api/registrations/all",
+                                    "/api/registrations/for-match/**",
+                                    "/api/registrations/no-response/**").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/registrations/**").authenticated()
+                            .requestMatchers("/api/inactivity/All",
+                                    "/api/inactivity/**").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/inactivity/player/**").authenticated()
+                            .anyRequest().authenticated()
+                    )
+                    //  TADY PĹESNÄš
+                    .sessionManagement(sm ->
+                            sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                    )
+                    //  a TEPRVE PAK login filter
+                    .addFilterAt(
+                            new CustomJsonLoginFilter("/api/login", authManager),
+                            UsernamePasswordAuthenticationFilter.class
+                    )
+                    .logout(logout -> logout
+                            .logoutUrl("/api/logout")
+                            .deleteCookies("JSESSIONID")
+                            .logoutSuccessHandler((request, response, auth) -> {
+                                request.getSession().removeAttribute("CURRENT_PLAYER_ID");
+                                response.setContentType("application/json");
+                                response.setCharacterEncoding("UTF-8");
+                                response.getWriter().write("{\"status\":\"ok\",\"message\":\"OdhlĂˇĹˇeno\"}");
+                            })
+                    );
+        }
+
+        return http.build();
+    }
+
+    // CORS pro React dev server a cookies
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+}
+
+

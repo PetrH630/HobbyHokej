@@ -1,0 +1,184 @@
+﻿Balíček (složka): repositories
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories
+
+Seznam souborů:
+AppUserRepository.java
+EmailVerificationTokenRepository.java
+MatchRegistrationHistoryRepository.java
+MatchRegistrationRepository.java
+MatchRepository.java
+PlayerInactivityPeriodRepository.java
+PlayerRepository.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\AppUserRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
+    Optional<AppUserEntity> findByEmail(String email);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\EmailVerificationTokenRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface EmailVerificationTokenRepository extends JpaRepository<EmailVerificationTokenEntity, Long> {
+    Optional<EmailVerificationTokenEntity> findByToken(String token);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\MatchRegistrationHistoryRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationHistoryEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface MatchRegistrationHistoryRepository extends JpaRepository<MatchRegistrationHistoryEntity, Long> {
+
+    // vĹˇechny registrace na zĂˇpas
+    List<MatchRegistrationHistoryEntity> findByMatchRegistrationIdOrderByChangedAtDesc(Long matchRegistrationId);
+
+    // Historie pro konkrĂ©tnĂ­ zĂˇpas
+    List<MatchRegistrationHistoryEntity> findByMatchIdOrderByChangedAtDesc(Long matchId);
+
+    // Historie zmÄ›n hrĂˇÄŤe
+    List<MatchRegistrationHistoryEntity> findByPlayerIdOrderByChangedAtDesc(Long playerId);
+
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\MatchRegistrationRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+    @Repository
+    public interface MatchRegistrationRepository extends JpaRepository<MatchRegistrationEntity, Long> {
+
+        // VrĂˇtĂ­ poslednĂ­ status pro danĂ©ho hrĂˇÄŤe a zĂˇpas
+        Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
+
+        // VolitelnÄ›: vĹˇechny registrace pro urÄŤitĂ˝ zĂˇpas
+        List<MatchRegistrationEntity> findByMatchId(Long matchId);
+
+        // VolitelnÄ›: vĹˇechny registrace pro urÄŤitĂ©ho hrĂˇÄŤe
+        List<MatchRegistrationEntity> findByPlayerId(Long playerId);
+
+        // --- NovĂˇ metoda pro hledĂˇnĂ­ konkrĂ©tnĂ­ registrace ---
+        Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
+
+        long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
+
+        List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
+    }
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\MatchRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
+    List<MatchEntity> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
+    List<MatchEntity> findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime dateTime);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\PlayerInactivityPeriodRepository.java
+-----
+
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Repository
+public interface PlayerInactivityPeriodRepository extends JpaRepository<PlayerInactivityPeriodEntity, Long> {
+
+    // zjistĂ­, zda hrĂˇÄŤ je aktuĂˇlnÄ› neaktivnĂ­
+    boolean existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
+            PlayerEntity player, LocalDateTime from, LocalDateTime to);
+
+    // zĂ­skĂˇ vĹˇechny neaktivnĂ­ obdobĂ­ hrĂˇÄŤe, kterĂ© spadajĂ­ do intervalu
+    List<PlayerInactivityPeriodEntity> findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
+            PlayerEntity player, LocalDateTime from, LocalDateTime to);
+
+    List<PlayerInactivityPeriodEntity> findByPlayerOrderByInactiveFromAsc(PlayerEntity player);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\PlayerRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
+    Optional<PlayerEntity> findById(Long id);
+
+    List<PlayerEntity> findByIdNotIn(List<Long> ids);
+    boolean existsByNameAndSurname(String name, String surname);
+
+    Optional<PlayerEntity> findByNameAndSurname(String name, String surname);
+    Optional<PlayerEntity> findByUserEmail(String email);
+    List<PlayerEntity> findAllByUserEmail(String email);
+    List<PlayerEntity> findByUser_EmailOrderByIdAsc(String email);
+}
+
+

@@ -14,7 +14,10 @@ public interface PlayerService {
     PlayerDTO createPlayerForUser(PlayerDTO dto, String userEmail);
     PlayerDTO updatePlayer(Long id, PlayerDTO player);
     SuccessResponseDTO deletePlayer(Long id);
-    public List<PlayerDTO> getPlayersByUser(String email);
+    List<PlayerDTO> getPlayersByUser(String email);
     SuccessResponseDTO approvePlayer (Long id);
     SuccessResponseDTO rejectPlayer (Long id);
+    SuccessResponseDTO setCurrentPlayerForUser(String userEmail, Long playerId);
+    SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail);
+
 }

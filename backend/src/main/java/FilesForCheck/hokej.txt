@@ -1,0 +1,33 @@
+﻿Balíček (složka): hokej
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej
+
+Seznam souborů:
+StaraGardaApplication.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\StaraGardaApplication.java
+-----
+
+package cz.phsoft.hokej;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+@SpringBootApplication
+@EnableJpaRepositories // JPA v naĹˇem Spring Boot projektu
+@EnableScheduling
+@EnableAsync
+public class StaraGardaApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(StaraGardaApplication.class, args);
+
+
+        }
+    }
+
+

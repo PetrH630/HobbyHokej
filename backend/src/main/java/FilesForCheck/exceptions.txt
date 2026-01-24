@@ -1,0 +1,341 @@
+﻿Balíček (složka): exceptions
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions
+
+Seznam souborů:
+AccountNotActivatedException.java
+ApiError.java
+BusinessException.java
+DuplicateNameSurnameException.java
+DuplicateRegistrationException.java
+InactivityPeriodNotFoundException.java
+InactivityPeriodOverlapException.java
+InvalidInactivityPeriodDateException.java
+InvalidOldPasswordException.java
+InvalidPlayerStatusException.java
+MatchNotFoundException.java
+PasswordsDoNotMatchException.java
+PlayerNotFoundException.java
+RegistrationNotFoundException.java
+UserAlreadyExistsException.java
+UserNotFoundException.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\AccountNotActivatedException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class AccountNotActivatedException extends BusinessException {
+
+    public AccountNotActivatedException() {
+        super("PrvnĂ­ musĂ­te aktivovat ĂşÄŤet pomocĂ­ odkazu v emailu", HttpStatus.FORBIDDEN); // 403
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\ApiError.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDateTime;
+import java.util.Map;
+
+public class ApiError {
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime timestamp;
+    private int status;
+    private String error;
+    private String message;
+    private String path;
+    private String clientIp; // â† novÄ›
+
+    // VolitelnĂ©: podrobnosti (validace, vĂ­ce chyb, atd.)
+    private Map<String, String> details;
+
+    public ApiError(int status, String error, String message, String path,
+                    String clientIp) {
+        this.timestamp = LocalDateTime.now();
+        this.status = status;
+        this.error = error;
+        this.message = message;
+        this.path = path;
+        this.clientIp = clientIp;
+    }
+
+    public ApiError(int status,
+                            String error,
+                            String message,
+                            String path,
+                            String clientIp,
+                            Map<String, String> details) {
+        this(status, error, message, path, clientIp);
+        this.details = details;
+    }
+
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public int getStatus() { return status; }
+    public String getError() { return error; }
+    public String getMessage() { return message; }
+    public String getPath() { return path; }
+    public String getClientIp() { return clientIp; }
+    public Map<String, String> getDetails() { return details; }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\BusinessException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class BusinessException extends RuntimeException {
+
+    private final HttpStatus status;
+
+    protected BusinessException(String message, HttpStatus status) {
+        super(message);
+        this.status = status;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
+    }
+}
+
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\DuplicateNameSurnameException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class DuplicateNameSurnameException extends BusinessException {
+    public DuplicateNameSurnameException(String name, String surname) {
+        super(
+                "BE - HrĂˇÄŤ se jmĂ©nem " + name + " " + surname + " jiĹľ existuje.",
+                HttpStatus.CONFLICT
+        );
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\DuplicateRegistrationException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class DuplicateRegistrationException extends BusinessException {
+    public DuplicateRegistrationException(Long matchId, Long playerId) {
+        super("BE - HrĂˇÄŤ " + playerId + " jiĹľ mĂˇ aktivnĂ­ registraci na zĂˇpas " + matchId,
+                HttpStatus.CONFLICT); // 409
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InactivityPeriodNotFoundException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class InactivityPeriodNotFoundException extends BusinessException {
+    public InactivityPeriodNotFoundException(Long id) {
+        super("BE - ObdobĂ­ neaktivity s ID " + id + " neexistuje.", HttpStatus.NOT_FOUND);
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InactivityPeriodOverlapException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class InactivityPeriodOverlapException extends BusinessException {
+    public InactivityPeriodOverlapException() {
+        super("BE - NovĂ© obdobĂ­ se pĹ™ekrĂ˝vĂˇ s existujĂ­cĂ­m obdobĂ­m neaktivity hrĂˇÄŤe.", HttpStatus.CONFLICT);
+    }
+    public InactivityPeriodOverlapException(String message) {
+        super(message, HttpStatus.CONFLICT);
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InvalidInactivityPeriodDateException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class InvalidInactivityPeriodDateException extends BusinessException {
+    public InvalidInactivityPeriodDateException(String message) {
+        super(message, HttpStatus.BAD_REQUEST);
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InvalidOldPasswordException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class InvalidOldPasswordException extends BusinessException {
+
+    public InvalidOldPasswordException() {
+        super("BE - StarĂ© heslo je nesprĂˇvnĂ©", HttpStatus.BAD_REQUEST);
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InvalidPlayerStatusException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class InvalidPlayerStatusException extends BusinessException {
+    public InvalidPlayerStatusException(String message) {
+        super(message, HttpStatus.BAD_REQUEST); // 400
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\MatchNotFoundException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class MatchNotFoundException extends BusinessException {
+    public MatchNotFoundException(Long matchId) {
+        super("BE - ZĂˇpas s ID " + matchId + " nenalezen.", HttpStatus.NOT_FOUND);
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\PasswordsDoNotMatchException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class PasswordsDoNotMatchException extends BusinessException {
+
+    public PasswordsDoNotMatchException() {
+        super("BE - Hesla se neshodujĂ­", HttpStatus.BAD_REQUEST);
+    }
+
+    public PasswordsDoNotMatchException(String message) {
+        super(message, HttpStatus.BAD_REQUEST);
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\PlayerNotFoundException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class PlayerNotFoundException extends BusinessException {
+    public PlayerNotFoundException(Long playerId) {
+        super("BE - HrĂˇÄŤ s ID " + playerId + " nenalezen.", HttpStatus.NOT_FOUND);
+    }
+
+    public PlayerNotFoundException(String email) {
+        super("BE - HrĂˇÄŤ s emailem " + email + " nenalezen.", HttpStatus.NOT_FOUND);
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\RegistrationNotFoundException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class RegistrationNotFoundException extends BusinessException {
+    public RegistrationNotFoundException(Long matchId, Long playerId) {
+        super("BE - HrĂˇÄŤ " + playerId + " nemĂˇ registraci na zĂˇpas " + matchId,
+                HttpStatus.NOT_FOUND);
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\UserAlreadyExistsException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class UserAlreadyExistsException extends BusinessException {
+
+    public UserAlreadyExistsException(String message) {
+        super(message, HttpStatus.CONFLICT); // 409
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\UserNotFoundException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class UserNotFoundException extends BusinessException {
+
+    public UserNotFoundException(String email) {
+        super("BE - UĹľivatel s emailem " + email + " nenalezen.", HttpStatus.NOT_FOUND);
+    }
+
+    public UserNotFoundException(Long id) {
+        super("BE - UĹľivatel s ID " + id + " nenalezen.", HttpStatus.NOT_FOUND);
+    }
+}
+
+

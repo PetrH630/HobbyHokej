@@ -1,0 +1,137 @@
+﻿Balíček (složka): enums
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums
+
+Seznam souborů:
+ExcuseReason.java
+NotificationChannel.java
+NotificationType.java
+PlayerMatchStatus.java
+PlayerStatus.java
+PlayerType.java
+Role.java
+Team.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\ExcuseReason.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum ExcuseReason {
+    NEMOC,
+    PRACE,
+    NECHE_SE_MI,
+    JINE
+}
+
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\NotificationChannel.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum NotificationChannel {
+    EMAIL,
+    SMS
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\NotificationType.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum NotificationType {
+    USER_UPDATED,
+    PLAYER_CREATED,
+    PLAYER_UPDATED,
+    PLAYER_APPROVED,
+    PLAYER_REJECTED,
+    PLAYER_REGISTERED,
+    PLAYER_UNREGISTERED,
+    PLAYER_EXCUSED,
+    PLAYER_RESERVED,
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\PlayerMatchStatus.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum PlayerMatchStatus {
+    REGISTERED, // registrovĂˇn
+    UNREGISTERED, // odhlĂˇĹˇen
+    EXCUSED,  // omluven
+    RESERVED, // nĂˇhradnĂ­k
+    NO_RESPONSE, // bez odpovÄ›di
+    NO_EXCUSED, // neomluven - byl registrovĂˇn a nepĹ™iĹˇel
+
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\PlayerStatus.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum PlayerStatus {
+    PENDING, // ÄŤekĂˇ na schvĂˇlenĂ­
+    APPROVED, // schvĂˇleno administrĂˇtorem
+    REJECTED // zamĂ­tnuto
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\PlayerType.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum PlayerType {
+    VIP,
+    STANDARD,
+    BASIC
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\Role.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum Role {
+    ROLE_PLAYER,
+    ROLE_MANAGER,
+    ROLE_ADMIN
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\Team.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum Team {
+    DARK,
+    LIGHT
+
+}
+
+

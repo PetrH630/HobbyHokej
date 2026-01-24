@@ -4,9 +4,9 @@ Aby to bylo praktické, tady máš konkrétní plán:
 
 Controller → Service čistota
 
- V AuthController.verifyEmail použij appUserService.activateUser(token) a smaž duplicitní logiku.
+ok -  V AuthController.verifyEmail použij appUserService.activateUser(token) a smaž duplicitní logiku.
 
- V CurrentPlayerController přesuň veškerou logiku do CurrentPlayerService/PlayerService – controller nebude používat repozitáře přímo.
+ok - V CurrentPlayerController přesuň veškerou logiku do CurrentPlayerService/PlayerService – controller nebude používat repozitáře přímo.
 
 Výjimky & konzistentní odpovědi
 

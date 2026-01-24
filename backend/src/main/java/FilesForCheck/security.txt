@@ -1,0 +1,231 @@
+﻿Balíček (složka): security
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\security
+
+Seznam souborů:
+CurrentPlayerContext.java
+CurrentPlayerFilter.java
+CurrentPlayerService.java
+PlayerSecurity.java
+SessionKeys.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\security\CurrentPlayerContext.java
+-----
+
+package cz.phsoft.hokej.security;
+
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+
+// pro vĂ˝bÄ›r hrĂˇÄŤe
+public class CurrentPlayerContext {
+
+        private static final ThreadLocal<PlayerEntity> currentPlayer = new ThreadLocal<>();
+
+        public static void set(PlayerEntity player) {
+            currentPlayer.set(player);
+        }
+
+        public static PlayerEntity get() {
+            return currentPlayer.get();
+        }
+
+        public static void clear() {
+            currentPlayer.remove();
+        }
+    }
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\security\CurrentPlayerFilter.java
+-----
+
+package cz.phsoft.hokej.security;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.List;
+
+@Component
+public class CurrentPlayerFilter extends OncePerRequestFilter {
+
+    private final PlayerRepository playerRepository;
+    private final CurrentPlayerService currentPlayerService;
+
+    public CurrentPlayerFilter(PlayerRepository playerRepository,
+                               CurrentPlayerService currentPlayerService) {
+        this.playerRepository = playerRepository;
+        this.currentPlayerService = currentPlayerService;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+
+        Long playerId = currentPlayerService.getCurrentPlayerId();
+
+        if (playerId != null) {
+            playerRepository.findById(playerId)
+                    .ifPresent(CurrentPlayerContext::set);
+        }
+
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            CurrentPlayerContext.clear();
+        }
+    }
+}
+
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\security\CurrentPlayerService.java
+-----
+
+package cz.phsoft.hokej.security;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerStatus;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CurrentPlayerService {
+
+    private final HttpSession session;
+    private final PlayerRepository playerRepository;
+
+    public CurrentPlayerService(HttpSession session, PlayerRepository playerRepository) {
+        this.session = session;
+        this.playerRepository = playerRepository;
+    }
+
+    public Long getCurrentPlayerId() {
+        return (Long) session.getAttribute(SessionKeys.CURRENT_PLAYER_ID);
+    }
+
+    public void setCurrentPlayerId(Long playerId) {
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+
+        if (player.getStatus() != PlayerStatus.APPROVED) {
+            throw new IllegalStateException(
+                    "BE - Nelze zvolit hrĂˇÄŤe, kterĂ˝ nenĂ­ schvĂˇlen administrĂˇtorem."
+            );
+        }
+
+        session.setAttribute(SessionKeys.CURRENT_PLAYER_ID, playerId);
+    }
+
+    public void requireCurrentPlayer() {
+        if (getCurrentPlayerId() == null) {
+            throw new IllegalStateException("BE - NenĂ­ zvolen aktuĂˇlnĂ­ hrĂˇÄŤ");
+        }
+    }
+
+    public void clear() {
+        session.removeAttribute(SessionKeys.CURRENT_PLAYER_ID);
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\security\PlayerSecurity.java
+-----
+
+package cz.phsoft.hokej.security;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+// - ZatĂ­m nepouĹľĂ­vĂˇm - pouĹľĂ­vĂˇm /me
+@Component("playerSecurity") // nĂˇzev pro pouĹľitĂ­ v SpEL (@PreAuthorize)
+public class PlayerSecurity {
+
+    private static final Logger logger = LoggerFactory.getLogger(PlayerSecurity.class);
+
+    private final PlayerRepository playerRepository;
+
+    public PlayerSecurity(PlayerRepository playerRepository) {
+        this.playerRepository = playerRepository;
+    }
+
+    /**
+     * ZjistĂ­, zda je aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel vlastnĂ­kem hrĂˇÄŤe
+     *
+     * @param authentication aktuĂˇlnĂ­ authentication objekt
+     * @param playerId       ID hrĂˇÄŤe
+     * @return true pokud je vlastnĂ­kem, jinak false
+     */
+    public boolean isOwner(Authentication authentication, Long playerId) {
+        try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                logger.warn("NeautorizovanĂ˝ pĹ™Ă­stup: ĹľĂˇdnĂˇ autentizace pro playerId {}", playerId);
+                return false;
+            }
+
+            Object principal = authentication.getPrincipal();
+            if (!(principal instanceof UserDetails userDetails)) {
+                logger.warn("NeautorizovanĂ˝ pĹ™Ă­stup: principal nenĂ­ UserDetails pro playerId {}", playerId);
+                return false;
+            }
+
+            boolean isOwner = playerRepository.findById(playerId)
+                    .map(player -> player.getUser() != null &&
+                            player.getUser().getEmail().equals(userDetails.getUsername()))
+                    .orElse(false);
+
+            if (!isOwner) {
+                logger.warn("NeautorizovanĂ˝ pĹ™Ă­stup: uĹľivatel {} nenĂ­ vlastnĂ­kem hrĂˇÄŤe {}", userDetails.getUsername(), playerId);
+            }
+
+            return isOwner;
+
+        } catch (Exception e) {
+            logger.error("Chyba pĹ™i kontrole vlastnĂ­ka hrĂˇÄŤe {}: {}", playerId, e.getMessage(), e);
+            // nikdy nepropustit vĂ˝jimku do SpEL
+            return false;
+        }
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\security\SessionKeys.java
+-----
+
+package cz.phsoft.hokej.security;
+
+public final class SessionKeys {
+    private SessionKeys() {}
+
+    public static final String CURRENT_PLAYER_ID = "CURRENT_PLAYER_ID";
+}
+
+

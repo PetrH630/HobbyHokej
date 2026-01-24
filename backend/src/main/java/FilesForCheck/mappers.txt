@@ -1,0 +1,227 @@
+﻿Balíček (složka): mappers
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\dto\mappers
+
+Seznam souborů:
+AppUserMapper.java
+MatchMapper.java
+MatchRegistrationMapper.java
+PlayerInactivityPeriodMapper.java
+PlayerMapper.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\dto\mappers\AppUserMapper.java
+-----
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.PlayerSummaryDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface AppUserMapper {
+    @Mapping(target = "players", source = "players")
+    AppUserDTO toDTO(AppUserEntity entity);
+
+    List<AppUserDTO> toDtoList(List<AppUserEntity> entities);
+
+    @Mapping(source = "nickname", target = "nickName")
+    @Mapping(target = "fullName", ignore = true)
+    PlayerDTO toPlayerDTO(PlayerEntity entity);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\dto\mappers\MatchMapper.java
+-----
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.models.dto.MatchDTO;
+import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+
+@Mapper(componentModel = "spring")
+public interface MatchMapper {
+
+    MatchDTO toDTO(MatchEntity entity);
+
+    MatchEntity toEntity(MatchDTO dto);
+
+    void updateEntity(MatchDTO dto, @MappingTarget MatchEntity entity);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\dto\mappers\MatchRegistrationMapper.java
+-----
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface MatchRegistrationMapper {
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "match", source = "match")
+    @Mapping(target = "player", source = "player")
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "excuseReason", source = "excuseReason")
+    @Mapping(target = "excuseNote", source = "note")
+    @Mapping(target = "team", source = "team")
+    @Mapping(target = "adminNote", source = "adminNote")
+    @Mapping(target = "createdBy", source = "createdBy")
+    @Mapping(target = "timestamp", expression = "java(java.time.LocalDateTime.now())")
+    MatchRegistrationEntity toEntity(
+            MatchEntity match,
+            PlayerEntity player,
+            PlayerMatchStatus status,
+            ExcuseReason excuseReason,
+            String note,
+            Team team,
+            String adminNote,
+            String createdBy
+    );
+
+    // entity â†’ DTO (volitelnĂ©)
+    @Mapping(target = "matchId", source = "match.id")
+    @Mapping(target = "playerId", source = "player.id")
+    MatchRegistrationDTO toDTO(MatchRegistrationEntity entity);
+
+    List<MatchRegistrationDTO> toDTOList(List<MatchRegistrationEntity> entities);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\dto\mappers\PlayerInactivityPeriodMapper.java
+-----
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
+import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
+import org.mapstruct.*;
+
+@Mapper(componentModel = "spring")
+public interface PlayerInactivityPeriodMapper {
+
+    // Entity -> DTO (OK)
+    @Mapping(target = "playerId", source = "player.id")
+    PlayerInactivityPeriodDTO toDTO(PlayerInactivityPeriodEntity entity);
+
+    // DTO -> Entity (player Ĺ™eĹˇĂ­ @ObjectFactory)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "player", ignore = true)
+    PlayerInactivityPeriodEntity toEntity(PlayerInactivityPeriodDTO dto, @Context PlayerEntity player);
+
+    // UPDATE DTO -> existujĂ­cĂ­ entity (bez zmÄ›ny player)
+    @Mapping(target = "player", ignore = true)
+    void updateEntityFromDto(PlayerInactivityPeriodDTO dto, @MappingTarget PlayerInactivityPeriodEntity entity);
+
+    // FACTORY â€“ jedinĂ˝ sprĂˇvnĂ˝ zpĹŻsob, jak nastavit player z @Context
+    @ObjectFactory
+    default PlayerInactivityPeriodEntity createEntity(PlayerInactivityPeriodDTO dto, @Context PlayerEntity player) {
+        PlayerInactivityPeriodEntity entity = new PlayerInactivityPeriodEntity();
+        entity.setPlayer(player);
+        return entity;
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\dto\mappers\PlayerMapper.java
+-----
+
+package cz.phsoft.hokej.models.dto.mappers;
+
+import cz.phsoft.hokej.data.entities.NotificationSettings;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface PlayerMapper {
+
+    // Entity â†’ DTO (heslo se neposĂ­lĂˇ)
+    @Mapping(source = "nickname", target = "nickName")
+    @Mapping(target = "fullName", ignore = true) // generuje se v DTO
+    @Mapping(source = "notificationSettings.emailEnabled", target = "notifyByEmail")
+    @Mapping(source = "notificationSettings.smsEnabled", target = "notifyBySms")
+    PlayerDTO toDTO(PlayerEntity entity);
+
+    // DTO â†’ Entity (heslo se mapuje, pokud existuje)
+    @Mapping(source = "nickName", target = "nickname")   // KLĂŤÄŚOVĂ‰
+    @Mapping(target = "fullName", ignore = true)         // generuje si Entity sama
+    @Mapping(target = "user", ignore = true)             // nastavujeĹˇ v service
+    @Mapping(
+            target = "status",
+            expression = "java(dto.getStatus() != null ? dto.getStatus() : cz.phsoft.hokej.data.enums.PlayerStatus.PENDING)"
+    )
+    // mapovĂˇnĂ­ do embedded NotificationSettings
+    @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
+    @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")
+    PlayerEntity toEntity(PlayerDTO dto);
+
+    // Aktualizace existujĂ­cĂ­ho DTO (ignorujeme fullName)
+    @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
+
+    // Aktualizace existujĂ­cĂ­ Entity (heslo se mapuje, fullName nenĂ­ pole v Entity)
+    @Mapping(source = "nickName", target = "nickname")   // i tady je dĹŻleĹľitĂ©
+    @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(
+            target = "status",
+            expression = "java(source.getStatus() != null ? source.getStatus() : target.getStatus())"
+    )
+    @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
+    @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")
+    void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
+
+    List<PlayerDTO> toDTOList(List<PlayerEntity> players);
+
+    @AfterMapping
+    default void ensureNotificationSettings(@MappingTarget PlayerEntity entity) {
+        if (entity.getNotificationSettings() == null) {
+            NotificationSettings ns = new NotificationSettings();
+            ns.setEmailEnabled(false);
+            ns.setSmsEnabled(false);
+            entity.setNotificationSettings(ns);
+        }
+    }
+
+}
+
+

@@ -30,17 +30,20 @@ public class PlayerServiceImpl implements PlayerService {
     private final PlayerMapper playerMapper;
     private final AppUserRepository appUserRepository;
     private final NotificationService notificationService;
+    private final CurrentPlayerService currentPlayerService;       // NEW
 
     public PlayerServiceImpl(
             PlayerRepository playerRepository,
             PlayerMapper playerMapper,
             AppUserRepository appUserRepository,
-            NotificationService notificationService // NEW
+            NotificationService notificationService,
+            CurrentPlayerService currentPlayerService             // NEW
     ) {
         this.playerRepository = playerRepository;
         this.playerMapper = playerMapper;
         this.appUserRepository = appUserRepository;
-        this.notificationService = notificationService; // NEW
+        this.notificationService = notificationService;
+        this.currentPlayerService = currentPlayerService;         // NEW
     }
 
     @Override
@@ -193,5 +196,65 @@ public class PlayerServiceImpl implements PlayerService {
         );
     }
 
+    // ----------------------------------------------------------------------
+    // NEW – nastavení aktuálního hráče pro přihlášeného uživatele
+    // ----------------------------------------------------------------------
+    @Override
+    public SuccessResponseDTO setCurrentPlayerForUser(String userEmail, Long playerId) {
 
+        // 1) Najdu hráče
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+
+        // 2) Ověřím, že patří uživateli s daným emailem
+        if (player.getUser() == null || player.getUser().getEmail() == null ||
+                !player.getUser().getEmail().equals(userEmail)) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Hráč nepatří přihlášenému uživateli."
+            );
+        }
+
+        // 3) Deleguji na CurrentPlayerService (ten už hlídá PlayerStatus.APPROVED)
+        currentPlayerService.setCurrentPlayerId(playerId);
+
+        // 4) Vrátím jednotný SuccessResponseDTO
+        return new SuccessResponseDTO(
+                "BE - Aktuální hráč nastaven na ID: " + playerId,
+                playerId,
+                LocalDateTime.now().toString()
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // NEW – automatický výběr aktuálního hráče po loginu
+    // ----------------------------------------------------------------------
+    @Override
+    public SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail) {
+
+        // 1) Vezmu hráče přes existující metodu getPlayersByUser
+        List<PlayerDTO> players = getPlayersByUser(userEmail);
+
+        if (players.size() == 1) {
+            PlayerDTO player = players.get(0);
+
+            // 2) Nastavím ho jako aktuálního
+            currentPlayerService.setCurrentPlayerId(player.getId());
+
+            // 3) Vrátím SuccessResponseDTO s ID
+            return new SuccessResponseDTO(
+                    "BE - Automaticky nastaven aktuální hráč na ID: " + player.getId(),
+                    player.getId(),
+                    LocalDateTime.now().toString()
+            );
+        }
+
+        // 4) Uživatel má 0 nebo více hráčů – necháme výběr na FE
+        return new SuccessResponseDTO(
+                "BE - Uživatel má více (nebo žádné) hráče, je nutný ruční výběr.",
+                null,
+                LocalDateTime.now().toString()
+        );
+    }
 }
+
+

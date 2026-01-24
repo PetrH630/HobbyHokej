@@ -1,0 +1,356 @@
+﻿Balíček (složka): sms
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\sms
+
+Seznam souborů:
+SmsMessageBuilder.java
+SmsService.java
+SmsServiceImpl.java
+SmsSchedulerService.java
+SmsTextBeeService.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsMessageBuilder.java
+-----
+
+package cz.phsoft.hokej.models.services.sms;
+
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import org.springframework.stereotype.Component;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+
+import java.time.format.DateTimeFormatter;
+
+@Component
+public class SmsMessageBuilder {
+
+    private final MatchRegistrationRepository matchRegistrationRepository;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public SmsMessageBuilder(MatchRegistrationRepository matchRegistrationRepository) {
+        this.matchRegistrationRepository = matchRegistrationRepository;
+    }
+
+    // --------------------------
+    // zprĂˇva po registraci/odhlĂˇĹˇenĂ­/omluvenĂ­
+    // --------------------------
+    public String buildMessageRegistration(MatchRegistrationEntity registration) {
+        PlayerMatchStatus status = registration.getStatus();
+        String statusText = switch (status) {
+            case REGISTERED -> "pĹ™ihlĂˇsil se k zĂˇpasu";
+            case UNREGISTERED -> "odhlĂˇsil se ze zĂˇpasu";
+            case EXCUSED -> "omluven";
+            default -> "neznĂˇmĂ˝ stav";
+        };
+
+        Long registeredCount = matchRegistrationRepository
+                .countByMatchIdAndStatus(registration.getMatch().getId(), PlayerMatchStatus.REGISTERED);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_hokej - datum: ")
+                .append(registration.getMatch().getDateTime().toLocalDate());
+
+        if (status != PlayerMatchStatus.EXCUSED) {
+            sb.append(", ").append(registeredCount)
+                    .append("/").append(registration.getMatch().getMaxPlayers());
+        }
+
+        sb.append(", hrĂˇÄŤ: ").append(registration.getPlayer().getFullName())
+                .append(", status: ").append(statusText);
+
+        return sb.toString();
+    }
+
+    // --------------------------
+    // zprĂˇva pro hrĂˇÄŤe, kteĹ™Ă­ jeĹˇtÄ› nereagovali
+    // --------------------------
+    public String buildMessageNoResponse(PlayerDTO player, MatchEntity match) {
+        Long registeredCount = matchRegistrationRepository
+                .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_hokej - upozornÄ›nĂ­: zĂˇpas ")
+                .append(match.getDateTime().format(dateFormatter))
+                .append(" - volnĂˇ mĂ­sta: ")
+                .append(match.getMaxPlayers() - registeredCount)
+                .append(". JeĹˇtÄ› jste nereagoval.");
+
+        return sb.toString();
+    }
+
+    // --------------------------
+    // finĂˇlnĂ­ pĹ™ipomĂ­nka pro pĹ™ihlĂˇĹˇenĂ© hrĂˇÄŤe v den zĂˇpasu
+    // --------------------------
+    public String buildMessageFinal(MatchRegistrationEntity registration) {
+        MatchEntity match = registration.getMatch();
+        Long registeredCount = matchRegistrationRepository
+                .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
+
+        double pricePerPlayer = match.getPrice() / Math.max(registeredCount, 1);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_hokej - pĹ™ipomĂ­nka zĂˇpasu ")
+                .append(match.getDateTime().format(dateFormatter))
+                .append(", pĹ™ihlĂˇĹˇeno: ").append(registeredCount).append("/").append(match.getMaxPlayers())
+                .append(", cena na hrĂˇÄŤe: ").append(String.format("%.2f KÄŤ", pricePerPlayer));
+
+        return sb.toString();
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsService.java
+-----
+
+package cz.phsoft.hokej.models.services.sms;
+
+public interface SmsService {
+    void sendSms(String phoneNumber, String message);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsServiceImpl.java
+-----
+
+/* package cz.phsoft.hokej.models.services.sms;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class SmsServiceImpl {
+
+   // private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${textbee.api-url}")
+    private String apiUrl;
+
+    @Value("${textbee.api-key}")
+    private String apiKey;
+
+    // testovacĂ­ ÄŤĂ­slo
+    //private final String testNumber = "+420776609956";
+
+    /**
+     * OdeĹˇle SMS na testovacĂ­ ÄŤĂ­slo.
+     * @param message text zprĂˇvy
+     */
+
+/*
+    public void sendSms(String phoneNumber, String message) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-api-key", apiKey);
+
+        Map<String, Object> body = Map.of(
+                "recipients", List.of(phoneNumber),
+                "message", message
+        );
+
+        HttpEntity<Map<String,Object>> request = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
+            System.out.println("SMS poslĂˇna na testovacĂ­ ÄŤĂ­slo  xxx   : " + response.getBody());
+        } catch (Exception e) {
+            System.err.println("Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS: " + e.getMessage());
+        }
+    }
+
+*/
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsSchedulerService.java
+-----
+
+package cz.phsoft.hokej.models.services.sms;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
+@Service
+public class SmsSchedulerService {
+
+    private final MatchRepository matchRepository;
+    private final MatchRegistrationRepository registrationRepository;
+    private final SmsService smsService;
+    private final SmsMessageBuilder smsMessageBuilder;
+    private final MatchRegistrationService matchRegistrationService;
+
+    public SmsSchedulerService(
+            MatchRepository matchRepository,
+            MatchRegistrationRepository registrationRepository,
+            SmsService smsService,
+            SmsMessageBuilder smsMessageBuilder,
+            MatchRegistrationService matchRegistrationService) {
+
+        this.matchRepository = matchRepository;
+        this.registrationRepository = registrationRepository;
+        this.smsService = smsService;
+        this.smsMessageBuilder = smsMessageBuilder;
+        this.matchRegistrationService = matchRegistrationService;
+    }
+
+    // PoslĂˇnĂ­ SMS v den zĂˇpasu
+    // SpustĂ­ se kaĹľdĂ˝ den v 12:30
+    @Scheduled(cron = "0 30 12 * * *")
+    @Transactional
+    public void sendFinalSmsForTodayMatches() {
+
+        LocalDate today = LocalDate.now();
+
+        // najdeme vĹˇechny dneĹˇnĂ­ zĂˇpasy
+        List<MatchEntity> todaysMatches = matchRepository.findAll().stream()
+                .filter(m -> m.getDateTime().toLocalDate().isEqual(today))
+                .toList();
+
+        for (MatchEntity match : todaysMatches) {
+
+            // naÄŤteme vĹˇechny registrace k danĂ©mu zĂˇpasu (BEZ zmÄ›n entit)
+            List<MatchRegistrationEntity> registrations =
+                    registrationRepository.findByMatchId(match.getId());
+
+            for (MatchRegistrationEntity reg : registrations) {
+
+                // pouĹľijeĹˇ svĹŻj pĹŻvodnĂ­ builder
+                String smsMsg = smsMessageBuilder.buildMessageFinal(reg);
+
+                try {
+                    smsService.sendSms(reg.getPlayer().getPhoneNumber(), smsMsg);
+                    System.out.println("FinĂˇlnĂ­ SMS poslĂˇna hrĂˇÄŤi "
+                            + reg.getPlayer().getFullName() + ": " + smsMsg);
+
+                } catch (Exception e) {
+                    System.err.println("Chyba SMS pro hrĂˇÄŤe "
+                            + reg.getPlayer().getFullName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    // poslĂˇnĂ­ SMS 3 dny pĹ™ed zĂˇpasem - noresponse player
+    @Scheduled(cron = "0 40 14 * * *") // kaĹľdĂ˝ den ve 12:30
+    @Transactional
+    public void sendNoResponseSmsForMatchesIn3Days() {
+
+        LocalDate targetDate = LocalDate.now().plusDays(3);
+
+        // vĹˇechny zĂˇpasy, kterĂ© jsou za 3 dny
+        List<MatchEntity> matchesInThreeDays = matchRepository.findAll().stream()
+                .filter(m -> m.getDateTime().toLocalDate().isEqual(targetDate))
+                .toList();
+
+        for (MatchEntity match : matchesInThreeDays) {
+
+            // pouĹľijeme tvĹŻj existujĂ­cĂ­ helper
+            List<PlayerDTO> noResponsePlayers =
+                    matchRegistrationService.getNoResponsePlayers(match.getId());
+
+            for (PlayerDTO player : noResponsePlayers) {
+
+                String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
+
+                try {
+                    smsService.sendSms(player.getPhoneNumber(), smsMsg);
+                    System.out.println("NORESPONSE SMS poslĂˇna hrĂˇÄŤi "
+                            + player.getFullName() + ": " + smsMsg);
+                } catch (Exception e) {
+                    System.err.println("Chyba NORESPONSE SMS pro hrĂˇÄŤe "
+                            + player.getFullName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsTextBeeService.java
+-----
+
+package cz.phsoft.hokej.models.services.sms;
+
+import cz.phsoft.hokej.models.services.sms.SmsService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Map;
+
+// textbee - free s omezenĂ­m na 50 sms / den
+@Service
+public class SmsTextBeeService implements SmsService {
+
+    @Value("${sms.enabled:true}")
+    private boolean smsEnabled;
+
+    @Value("${textbee.api-url}")
+    private String apiUrl;
+
+    @Value("${textbee.api-key}")
+    private String apiKey;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Override
+    public void sendSms(String phoneNumber, String message) {
+        if (!smsEnabled) {
+            System.out.println("SMS disabled, message not sent: " + message);
+            return;
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-api-key", apiKey);
+
+        Map<String, Object> body = Map.of(
+                "recipients", List.of(phoneNumber),
+                "message", message
+        );
+
+        HttpEntity<Map<String,Object>> request = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
+            System.out.println("SMS odeslĂˇna hrĂˇÄŤi: " + phoneNumber + ", response: " + response.getBody());
+        } catch (Exception e) {
+            System.err.println("Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS: " + e.getMessage());
+        }
+    }
+}
+
+

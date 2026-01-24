@@ -1,0 +1,782 @@
+﻿Balíček (složka): entities
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\entities
+
+Seznam souborů:
+AppUserEntity.java
+EmailVerificationTokenEntity.java
+MatchEntity.java
+MatchRegistrationEntity.java
+MatchRegistrationHistoryEntity.java
+NotificationSettings.java
+PlayerEntity.java
+PlayerInactivityPeriodEntity.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\entities\AppUserEntity.java
+-----
+
+package cz.phsoft.hokej.data.entities;
+
+import cz.phsoft.hokej.data.enums.Role;
+import jakarta.persistence.*;
+
+import java.util.Set;
+
+@Entity
+@Table(name = "app_users")
+public class AppUserEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String surname;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    @Column(nullable = false)
+    private boolean enabled = false; // vĂ˝chozĂ­ hodnota false
+
+
+    // One-to-Many: jeden uĹľivatel â†’ vĂ­ce hrĂˇÄŤĹŻ
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PlayerEntity> players;
+
+    // gettery/settery
+
+
+    public Long getId() {return id;}
+
+    public void setId(Long id) {this.id = id;}
+
+    public String getName() {return name;}
+
+    public void setName(String name) {this.name = name;}
+
+    public String getSurname() { return surname; }
+
+    public void setSurname(String surname) { this.surname = surname; }
+
+    public String getEmail() {return email;}
+
+    public void setEmail(String email) {this.email = email;}
+
+    public String getPassword() {return password;}
+
+    public void setPassword(String password) {this.password = password;}
+
+    public Role getRole() {return role;}
+
+    public void setRole(Role role) {this.role = role;}
+
+    public boolean isEnabled() {    return enabled;    }
+
+    public void setEnabled(boolean enabled) {  this.enabled = enabled;    }
+
+    public Set<PlayerEntity> getPlayers() {return players;}
+
+    public void setPlayers(Set<PlayerEntity> players) {this.players = players;}
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\entities\EmailVerificationTokenEntity.java
+-----
+
+package cz.phsoft.hokej.data.entities;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+
+@Entity
+@Table(name = "email_verification_tokens")
+public class EmailVerificationTokenEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 64)
+    private String token;
+
+    @Column(nullable = false)
+    private LocalDateTime expiresAt;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private AppUserEntity user;
+
+    // gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
+
+    public LocalDateTime getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+
+    public AppUserEntity getUser() { return user; }
+    public void setUser(AppUserEntity user) { this.user = user; }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\entities\MatchEntity.java
+-----
+
+package cz.phsoft.hokej.data.entities;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+/**
+ * tĹ™Ă­da pro vklĂˇdĂˇnĂ­ Entity zĂˇpasu do db
+ */
+@Entity
+@Table(name = "matches")
+public class MatchEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private LocalDateTime dateTime;
+
+    @Column(nullable = false)
+    private String location;
+
+    private String description;
+
+    // maximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ - vyuĹľĂ­vĂˇ se pro ovÄ›Ĺ™enĂ­ kapacity pĹ™i pĹ™ihlĂˇĹˇenĂ­
+    @Column(nullable = false)
+    private Integer maxPlayers;
+
+    @Column(nullable = false)
+    private Integer price;
+
+    public MatchEntity() {}
+
+    // Gettery a settery
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Integer getMaxPlayers() { return maxPlayers; }
+
+    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
+
+    public Integer getPrice() { return price; }
+
+    public void setPrice(Integer price) { this.price = price; }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\entities\MatchRegistrationEntity.java
+-----
+
+package cz.phsoft.hokej.data.entities;
+
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.Team;
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+/**
+ * tĹ™Ă­da reprezentuje registracei hrĂˇÄŤe k zĂˇpasu
+ */
+@Entity
+@Table(name = "match_registrations")
+public class MatchRegistrationEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "match_id", nullable = false)
+    private MatchEntity match;
+
+    @ManyToOne
+    @JoinColumn(name = "player_id", nullable = false)
+    private PlayerEntity player;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PlayerMatchStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private ExcuseReason excuseReason;
+
+    private String excuseNote;
+
+    // admin mĹŻĹľe vloĹľit poznĂˇmku, napĹ™. kdyĹľ se nÄ›kdo zaregistruje a potĂ© nepĹ™Ă­jde
+    private String adminNote;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "team")
+    private Team team;
+
+    // datÄŤas vytvoĹ™enĂ­ registrace - musĂ­ se mÄ›nit aby nebyl hrĂˇÄŤ i po zruĹˇenĂ­ registrace
+    // v poĹ™adĂ­ pĹ™ed hrĂˇÄŤi kteĹ™Ă­ se registrovali po zruĹˇenĂ­ registrace
+    @Column(nullable = false, updatable = true)
+    private LocalDateTime timestamp = LocalDateTime.now();
+
+    // systĂ©m automaticky vytvĂˇĹ™Ă­ reserved/registered dle kapacity - maxPlayers
+    @Column(nullable = false, updatable = true)
+    private String createdBy; // "user" nebo "system"
+
+    public MatchRegistrationEntity() {
+    }
+
+    // Gettery a Settery
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public MatchEntity getMatch() {
+        return match;
+    }
+
+    public void setMatch(MatchEntity match) {
+        this.match = match;
+    }
+
+    public PlayerEntity getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(PlayerEntity player) {
+        this.player = player;
+    }
+
+    public PlayerMatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerMatchStatus status) {
+        this.status = status;
+    }
+
+    public ExcuseReason getExcuseReason() {
+        return excuseReason;
+    }
+
+    public void setExcuseReason(ExcuseReason excuseReason) {
+        this.excuseReason = excuseReason;
+    }
+
+    public String getExcuseNote() {
+        return excuseNote;
+    }
+
+    public void setExcuseNote(String excuseNote) {
+        this.excuseNote = excuseNote;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+}
+
+
+
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\entities\MatchRegistrationHistoryEntity.java
+-----
+
+package cz.phsoft.hokej.data.entities;
+
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.Team;
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "match_registration_history")
+public class MatchRegistrationHistoryEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // ID z pĹŻvodnĂ­ hlavnĂ­ tabulky
+    @Column(name = "match_registration_id", nullable = false)
+    private Long matchRegistrationId;
+
+    @Column(name = "match_id", nullable = false)
+    private Long matchId;
+
+    @Column(name = "player_id", nullable = false)
+    private Long playerId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PlayerMatchStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "excuse_reason")
+    private ExcuseReason excuseReason;
+
+    @Column(name = "excuse_note")
+    private String excuseNote;
+
+    @Column(name = "admin_note")
+    private String adminNote;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "team")
+    private Team team;
+
+    // pĹŻvodnĂ­ timestamp
+    @Column(name = "original_timestamp", nullable = false)
+    private LocalDateTime originalTimestamp;
+
+    @Column(name = "created_by", nullable = false)
+    private String createdBy;
+
+    @Column(nullable = false)
+    private String action; // INSERT / UPDATE / DELETE
+
+    @Column(name = "changed_at", nullable = false)
+    private LocalDateTime changedAt;
+
+    public MatchRegistrationHistoryEntity() {
+    }
+
+    // Gettery a settery
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getMatchRegistrationId() {
+        return matchRegistrationId;
+    }
+
+    public void setMatchRegistrationId(Long matchRegistrationId) {
+        this.matchRegistrationId = matchRegistrationId;
+    }
+
+    public Long getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
+    }
+
+    public Long getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
+    public PlayerMatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerMatchStatus status) {
+        this.status = status;
+    }
+
+    public ExcuseReason getExcuseReason() {
+        return excuseReason;
+    }
+
+    public void setExcuseReason(ExcuseReason excuseReason) {
+        this.excuseReason = excuseReason;
+    }
+
+    public String getExcuseNote() {
+        return excuseNote;
+    }
+
+    public void setExcuseNote(String excuseNote) {
+        this.excuseNote = excuseNote;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public LocalDateTime getOriginalTimestamp() {
+        return originalTimestamp;
+    }
+
+    public void setOriginalTimestamp(LocalDateTime originalTimestamp) {
+        this.originalTimestamp = originalTimestamp;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public LocalDateTime getChangedAt() {
+        return changedAt;
+    }
+
+    public void setChangedAt(LocalDateTime changedAt) {
+        this.changedAt = changedAt;
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\entities\NotificationSettings.java
+-----
+
+package cz.phsoft.hokej.data.entities;
+
+import jakarta.persistence.Embeddable;
+
+@Embeddable
+public class NotificationSettings {
+
+    private boolean emailEnabled;
+    private boolean smsEnabled;
+
+    public boolean isEmailEnabled() {
+        return emailEnabled;
+    }
+
+    public void setEmailEnabled(boolean emailEnabled) {
+        this.emailEnabled = emailEnabled;
+    }
+
+    public boolean isSmsEnabled() {
+        return smsEnabled;
+    }
+
+    public void setSmsEnabled(boolean smsEnabled) {
+        this.smsEnabled = smsEnabled;
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\entities\PlayerEntity.java
+-----
+
+package cz.phsoft.hokej.data.entities;
+
+import cz.phsoft.hokej.data.enums.PlayerStatus;
+import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.data.enums.PlayerType;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "player_entity")
+public class PlayerEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String surname;
+
+    private String nickName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PlayerType type; // VIP, STANDARD, BASIC
+
+    private String fullName;
+    private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    private Team team;
+
+    @Enumerated(EnumType.STRING)
+    private PlayerStatus status = PlayerStatus.PENDING;
+
+
+    // Many-to-One: kaĹľdĂ˝ hrĂˇÄŤ patĹ™Ă­ jednomu uĹľivateli
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private AppUserEntity user;
+
+    @Embedded
+    private NotificationSettings notificationSettings = new NotificationSettings();
+
+    // ----------------- Konstruktor -----------------
+    public PlayerEntity() {
+        this.type = PlayerType.BASIC;
+    }
+
+    public PlayerEntity(String name, String surname, String nickName, PlayerType type, String phoneNumber, Team team, PlayerStatus status) {
+        this.name = name;
+        this.surname = surname;
+        this.nickName = nickName;
+        this.type = type;
+        this.fullName = name + " " + surname;
+        this.phoneNumber = phoneNumber;
+        this.team = team;
+        this.status = status;
+    }
+
+    // ----------------- Gettery a Settery -----------------
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+        updateFullName();
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+        updateFullName();
+    }
+
+    public String getNickname() { return nickName;}
+    public void setNickname(String nickName) { this.nickName = nickName; }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public PlayerType getType() {
+        return type;
+    }
+    public void setType(PlayerType type) {
+        this.type = type;
+    }
+
+    private void updateFullName() {
+        this.fullName = name + " " + surname;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public AppUserEntity getUser() {
+        return user;
+    }
+    public void setUser(AppUserEntity user) {
+        this.user = user;
+    }
+
+    public PlayerStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PlayerStatus status) {
+        this.status = status;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+    public NotificationSettings getNotificationSettings() {
+        return notificationSettings;
+    }
+
+    public void setNotificationSettings(NotificationSettings notificationSettings) {
+        this.notificationSettings = notificationSettings;
+    }
+
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\entities\PlayerInactivityPeriodEntity.java
+-----
+
+package cz.phsoft.hokej.data.entities;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "player_inactivity_period")
+public class PlayerInactivityPeriodEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "player_id", nullable = false)
+    private PlayerEntity player;
+
+    // neaktivnĂ­ od
+    @Column(name = "inactive_from", nullable = false)
+    private LocalDateTime inactiveFrom;
+
+    // neaktivnĂ­ do
+    @Column(name = "inactive_to", nullable = false)
+    private LocalDateTime inactiveTo;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public PlayerEntity getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(PlayerEntity player) {
+        this.player = player;
+    }
+
+    public LocalDateTime getInactiveFrom() {
+        return inactiveFrom;
+    }
+
+    public void setInactiveFrom(LocalDateTime inactiveFrom) {
+        this.inactiveFrom = inactiveFrom;
+    }
+
+    public LocalDateTime getInactiveTo() {
+        return inactiveTo;
+    }
+
+    public void setInactiveTo(LocalDateTime inactiveTo) {
+        this.inactiveTo = inactiveTo;
+    }
+
+}
+
+

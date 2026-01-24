@@ -1,0 +1,961 @@
+﻿BalĂ­ÄŤek (sloĹľka): controllers
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\controllers
+
+Seznam souborĹŻ:
+
+AdminMatchController.java
+AdminMatchRegistrationController.java
+AdminPlayerController.java
+AppUserController.java
+AuthController.java
+CurrentPlayerController.java
+DebugController.java
+MatchController.java
+MatchRegistrationController.java
+PlayerController.java
+PlayerInactivityPeriodController.java
+TestController.java
+TestEmailController.java
+TestSmsController.java
+
+
+----------
+AdminMatchController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.MatchDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.services.MatchService;
+import cz.phsoft.hokej.security.CurrentPlayerService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/matches/admin")
+@CrossOrigin(origins = "*")
+public class AdminMatchController {
+    private final MatchService matchService;
+    private final CurrentPlayerService currentPlayerService;
+
+
+    public AdminMatchController(MatchService matchService,
+                           CurrentPlayerService currentPlayerService) {
+        this.matchService = matchService;
+        this.currentPlayerService = currentPlayerService;
+    }
+
+    // VĹˇechny zĂˇpasy
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getAllMatches() {
+        return matchService.getAllMatches();
+    }
+
+    // VĹˇechny nadchĂˇzejĂ­cĂ­ zĂˇpasy
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @GetMapping("/upcoming")
+    public List<MatchDTO> getUpcomingMatches() {
+        return matchService.getUpcomingMatches();
+    }
+
+    // UĹľ uskuteÄŤnÄ›nĂ© zĂˇpasy
+    @GetMapping("/past")
+    public List<MatchDTO> getPastMatches() {
+        return matchService.getPastMatches();
+    }
+
+    // VytvoĹ™enĂ­ zĂˇpasu
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public MatchDTO createMatch(@Valid @RequestBody MatchDTO matchDTO) {
+        return matchService.createMatch(matchDTO);
+    }
+
+    // ZĂ­skĂˇnĂ­ zĂˇpasu podle ID
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchDTO getMatch(@PathVariable Long id) {
+        return matchService.getMatchById(id);
+    }
+
+    // Editace zĂˇpasu
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchDTO updateMatch(@PathVariable Long id, @Valid @RequestBody MatchDTO dto) {
+        return matchService.updateMatch(id, dto);
+    }
+
+    // SmazĂˇnĂ­ zĂˇpasu
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SuccessResponseDTO> deleteMatch(@PathVariable Long id) {
+        SuccessResponseDTO response = matchService.deleteMatch(id);
+        return ResponseEntity.ok(response);
+    }
+
+    // DostupnĂ© zĂˇpasy pro hrĂˇÄŤe
+    @GetMapping("/available-for-player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getAvailableMatchesForPlayer(@PathVariable Long playerId) {
+        return matchService.getAvailableMatchesForPlayer(playerId);
+    }
+
+}
+
+
+----------
+AdminMatchRegistrationController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
+import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import cz.phsoft.hokej.models.services.MatchService;
+import cz.phsoft.hokej.security.CurrentPlayerService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/registrations/admin")
+@CrossOrigin(origins = "*")
+public class AdminMatchRegistrationController {
+    private final MatchRegistrationService service;
+    private final CurrentPlayerService currentPlayerService;
+    private final MatchService matchService;
+
+    public AdminMatchRegistrationController(MatchRegistrationService service,
+                                       CurrentPlayerService currentPlayerService,
+                                            MatchService matchService) {
+        this.service = service;
+        this.currentPlayerService = currentPlayerService;
+        this.matchService = matchService;
+    }
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchRegistrationDTO> getAllRegistrations() {
+        return service.getAllRegistrations();
+    }
+    @GetMapping("/for-match/{matchId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchRegistrationDTO> forMatch(@PathVariable Long matchId) {
+        return service.getRegistrationsForMatch(matchId);
+    }
+
+    @GetMapping("/for-player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchRegistrationDTO> forPlayer(@PathVariable Long playerId) {
+        return service.getRegistrationsForPlayer(playerId);
+    }
+    @GetMapping("/no-response/{matchId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<PlayerDTO> getNoResponse(@PathVariable Long matchId) {
+        return service.getNoResponsePlayers(matchId);
+    }
+
+    // UNIVERZĂLNĂŤ ENDPOINT PRO REGISTRACE - za hrĂˇÄŤe
+
+    @PostMapping("/upsert/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO upsert(@PathVariable Long playerId, @RequestBody MatchRegistrationRequest request) {
+
+        return service.upsertRegistration(
+                request.getMatchId(),
+                request.getPlayerId(), // vybranĂ˝ hrĂˇÄŤ
+                request.getTeam(),
+                request.getAdminNote(),
+                request.getExcuseReason(),
+                request.getExcuseNote(),
+                request.isUnregister()
+        );
+    }
+
+    @PostMapping("/matches/{matchId}/players/{playerId}/no-excused")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO markNoExcused(
+            @PathVariable Long matchId,
+            @PathVariable Long playerId,
+            @RequestBody(required = false) String adminNote
+    ) {
+        return matchService.markNoExcused(matchId, playerId, adminNote);
+    }
+}
+
+
+
+----------
+AdminPlayerController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.data.enums.PlayerStatus;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.services.PlayerService;
+import cz.phsoft.hokej.security.CurrentPlayerService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/players/admin")
+@CrossOrigin(origins = "*")
+public class AdminPlayerController {
+
+    private final PlayerService playerService;
+    private final CurrentPlayerService currentPlayerService;
+
+    public AdminPlayerController(PlayerService playerService, CurrentPlayerService currentPlayerService) {
+        this.playerService = playerService;
+        this.currentPlayerService = currentPlayerService;
+    }
+    // vĹˇichni hrĂˇÄŤi
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<PlayerDTO> getAllPlayers() {
+        return playerService.getAllPlayers();
+    }
+
+    // hrĂˇÄŤ dle id
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public PlayerDTO getPlayerById(@PathVariable Long id) {
+        return playerService.getPlayerById(id);
+    }
+
+    // vytvoĹ™enĂ­ hrĂˇÄŤe
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+        public PlayerDTO createPlayer(@RequestBody PlayerDTO playerDTO) {
+        return playerService.createPlayer(playerDTO);
+    }
+
+    // Ăşprava hrĂˇÄŤe administrĂˇtorem dle id hrĂˇÄŤe
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public PlayerDTO upatePlayerAdmin(@PathVariable Long id,  @RequestBody PlayerDTO dto) {
+
+        return playerService.updatePlayer(id, dto);
+    }
+    // odstranĂ­ hrĂˇÄŤe
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SuccessResponseDTO> deletePlayer(@PathVariable Long id) {
+        SuccessResponseDTO response = playerService.deletePlayer(id);
+        return ResponseEntity.ok(response);
+    }
+
+    //
+    // SCHVĂLENĂŤ HRĂÄŚE
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/approve/{id}")
+    public ResponseEntity<SuccessResponseDTO> approvePlayer(@PathVariable Long id) {
+        SuccessResponseDTO response = playerService.approvePlayer(id);
+        return ResponseEntity.ok(response);
+
+    }
+    // ZAMĂŤTNUTĂŤ HRĂÄŚE
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/reject/{id}")
+    public ResponseEntity<SuccessResponseDTO> rejectPlayer(@PathVariable Long id) {
+        SuccessResponseDTO response = playerService.rejectPlayer(id);
+        return ResponseEntity.ok(response);
+
+    }
+
+
+
+
+
+}
+
+
+----------
+AppUserController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.ChangePasswordDTO;
+import cz.phsoft.hokej.models.services.AppUserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/users")
+@CrossOrigin(origins = "*")
+public class AppUserController {
+
+    private final AppUserService appUserService;
+
+    public AppUserController(AppUserService appUserService) {
+        this.appUserService = appUserService;
+    }
+
+    // PĹ™ihlĂˇĹˇenĂ˝ uĹľivatel â€“ bezpeÄŤnĂ©
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public AppUserDTO getCurrentUser(Authentication authentication) {
+        return appUserService.getCurrentUser(authentication.getName());
+    }
+
+    // ZmÄ›na hesla pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+    @PostMapping("/me/change-password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> changePassword(Authentication authentication,
+                                                 @RequestBody ChangePasswordDTO dto) {
+        String email = authentication.getName();
+        appUserService.changePassword(email, dto.getOldPassword(), dto.getNewPassword(), dto.getNewPasswordConfirm());
+        return ResponseEntity.ok("Heslo ĂşspÄ›ĹˇnÄ› zmÄ›nÄ›no");
+    }
+
+    // ZmÄ›na pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+    @PutMapping("/me/update")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> updateUser(Authentication authentication,
+                                                 @RequestBody AppUserDTO dto) {
+        String email = authentication.getName();
+        appUserService.updateUser(email, dto);
+
+        return ResponseEntity.ok("uĹľivatel byl zmÄ›nÄ›n");
+    }
+
+
+    // reset hesla uĹľivatele
+    @PostMapping("/{id}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> resetPassword(@PathVariable Long id) {
+        appUserService.resetPassword(id);
+        return ResponseEntity.ok("Heslo resetovĂˇno na 'Player123'");
+    }
+
+    // Seznam vĹˇech uĹľivatelĹŻ â€“ jen ADMIN
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<AppUserDTO> getAllUsers() {
+        return appUserService.getAllUsers();
+    }
+
+
+}
+
+
+----------
+AuthController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
+import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.RegisterUserDTO;
+import cz.phsoft.hokej.models.services.AppUserService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "*")
+public class AuthController {
+
+    private final AppUserService appUserService;
+    private final AppUserRepository userRepository;
+    private final EmailVerificationTokenRepository tokenRepository;
+
+    public AuthController(AppUserService appUserService,
+                          AppUserRepository userRepository,
+                          EmailVerificationTokenRepository tokenRepository) {
+        this.appUserService = appUserService;
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
+    }
+
+    // ===== Registrace =====
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDTO dto) {
+        appUserService.register(dto);
+        return ResponseEntity.ok(
+                Map.of("status", "ok", "message", "Registrace ĂşspÄ›ĹˇnĂˇ. Zkontrolujte email pro aktivaci ĂşÄŤtu.")
+        );
+    }
+
+    // ===== ZĂ­skĂˇnĂ­ aktuĂˇlnĂ­ho uĹľivatele =====
+    @GetMapping("/me")
+    public ResponseEntity<AppUserDTO> getCurrentUser(Authentication authentication) {
+        AppUserDTO dto = appUserService.getCurrentUser(authentication.getName());
+        return ResponseEntity.ok(dto);
+    }
+
+    // ===== Aktivace ĂşÄŤtu =====
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        Optional<EmailVerificationTokenEntity> optionalToken = tokenRepository.findByToken(token);
+
+        if (optionalToken.isEmpty()) {
+            return ResponseEntity.badRequest().body("NeplatnĂ˝ aktivaÄŤnĂ­ odkaz.");
+        }
+
+        EmailVerificationTokenEntity verificationToken = optionalToken.get();
+
+        if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("AktivaÄŤnĂ­ odkaz vyprĹˇel.");
+        }
+
+        AppUserEntity user = verificationToken.getUser();
+        user.setEnabled(true);
+        userRepository.save(user);
+
+        tokenRepository.delete(verificationToken);
+
+        return ResponseEntity.ok("ĂšÄŤet byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn.");
+    }
+}
+
+
+----------
+CurrentPlayerController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.services.PlayerService;
+import cz.phsoft.hokej.security.CurrentPlayerService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+// aktuĂˇlnĂ­ hrĂˇÄŤ
+@RestController
+@RequestMapping("/api/current-player")
+public class CurrentPlayerController {
+
+    private final PlayerRepository playerRepository;
+    private final AppUserRepository appUserRepository;
+    private final CurrentPlayerService currentPlayerService;
+    private final PlayerService playerService;
+
+    public CurrentPlayerController(PlayerRepository playerRepository,
+                                   AppUserRepository appUserRepository,
+                                   CurrentPlayerService currentPlayerService,
+                                   PlayerService playerService) {
+        this.playerRepository = playerRepository;
+        this.appUserRepository = appUserRepository;
+        this.currentPlayerService = currentPlayerService;
+        this.playerService = playerService;
+    }
+
+    // -----------------------------------------------------
+    // NastavenĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe â€“ pokud uĹľivatel mĂˇ jen jednoho, vybere se automaticky
+    // -----------------------------------------------------
+    @PostMapping("/{playerId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> setCurrentPlayer(@PathVariable Long playerId,
+                                 Authentication auth,
+                                 HttpSession session) {
+
+        AppUserEntity user = appUserRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Player not found"));
+
+        if (!player.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Player does not belong to user");
+        }
+
+        currentPlayerService.setCurrentPlayerId(player.getId());
+        return ResponseEntity.ok("AktuĂˇlnĂ­ hrĂˇÄŤ nastaven na ID: " + player.getId());
+    }
+
+    // -----------------------------------------------------
+    // AutomatickĂ˝ vĂ˝bÄ›r aktuĂˇlnĂ­ho hrĂˇÄŤe po loginu
+    // Zavolat z frontendu /api/current-player/auto-select po pĹ™ihlĂˇĹˇenĂ­
+    // -----------------------------------------------------
+    @PostMapping("/auto-select")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> autoSelectCurrentPlayer(Authentication auth) {
+        AppUserEntity user = appUserRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<PlayerDTO> players = playerService.getPlayersByUser(user.getEmail());
+
+        if (players.size() == 1) {
+            PlayerDTO player = players.get(0);
+            currentPlayerService.setCurrentPlayerId(player.getId());
+            return ResponseEntity.ok("Automaticky nastaven hrĂˇÄŤ nastaven na ID: " + player.getId());
+        } else {
+            return ResponseEntity.ok("UĹľivatel mĂˇ vĂ­ce hrĂˇÄŤĹŻ, vĂ˝bÄ›r nutnĂ˝ ruÄŤnÄ›");
+        }
+    }
+
+    // -----------------------------------------------------
+    // ZĂ­skĂˇnĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe
+    // -----------------------------------------------------
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public PlayerDTO getCurrentPlayer(HttpSession session) {
+
+        Long playerId = currentPlayerService.getCurrentPlayerId();
+        if (playerId == null) {
+            System.out.println("Ĺ˝ĂˇdnĂ˝ aktuĂˇlnĂ­ hrĂˇÄŤ");
+            return null;
+        }
+
+        PlayerDTO player = playerService.getPlayerById(playerId);
+        System.out.println("AktuĂˇlnĂ­ hrĂˇÄŤ ID: " + playerId);
+        return player;
+    }
+
+    // -----------------------------------------------------
+    // PomocnĂ˝ endpoint â€“ seznam hrĂˇÄŤĹŻ aktuĂˇlnĂ­ho uĹľivatele
+    // -----------------------------------------------------
+    @GetMapping("/my-players")
+    @PreAuthorize("isAuthenticated()")
+    public List<PlayerDTO> getMyPlayers(Authentication auth, HttpSession session) {
+        AppUserEntity user = appUserRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<PlayerDTO> players = playerService.getPlayersByUser(user.getEmail());
+
+        System.out.println("Seznam hrĂˇÄŤĹŻ uĹľivatele " + user.getEmail() + ": " +
+                players.stream().map(PlayerDTO::getId).toList());
+
+        return players;
+    }
+}
+
+
+----------
+DebugController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class DebugController {
+
+    @GetMapping("/api/debug/me")
+    public Object me(Authentication auth) {
+        return auth;
+    }
+}
+
+
+----------
+MatchController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.MatchDTO;
+import cz.phsoft.hokej.models.dto.MatchDetailDTO;
+import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.services.MatchService;
+import cz.phsoft.hokej.security.CurrentPlayerService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+
+@RestController
+@RequestMapping("/api/matches")
+@CrossOrigin(origins = "*")
+public class MatchController {
+
+    private final MatchService matchService;
+    private final CurrentPlayerService currentPlayerService;
+
+
+    public MatchController(MatchService matchService,
+                           CurrentPlayerService currentPlayerService) {
+        this.matchService = matchService;
+        this.currentPlayerService = currentPlayerService;
+    }
+
+    // Detail zĂˇpasu
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/matchDetail/{id}")
+    public MatchDetailDTO getMatchDetail(@PathVariable Long id) {
+        return matchService.getMatchDetail(id);
+    }
+
+    // NadchĂˇzejĂ­cĂ­ zĂˇpas - NEPOUĹ˝ĂŤVAT - NENĂŤ TAM PLAYER TYPE
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/next")
+    public MatchDTO getNextMatch() {
+        return matchService.getNextMatch();
+    }
+
+    // NadchĂˇzejĂ­cĂ­ zĂˇpasy pro pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe
+    @GetMapping("/me/upcoming")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchDTO> getUpcomingMatchesForMe(Authentication authentication) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return matchService.getUpcomingMatchesForPlayer(currentPlayerId);
+    }
+
+    @GetMapping("/me/upcoming-overview")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchOverviewDTO> getUpcomingMatchesOverviewForMe(Authentication authentication) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return matchService.getUpcomingMatchesOverviewForPlayer(currentPlayerId);
+    }
+
+    @GetMapping("/me/all-passed")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchOverviewDTO> getAllMatchesForPlayer(Authentication authentication) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return matchService.getAllPassedMatchesForPlayer(currentPlayerId);
+    }
+
+
+
+
+
+}
+
+
+----------
+MatchRegistrationController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
+import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import cz.phsoft.hokej.security.CurrentPlayerService;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/registrations")
+@CrossOrigin(origins = "*")
+public class MatchRegistrationController {
+
+    private final MatchRegistrationService service;
+    private final CurrentPlayerService currentPlayerService;
+
+    public MatchRegistrationController(MatchRegistrationService service,
+                                       CurrentPlayerService currentPlayerService) {
+        this.service = service;
+        this.currentPlayerService = currentPlayerService;
+    }
+
+
+    // UNIVERZĂLNĂŤ ENDPOINT PRO REGISTRACE
+
+
+    @PostMapping("/me/upsert")
+    @PreAuthorize("isAuthenticated()")
+    public MatchRegistrationDTO upsert(@RequestBody MatchRegistrationRequest request) {
+        // automaticky bere vybranĂ©ho hrĂˇÄŤe
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+
+        return service.upsertRegistration(
+                request.getMatchId(),
+                currentPlayerId, // vĹľdy aktuĂˇlnĂ­ hrĂˇÄŤ
+                request.getTeam(),
+                request.getAdminNote(),
+                request.getExcuseReason(),
+                request.getExcuseNote(),
+                request.isUnregister()
+        );
+    }
+
+    // registrace na zĂˇpasy pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe
+    @GetMapping("/me/for-current-player")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchRegistrationDTO> forCurrentPlayer() {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return service.getRegistrationsForPlayer(currentPlayerId);
+    }
+
+
+}
+
+
+----------
+PlayerController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.data.enums.PlayerStatus;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import cz.phsoft.hokej.models.services.PlayerService;
+import cz.phsoft.hokej.security.CurrentPlayerService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/players")
+@CrossOrigin(origins = "*")
+public class PlayerController {
+
+    private final PlayerService playerService;
+    private final CurrentPlayerService currentPlayerService;
+
+    public PlayerController(PlayerService playerService, CurrentPlayerService currentPlayerService) {
+        this.playerService = playerService;
+        this.currentPlayerService = currentPlayerService;
+    }
+
+    // vytvoĹ™enĂ­ hrĂˇÄŤe pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+    @PostMapping("/me")
+    @PreAuthorize("isAuthenticated()") // kaĹľdĂ˝ pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel
+    public PlayerDTO createMyPlayer(@RequestBody PlayerDTO playerDTO, Authentication authentication) {
+        String email = authentication.getName(); // email pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+        return playerService.createPlayerForUser(playerDTO, email);
+    }
+
+    // zĂ­skĂˇnĂ­ hrĂˇÄŤĹŻ pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public List<PlayerDTO> getMyPlayers(Authentication authentication) {
+        String email = authentication.getName();
+        return playerService.getPlayersByUser(email);
+    }
+
+    // Ăşprava hrĂˇÄŤe pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public PlayerDTO updatePlayer(@RequestBody PlayerDTO dto) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+
+        return playerService.updatePlayer(currentPlayerId, dto);
+    }
+}
+
+
+----------
+PlayerInactivityPeriodController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
+import cz.phsoft.hokej.models.services.PlayerInactivityPeriodService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/inactivity/Admin")
+@CrossOrigin(origins = "*")
+public class PlayerInactivityPeriodController {
+
+    private final PlayerInactivityPeriodService service;
+
+    public PlayerInactivityPeriodController(PlayerInactivityPeriodService service) {
+        this.service = service;
+    }
+
+    // vĹˇechny zĂˇznamy o neaktivitÄ› hrĂˇÄŤĹŻ
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<PlayerInactivityPeriodDTO> getAll() {
+        return service.getAll();
+    }
+
+    // neaktivita hrĂˇÄŤĹŻ dle id neaktivity
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<PlayerInactivityPeriodDTO> getById(@PathVariable Long id) {
+        PlayerInactivityPeriodDTO dto = service.getById(id);
+        return ResponseEntity.ok(dto);
+    }
+
+    // zĂ­skĂˇ zĂˇznamy o periodÄ› neaktivity dle id hrĂˇÄŤe
+    @GetMapping("/player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<PlayerInactivityPeriodDTO> getByPlayer(@PathVariable Long playerId) {
+        return service.getByPlayer(playerId);
+    }
+
+    // vytvoĹ™Ă­ zĂˇznam o neaktivitÄ› hrĂˇÄŤe
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PlayerInactivityPeriodDTO> create(@RequestBody PlayerInactivityPeriodDTO dto) {
+        PlayerInactivityPeriodDTO created = service.create(dto);
+        return ResponseEntity.ok(created);
+    }
+
+    // zmÄ›nĂ­ zĂˇznam o neaktivitÄ› hrĂˇÄŤe dle id
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PlayerInactivityPeriodDTO> update(
+            @PathVariable Long id,
+            @RequestBody PlayerInactivityPeriodDTO dto) {
+
+        PlayerInactivityPeriodDTO updated = service.update(id, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    // vymaĹľe zĂˇznam o neaktivitÄ› hrĂˇÄŤe dle id zĂˇznamu
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+
+----------
+TestController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/test")
+@CrossOrigin(origins = "*")
+public class TestController {
+
+    @GetMapping
+    public String hello() {
+        return "Backend je online!";
+    }
+}
+
+
+----------
+TestEmailController.java
+----------
+
+package cz.phsoft.hokej.controllers;
+
+
+import cz.phsoft.hokej.models.services.email.EmailService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/email/test")
+public class TestEmailController {
+    private final EmailService emailService;
+
+    public TestEmailController(EmailService emailService) {
+        this.emailService = emailService;
+    }
+
+    @PostMapping("/send-mail")
+    public String sendTestMail() {
+        emailService.sendSimpleEmail(
+                "petrhlista@seznam.cz",
+                "APP - TestovacĂ­ email",
+                "Ahoj, toto je test z backendu."
+        );
+        return "Email odeslĂˇn";
+    }
+
+}
+
+
+----------
+TestSmsController.java
+----------
+
+/*
+package cz.phsoft.hokej.controllers;
+
+
+import cz.phsoft.hokej.models.services.sms.SmsTextBeeService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class TestSmsController {
+
+    private final SmsTextBeeService smsTextBeeService;
+
+    public TestSmsController(SmsTextBeeService smsTextBeeService) {
+        this.smsTextBeeService = smsTextBeeService;
+    }
+
+    /**
+     * TestovacĂ­ endpoint pro odeslĂˇnĂ­ SMS na testovacĂ­ ÄŤĂ­slo.
+     * Zavolej: GET /api/test-sms
+     */
+/*
+    @GetMapping("/api/test-sms")
+    public String sendTestSms() {
+        smsTextBeeService.sendSms("+420776609956", "testovacĂ­ sms app-sg");
+        return "SMS byla odeslĂˇna na testovacĂ­ ÄŤĂ­slo +420776609956";
+    }
+}
+
+        */
+

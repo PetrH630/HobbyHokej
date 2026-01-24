@@ -1,0 +1,108 @@
+﻿Balíček (složka): email
+Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\email
+
+Seznam souborů:
+EmailService.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\email\EmailService.java
+-----
+
+package cz.phsoft.hokej.models.services.email;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+@Service
+public class EmailService {
+    private final JavaMailSender mailSender;
+
+    @Value("${spring.mail.from}")
+    private String fromEmail;
+
+    @Value("${email.enabled:true}")   //
+    private boolean emailEnabled;
+
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
+    // ===== 1) JEDNODUCHĂť TEXTOVĂť EMAIL =====
+    @Async
+    public void sendSimpleEmail(String to, String subject, String text) {
+
+        if (!emailEnabled) {
+            System.out.println("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: " + to);
+            return;
+        }
+
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
+            message.setFrom(fromEmail);
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            // DoporuÄŤeno: logovat do souboru
+            throw new RuntimeException("Chyba pĹ™i odesĂ­lĂˇnĂ­ emailu: " + e.getMessage(), e);
+        }
+    }
+
+    // ===== 2) HTML EMAIL (HEZÄŚĂŤ) =====
+    @Async
+    public void sendHtmlEmail(String to, String subject, String htmlContent) {
+
+        if (!emailEnabled) {
+            System.out.println("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: " + to);
+            return;
+        }
+
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true); // true = HTML
+            helper.setFrom(fromEmail);
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Chyba pĹ™i odesĂ­lĂˇnĂ­ HTML emailu: " + e.getMessage(), e);
+        }
+    }
+    public void sendActivationEmail(String to, String activationLink) {
+        String subject = "PotvrÄŹte svĹŻj ĂşÄŤet";
+        String text = "DobrĂ˝ den,\n\n"
+                + "KliknÄ›te na tento odkaz pro aktivaci ĂşÄŤtu:\n"
+                + activationLink + "\n\n"
+                + "Platnost odkazu: 24 hodin.\n\n"
+                + "DÄ›kujeme!";
+        sendSimpleEmail(to, subject, text);
+    }
+
+    @Async
+    public void sendActivationEmailHTML(String to, String activationLink) {
+        String subject = "PotvrzenĂ­ registrace - App - Hokej StarĂˇ Garda";
+        String html = "<p>DÄ›kujeme za registraci.</p>" +
+                "<p>KliknÄ›te na odkaz pro aktivaci ĂşÄŤtu:</p>" +
+                "<a href=\"" + activationLink + "\">Aktivovat ĂşÄŤet</a>";
+
+        sendHtmlEmail(to, subject, html);
+    }
+
+}
+
+
+
