@@ -26,3 +26,11 @@ Get-ChildItem -Recurse -File -Include *.java |
         "--------------------" | Out-File vsechny_soubory2.txt -Append -Encoding UTF8
         Get-Content $_        | Out-File vsechny_soubory2.txt -Append -Encoding UTF8
     }
+
+
+
+
+---------------------------
+.\export-by-folder.ps1
+
+a potom jsou všechny balíčky v FilesForCheck

@@ -1,0 +1,49 @@
+9. Konkrétní TODO checklist
+
+Aby to bylo praktické, tady máš konkrétní plán:
+
+Controller → Service čistota
+
+ V AuthController.verifyEmail použij appUserService.activateUser(token) a smaž duplicitní logiku.
+
+ V CurrentPlayerController přesuň veškerou logiku do CurrentPlayerService/PlayerService – controller nebude používat repozitáře přímo.
+
+Výjimky & konzistentní odpovědi
+
+ Všechny RuntimeException/IllegalStateException nahraď BusinessException potomky (např. CurrentPlayerNotSetException, ForbiddenPlayerAccessException).
+
+ Ověř, že globální exception handler vrací jednotný ApiError. (Ten obj máš připravený.)
+
+exceptions
+
+DRY „no response“ a NO_EXCUSED
+
+ Nech definici getNoResponsePlayers pouze v MatchRegistrationService.
+
+ MatchServiceImpl.collectPlayerStatus použije tu metodu, ne vlastní výpočet.
+
+ Zkontroluj, že logika NO_EXCUSED je pouze v MatchRegistrationServiceImpl.markNoExcused a ostatní metody jen delegují.
+
+Repozitáře místo filtrů v paměti
+
+ V MatchServiceImpl.checkAccessForPlayer používej playerRepository.findByUser_EmailOrderByIdAsc(...).
+
+ Podobně kdekoliv jinde, kde používáš findAll().stream().filter(...) na jednoduché podmínky podle už připravených fieldů.
+
+Notifikace / test logy
+
+ Smaž testovací logger.error("Test ERROR zpráva pro email"); v MatchRegistrationServiceImpl.upsertRegistration.
+
+ Ujisti se, že všechny notifikace jdou přes NotificationService a SMS/email implementace jsou schované za interface.
+
+application.properties – bezpečnost
+
+ Vyhoď reálné heslo/API key z Gitu a nahraď je placeholdery s ${...}.
+
+ Na serveru / lokálně nastav environment proměnné.
+
+Validace DTO
+
+ Přidej @Valid do AdminPlayerController.createPlayer a dalších POST/PUT metod s DTO.
+
+ Otestuj chování FE, až přijde 400 s ApiError.details.
