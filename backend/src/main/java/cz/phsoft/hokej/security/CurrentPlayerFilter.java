@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.security;
 
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

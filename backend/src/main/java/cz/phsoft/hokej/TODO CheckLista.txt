@@ -10,7 +10,7 @@ ok - V CurrentPlayerController přesuň veškerou logiku do CurrentPlayerService
 
 Výjimky & konzistentní odpovědi
 
- Všechny RuntimeException/IllegalStateException nahraď BusinessException potomky (např. CurrentPlayerNotSetException, ForbiddenPlayerAccessException).
+ok -  Všechny RuntimeException/IllegalStateException nahraď BusinessException potomky (např. CurrentPlayerNotSetException, ForbiddenPlayerAccessException).
 
  Ověř, že globální exception handler vrací jednotný ApiError. (Ten obj máš připravený.)
 

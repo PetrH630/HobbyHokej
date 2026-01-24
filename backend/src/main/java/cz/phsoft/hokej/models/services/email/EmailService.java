@@ -8,9 +8,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;                         // NEW
+import org.slf4j.LoggerFactory;
 
 @Service
 public class EmailService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.from}")
@@ -28,6 +32,8 @@ public class EmailService {
     public void sendSimpleEmail(String to, String subject, String text) {
 
         if (!emailEnabled) {
+            log.info("MAIL JE VYPNUTÝ – email nebyl odeslán na: {}", to);
+            // pro testování
             System.out.println("MAIL JE VYPNUTÝ – email nebyl odeslán na: " + to);
             return;
         }
@@ -43,7 +49,9 @@ public class EmailService {
             mailSender.send(message);
         } catch (Exception e) {
             // Doporučeno: logovat do souboru
-            throw new RuntimeException("Chyba při odesílání emailu: " + e.getMessage(), e);
+            // pro testování
+            System.out.println("Chyba při odesílání emailu na: " + to);
+            log.error("Chyba při odesílání emailu na {}: {}", to, e.getMessage(), e);
         }
     }
 
@@ -52,6 +60,9 @@ public class EmailService {
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
 
         if (!emailEnabled) {
+            // CHANGED: System.out -> logger
+            log.info("MAIL JE VYPNUTÝ – HTML email nebyl odeslán na: {}", to);
+            // pro testování
             System.out.println("MAIL JE VYPNUTÝ – email nebyl odeslán na: " + to);
             return;
         }
@@ -66,10 +77,14 @@ public class EmailService {
             helper.setFrom(fromEmail);
 
             mailSender.send(mimeMessage);
+            log.debug("HTML email odeslán na {} se subjectem '{}'", to, subject);  // NEW
         } catch (MessagingException e) {
-            throw new RuntimeException("Chyba při odesílání HTML emailu: " + e.getMessage(), e);
+            // CHANGED: opět jen logujeme
+            log.error("Chyba při odesílání HTML emailu na {}: {}", to, e.getMessage(), e);
+            System.out.println("Chyba při odesílání HTML emailu na: " + to);
         }
     }
+
     public void sendActivationEmail(String to, String activationLink) {
         String subject = "Potvrďte svůj účet";
         String text = "Dobrý den,\n\n"
@@ -91,4 +106,3 @@ public class EmailService {
     }
 
 }
-

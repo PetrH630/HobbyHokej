@@ -3,6 +3,8 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.CurrentPlayerNotSelectedException;
+import cz.phsoft.hokej.exceptions.InvalidPlayerStatusException;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.security.SessionKeys;
 import jakarta.servlet.http.HttpSession;
@@ -32,7 +34,7 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
 
         if (player.getStatus() != PlayerStatus.APPROVED) {
             // TODO: později nahradíme za BusinessException (např. CurrentPlayerNotAllowedException)
-            throw new IllegalStateException(
+            throw new InvalidPlayerStatusException(
                     "BE - Nelze zvolit hráče, který není schválen administrátorem."
             );
         }
@@ -44,7 +46,7 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
     public void requireCurrentPlayer() {
         if (getCurrentPlayerId() == null) {
             // TODO: později nahradíme za BusinessException (CurrentPlayerNotSetException)
-            throw new IllegalStateException("BE - Není zvolen aktuální hráč");
+            throw new CurrentPlayerNotSelectedException();
         }
     }
 

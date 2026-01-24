@@ -2,6 +2,7 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
+import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;

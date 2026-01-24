@@ -6,10 +6,7 @@ import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.exceptions.DuplicateNameSurnameException;
-import cz.phsoft.hokej.exceptions.InvalidPlayerStatusException;
-import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import jakarta.transaction.Transactional;
@@ -207,11 +204,12 @@ public class PlayerServiceImpl implements PlayerService {
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
 
         // 2) Ověřím, že patří uživateli s daným emailem
-        if (player.getUser() == null || player.getUser().getEmail() == null ||
-                !player.getUser().getEmail().equals(userEmail)) {
-            throw new InvalidPlayerStatusException(
-                    "BE - Hráč nepatří přihlášenému uživateli."
-            );
+        if (player.getUser() == null
+                || player.getUser().getEmail() == null
+                || !player.getUser().getEmail().equals(userEmail)) {
+
+            // CHANGED: místo InvalidPlayerStatusException použijeme jasnější doménovou chybu
+            throw new ForbiddenPlayerAccessException(playerId);
         }
 
         // 3) Deleguji na CurrentPlayerService (ten už hlídá PlayerStatus.APPROVED)

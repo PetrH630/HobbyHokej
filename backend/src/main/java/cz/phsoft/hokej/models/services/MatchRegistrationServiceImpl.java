@@ -31,7 +31,8 @@ import java.util.List;
 @Service
 public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
-    Logger logger = LoggerFactory.getLogger(MatchServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchRegistrationServiceImpl.class);
+
     private final MatchRegistrationRepository registrationRepository;
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
@@ -39,7 +40,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     private final PlayerMapper playerMapper;
     private final SmsService smsService;
     private final SmsMessageBuilder smsMessageBuilder;
-    private final NotificationService notificationService; // NEW
+    private final NotificationService notificationService;
 
     public MatchRegistrationServiceImpl(
             MatchRegistrationRepository registrationRepository,
@@ -49,7 +50,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             PlayerMapper playerMapper,
             SmsService smsService,
             SmsMessageBuilder smsMessageBuilder,
-            NotificationService notificationService              // NEW
+            NotificationService notificationService
     ) {
         this.registrationRepository = registrationRepository;
         this.matchRepository = matchRepository;
@@ -58,29 +59,41 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         this.playerMapper = playerMapper;
         this.smsService = smsService;
         this.smsMessageBuilder = smsMessageBuilder;
-        this.notificationService = notificationService;           // NEW
+        this.notificationService = notificationService;
     }
 
     private MatchEntity getMatchOrThrow(Long matchId) {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
     }
+
     private PlayerEntity getPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
     }
+
     private boolean isSlotAvailable(MatchEntity match) {
         long registeredCount = registrationRepository.countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
         return registeredCount < match.getMaxPlayers();
     }
+
     private void sendSms(MatchRegistrationEntity registration, String message) {
-        if (registration == null || registration.getPlayer() == null) return;
+        if (registration == null || registration.getPlayer() == null) {
+            return;
+        }
+
         try {
             smsService.sendSms(registration.getPlayer().getPhoneNumber(), message);
         } catch (Exception e) {
-            System.err.println("Chyba SMS: " + e.getMessage());
+            log.error(
+                    "Chyba při odesílání SMS pro registraci {}: {}",
+                    registration.getId(),
+                    e.getMessage(),
+                    e
+            );
         }
     }
+
     private MatchRegistrationEntity updateRegistrationStatus(
             MatchRegistrationEntity registration, PlayerMatchStatus status, String updatedBy, boolean updateTimestamp) {
 
@@ -91,6 +104,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         }
         return registrationRepository.saveAndFlush(registration);
     }
+
     // -------------------- REGISTRATION --------------------
     @Transactional
     @Override
@@ -102,9 +116,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             ExcuseReason excuseReason,
             String excuseNote,
             boolean unregister) {
-
-        // TEST: pošli ERROR zprávu pro otestování emailu
-        logger.error("Test ERROR zpráva pro email");
 
         MatchEntity match = getMatchOrThrow(matchId);
         PlayerEntity player = getPlayerOrThrow(playerId);
@@ -187,6 +198,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         return matchRegistrationMapper.toDTO(registration);
     }
+
     // -------------------- FETCH --------------------
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
@@ -228,6 +240,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 .map(playerMapper::toDTO)
                 .toList();
     }
+
     // -------------------- RECALC --------------------
     @Override
     @Transactional
@@ -270,14 +283,20 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
 
             try {
-                // NEW – respektuj notifyBySms v PlayerDTO (mapované z NotificationSettings)
+                // respektuj notifyBySms v PlayerDTO (mapované z NotificationSettings)
                 if (player.isNotifyBySms()) {
                     smsService.sendSms(player.getPhoneNumber(), smsMsg);
                 }
             } catch (Exception e) {
-                System.err.println("Chyba SMS pro hráče "
-                        + player.getFullName() + ": " + e.getMessage());
-                logger.error("Chyba při odeslání SMS hráči {}: {}", player.getFullName(), e.getMessage());
+                // CHANGED: žádný System.err, jen strukturovaný log se stacktrace
+                log.error(
+                        "Chyba při odeslání SMS hráči {} ({}) pro zápas {}: {}",
+                        player.getFullName(),
+                        player.getPhoneNumber(),
+                        matchId,
+                        e.getMessage(),
+                        e
+                );
             }
         });
     }
@@ -347,7 +366,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         return matchRegistrationMapper.toDTO(updated);
     }
-
 
 
 }

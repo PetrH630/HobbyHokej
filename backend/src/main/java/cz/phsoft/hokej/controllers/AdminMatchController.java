@@ -2,6 +2,7 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.MatchService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

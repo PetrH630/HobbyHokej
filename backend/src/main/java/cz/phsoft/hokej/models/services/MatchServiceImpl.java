@@ -183,7 +183,7 @@ public class MatchServiceImpl implements MatchService {
                     "BE - Nemáte přístup k detailu tohoto zápasu."
             );
         }
-
+        // UPRAVIT DLE TODO CHECKlIST
         // všichni hráči patřící aktuálnímu uživateli
         List<PlayerEntity> ownedPlayers = playerRepository.findAll().stream()
                 .filter(p -> p.getUser() != null && p.getUser().getEmail().equals(userDetails.getUsername()))
@@ -263,10 +263,7 @@ public class MatchServiceImpl implements MatchService {
                 .collect(Collectors.toSet());
 
         // hráči bez registrace = NO_RESPONSE (pokud to používáš)
-        List<PlayerDTO> noResponsePlayers = allPlayers.stream()
-                .filter(p -> !respondedIds.contains(p.getId()))
-                .map(playerMapper::toDTO)
-                .toList();
+        List<PlayerDTO> noResponsePlayers = registrationService.getNoResponsePlayers(match.getId());
 
         // ❗ TADY byla chyba – tohle pole bylo předtím spočítané stejně jako noResponsePlayers.
         // Už ho nepotřebujeme jako zvláštní kolekci, NO_EXCUSED bereme z mapy statusů.
@@ -279,13 +276,13 @@ public class MatchServiceImpl implements MatchService {
         int outGamePlayers =
                 statusToPlayersMap.getOrDefault(PlayerMatchStatus.UNREGISTERED, List.of()).size()
                         + statusToPlayersMap.getOrDefault(PlayerMatchStatus.EXCUSED, List.of()).size()
-                        + statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size(); // ⬅️ přidáno
+                        + statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size();
 
         int waitingPlayers =
                 statusToPlayersMap.getOrDefault(PlayerMatchStatus.RESERVED, List.of()).size();
 
         int noExcusedPlayersSum =
-                statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size(); // ⬅️ používáme mapu
+                statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size();
 
         int noActionPlayers = noResponsePlayers.size();
 
@@ -304,7 +301,7 @@ public class MatchServiceImpl implements MatchService {
         dto.setInGamePlayers(inGamePlayers);
         dto.setOutGamePlayers(outGamePlayers);
         dto.setWaitingPlayers(waitingPlayers);
-        dto.setNoExcusedPlayersSum(noExcusedPlayersSum);   // ⬅️ vyplněno
+        dto.setNoExcusedPlayersSum(noExcusedPlayersSum);
         dto.setNoActionPlayers(noActionPlayers);
         dto.setPricePerRegisteredPlayer(pricePerRegistered);
         dto.setRemainingSlots(remainingSlots);
