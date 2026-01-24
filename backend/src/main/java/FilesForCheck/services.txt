@@ -4,6 +4,8 @@ Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\model
 Seznam souborů:
 AppUserService.java
 AppUserServiceImpl.java
+CurrentPlayerService.java
+CurrentPlayerServiceImpl.java
 MatchRegistrationService.java
 MatchRegistrationServiceImpl.java
 MatchService.java
@@ -14,6 +16,8 @@ PlayerInactivityPeriodService.java
 PlayerInactivityPeriodServiceImpl.java
 PlayerService.java
 PlayerServiceImpl.java
+SeasonService.java
+SeasonServiceImpl.java
 
 
 
@@ -225,6 +229,86 @@ public class AppUserServiceImpl implements AppUserService {
 
 
 -----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\CurrentPlayerService.java
+-----
+
+package cz.phsoft.hokej.models.services;
+
+public interface CurrentPlayerService {
+    Long getCurrentPlayerId();
+    void setCurrentPlayerId(Long playerId);
+    void requireCurrentPlayer();
+    void clear();
+
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\CurrentPlayerServiceImpl.java
+-----
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerStatus;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.CurrentPlayerNotSelectedException;
+import cz.phsoft.hokej.exceptions.InvalidPlayerStatusException;
+import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.security.SessionKeys;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Service;
+
+@Service
+// NEW: implementujeme CurrentPlayerService z balĂ­ÄŤku models.services
+public class CurrentPlayerServiceImpl implements CurrentPlayerService {
+
+    private final HttpSession session;
+    private final PlayerRepository playerRepository;
+
+    public CurrentPlayerServiceImpl(HttpSession session, PlayerRepository playerRepository) {
+        this.session = session;
+        this.playerRepository = playerRepository;
+    }
+
+    @Override
+    public Long getCurrentPlayerId() {
+        return (Long) session.getAttribute(SessionKeys.CURRENT_PLAYER_ID);
+    }
+
+    @Override
+    public void setCurrentPlayerId(Long playerId) {
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+
+        if (player.getStatus() != PlayerStatus.APPROVED) {
+            // TODO: pozdÄ›ji nahradĂ­me za BusinessException (napĹ™. CurrentPlayerNotAllowedException)
+            throw new InvalidPlayerStatusException(
+                    "BE - Nelze zvolit hrĂˇÄŤe, kterĂ˝ nenĂ­ schvĂˇlen administrĂˇtorem."
+            );
+        }
+
+        session.setAttribute(SessionKeys.CURRENT_PLAYER_ID, playerId);
+    }
+
+    @Override
+    public void requireCurrentPlayer() {
+        if (getCurrentPlayerId() == null) {
+            // TODO: pozdÄ›ji nahradĂ­me za BusinessException (CurrentPlayerNotSetException)
+            throw new CurrentPlayerNotSelectedException();
+        }
+    }
+
+    @Override
+    public void clear() {
+        session.removeAttribute(SessionKeys.CURRENT_PLAYER_ID);
+    }
+}
+
+
+
+-----
 # Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationService.java
 -----
 
@@ -309,7 +393,8 @@ import java.util.List;
 @Service
 public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
-    Logger logger = LoggerFactory.getLogger(MatchServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchRegistrationServiceImpl.class);
+
     private final MatchRegistrationRepository registrationRepository;
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
@@ -317,7 +402,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     private final PlayerMapper playerMapper;
     private final SmsService smsService;
     private final SmsMessageBuilder smsMessageBuilder;
-    private final NotificationService notificationService; // NEW
+    private final NotificationService notificationService;
 
     public MatchRegistrationServiceImpl(
             MatchRegistrationRepository registrationRepository,
@@ -327,7 +412,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             PlayerMapper playerMapper,
             SmsService smsService,
             SmsMessageBuilder smsMessageBuilder,
-            NotificationService notificationService              // NEW
+            NotificationService notificationService
     ) {
         this.registrationRepository = registrationRepository;
         this.matchRepository = matchRepository;
@@ -336,29 +421,41 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         this.playerMapper = playerMapper;
         this.smsService = smsService;
         this.smsMessageBuilder = smsMessageBuilder;
-        this.notificationService = notificationService;           // NEW
+        this.notificationService = notificationService;
     }
 
     private MatchEntity getMatchOrThrow(Long matchId) {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
     }
+
     private PlayerEntity getPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
     }
+
     private boolean isSlotAvailable(MatchEntity match) {
         long registeredCount = registrationRepository.countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
         return registeredCount < match.getMaxPlayers();
     }
+
     private void sendSms(MatchRegistrationEntity registration, String message) {
-        if (registration == null || registration.getPlayer() == null) return;
+        if (registration == null || registration.getPlayer() == null) {
+            return;
+        }
+
         try {
             smsService.sendSms(registration.getPlayer().getPhoneNumber(), message);
         } catch (Exception e) {
-            System.err.println("Chyba SMS: " + e.getMessage());
+            log.error(
+                    "Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS pro registraci {}: {}",
+                    registration.getId(),
+                    e.getMessage(),
+                    e
+            );
         }
     }
+
     private MatchRegistrationEntity updateRegistrationStatus(
             MatchRegistrationEntity registration, PlayerMatchStatus status, String updatedBy, boolean updateTimestamp) {
 
@@ -369,6 +466,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         }
         return registrationRepository.saveAndFlush(registration);
     }
+
     // -------------------- REGISTRATION --------------------
     @Transactional
     @Override
@@ -380,9 +478,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             ExcuseReason excuseReason,
             String excuseNote,
             boolean unregister) {
-
-        // TEST: poĹˇli ERROR zprĂˇvu pro otestovĂˇnĂ­ emailu
-        logger.error("Test ERROR zprĂˇva pro email");
 
         MatchEntity match = getMatchOrThrow(matchId);
         PlayerEntity player = getPlayerOrThrow(playerId);
@@ -413,6 +508,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 registration.setPlayer(player);
             }
             registration.setExcuseReason(excuseReason);
+            registration.setExcuseNote(excuseNote);
             newStatus = PlayerMatchStatus.EXCUSED;
 
             // REGISTER / RESERVE: lze vytvoĹ™it pokud hrĂˇÄŤ NEMĂ status REGISTERED (tedy i kdyĹľ mĂˇ EXCUSED)
@@ -431,6 +527,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             } else {
                 // pĹ™i pĹ™echodu na register/reserve zruĹˇĂ­me pĹ™Ă­padnou vĂ˝mluvu
                 registration.setExcuseReason(null);
+                registration.setExcuseNote(null);
             }
         }
 
@@ -445,7 +542,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         registration = registrationRepository.save(registration);
 
-        if (unregister) recalcStatusesForMatch(matchId);
+        if (unregister) {
+            recalcStatusesForMatch(matchId);
+        }
 
         // starĹˇĂ­ verze notifikace
         // sendSms(registration, smsMessageBuilder.buildMessageRegistration(registration));
@@ -465,6 +564,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         return matchRegistrationMapper.toDTO(registration);
     }
+
     // -------------------- FETCH --------------------
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
@@ -506,6 +606,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 .map(playerMapper::toDTO)
                 .toList();
     }
+
     // -------------------- RECALC --------------------
     @Override
     @Transactional
@@ -548,14 +649,20 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
 
             try {
-                // NEW â€“ respektuj notifyBySms v PlayerDTO (mapovanĂ© z NotificationSettings)
+                // respektuj notifyBySms v PlayerDTO (mapovanĂ© z NotificationSettings)
                 if (player.isNotifyBySms()) {
                     smsService.sendSms(player.getPhoneNumber(), smsMsg);
                 }
             } catch (Exception e) {
-                System.err.println("Chyba SMS pro hrĂˇÄŤe "
-                        + player.getFullName() + ": " + e.getMessage());
-                logger.error("Chyba pĹ™i odeslĂˇnĂ­ SMS hrĂˇÄŤi {}: {}", player.getFullName(), e.getMessage());
+                // CHANGED: ĹľĂˇdnĂ˝ System.err, jen strukturovanĂ˝ log se stacktrace
+                log.error(
+                        "Chyba pĹ™i odeslĂˇnĂ­ SMS hrĂˇÄŤi {} ({}) pro zĂˇpas {}: {}",
+                        player.getFullName(),
+                        player.getPhoneNumber(),
+                        matchId,
+                        e.getMessage(),
+                        e
+                );
             }
         });
     }
@@ -566,6 +673,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         MatchEntity match = getMatchOrThrow(matchId);
         PlayerEntity player = getPlayerOrThrow(playerId);
+
+        if (status == PlayerMatchStatus.NO_EXCUSED) {
+            throw new InvalidPlayerStatusException(
+                    "Status NO_EXCUSED musĂ­ bĂ˝t nastaven pĹ™es speciĂˇlnĂ­ endpoint /logiku."
+            );
+        }
 
         MatchRegistrationEntity registration = registrationRepository
                 .findByPlayerIdAndMatchId(playerId, matchId)
@@ -607,6 +720,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         // domĂ©novĂˇ logika NO_EXCUSED
         registration.setExcuseReason(null);
+        registration.setExcuseNote(null);
 
         // adminNote â€“ default fallback
         if (adminNote == null || adminNote.isBlank()) {
@@ -627,7 +741,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
 
-
 }
 
 
@@ -638,6 +751,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.models.dto.*;
 
 import java.util.List;
@@ -658,6 +772,8 @@ public interface MatchService {
     List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId);
     List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId);
     MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote);
+    Void cancelMatch(Long matchId, MatchCancelReason reason);
+    Void unCancelMatch(Long matchId);
 
 }
 
@@ -671,16 +787,19 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.InvalidMatchStatusException;
 import cz.phsoft.hokej.exceptions.MatchNotFoundException;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.*;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -853,11 +972,10 @@ public class MatchServiceImpl implements MatchService {
                     "BE - NemĂˇte pĹ™Ă­stup k detailu tohoto zĂˇpasu."
             );
         }
-
+        // UPRAVIT DLE TODO CHECKlIST
         // vĹˇichni hrĂˇÄŤi patĹ™Ă­cĂ­ aktuĂˇlnĂ­mu uĹľivateli
-        List<PlayerEntity> ownedPlayers = playerRepository.findAll().stream()
-                .filter(p -> p.getUser() != null && p.getUser().getEmail().equals(userDetails.getUsername()))
-                .toList();
+        List<PlayerEntity> ownedPlayers =
+                playerRepository.findByUser_EmailOrderByIdAsc(userDetails.getUsername());
 
         if (ownedPlayers.isEmpty()) {
             throw new org.springframework.security.access.AccessDeniedException(
@@ -933,10 +1051,7 @@ public class MatchServiceImpl implements MatchService {
                 .collect(Collectors.toSet());
 
         // hrĂˇÄŤi bez registrace = NO_RESPONSE (pokud to pouĹľĂ­vĂˇĹˇ)
-        List<PlayerDTO> noResponsePlayers = allPlayers.stream()
-                .filter(p -> !respondedIds.contains(p.getId()))
-                .map(playerMapper::toDTO)
-                .toList();
+        List<PlayerDTO> noResponsePlayers = registrationService.getNoResponsePlayers(match.getId());
 
         // âť— TADY byla chyba â€“ tohle pole bylo pĹ™edtĂ­m spoÄŤĂ­tanĂ© stejnÄ› jako noResponsePlayers.
         // UĹľ ho nepotĹ™ebujeme jako zvlĂˇĹˇtnĂ­ kolekci, NO_EXCUSED bereme z mapy statusĹŻ.
@@ -949,13 +1064,13 @@ public class MatchServiceImpl implements MatchService {
         int outGamePlayers =
                 statusToPlayersMap.getOrDefault(PlayerMatchStatus.UNREGISTERED, List.of()).size()
                         + statusToPlayersMap.getOrDefault(PlayerMatchStatus.EXCUSED, List.of()).size()
-                        + statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size(); // â¬…ď¸Ź pĹ™idĂˇno
+                        + statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size();
 
         int waitingPlayers =
                 statusToPlayersMap.getOrDefault(PlayerMatchStatus.RESERVED, List.of()).size();
 
         int noExcusedPlayersSum =
-                statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size(); // â¬…ď¸Ź pouĹľĂ­vĂˇme mapu
+                statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()).size();
 
         int noActionPlayers = noResponsePlayers.size();
 
@@ -974,7 +1089,7 @@ public class MatchServiceImpl implements MatchService {
         dto.setInGamePlayers(inGamePlayers);
         dto.setOutGamePlayers(outGamePlayers);
         dto.setWaitingPlayers(waitingPlayers);
-        dto.setNoExcusedPlayersSum(noExcusedPlayersSum);   // â¬…ď¸Ź vyplnÄ›no
+        dto.setNoExcusedPlayersSum(noExcusedPlayersSum);
         dto.setNoActionPlayers(noActionPlayers);
         dto.setPricePerRegisteredPlayer(pricePerRegistered);
         dto.setRemainingSlots(remainingSlots);
@@ -1212,6 +1327,39 @@ public class MatchServiceImpl implements MatchService {
         // tady jen delegujeĹˇ na RegistrationService
         // (pĹ™Ă­p. mĹŻĹľeĹˇ pĹ™idat dalĹˇĂ­ validaÄŤnĂ­ logiku na Ăşrovni zĂˇpasu/uĹľivatele)
         return registrationService.markNoExcused(matchId, playerId, adminNote);
+    }
+
+    @Override
+    @Transactional
+    public Void cancelMatch(Long matchId, MatchCancelReason reason) {
+        MatchEntity match = findMatchOrThrow(matchId);
+        String message = " je jiĹľ zruĹˇen";
+
+        if (match.getStatus() == MatchStatus.CANCELLED) {
+            throw new InvalidMatchStatusException(matchId, message);
+        }
+
+
+        match.setStatus(MatchStatus.CANCELLED);
+        match.setCancelReason(reason);
+
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public Void unCancelMatch(Long matchId) {
+        MatchEntity match = findMatchOrThrow(matchId);
+        String message = " jeĹˇtÄ› nebyl zruĹˇen";
+
+        if (match.getStatus() != MatchStatus.CANCELLED) {
+            throw new InvalidMatchStatusException(matchId, message);
+        }
+
+        match.setStatus(null);
+        match.setCancelReason(null);
+
+        return null;
     }
 
 
@@ -1626,9 +1774,12 @@ public interface PlayerService {
     PlayerDTO createPlayerForUser(PlayerDTO dto, String userEmail);
     PlayerDTO updatePlayer(Long id, PlayerDTO player);
     SuccessResponseDTO deletePlayer(Long id);
-    public List<PlayerDTO> getPlayersByUser(String email);
+    List<PlayerDTO> getPlayersByUser(String email);
     SuccessResponseDTO approvePlayer (Long id);
     SuccessResponseDTO rejectPlayer (Long id);
+    SuccessResponseDTO setCurrentPlayerForUser(String userEmail, Long playerId);
+    SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail);
+
 }
 
 
@@ -1645,10 +1796,7 @@ import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.exceptions.DuplicateNameSurnameException;
-import cz.phsoft.hokej.exceptions.InvalidPlayerStatusException;
-import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import jakarta.transaction.Transactional;
@@ -1669,17 +1817,20 @@ public class PlayerServiceImpl implements PlayerService {
     private final PlayerMapper playerMapper;
     private final AppUserRepository appUserRepository;
     private final NotificationService notificationService;
+    private final CurrentPlayerService currentPlayerService;       // NEW
 
     public PlayerServiceImpl(
             PlayerRepository playerRepository,
             PlayerMapper playerMapper,
             AppUserRepository appUserRepository,
-            NotificationService notificationService // NEW
+            NotificationService notificationService,
+            CurrentPlayerService currentPlayerService             // NEW
     ) {
         this.playerRepository = playerRepository;
         this.playerMapper = playerMapper;
         this.appUserRepository = appUserRepository;
-        this.notificationService = notificationService; // NEW
+        this.notificationService = notificationService;
+        this.currentPlayerService = currentPlayerService;         // NEW
     }
 
     @Override
@@ -1832,6 +1983,255 @@ public class PlayerServiceImpl implements PlayerService {
         );
     }
 
+    // ----------------------------------------------------------------------
+    // NEW â€“ nastavenĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+    // ----------------------------------------------------------------------
+    @Override
+    public SuccessResponseDTO setCurrentPlayerForUser(String userEmail, Long playerId) {
+
+        // 1) Najdu hrĂˇÄŤe
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+
+        // 2) OvÄ›Ĺ™Ă­m, Ĺľe patĹ™Ă­ uĹľivateli s danĂ˝m emailem
+        if (player.getUser() == null
+                || player.getUser().getEmail() == null
+                || !player.getUser().getEmail().equals(userEmail)) {
+
+            // CHANGED: mĂ­sto InvalidPlayerStatusException pouĹľijeme jasnÄ›jĹˇĂ­ domĂ©novou chybu
+            throw new ForbiddenPlayerAccessException(playerId);
+        }
+
+        // 3) Deleguji na CurrentPlayerService (ten uĹľ hlĂ­dĂˇ PlayerStatus.APPROVED)
+        currentPlayerService.setCurrentPlayerId(playerId);
+
+        // 4) VrĂˇtĂ­m jednotnĂ˝ SuccessResponseDTO
+        return new SuccessResponseDTO(
+                "BE - AktuĂˇlnĂ­ hrĂˇÄŤ nastaven na ID: " + playerId,
+                playerId,
+                LocalDateTime.now().toString()
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // NEW â€“ automatickĂ˝ vĂ˝bÄ›r aktuĂˇlnĂ­ho hrĂˇÄŤe po loginu
+    // ----------------------------------------------------------------------
+    @Override
+    public SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail) {
+
+        // 1) Vezmu hrĂˇÄŤe pĹ™es existujĂ­cĂ­ metodu getPlayersByUser
+        List<PlayerDTO> players = getPlayersByUser(userEmail);
+
+        if (players.size() == 1) {
+            PlayerDTO player = players.get(0);
+
+            // 2) NastavĂ­m ho jako aktuĂˇlnĂ­ho
+            currentPlayerService.setCurrentPlayerId(player.getId());
+
+            // 3) VrĂˇtĂ­m SuccessResponseDTO s ID
+            return new SuccessResponseDTO(
+                    "BE - Automaticky nastaven aktuĂˇlnĂ­ hrĂˇÄŤ na ID: " + player.getId(),
+                    player.getId(),
+                    LocalDateTime.now().toString()
+            );
+        }
+
+        // 4) UĹľivatel mĂˇ 0 nebo vĂ­ce hrĂˇÄŤĹŻ â€“ nechĂˇme vĂ˝bÄ›r na FE
+        return new SuccessResponseDTO(
+                "BE - UĹľivatel mĂˇ vĂ­ce (nebo ĹľĂˇdnĂ©) hrĂˇÄŤe, je nutnĂ˝ ruÄŤnĂ­ vĂ˝bÄ›r.",
+                null,
+                LocalDateTime.now().toString()
+        );
+    }
+}
+
+
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\SeasonService.java
+-----
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.SeasonEntity;
+import cz.phsoft.hokej.models.dto.SeasonDTO;
+
+import java.util.List;
+
+public interface SeasonService {
+
+    SeasonDTO createSeason(SeasonDTO season);
+    SeasonDTO updateSeason(Long id, SeasonDTO season);
+    SeasonEntity getActiveSeason();
+    List<SeasonDTO> getAllSeasons();
+    void setActiveSeason(Long seasonId);
 
 }
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\SeasonServiceImpl.java
+-----
+
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.data.entities.SeasonEntity;
+import cz.phsoft.hokej.data.repositories.SeasonRepository;
+import cz.phsoft.hokej.exceptions.InvalidSeasonPeriodDateException;
+import cz.phsoft.hokej.exceptions.SeasonNotFoundException;
+import cz.phsoft.hokej.exceptions.SeasonPeriodOverlapException;
+import cz.phsoft.hokej.models.dto.SeasonDTO;
+import cz.phsoft.hokej.models.dto.mappers.SeasonMapper;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+public class SeasonServiceImpl implements SeasonService {
+
+    private final SeasonRepository seasonRepository;
+    private final SeasonMapper mapper;
+
+    public SeasonServiceImpl(SeasonRepository seasonRepository, SeasonMapper mapper) {
+        this.seasonRepository = seasonRepository;
+        this.mapper = mapper;
+    }
+
+    // ======================
+    // CREATE
+    // ======================
+    @Override
+    @Transactional
+    public SeasonDTO createSeason(SeasonDTO seasonDTO) {
+        // u create nemĂˇme ID
+        validateDates(seasonDTO, null);
+
+        SeasonEntity entity = mapper.toEntity(seasonDTO);
+        SeasonEntity saved = seasonRepository.save(entity);
+        return mapper.toDTO(saved);
+    }
+
+    // ======================
+    // UPDATE
+    // ======================
+    @Override
+    @Transactional
+    public SeasonDTO updateSeason(Long id, SeasonDTO seasonDTO) {
+        // 1) najĂ­t existujĂ­cĂ­ sezĂłnu
+        SeasonEntity existing = seasonRepository.findById(id)
+                .orElseThrow(() -> new SeasonNotFoundException(
+                        "BE - SezĂłna s ID " + id + " nebyla nalezena."
+                ));
+
+        // 2) validace dat s ignorovĂˇnĂ­m tĂ©to sezĂłny
+        validateDates(seasonDTO, id);
+
+        // 3) promĂ­tnout zmÄ›ny a uloĹľit
+        mapper.updateEntityFromDTO(seasonDTO, existing);
+        SeasonEntity saved = seasonRepository.save(existing);
+
+        return mapper.toDTO(saved);
+    }
+
+    // ======================
+    // AKTIVNĂŤ SEZĂ“NA
+    // ======================
+    @Override
+    public SeasonEntity getActiveSeason() {
+        return seasonRepository.findByActiveTrue()
+                .orElseThrow(() -> new SeasonNotFoundException(
+                        "BE - NenĂ­ nastavena ĹľĂˇdnĂˇ aktivnĂ­ sezĂłna."
+                ));
+    }
+
+    // Pokud chceĹˇ radÄ›ji DTO:
+    // @Override
+    // public SeasonDTO getActiveSeason() {
+    //     SeasonEntity entity = seasonRepository.findByActiveTrue()
+    //             .orElseThrow(() -> new SeasonNotFoundException(
+    //                     "BE - NenĂ­ nastavena ĹľĂˇdnĂˇ aktivnĂ­ sezĂłna."
+    //             ));
+    //     return mapper.toDTO(entity);
+    // }
+
+    // ======================
+    // SEZNAM VĹ ECH SEZĂ“N
+    // ======================
+    @Override
+    public List<SeasonDTO> getAllSeasons() {
+        return seasonRepository.findAllByOrderByStartDateAsc()
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
+
+    // ======================
+    // NASTAVENĂŤ AKTIVNĂŤ SEZĂ“NY
+    // ======================
+    @Override
+    @Transactional
+    public void setActiveSeason(Long seasonId) {
+        // 1) ovÄ›Ĺ™, Ĺľe existuje
+        SeasonEntity toActivate = seasonRepository.findById(seasonId)
+                .orElseThrow(() -> new SeasonNotFoundException(
+                        "BE - SezĂłna s ID " + seasonId + " nebyla nalezena."
+                ));
+
+        // 2) naÄŤĂ­st vĹˇechny sezĂłny a pĹ™epnout pĹ™Ă­znak
+        List<SeasonEntity> all = seasonRepository.findAll();
+        for (SeasonEntity season : all) {
+            season.setActive(season.getId().equals(seasonId));
+        }
+
+        seasonRepository.saveAll(all);
+    }
+
+    // ======================
+    // PRIVĂTNĂŤ VALIDACE DAT
+    // ======================
+    /**
+     * Validace obdobĂ­ sezĂłny + kontrola pĹ™ekryvu.
+     *
+     * @param seasonDTO        data sezĂłny
+     * @param currentSeasonId  ID sezĂłny pĹ™i updatu (pro create null)
+     */
+    private void validateDates(SeasonDTO seasonDTO, Long currentSeasonId) {
+        LocalDate start = seasonDTO.getStartDate();
+        LocalDate end = seasonDTO.getEndDate();
+
+        if (start == null || end == null) {
+            throw new InvalidSeasonPeriodDateException("BE - Datum od a do nesmĂ­ bĂ˝t null.");
+        }
+
+        if (!start.isBefore(end)) {
+            throw new InvalidSeasonPeriodDateException("BE - Datum 'od' musĂ­ bĂ˝t pĹ™ed 'do'.");
+        }
+
+        boolean overlaps;
+
+        if (currentSeasonId == null) {
+            // CREATE â€“ pĹ™ekryv s jakoukoli existujĂ­cĂ­ sezĂłnou
+            overlaps = seasonRepository
+                    .existsByStartDateLessThanEqualAndEndDateGreaterThanEqual(end, start);
+        } else {
+            // UPDATE â€“ pĹ™ekryv s jinou sezĂłnou (id != currentSeasonId)
+            overlaps = seasonRepository
+                    .existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(
+                            end,
+                            start,
+                            currentSeasonId
+                    );
+        }
+
+        if (overlaps) {
+            throw new SeasonPeriodOverlapException("BE - SezĂłna se pĹ™ekrĂ˝vĂˇ s existujĂ­cĂ­ sezĂłnou.");
+        }
+    }
+}
+
 

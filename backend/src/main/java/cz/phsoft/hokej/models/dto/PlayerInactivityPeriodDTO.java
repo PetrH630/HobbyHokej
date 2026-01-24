@@ -1,12 +1,16 @@
 package cz.phsoft.hokej.models.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
 public class PlayerInactivityPeriodDTO {
 
     private Long id;
     private Long playerId;
+    @NotNull(message = "Datum začátku neaktivity je povinné.")
     private LocalDateTime inactiveFrom;
+    @NotNull(message = "Datum konce neaktivity je povinné.")
     private LocalDateTime inactiveTo;
 
     public Long getId() {

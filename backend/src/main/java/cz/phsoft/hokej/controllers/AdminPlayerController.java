@@ -2,10 +2,12 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.PlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -39,14 +41,14 @@ public class AdminPlayerController {
     // vytvoření hráče
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-        public PlayerDTO createPlayer(@RequestBody PlayerDTO playerDTO) {
+        public PlayerDTO createPlayer(@Valid @RequestBody PlayerDTO playerDTO) {
         return playerService.createPlayer(playerDTO);
     }
 
     // úprava hráče administrátorem dle id hráče
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public PlayerDTO upatePlayerAdmin(@PathVariable Long id,  @RequestBody PlayerDTO dto) {
+    public PlayerDTO upatePlayerAdmin(@PathVariable Long id,  @Valid @RequestBody PlayerDTO dto) {
 
         return playerService.updatePlayer(id, dto);
     }

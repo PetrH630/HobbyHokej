@@ -3,6 +3,7 @@ package cz.phsoft.hokej.controllers;
 import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.ChangePasswordDTO;
 import cz.phsoft.hokej.models.services.AppUserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,7 @@ public class AppUserController {
     @PostMapping("/me/change-password")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> changePassword(Authentication authentication,
-                                                 @RequestBody ChangePasswordDTO dto) {
+                                                 @Valid @RequestBody ChangePasswordDTO dto) {
         String email = authentication.getName();
         appUserService.changePassword(email, dto.getOldPassword(), dto.getNewPassword(), dto.getNewPasswordConfirm());
         return ResponseEntity.ok("Heslo úspěšně změněno");
@@ -42,7 +43,7 @@ public class AppUserController {
     @PutMapping("/me/update")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> updateUser(Authentication authentication,
-                                                 @RequestBody AppUserDTO dto) {
+                                             @Valid @RequestBody AppUserDTO dto) {
         String email = authentication.getName();
         appUserService.updateUser(email, dto);
 

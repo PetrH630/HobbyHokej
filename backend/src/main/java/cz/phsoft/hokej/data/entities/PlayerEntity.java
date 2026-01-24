@@ -32,6 +32,7 @@ public class PlayerEntity {
     private Team team;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PlayerStatus status = PlayerStatus.PENDING;
 
 

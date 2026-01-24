@@ -3,6 +3,8 @@ Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\
 
 Seznam souborů:
 ExcuseReason.java
+MatchCancelReason.java
+MatchStatus.java
 NotificationChannel.java
 NotificationType.java
 PlayerMatchStatus.java
@@ -26,6 +28,36 @@ public enum ExcuseReason {
     JINE
 }
 
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\MatchCancelReason.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum MatchCancelReason {
+    NOT_ENOUGH_PLAYERS,     // mĂˇlo hrĂˇÄŤĹŻ
+    TECHNICAL_ISSUE,        // technickĂ© problĂ©my (led, hala, busâ€¦)
+    WEATHER,                // poÄŤasĂ­
+    ORGANIZER_DECISION,     // rozhodnutĂ­ organizĂˇtora
+    OTHER                   // jinĂ˝ dĹŻvod
+}
+
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\enums\MatchStatus.java
+-----
+
+package cz.phsoft.hokej.data.enums;
+
+public enum MatchStatus {
+    UNCANCELED,     // znovu aktivovanĂ˝
+    CANCELLED       // zruĹˇenĂ˝
+}
 
 
 

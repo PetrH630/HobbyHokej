@@ -3,16 +3,28 @@ package cz.phsoft.hokej.models.dto;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.enums.Team;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.util.Set;
 
 public class AppUserDTO {
+
     private Long id;
-    private String name; // not null
+
+    @NotBlank(message = "Křestní jméno je povinné.")
+    @Size(min = 2, max = 50)
+    private String name;
+
+    @NotBlank(message = "Příjmení je povinné.")
+    @Size(min = 2, max = 50)
     private String surname;
+
+    @NotBlank(message = "Email je povinný.")
+    @Email(message = "Email není ve správném formátu.")
     private String email;
+
     private Role role;
     private boolean enabled;
     private Set<PlayerDTO> players; // jednostranné

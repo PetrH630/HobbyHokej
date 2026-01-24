@@ -2,6 +2,7 @@ package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
@@ -14,11 +15,11 @@ public class SeasonDTO {
     @NotBlank(message = "např. 2025/2026")
     private String name;
 
-    @NotBlank(message = "datum sezony OD musí být zadán")
+    @NotNull(message = "datum sezony OD musí být zadán")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
-    @NotBlank(message = "datum sezony DO musí být zadán")
+    @NotNull(message = "datum sezony DO musí být zadán")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 

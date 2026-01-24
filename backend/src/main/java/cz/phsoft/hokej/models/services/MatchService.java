@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.models.dto.*;
 
 import java.util.List;
@@ -21,5 +22,7 @@ public interface MatchService {
     List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId);
     List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId);
     MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote);
+    Void cancelMatch(Long matchId, MatchCancelReason reason);
+    Void unCancelMatch(Long matchId);
 
 }

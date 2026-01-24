@@ -20,7 +20,7 @@ public class MatchDTO {
     private LocalDateTime dateTime;
 
     @NotBlank(message = "Místo zápasu je povinné.")
-    @Size(min = 3, max = 100)
+    @Size(min = 3, max = 70)
     private String location;
 
     @Size(max = 255, message = "Popis může mít max 255 znaků.")

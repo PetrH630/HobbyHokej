@@ -3,8 +3,10 @@ package cz.phsoft.hokej.controllers;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
+import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import cz.phsoft.hokej.models.services.MatchService;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +54,7 @@ public class AdminMatchRegistrationController {
 
     @PostMapping("/upsert/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public MatchRegistrationDTO upsert(@PathVariable Long playerId, @RequestBody MatchRegistrationRequest request) {
+    public MatchRegistrationDTO upsert(@PathVariable Long playerId, @Valid @RequestBody MatchRegistrationRequest request) {
 
         return service.upsertRegistration(
                 request.getMatchId(),

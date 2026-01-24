@@ -4,6 +4,7 @@ import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -29,7 +30,7 @@ public class MatchRegistrationController {
 
     @PostMapping("/me/upsert")
     @PreAuthorize("isAuthenticated()")
-    public MatchRegistrationDTO upsert(@RequestBody MatchRegistrationRequest request) {
+    public MatchRegistrationDTO upsert(@Valid @RequestBody MatchRegistrationRequest request) {
         // automaticky bere vybraného hráče
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();

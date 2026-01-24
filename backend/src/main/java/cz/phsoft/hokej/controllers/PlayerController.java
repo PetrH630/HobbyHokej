@@ -3,6 +3,7 @@ package cz.phsoft.hokej.controllers;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.PlayerService;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class PlayerController {
     // vytvoření hráče pro přihlášeného uživatele
     @PostMapping("/me")
     @PreAuthorize("isAuthenticated()") // každý přihlášený uživatel
-    public PlayerDTO createMyPlayer(@RequestBody PlayerDTO playerDTO, Authentication authentication) {
+    public PlayerDTO createMyPlayer(@Valid @RequestBody PlayerDTO playerDTO, Authentication authentication) {
         String email = authentication.getName(); // email přihlášeného uživatele
         return playerService.createPlayerForUser(playerDTO, email);
     }
@@ -41,7 +42,7 @@ public class PlayerController {
     // úprava hráče přihlášeného uživatele
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public PlayerDTO updatePlayer(@RequestBody PlayerDTO dto) {
+    public PlayerDTO updatePlayer(@Valid @RequestBody PlayerDTO dto) {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
 

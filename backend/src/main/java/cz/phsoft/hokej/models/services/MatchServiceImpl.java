@@ -2,15 +2,19 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.InvalidMatchStatusException;
 import cz.phsoft.hokej.exceptions.MatchNotFoundException;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.*;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -538,6 +542,39 @@ public class MatchServiceImpl implements MatchService {
         // tady jen deleguješ na RegistrationService
         // (příp. můžeš přidat další validační logiku na úrovni zápasu/uživatele)
         return registrationService.markNoExcused(matchId, playerId, adminNote);
+    }
+
+    @Override
+    @Transactional
+    public Void cancelMatch(Long matchId, MatchCancelReason reason) {
+        MatchEntity match = findMatchOrThrow(matchId);
+        String message = " je již zrušen";
+
+        if (match.getStatus() == MatchStatus.CANCELLED) {
+            throw new InvalidMatchStatusException(matchId, message);
+        }
+
+
+        match.setStatus(MatchStatus.CANCELLED);
+        match.setCancelReason(reason);
+
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public Void unCancelMatch(Long matchId) {
+        MatchEntity match = findMatchOrThrow(matchId);
+        String message = " ještě nebyl zrušen";
+
+        if (match.getStatus() != MatchStatus.CANCELLED) {
+            throw new InvalidMatchStatusException(matchId, message);
+        }
+
+        match.setStatus(null);
+        match.setCancelReason(null);
+
+        return null;
     }
 
 

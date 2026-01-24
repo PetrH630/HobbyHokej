@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import cz.phsoft.hokej.data.enums.MatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ public class MatchDetailDTO {
     private double pricePerRegisteredPlayer;
     private int remainingSlots;
     private PlayerMatchStatus status;
+    private MatchStatus matchStatus;
 
     List<PlayerDTO> registeredPlayers;
     List<PlayerDTO> reservedPlayers;
@@ -115,6 +117,14 @@ public class MatchDetailDTO {
     }
     public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) {
         this.pricePerRegisteredPlayer = pricePerRegisteredPlayer;
+    }
+
+    public MatchStatus getMatchStatus() {
+        return matchStatus;
+    }
+
+    public void setMatchStatus(MatchStatus matchStatus) {
+        this.matchStatus = matchStatus;
     }
 
     public int getRemainingSlots() {

@@ -20,9 +20,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;                         // NEW
+import org.slf4j.LoggerFactory;
 
 @Service
 public class EmailService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.from}")
@@ -40,6 +44,8 @@ public class EmailService {
     public void sendSimpleEmail(String to, String subject, String text) {
 
         if (!emailEnabled) {
+            log.info("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: {}", to);
+            // pro testovĂˇnĂ­
             System.out.println("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: " + to);
             return;
         }
@@ -55,7 +61,9 @@ public class EmailService {
             mailSender.send(message);
         } catch (Exception e) {
             // DoporuÄŤeno: logovat do souboru
-            throw new RuntimeException("Chyba pĹ™i odesĂ­lĂˇnĂ­ emailu: " + e.getMessage(), e);
+            // pro testovĂˇnĂ­
+            System.out.println("Chyba pĹ™i odesĂ­lĂˇnĂ­ emailu na: " + to);
+            log.error("Chyba pĹ™i odesĂ­lĂˇnĂ­ emailu na {}: {}", to, e.getMessage(), e);
         }
     }
 
@@ -64,6 +72,9 @@ public class EmailService {
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
 
         if (!emailEnabled) {
+            // CHANGED: System.out -> logger
+            log.info("MAIL JE VYPNUTĂť â€“ HTML email nebyl odeslĂˇn na: {}", to);
+            // pro testovĂˇnĂ­
             System.out.println("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: " + to);
             return;
         }
@@ -78,10 +89,14 @@ public class EmailService {
             helper.setFrom(fromEmail);
 
             mailSender.send(mimeMessage);
+            log.debug("HTML email odeslĂˇn na {} se subjectem '{}'", to, subject);  // NEW
         } catch (MessagingException e) {
-            throw new RuntimeException("Chyba pĹ™i odesĂ­lĂˇnĂ­ HTML emailu: " + e.getMessage(), e);
+            // CHANGED: opÄ›t jen logujeme
+            log.error("Chyba pĹ™i odesĂ­lĂˇnĂ­ HTML emailu na {}: {}", to, e.getMessage(), e);
+            System.out.println("Chyba pĹ™i odesĂ­lĂˇnĂ­ HTML emailu na: " + to);
         }
     }
+
     public void sendActivationEmail(String to, String activationLink) {
         String subject = "PotvrÄŹte svĹŻj ĂşÄŤet";
         String text = "DobrĂ˝ den,\n\n"
@@ -103,6 +118,4 @@ public class EmailService {
     }
 
 }
-
-
 

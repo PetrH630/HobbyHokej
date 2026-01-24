@@ -5,17 +5,23 @@ Seznam souborů:
 AccountNotActivatedException.java
 ApiError.java
 BusinessException.java
+CurrentPlayerNotSelectedException.java
 DuplicateNameSurnameException.java
 DuplicateRegistrationException.java
+ForbiddenPlayerAccessException.java
 InactivityPeriodNotFoundException.java
 InactivityPeriodOverlapException.java
 InvalidInactivityPeriodDateException.java
+InvalidMatchStatusException.java
 InvalidOldPasswordException.java
 InvalidPlayerStatusException.java
+InvalidSeasonPeriodDateException.java
 MatchNotFoundException.java
 PasswordsDoNotMatchException.java
 PlayerNotFoundException.java
 RegistrationNotFoundException.java
+SeasonNotFoundException.java
+SeasonPeriodOverlapException.java
 UserAlreadyExistsException.java
 UserNotFoundException.java
 
@@ -118,6 +124,25 @@ public class BusinessException extends RuntimeException {
 
 
 -----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\CurrentPlayerNotSelectedException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class CurrentPlayerNotSelectedException extends BusinessException {
+
+    public CurrentPlayerNotSelectedException() {
+        super("BE - NenĂ­ zvolen aktuĂˇlnĂ­ hrĂˇÄŤ.", HttpStatus.BAD_REQUEST);
+        // alternativnÄ› by Ĺˇel i HttpStatus.CONFLICT, ale BAD_REQUEST dĂˇvĂˇ smysl:
+        // klient volĂˇ endpoint, kterĂ˝ vyĹľaduje current player, ale ĹľĂˇdnĂ©ho nenastavil
+    }
+}
+
+
+
+-----
 # Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\DuplicateNameSurnameException.java
 -----
 
@@ -150,6 +175,23 @@ public class DuplicateRegistrationException extends BusinessException {
                 HttpStatus.CONFLICT); // 409
     }
 }
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\ForbiddenPlayerAccessException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class ForbiddenPlayerAccessException extends BusinessException {
+
+    public ForbiddenPlayerAccessException(Long playerId) {
+        super("BE - HrĂˇÄŤ " + playerId + " nepatĹ™Ă­ pĹ™ihlĂˇĹˇenĂ©mu uĹľivateli.", HttpStatus.FORBIDDEN);
+    }
+}
+
 
 
 -----
@@ -201,6 +243,22 @@ public class InvalidInactivityPeriodDateException extends BusinessException {
 
 
 -----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InvalidMatchStatusException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class InvalidMatchStatusException extends BusinessException {
+    public InvalidMatchStatusException(Long id, String message) {
+        super("BE - ZĂˇpas s id: " + id + message, HttpStatus.CONFLICT);
+    }
+}
+
+
+
+-----
 # Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InvalidOldPasswordException.java
 -----
 
@@ -229,6 +287,22 @@ public class InvalidPlayerStatusException extends BusinessException {
         super(message, HttpStatus.BAD_REQUEST); // 400
     }
 }
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InvalidSeasonPeriodDateException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class InvalidSeasonPeriodDateException extends BusinessException {
+    public InvalidSeasonPeriodDateException(String message){
+        super(message, HttpStatus.BAD_REQUEST);
+    }
+}
+
 
 
 -----
@@ -300,6 +374,48 @@ public class RegistrationNotFoundException extends BusinessException {
                 HttpStatus.NOT_FOUND);
     }
 }
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\SeasonNotFoundException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class SeasonNotFoundException extends BusinessException {
+    public SeasonNotFoundException() {
+        super("BE - SezĂłna nebyla nalezena.", HttpStatus.CONFLICT);
+    }
+
+    public SeasonNotFoundException(String message) {
+        super(message, HttpStatus.CONFLICT);
+    }
+
+
+
+
+
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\SeasonPeriodOverlapException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class SeasonPeriodOverlapException extends BusinessException {
+
+       public SeasonPeriodOverlapException(String message) {
+        super(message, HttpStatus.CONFLICT);
+    }
+}
+
 
 
 -----

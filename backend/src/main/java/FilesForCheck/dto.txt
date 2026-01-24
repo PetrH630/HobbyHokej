@@ -12,6 +12,7 @@ PlayerDTO.java
 PlayerInactivityPeriodDTO.java
 PlayerSummaryDTO.java
 RegisterUserDTO.java
+SeasonDTO.java
 SuccessResponseDTO.java
 
 
@@ -125,6 +126,7 @@ public class ChangePasswordDTO {
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import cz.phsoft.hokej.data.enums.MatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 
 import java.time.LocalDateTime;
@@ -146,6 +148,7 @@ public class MatchDetailDTO {
     private double pricePerRegisteredPlayer;
     private int remainingSlots;
     private PlayerMatchStatus status;
+    private MatchStatus matchStatus;
 
     List<PlayerDTO> registeredPlayers;
     List<PlayerDTO> reservedPlayers;
@@ -241,6 +244,14 @@ public class MatchDetailDTO {
         this.pricePerRegisteredPlayer = pricePerRegisteredPlayer;
     }
 
+    public MatchStatus getMatchStatus() {
+        return matchStatus;
+    }
+
+    public void setMatchStatus(MatchStatus matchStatus) {
+        this.matchStatus = matchStatus;
+    }
+
     public int getRemainingSlots() {
         return remainingSlots;
     }
@@ -313,6 +324,10 @@ public class MatchDetailDTO {
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -340,6 +355,12 @@ public class MatchDTO {
     @NotNull(message = "Cena je povinnĂˇ")
     private Integer price;
 
+    @Enumerated(EnumType.STRING)
+    private MatchStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private MatchCancelReason cancelReason;
+
     // gettery a settery
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -362,6 +383,22 @@ public class MatchDTO {
 
     public void setPrice(Integer price) {
         this.price = price;
+    }
+
+    public MatchStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MatchStatus status) {
+        this.status = status;
+    }
+
+    public MatchCancelReason getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(MatchCancelReason cancelReason) {
+        this.cancelReason = cancelReason;
     }
 }
 
@@ -799,6 +836,105 @@ public class RegisterUserDTO {
         this.passwordConfirm = passwordConfirm;
     }
 }
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\dto\SeasonDTO.java
+-----
+
+package cz.phsoft.hokej.models.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotBlank;
+
+import java.time.LocalDate;
+
+public class SeasonDTO {
+
+    private Long id;
+    /**
+     * NapĹ™. "2024/2025"
+     */
+    @NotBlank(message = "napĹ™. 2025/2026")
+    private String name;
+
+    @NotBlank(message = "datum sezony OD musĂ­ bĂ˝t zadĂˇn")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate startDate;
+
+    @NotBlank(message = "datum sezony DO musĂ­ bĂ˝t zadĂˇn")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate endDate;
+
+    /**
+     * Je tato sezĂłna aktuĂˇlnÄ› aktivnĂ­
+     */
+    private boolean active;
+
+    // --- konstruktory ---
+
+    public SeasonDTO() {
+    }
+
+    public SeasonDTO(
+            Long id,
+            String name,
+            LocalDate startDate,
+            LocalDate endDate,
+            boolean active
+    ) {
+        this.id = id;
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.active = active;
+    }
+
+    // --- gettery / settery ---
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+}
+
+
 
 
 

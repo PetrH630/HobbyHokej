@@ -27,8 +27,8 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.services.MatchService;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
+import cz.phsoft.hokej.models.services.MatchService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -119,9 +119,9 @@ package cz.phsoft.hokej.controllers;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
+import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import cz.phsoft.hokej.models.services.MatchService;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -202,14 +202,14 @@ public class AdminMatchRegistrationController {
 
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.services.PlayerService;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
+import cz.phsoft.hokej.models.services.PlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -243,14 +243,14 @@ public class AdminPlayerController {
     // vytvoĹ™enĂ­ hrĂˇÄŤe
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-        public PlayerDTO createPlayer(@RequestBody PlayerDTO playerDTO) {
+        public PlayerDTO createPlayer(@Valid @RequestBody PlayerDTO playerDTO) {
         return playerService.createPlayer(playerDTO);
     }
 
     // Ăşprava hrĂˇÄŤe administrĂˇtorem dle id hrĂˇÄŤe
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public PlayerDTO upatePlayerAdmin(@PathVariable Long id,  @RequestBody PlayerDTO dto) {
+    public PlayerDTO upatePlayerAdmin(@PathVariable Long id,  @Valid @RequestBody PlayerDTO dto) {
 
         return playerService.updatePlayer(id, dto);
     }
@@ -370,10 +370,6 @@ public class AppUserController {
 
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
-import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import cz.phsoft.hokej.models.services.AppUserService;
@@ -382,9 +378,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+
 import java.util.Map;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -392,17 +388,11 @@ import java.util.Optional;
 public class AuthController {
 
     private final AppUserService appUserService;
-    private final AppUserRepository userRepository;
-    private final EmailVerificationTokenRepository tokenRepository;
 
-    public AuthController(AppUserService appUserService,
-                          AppUserRepository userRepository,
-                          EmailVerificationTokenRepository tokenRepository) {
+    public AuthController(AppUserService appUserService) {
         this.appUserService = appUserService;
-        this.userRepository = userRepository;
-        this.tokenRepository = tokenRepository;
-    }
 
+    }
     // ===== Registrace =====
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDTO dto) {
@@ -411,38 +401,28 @@ public class AuthController {
                 Map.of("status", "ok", "message", "Registrace ĂşspÄ›ĹˇnĂˇ. Zkontrolujte email pro aktivaci ĂşÄŤtu.")
         );
     }
-
     // ===== ZĂ­skĂˇnĂ­ aktuĂˇlnĂ­ho uĹľivatele =====
     @GetMapping("/me")
     public ResponseEntity<AppUserDTO> getCurrentUser(Authentication authentication) {
         AppUserDTO dto = appUserService.getCurrentUser(authentication.getName());
         return ResponseEntity.ok(dto);
     }
-
     // ===== Aktivace ĂşÄŤtu =====
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        Optional<EmailVerificationTokenEntity> optionalToken = tokenRepository.findByToken(token);
+        boolean activated = appUserService.activateUser(token);
 
-        if (optionalToken.isEmpty()) {
-            return ResponseEntity.badRequest().body("NeplatnĂ˝ aktivaÄŤnĂ­ odkaz.");
+        if (!activated) {
+            // sjednocenĂˇ chyba: neplatnĂ˝ NEBO expirovanĂ˝ token
+            return ResponseEntity
+                    .badRequest()
+                    .body("NeplatnĂ˝ nebo expirovanĂ˝ aktivaÄŤnĂ­ odkaz.");
         }
-
-        EmailVerificationTokenEntity verificationToken = optionalToken.get();
-
-        if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("AktivaÄŤnĂ­ odkaz vyprĹˇel.");
-        }
-
-        AppUserEntity user = verificationToken.getUser();
-        user.setEnabled(true);
-        userRepository.save(user);
-
-        tokenRepository.delete(verificationToken);
 
         return ResponseEntity.ok("ĂšÄŤet byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn.");
     }
 }
+
 
 
 
@@ -452,14 +432,16 @@ public class AuthController {
 
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
+// REMOVED: importy na entity a repozitĂˇĹ™e
+// import cz.phsoft.hokej.data.entities.AppUserEntity;
+// import cz.phsoft.hokej.data.entities.PlayerEntity;
+// import cz.phsoft.hokej.data.repositories.AppUserRepository;
+// import cz.phsoft.hokej.data.repositories.PlayerRepository;
+
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.services.PlayerService;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import jakarta.servlet.http.HttpSession;
+import cz.phsoft.hokej.models.services.CurrentPlayerService;   // NEW â€“ sprĂˇvnĂ˝ import interface
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -472,63 +454,40 @@ import java.util.List;
 @RequestMapping("/api/current-player")
 public class CurrentPlayerController {
 
-    private final PlayerRepository playerRepository;
-    private final AppUserRepository appUserRepository;
     private final CurrentPlayerService currentPlayerService;
     private final PlayerService playerService;
 
-    public CurrentPlayerController(PlayerRepository playerRepository,
-                                   AppUserRepository appUserRepository,
-                                   CurrentPlayerService currentPlayerService,
+    public CurrentPlayerController(CurrentPlayerService currentPlayerService,
                                    PlayerService playerService) {
-        this.playerRepository = playerRepository;
-        this.appUserRepository = appUserRepository;
         this.currentPlayerService = currentPlayerService;
         this.playerService = playerService;
     }
 
     // -----------------------------------------------------
-    // NastavenĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe â€“ pokud uĹľivatel mĂˇ jen jednoho, vybere se automaticky
+    // NastavenĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe
     // -----------------------------------------------------
     @PostMapping("/{playerId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> setCurrentPlayer(@PathVariable Long playerId,
-                                 Authentication auth,
-                                 HttpSession session) {
+    public ResponseEntity<SuccessResponseDTO> setCurrentPlayer(@PathVariable Long playerId,
+                                                               Authentication auth) {
 
-        AppUserEntity user = appUserRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        SuccessResponseDTO response =
+                playerService.setCurrentPlayerForUser(auth.getName(), playerId);
 
-        PlayerEntity player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new RuntimeException("Player not found"));
-
-        if (!player.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Player does not belong to user");
-        }
-
-        currentPlayerService.setCurrentPlayerId(player.getId());
-        return ResponseEntity.ok("AktuĂˇlnĂ­ hrĂˇÄŤ nastaven na ID: " + player.getId());
+        return ResponseEntity.ok(response);
     }
 
     // -----------------------------------------------------
     // AutomatickĂ˝ vĂ˝bÄ›r aktuĂˇlnĂ­ho hrĂˇÄŤe po loginu
-    // Zavolat z frontendu /api/current-player/auto-select po pĹ™ihlĂˇĹˇenĂ­
     // -----------------------------------------------------
     @PostMapping("/auto-select")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> autoSelectCurrentPlayer(Authentication auth) {
-        AppUserEntity user = appUserRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ResponseEntity<SuccessResponseDTO> autoSelectCurrentPlayer(Authentication auth) {
 
-        List<PlayerDTO> players = playerService.getPlayersByUser(user.getEmail());
+        SuccessResponseDTO response =
+                playerService.autoSelectCurrentPlayerForUser(auth.getName());
 
-        if (players.size() == 1) {
-            PlayerDTO player = players.get(0);
-            currentPlayerService.setCurrentPlayerId(player.getId());
-            return ResponseEntity.ok("Automaticky nastaven hrĂˇÄŤ nastaven na ID: " + player.getId());
-        } else {
-            return ResponseEntity.ok("UĹľivatel mĂˇ vĂ­ce hrĂˇÄŤĹŻ, vĂ˝bÄ›r nutnĂ˝ ruÄŤnÄ›");
-        }
+        return ResponseEntity.ok(response);
     }
 
     // -----------------------------------------------------
@@ -536,17 +495,15 @@ public class CurrentPlayerController {
     // -----------------------------------------------------
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public PlayerDTO getCurrentPlayer(HttpSession session) {
+    public ResponseEntity<PlayerDTO> getCurrentPlayer() {
 
         Long playerId = currentPlayerService.getCurrentPlayerId();
         if (playerId == null) {
-            System.out.println("Ĺ˝ĂˇdnĂ˝ aktuĂˇlnĂ­ hrĂˇÄŤ");
-            return null;
+            return ResponseEntity.ok(null);
         }
 
         PlayerDTO player = playerService.getPlayerById(playerId);
-        System.out.println("AktuĂˇlnĂ­ hrĂˇÄŤ ID: " + playerId);
-        return player;
+        return ResponseEntity.ok(player);
     }
 
     // -----------------------------------------------------
@@ -554,16 +511,8 @@ public class CurrentPlayerController {
     // -----------------------------------------------------
     @GetMapping("/my-players")
     @PreAuthorize("isAuthenticated()")
-    public List<PlayerDTO> getMyPlayers(Authentication auth, HttpSession session) {
-        AppUserEntity user = appUserRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        List<PlayerDTO> players = playerService.getPlayersByUser(user.getEmail());
-
-        System.out.println("Seznam hrĂˇÄŤĹŻ uĹľivatele " + user.getEmail() + ": " +
-                players.stream().map(PlayerDTO::getId).toList());
-
-        return players;
+    public List<PlayerDTO> getMyPlayers(Authentication auth) {
+        return playerService.getPlayersByUser(auth.getName());
     }
 }
 
@@ -599,11 +548,8 @@ package cz.phsoft.hokej.controllers;
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.MatchDetailDTO;
 import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.services.MatchService;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
+import cz.phsoft.hokej.models.services.MatchService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -679,12 +625,10 @@ public class MatchController {
 
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
-import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
+import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -746,13 +690,10 @@ public class MatchRegistrationController {
 
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
-import cz.phsoft.hokej.models.services.PlayerService;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import org.springframework.http.ResponseEntity;
+import cz.phsoft.hokej.models.services.PlayerService;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -775,7 +716,7 @@ public class PlayerController {
     // vytvoĹ™enĂ­ hrĂˇÄŤe pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
     @PostMapping("/me")
     @PreAuthorize("isAuthenticated()") // kaĹľdĂ˝ pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel
-    public PlayerDTO createMyPlayer(@RequestBody PlayerDTO playerDTO, Authentication authentication) {
+    public PlayerDTO createMyPlayer(@Valid @RequestBody PlayerDTO playerDTO, Authentication authentication) {
         String email = authentication.getName(); // email pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
         return playerService.createPlayerForUser(playerDTO, email);
     }
@@ -791,7 +732,7 @@ public class PlayerController {
     // Ăşprava hrĂˇÄŤe pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public PlayerDTO updatePlayer(@RequestBody PlayerDTO dto) {
+    public PlayerDTO updatePlayer(@Valid @RequestBody PlayerDTO dto) {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
 
