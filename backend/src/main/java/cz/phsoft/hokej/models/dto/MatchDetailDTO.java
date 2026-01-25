@@ -1,6 +1,9 @@
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 
@@ -22,8 +25,13 @@ public class MatchDetailDTO {
     private int noExcusedPlayersSum;
     private double pricePerRegisteredPlayer;
     private int remainingSlots;
-    private PlayerMatchStatus status;
+    private PlayerMatchStatus playerMatchStatus;
+    private ExcuseReason excuseReason;
+    private String excuseNote;
     private MatchStatus matchStatus;
+    private MatchCancelReason cancelReason;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long seasonId;
 
     List<PlayerDTO> registeredPlayers;
     List<PlayerDTO> reservedPlayers;
@@ -72,12 +80,35 @@ public class MatchDetailDTO {
         this.price = price;
     }
 
-    public PlayerMatchStatus getStatus() {
-        return status;
+    public PlayerMatchStatus getPlayerMatchStatus() {
+        return playerMatchStatus;
     }
 
-    public void setStatus(PlayerMatchStatus status) {
-        this.status = status;
+    public void setPlayerMatchStatus(PlayerMatchStatus playerMatchStatus) {
+        this.playerMatchStatus = playerMatchStatus;
+    }
+
+    public ExcuseReason getExcuseReason() {
+        return excuseReason;
+    }
+
+    public void setExcuseReason(ExcuseReason excuseReason) {
+        this.excuseReason = excuseReason;
+    }
+
+    public String getExcuseNote() {
+        return excuseNote;
+    }
+    public void setExcuseNote(String excuseNote) {
+        this.excuseNote = excuseNote;
+    }
+
+    public Long getSeasonId() {
+        return seasonId;
+    }
+
+    public void setSeasonId(Long seasonId) {
+        this.seasonId = seasonId;
     }
 
     public int getMaxPlayers() {
@@ -125,6 +156,14 @@ public class MatchDetailDTO {
 
     public void setMatchStatus(MatchStatus matchStatus) {
         this.matchStatus = matchStatus;
+    }
+
+    public MatchCancelReason getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(MatchCancelReason cancelReason) {
+        this.cancelReason = cancelReason;
     }
 
     public int getRemainingSlots() {

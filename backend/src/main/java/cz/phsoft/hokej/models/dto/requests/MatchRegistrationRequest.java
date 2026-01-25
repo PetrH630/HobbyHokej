@@ -9,19 +9,17 @@ public class MatchRegistrationRequest {
     @NotNull
     @Positive
     private Long matchId;
-
-    @NotNull
-    @Positive
     private Long playerId;
-
     private Team team;
     private ExcuseReason excuseReason;
     private String excuseNote;
     private String adminNote;
     private boolean unregister;
 
+    public Long getPlayerId() {
+        return playerId;
+    }
     public Long getMatchId() { return matchId; }
-    public Long getPlayerId() { return playerId; }
     public Team getTeam() { return team; }
     public ExcuseReason getExcuseReason() { return excuseReason; }
     public String getExcuseNote() { return excuseNote; }

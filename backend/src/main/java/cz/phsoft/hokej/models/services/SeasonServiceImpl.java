@@ -3,6 +3,7 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.entities.SeasonEntity;
 import cz.phsoft.hokej.data.repositories.SeasonRepository;
 import cz.phsoft.hokej.exceptions.InvalidSeasonPeriodDateException;
+import cz.phsoft.hokej.exceptions.InvalidSeasonStateException;
 import cz.phsoft.hokej.exceptions.SeasonNotFoundException;
 import cz.phsoft.hokej.exceptions.SeasonPeriodOverlapException;
 import cz.phsoft.hokej.models.dto.SeasonDTO;
@@ -35,6 +36,18 @@ public class SeasonServiceImpl implements SeasonService {
 
         SeasonEntity entity = mapper.toEntity(seasonDTO);
         SeasonEntity saved = seasonRepository.save(entity);
+
+        long activeCount = seasonRepository.countByActiveTrue();
+
+        if (seasonDTO.isActive()) {
+            // nová sezóna má být aktivní → uděláme z ní jedinou aktivní
+            setOnlyActiveSeason(saved.getId());
+        } else if (activeCount == 0) {
+            // v systému není žádná aktivní sezóna → nesmíme zůstat bez aktivní
+            // → automaticky tuto novou sezónu nastavíme jako jedinou aktivní
+            setOnlyActiveSeason(saved.getId());
+        }
+
         return mapper.toDTO(saved);
     }
 
@@ -53,9 +66,28 @@ public class SeasonServiceImpl implements SeasonService {
         // 2) validace dat s ignorováním této sezóny
         validateDates(seasonDTO, id);
 
+        boolean wasActive = existing.isActive();
+        boolean willBeActive = seasonDTO.isActive();
+
+        // *** STRIKTNÍ REŽIM: nelze deaktivovat jedinou aktivní sezónu
+        if (wasActive && !willBeActive) {
+            long activeCount = seasonRepository.countByActiveTrue();
+            if (activeCount <= 1) {
+                throw new InvalidSeasonStateException(
+                        "BE - Nelze deaktivovat jedinou aktivní sezónu. " +
+                                "Nejprve nastavte jinou sezónu jako aktivní."
+                );
+            }
+        }
+
         // 3) promítnout změny a uložit
         mapper.updateEntityFromDTO(seasonDTO, existing);
         SeasonEntity saved = seasonRepository.save(existing);
+
+        // pokud se sezóna z neaktivní stala aktivní → uděláme z ní jedinou aktivní
+        if (!wasActive && saved.isActive()) {
+            setOnlyActiveSeason(saved.getId());
+        }
 
         return mapper.toDTO(saved);
     }
@@ -70,16 +102,6 @@ public class SeasonServiceImpl implements SeasonService {
                         "BE - Není nastavena žádná aktivní sezóna."
                 ));
     }
-
-    // Pokud chceš raději DTO:
-    // @Override
-    // public SeasonDTO getActiveSeason() {
-    //     SeasonEntity entity = seasonRepository.findByActiveTrue()
-    //             .orElseThrow(() -> new SeasonNotFoundException(
-    //                     "BE - Není nastavena žádná aktivní sezóna."
-    //             ));
-    //     return mapper.toDTO(entity);
-    // }
 
     // ======================
     // SEZNAM VŠECH SEZÓN
@@ -104,24 +126,13 @@ public class SeasonServiceImpl implements SeasonService {
                         "BE - Sezóna s ID " + seasonId + " nebyla nalezena."
                 ));
 
-        // 2) načíst všechny sezóny a přepnout příznak
-        List<SeasonEntity> all = seasonRepository.findAll();
-        for (SeasonEntity season : all) {
-            season.setActive(season.getId().equals(seasonId));
-        }
-
-        seasonRepository.saveAll(all);
+        // 2) nastavíme ji jako jedinou aktivní
+        setOnlyActiveSeason(toActivate.getId());
     }
 
     // ======================
     // PRIVÁTNÍ VALIDACE DAT
     // ======================
-    /**
-     * Validace období sezóny + kontrola překryvu.
-     *
-     * @param seasonDTO        data sezóny
-     * @param currentSeasonId  ID sezóny při updatu (pro create null)
-     */
     private void validateDates(SeasonDTO seasonDTO, Long currentSeasonId) {
         LocalDate start = seasonDTO.getStartDate();
         LocalDate end = seasonDTO.getEndDate();
@@ -153,5 +164,19 @@ public class SeasonServiceImpl implements SeasonService {
         if (overlaps) {
             throw new SeasonPeriodOverlapException("BE - Sezóna se překrývá s existující sezónou.");
         }
+    }
+
+    // ======================
+    // PRIVÁTNÍ POMOCNÁ METODA
+    // ======================
+    /**
+     * Nastaví danou sezónu jako jedinou aktivní a všechny ostatní deaktivuje.
+     */
+    private void setOnlyActiveSeason(Long activeSeasonId) {
+        List<SeasonEntity> all = seasonRepository.findAll();
+        for (SeasonEntity season : all) {
+            season.setActive(season.getId().equals(activeSeasonId));
+        }
+        seasonRepository.saveAll(all);
     }
 }

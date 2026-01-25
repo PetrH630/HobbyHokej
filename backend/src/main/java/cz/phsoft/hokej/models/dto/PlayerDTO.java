@@ -23,7 +23,7 @@ public class PlayerDTO {
     private String phoneNumber;
     private PlayerType type; // not null, default BASIC
     private Team team;
-    private PlayerStatus status;
+    private PlayerStatus playerStatus;
     private boolean notifyByEmail;
     private boolean notifyBySms;
 
@@ -33,7 +33,7 @@ public class PlayerDTO {
 
     public PlayerDTO(Long id, String name, String surname,
                      String nickName, PlayerType type,
-                     Team team, PlayerStatus status,
+                     Team team, PlayerStatus playerStatus,
                      boolean notifyByEmail, boolean notifyBySms) {
         this.id = id;
         this.name = name;
@@ -42,7 +42,7 @@ public class PlayerDTO {
         this.type = type != null ? type : PlayerType.BASIC;
         this.updateFullName();
         this.team = team;
-        this.status = status != null ? status : PlayerStatus.PENDING;
+        this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
         this.notifyByEmail = notifyByEmail;
         this.notifyBySms = notifyBySms;
     }
@@ -75,8 +75,8 @@ public class PlayerDTO {
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public PlayerStatus getStatus() { return status; }
-    public void setStatus(PlayerStatus status) { this.status = status != null ? status : PlayerStatus.PENDING;
+    public PlayerStatus getPlayerStatus() { return playerStatus; }
+    public void setPlayerStatus(PlayerStatus playerStatus) { this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
     }
     public boolean isNotifyByEmail() {
         return notifyByEmail;

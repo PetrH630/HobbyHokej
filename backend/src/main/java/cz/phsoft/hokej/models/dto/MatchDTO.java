@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
 import jakarta.persistence.EnumType;
@@ -33,10 +34,13 @@ public class MatchDTO {
     private Integer price;
 
     @Enumerated(EnumType.STRING)
-    private MatchStatus status;
+    private MatchStatus matchStatus;
 
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long seasonId;
 
     // gettery a settery
     public Long getId() { return id; }
@@ -62,12 +66,12 @@ public class MatchDTO {
         this.price = price;
     }
 
-    public MatchStatus getStatus() {
-        return status;
+    public MatchStatus getMatchStatus() {
+        return matchStatus;
     }
 
-    public void setStatus(MatchStatus status) {
-        this.status = status;
+    public void setMatchStatus(MatchStatus matchStatus) {
+        this.matchStatus = matchStatus;
     }
 
     public MatchCancelReason getCancelReason() {
@@ -76,5 +80,13 @@ public class MatchDTO {
 
     public void setCancelReason(MatchCancelReason cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public Long getSeasonId() {
+        return seasonId;
+    }
+
+    public void setSeasonId(Long seasonId) {
+        this.seasonId = seasonId;
     }
 }

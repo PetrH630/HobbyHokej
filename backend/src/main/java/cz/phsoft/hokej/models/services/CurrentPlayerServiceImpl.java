@@ -32,7 +32,7 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
         PlayerEntity player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
 
-        if (player.getStatus() != PlayerStatus.APPROVED) {
+        if (player.getPlayerStatus() != PlayerStatus.APPROVED) {
             // TODO: později nahradíme za BusinessException (např. CurrentPlayerNotAllowedException)
             throw new InvalidPlayerStatusException(
                     "BE - Nelze zvolit hráče, který není schválen administrátorem."

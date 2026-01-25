@@ -1,10 +1,12 @@
 package cz.phsoft.hokej.controllers;
 
+import cz.phsoft.hokej.exceptions.CurrentPlayerNotSelectedException;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -15,12 +17,12 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class MatchRegistrationController {
 
-    private final MatchRegistrationService service;
+    private final MatchRegistrationService matchRegistrationService;
     private final CurrentPlayerService currentPlayerService;
 
-    public MatchRegistrationController(MatchRegistrationService service,
+    public MatchRegistrationController(MatchRegistrationService matchRegistrationService,
                                        CurrentPlayerService currentPlayerService) {
-        this.service = service;
+        this.matchRegistrationService = matchRegistrationService;
         this.currentPlayerService = currentPlayerService;
     }
 
@@ -35,15 +37,12 @@ public class MatchRegistrationController {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
 
-        return service.upsertRegistration(
-                request.getMatchId(),
-                currentPlayerId, // vždy aktuální hráč
-                request.getTeam(),
-                request.getAdminNote(),
-                request.getExcuseReason(),
-                request.getExcuseNote(),
-                request.isUnregister()
-        );
+        //TODO - Vlastní vyjímiku
+        if (currentPlayerId == null) {
+            throw new CurrentPlayerNotSelectedException();
+        }
+
+        return matchRegistrationService.upsertRegistration(currentPlayerId,request);
     }
 
     // registrace na zápasy přihlášeného hráče
@@ -52,7 +51,7 @@ public class MatchRegistrationController {
     public List<MatchRegistrationDTO> forCurrentPlayer() {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
-        return service.getRegistrationsForPlayer(currentPlayerId);
+        return matchRegistrationService.getRegistrationsForPlayer(currentPlayerId);
     }
 
 

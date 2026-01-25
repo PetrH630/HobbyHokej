@@ -20,7 +20,7 @@ public interface MatchRegistrationMapper {
     @Mapping(target = "player", source = "player")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "excuseReason", source = "excuseReason")
-    @Mapping(target = "excuseNote", source = "note")
+    @Mapping(target = "excuseNote", source = "excuseNote")
     @Mapping(target = "team", source = "team")
     @Mapping(target = "adminNote", source = "adminNote")
     @Mapping(target = "createdBy", source = "createdBy")
@@ -30,7 +30,7 @@ public interface MatchRegistrationMapper {
             PlayerEntity player,
             PlayerMatchStatus status,
             ExcuseReason excuseReason,
-            String note,
+            String excuseNote,
             Team team,
             String adminNote,
             String createdBy

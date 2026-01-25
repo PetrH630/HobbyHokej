@@ -1,7 +1,12 @@
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +23,16 @@ public class MatchOverviewDTO {
     private int maxPlayers;
     private int inGamePlayers;
     private double pricePerRegisteredPlayer;
-    private PlayerMatchStatus status;
+    private PlayerMatchStatus playerMatchStatus;
+    @Enumerated(EnumType.STRING)
+    private MatchStatus matchStatus;
+
+    @Enumerated(EnumType.STRING)
+    private MatchCancelReason cancelReason;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long seasonId;
+
 
     // Gettery a settery
     public Long getId() { return id; }
@@ -45,11 +59,35 @@ public class MatchOverviewDTO {
     public double getPricePerRegisteredPlayer() { return pricePerRegisteredPlayer; }
     public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) { this.pricePerRegisteredPlayer = pricePerRegisteredPlayer; }
 
-    public PlayerMatchStatus getStatus() {
-        return status;
+    public PlayerMatchStatus getPlayerMatchStatus() {
+        return playerMatchStatus;
     }
 
-    public void setStatus(PlayerMatchStatus status) {
-        this.status = status;
+    public void setPlayerMatchStatus(PlayerMatchStatus playerMatchStatus) {
+        this.playerMatchStatus = playerMatchStatus;
+    }
+
+    public MatchStatus getMatchStatus() {
+        return matchStatus;
+    }
+
+    public void setMatchStatus(MatchStatus matchStatus) {
+        this.matchStatus = matchStatus;
+    }
+
+    public MatchCancelReason getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(MatchCancelReason cancelReason) {
+        this.cancelReason = cancelReason;
+    }
+
+    public Long getSeasonId() {
+        return seasonId;
+    }
+
+    public void setSeasonId(Long seasonId) {
+        this.seasonId = seasonId;
     }
 }

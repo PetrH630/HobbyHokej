@@ -12,6 +12,7 @@ import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+
 import cz.phsoft.hokej.models.services.NotificationService;
 
 
@@ -115,7 +116,7 @@ public class PlayerServiceImpl implements PlayerService {
         existing.setPhoneNumber(dto.getPhoneNumber());
         existing.setType(dto.getType());
         existing.setTeam(dto.getTeam());
-        existing.setStatus(dto.getStatus());
+        existing.setPlayerStatus(dto.getPlayerStatus());
 
         PlayerEntity saved = playerRepository.save(existing);
 
@@ -158,10 +159,10 @@ public class PlayerServiceImpl implements PlayerService {
     public SuccessResponseDTO approvePlayer(Long id) {
         PlayerEntity player = findPlayerOrThrow(id);
 
-        if (player.getStatus() == PlayerStatus.APPROVED) {
+        if (player.getPlayerStatus() == PlayerStatus.APPROVED) {
             throw new InvalidPlayerStatusException("BE - Hráč už je schválen.");
         }
-        player.setStatus(PlayerStatus.APPROVED);
+        player.setPlayerStatus(PlayerStatus.APPROVED);
         playerRepository.save(player);
 
         notificationService.notifyPlayer(player, NotificationType.PLAYER_APPROVED, null);
@@ -178,10 +179,10 @@ public class PlayerServiceImpl implements PlayerService {
     public SuccessResponseDTO rejectPlayer(Long id) {
         PlayerEntity player = findPlayerOrThrow(id);
 
-        if (player.getStatus() == PlayerStatus.REJECTED) {
+        if (player.getPlayerStatus() == PlayerStatus.REJECTED) {
             throw new InvalidPlayerStatusException("BE - Hráč už je zamítnut.");
         }
-        player.setStatus(PlayerStatus.REJECTED);
+        player.setPlayerStatus(PlayerStatus.REJECTED);
         playerRepository.save(player);
 
         notificationService.notifyPlayer(player, NotificationType.PLAYER_REJECTED, null);

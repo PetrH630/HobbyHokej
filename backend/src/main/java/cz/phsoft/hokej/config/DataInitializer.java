@@ -1,20 +1,14 @@
 package cz.phsoft.hokej.config;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.*;
 import cz.phsoft.hokej.data.enums.*;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.data.repositories.MatchRepository;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.data.repositories.*;
 import jakarta.annotation.PostConstruct;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,34 +16,70 @@ import java.util.List;
 @Component
 public class DataInitializer {
 
+
     private final PlayerRepository playerRepository;
     private final MatchRepository matchRepository;
     private final MatchRegistrationRepository matchRegistrationRepository;
     private final AppUserRepository appUserRepository;
+    private final SeasonRepository seasonRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public DataInitializer(PlayerRepository playerRepository,
                            MatchRepository matchRepository,
                            MatchRegistrationRepository matchRegistrationRepository,
                            AppUserRepository appUserRepository,
+                           SeasonRepository seasonRepository,
                            JdbcTemplate jdbcTemplate) {
         this.playerRepository = playerRepository;
         this.matchRepository = matchRepository;
         this.matchRegistrationRepository = matchRegistrationRepository;
         this.appUserRepository = appUserRepository;
+        this.seasonRepository = seasonRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @PostConstruct
     public void init() {
-        // Pokud existuje alespoň 1 hráč, DB už byla inicializovaná
+        initAdmin();
+        initPlayersAndUsers();
+        initSeasons();
+        initMatches();
+        initRegistrations();
+        initTriggers();
+
+        System.out.println("Data initialization completed.");
+    }
+
+    // =====================
+    // ADMIN
+    // =====================
+    private void initAdmin() {
+        appUserRepository.findByEmail("admin@example.com").ifPresentOrElse(
+                existing -> System.out.println("Admin user already exists – skipping."),
+                () -> {
+                    AppUserEntity admin = new AppUserEntity();
+                    admin.setName("admin");
+                    admin.setSurname("admin");
+                    admin.setEmail("admin@example.com");
+                    admin.setPassword(encoder.encode("Administrator123"));
+                    admin.setRole(Role.ROLE_ADMIN);
+                    admin.setEnabled(true);
+                    appUserRepository.save(admin);
+                    System.out.println("Default admin user created.");
+                }
+        );
+    }
+
+    // =====================
+    // PLAYERS + USERS
+    // =====================
+    private void initPlayersAndUsers() {
         if (playerRepository.count() > 0) {
-            System.out.println("Data already initialized – skipping DataInitializer.");
+            System.out.println("Players already exist – skipping player initialization.");
             return;
         }
-        System.out.println("Initializing default data...");
 
-        // --- Seznam hráčů ---
         List<PlayerEntity> players = new ArrayList<>(List.of(
                 new PlayerEntity("Hráč_1", "Jedna", "", PlayerType.VIP, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
                 new PlayerEntity("Hráč_2", "Dva", "", PlayerType.VIP, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
@@ -61,33 +91,15 @@ public class DataInitializer {
                 new PlayerEntity("Hráč_8", "Osum", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING),
                 new PlayerEntity("Hráč_9", "Devět", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING),
                 new PlayerEntity("Hráč_10", "Deset", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING)
-                // ... případně další hráči
         ));
 
-        // --- Vytvoření uživatelů ke každému hráči ---
-
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-        // --- Default admin ---
-        if (appUserRepository.findByEmail("admin@example.com").isEmpty()) {
-            AppUserEntity admin = new AppUserEntity();
-            admin.setName("admin");
-            admin.setSurname("admin");
-            admin.setEmail("admin@example.com");
-            admin.setPassword(encoder.encode("Administrator123"));
-            admin.setRole(Role.ROLE_ADMIN);
-            admin.setEnabled(true);
-            appUserRepository.save(admin);
-            System.out.println("Default admin user created.");
-        } else {
-            System.out.println("Admin user already exists – skipping.");
+        for (PlayerEntity player : players) {
+            player.setNotifyByEmail(true);
+            player.setNotifyBySms(true);
         }
-
-        System.out.println("Data initialization completed.");
 
         int playerCounter = 1;
         for (PlayerEntity player : players) {
-            // vytvoření uživatele
             String email = "player" + playerCounter + "@example.com";
             String password = "Player123";
 
@@ -97,149 +109,241 @@ public class DataInitializer {
             user.setEmail(email);
             user.setPassword(encoder.encode(password));
 
-            switch (playerCounter){
-                case 1:
-                    user.setRole(Role.ROLE_ADMIN);
-                    System.out.println("Nastavena role: admin");
-                    break;
-                case 2:
-                    user.setRole(Role.ROLE_MANAGER);
-                    System.out.println("Nastavena role: manager");
-                    break;
-                default:
-                    user.setRole(Role.ROLE_PLAYER);
-                    System.out.println("Nastavena role: player");
+            switch (playerCounter) {
+                case 1 -> user.setRole(Role.ROLE_ADMIN);
+                case 2 -> user.setRole(Role.ROLE_MANAGER);
+                default -> user.setRole(Role.ROLE_PLAYER);
             }
             user.setEnabled(true);
-            // přiřadit hráče k uživateli
-            System.out.println("Vytvářím uživatele č. " + playerCounter);
+
+            // vztah user <-> player podle tvého modelu
             player.setUser(user);
 
-            // uložit uživatele (cascade uloží i hráče, pokud je správně nastaven)
-            appUserRepository.save(user);
-
+            appUserRepository.save(user); // nebo playerRepository.save(player) – podle cascade
             playerCounter++;
         }
 
-        // --- Uložit hráče (už uložen při cascade, ale pro jistotu) ---
+        // pokud cascade není, můžeš explicitně uložit i hráče:
         playerRepository.saveAll(players);
 
-        // --- Vytvoření zápasů ---
-        LocalDateTime startDate = LocalDateTime.of(2025, 11, 21, 18, 45);
-        for (int i = 0; i < 10; i++) {
+        System.out.println("Players and users initialized.");
+    }
+
+    // =====================
+    // SEASONS
+    // =====================
+
+    private void initSeasons() {
+        if (seasonRepository.count() > 0) {
+            System.out.println("Seasons already exist – skipping match initialization.");
+            return;
+        }
+        System.out.println("Initializing seasons...");
+
+        // Sezóna 2024/2025: 1.11.2024 – 31.3.2025
+        SeasonEntity season2024_2025 = new SeasonEntity();
+        season2024_2025.setName("2024/2025");
+        season2024_2025.setStartDate(LocalDate.of(2024, 11, 1));
+        season2024_2025.setEndDate(LocalDate.of(2025, 3, 31));
+        season2024_2025.setActive(false);
+
+        // Sezóna 2025/2026: 1.11.2025 – 31.3.2026 (aktuální – nastavíme jako active)
+        SeasonEntity season2025_2026 = new SeasonEntity();
+        season2025_2026.setName("2025/2026");
+        season2025_2026.setStartDate(LocalDate.of(2025, 11, 1));
+        season2025_2026.setEndDate(LocalDate.of(2026, 3, 31));
+        season2025_2026.setActive(true);
+
+        // Sezóna 2026/2027: 1.11.2026 – 31.3.2027
+        SeasonEntity season2026_2027 = new SeasonEntity();
+        season2026_2027.setName("2026/2027");
+        season2026_2027.setStartDate(LocalDate.of(2026, 11, 1));
+        season2026_2027.setEndDate(LocalDate.of(2027, 3, 31));
+        season2026_2027.setActive(false);
+
+        seasonRepository.saveAll(List.of(
+                season2024_2025,
+                season2025_2026,
+                season2026_2027
+        ));
+
+        System.out.println("Seasons initialized.");
+    }
+
+    // =====================
+    // MATCHES
+    // =====================
+    private void initMatches() {
+        // Pokud už nějaké zápasy existují, nic nevytváříme
+        if (matchRepository.count() > 0) {
+            System.out.println("Matches already exist – skipping match initialization.");
+            return;
+        }
+
+        // Sezóny MUSÍ existovat, jinak nemáme co přiřadit
+        java.util.List<SeasonEntity> seasons = seasonRepository.findAll();
+        if (seasons.isEmpty()) {
+            throw new IllegalStateException("BE - Nelze inicializovat zápasy, neexistuje žádná sezóna.");
+        }
+
+        System.out.println("Initializing matches...");
+
+        // výchozí datum prvního zápasu
+        java.time.LocalDateTime startDate = java.time.LocalDateTime.of(2025, 11, 21, 18, 45);
+
+        for (int i = 0; i < 15; i++) {
             MatchEntity match = new MatchEntity();
-            match.setDateTime(startDate.plusWeeks(i));
-            match.setLocation("Ostravice");
+
+            java.time.LocalDateTime dateTime = startDate.plusWeeks(i);
+
+            match.setDateTime(dateTime);
+            match.setLocation("WOODARÉNA");
             match.setDescription("");
             match.setMaxPlayers(12);
             match.setPrice(2200);
+            match.setMatchStatus(null);
+            match.setCancelReason(null);
+
+            // 🔹 TADY je KLÍČ: vždy najdeme sezónu a nastavíme ji
+            SeasonEntity season = findSeasonForDate(dateTime.toLocalDate(), seasons);
+            if (season == null) {
+                // Tohle by za normálních okolností nemělo nastat, ale když jo, chceme failnout srozumitelně
+                throw new IllegalStateException(
+                        "BE - Nepodařilo se najít sezónu pro datum zápasu " + dateTime.toLocalDate()
+                );
+            }
+            match.setSeason(season);
+
+            // uložíme zápas
             matchRepository.save(match);
         }
 
-        // --- Registrace hráčů na zápas id 3 ---
-        MatchEntity match3 = matchRepository.findById(3L)
-                .orElseThrow(() -> new RuntimeException("Match with id 3 not found"));
+        System.out.println("Matches initialized.");
+    }
 
-        for (long playerId = 1; playerId <= 6; playerId++) {
-            final long pid = playerId;
-            PlayerEntity player = playerRepository.findById(playerId)
-                    .orElseThrow(() -> new RuntimeException("Player with id " + pid + " not found"));
+    // POMOCNÁ METODA PRO INIT MATCHES - Nastavení sezony
+    private SeasonEntity findSeasonForDate(
+            java.time.LocalDate date,
+            java.util.List<SeasonEntity> seasons
+    ) {
+        // 1) Zkusíme najít sezónu, do které datum spadá (startDate <= date <= endDate)
+        for (SeasonEntity season : seasons) {
+            boolean startsBeforeOrSame = !date.isBefore(season.getStartDate()); // date >= start
+            boolean endsAfterOrSame = !date.isAfter(season.getEndDate());       // date <= end
+
+            if (startsBeforeOrSame && endsAfterOrSame) {
+                return season;
+            }
+        }
+
+        // 2) Pokud žádná nesedí intervalem, vezmeme aktivní sezónu (pokud nějaká je)
+        for (SeasonEntity season : seasons) {
+            if (season.isActive()) {
+                return season;
+            }
+        }
+
+        // 3) Jako úplný fallback vezmeme první sezónu v seznamu
+        //    (k tomuhle by se to nemělo moc dostávat, ale je to bezpečná pojistka)
+        return seasons.get(0);
+    }
+
+
+
+    // =====================
+    // REGISTRATIONS
+    // =====================
+    private void initRegistrations() {
+        if (matchRegistrationRepository.count() > 0) {
+            System.out.println("Match registrations already exist – skipping registration initialization.");
+            return;
+        }
+
+        List<MatchEntity> matches = matchRepository.findAll();
+        List<PlayerEntity> players = playerRepository.findAll();
+
+        if (matches.isEmpty() || players.size() < 6) {
+            System.out.println("Not enough data to create registrations – skipping.");
+            return;
+        }
+
+        MatchEntity match = matches.get(2); // „třetí“ vytvořený zápas
+        for (int i = 0; i < 6; i++) {
+            PlayerEntity player = players.get(i);
 
             MatchRegistrationEntity reg = new MatchRegistrationEntity();
-            reg.setMatch(match3);
+            reg.setMatch(match);
             reg.setPlayer(player);
             reg.setStatus(PlayerMatchStatus.REGISTERED);
-            if (playerId <=3){
-                reg.setTeam(Team.DARK);
-            }else {
-                reg.setTeam(Team.LIGHT);
-            }
+            reg.setTeam(i < 3 ? Team.DARK : Team.LIGHT);
             reg.setTimestamp(LocalDateTime.now());
-            reg.setCreatedBy("user");
+            reg.setCreatedBy("initializer");
+
             matchRegistrationRepository.save(reg);
         }
 
-        // --- Default admin ---
-        if (appUserRepository.findByEmail("admin@example.com").isEmpty()) {
-            AppUserEntity admin = new AppUserEntity();
-            admin.setEmail("admin@example.com");
-            admin.setPassword(encoder.encode("Administrator123"));
-            admin.setRole(Role.ROLE_ADMIN);
-            appUserRepository.save(admin);
-            System.out.println("Default admin user created.");
-        } else {
-            System.out.println("Admin user already exists – skipping.");
-        }
+        System.out.println("Sample registrations initialized.");
+    }
 
-        // --- vytvoření triggeru ---
-        try {
-            jdbcTemplate.execute("""
-                           CREATE TRIGGER trg_match_reg_insert
-                           AFTER INSERT ON match_registrations
-                           FOR EACH ROW
-                           BEGIN
-                               INSERT INTO match_registration_history
-                               (match_registration_id, match_id, player_id, status, excuse_reason,
-                                excuse_note, admin_note, team, original_timestamp, created_by,
-                                action, changed_at)
-                               VALUES
-                               (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
-                                NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
-                                'INSERT', NOW());
-                           END
-                    """);
-            System.out.println("Trigger created successfully.");
-        } catch (Exception e) {
-            System.out.println("Trigger already exists or error: " + e.getMessage());
-        }
-
-        try {
-            jdbcTemplate.execute("""
-                    CREATE TRIGGER trg_match_reg_update
-                    AFTER UPDATE ON match_registrations
-                    FOR EACH ROW
-                    BEGIN
-                        INSERT INTO match_registration_history
-                        (match_registration_id, match_id, player_id, status, excuse_reason,
-                         excuse_note, admin_note, team, original_timestamp, created_by,
-                         action, changed_at)
-                        VALUES
-                        (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
-                         NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
-                         'UPDATE', NOW());
-                    END
-                    """);
-            System.out.println("Trigger created successfully.");
-        } catch (Exception e) {
-            System.out.println("Trigger already exists or error: " + e.getMessage());
-        }
-
-        try {
-            jdbcTemplate.execute("""
-        CREATE TRIGGER trg_match_reg_delete
-        AFTER DELETE ON match_registrations
-        FOR EACH ROW
+    // =====================
+    // TRIGGERS
+    // =====================
+    private void initTriggers() {
+        createTrigger("trg_match_reg_insert", """
+                CREATE TRIGGER trg_match_reg_insert
+                AFTER INSERT ON match_registrations
+                FOR EACH ROW
                 BEGIN
-        INSERT INTO match_registration_history
-                (match_registration_id, match_id, player_id, status, excuse_reason,
-                        excuse_note, admin_note, team, original_timestamp, created_by,
-                        action, changed_at)
-        VALUES
-                (OLD.id, OLD.match_id, OLD.player_id, OLD.status, OLD.excuse_reason,
-                        OLD.excuse_note, OLD.admin_note, OLD.team, OLD.timestamp, OLD.created_by,
-                        'DELETE', NOW());
-        END
-        """);
-            System.out.println("Trigger created successfully.");
-                } catch (Exception e) {
-                    System.out.println("Trigger already exists or error: " + e.getMessage());
-                }
-        
-        System.out.println("Data initialization completed.");
-    
+                    INSERT INTO match_registration_history
+                    (match_registration_id, match_id, player_id, status, excuse_reason,
+                     excuse_note, admin_note, team, original_timestamp, created_by,
+                     action, changed_at)
+                    VALUES
+                    (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
+                     NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
+                     'INSERT', NOW());
+                END
+                """);
 
+        createTrigger("trg_match_reg_update", """
+                CREATE TRIGGER trg_match_reg_update
+                AFTER UPDATE ON match_registrations
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO match_registration_history
+                    (match_registration_id, match_id, player_id, status, excuse_reason,
+                     excuse_note, admin_note, team, original_timestamp, created_by,
+                     action, changed_at)
+                    VALUES
+                    (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
+                     NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
+                     'UPDATE', NOW());
+                END
+                """);
+
+        createTrigger("trg_match_reg_delete", """
+                CREATE TRIGGER trg_match_reg_delete
+                AFTER DELETE ON match_registrations
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO match_registration_history
+                    (match_registration_id, match_id, player_id, status, excuse_reason,
+                     excuse_note, admin_note, team, original_timestamp, created_by,
+                     action, changed_at)
+                    VALUES
+                    (OLD.id, OLD.match_id, OLD.player_id, OLD.status, OLD.excuse_reason,
+                     OLD.excuse_note, OLD.admin_note, OLD.team, OLD.timestamp, OLD.created_by,
+                     'DELETE', NOW());
+                END
+                """);
+    }
+
+    private void createTrigger(String name, String sql) {
+        try {
+            jdbcTemplate.execute(sql);
+            System.out.println("Trigger " + name + " created successfully.");
+        } catch (Exception e) {
+            System.out.println("Trigger " + name + " already exists or error: " + e.getMessage());
+        }
     }
 }
-
-
-

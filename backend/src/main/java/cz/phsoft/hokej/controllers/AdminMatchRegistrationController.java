@@ -55,16 +55,8 @@ public class AdminMatchRegistrationController {
     @PostMapping("/upsert/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public MatchRegistrationDTO upsert(@PathVariable Long playerId, @Valid @RequestBody MatchRegistrationRequest request) {
+        return service.upsertRegistration(playerId, request);
 
-        return service.upsertRegistration(
-                request.getMatchId(),
-                request.getPlayerId(), // vybraný hráč
-                request.getTeam(),
-                request.getAdminNote(),
-                request.getExcuseReason(),
-                request.getExcuseNote(),
-                request.isUnregister()
-        );
     }
 
     @PostMapping("/matches/{matchId}/players/{playerId}/no-excused")

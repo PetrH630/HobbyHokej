@@ -17,6 +17,10 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
 
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate endDate, LocalDate startDate);
 
-    boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(LocalDate endDate, LocalDate startDate, Long id);
+    boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(
+            LocalDate endDate,
+            LocalDate startDate,
+            Long id);
 
+    long countByActiveTrue();
 }

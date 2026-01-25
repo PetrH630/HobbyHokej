@@ -33,8 +33,7 @@ public class PlayerEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PlayerStatus status = PlayerStatus.PENDING;
-
+    private PlayerStatus playerStatus = PlayerStatus.PENDING;
 
     // Many-to-One: každý hráč patří jednomu uživateli
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,7 +48,7 @@ public class PlayerEntity {
         this.type = PlayerType.BASIC;
     }
 
-    public PlayerEntity(String name, String surname, String nickName, PlayerType type, String phoneNumber, Team team, PlayerStatus status) {
+    public PlayerEntity(String name, String surname, String nickName, PlayerType type, String phoneNumber, Team team, PlayerStatus playerStatus) {
         this.name = name;
         this.surname = surname;
         this.nickName = nickName;
@@ -57,7 +56,8 @@ public class PlayerEntity {
         this.fullName = name + " " + surname;
         this.phoneNumber = phoneNumber;
         this.team = team;
-        this.status = status;
+        this.playerStatus = playerStatus;
+
     }
 
     // ----------------- Gettery a Settery -----------------
@@ -126,12 +126,12 @@ public class PlayerEntity {
         this.user = user;
     }
 
-    public PlayerStatus getStatus() {
-        return status;
+    public PlayerStatus getPlayerStatus() {
+        return playerStatus;
     }
 
-    public void setStatus(PlayerStatus status) {
-        this.status = status;
+    public void setPlayerStatus(PlayerStatus playerStatus) {
+        this.playerStatus = playerStatus;
     }
 
     public String getNickName() {
@@ -147,6 +147,27 @@ public class PlayerEntity {
 
     public void setNotificationSettings(NotificationSettings notificationSettings) {
         this.notificationSettings = notificationSettings;
+    }
+    public boolean isNotifyByEmail() {
+        return notificationSettings != null && notificationSettings.isEmailEnabled();
+    }
+
+    public void setNotifyByEmail(boolean notifyByEmail) {
+        if (notificationSettings == null) {
+            notificationSettings = new NotificationSettings();
+        }
+        notificationSettings.setEmailEnabled(notifyByEmail);
+    }
+
+    public boolean isNotifyBySms() {
+        return notificationSettings != null && notificationSettings.isSmsEnabled();
+    }
+
+    public void setNotifyBySms(boolean notifyBySms) {
+        if (notificationSettings == null) {
+            notificationSettings = new NotificationSettings();
+        }
+        notificationSettings.setSmsEnabled(notifyBySms);
     }
 
 }

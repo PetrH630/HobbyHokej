@@ -1,15 +1,18 @@
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerType;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.InvalidMatchStatusException;
 import cz.phsoft.hokej.exceptions.MatchNotFoundException;
+import cz.phsoft.hokej.exceptions.MatchRegistrationNotFoundException;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.*;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
@@ -32,6 +35,7 @@ import org.slf4j.LoggerFactory;
 public class MatchServiceImpl implements MatchService {
 
     private final MatchRepository matchRepository;
+    private final MatchRegistrationRepository matchRegistrationRepository;
     private final MatchMapper matchMapper;
     private final MatchRegistrationService registrationService;
     private final PlayerRepository playerRepository;
@@ -40,40 +44,47 @@ public class MatchServiceImpl implements MatchService {
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final String ROLE_MANAGER = "ROLE_MANAGER";
     private final CurrentPlayerService currentPlayerService;
+    private final SeasonService seasonService;
     private static final Logger logger = LoggerFactory.getLogger(MatchServiceImpl.class);
 
     public MatchServiceImpl(MatchRepository matchRepository,
+                            MatchRegistrationRepository matchRegistrationRepository,
                             MatchMapper matchMapper,
                             MatchRegistrationService registrationService,
                             PlayerRepository playerRepository,
                             PlayerInactivityPeriodService playerInactivityPeriodService,
-                            PlayerMapper playerMapper,  CurrentPlayerService currentPlayerService) {
+                            PlayerMapper playerMapper,
+                            CurrentPlayerService currentPlayerService,
+                            SeasonService seasonService) {
         this.matchRepository = matchRepository;
+        this.matchRegistrationRepository = matchRegistrationRepository;
         this.matchMapper = matchMapper;
         this.registrationService = registrationService;
         this.playerRepository = playerRepository;
         this.playerInactivityPeriodService = playerInactivityPeriodService;
         this.playerMapper = playerMapper;
         this.currentPlayerService = currentPlayerService;
+        this.seasonService = seasonService;
     }
     // metoda pro získání všech zápasů
     @Override
     public List<MatchDTO> getAllMatches() {
-        return matchRepository.findAll().stream()
+        return matchRepository.findAllBySeasonIdOrderByDateTimeAsc(getActiveSeasonId())
+                .stream()
                 .map(matchMapper::toDTO)
                 .toList();
     }
     // metoda pro získání všech nadcházejících zápasů
     @Override
     public List<MatchDTO> getUpcomingMatches() {
-        return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
+        return matchRepository.findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(getActiveSeasonId(), now())
                 .stream()
                 .map(matchMapper::toDTO)
                 .toList();
     }
     // metoda pro získání uplynulých zápasů
     public List<MatchDTO> getPastMatches() {
-        return matchRepository.findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime.now())
+        return matchRepository.findBySeasonIdAndDateTimeBeforeOrderByDateTimeDesc(getActiveSeasonId(), now())
                 .stream()
                 .map(matchMapper::toDTO)
                 .toList();
@@ -81,7 +92,7 @@ public class MatchServiceImpl implements MatchService {
     // metoda pro získání prvního nadcházejícího zápasu
     @Override
     public MatchDTO getNextMatch() {
-        return matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now())
+        return matchRepository.findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(getActiveSeasonId(), now())
                 .stream()
                 .findFirst()
                 .map(matchMapper::toDTO)
@@ -97,6 +108,9 @@ public class MatchServiceImpl implements MatchService {
     @Override
     public MatchDTO createMatch(MatchDTO dto) {
         MatchEntity entity = matchMapper.toEntity(dto);
+
+        entity.setSeason(seasonService.getActiveSeason());
+
         return matchMapper.toDTO(matchRepository.save(entity));
     }
 
@@ -105,6 +119,13 @@ public class MatchServiceImpl implements MatchService {
     public MatchDTO updateMatch(Long id, MatchDTO dto) {
         MatchEntity match = findMatchOrThrow(id);
 
+        Long activeSeasonId = seasonService.getActiveSeason().getId();
+        if (!match.getSeason().getId().equals(activeSeasonId)) {
+            // můžeš mít vlastní exception, třeba:
+            throw new InvalidMatchStatusException(
+                    id, " - Zápas nepatří do aktuální sezóny, nelze ho upravit."
+            );
+        }
         int oldMaxPlayers = match.getMaxPlayers();
         matchMapper.updateEntity(dto, match);
         MatchEntity saved = matchRepository.save(match);
@@ -131,11 +152,12 @@ public class MatchServiceImpl implements MatchService {
                 LocalDateTime.now().toString()
         );
     }
-
+    // TODO zkusit získat údaje z matchregistration entity viz ****NAVÍC
     // metoda pro detail zápasu - omezen výpis pro ADMIN, MANAGER, PLAYER
     @Override
     public MatchDetailDTO getMatchDetail(Long id) {
         MatchEntity match = findMatchOrThrow(id);
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         boolean isAdminOrManager = auth != null && auth.getAuthorities().stream()
@@ -155,12 +177,22 @@ public class MatchServiceImpl implements MatchService {
             // pokud není vybraný aktuální hráč, necháme currentPlayerId = null → NO_RESPONSE
             logger.debug("Nebyl nalezen currentPlayerId pro match detail {}", id);
         }
-
+        // **** NAVÍC
         // 🔹 Určit status aktuálního hráče podle seznamů v DTO
-        PlayerMatchStatus status = resolveStatusForPlayer(dto, currentPlayerId);
-        dto.setStatus(status);
+        PlayerMatchStatus playerMatchStatus = resolveStatusForPlayer(dto, currentPlayerId);
+        dto.setPlayerMatchStatus(playerMatchStatus);
+
+        MatchRegistrationEntity matchRegistrationEntity = findMatchRegistrationOrThrow(currentPlayerId, match.getId());
+
+        dto.setExcuseReason(matchRegistrationEntity.getExcuseReason());
+        dto.setExcuseNote(matchRegistrationEntity.getExcuseNote());
+
+        // Match status
+        dto.setMatchStatus(match.getMatchStatus());
+        dto.setCancelReason(match.getCancelReason());
 
         return dto;
+
 
     }
 
@@ -384,7 +416,7 @@ public class MatchServiceImpl implements MatchService {
         PlayerType type = player.getType();
 
         // 1) Nejbližší nadcházející zápasy podle data
-        List<MatchEntity> upcomingAll = matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
+        List<MatchEntity> upcomingAll = matchRepository.findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(getActiveSeasonId(),now());
 
         // 2) Omezení podle typu hráče
         List<MatchEntity> limited = switch (type) {
@@ -407,7 +439,7 @@ public class MatchServiceImpl implements MatchService {
         PlayerType type = player.getType();
 
         // 1) Nejbližší nadcházející zápasy podle data
-        List<MatchEntity> upcomingAll = matchRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
+        List<MatchEntity> upcomingAll = matchRepository.findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(getActiveSeasonId(),now());
 
         List<MatchEntity> limited = switch (type) {
             case VIP -> upcomingAll;
@@ -431,6 +463,19 @@ public class MatchServiceImpl implements MatchService {
     private MatchEntity findMatchOrThrow(Long matchId) {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
+    }
+
+    private MatchRegistrationEntity findMatchRegistrationOrThrow(Long playerId, Long matchId){
+        return matchRegistrationRepository.findByPlayerIdAndMatchId(playerId, matchId)
+                .orElseThrow(() -> new MatchRegistrationNotFoundException(playerId, matchId));
+    }
+
+    private Long getActiveSeasonId() {
+        return seasonService.getActiveSeason().getId();
+    }
+
+    private LocalDateTime now() {
+        return LocalDateTime.now();
     }
 
     private MatchOverviewDTO toOverviewDTO(MatchEntity match) {
@@ -464,7 +509,7 @@ public class MatchServiceImpl implements MatchService {
 
         MatchOverviewDTO dto = toOverviewDTO(match); // ← znovupoužití tvé původní metody
 
-        PlayerMatchStatus status = registrationService
+        PlayerMatchStatus playerMatchStatus = registrationService
                 .getRegistrationsForMatch(match.getId()).stream()
                 .filter(r -> r.getPlayerId().equals(playerId))
                 .map(MatchRegistrationDTO::getStatus)
@@ -478,7 +523,7 @@ public class MatchServiceImpl implements MatchService {
                 )
                 .orElse(PlayerMatchStatus.NO_RESPONSE);
 
-        dto.setStatus(status);
+        dto.setPlayerMatchStatus(playerMatchStatus);
         return dto;
     }
 
@@ -487,8 +532,7 @@ public class MatchServiceImpl implements MatchService {
         PlayerEntity player = findPlayerOrThrow(playerId);
 
         // Vezmeme dostupné zápasy jako entity (bez DTO)
-        List<MatchEntity> availableMatches = matchRepository.findAll().stream()
-                .filter(match -> match.getDateTime().isBefore(LocalDateTime.now()) || match.getDateTime().isEqual(LocalDateTime.now()))
+        List<MatchEntity> availableMatches = matchRepository.findBySeasonIdAndDateTimeBeforeOrderByDateTimeDesc(getActiveSeasonId(), now()).stream()
                 .filter(match -> playerInactivityPeriodService.isActive(player, match.getDateTime()))
                 .toList();
 
@@ -521,7 +565,7 @@ public class MatchServiceImpl implements MatchService {
                 .map(match -> {
                     MatchOverviewDTO overview = toOverviewDTO(match);
 
-                    PlayerMatchStatus status = Optional.ofNullable(statusMap.get(match.getId()))
+                    PlayerMatchStatus playerMatchStatus = Optional.ofNullable(statusMap.get(match.getId()))
                             .map(m -> m.get(playerId))
                             .filter(s ->
                                             s == PlayerMatchStatus.REGISTERED ||
@@ -532,11 +576,12 @@ public class MatchServiceImpl implements MatchService {
                             )
                             .orElse(PlayerMatchStatus.NO_RESPONSE);
 
-                    overview.setStatus(status);
+                    overview.setPlayerMatchStatus(playerMatchStatus);
                     return overview;
                 })
                 .toList();
     }
+    // TODO ENDPOINT
     @Override
     public MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote) {
         // tady jen deleguješ na RegistrationService
@@ -544,18 +589,19 @@ public class MatchServiceImpl implements MatchService {
         return registrationService.markNoExcused(matchId, playerId, adminNote);
     }
 
+    //TODO ENDPOINT
     @Override
     @Transactional
     public Void cancelMatch(Long matchId, MatchCancelReason reason) {
         MatchEntity match = findMatchOrThrow(matchId);
         String message = " je již zrušen";
 
-        if (match.getStatus() == MatchStatus.CANCELLED) {
+        if (match.getMatchStatus() == MatchStatus.CANCELLED) {
             throw new InvalidMatchStatusException(matchId, message);
         }
 
 
-        match.setStatus(MatchStatus.CANCELLED);
+        match.setMatchStatus(MatchStatus.CANCELLED);
         match.setCancelReason(reason);
 
         return null;
@@ -567,11 +613,11 @@ public class MatchServiceImpl implements MatchService {
         MatchEntity match = findMatchOrThrow(matchId);
         String message = " ještě nebyl zrušen";
 
-        if (match.getStatus() != MatchStatus.CANCELLED) {
+        if (match.getMatchStatus() != MatchStatus.CANCELLED) {
             throw new InvalidMatchStatusException(matchId, message);
         }
 
-        match.setStatus(null);
+        match.setMatchStatus(null);
         match.setCancelReason(null);
 
         return null;

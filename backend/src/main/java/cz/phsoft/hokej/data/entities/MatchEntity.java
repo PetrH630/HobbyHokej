@@ -32,10 +32,14 @@ public class MatchEntity {
     private Integer price;
 
     @Enumerated(EnumType.STRING)
-    private MatchStatus status;
+    private MatchStatus matchStatus;
 
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "season_id", nullable = false)
+    private SeasonEntity season;
 
     public MatchEntity() {}
 
@@ -60,12 +64,12 @@ public class MatchEntity {
 
     public void setPrice(Integer price) { this.price = price; }
 
-    public MatchStatus getStatus() {
-        return status;
+    public MatchStatus getMatchStatus() {
+        return matchStatus;
     }
 
-    public void setStatus(MatchStatus status) {
-        this.status = status;
+    public void setMatchStatus(MatchStatus matchStatus) {
+        this.matchStatus = matchStatus;
     }
 
     public MatchCancelReason getCancelReason() {
@@ -74,5 +78,13 @@ public class MatchEntity {
 
     public void setCancelReason(MatchCancelReason cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public SeasonEntity getSeason() {
+        return season;
+    }
+
+    public void setSeason(SeasonEntity season) {
+        this.season = season;
     }
 }

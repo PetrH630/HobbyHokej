@@ -5,6 +5,7 @@ import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 
 import java.util.List;
 
@@ -12,13 +13,8 @@ public interface MatchRegistrationService {
 
     // 🔥 Vrací DTO místo entity
     MatchRegistrationDTO upsertRegistration(
-            Long matchId,
             Long playerId,
-            Team team,
-            String adminNote,
-            ExcuseReason excuseReason,
-            String excuseNote,
-            boolean unregister
+            MatchRegistrationRequest request
     );
 
     List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId);

@@ -6,4 +6,6 @@ public class InvalidMatchStatusException extends BusinessException {
     public InvalidMatchStatusException(Long id, String message) {
         super("BE - Zápas s id: " + id + message, HttpStatus.CONFLICT);
     }
+
+
 }

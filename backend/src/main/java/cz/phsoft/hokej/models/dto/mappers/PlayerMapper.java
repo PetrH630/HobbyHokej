@@ -25,8 +25,8 @@ public interface PlayerMapper {
     @Mapping(target = "fullName", ignore = true)         // generuje si Entity sama
     @Mapping(target = "user", ignore = true)             // nastavuješ v service
     @Mapping(
-            target = "status",
-            expression = "java(dto.getStatus() != null ? dto.getStatus() : cz.phsoft.hokej.data.enums.PlayerStatus.PENDING)"
+            target = "playerStatus",
+            expression = "java(dto.getPlayerStatus() != null ? dto.getPlayerStatus() : cz.phsoft.hokej.data.enums.PlayerStatus.PENDING)"
     )
     // mapování do embedded NotificationSettings
     @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
@@ -43,8 +43,8 @@ public interface PlayerMapper {
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(
-            target = "status",
-            expression = "java(source.getStatus() != null ? source.getStatus() : target.getStatus())"
+            target = "playerStatus",
+            expression = "java(source.getPlayerStatus() != null ? source.getPlayerStatus() : target.getPlayerStatus())"
     )
     @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
     @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")
