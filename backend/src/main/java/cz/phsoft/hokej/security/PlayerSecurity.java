@@ -13,19 +13,24 @@ import org.springframework.stereotype.Component;
  *
  * ÚČEL:
  * -----
- * Slouží pro jemnozrnnou autorizaci pomocí SpEL výrazů
- * (např. v @PreAuthorize anotacích).
+ * Poskytuje metody pro jemnozrnnou autorizaci nad entitou {@link PlayerEntity},
+ * typicky ve SpEL výrazech v anotacích jako {@code @PreAuthorize}.
  *
  * Typické použití:
- * ----------------
+ * <pre>
+ * {@code
  * @PreAuthorize("@playerSecurity.isOwner(authentication, #playerId)")
+ * public ResponseEntity<?> getPlayerDetail(Long playerId) { ... }
+ * }
+ * </pre>
  *
  * Poznámka:
- * ----------
- * Aktuálně nepoužívám (používáš /me a CurrentPlayer),
- * Připravené řešení do budoucna.
+ * ---------
+ * V aktuální verzi využíváš hlavně endpointy typu {@code /me}
+ * a {@link CurrentPlayerContext}, ale tato třída je připravena
+ * pro případné rozšíření autorizace na úrovni konkrétních hráčů.
  */
-@Component("playerSecurity") // bean name pro SpEL
+@Component("playerSecurity") // název beany pro použití ve SpEL výrazech
 public class PlayerSecurity {
 
     private static final Logger logger =
@@ -42,18 +47,22 @@ public class PlayerSecurity {
      *
      * LOGIKA:
      * -------
-     * 1) ověření existence autentizace
-     * 2) ověření, že principal je UserDetails
-     * 3) načtení hráče z DB
-     * 4) porovnání emailu uživatele s email usera u hráče
+     * <ol>
+     *     <li>ověří existenci autentizace a její platnost,</li>
+     *     <li>ověří, že {@code principal} je typu {@link UserDetails},</li>
+     *     <li>načte hráče z DB podle {@code playerId},</li>
+     *     <li>porovná email přihlášeného uživatele (username)
+     *         s emailem uživatele přiřazeného k hráči.</li>
+     * </ol>
      *
      * BEZPEČNOSTNÍ PRAVIDLO:
-     * ---------------------
-     * Jakákoli chyba = přístup ZAMÍTNUT
+     * ----------------------
+     * Jakákoli chyba nebo nesrovnalost → přístup je zamítnut
+     * (metoda vždy vrací {@code false}, nikdy nevyhazuje výjimku).
      *
-     * @param authentication aktuální Authentication objekt
-     * @param playerId       ID hráče
-     * @return true pokud je uživatel vlastníkem hráče
+     * @param authentication aktuální {@link Authentication} objekt
+     * @param playerId       ID hráče, ke kterému se má ověřit vlastnictví
+     * @return {@code true}, pokud je uživatel vlastníkem hráče; jinak {@code false}
      */
     public boolean isOwner(Authentication authentication, Long playerId) {
 
@@ -80,9 +89,9 @@ public class PlayerSecurity {
             // 3) kontrola vlastnictví hráče
             boolean isOwner = playerRepository.findById(playerId)
                     .map(player ->
-                            player.getUser() != null &&
-                                    player.getUser().getEmail()
-                                            .equals(userDetails.getUsername())
+                            player.getUser() != null
+                                    && player.getUser().getEmail()
+                                    .equals(userDetails.getUsername())
                     )
                     .orElse(false);
 
@@ -98,8 +107,7 @@ public class PlayerSecurity {
             return isOwner;
 
         } catch (Exception e) {
-            // NIKDY nepropustit výjimku do SpEL výrazu
-            // SpEL musí vždy vrátit boolean
+            // NIKDY nepropouštět výjimku do SpEL výrazu – vždy vracíme boolean
             logger.error(
                     "Chyba při kontrole vlastníka hráče {}: {}",
                     playerId,

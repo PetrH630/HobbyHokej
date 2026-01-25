@@ -24,7 +24,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou {@link AppUserEntity}.
+ *
+ * SlouĹľĂ­ k perzistenci a naÄŤĂ­tĂˇnĂ­ uĹľivatelskĂ˝ch ĂşÄŤtĹŻ
+ * z databĂˇze pomocĂ­ Spring Data JPA.
+ */
 public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
+
+    /**
+     * VyhledĂˇ uĹľivatele podle emailovĂ© adresy.
+     *
+     * Email slouĹľĂ­ jako unikĂˇtnĂ­ identifikĂˇtor uĹľivatele
+     * v rĂˇmci autentizace.
+     *
+     * @param email email uĹľivatele
+     * @return uĹľivatel zabalenĂ˝ v {@link Optional}, pokud existuje
+     */
     Optional<AppUserEntity> findByEmail(String email);
 }
 
@@ -41,7 +57,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface EmailVerificationTokenRepository extends JpaRepository<EmailVerificationTokenEntity, Long> {
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou {@link EmailVerificationTokenEntity}.
+ *
+ * SlouĹľĂ­ k uklĂˇdĂˇnĂ­ a vyhledĂˇvĂˇnĂ­ ovÄ›Ĺ™ovacĂ­ch tokenĹŻ
+ * pouĹľĂ­vanĂ˝ch pĹ™i aktivaci uĹľivatelskĂ˝ch ĂşÄŤtĹŻ.
+ */
+public interface EmailVerificationTokenRepository
+        extends JpaRepository<EmailVerificationTokenEntity, Long> {
+
+    /**
+     * VyhledĂˇ ovÄ›Ĺ™ovacĂ­ token podle jeho hodnoty.
+     *
+     * PouĹľĂ­vĂˇ se pĹ™i ovÄ›Ĺ™ovĂˇnĂ­ aktivaÄŤnĂ­ho odkazu uĹľivatele.
+     *
+     * @param token hodnota ovÄ›Ĺ™ovacĂ­ho tokenu
+     * @return token zabalenĂ˝ v {@link Optional}, pokud existuje
+     */
     Optional<EmailVerificationTokenEntity> findByToken(String token);
 }
 
@@ -58,18 +90,51 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface MatchRegistrationHistoryRepository extends JpaRepository<MatchRegistrationHistoryEntity, Long> {
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou {@link MatchRegistrationHistoryEntity}.
+ *
+ * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ historickĂ˝ch (auditnĂ­ch) zĂˇznamĹŻ zmÄ›n
+ * registracĂ­ hrĂˇÄŤĹŻ k zĂˇpasĹŻm.
+ */
+public interface MatchRegistrationHistoryRepository
+        extends JpaRepository<MatchRegistrationHistoryEntity, Long> {
 
-    // vĹˇechny registrace na zĂˇpas
-    List<MatchRegistrationHistoryEntity> findByMatchRegistrationIdOrderByChangedAtDesc(Long matchRegistrationId);
+    /**
+     * VrĂˇtĂ­ historii zmÄ›n konkrĂ©tnĂ­ registrace.
+     *
+     * ZĂˇznamy jsou seĹ™azeny sestupnÄ› podle ÄŤasu zmÄ›ny
+     * (nejnovÄ›jĹˇĂ­ zmÄ›na jako prvnĂ­).
+     *
+     * @param matchRegistrationId ID pĹŻvodnĂ­ registrace
+     * @return seznam historickĂ˝ch zĂˇznamĹŻ
+     */
+    List<MatchRegistrationHistoryEntity>
+    findByMatchRegistrationIdOrderByChangedAtDesc(Long matchRegistrationId);
 
-    // Historie pro konkrĂ©tnĂ­ zĂˇpas
-    List<MatchRegistrationHistoryEntity> findByMatchIdOrderByChangedAtDesc(Long matchId);
+    /**
+     * VrĂˇtĂ­ historii vĹˇech zmÄ›n registracĂ­ pro danĂ˝ zĂˇpas.
+     *
+     * PouĹľĂ­vĂˇ se napĹ™. pro administrativnĂ­ pĹ™ehledy
+     * nebo auditnĂ­ kontrolu zĂˇpasu.
+     *
+     * @param matchId ID zĂˇpasu
+     * @return seznam historickĂ˝ch zĂˇznamĹŻ
+     */
+    List<MatchRegistrationHistoryEntity>
+    findByMatchIdOrderByChangedAtDesc(Long matchId);
 
-    // Historie zmÄ›n hrĂˇÄŤe
-    List<MatchRegistrationHistoryEntity> findByPlayerIdOrderByChangedAtDesc(Long playerId);
-
+    /**
+     * VrĂˇtĂ­ historii zmÄ›n registracĂ­ konkrĂ©tnĂ­ho hrĂˇÄŤe.
+     *
+     * ZĂˇznamy jsou seĹ™azeny sestupnÄ› podle ÄŤasu zmÄ›ny.
+     *
+     * @param playerId ID hrĂˇÄŤe
+     * @return seznam historickĂ˝ch zĂˇznamĹŻ
+     */
+    List<MatchRegistrationHistoryEntity>
+    findByPlayerIdOrderByChangedAtDesc(Long playerId);
 }
+
 
 
 -----
@@ -78,7 +143,6 @@ public interface MatchRegistrationHistoryRepository extends JpaRepository<MatchR
 
 package cz.phsoft.hokej.data.repositories;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -87,25 +151,77 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-    @Repository
-    public interface MatchRegistrationRepository extends JpaRepository<MatchRegistrationEntity, Long> {
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou {@link MatchRegistrationEntity}.
+ *
+ * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ a sprĂˇvÄ› registracĂ­ hrĂˇÄŤĹŻ k zĂˇpasĹŻm,
+ * vÄŤetnÄ› kontroly existence registrace, poÄŤtĹŻ hrĂˇÄŤĹŻ
+ * a vyhledĂˇvĂˇnĂ­ dle zĂˇpasu nebo hrĂˇÄŤe.
+ */
+@Repository
+public interface MatchRegistrationRepository
+        extends JpaRepository<MatchRegistrationEntity, Long> {
 
-        // VrĂˇtĂ­ poslednĂ­ status pro danĂ©ho hrĂˇÄŤe a zĂˇpas
-        Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
+    /**
+     * OvÄ›Ĺ™Ă­, zda existuje registrace hrĂˇÄŤe k danĂ©mu zĂˇpasu.
+     *
+     * PouĹľĂ­vĂˇ se zejmĂ©na k rychlĂ© kontrole existence
+     * registrace bez nutnosti naÄŤĂ­tat celou entitu.
+     *
+     * @param playerId ID hrĂˇÄŤe
+     * @param matchId  ID zĂˇpasu
+     * @return {@code true}, pokud registrace existuje
+     */
+    Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
 
-        // VolitelnÄ›: vĹˇechny registrace pro urÄŤitĂ˝ zĂˇpas
-        List<MatchRegistrationEntity> findByMatchId(Long matchId);
+    /**
+     * VrĂˇtĂ­ vĹˇechny registrace k danĂ©mu zĂˇpasu.
+     *
+     * @param matchId ID zĂˇpasu
+     * @return seznam registracĂ­
+     */
+    List<MatchRegistrationEntity> findByMatchId(Long matchId);
 
-        // VolitelnÄ›: vĹˇechny registrace pro urÄŤitĂ©ho hrĂˇÄŤe
-        List<MatchRegistrationEntity> findByPlayerId(Long playerId);
+    /**
+     * VrĂˇtĂ­ vĹˇechny registrace danĂ©ho hrĂˇÄŤe.
+     *
+     * @param playerId ID hrĂˇÄŤe
+     * @return seznam registracĂ­
+     */
+    List<MatchRegistrationEntity> findByPlayerId(Long playerId);
 
-        // --- NovĂˇ metoda pro hledĂˇnĂ­ konkrĂ©tnĂ­ registrace ---
-        Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
+    /**
+     * Najde konkrĂ©tnĂ­ registraci hrĂˇÄŤe k zĂˇpasu.
+     *
+     * @param playerId ID hrĂˇÄŤe
+     * @param matchId  ID zĂˇpasu
+     * @return registrace zabalenĂˇ v {@link Optional}, pokud existuje
+     */
+    Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
 
-        long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
+    /**
+     * SpoÄŤĂ­tĂˇ poÄŤet registracĂ­ danĂ©ho zĂˇpasu podle stavu.
+     *
+     * Typicky se pouĹľĂ­vĂˇ pro zjiĹˇtÄ›nĂ­ aktuĂˇlnĂ­
+     * obsazenosti zĂˇpasu.
+     *
+     * @param matchId ID zĂˇpasu
+     * @param status  stav registrace
+     * @return poÄŤet registracĂ­
+     */
+    long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
 
-        List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
-    }
+    /**
+     * VrĂˇtĂ­ registrace pro vĂ­ce zĂˇpasĹŻ najednou.
+     *
+     * PouĹľĂ­vĂˇ se napĹ™. pĹ™i hromadnĂ©m naÄŤĂ­tĂˇnĂ­
+     * registracĂ­ pro pĹ™ehledy a statistiky.
+     *
+     * @param matchIds seznam ID zĂˇpasĹŻ
+     * @return seznam registracĂ­
+     */
+    List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
+}
 
 
 
@@ -121,37 +237,97 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou {@link MatchEntity}.
+ *
+ * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ zĂˇpasĹŻ podle ÄŤasu konĂˇnĂ­ a sezĂłny,
+ * zejmĂ©na pro pĹ™ehledy nadchĂˇzejĂ­cĂ­ch a odehranĂ˝ch zĂˇpasĹŻ.
+ */
 public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
 
-    // --- podle data bez ohledu na sezĂłnu ---
+    // ==================================================
+    // ZĂPASY PODLE DATA (NEZĂVISLE NA SEZĂ“NÄš)
+    // ==================================================
+
+    /**
+     * VrĂˇtĂ­ vĹˇechny zĂˇpasy konajĂ­cĂ­ se po zadanĂ©m ÄŤase.
+     *
+     * ZĂˇpasy jsou seĹ™azeny vzestupnÄ› podle data konĂˇnĂ­
+     * (nejbliĹľĹˇĂ­ zĂˇpas jako prvnĂ­).
+     *
+     * @param dateTime referenÄŤnĂ­ datum a ÄŤas
+     * @return seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ
+     */
     List<MatchEntity> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
 
+    /**
+     * VrĂˇtĂ­ vĹˇechny zĂˇpasy konajĂ­cĂ­ se pĹ™ed zadanĂ˝m ÄŤasem.
+     *
+     * ZĂˇpasy jsou seĹ™azeny sestupnÄ› podle data konĂˇnĂ­
+     * (nejnovÄ›jĹˇĂ­ odehranĂ˝ zĂˇpas jako prvnĂ­).
+     *
+     * @param dateTime referenÄŤnĂ­ datum a ÄŤas
+     * @return seznam odehranĂ˝ch zĂˇpasĹŻ
+     */
     List<MatchEntity> findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime dateTime);
 
+    // ==================================================
+    // ZĂPASY V KONKRĂ‰TNĂŤ SEZĂ“NÄš
+    // ==================================================
 
-    // --- vĹˇechny zĂˇpasy v konkrĂ©tnĂ­ sezĂłnÄ› ---
+    /**
+     * VrĂˇtĂ­ vĹˇechny zĂˇpasy v danĂ© sezĂłnÄ› seĹ™azenĂ©
+     * vzestupnÄ› podle data konĂˇnĂ­.
+     *
+     * @param seasonId ID sezĂłny
+     * @return seznam zĂˇpasĹŻ v sezĂłnÄ›
+     */
     List<MatchEntity> findAllBySeasonIdOrderByDateTimeAsc(Long seasonId);
 
+    /**
+     * VrĂˇtĂ­ vĹˇechny zĂˇpasy v danĂ© sezĂłnÄ› seĹ™azenĂ©
+     * sestupnÄ› podle data konĂˇnĂ­.
+     *
+     * @param seasonId ID sezĂłny
+     * @return seznam zĂˇpasĹŻ v sezĂłnÄ›
+     */
     List<MatchEntity> findAllBySeasonIdOrderByDateTimeDesc(Long seasonId);
 
+    // ==================================================
+    // ZĂPASY V SEZĂ“NÄš S ÄŚASOVĂťM OMEZENĂŤM
+    // ==================================================
 
-    // --- zĂˇpasy v sezĂłnÄ› po danĂ©m ÄŤase (pouĹľĂ­vanĂ© ve sluĹľbÄ›) ---
+    /**
+     * VrĂˇtĂ­ zĂˇpasy v danĂ© sezĂłnÄ›, kterĂ© se konajĂ­
+     * po zadanĂ©m ÄŤase.
+     *
+     * PouĹľĂ­vĂˇ se zejmĂ©na pro naÄŤĂ­tĂˇnĂ­ nadchĂˇzejĂ­cĂ­ch
+     * zĂˇpasĹŻ v aktivnĂ­ sezĂłnÄ›.
+     *
+     * @param seasonId ID sezĂłny
+     * @param from     referenÄŤnĂ­ datum a ÄŤas
+     * @return seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ v sezĂłnÄ›
+     */
     List<MatchEntity> findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(
             Long seasonId,
             LocalDateTime from
     );
 
-    // --- zĂˇpasy v sezĂłnÄ› pĹ™ed danĂ˝m ÄŤasem (pouĹľĂ­vanĂ© ve sluĹľbÄ›) ---
+    /**
+     * VrĂˇtĂ­ zĂˇpasy v danĂ© sezĂłnÄ›, kterĂ© se konaly
+     * pĹ™ed zadanĂ˝m ÄŤasem.
+     *
+     * PouĹľĂ­vĂˇ se zejmĂ©na pro pĹ™ehled odehranĂ˝ch
+     * zĂˇpasĹŻ v sezĂłnÄ›.
+     *
+     * @param seasonId ID sezĂłny
+     * @param to       referenÄŤnĂ­ datum a ÄŤas
+     * @return seznam odehranĂ˝ch zĂˇpasĹŻ v sezĂłnÄ›
+     */
     List<MatchEntity> findBySeasonIdAndDateTimeBeforeOrderByDateTimeDesc(
             Long seasonId,
             LocalDateTime to
     );
-
-    // (VOLITELNĂ‰) pokud bys nÄ›kdy chtÄ›l >= mĂ­sto >
-    // List<MatchEntity> findAllBySeasonIdAndDateTimeGreaterThanEqualOrderByDateTimeAsc(
-    //         Long seasonId,
-    //         LocalDateTime from
-    // );
 }
 
 
@@ -159,7 +335,6 @@ public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
 -----
 # Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\PlayerInactivityPeriodRepository.java
 -----
-
 
 package cz.phsoft.hokej.data.repositories;
 
@@ -171,18 +346,61 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou {@link PlayerInactivityPeriodEntity}.
+ *
+ * SlouĹľĂ­ k evidenci a vyhledĂˇvĂˇnĂ­ obdobĂ­ neaktivity hrĂˇÄŤĹŻ,
+ * zejmĂ©na pro ovÄ›Ĺ™enĂ­ dostupnosti hrĂˇÄŤe v konkrĂ©tnĂ­m ÄŤase.
+ */
 @Repository
-public interface PlayerInactivityPeriodRepository extends JpaRepository<PlayerInactivityPeriodEntity, Long> {
+public interface PlayerInactivityPeriodRepository
+        extends JpaRepository<PlayerInactivityPeriodEntity, Long> {
 
-    // zjistĂ­, zda hrĂˇÄŤ je aktuĂˇlnÄ› neaktivnĂ­
+    /**
+     * OvÄ›Ĺ™Ă­, zda je hrĂˇÄŤ v danĂ©m ÄŤasovĂ©m okamĹľiku neaktivnĂ­.
+     *
+     * PouĹľĂ­vĂˇ se napĹ™. pĹ™i registraci hrĂˇÄŤe na zĂˇpas
+     * nebo pĹ™i kontrole jeho dostupnosti.
+     *
+     * @param player hrĂˇÄŤ, jehoĹľ neaktivita se ovÄ›Ĺ™uje
+     * @param from   referenÄŤnĂ­ ÄŤas (obvykle ÄŤas zĂˇpasu)
+     * @param to     referenÄŤnĂ­ ÄŤas (obvykle shodnĂ˝ s {@code from})
+     * @return {@code true}, pokud hrĂˇÄŤ spadĂˇ do obdobĂ­ neaktivity
+     */
     boolean existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
-            PlayerEntity player, LocalDateTime from, LocalDateTime to);
+            PlayerEntity player,
+            LocalDateTime from,
+            LocalDateTime to
+    );
 
-    // zĂ­skĂˇ vĹˇechny neaktivnĂ­ obdobĂ­ hrĂˇÄŤe, kterĂ© spadajĂ­ do intervalu
-    List<PlayerInactivityPeriodEntity> findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
-            PlayerEntity player, LocalDateTime from, LocalDateTime to);
+    /**
+     * VrĂˇtĂ­ vĹˇechna obdobĂ­ neaktivity hrĂˇÄŤe, kterĂˇ
+     * se pĹ™ekrĂ˝vajĂ­ se zadanĂ˝m ÄŤasovĂ˝m intervalem.
+     *
+     * PouĹľĂ­vĂˇ se zejmĂ©na pĹ™i validaci vytvĂˇĹ™enĂ­
+     * nebo Ăşpravy obdobĂ­ neaktivity.
+     *
+     * @param player hrĂˇÄŤ
+     * @param from   zaÄŤĂˇtek kontrolovanĂ©ho intervalu
+     * @param to     konec kontrolovanĂ©ho intervalu
+     * @return seznam pĹ™ekrĂ˝vajĂ­cĂ­ch se obdobĂ­ neaktivity
+     */
+    List<PlayerInactivityPeriodEntity>
+    findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
+            PlayerEntity player,
+            LocalDateTime from,
+            LocalDateTime to
+    );
 
-    List<PlayerInactivityPeriodEntity> findByPlayerOrderByInactiveFromAsc(PlayerEntity player);
+    /**
+     * VrĂˇtĂ­ vĹˇechna obdobĂ­ neaktivity danĂ©ho hrĂˇÄŤe
+     * seĹ™azenĂˇ vzestupnÄ› podle zaÄŤĂˇtku neaktivity.
+     *
+     * @param player hrĂˇÄŤ
+     * @return seznam obdobĂ­ neaktivity hrĂˇÄŤe
+     */
+    List<PlayerInactivityPeriodEntity>
+    findByPlayerOrderByInactiveFromAsc(PlayerEntity player);
 }
 
 
@@ -199,15 +417,88 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou {@link PlayerEntity}.
+ *
+ * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ a sprĂˇvÄ› hrĂˇÄŤĹŻ, zejmĂ©na ve vztahu
+ * k uĹľivatelskĂ˝m ĂşÄŤtĹŻm a identifikaci hrĂˇÄŤĹŻ podle jmĂ©na
+ * nebo emailu vlastnĂ­ka.
+ */
 public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
+
+    /**
+     * Najde hrĂˇÄŤe podle jeho ID.
+     *
+     * PĹ™ekrĂ˝vĂˇ zĂˇkladnĂ­ metodu {@link JpaRepository},
+     * aby bylo moĹľnĂ© vracet {@link Optional}.
+     *
+     * @param id ID hrĂˇÄŤe
+     * @return hrĂˇÄŤ zabalenĂ˝ v {@link Optional}, pokud existuje
+     */
     Optional<PlayerEntity> findById(Long id);
 
+    /**
+     * VrĂˇtĂ­ vĹˇechny hrĂˇÄŤe, jejichĹľ ID nenĂ­ obsaĹľeno
+     * v zadanĂ©m seznamu.
+     *
+     * PouĹľĂ­vĂˇ se napĹ™. pĹ™i filtrovĂˇnĂ­ dostupnĂ˝ch hrĂˇÄŤĹŻ.
+     *
+     * @param ids seznam ID hrĂˇÄŤĹŻ, kterĂ© majĂ­ bĂ˝t vylouÄŤeny
+     * @return seznam hrĂˇÄŤĹŻ
+     */
     List<PlayerEntity> findByIdNotIn(List<Long> ids);
+
+    /**
+     * OvÄ›Ĺ™Ă­, zda jiĹľ existuje hrĂˇÄŤ se stejnĂ˝m jmĂ©nem a pĹ™Ă­jmenĂ­m.
+     *
+     * PouĹľĂ­vĂˇ se jako ochrana proti duplicitnĂ­mu
+     * vytvĂˇĹ™enĂ­ hrĂˇÄŤĹŻ.
+     *
+     * @param name    jmĂ©no hrĂˇÄŤe
+     * @param surname pĹ™Ă­jmenĂ­ hrĂˇÄŤe
+     * @return {@code true}, pokud hrĂˇÄŤ existuje
+     */
     boolean existsByNameAndSurname(String name, String surname);
 
+    /**
+     * Najde hrĂˇÄŤe podle jmĂ©na a pĹ™Ă­jmenĂ­.
+     *
+     * @param name    jmĂ©no hrĂˇÄŤe
+     * @param surname pĹ™Ă­jmenĂ­ hrĂˇÄŤe
+     * @return hrĂˇÄŤ zabalenĂ˝ v {@link Optional}, pokud existuje
+     */
     Optional<PlayerEntity> findByNameAndSurname(String name, String surname);
+
+    /**
+     * Najde jednoho hrĂˇÄŤe podle emailu uĹľivatele,
+     * ke kterĂ©mu je hrĂˇÄŤ pĹ™iĹ™azen.
+     *
+     * PouĹľĂ­vĂˇ se zejmĂ©na v pĹ™Ă­padech, kdy mĂˇ uĹľivatel
+     * pouze jednoho hrĂˇÄŤe.
+     *
+     * @param email email uĹľivatele
+     * @return hrĂˇÄŤ zabalenĂ˝ v {@link Optional}, pokud existuje
+     */
     Optional<PlayerEntity> findByUserEmail(String email);
+
+    /**
+     * VrĂˇtĂ­ vĹˇechny hrĂˇÄŤe patĹ™Ă­cĂ­ danĂ©mu uĹľivateli.
+     *
+     * @param email email uĹľivatele
+     * @return seznam hrĂˇÄŤĹŻ uĹľivatele
+     */
     List<PlayerEntity> findAllByUserEmail(String email);
+
+    /**
+     * VrĂˇtĂ­ vĹˇechny hrĂˇÄŤe uĹľivatele seĹ™azenĂ©
+     * podle ID vzestupnÄ›.
+     *
+     * PouĹľĂ­vĂˇ se pro konzistentnĂ­ vĂ˝pis hrĂˇÄŤĹŻ
+     * v uĹľivatelskĂ©m rozhranĂ­.
+     *
+     * @param email email uĹľivatele
+     * @return seznam hrĂˇÄŤĹŻ uĹľivatele
+     */
     List<PlayerEntity> findByUser_EmailOrderByIdAsc(String email);
 }
 
@@ -219,28 +510,82 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
 
 package cz.phsoft.hokej.data.repositories;
 
-
 import cz.phsoft.hokej.data.entities.SeasonEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou {@link SeasonEntity}.
+ *
+ * SlouĹľĂ­ ke sprĂˇvÄ› sezĂłn, zejmĂ©na k urÄŤenĂ­ aktivnĂ­ sezĂłny,
+ * kontrole ÄŤasovĂ˝ch pĹ™ekryvĹŻ a naÄŤĂ­tĂˇnĂ­ sezĂłn
+ * v chronologickĂ©m poĹ™adĂ­.
+ */
 public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
 
+    /**
+     * VrĂˇtĂ­ aktuĂˇlnÄ› aktivnĂ­ sezĂłnu.
+     *
+     * V systĂ©mu mĹŻĹľe bĂ˝t v danĂ©m okamĹľiku
+     * aktivnĂ­ maximĂˇlnÄ› jedna sezĂłna.
+     *
+     * @return aktivnĂ­ sezĂłna zabalenĂˇ v {@link Optional}, pokud existuje
+     */
     Optional<SeasonEntity> findByActiveTrue();
 
+    /**
+     * VrĂˇtĂ­ vĹˇechny sezĂłny seĹ™azenĂ©
+     * podle data zaÄŤĂˇtku vzestupnÄ›.
+     *
+     * @return seznam sezĂłn
+     */
     List<SeasonEntity> findAllByOrderByStartDateAsc();
 
-    boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate endDate, LocalDate startDate);
+    /**
+     * OvÄ›Ĺ™Ă­, zda existuje sezĂłna, kterĂˇ se ÄŤasovÄ›
+     * pĹ™ekrĂ˝vĂˇ se zadanĂ˝m intervalem.
+     *
+     * PouĹľĂ­vĂˇ se pĹ™i vytvĂˇĹ™enĂ­ novĂ© sezĂłny
+     * jako ochrana proti pĹ™ekrĂ˝vajĂ­cĂ­m se obdobĂ­m.
+     *
+     * @param endDate   konec kontrolovanĂ©ho intervalu
+     * @param startDate zaÄŤĂˇtek kontrolovanĂ©ho intervalu
+     * @return {@code true}, pokud existuje ÄŤasovĂ˝ pĹ™ekryv
+     */
+    boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqual(
+            LocalDate endDate,
+            LocalDate startDate
+    );
 
+    /**
+     * OvÄ›Ĺ™Ă­, zda existuje jinĂˇ sezĂłna (mimo zadanĂ© ID),
+     * kterĂˇ se ÄŤasovÄ› pĹ™ekrĂ˝vĂˇ se zadanĂ˝m intervalem.
+     *
+     * PouĹľĂ­vĂˇ se pĹ™i aktualizaci existujĂ­cĂ­ sezĂłny,
+     * aby nedoĹˇlo ke kolizi s jinou sezĂłnou.
+     *
+     * @param endDate   konec kontrolovanĂ©ho intervalu
+     * @param startDate zaÄŤĂˇtek kontrolovanĂ©ho intervalu
+     * @param id        ID sezĂłny, kterĂˇ mĂˇ bĂ˝t z kontroly vynechĂˇna
+     * @return {@code true}, pokud existuje ÄŤasovĂ˝ pĹ™ekryv
+     */
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(
             LocalDate endDate,
             LocalDate startDate,
-            Long id);
+            Long id
+    );
 
+    /**
+     * SpoÄŤĂ­tĂˇ poÄŤet aktivnĂ­ch sezĂłn.
+     *
+     * SlouĹľĂ­ jako ochrana proti stavu,
+     * kdy by bylo aktivnĂ­ch vĂ­ce sezĂłn souÄŤasnÄ›.
+     *
+     * @return poÄŤet aktivnĂ­ch sezĂłn
+     */
     long countByActiveTrue();
 }
 

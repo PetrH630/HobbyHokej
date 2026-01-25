@@ -15,26 +15,101 @@ SessionKeys.java
 
 package cz.phsoft.hokej.security;
 
-
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 
-// pro vĂ˝bÄ›r hrĂˇÄŤe
-public class CurrentPlayerContext {
+/**
+ * Thread-local kontext pro â€žaktuĂˇlnĂ­ho hrĂˇÄŤeâ€ś.
+ *
+ * SlouĹľĂ­ k uchovĂˇnĂ­ instance {@link PlayerEntity},
+ * kterĂˇ je zvolenĂˇ jako â€žcurrent playerâ€ś
+ * v rĂˇmci jednoho konkrĂ©tnĂ­ho HTTP requestu.
+ *
+ * -------------------------------------------------
+ * Ĺ˝IVOTNĂŤ CYKLUS
+ * -------------------------------------------------
+ * <ul>
+ *     <li>naplnÄ›n v {@code CurrentPlayerFilter} na zaÄŤĂˇtku requestu,</li>
+ *     <li>dostupnĂ˝ v celĂ©m call stacku
+ *         (controller â†’ service â†’ helper),</li>
+ *     <li>vyÄŤiĹˇtÄ›n po dokonÄŤenĂ­ requestu.</li>
+ * </ul>
+ *
+ * -------------------------------------------------
+ * PROÄŚ THREADLOCAL
+ * -------------------------------------------------
+ * Spring obsluhuje HTTP requesty paralelnÄ› ve vlĂˇknech.
+ * {@link ThreadLocal} zajiĹˇĹĄuje, Ĺľe:
+ * <ul>
+ *     <li>kaĹľdĂ˝ request mĂˇ vlastnĂ­ instanci {@code PlayerEntity},</li>
+ *     <li>nedochĂˇzĂ­ ke sdĂ­lenĂ­ dat mezi uĹľivateli,</li>
+ *     <li>nenĂ­ nutnĂ© pĹ™edĂˇvat hrĂˇÄŤe pĹ™es vĹˇechny metody.</li>
+ * </ul>
+ *
+ * -------------------------------------------------
+ * DĹ®LEĹ˝ITĂ‰
+ * -------------------------------------------------
+ * {@link ThreadLocal} MUSĂŤ bĂ˝t vĹľdy vyÄŤiĹˇtÄ›n pomocĂ­ {@link #clear()},
+ * jinak hrozĂ­:
+ * <ul>
+ *     <li>memory leak v aplikaÄŤnĂ­m serveru,</li>
+ *     <li>Ăşnik dat mezi jednotlivĂ˝mi requesty.</li>
+ * </ul>
+ */
+public final class CurrentPlayerContext {
 
-        private static final ThreadLocal<PlayerEntity> currentPlayer = new ThreadLocal<>();
+    /**
+     * ThreadLocal uchovĂˇvajĂ­cĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe
+     * pro prĂˇvÄ› zpracovĂˇvanĂ˝ request.
+     */
+    private static final ThreadLocal<PlayerEntity> currentPlayer = new ThreadLocal<>();
 
-        public static void set(PlayerEntity player) {
-            currentPlayer.set(player);
-        }
-
-        public static PlayerEntity get() {
-            return currentPlayer.get();
-        }
-
-        public static void clear() {
-            currentPlayer.remove();
-        }
+    private CurrentPlayerContext() {
+        // utility class â€“ nelze instancovat
     }
+
+    /**
+     * NastavĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe do thread-local kontextu.
+     *
+     * VolĂˇ se typicky:
+     * <ul>
+     *     <li>na zaÄŤĂˇtku requestu ve {@code CurrentPlayerFilter}.</li>
+     * </ul>
+     *
+     * @param player hrĂˇÄŤ zvolenĂ˝ jako aktuĂˇlnĂ­ pro danĂ˝ request
+     */
+    public static void set(PlayerEntity player) {
+        currentPlayer.set(player);
+    }
+
+    /**
+     * VrĂˇtĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe pro prĂˇvÄ› zpracovĂˇvanĂ˝ request.
+     *
+     * @return {@link PlayerEntity} nebo {@code null},
+     *         pokud hrĂˇÄŤ nebyl zvolen nebo request
+     *         nevyĹľaduje kontext hrĂˇÄŤe
+     */
+    public static PlayerEntity get() {
+        return currentPlayer.get();
+    }
+
+    /**
+     * VyÄŤistĂ­ thread-local kontext.
+     *
+     * MUSĂŤ se volat:
+     * <ul>
+     *     <li>vĹľdy po dokonÄŤenĂ­ requestu (typicky ve {@code finally} bloku filtru).</li>
+     * </ul>
+     *
+     * PouĹľitĂ­ {@link ThreadLocal#remove()}:
+     * <ul>
+     *     <li>uvolnĂ­ referenci na {@link PlayerEntity},</li>
+     *     <li>zabrĂˇnĂ­ memory leakĹŻm pĹ™i reuse vlĂˇken.</li>
+     * </ul>
+     */
+    public static void clear() {
+        currentPlayer.remove();
+    }
+}
 
 
 
@@ -55,6 +130,42 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Security / request filtr pro prĂˇci s â€žaktuĂˇlnĂ­m hrĂˇÄŤemâ€ś.
+ *
+ * ĂšÄŚEL:
+ * ------
+ * Zajistit, aby byl v prĹŻbÄ›hu zpracovĂˇnĂ­ jednoho HTTP requestu
+ * v thread-local kontextu ({@link CurrentPlayerContext})
+ * dostupnĂ˝ hrĂˇÄŤ, kterĂ©ho si uĹľivatel vybral jako â€žcurrent playerâ€ś.
+ *
+ * DĹ®VOD EXISTENCE:
+ * ----------------
+ * <ul>
+ *     <li>uĹľivatelskĂ˝ ĂşÄŤet ({@code AppUser}) mĹŻĹľe mĂ­t vĂ­ce hrĂˇÄŤĹŻ ({@code Player}),</li>
+ *     <li>FE si zvolĂ­, kterĂ˝ hrĂˇÄŤ je prĂˇvÄ› aktivnĂ­,</li>
+ *     <li>backend potĹ™ebuje mĂ­t v prĹŻbÄ›hu requestu pohodlnÄ› dostupnĂ©ho hrĂˇÄŤe
+ *         bez nutnosti pracovat pĹ™Ă­mo s {@code HttpSession} v kaĹľdĂ© vrstvÄ›.</li>
+ * </ul>
+ *
+ * CHOVĂNĂŤ:
+ * --------
+ * <ol>
+ *     <li>zĂ­skĂˇ ID aktuĂˇlnĂ­ho hrĂˇÄŤe ze session pĹ™es {@link CurrentPlayerService},</li>
+ *     <li>ovÄ›Ĺ™Ă­ existenci hrĂˇÄŤe v DB pĹ™es {@link PlayerRepository},</li>
+ *     <li>uloĹľĂ­ {@code PlayerEntity} do {@link CurrentPlayerContext} (ThreadLocal),</li>
+ *     <li>pĹ™edĂˇ Ĺ™Ă­zenĂ­ dĂˇl ve filter chainu,</li>
+ *     <li>po dokonÄŤenĂ­ requestu vĹľdy kontext vyÄŤistĂ­.</li>
+ * </ol>
+ *
+ * THREAD-SAFETY:
+ * --------------
+ * <ul>
+ *     <li>vyuĹľĂ­vĂˇ {@link ThreadLocal} â€“ kaĹľdĂ˝ request mĂˇ vlastnĂ­ kontext,</li>
+ *     <li>v {@code finally} bloku se vĹľdy volĂˇ {@link CurrentPlayerContext#clear()},</li>
+ *     <li>tĂ­m se pĹ™edchĂˇzĂ­ memory leakĹŻm a pĹ™enosu dat mezi requesty.</li>
+ * </ul>
+ */
 @Component
 public class CurrentPlayerFilter extends OncePerRequestFilter {
 
@@ -67,27 +178,43 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
         this.currentPlayerService = currentPlayerService;
     }
 
+    /**
+     * HlavnĂ­ filtraÄŤnĂ­ metoda â€“ volĂˇ se jednou pro kaĹľdĂ˝ HTTP request.
+     *
+     * Postup:
+     * <ol>
+     *     <li>naÄŤte {@code currentPlayerId} ze session
+     *         pomocĂ­ {@link CurrentPlayerService#getCurrentPlayerId()},</li>
+     *     <li>pokud ID existuje, ovÄ›Ĺ™Ă­ pĹ™Ă­tomnost hrĂˇÄŤe v databĂˇzi,</li>
+     *     <li>pokud je hrĂˇÄŤ nalezen, uloĹľĂ­ ho do {@link CurrentPlayerContext},</li>
+     *     <li>pokraÄŤuje ve filter chainu,</li>
+     *     <li>vĹľdy v {@code finally} bloku vyÄŤistĂ­ thread-local kontext.</li>
+     * </ol>
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        // ID aktuĂˇlnĂ­ho hrĂˇÄŤe uloĹľenĂ© v HTTP session
         Long playerId = currentPlayerService.getCurrentPlayerId();
 
         if (playerId != null) {
+            // bezpeÄŤnostnĂ­ kontrola â€“ hrĂˇÄŤ musĂ­ existovat v DB
             playerRepository.findById(playerId)
                     .ifPresent(CurrentPlayerContext::set);
         }
 
         try {
+            // pokraÄŤovĂˇnĂ­ ve zpracovĂˇnĂ­ requestu
             filterChain.doFilter(request, response);
         } finally {
+            // dĹŻleĹľitĂ©: vĹľdy vyÄŤistit ThreadLocal kontext
             CurrentPlayerContext.clear();
         }
     }
 }
-
 
 
 
@@ -104,11 +231,34 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-// - ZatĂ­m nepouĹľĂ­vĂˇm - pouĹľĂ­vĂˇm /me
-@Component("playerSecurity") // nĂˇzev pro pouĹľitĂ­ v SpEL (@PreAuthorize)
+
+/**
+ * BezpeÄŤnostnĂ­ helper pro kontrolu vlastnictvĂ­ hrĂˇÄŤe.
+ *
+ * ĂšÄŚEL:
+ * -----
+ * Poskytuje metody pro jemnozrnnou autorizaci nad entitou {@link PlayerEntity},
+ * typicky ve SpEL vĂ˝razech v anotacĂ­ch jako {@code @PreAuthorize}.
+ *
+ * TypickĂ© pouĹľitĂ­:
+ * <pre>
+ * {@code
+ * @PreAuthorize("@playerSecurity.isOwner(authentication, #playerId)")
+ * public ResponseEntity<?> getPlayerDetail(Long playerId) { ... }
+ * }
+ * </pre>
+ *
+ * PoznĂˇmka:
+ * ---------
+ * V aktuĂˇlnĂ­ verzi vyuĹľĂ­vĂˇĹˇ hlavnÄ› endpointy typu {@code /me}
+ * a {@link CurrentPlayerContext}, ale tato tĹ™Ă­da je pĹ™ipravena
+ * pro pĹ™Ă­padnĂ© rozĹˇĂ­Ĺ™enĂ­ autorizace na Ăşrovni konkrĂ©tnĂ­ch hrĂˇÄŤĹŻ.
+ */
+@Component("playerSecurity") // nĂˇzev beany pro pouĹľitĂ­ ve SpEL vĂ˝razech
 public class PlayerSecurity {
 
-    private static final Logger logger = LoggerFactory.getLogger(PlayerSecurity.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(PlayerSecurity.class);
 
     private final PlayerRepository playerRepository;
 
@@ -117,39 +267,77 @@ public class PlayerSecurity {
     }
 
     /**
-     * ZjistĂ­, zda je aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel vlastnĂ­kem hrĂˇÄŤe
+     * OvÄ›Ĺ™Ă­, zda je aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel vlastnĂ­kem danĂ©ho hrĂˇÄŤe.
      *
-     * @param authentication aktuĂˇlnĂ­ authentication objekt
-     * @param playerId       ID hrĂˇÄŤe
-     * @return true pokud je vlastnĂ­kem, jinak false
+     * LOGIKA:
+     * -------
+     * <ol>
+     *     <li>ovÄ›Ĺ™Ă­ existenci autentizace a jejĂ­ platnost,</li>
+     *     <li>ovÄ›Ĺ™Ă­, Ĺľe {@code principal} je typu {@link UserDetails},</li>
+     *     <li>naÄŤte hrĂˇÄŤe z DB podle {@code playerId},</li>
+     *     <li>porovnĂˇ email pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele (username)
+     *         s emailem uĹľivatele pĹ™iĹ™azenĂ©ho k hrĂˇÄŤi.</li>
+     * </ol>
+     *
+     * BEZPEÄŚNOSTNĂŤ PRAVIDLO:
+     * ----------------------
+     * JakĂˇkoli chyba nebo nesrovnalost â†’ pĹ™Ă­stup je zamĂ­tnut
+     * (metoda vĹľdy vracĂ­ {@code false}, nikdy nevyhazuje vĂ˝jimku).
+     *
+     * @param authentication aktuĂˇlnĂ­ {@link Authentication} objekt
+     * @param playerId       ID hrĂˇÄŤe, ke kterĂ©mu se mĂˇ ovÄ›Ĺ™it vlastnictvĂ­
+     * @return {@code true}, pokud je uĹľivatel vlastnĂ­kem hrĂˇÄŤe; jinak {@code false}
      */
     public boolean isOwner(Authentication authentication, Long playerId) {
+
         try {
+            // 1) zĂˇkladnĂ­ kontrola autentizace
             if (authentication == null || !authentication.isAuthenticated()) {
-                logger.warn("NeautorizovanĂ˝ pĹ™Ă­stup: ĹľĂˇdnĂˇ autentizace pro playerId {}", playerId);
+                logger.warn(
+                        "NeautorizovanĂ˝ pĹ™Ă­stup: ĹľĂˇdnĂˇ autentizace pro playerId {}",
+                        playerId
+                );
                 return false;
             }
 
+            // 2) kontrola typu principal
             Object principal = authentication.getPrincipal();
             if (!(principal instanceof UserDetails userDetails)) {
-                logger.warn("NeautorizovanĂ˝ pĹ™Ă­stup: principal nenĂ­ UserDetails pro playerId {}", playerId);
+                logger.warn(
+                        "NeautorizovanĂ˝ pĹ™Ă­stup: principal nenĂ­ UserDetails pro playerId {}",
+                        playerId
+                );
                 return false;
             }
 
+            // 3) kontrola vlastnictvĂ­ hrĂˇÄŤe
             boolean isOwner = playerRepository.findById(playerId)
-                    .map(player -> player.getUser() != null &&
-                            player.getUser().getEmail().equals(userDetails.getUsername()))
+                    .map(player ->
+                            player.getUser() != null
+                                    && player.getUser().getEmail()
+                                    .equals(userDetails.getUsername())
+                    )
                     .orElse(false);
 
+            // 4) logovĂˇnĂ­ pokusu o neoprĂˇvnÄ›nĂ˝ pĹ™Ă­stup
             if (!isOwner) {
-                logger.warn("NeautorizovanĂ˝ pĹ™Ă­stup: uĹľivatel {} nenĂ­ vlastnĂ­kem hrĂˇÄŤe {}", userDetails.getUsername(), playerId);
+                logger.warn(
+                        "NeautorizovanĂ˝ pĹ™Ă­stup: uĹľivatel {} nenĂ­ vlastnĂ­kem hrĂˇÄŤe {}",
+                        userDetails.getUsername(),
+                        playerId
+                );
             }
 
             return isOwner;
 
         } catch (Exception e) {
-            logger.error("Chyba pĹ™i kontrole vlastnĂ­ka hrĂˇÄŤe {}: {}", playerId, e.getMessage(), e);
-            // nikdy nepropustit vĂ˝jimku do SpEL
+            // NIKDY nepropouĹˇtÄ›t vĂ˝jimku do SpEL vĂ˝razu â€“ vĹľdy vracĂ­me boolean
+            logger.error(
+                    "Chyba pĹ™i kontrole vlastnĂ­ka hrĂˇÄŤe {}: {}",
+                    playerId,
+                    e.getMessage(),
+                    e
+            );
             return false;
         }
     }
@@ -163,10 +351,46 @@ public class PlayerSecurity {
 
 package cz.phsoft.hokej.security;
 
+/**
+ * CentrĂˇlnĂ­ definice klĂ­ÄŤĹŻ pouĹľĂ­vanĂ˝ch v HTTP session.
+ * <p>
+ * Tato tĹ™Ă­da slouĹľĂ­ jako jednotnĂ© mĂ­sto pro uloĹľenĂ­ nĂˇzvĹŻ
+ * session atributĹŻ, aby se zabrĂˇnilo:
+ * </p>
+ * <ul>
+ *     <li>duplicitĂˇm Ĺ™etÄ›zcovĂ˝ch konstant,</li>
+ *     <li>pĹ™eklepĹŻm v nĂˇzvech klĂ­ÄŤĹŻ,</li>
+ *     <li>nekonzistenci napĹ™Ă­ÄŤ aplikacĂ­.</li>
+ * </ul>
+ *
+ * PouĹľitĂ­:
+ * <ul>
+ *     <li>vyuĹľĂ­vĂˇ se ve sluĹľbĂˇch pracujĂ­cĂ­ch s HTTP session,</li>
+ *     <li>typicky v {@code CurrentPlayerService} a souvisejĂ­cĂ­ch tĹ™Ă­dĂˇch.</li>
+ * </ul>
+ *
+ * TechnickĂˇ poznĂˇmka:
+ * <ul>
+ *     <li>tĹ™Ă­da je {@code final} a mĂˇ privĂˇtnĂ­ konstruktor,</li>
+ *     <li>slouĹľĂ­ vĂ˝hradnÄ› jako drĹľĂˇk konstant (utility class).</li>
+ * </ul>
+ */
 public final class SessionKeys {
-    private SessionKeys() {}
 
+    /**
+     * KlĂ­ÄŤ session atributu pro ID aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
+     * <p>
+     * Hodnota pĹ™edstavuje identifikĂˇtor hrĂˇÄŤe, se kterĂ˝m
+     * aktuĂˇlnÄ› pracuje pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel.
+     * </p>
+     */
     public static final String CURRENT_PLAYER_ID = "CURRENT_PLAYER_ID";
+
+    /**
+     * PrivĂˇtnĂ­ konstruktor zabraĹujĂ­cĂ­ vytvoĹ™enĂ­ instance tĹ™Ă­dy.
+     */
+    private SessionKeys() {
+    }
 }
 
 

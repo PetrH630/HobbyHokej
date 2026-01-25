@@ -23,15 +23,19 @@ SuccessResponseDTO.java
 
 package cz.phsoft.hokej.models.dto;
 
-import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.enums.Role;
-import cz.phsoft.hokej.data.enums.Team;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.util.Set;
 
+/**
+ * DTO reprezentujĂ­cĂ­ uĹľivatelskĂ˝ ĂşÄŤet aplikace.
+ *
+ * SlouĹľĂ­ k pĹ™enosu uĹľivatelskĂ˝ch dat mezi backendem
+ * a klientem (napĹ™. pĹ™i sprĂˇvÄ› uĹľivatelĹŻ nebo pĹ™ihlĂˇĹˇenĂ­).
+ */
 public class AppUserDTO {
 
     private Long id;
@@ -44,66 +48,53 @@ public class AppUserDTO {
     @Size(min = 2, max = 50)
     private String surname;
 
+    /**
+     * Email uĹľivatele slouĹľĂ­cĂ­ jako pĹ™ihlaĹˇovacĂ­ identifikĂˇtor.
+     */
     @NotBlank(message = "Email je povinnĂ˝.")
     @Email(message = "Email nenĂ­ ve sprĂˇvnĂ©m formĂˇtu.")
     private String email;
 
+    /**
+     * Role uĹľivatele v systĂ©mu.
+     */
     private Role role;
+
+    /**
+     * PĹ™Ă­znak aktivace uĹľivatelskĂ©ho ĂşÄŤtu.
+     */
     private boolean enabled;
-    private Set<PlayerDTO> players; // jednostrannĂ©
 
+    /**
+     * HrĂˇÄŤi pĹ™iĹ™azenĂ­ k uĹľivateli.
+     *
+     * JednĂˇ se o jednostrannĂ˝ vztah pouĹľĂ­vanĂ˝
+     * pouze pro prezentaÄŤnĂ­ ĂşÄŤely.
+     */
+    private Set<PlayerDTO> players;
 
-    public Long getId() {
-        return id;
-    }
+    // gettery / settery
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; }
 
-    public String getSurname() {
-        return surname;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
     public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public void setEnabled(boolean enabled) { this.enabled = enabled;}
-
-    public Set<PlayerDTO> getPlayers() {
-        return players;
-    }
-
-    public void setPlayers(Set<PlayerDTO> players) {
-        this.players = players;
-    }
+    public Set<PlayerDTO> getPlayers() { return players; }
+    public void setPlayers(Set<PlayerDTO> players) { this.players = players; }
 }
 
 
@@ -114,9 +105,27 @@ public class AppUserDTO {
 
 package cz.phsoft.hokej.models.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
+/**
+ * DTO pro zmÄ›nu hesla pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+ *
+ * PouĹľĂ­vĂˇ se pĹ™i:
+ * <ul>
+ *     <li>zmÄ›nÄ› hesla z uĹľivatelskĂ©ho profilu,</li>
+ *     <li>ovÄ›Ĺ™enĂ­ pĹŻvodnĂ­ho hesla pĹ™ed nastavenĂ­m novĂ©ho.</li>
+ * </ul>
+ *
+ * Validace:
+ * <ul>
+ *     <li>vĹˇechna pole jsou povinnĂˇ,</li>
+ *     <li>novĂ© heslo musĂ­ splĹovat minimĂˇlnĂ­ dĂ©lku,</li>
+ *     <li>shoda novĂ©ho hesla a potvrzenĂ­ se kontroluje v servisnĂ­ vrstvÄ›.</li>
+ * </ul>
+ */
 public class ChangePasswordDTO {
+
     @NotBlank(message = "PĹŻvodnĂ­ heslo je povinnĂ©.")
     private String oldPassword;
 
@@ -127,16 +136,17 @@ public class ChangePasswordDTO {
     @NotBlank(message = "PotvrzenĂ­ novĂ©ho hesla je povinnĂ©.")
     private String newPasswordConfirm;
 
+    // gettery / settery
 
-    // gettery a settery
     public String getOldPassword() { return oldPassword; }
     public void setOldPassword(String oldPassword) { this.oldPassword = oldPassword; }
+
     public String getNewPassword() { return newPassword; }
     public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
+
     public String getNewPasswordConfirm() { return newPasswordConfirm; }
     public void setNewPasswordConfirm(String newPasswordConfirm) { this.newPasswordConfirm = newPasswordConfirm; }
 }
-
 
 
 
@@ -156,222 +166,176 @@ import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DetailnĂ­ DTO reprezentujĂ­cĂ­ zĂˇpas vÄŤetnÄ›
+ * kontextu pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe a agregovanĂ˝ch statistik.
+ *
+ * PouĹľĂ­vĂˇ se zejmĂ©na:
+ * <ul>
+ *     <li>na strĂˇnce detailu zĂˇpasu,</li>
+ *     <li>pro zobrazenĂ­ seznamĹŻ hrĂˇÄŤĹŻ dle stavu registrace,</li>
+ *     <li>pro zobrazenĂ­ kapacity, ceny a stavu ĂşÄŤasti.</li>
+ * </ul>
+ *
+ * DTO obsahuje jak:
+ * <ul>
+ *     <li>zĂˇkladnĂ­ informace o zĂˇpasu,</li>
+ *     <li>agregovanĂ© hodnoty (poÄŤty hrĂˇÄŤĹŻ, ceny),</li>
+ *     <li>stav pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe k danĂ©mu zĂˇpasu.</li>
+ * </ul>
+ */
 public class MatchDetailDTO {
+
     private Long id;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;
+
     private String location;
     private String description;
     private Integer price;
+
+    /**
+     * KapacitnĂ­ a agregaÄŤnĂ­ Ăşdaje zĂˇpasu.
+     */
     private int maxPlayers;
     private int inGamePlayers;
     private int outGamePlayers;
     private int waitingPlayers;
     private int noActionPlayers;
     private int noExcusedPlayersSum;
-    private double pricePerRegisteredPlayer;
     private int remainingSlots;
+
+    /**
+     * Cena pĹ™epoÄŤtenĂˇ na jednoho pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe.
+     * Hodnota je poÄŤĂ­tĂˇna serverem.
+     */
+    private double pricePerRegisteredPlayer;
+
+    /**
+     * Stav pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe k tomuto zĂˇpasu.
+     */
     private PlayerMatchStatus playerMatchStatus;
+
+    /**
+     * Informace o omluvÄ› pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe (pokud existuje).
+     */
     private ExcuseReason excuseReason;
     private String excuseNote;
+
+    /**
+     * Stav zĂˇpasu a pĹ™Ă­padnĂ˝ dĹŻvod zruĹˇenĂ­.
+     */
     private MatchStatus matchStatus;
     private MatchCancelReason cancelReason;
+
+    /**
+     * ID sezĂłny â€“ pouze pro ÄŤtenĂ­.
+     */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
-    List<PlayerDTO> registeredPlayers;
-    List<PlayerDTO> reservedPlayers;
-    List<PlayerDTO> unregisteredPlayers;
-    List<PlayerDTO> excusedPlayers;
-    List<PlayerDTO> noExcusedPlayers;
-    List<PlayerDTO> noResponsePlayers;
+    /**
+     * Seznamy hrĂˇÄŤĹŻ rozdÄ›lenĂ© podle stavu registrace.
+     */
+    private List<PlayerDTO> registeredPlayers;
+    private List<PlayerDTO> reservedPlayers;
+    private List<PlayerDTO> unregisteredPlayers;
+    private List<PlayerDTO> excusedPlayers;
+    private List<PlayerDTO> noExcusedPlayers;
+    private List<PlayerDTO> noResponsePlayers;
 
-    // Gettery a settery
+    // gettery / settery
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
-    public Long getId() {       return id;    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getLocation() {
-        return location;
-    }
+    public Integer getPrice() { return price; }
+    public void setPrice(Integer price) { this.price = price; }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+    public int getMaxPlayers() { return maxPlayers; }
+    public void setMaxPlayers(int maxPlayers) { this.maxPlayers = maxPlayers; }
 
-    public String getDescription() {
-        return description;
-    }
+    public int getInGamePlayers() { return inGamePlayers; }
+    public void setInGamePlayers(int inGamePlayers) { this.inGamePlayers = inGamePlayers; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public int getOutGamePlayers() { return outGamePlayers; }
+    public void setOutGamePlayers(int outGamePlayers) { this.outGamePlayers = outGamePlayers; }
 
-    public Integer getPrice() {
-        return price;
-    }
+    public int getWaitingPlayers() { return waitingPlayers; }
+    public void setWaitingPlayers(int waitingPlayers) { this.waitingPlayers = waitingPlayers; }
 
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
+    public int getNoActionPlayers() { return noActionPlayers; }
+    public void setNoActionPlayers(int noActionPlayers) { this.noActionPlayers = noActionPlayers; }
 
-    public PlayerMatchStatus getPlayerMatchStatus() {
-        return playerMatchStatus;
-    }
+    public int getNoExcusedPlayersSum() { return noExcusedPlayersSum; }
+    public void setNoExcusedPlayersSum(int noExcusedPlayersSum) { this.noExcusedPlayersSum = noExcusedPlayersSum; }
 
-    public void setPlayerMatchStatus(PlayerMatchStatus playerMatchStatus) {
-        this.playerMatchStatus = playerMatchStatus;
-    }
+    public int getRemainingSlots() { return remainingSlots; }
+    public void setRemainingSlots(int remainingSlots) { this.remainingSlots = remainingSlots; }
 
-    public ExcuseReason getExcuseReason() {
-        return excuseReason;
-    }
-
-    public void setExcuseReason(ExcuseReason excuseReason) {
-        this.excuseReason = excuseReason;
-    }
-
-    public String getExcuseNote() {
-        return excuseNote;
-    }
-    public void setExcuseNote(String excuseNote) {
-        this.excuseNote = excuseNote;
-    }
-
-    public Long getSeasonId() {
-        return seasonId;
-    }
-
-    public void setSeasonId(Long seasonId) {
-        this.seasonId = seasonId;
-    }
-
-    public int getMaxPlayers() {
-        return maxPlayers;
-    }
-    public void setMaxPlayers(int maxPlayers) {
-        this.maxPlayers = maxPlayers;
-    }
-
-    public int getInGamePlayers() {
-        return inGamePlayers;
-    }
-    public void setInGamePlayers(int inGamePlayers) {
-        this.inGamePlayers = inGamePlayers;
-    }
-
-    public void setOutGamePlayers(int outGamePlayers) {
-        this.outGamePlayers = outGamePlayers;
-    }
-
-    public int getWaitingPlayers() {
-        return waitingPlayers;
-    }
-    public void setWaitingPlayers(int waitingPlayers) {
-        this.waitingPlayers = waitingPlayers;
-    }
-
-    public int getNoActionPlayers() {
-        return noActionPlayers;
-    }
-    public void setNoActionPlayers(int noActionPlayers) {
-        this.noActionPlayers = noActionPlayers;
-    }
-
-    public double getPricePerRegisteredPlayer() {
-        return pricePerRegisteredPlayer;
-    }
+    public double getPricePerRegisteredPlayer() { return pricePerRegisteredPlayer; }
     public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) {
         this.pricePerRegisteredPlayer = pricePerRegisteredPlayer;
     }
 
-    public MatchStatus getMatchStatus() {
-        return matchStatus;
+    public PlayerMatchStatus getPlayerMatchStatus() { return playerMatchStatus; }
+    public void setPlayerMatchStatus(PlayerMatchStatus playerMatchStatus) {
+        this.playerMatchStatus = playerMatchStatus;
     }
 
-    public void setMatchStatus(MatchStatus matchStatus) {
-        this.matchStatus = matchStatus;
-    }
+    public ExcuseReason getExcuseReason() { return excuseReason; }
+    public void setExcuseReason(ExcuseReason excuseReason) { this.excuseReason = excuseReason; }
 
-    public MatchCancelReason getCancelReason() {
-        return cancelReason;
-    }
+    public String getExcuseNote() { return excuseNote; }
+    public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
 
-    public void setCancelReason(MatchCancelReason cancelReason) {
-        this.cancelReason = cancelReason;
-    }
+    public MatchStatus getMatchStatus() { return matchStatus; }
+    public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
 
-    public int getRemainingSlots() {
-        return remainingSlots;
-    }
-    public void setRemainingSlots(int remainingSlots) {
-        this.remainingSlots = remainingSlots;
-    }
+    public MatchCancelReason getCancelReason() { return cancelReason; }
+    public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
 
-    public List<PlayerDTO> getRegisteredPlayers() {
-        return registeredPlayers;
-    }
+    public Long getSeasonId() { return seasonId; }
+    public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
+
+    public List<PlayerDTO> getRegisteredPlayers() { return registeredPlayers; }
     public void setRegisteredPlayers(List<PlayerDTO> registeredPlayers) {
         this.registeredPlayers = registeredPlayers;
     }
 
-    public List<PlayerDTO> getReservedPlayers() {
-        return reservedPlayers;
-    }
+    public List<PlayerDTO> getReservedPlayers() { return reservedPlayers; }
     public void setReservedPlayers(List<PlayerDTO> reservedPlayers) {
         this.reservedPlayers = reservedPlayers;
     }
 
-    public List<PlayerDTO> getUnregisteredPlayers() {
-        return unregisteredPlayers;
-    }
-
+    public List<PlayerDTO> getUnregisteredPlayers() { return unregisteredPlayers; }
     public void setUnregisteredPlayers(List<PlayerDTO> unregisteredPlayers) {
         this.unregisteredPlayers = unregisteredPlayers;
     }
-    public List<PlayerDTO> getExcusedPlayers() {
-        return excusedPlayers;
-    }
+
+    public List<PlayerDTO> getExcusedPlayers() { return excusedPlayers; }
     public void setExcusedPlayers(List<PlayerDTO> excusedPlayers) {
         this.excusedPlayers = excusedPlayers;
     }
 
-    public List<PlayerDTO> getNoResponsePlayers() {
-        return noResponsePlayers;
-    }
-    public void setNoResponsePlayers(List<PlayerDTO> noResponsePlayers) {
-        this.noResponsePlayers = noResponsePlayers;
-    }
-
-    public int getOutGamePlayers() {
-        return outGamePlayers;
-    }
-
-    public int getNoExcusedPlayersSum() {
-        return noExcusedPlayersSum;
-    }
-
-    public void setNoExcusedPlayersSum(int noExcusedPlayersSum) {
-        this.noExcusedPlayersSum = noExcusedPlayersSum;
-    }
-
-    public List<PlayerDTO> getNoExcusedPlayers() {
-        return noExcusedPlayers;
-    }
-
+    public List<PlayerDTO> getNoExcusedPlayers() { return noExcusedPlayers; }
     public void setNoExcusedPlayers(List<PlayerDTO> noExcusedPlayers) {
         this.noExcusedPlayers = noExcusedPlayers;
+    }
+
+    public List<PlayerDTO> getNoResponsePlayers() { return noResponsePlayers; }
+    public void setNoResponsePlayers(List<PlayerDTO> noResponsePlayers) {
+        this.noResponsePlayers = noResponsePlayers;
     }
 }
 
@@ -389,16 +353,27 @@ import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO reprezentujĂ­cĂ­ zĂˇpas.
+ *
+ * SlouĹľĂ­ k pĹ™enosu dat o zĂˇpasech mezi backendem
+ * a klientem (vytvĂˇĹ™enĂ­, editace, pĹ™ehledy).
+ *
+ * Neobsahuje ĹľĂˇdnou business logiku ani vazby na entity.
+ */
 public class MatchDTO {
 
     private Long id;
+
+    /**
+     * Datum a ÄŤas konĂˇnĂ­ zĂˇpasu.
+     */
     @NotNull(message = "Datum a ÄŤas zĂˇpasu je povinnĂ©.")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;
@@ -416,16 +391,28 @@ public class MatchDTO {
     @NotNull(message = "Cena je povinnĂˇ")
     private Integer price;
 
+    /**
+     * AktuĂˇlnĂ­ stav zĂˇpasu (napĹ™. aktivnĂ­, zruĹˇenĂ˝).
+     */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
+    /**
+     * DĹŻvod zruĹˇenĂ­ zĂˇpasu, pokud byl zruĹˇen.
+     */
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
 
+    /**
+     * ID sezĂłny, do kterĂ© zĂˇpas patĹ™Ă­.
+     *
+     * Pouze pro ÄŤtenĂ­ â€“ nastavuje server.
+     */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
-    // gettery a settery
+    // gettery / settery
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -441,37 +428,17 @@ public class MatchDTO {
     public Integer getMaxPlayers() { return maxPlayers; }
     public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 
-    public Integer getPrice() {
-        return price;
-    }
+    public Integer getPrice() { return price; }
+    public void setPrice(Integer price) { this.price = price; }
 
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
+    public MatchStatus getMatchStatus() { return matchStatus; }
+    public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
 
-    public MatchStatus getMatchStatus() {
-        return matchStatus;
-    }
+    public MatchCancelReason getCancelReason() { return cancelReason; }
+    public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
 
-    public void setMatchStatus(MatchStatus matchStatus) {
-        this.matchStatus = matchStatus;
-    }
-
-    public MatchCancelReason getCancelReason() {
-        return cancelReason;
-    }
-
-    public void setCancelReason(MatchCancelReason cancelReason) {
-        this.cancelReason = cancelReason;
-    }
-
-    public Long getSeasonId() {
-        return seasonId;
-    }
-
-    public void setSeasonId(Long seasonId) {
-        this.seasonId = seasonId;
-    }
+    public Long getSeasonId() { return seasonId; }
+    public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
 }
 
 
@@ -492,6 +459,20 @@ import jakarta.persistence.Enumerated;
 
 import java.time.LocalDateTime;
 
+/**
+ * PĹ™ehledovĂ© DTO reprezentujĂ­cĂ­ zĂˇpas v seznamu.
+ *
+ * PouĹľĂ­vĂˇ se zejmĂ©na:
+ * <ul>
+ *     <li>v pĹ™ehledech nadchĂˇzejĂ­cĂ­ch a minulĂ˝ch zĂˇpasĹŻ,</li>
+ *     <li>v seznamu zĂˇpasĹŻ hrĂˇÄŤe,</li>
+ *     <li>na dashboardu nebo ĂşvodnĂ­ch obrazovkĂˇch.</li>
+ * </ul>
+ *
+ * Obsahuje zjednoduĹˇenĂ˝ pohled na zĂˇpas
+ * doplnÄ›nĂ˝ o kontext pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe
+ * a zĂˇkladnĂ­ agregaÄŤnĂ­ informace.
+ */
 public class MatchOverviewDTO {
 
     private Long id;
@@ -502,21 +483,43 @@ public class MatchOverviewDTO {
     private String location;
     private String description;
     private Integer price;
+
+    /**
+     * ZĂˇkladnĂ­ agregaÄŤnĂ­ Ăşdaje zĂˇpasu.
+     */
     private int maxPlayers;
     private int inGamePlayers;
+
+    /**
+     * Cena pĹ™epoÄŤtenĂˇ na jednoho pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe.
+     * Hodnota je poÄŤĂ­tĂˇna serverem.
+     */
     private double pricePerRegisteredPlayer;
+
+    /**
+     * Stav pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe k danĂ©mu zĂˇpasu.
+     */
     private PlayerMatchStatus playerMatchStatus;
+
+    /**
+     * Stav zĂˇpasu a pĹ™Ă­padnĂ˝ dĹŻvod jeho zruĹˇenĂ­.
+     */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
 
+    /**
+     * ID sezĂłny, do kterĂ© zĂˇpas patĹ™Ă­.
+     *
+     * Pouze pro ÄŤtenĂ­ â€“ nastavuje server.
+     */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
+    // gettery / settery
 
-    // Gettery a settery
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -539,39 +542,23 @@ public class MatchOverviewDTO {
     public void setInGamePlayers(int inGamePlayers) { this.inGamePlayers = inGamePlayers; }
 
     public double getPricePerRegisteredPlayer() { return pricePerRegisteredPlayer; }
-    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) { this.pricePerRegisteredPlayer = pricePerRegisteredPlayer; }
-
-    public PlayerMatchStatus getPlayerMatchStatus() {
-        return playerMatchStatus;
+    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) {
+        this.pricePerRegisteredPlayer = pricePerRegisteredPlayer;
     }
 
+    public PlayerMatchStatus getPlayerMatchStatus() { return playerMatchStatus; }
     public void setPlayerMatchStatus(PlayerMatchStatus playerMatchStatus) {
         this.playerMatchStatus = playerMatchStatus;
     }
 
-    public MatchStatus getMatchStatus() {
-        return matchStatus;
-    }
+    public MatchStatus getMatchStatus() { return matchStatus; }
+    public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
 
-    public void setMatchStatus(MatchStatus matchStatus) {
-        this.matchStatus = matchStatus;
-    }
+    public MatchCancelReason getCancelReason() { return cancelReason; }
+    public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
 
-    public MatchCancelReason getCancelReason() {
-        return cancelReason;
-    }
-
-    public void setCancelReason(MatchCancelReason cancelReason) {
-        this.cancelReason = cancelReason;
-    }
-
-    public Long getSeasonId() {
-        return seasonId;
-    }
-
-    public void setSeasonId(Long seasonId) {
-        this.seasonId = seasonId;
-    }
+    public Long getSeasonId() { return seasonId; }
+    public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
 }
 
 
@@ -588,8 +575,28 @@ import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+/**
+ * DTO reprezentujĂ­cĂ­ registraci hrĂˇÄŤe k zĂˇpasu.
+ *
+ * SlouĹľĂ­ k pĹ™enosu informacĂ­ o stavu ĂşÄŤasti hrĂˇÄŤe
+ * na konkrĂ©tnĂ­m zĂˇpasu mezi backendem a klientem.
+ *
+ * PouĹľĂ­vĂˇ se zejmĂ©na:
+ * <ul>
+ *     <li>pĹ™i registraci / odhlĂˇĹˇenĂ­ / omluvÄ› hrĂˇÄŤe,</li>
+ *     <li>v pĹ™ehledech registracĂ­ zĂˇpasu,</li>
+ *     <li>v administraci ĂşÄŤasti hrĂˇÄŤĹŻ.</li>
+ * </ul>
+ */
 public class MatchRegistrationDTO {
-    private Long id; // volitelnĂ©, pĹ™i GET
+
+    /**
+     * ID registrace.
+     *
+     * VyplnÄ›no pĹ™i naÄŤĂ­tĂˇnĂ­ dat (GET),
+     * pĹ™i vytvĂˇĹ™enĂ­ novĂ© registrace mĹŻĹľe bĂ˝t {@code null}.
+     */
+    private Long id;
 
     @NotNull(message = "ID zĂˇpasu je povinnĂ©.")
     @Positive(message = "ID zĂˇpasu musĂ­ bĂ˝t kladnĂ©.")
@@ -599,20 +606,43 @@ public class MatchRegistrationDTO {
     @Positive(message = "ID hrĂˇÄŤe musĂ­ bĂ˝t kladnĂ©.")
     private Long playerId;
 
+    /**
+     * AktuĂˇlnĂ­ stav registrace hrĂˇÄŤe k zĂˇpasu.
+     */
     private PlayerMatchStatus status;
-    private ExcuseReason excuseReason; // pouze pokud status = EXCUSED
+
+    /**
+     * DĹŻvod omluvy â€“ vyplnÄ›n pouze pokud je
+     * {@link #status} nastaven na {@code EXCUSED}.
+     */
+    private ExcuseReason excuseReason;
+
     private String excuseNote;
     private String adminNote;
     private Team team;
 
+    /**
+     * Informace o pĹŻvodu registrace.
+     *
+     * TypickĂ© hodnoty:
+     * <ul>
+     *     <li>{@code "user"} â€“ akce provedenĂˇ hrĂˇÄŤem,</li>
+     *     <li>{@code "system"} â€“ automatickĂˇ zmÄ›na systĂ©mem.</li>
+     * </ul>
+     */
     @NotNull
-    private String createdBy; // "user" nebo "system"
+    private String createdBy;
 
+    /**
+     * Detail hrĂˇÄŤe â€“ pouĹľĂ­vĂˇ se pro prezentaÄŤnĂ­ ĂşÄŤely
+     * v pĹ™ehledech registracĂ­.
+     */
     private PlayerDTO playerDTO;
 
     public MatchRegistrationDTO() {}
 
-    // Gettery a settery
+    // gettery / settery
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -635,12 +665,14 @@ public class MatchRegistrationDTO {
     public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
 
     public Team getTeam() { return team; }
-    public void setTeam (Team team) { this.team = team; }
+    public void setTeam(Team team) { this.team = team; }
 
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-}
 
+    public PlayerDTO getPlayerDTO() { return playerDTO; }
+    public void setPlayerDTO(PlayerDTO playerDTO) { this.playerDTO = playerDTO; }
+}
 
 
 
@@ -656,48 +688,94 @@ import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * DTO reprezentujĂ­cĂ­ hrĂˇÄŤe v systĂ©mu.
+ *
+ * SlouĹľĂ­ k pĹ™enosu dat o hrĂˇÄŤi mezi backendem a klientem
+ * (registrace hrĂˇÄŤe, sprĂˇva profilu, pĹ™ehledy a registrace na zĂˇpasy).
+ *
+ * DTO neobsahuje ĹľĂˇdnou perzistentnĂ­ logiku
+ * a je nezĂˇvislĂ© na databĂˇzovĂ© vrstvÄ›.
+ */
 public class PlayerDTO {
 
-
-    private Long id; // autogenerated, nullable pĹ™i create
+    /**
+     * ID hrĂˇÄŤe.
+     *
+     * PĹ™i vytvĂˇĹ™enĂ­ novĂ©ho hrĂˇÄŤe mĹŻĹľe bĂ˝t {@code null},
+     * hodnota je generovĂˇna serverem.
+     */
+    private Long id;
 
     @NotBlank(message = "KĹ™estnĂ­ jmĂ©no je povinnĂ©.")
     @Size(min = 2, max = 50)
-    private String name; // not null
+    private String name;
 
     @NotBlank(message = "PĹ™Ă­jmenĂ­ je povinnĂ©.")
     @Size(min = 2, max = 50)
-    private String surname; // not null
+    private String surname;
+
     private String nickName;
-    private String fullName; // derived
+
+    /**
+     * CelĂ© jmĂ©no hrĂˇÄŤe.
+     *
+     * OdvozenĂˇ hodnota sloĹľenĂˇ ze jmĂ©na a pĹ™Ă­jmenĂ­.
+     */
+    private String fullName;
+
     private String phoneNumber;
-    private PlayerType type; // not null, default BASIC
+
+    /**
+     * Typ hrĂˇÄŤe (napĹ™. BASIC, STANDARD, VIP).
+     *
+     * Pokud nenĂ­ explicitnÄ› nastaven,
+     * pouĹľije se vĂ˝chozĂ­ hodnota {@link PlayerType#BASIC}.
+     */
+    private PlayerType type;
+
     private Team team;
+
+    /**
+     * Stav hrĂˇÄŤe v systĂ©mu (napĹ™. PENDING, APPROVED).
+     *
+     * Pokud nenĂ­ nastaven, pouĹľije se vĂ˝chozĂ­ stav {@link PlayerStatus#PENDING}.
+     */
     private PlayerStatus playerStatus;
+
+    /**
+     * NastavenĂ­ notifikacĂ­ hrĂˇÄŤe.
+     */
     private boolean notifyByEmail;
     private boolean notifyBySms;
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
-   }
+    }
 
-    public PlayerDTO(Long id, String name, String surname,
-                     String nickName, PlayerType type,
-                     Team team, PlayerStatus playerStatus,
-                     boolean notifyByEmail, boolean notifyBySms) {
+    public PlayerDTO(Long id,
+                     String name,
+                     String surname,
+                     String nickName,
+                     PlayerType type,
+                     Team team,
+                     PlayerStatus playerStatus,
+                     boolean notifyByEmail,
+                     boolean notifyBySms) {
+
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.nickName = nickName;
         this.type = type != null ? type : PlayerType.BASIC;
-        this.updateFullName();
         this.team = team;
         this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
         this.notifyByEmail = notifyByEmail;
         this.notifyBySms = notifyBySms;
+        updateFullName();
     }
 
-    // --- Gettery a Settery ---
+    // gettery / settery
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -709,15 +787,14 @@ public class PlayerDTO {
     public void setSurname(String surname) { this.surname = surname; updateFullName(); }
 
     public String getNickName() { return nickName; }
-
     public void setNickName(String nickName) { this.nickName = nickName; }
 
     public String getFullName() { return fullName; }
 
-    private void updateFullName() { this.fullName = name + " " + surname; }
-
     public PlayerType getType() { return type; }
-    public void setType(PlayerType type) { this.type = type != null ? type : PlayerType.BASIC; }
+    public void setType(PlayerType type) {
+        this.type = type != null ? type : PlayerType.BASIC;
+    }
 
     public Team getTeam() { return team; }
     public void setTeam(Team team) { this.team = team; }
@@ -726,22 +803,26 @@ public class PlayerDTO {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
     public PlayerStatus getPlayerStatus() { return playerStatus; }
-    public void setPlayerStatus(PlayerStatus playerStatus) { this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
-    }
-    public boolean isNotifyByEmail() {
-        return notifyByEmail;
+    public void setPlayerStatus(PlayerStatus playerStatus) {
+        this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
     }
 
-    public void setNotifyByEmail(boolean notifyByEmail) {
-        this.notifyByEmail = notifyByEmail;
-    }
+    public boolean isNotifyByEmail() { return notifyByEmail; }
+    public void setNotifyByEmail(boolean notifyByEmail) { this.notifyByEmail = notifyByEmail; }
 
-    public boolean isNotifyBySms() {
-        return notifyBySms;
-    }
+    public boolean isNotifyBySms() { return notifyBySms; }
+    public void setNotifyBySms(boolean notifyBySms) { this.notifyBySms = notifyBySms; }
 
-    public void setNotifyBySms(boolean notifyBySms) {
-        this.notifyBySms = notifyBySms;
+    // ==================================================
+    // INTERNĂŤ LOGIKA
+    // ==================================================
+
+    /**
+     * Aktualizuje odvozenĂ© pole {@link #fullName}
+     * pĹ™i zmÄ›nÄ› jmĂ©na nebo pĹ™Ă­jmenĂ­.
+     */
+    private void updateFullName() {
+        this.fullName = name + " " + surname;
     }
 }
 
@@ -757,46 +838,37 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO reprezentujĂ­cĂ­ obdobĂ­ neaktivity hrĂˇÄŤe.
+ *
+ * PouĹľĂ­vĂˇ se k pĹ™enosu informacĂ­ o ÄŤasovĂ©m intervalu,
+ * ve kterĂ©m hrĂˇÄŤ nenĂ­ k dispozici pro zĂˇpasy
+ * (napĹ™. zranÄ›nĂ­, dlouhodobĂˇ absence).
+ */
 public class PlayerInactivityPeriodDTO {
 
     private Long id;
     private Long playerId;
+
     @NotNull(message = "Datum zaÄŤĂˇtku neaktivity je povinnĂ©.")
     private LocalDateTime inactiveFrom;
+
     @NotNull(message = "Datum konce neaktivity je povinnĂ©.")
     private LocalDateTime inactiveTo;
 
-    public Long getId() {
-        return id;
-    }
+    // gettery / settery
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getPlayerId() {
-        return playerId;
-    }
+    public Long getPlayerId() { return playerId; }
+    public void setPlayerId(Long playerId) { this.playerId = playerId; }
 
-    public void setPlayerId(Long playerId) {
-        this.playerId = playerId;
-    }
+    public LocalDateTime getInactiveFrom() { return inactiveFrom; }
+    public void setInactiveFrom(LocalDateTime inactiveFrom) { this.inactiveFrom = inactiveFrom; }
 
-    public LocalDateTime getInactiveFrom() {
-        return inactiveFrom;
-    }
-
-    public void setInactiveFrom(LocalDateTime inactiveFrom) {
-        this.inactiveFrom = inactiveFrom;
-    }
-
-    public LocalDateTime getInactiveTo() {
-        return inactiveTo;
-    }
-
-    public void setInactiveTo(LocalDateTime inactiveTo) {
-        this.inactiveTo = inactiveTo;
-    }
+    public LocalDateTime getInactiveTo() { return inactiveTo; }
+    public void setInactiveTo(LocalDateTime inactiveTo) { this.inactiveTo = inactiveTo; }
 }
 
 
@@ -810,7 +882,15 @@ package cz.phsoft.hokej.models.dto;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.enums.Team;
 
+/**
+ * ZjednoduĹˇenĂ© DTO reprezentujĂ­cĂ­ hrĂˇÄŤe.
+ *
+ * SlouĹľĂ­ pro pĹ™ehledovĂ© a seznamovĂ© pohledy,
+ * kde nenĂ­ potĹ™eba kompletnĂ­ detail hrĂˇÄŤe
+ * ani jeho stavovĂ© ÄŤi notifikaÄŤnĂ­ informace.
+ */
 public class PlayerSummaryDTO {
+
     private Long id;
     private String name;
     private String surname;
@@ -819,61 +899,28 @@ public class PlayerSummaryDTO {
     private PlayerType type;
     private Team team;
 
-    public Long getId() {
-        return id;
-    }
+    // gettery / settery
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; }
 
-    public String getSurname() {
-        return surname;
-    }
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
+    public String getNickName() { return nickName; }
+    public void setNickName(String nickName) { this.nickName = nickName; }
 
-    public String getFullName() {
-        return fullName;
-    }
+    public PlayerType getType() { return type; }
+    public void setType(PlayerType type) { this.type = type; }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getNickName() {
-        return nickName;
-    }
-
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
-    }
-
-    public PlayerType getType() {
-        return type;
-    }
-
-    public void setType(PlayerType type) {
-        this.type = type;
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public void setTeam(Team team) {
-        this.team = team;
-    }
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
 }
 
 
@@ -888,17 +935,27 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * DTO pro registraci novĂ©ho uĹľivatele.
+ *
+ * SlouĹľĂ­ k pĹ™enosu registraÄŤnĂ­ch ĂşdajĹŻ z klienta
+ * do backendu pĹ™i vytvĂˇĹ™enĂ­ novĂ©ho uĹľivatelskĂ©ho ĂşÄŤtu.
+ *
+ * DTO obsahuje pouze validaÄŤnĂ­ pravidla zĂˇkladnĂ­ho formĂˇtu dat.
+ * Kontrola shody hesel a dalĹˇĂ­ business validace
+ * jsou Ĺ™eĹˇeny v servisnĂ­ vrstvÄ›.
+ */
 public class RegisterUserDTO {
 
     @NotBlank(message = "KĹ™estnĂ­ jmĂ©no je povinnĂ©.")
     @Size(min = 2, max = 50)
-    private String name; // not null
+    private String name;
 
     @NotBlank(message = "PĹ™Ă­jmenĂ­ je povinnĂ©.")
     @Size(min = 2, max = 50)
     private String surname;
 
-    @NotBlank(message = "email je povinnĂ˝.")
+    @NotBlank(message = "Email je povinnĂ˝.")
     @Email
     private String email;
 
@@ -909,46 +966,22 @@ public class RegisterUserDTO {
     @NotBlank
     private String passwordConfirm;
 
+    // gettery / settery
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; }
 
-    public String getSurname() {
-        return surname;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPasswordConfirm() {
-        return passwordConfirm;
-    }
-
-    public void setPasswordConfirm(String passwordConfirm) {
-        this.passwordConfirm = passwordConfirm;
-    }
+    public String getPasswordConfirm() { return passwordConfirm; }
+    public void setPasswordConfirm(String passwordConfirm) { this.passwordConfirm = passwordConfirm; }
 }
 
 
@@ -965,11 +998,21 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
+/**
+ * DTO reprezentujĂ­cĂ­ sezĂłnu v aplikaci.
+ *
+ * SlouĹľĂ­ k pĹ™enosu informacĂ­ o sezĂłnĂˇch mezi backendem
+ * a klientem (sprĂˇva sezĂłn, vĂ˝bÄ›r aktivnĂ­ sezĂłny).
+ *
+ * SezĂłna vymezuje ÄŤasovĂ© obdobĂ­, ve kterĂ©m
+ * se konajĂ­ zĂˇpasy a ke kterĂ©mu se vztahujĂ­ statistiky.
+ */
 public class SeasonDTO {
 
     private Long id;
+
     /**
-     * NapĹ™. "2024/2025"
+     * NĂˇzev sezĂłny (napĹ™. "2024/2025").
      */
     @NotBlank(message = "napĹ™. 2025/2026")
     private String name;
@@ -983,22 +1026,23 @@ public class SeasonDTO {
     private LocalDate endDate;
 
     /**
-     * Je tato sezĂłna aktuĂˇlnÄ› aktivnĂ­
+     * UrÄŤuje, zda je sezĂłna aktuĂˇlnÄ› aktivnĂ­.
+     *
+     * V systĂ©mu mĹŻĹľe bĂ˝t v danĂ©m okamĹľiku
+     * aktivnĂ­ maximĂˇlnÄ› jedna sezĂłna.
      */
     private boolean active;
 
-    // --- konstruktory ---
+    // konstruktory
 
-    public SeasonDTO() {
-    }
+    public SeasonDTO() {}
 
-    public SeasonDTO(
-            Long id,
-            String name,
-            LocalDate startDate,
-            LocalDate endDate,
-            boolean active
-    ) {
+    public SeasonDTO(Long id,
+                     String name,
+                     LocalDate startDate,
+                     LocalDate endDate,
+                     boolean active) {
+
         this.id = id;
         this.name = name;
         this.startDate = startDate;
@@ -1006,50 +1050,23 @@ public class SeasonDTO {
         this.active = active;
     }
 
-    // --- gettery / settery ---
+    // gettery / settery
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 }
-
-
 
 
 
@@ -1059,10 +1076,32 @@ public class SeasonDTO {
 
 package cz.phsoft.hokej.models.dto;
 
+/**
+ * DTO reprezentujĂ­cĂ­ standardizovanou ĂşspÄ›Ĺˇnou odpovÄ›ÄŹ API.
+ *
+ * PouĹľĂ­vĂˇ se jako nĂˇvratovĂˇ hodnota u operacĂ­,
+ * kterĂ© provedly zmÄ›nu stavu systĂ©mu
+ * (napĹ™. vytvoĹ™enĂ­, aktualizace, smazĂˇnĂ­, schvĂˇlenĂ­).
+ */
 public class SuccessResponseDTO {
-    private  String message;
-    private Long id;
-    private String timestamp;
+
+    /**
+     * TextovĂˇ zprĂˇva popisujĂ­cĂ­ vĂ˝sledek operace.
+     */
+    private final String message;
+
+    /**
+     * ID entity, kterĂ© se operace tĂ˝kala.
+     *
+     * MĹŻĹľe bĂ˝t {@code null}, pokud operace
+     * nemĂˇ pĹ™Ă­mou vazbu na konkrĂ©tnĂ­ entitu.
+     */
+    private final Long id;
+
+    /**
+     * ÄŚas vytvoĹ™enĂ­ odpovÄ›di (typicky ve formĂˇtu ISO-8601).
+     */
+    private final String timestamp;
 
     public SuccessResponseDTO(String message, Long id, String timestamp) {
         this.message = message;
@@ -1070,10 +1109,11 @@ public class SuccessResponseDTO {
         this.timestamp = timestamp;
     }
 
+    // gettery
+
     public String getMessage() { return message; }
     public Long getId() { return id; }
     public String getTimestamp() { return timestamp; }
-
 }
 
 

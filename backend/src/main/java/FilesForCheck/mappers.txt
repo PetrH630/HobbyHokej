@@ -21,22 +21,144 @@ import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.PlayerSummaryDTO;
+import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
+/**
+ * MapStruct mapper pro pĹ™evod mezi AppUser / Player entitami a jejich DTO objekty.
+ *
+ * <p>
+ * ZajiĹˇĹĄuje:
+ * </p>
+ * <ul>
+ *     <li>mapovĂˇnĂ­ uĹľivatelskĂ˝ch entit na DTO pro API vrstvy,</li>
+ *     <li>mapovĂˇnĂ­ registraÄŤnĂ­ch DTO na novĂ© uĹľivatelskĂ© entity,</li>
+ *     <li>bezpeÄŤnou aktualizaci uĹľivatelĹŻ z AppUserDTO.</li>
+ * </ul>
+ *
+ * <h3>ArchitektonickĂˇ role</h3>
+ * <ul>
+ *     <li>oddÄ›lenĂ­ mapovĂˇnĂ­ (transformace dat) od business logiky,</li>
+ *     <li>centralizovanĂ© mapovĂˇnĂ­ uĹľivatelskĂ˝ch a hrĂˇÄŤskĂ˝ch objektĹŻ,</li>
+ *     <li>jasnĂˇ kontrola nad tĂ­m, kterĂˇ pole se pĹ™enĂˇĹˇĂ­ a kterĂˇ jsou Ĺ™Ă­zena pouze sluĹľbami.</li>
+ * </ul>
+ *
+ * <h3>ImplementaÄŤnĂ­ poznĂˇmky</h3>
+ * <ul>
+ *     <li>cĂ­lem je pracovat s DTO v controller vrstvĂˇch a entitami v persistence vrstvÄ›,</li>
+ *     <li>bezpeÄŤnostnÄ› citlivĂˇ pole (heslo, role, stav ĂşÄŤtu) jsou z mapovĂˇnĂ­ zĂˇmÄ›rnÄ› vylouÄŤena,</li>
+ *     <li>MapStruct generuje implementaci tohoto rozhranĂ­ jako Spring bean.</li>
+ * </ul>
+ */
 @Mapper(componentModel = "spring")
 public interface AppUserMapper {
+
+    /**
+     * PĹ™evede entitu uĹľivatele na DTO reprezentaci.
+     *
+     * <p>
+     * Metoda slouĹľĂ­ k pĹ™Ă­pravÄ› dat pro API odpovÄ›di. SouÄŤĂˇstĂ­ DTO je
+     * i kolekce hrĂˇÄŤĹŻ pĹ™iĹ™azenĂ˝ch k danĂ©mu uĹľivateli.
+     * </p>
+     *
+     * @param entity uĹľivatelskĂˇ entita naÄŤtenĂˇ z databĂˇze
+     * @return DTO reprezentace uĹľivatele vÄŤetnÄ› seznamu hrĂˇÄŤĹŻ
+     */
     @Mapping(target = "players", source = "players")
     AppUserDTO toDTO(AppUserEntity entity);
 
+    /**
+     * PĹ™evede seznam uĹľivatelskĂ˝ch entit na seznam DTO.
+     *
+     * <p>
+     * Typicky pouĹľito v administrĂˇtorskĂ˝ch pĹ™ehledech uĹľivatelĹŻ.
+     * MapovĂˇnĂ­ jednotlivĂ˝ch prvkĹŻ vyuĹľĂ­vĂˇ metodu {@link #toDTO(AppUserEntity)}.
+     * </p>
+     *
+     * @param entities seznam uĹľivatelskĂ˝ch entit
+     * @return seznam uĹľivatelskĂ˝ch DTO
+     */
     List<AppUserDTO> toDtoList(List<AppUserEntity> entities);
 
+    /**
+     * PĹ™evede entitu hrĂˇÄŤe na {@link PlayerDTO}.
+     *
+     * <p>
+     * Mapuje rozdĂ­lnĂ© nĂˇzvy atributĹŻ (napĹ™. {@code nickname} â†’ {@code nickName})
+     * a ignoruje pole {@code fullName}, kterĂ© se typicky sestavuje jinde
+     * (napĹ™Ă­klad v domĂ©novĂ© logice nebo pĹ™Ă­mo v DTO).
+     * </p>
+     *
+     * @param entity hrĂˇÄŤskĂˇ entita
+     * @return DTO reprezentace hrĂˇÄŤe
+     */
     @Mapping(source = "nickname", target = "nickName")
     @Mapping(target = "fullName", ignore = true)
     PlayerDTO toPlayerDTO(PlayerEntity entity);
+
+    /**
+     * PĹ™evede registraÄŤnĂ­ DTO na novou entitu uĹľivatele.
+     *
+     * <p>
+     * PouĹľĂ­vĂˇ se pĹ™i vytvĂˇĹ™enĂ­ novĂ©ho uĹľivatelskĂ©ho ĂşÄŤtu. SystĂ©movÄ›
+     * Ĺ™Ă­zenĂˇ pole nejsou mapovĂˇna a jejich hodnota je nastavovĂˇna aĹľ
+     * v servisnĂ­ vrstvÄ› (napĹ™. role, heslo, stav ĂşÄŤtu).
+     * </p>
+     *
+     * IgnorovanĂˇ pole:
+     * <ul>
+     *     <li>{@code id} â€“ generuje databĂˇze,</li>
+     *     <li>{@code password} â€“ nastavuje se v service po zahashovĂˇnĂ­,</li>
+     *     <li>{@code role} â€“ nastavuje business logika (napĹ™. vĂ˝chozĂ­ role),</li>
+     *     <li>{@code enabled} â€“ stav aktivace ĂşÄŤtu, Ĺ™eĹˇĂ­ se v service,</li>
+     *     <li>{@code players} â€“ vazba na hrĂˇÄŤe se Ĺ™eĹˇĂ­ samostatnÄ›.</li>
+     * </ul>
+     *
+     * @param dto registraÄŤnĂ­ DTO s Ăşdaji novĂ©ho uĹľivatele
+     * @return novĂˇ entita uĹľivatele pĹ™ipravenĂˇ k uloĹľenĂ­
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "enabled", ignore = true)
+    @Mapping(target = "players", ignore = true)
+    AppUserEntity fromRegisterDto(RegisterUserDTO dto);
+
+    /**
+     * Aktualizuje existujĂ­cĂ­ entitu uĹľivatele na zĂˇkladÄ› hodnot z DTO.
+     *
+     * <p>
+     * SlouĹľĂ­ pro Ăşpravu profilu uĹľivatele. Metoda nevracĂ­ novou instanci,
+     * ale mÄ›nĂ­ stav pĹ™edanĂ© entity oznaÄŤenĂ© jako {@link MappingTarget}.
+     * </p>
+     *
+     * <p>
+     * KritickĂˇ pole nejsou z DTO pĹ™ebĂ­rĂˇna a zĹŻstĂˇvajĂ­ plnÄ› v reĹľii
+     * servisnĂ­ vrstvy (napĹ™. zmÄ›na role, hesla nebo stavu ĂşÄŤtu).
+     * </p>
+     *
+     * IgnorovanĂˇ pole:
+     * <ul>
+     *     <li>{@code id} â€“ primĂˇrnĂ­ klĂ­ÄŤ se nemÄ›nĂ­,</li>
+     *     <li>{@code password} â€“ mÄ›nĂ­ se pouze pĹ™es dedikovanou logiku zmÄ›ny hesla,</li>
+     *     <li>{@code role} â€“ spravuje administrace / business logika,</li>
+     *     <li>{@code enabled} â€“ stav ĂşÄŤtu (aktivace/blokace),</li>
+     *     <li>{@code players} â€“ vazby na hrĂˇÄŤe jsou spravovĂˇny samostatnÄ›.</li>
+     * </ul>
+     *
+     * @param dto    zdrojovĂ© DTO s novĂ˝mi hodnotami
+     * @param entity cĂ­lovĂˇ entita, kterĂˇ mĂˇ bĂ˝t aktualizovĂˇna
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "enabled", ignore = true)
+    @Mapping(target = "players", ignore = true)
+    void updateEntityFromDto(AppUserDTO dto, @MappingTarget AppUserEntity entity);
 }
 
 
@@ -49,20 +171,80 @@ package cz.phsoft.hokej.models.dto.mappers;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.models.dto.MatchDTO;
-
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+/**
+ * MapStruct mapper pro pĹ™evod mezi entitou zĂˇpasu {@link MatchEntity}
+ * a jejĂ­m DTO {@link MatchDTO}.
+ *
+ * <p>
+ * ZajiĹˇĹĄuje transformaci dat mezi perzistenÄŤnĂ­ vrstvou a API vrstvou
+ * tak, aby controllery a FE pracovaly s jednoduchĂ˝m DTO modelem, zatĂ­mco
+ * databĂˇzovĂˇ reprezentace mĹŻĹľe zĹŻstat navĂˇzanĂˇ na entitnĂ­ vztahy
+ * (napĹ™. vazba na sezĂłnu).
+ * </p>
+ *
+ * <h3>ArchitektonickĂˇ role</h3>
+ * <ul>
+ *     <li>oddÄ›lenĂ­ entit od DTO modelu pouĹľĂ­vanĂ©ho v API,</li>
+ *     <li>centralizace mapovĂˇnĂ­ pro zĂˇpasy,</li>
+ *     <li>Ĺ™Ă­zenĂ­, jak se pracuje s vazbou na sezĂłnu (ID vs. entita).</li>
+ * </ul>
+ *
+ * <h3>ImplementaÄŤnĂ­ poznĂˇmky</h3>
+ * <ul>
+ *     <li>v DTO se pouĹľĂ­vĂˇ {@code seasonId} mĂ­sto celĂ© {@code SeasonEntity},</li>
+ *     <li>nastavenĂ­ entitnĂ­ vazby na {@code season} probĂ­hĂˇ v servisnĂ­ vrstvÄ›,</li>
+ *     <li>MapStruct generuje implementaci jako Spring bean.</li>
+ * </ul>
+ */
 @Mapper(componentModel = "spring")
 public interface MatchMapper {
 
+    /**
+     * PĹ™evede entitu zĂˇpasu na DTO reprezentaci.
+     *
+     * <p>
+     * EntitnĂ­ vazba na sezĂłnu ({@code season}) se pĹ™evĂˇdĂ­ na jednoduchĂ©
+     * identifikĂˇtorovĂ© pole {@code seasonId}. OstatnĂ­ pole se mapujĂ­
+     * podle shody nĂˇzvĹŻ mezi entitou a DTO.
+     * </p>
+     *
+     * @param entity entita zĂˇpasu naÄŤtenĂˇ z databĂˇze
+     * @return DTO reprezentace zĂˇpasu vÄŤetnÄ› {@code seasonId}
+     */
     @Mapping(source = "season.id", target = "seasonId")
     MatchDTO toDTO(MatchEntity entity);
 
+    /**
+     * PĹ™evede DTO zĂˇpasu na entitu.
+     *
+     * <p>
+     * Pole {@code season} je z mapovĂˇnĂ­ zĂˇmÄ›rnÄ› vylouÄŤeno, protoĹľe
+     * nastavenĂ­ vazby na konkrĂ©tnĂ­ {@code SeasonEntity} probĂ­hĂˇ aĹľ
+     * v servisnĂ­ vrstvÄ› na zĂˇkladÄ› {@code seasonId} z DTO.
+     * </p>
+     *
+     * @param dto DTO reprezentace zĂˇpasu
+     * @return novĂˇ entita zĂˇpasu pĹ™ipravenĂˇ k doplnÄ›nĂ­ sezĂłny a uloĹľenĂ­
+     */
     @Mapping(target = "season", ignore = true)
     MatchEntity toEntity(MatchDTO dto);
 
+    /**
+     * Aktualizuje existujĂ­cĂ­ entitu zĂˇpasu na zĂˇkladÄ› hodnot z DTO.
+     *
+     * <p>
+     * Metoda nemÄ›nĂ­ vazbu na sezĂłnu, tj. pole {@code season} je z mapovĂˇnĂ­
+     * zĂˇmÄ›rnÄ› ignorovĂˇno. ZmÄ›na sezĂłny (pĹ™epojenĂ­ na jinou entitu) se mĂˇ
+     * provĂˇdÄ›t explicitnÄ› v servisnĂ­ vrstvÄ›.
+     * </p>
+     *
+     * @param dto    zdrojovĂ© DTO s novĂ˝mi hodnotami
+     * @param entity cĂ­lovĂˇ entita, kterĂˇ mĂˇ bĂ˝t aktualizovĂˇna
+     */
     @Mapping(target = "season", ignore = true)
     void updateEntity(MatchDTO dto, @MappingTarget MatchEntity entity);
 }
@@ -87,9 +269,62 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
+/**
+ * MapStruct mapper pro pĹ™evod mezi entitou registrace na zĂˇpas
+ * {@link MatchRegistrationEntity} a jejĂ­m DTO {@link MatchRegistrationDTO}.
+ *
+ * <p>
+ * ZajiĹˇĹĄuje transformaci dat mezi perzistenÄŤnĂ­ vrstvou a API vrstvou
+ * pro registrace hrĂˇÄŤĹŻ na konkrĂ©tnĂ­ zĂˇpasy vÄŤetnÄ›:
+ * </p>
+ * <ul>
+ *     <li>stavu registrace (pĹ™ihlĂˇĹˇen, odhlĂˇĹˇen, omluven apod.),</li>
+ *     <li>tĂ˝mu, do kterĂ©ho je hrĂˇÄŤ pĹ™iĹ™azen,</li>
+ *     <li>omluv (dĹŻvod, poznĂˇmka),</li>
+ *     <li>administrativnĂ­ch poznĂˇmek a metadat (createdBy, timestamp).</li>
+ * </ul>
+ *
+ * <h3>ArchitektonickĂˇ role</h3>
+ * <ul>
+ *     <li>oddÄ›lenĂ­ entitnĂ­ho modelu registrace od DTO pouĹľĂ­vanĂ©ho v API,</li>
+ *     <li>centralizace mapovĂˇnĂ­ registracĂ­ pro business a prezentaÄŤnĂ­ vrstvu,</li>
+ *     <li>zajiĹˇtÄ›nĂ­ konzistentnĂ­ho nastavenĂ­ metadat pĹ™i vytvĂˇĹ™enĂ­ registrace.</li>
+ * </ul>
+ *
+ * <h3>ImplementaÄŤnĂ­ poznĂˇmky</h3>
+ * <ul>
+ *     <li>pĹ™i vytvĂˇĹ™enĂ­ novĂ© registrace se nastavuje timestamp na aktuĂˇlnĂ­ ÄŤas,</li>
+ *     <li>v DTO se pro vazby pouĹľĂ­vajĂ­ identifikĂˇtory ({@code matchId}, {@code playerId}),</li>
+ *     <li>MapStruct generuje implementaci jako Spring bean.</li>
+ * </ul>
+ */
 @Mapper(componentModel = "spring")
 public interface MatchRegistrationMapper {
 
+    /**
+     * VytvoĹ™Ă­ novou entitu registrace hrĂˇÄŤe na zĂˇpas.
+     *
+     * <p>
+     * Metoda slouĹľĂ­ jako tovĂˇrnĂ­ mapovacĂ­ metoda pro vznik novĂ© registrace.
+     * PĹ™ijĂ­mĂˇ explicitnÄ› vĹˇechny relevantnĂ­ hodnoty (zĂˇpas, hrĂˇÄŤ, stav,
+     * dĹŻvod omluvy, tĂ˝m, poznĂˇmky, autora zmÄ›ny) a doplnĂ­ systĂ©movĂ©
+     * metadata (ÄŤas vytvoĹ™enĂ­).
+     * </p>
+     *
+     * <p>
+     * IdentifikĂˇtor {@code id} je ignorovĂˇn a generuje se aĹľ databĂˇzĂ­.
+     * </p>
+     *
+     * @param match        entita zĂˇpasu, ke kterĂ©mu se hrĂˇÄŤ registruje
+     * @param player       entita hrĂˇÄŤe, kterĂ˝ se registruje
+     * @param status       stav registrace (napĹ™. REGISTERED, UNREGISTERED, EXCUSED)
+     * @param excuseReason dĹŻvod omluvy (pokud je pouĹľit)
+     * @param excuseNote   textovĂˇ poznĂˇmka k omluvÄ›
+     * @param team         tĂ˝m, do kterĂ©ho je hrĂˇÄŤ pĹ™iĹ™azen
+     * @param adminNote    internĂ­ poznĂˇmka administrĂˇtora
+     * @param createdBy    identifikace uĹľivatele, kterĂ˝ registraci vytvoĹ™il / zmÄ›nil
+     * @return novÄ› vytvoĹ™enĂˇ entita registrace pĹ™ipravenĂˇ k uloĹľenĂ­
+     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "match", source = "match")
     @Mapping(target = "player", source = "player")
@@ -111,11 +346,35 @@ public interface MatchRegistrationMapper {
             String createdBy
     );
 
-    // entity â†’ DTO (volitelnĂ©)
+    /**
+     * PĹ™evede entitu registrace na DTO reprezentaci.
+     *
+     * <p>
+     * EntitnĂ­ vazby na zĂˇpas a hrĂˇÄŤe ({@code match}, {@code player})
+     * jsou v DTO reprezentovĂˇny pouze pomocĂ­ identifikĂˇtorĹŻ
+     * {@code matchId} a {@code playerId}. OstatnĂ­ pole se mapujĂ­
+     * podle shody nĂˇzvĹŻ mezi entitou a DTO.
+     * </p>
+     *
+     * @param entity entita registrace hrĂˇÄŤe na zĂˇpas
+     * @return DTO reprezentace registrace
+     */
     @Mapping(target = "matchId", source = "match.id")
     @Mapping(target = "playerId", source = "player.id")
     MatchRegistrationDTO toDTO(MatchRegistrationEntity entity);
 
+    /**
+     * PĹ™evede seznam entit registracĂ­ na seznam DTO.
+     *
+     * <p>
+     * PouĹľĂ­vĂˇ se typicky pĹ™i vracenĂ­ seznamu registracĂ­ pro danĂ˝ zĂˇpas
+     * nebo pro danĂ©ho hrĂˇÄŤe. MapovĂˇnĂ­ jednotlivĂ˝ch prvkĹŻ vyuĹľĂ­vĂˇ metodu
+     * {@link #toDTO(MatchRegistrationEntity)}.
+     * </p>
+     *
+     * @param entities seznam entit registracĂ­
+     * @return seznam DTO reprezentacĂ­ registracĂ­
+     */
     List<MatchRegistrationDTO> toDTOList(List<MatchRegistrationEntity> entities);
 }
 
@@ -132,23 +391,96 @@ import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
 import org.mapstruct.*;
 
+/**
+ * MapStruct mapper pro pĹ™evod mezi entitou obdobĂ­ neaktivity hrĂˇÄŤe
+ * {@link PlayerInactivityPeriodEntity} a jejĂ­m DTO {@link PlayerInactivityPeriodDTO}.
+ *
+ * <p>
+ * ZajiĹˇĹĄuje transformaci dat mezi perzistenÄŤnĂ­ vrstvou a API vrstvou
+ * pro obdobĂ­, kdy je hrĂˇÄŤ doÄŤasnÄ› nedostupnĂ˝ (zranÄ›nĂ­, dovolenĂˇ, dlouhodobĂˇ absence).
+ * </p>
+ *
+ * <h3>ArchitektonickĂˇ role</h3>
+ * <ul>
+ *     <li>oddÄ›lenĂ­ entitnĂ­ho modelu od DTO pouĹľĂ­vanĂ©ho v API,</li>
+ *     <li>centralizovanĂ© mapovĂˇnĂ­ obdobĂ­ neaktivity hrĂˇÄŤe,</li>
+ *     <li>zajiĹˇtÄ›nĂ­ konzistentnĂ­ho nastavenĂ­ vazby na hrĂˇÄŤe pomocĂ­ {@code @Context}.</li>
+ * </ul>
+ *
+ * <h3>ImplementaÄŤnĂ­ poznĂˇmky</h3>
+ * <ul>
+ *     <li>v DTO se pouĹľĂ­vĂˇ {@code playerId} mĂ­sto celĂ© {@code PlayerEntity},</li>
+ *     <li>vazba na hrĂˇÄŤe je pĹ™edĂˇvĂˇna pĹ™es {@link Context} a nastavuje se v {@link ObjectFactory},</li>
+ *     <li>MapStruct generuje implementaci jako Spring bean.</li>
+ * </ul>
+ */
 @Mapper(componentModel = "spring")
 public interface PlayerInactivityPeriodMapper {
 
-    // Entity -> DTO (OK)
+    /**
+     * PĹ™evede entitu obdobĂ­ neaktivity na DTO reprezentaci.
+     *
+     * <p>
+     * EntitnĂ­ vazba na hrĂˇÄŤe ({@code player}) je v DTO reprezentovĂˇna
+     * pouze pomocĂ­ identifikĂˇtoru {@code playerId}. OstatnĂ­ pole se
+     * mapujĂ­ podle shody nĂˇzvĹŻ mezi entitou a DTO.
+     * </p>
+     *
+     * @param entity entita obdobĂ­ neaktivity hrĂˇÄŤe
+     * @return DTO reprezentace obdobĂ­ neaktivity
+     */
     @Mapping(target = "playerId", source = "player.id")
     PlayerInactivityPeriodDTO toDTO(PlayerInactivityPeriodEntity entity);
 
-    // DTO -> Entity (player Ĺ™eĹˇĂ­ @ObjectFactory)
+    /**
+     * PĹ™evede DTO obdobĂ­ neaktivity na novou entitu.
+     *
+     * <p>
+     * Vazba na hrĂˇÄŤe ({@code player}) se explicitnÄ› ignoruje, protoĹľe
+     * je nastavovĂˇna v tovĂˇrnĂ­ metodÄ› oznaÄŤenĂ© {@link ObjectFactory},
+     * kterĂˇ vyuĹľĂ­vĂˇ {@link PlayerEntity} pĹ™edanou v {@link Context}.
+     * </p>
+     *
+     * <p>
+     * IdentifikĂˇtor {@code id} je ignorovĂˇn a generuje se aĹľ databĂˇzĂ­.
+     * </p>
+     *
+     * @param dto    DTO reprezentace obdobĂ­ neaktivity
+     * @param player entita hrĂˇÄŤe pĹ™edanĂˇ v kontextu mapovĂˇnĂ­
+     * @return novÄ› vytvoĹ™enĂˇ entita obdobĂ­ neaktivity pĹ™ipravenĂˇ k uloĹľenĂ­
+     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "player", ignore = true)
     PlayerInactivityPeriodEntity toEntity(PlayerInactivityPeriodDTO dto, @Context PlayerEntity player);
 
-    // UPDATE DTO -> existujĂ­cĂ­ entity (bez zmÄ›ny player)
+    /**
+     * Aktualizuje existujĂ­cĂ­ entitu obdobĂ­ neaktivity na zĂˇkladÄ› hodnot z DTO.
+     *
+     * <p>
+     * Vazba na hrĂˇÄŤe ({@code player}) se pĹ™i aktualizaci nemÄ›nĂ­ a je proto
+     * z mapovĂˇnĂ­ zĂˇmÄ›rnÄ› vylouÄŤena. ZmÄ›na pĹ™iĹ™azenĂ©ho hrĂˇÄŤe k obdobĂ­ neaktivity
+     * by mÄ›la bĂ˝t Ĺ™eĹˇena explicitnÄ› v servisnĂ­ vrstvÄ›, pokud je vĹŻbec povolena.
+     * </p>
+     *
+     * @param dto    zdrojovĂ© DTO s novĂ˝mi hodnotami
+     * @param entity cĂ­lovĂˇ entita, kterĂˇ mĂˇ bĂ˝t aktualizovĂˇna
+     */
     @Mapping(target = "player", ignore = true)
     void updateEntityFromDto(PlayerInactivityPeriodDTO dto, @MappingTarget PlayerInactivityPeriodEntity entity);
 
-    // FACTORY â€“ jedinĂ˝ sprĂˇvnĂ˝ zpĹŻsob, jak nastavit player z @Context
+    /**
+     * TovĂˇrnĂ­ metoda pro vytvoĹ™enĂ­ novĂ© entity obdobĂ­ neaktivity.
+     *
+     * <p>
+     * JedinĂ˝ sprĂˇvnĂ˝ zpĹŻsob, jak nastavit vazbu na hrĂˇÄŤe pĹ™i mapovĂˇnĂ­ DTO â†’ entita.
+     * MapStruct pouĹľije tuto metodu pĹ™i vytvĂˇĹ™enĂ­ novĂ© instance
+     * {@link PlayerInactivityPeriodEntity}, pĹ™iÄŤemĹľ hrĂˇÄŤ je pĹ™edĂˇn v {@link Context}.
+     * </p>
+     *
+     * @param dto    zdrojovĂ© DTO (obsahuje data obdobĂ­ neaktivity)
+     * @param player entita hrĂˇÄŤe, ke kterĂ©mu se obdobĂ­ neaktivity vztahuje
+     * @return novĂˇ entita obdobĂ­ neaktivity s nastavenĂ˝m hrĂˇÄŤem
+     */
     @ObjectFactory
     default PlayerInactivityPeriodEntity createEntity(PlayerInactivityPeriodDTO dto, @Context PlayerEntity player) {
         PlayerInactivityPeriodEntity entity = new PlayerInactivityPeriodEntity();
@@ -175,36 +507,133 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
+/**
+ * MapStruct mapper pro pĹ™evod mezi entitou hrĂˇÄŤe {@link PlayerEntity}
+ * a jejĂ­m DTO {@link PlayerDTO}.
+ *
+ * <p>
+ * ZajiĹˇĹĄuje transformaci dat mezi perzistenÄŤnĂ­ vrstvou a API vrstvou,
+ * vÄŤetnÄ› mapovĂˇnĂ­ notifikaÄŤnĂ­ch nastavenĂ­ a statusu hrĂˇÄŤe.
+ * </p>
+ *
+ * <h3>ArchitektonickĂˇ role</h3>
+ * <ul>
+ *     <li>oddÄ›lenĂ­ entitnĂ­ho modelu hrĂˇÄŤe od DTO pouĹľĂ­vanĂ©ho v API,</li>
+ *     <li>centralizace mapovĂˇnĂ­ hrĂˇÄŤskĂ˝ch objektĹŻ,</li>
+ *     <li>Ĺ™Ă­zenĂ­ mapovĂˇnĂ­ vloĹľenĂ©ho objektu {@link NotificationSettings}.</li>
+ * </ul>
+ *
+ * <h3>ImplementaÄŤnĂ­ poznĂˇmky</h3>
+ * <ul>
+ *     <li>v DTO se pouĹľĂ­vĂˇ vlastnost {@code nickName} mĂ­sto {@code nickname},</li>
+ *     <li>pole {@code fullName} se negeneruje v mapperu, ale v entitÄ›/DTO logice,</li>
+ *     <li>vazba na uĹľivatele ({@code user}) se nastavuje vĂ˝hradnÄ› v servisnĂ­ vrstvÄ›,</li>
+ *     <li>notifikaÄŤnĂ­ nastavenĂ­ se mapujĂ­ do embedded objektu {@link NotificationSettings}.</li>
+ * </ul>
+ */
 @Mapper(componentModel = "spring")
 public interface PlayerMapper {
 
-    // Entity â†’ DTO (heslo se neposĂ­lĂˇ)
+    /**
+     * PĹ™evede entitu hrĂˇÄŤe na DTO reprezentaci.
+     *
+     * <p>
+     * RozdĂ­lnĂ© nĂˇzvy atributĹŻ jsou mapovĂˇny explicitnÄ›
+     * ({@code nickname} â†’ {@code nickName}). CelĂ© jmĂ©no hrĂˇÄŤe
+     * ({@code fullName}) se v tĂ©to fĂˇzi neplnĂ­ a pĹ™edpoklĂˇdĂˇ se jeho
+     * sestavenĂ­ jinde (napĹ™. z kĹ™estnĂ­ho jmĂ©na a pĹ™Ă­jmenĂ­).
+     * </p>
+     *
+     * <p>
+     * NotifikaÄŤnĂ­ nastavenĂ­ se rozbalujĂ­ z embedded objektu
+     * {@link NotificationSettings} do jednoduchĂ˝ch boolean pĹ™Ă­znakĹŻ
+     * {@code notifyByEmail} a {@code notifyBySms}.
+     * </p>
+     *
+     * @param entity entita hrĂˇÄŤe naÄŤtenĂˇ z databĂˇze
+     * @return DTO reprezentace hrĂˇÄŤe
+     */
     @Mapping(source = "nickname", target = "nickName")
-    @Mapping(target = "fullName", ignore = true) // generuje se v DTO
+    @Mapping(target = "fullName", ignore = true)
     @Mapping(source = "notificationSettings.emailEnabled", target = "notifyByEmail")
     @Mapping(source = "notificationSettings.smsEnabled", target = "notifyBySms")
     PlayerDTO toDTO(PlayerEntity entity);
 
-    // DTO â†’ Entity (heslo se mapuje, pokud existuje)
-    @Mapping(source = "nickName", target = "nickname")   // KLĂŤÄŚOVĂ‰
-    @Mapping(target = "fullName", ignore = true)         // generuje si Entity sama
-    @Mapping(target = "user", ignore = true)             // nastavujeĹˇ v service
+    /**
+     * PĹ™evede DTO hrĂˇÄŤe na novou entitu.
+     *
+     * <p>
+     * RozdĂ­lnĂ© nĂˇzvy atributĹŻ jsou mapovĂˇny explicitnÄ›
+     * ({@code nickName} â†’ {@code nickname}). Pole {@code fullName}
+     * se ignoruje a pĹ™edpoklĂˇdĂˇ se, Ĺľe entita si ho generuje sama
+     * (napĹ™. v setteru nebo v logice entitnĂ­ vrstvy).
+     * </p>
+     *
+     * <p>
+     * Vazba na uĹľivatele ({@code user}) se nemapuje â€“ je plnÄ› spravovĂˇna
+     * servisnĂ­ vrstvou. Status hrĂˇÄŤe se nastavuje podle hodnoty v DTO;
+     * pokud nenĂ­ vyplnÄ›n, pouĹľije se vĂ˝chozĂ­ hodnota {@code PENDING}.
+     * </p>
+     *
+     * <p>
+     * NotifikaÄŤnĂ­ pĹ™Ă­znaky ({@code notifyByEmail}, {@code notifyBySms})
+     * se mapujĂ­ do embedded objektu {@link NotificationSettings}.
+     * </p>
+     *
+     * @param dto DTO reprezentace hrĂˇÄŤe
+     * @return novĂˇ entita hrĂˇÄŤe pĹ™ipravenĂˇ k uloĹľenĂ­
+     */
+    @Mapping(source = "nickName", target = "nickname")
+    @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "user", ignore = true)
     @Mapping(
             target = "playerStatus",
             expression = "java(dto.getPlayerStatus() != null ? dto.getPlayerStatus() : cz.phsoft.hokej.data.enums.PlayerStatus.PENDING)"
     )
-    // mapovĂˇnĂ­ do embedded NotificationSettings
     @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
     @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")
     PlayerEntity toEntity(PlayerDTO dto);
 
-    // Aktualizace existujĂ­cĂ­ho DTO (ignorujeme fullName)
+    /**
+     * Aktualizuje existujĂ­cĂ­ DTO hrĂˇÄŤe z jinĂ©ho DTO.
+     *
+     * <p>
+     * PouĹľĂ­vĂˇ se v situacĂ­ch, kdy je potĹ™eba aktualizovat DTO objekt
+     * (napĹ™. v rĂˇmci FE/API vrstvy) bez zmÄ›ny identifikĂˇtoru a
+     * bez zĂˇsahu do pole {@code fullName}, kterĂ© se sestavuje jinde.
+     * </p>
+     *
+     * @param source zdrojovĂ© DTO s novĂ˝mi hodnotami
+     * @param target cĂ­lovĂ© DTO, kterĂ© mĂˇ bĂ˝t aktualizovĂˇno
+     */
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "id", ignore = true)
     void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
 
-    // Aktualizace existujĂ­cĂ­ Entity (heslo se mapuje, fullName nenĂ­ pole v Entity)
-    @Mapping(source = "nickName", target = "nickname")   // i tady je dĹŻleĹľitĂ©
+    /**
+     * Aktualizuje existujĂ­cĂ­ entitu hrĂˇÄŤe na zĂˇkladÄ› hodnot z DTO.
+     *
+     * <p>
+     * RozdĂ­lnĂ˝ nĂˇzev atributu {@code nickName} â†’ {@code nickname} je
+     * mapovĂˇn explicitnÄ›. CelĂ© jmĂ©no hrĂˇÄŤe ({@code fullName}) se
+     * ignoruje, stejnÄ› tak vazba na uĹľivatele ({@code user}), kterĂˇ je
+     * spravovĂˇna servisnĂ­ vrstvou.
+     * </p>
+     *
+     * <p>
+     * Status hrĂˇÄŤe se aktualizuje pouze v pĹ™Ă­padÄ›, Ĺľe je v DTO vyplnÄ›n.
+     * Pokud je v DTO {@code null}, ponechĂˇ se stĂˇvajĂ­cĂ­ hodnota v entitÄ›.
+     * </p>
+     *
+     * <p>
+     * NotifikaÄŤnĂ­ pĹ™Ă­znaky se opÄ›t mapujĂ­ do embedded objektu
+     * {@link NotificationSettings}.
+     * </p>
+     *
+     * @param source zdrojovĂ© DTO s novĂ˝mi hodnotami
+     * @param target cĂ­lovĂˇ entita hrĂˇÄŤe, kterĂˇ mĂˇ bĂ˝t aktualizovĂˇna
+     */
+    @Mapping(source = "nickName", target = "nickname")
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(
@@ -215,8 +644,31 @@ public interface PlayerMapper {
     @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")
     void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
 
+    /**
+     * PĹ™evede seznam entit hrĂˇÄŤĹŻ na seznam DTO.
+     *
+     * <p>
+     * PouĹľĂ­vĂˇ se typicky pĹ™i vracenĂ­ seznamu hrĂˇÄŤĹŻ pro administraci
+     * nebo pro pĹ™ehledy. MapovĂˇnĂ­ jednotlivĂ˝ch prvkĹŻ vyuĹľĂ­vĂˇ metodu
+     * {@link #toDTO(PlayerEntity)}.
+     * </p>
+     *
+     * @param players seznam entit hrĂˇÄŤĹŻ
+     * @return seznam DTO reprezentacĂ­ hrĂˇÄŤĹŻ
+     */
     List<PlayerDTO> toDTOList(List<PlayerEntity> players);
 
+    /**
+     * ZajistĂ­ inicializaci notifikaÄŤnĂ­ho nastavenĂ­ po mapovĂˇnĂ­.
+     *
+     * <p>
+     * Pokud bÄ›hem mapovĂˇnĂ­ nevznikne instance {@link NotificationSettings},
+     * vytvoĹ™Ă­ se vĂ˝chozĂ­ objekt s vypnutĂ˝mi notifikacemi. TĂ­m se eliminuje
+     * nutnost kontrolovat {@code null} v dalĹˇĂ­ch ÄŤĂˇstech aplikace.
+     * </p>
+     *
+     * @param entity cĂ­lovĂˇ entita hrĂˇÄŤe po dokonÄŤenĂ­ mapovĂˇnĂ­
+     */
     @AfterMapping
     default void ensureNotificationSettings(@MappingTarget PlayerEntity entity) {
         if (entity.getNotificationSettings() == null) {
@@ -242,16 +694,71 @@ import cz.phsoft.hokej.models.dto.SeasonDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
-
+/**
+ * MapStruct mapper pro pĹ™evod mezi entitou sezĂłny {@link SeasonEntity}
+ * a jejĂ­m DTO {@link SeasonDTO}.
+ *
+ * <p>
+ * SlouĹľĂ­ k transformaci dat mezi perzistenÄŤnĂ­ vrstvou a API vrstvou
+ * pro sprĂˇvu hokejovĂ˝ch sezĂłn (ÄŤasovĂ© vymezenĂ­, aktivnĂ­ sezĂłna apod.).
+ * </p>
+ *
+ * <h3>ArchitektonickĂˇ role</h3>
+ * <ul>
+ *     <li>oddÄ›lenĂ­ entitnĂ­ho modelu sezĂłny od DTO pouĹľĂ­vanĂ©ho v API,</li>
+ *     <li>centralizace mapovĂˇnĂ­ sezĂłn v aplikaci,</li>
+ *     <li>zajiĹˇtÄ›nĂ­ konzistentnĂ­ prĂˇce s daty sezĂłn napĹ™Ă­ÄŤ vrstvami.</li>
+ * </ul>
+ *
+ * <h3>ImplementaÄŤnĂ­ poznĂˇmky</h3>
+ * <ul>
+ *     <li>mapovĂˇnĂ­ probĂ­hĂˇ pĹ™evĂˇĹľnÄ› automaticky na zĂˇkladÄ› shodnĂ˝ch nĂˇzvĹŻ atributĹŻ,</li>
+ *     <li>ĹľĂˇdnĂ© vazby na jinĂ© entity se zde explicitnÄ› neĹ™eĹˇĂ­,</li>
+ *     <li>MapStruct generuje implementaci tohoto rozhranĂ­ jako Spring bean.</li>
+ * </ul>
+ */
 @Mapper(componentModel = "spring")
 public interface SeasonMapper {
 
-        SeasonDTO toDTO(SeasonEntity entity);
+    /**
+     * PĹ™evede entitu sezĂłny na DTO reprezentaci.
+     *
+     * <p>
+     * PouĹľĂ­vĂˇ se pĹ™i vracenĂ­ dat sezĂłn do API (napĹ™. pĹ™ehled sezĂłn,
+     * aktuĂˇlnĂ­ aktivnĂ­ sezĂłna, detail sezĂłny).
+     * </p>
+     *
+     * @param entity entita sezĂłny naÄŤtenĂˇ z databĂˇze
+     * @return DTO reprezentace sezĂłny
+     */
+    SeasonDTO toDTO(SeasonEntity entity);
 
-        SeasonEntity toEntity(SeasonDTO dto);
+    /**
+     * PĹ™evede DTO sezĂłny na novou entitu.
+     *
+     * <p>
+     * Typicky se pouĹľĂ­vĂˇ pĹ™i vytvĂˇĹ™enĂ­ novĂ© sezĂłny. IdentifikĂˇtor
+     * sezĂłny je generovĂˇn databĂˇzĂ­ a nenĂ­ zde Ĺ™eĹˇen explicitnÄ›.
+     * </p>
+     *
+     * @param dto DTO reprezentace sezĂłny
+     * @return novĂˇ entita sezĂłny pĹ™ipravenĂˇ k uloĹľenĂ­
+     */
+    SeasonEntity toEntity(SeasonDTO dto);
 
-        void updateEntityFromDTO(SeasonDTO dto, @MappingTarget SeasonEntity entity);
+    /**
+     * Aktualizuje existujĂ­cĂ­ entitu sezĂłny na zĂˇkladÄ› hodnot z DTO.
+     *
+     * <p>
+     * Metoda nemÄ›nĂ­ identitu sezĂłny, pouze aktualizuje jejĂ­ atributy
+     * (napĹ™. datumy, stav aktivace). SlouĹľĂ­ pro editaci existujĂ­cĂ­
+     * sezĂłny v administrĂˇtorskĂ©m rozhranĂ­.
+     * </p>
+     *
+     * @param dto    zdrojovĂ© DTO s novĂ˝mi hodnotami
+     * @param entity cĂ­lovĂˇ entita sezĂłny, kterĂˇ mĂˇ bĂ˝t aktualizovĂˇna
+     */
+    void updateEntityFromDTO(SeasonDTO dto, @MappingTarget SeasonEntity entity);
 }
-
 
 

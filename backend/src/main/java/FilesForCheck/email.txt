@@ -20,36 +20,93 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;                         // NEW
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * SluĹľba pro odesĂ­lĂˇnĂ­ emailovĂ˝ch notifikacĂ­.
+ * <p>
+ * OdpovÄ›dnosti:
+ * <ul>
+ *     <li>odesĂ­lĂˇnĂ­ jednoduchĂ˝ch textovĂ˝ch emailĹŻ,</li>
+ *     <li>odesĂ­lĂˇnĂ­ HTML emailĹŻ (napĹ™. aktivaÄŤnĂ­ emaily),</li>
+ *     <li>zapouzdĹ™enĂ­ prĂˇce s {@link JavaMailSender},</li>
+ *     <li>centrĂˇlnĂ­ mĂ­sto pro emailovou komunikaci aplikace.</li>
+ * </ul>
+ *
+ * Vlastnosti:
+ * <ul>
+ *     <li>odesĂ­lĂˇnĂ­ probĂ­hĂˇ asynchronnÄ› ({@link Async}),</li>
+ *     <li>emaily lze globĂˇlnÄ› vypnout pomocĂ­ konfigurace ({@code email.enabled}),</li>
+ *     <li>chyby pĹ™i odesĂ­lĂˇnĂ­ NIKDY neshodĂ­ aplikaci â€“ pouze se zalogujĂ­.</li>
+ * </ul>
+ *
+ * Tato tĹ™Ă­da:
+ * <ul>
+ *     <li>neĹ™eĹˇĂ­ business logiku (kdy a komu se email posĂ­lĂˇ),</li>
+ *     <li>neĹ™eĹˇĂ­ ĹˇablonovĂˇnĂ­ (lze pozdÄ›ji rozĹˇĂ­Ĺ™it napĹ™. o Thymeleaf).</li>
+ * </ul>
+ */
 @Service
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+
+    /**
+     * Spring JavaMailSender.
+     * <p>
+     * Konfigurace (SMTP server, port, auth, atd.)
+     * se naÄŤĂ­tĂˇ z application.properties / application.yml.
+     */
     private final JavaMailSender mailSender;
 
+    /**
+     * VĂ˝chozĂ­ email odesĂ­latele (FROM).
+     */
     @Value("${spring.mail.from}")
     private String fromEmail;
 
-    @Value("${email.enabled:true}")   //
+    /**
+     * GlobĂˇlnĂ­ pĹ™epĂ­naÄŤ pro zapnutĂ­ / vypnutĂ­ emailĹŻ.
+     * <p>
+     * VhodnĂ© pro:
+     * <ul>
+     *     <li>lokĂˇlnĂ­ vĂ˝voj,</li>
+     *     <li>testovacĂ­ prostĹ™edĂ­,</li>
+     *     <li>ladÄ›nĂ­ bez reĂˇlnĂ©ho odesĂ­lĂˇnĂ­.</li>
+     * </ul>
+     */
+    @Value("${email.enabled:true}")
     private boolean emailEnabled;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
-    // ===== 1) JEDNODUCHĂť TEXTOVĂť EMAIL =====
+    // ====================================================
+    // 1) JEDNODUCHĂť TEXTOVĂť EMAIL
+    // ====================================================
+
+    /**
+     * OdeĹˇle jednoduchĂ˝ textovĂ˝ email.
+     * <p>
+     * OdesĂ­lĂˇnĂ­ probĂ­hĂˇ asynchronnÄ› â€“ request neÄŤekĂˇ
+     * na odpovÄ›ÄŹ SMTP serveru.
+     *
+     * @param to      cĂ­lovĂˇ emailovĂˇ adresa
+     * @param subject pĹ™edmÄ›t emailu
+     * @param text    textovĂ˝ obsah emailu
+     */
     @Async
     public void sendSimpleEmail(String to, String subject, String text) {
 
+        // globĂˇlnĂ­ vypnutĂ­ emailĹŻ (napĹ™. v dev/test prostĹ™edĂ­)
         if (!emailEnabled) {
             log.info("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: {}", to);
-            // pro testovĂˇnĂ­
+            // pomocnĂ˝ vĂ˝pis pro lokĂˇlnĂ­ ladÄ›nĂ­
             System.out.println("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: " + to);
             return;
         }
-
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -59,63 +116,109 @@ public class EmailService {
             message.setFrom(fromEmail);
 
             mailSender.send(message);
+
         } catch (Exception e) {
-            // DoporuÄŤeno: logovat do souboru
-            // pro testovĂˇnĂ­
-            System.out.println("Chyba pĹ™i odesĂ­lĂˇnĂ­ emailu na: " + to);
+            // chyby pĹ™i odesĂ­lĂˇnĂ­ emailĹŻ NESMĂŤ shodit aplikaci
             log.error("Chyba pĹ™i odesĂ­lĂˇnĂ­ emailu na {}: {}", to, e.getMessage(), e);
+            System.out.println("Chyba pĹ™i odesĂ­lĂˇnĂ­ emailu na: " + to);
         }
     }
 
-    // ===== 2) HTML EMAIL (HEZÄŚĂŤ) =====
+    // ====================================================
+    // 2) HTML EMAIL
+    // ====================================================
+
+    /**
+     * OdeĹˇle HTML email.
+     * <p>
+     * PouĹľĂ­vĂˇ se napĹ™. pro:
+     * <ul>
+     *     <li>aktivaÄŤnĂ­ emaily,</li>
+     *     <li>vizuĂˇlnÄ› bohatĹˇĂ­ notifikace.</li>
+     * </ul>
+     *
+     * @param to          cĂ­lovĂˇ emailovĂˇ adresa
+     * @param subject     pĹ™edmÄ›t emailu
+     * @param htmlContent HTML obsah zprĂˇvy
+     */
     @Async
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
 
+        // globĂˇlnĂ­ vypnutĂ­ emailĹŻ
         if (!emailEnabled) {
-            // CHANGED: System.out -> logger
             log.info("MAIL JE VYPNUTĂť â€“ HTML email nebyl odeslĂˇn na: {}", to);
-            // pro testovĂˇnĂ­
             System.out.println("MAIL JE VYPNUTĂť â€“ email nebyl odeslĂˇn na: " + to);
             return;
         }
 
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(htmlContent, true); // true = HTML
+            helper.setText(htmlContent, true); // true = HTML obsah
             helper.setFrom(fromEmail);
 
             mailSender.send(mimeMessage);
-            log.debug("HTML email odeslĂˇn na {} se subjectem '{}'", to, subject);  // NEW
+
+            log.debug(
+                    "HTML email odeslĂˇn na {} se subjectem '{}'",
+                    to,
+                    subject
+            );
+
         } catch (MessagingException e) {
-            // CHANGED: opÄ›t jen logujeme
-            log.error("Chyba pĹ™i odesĂ­lĂˇnĂ­ HTML emailu na {}: {}", to, e.getMessage(), e);
+            // opÄ›t pouze logujeme, aplikace bÄ›ĹľĂ­ dĂˇl
+            log.error(
+                    "Chyba pĹ™i odesĂ­lĂˇnĂ­ HTML emailu na {}: {}",
+                    to,
+                    e.getMessage(),
+                    e
+            );
             System.out.println("Chyba pĹ™i odesĂ­lĂˇnĂ­ HTML emailu na: " + to);
         }
     }
 
+    // ====================================================
+    // KONKRĂ‰TNĂŤ EMAILY â€“ AKTIVACE ĂšÄŚTU
+    // ====================================================
+
+    /**
+     * OdeĹˇle jednoduchĂ˝ textovĂ˝ aktivaÄŤnĂ­ email.
+     *
+     * @param to             cĂ­lovĂ˝ email
+     * @param activationLink aktivaÄŤnĂ­ odkaz
+     */
     public void sendActivationEmail(String to, String activationLink) {
         String subject = "PotvrÄŹte svĹŻj ĂşÄŤet";
-        String text = "DobrĂ˝ den,\n\n"
-                + "KliknÄ›te na tento odkaz pro aktivaci ĂşÄŤtu:\n"
-                + activationLink + "\n\n"
-                + "Platnost odkazu: 24 hodin.\n\n"
-                + "DÄ›kujeme!";
+        String text =
+                "DobrĂ˝ den,\n\n" +
+                        "KliknÄ›te na tento odkaz pro aktivaci ĂşÄŤtu:\n" +
+                        activationLink + "\n\n" +
+                        "Platnost odkazu: 24 hodin.\n\n" +
+                        "DÄ›kujeme!";
+
         sendSimpleEmail(to, subject, text);
     }
 
+    /**
+     * OdeĹˇle HTML aktivaÄŤnĂ­ email.
+     *
+     * @param to             cĂ­lovĂ˝ email
+     * @param activationLink aktivaÄŤnĂ­ odkaz
+     */
     @Async
     public void sendActivationEmailHTML(String to, String activationLink) {
         String subject = "PotvrzenĂ­ registrace - App - Hokej StarĂˇ Garda";
-        String html = "<p>DÄ›kujeme za registraci.</p>" +
-                "<p>KliknÄ›te na odkaz pro aktivaci ĂşÄŤtu:</p>" +
-                "<a href=\"" + activationLink + "\">Aktivovat ĂşÄŤet</a>";
+        String html =
+                "<p>DÄ›kujeme za registraci.</p>" +
+                        "<p>KliknÄ›te na odkaz pro aktivaci ĂşÄŤtu:</p>" +
+                        "<a href=\"" + activationLink + "\">Aktivovat ĂşÄŤet</a>";
 
         sendHtmlEmail(to, subject, html);
     }
-
 }
+
 

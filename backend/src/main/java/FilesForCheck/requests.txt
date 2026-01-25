@@ -14,23 +14,82 @@ package cz.phsoft.hokej.models.dto.requests;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.Team;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-
+/**
+ * Request DTO pro zmÄ›nu registrace hrĂˇÄŤe na zĂˇpas.
+ *
+ * ĂšÄŚEL:
+ * -----
+ * SlouĹľĂ­ jako vstupnĂ­ objekt pro operace:
+ * <ul>
+ *     <li>pĹ™ihlĂˇĹˇenĂ­ hrĂˇÄŤe na zĂˇpas,</li>
+ *     <li>odhlĂˇĹˇenĂ­ hrĂˇÄŤe ze zĂˇpasu,</li>
+ *     <li>omluvenĂ­ hrĂˇÄŤe (EXCUSED),</li>
+ *     <li>administrĂˇtorskĂ© zĂˇsahy do registrace.</li>
+ * </ul>
+ *
+ * Tento request je zpracovĂˇvĂˇn metodou
+ * {@code MatchRegistrationService#upsertRegistration(...)}.
+ *
+ * POZNĂMKA:
+ * ---------
+ * Ne vĹˇechna pole jsou povinnĂˇ â€“ jejich vĂ˝znam a validace
+ * zĂˇvisĂ­ na konkrĂ©tnĂ­ operaci a business logice sluĹľby.
+ */
 public class MatchRegistrationRequest {
+
+    /**
+     * ID zĂˇpasu, ke kterĂ©mu se registrace vztahuje.
+     */
     @NotNull
     @Positive
     private Long matchId;
+
+    /**
+     * ID hrĂˇÄŤe.
+     *
+     * Typicky:
+     * <ul>
+     *     <li>u endpointĹŻ typu {@code /me} mĹŻĹľe bĂ˝t {@code null}
+     *         a hrĂˇÄŤ je urÄŤen kontextem,</li>
+     *     <li>u administrĂˇtorskĂ˝ch operacĂ­ je vyplnÄ›no explicitnÄ›.</li>
+     * </ul>
+     */
     private Long playerId;
+
+    /**
+     * TĂ˝m, do kterĂ©ho je hrĂˇÄŤ pĹ™iĹ™azen (napĹ™. DARK / LIGHT).
+     */
     private Team team;
+
+    /**
+     * DĹŻvod omluvy â€“ pouĹľĂ­vĂˇ se pouze pĹ™i statusu {@code EXCUSED}.
+     */
     private ExcuseReason excuseReason;
+
+    /**
+     * VolitelnĂˇ poznĂˇmka k omluvÄ› od hrĂˇÄŤe.
+     */
     private String excuseNote;
+
+    /**
+     * AdministrĂˇtorskĂˇ poznĂˇmka k registraci
+     * (napĹ™. no-show, internĂ­ komentĂˇĹ™).
+     */
     private String adminNote;
+
+    /**
+     * PĹ™Ă­znak odhlĂˇĹˇenĂ­ ze zĂˇpasu.
+     *
+     * Pokud je {@code true}, request reprezentuje akci UNREGISTER.
+     */
     private boolean unregister;
 
-    public Long getPlayerId() {
-        return playerId;
-    }
+    // --- gettery ---
+
+    public Long getPlayerId() { return playerId; }
     public Long getMatchId() { return matchId; }
     public Team getTeam() { return team; }
     public ExcuseReason getExcuseReason() { return excuseReason; }

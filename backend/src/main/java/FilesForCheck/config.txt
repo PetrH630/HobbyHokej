@@ -52,50 +52,153 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * AuditAspect
+ *
+ * CROSS-CUTTING CONCERN:
+ * ----------------------
+ * Tento aspekt slouĹľĂ­ k centrĂˇlnĂ­mu auditnĂ­mu logovĂˇnĂ­ volĂˇnĂ­
+ * service vrstev aplikace.
+ *
+ * CO LOGUJE:
+ * ----------
+ * - zaÄŤĂˇtek volĂˇnĂ­ metody (nĂˇzev + argumenty)
+ * - konec ĂşspÄ›ĹˇnĂ©ho volĂˇnĂ­ metody
+ * - nĂˇvratovou hodnotu
+ * - ÄŤasovĂ© razĂ­tko
+ *
+ * ROZSAH:
+ * -------
+ * - vĹˇechny metody ve vĹˇech tĹ™Ă­dĂˇch v balĂ­ÄŤku
+ *   cz.phsoft.hokej.models.services..*
+ *
+ * PROÄŚ AOP:
+ * ----------
+ * - auditnĂ­ logika nenĂ­ roztrouĹˇena po sluĹľbĂˇch
+ * - ĹľĂˇdnĂ© duplikace kĂłdu
+ * - snadnĂ© zapnutĂ­ / vypnutĂ­ / Ăşpravy
+ *
+ * BEZPEÄŚNOST:
+ * -----------
+ * - aspekt NEMÄšNĂŤ chovĂˇnĂ­ aplikace
+ * - pouze ÄŤte data a loguje
+ * - v pĹ™Ă­padÄ› chyby v logovĂˇnĂ­ aplikace pokraÄŤuje dĂˇl
+ */
 @Component
 @Aspect
 public class AuditAspect {
 
+    /**
+     * SpeciĂˇlnĂ­ logger urÄŤenĂ˝ pouze pro auditnĂ­ zĂˇznamy.
+     *
+     * DoporuÄŤenĂ­:
+     * - v logback.xml / log4j2.xml mĂ­t samostatnĂ˝ appender (soubor)
+     * - oddÄ›lit auditnĂ­ logy od aplikaÄŤnĂ­ch logĹŻ
+     */
     private static final Logger logger = LoggerFactory.getLogger("AUDIT_LOGGER");
 
-    // Pointcut pro vĹˇechny metody ve sluĹľbĂˇch
-    @Pointcut("within(cz.phsoft.hokej.models.services..*)")
-    public void serviceMethods() {}
+    // =====================================================
+    // POINTCUT
+    // =====================================================
 
-    // SpustĂ­ se pĹ™ed metodou
-    @Before("serviceMethods()")
-    public void logBefore(JoinPoint joinPoint) {
-        String methodName = joinPoint.getSignature().toShortString();
-        String args = java.util.Arrays.toString(joinPoint.getArgs());
-        logger.info("START {} at {} with args {}", methodName, LocalDateTime.now(), args);
+    /**
+     * Pointcut definujĂ­cĂ­ vĹˇechny metody ve service vrstvÄ›.
+     *
+     * Zahrnuje:
+     * - vĹˇechny tĹ™Ă­dy
+     * - vĹˇechny metody
+     * - vÄŤetnÄ› podbalĂ­ÄŤkĹŻ
+     */
+    @Pointcut("within(cz.phsoft.hokej.models.services..*)")
+    public void serviceMethods() {
+        // pouze marker metoda pro pointcut
     }
 
-    // SpustĂ­ se po ĂşspÄ›ĹˇnĂ©m dokonÄŤenĂ­ metody
-    @AfterReturning(pointcut = "serviceMethods()", returning = "result")
+    // =====================================================
+    // BEFORE ADVICE
+    // =====================================================
+
+    /**
+     * SpustĂ­ se PĹED zavolĂˇnĂ­m jakĂ©koli service metody.
+     *
+     * SlouĹľĂ­ pro:
+     * - zĂˇznam zaÄŤĂˇtku operace
+     * - debug / audit ÄŤasovĂˇnĂ­
+     *
+     * @param joinPoint kontext volanĂ© metody
+     */
+    @Before("serviceMethods()")
+    public void logBefore(JoinPoint joinPoint) {
+
+        String methodName = joinPoint.getSignature().toShortString();
+        String args = java.util.Arrays.toString(joinPoint.getArgs());
+
+        logger.info(
+                "START {} at {} with args {}",
+                methodName,
+                LocalDateTime.now(),
+                args
+        );
+    }
+
+    // =====================================================
+    // AFTER RETURNING ADVICE
+    // =====================================================
+
+    /**
+     * SpustĂ­ se PO ĂšSPÄšĹ NĂ‰M dokonÄŤenĂ­ metody
+     * (NEspustĂ­ se pĹ™i vyhozenĂ­ vĂ˝jimky).
+     *
+     * SlouĹľĂ­ pro:
+     * - audit ĂşspÄ›ĹˇnĂ˝ch operacĂ­
+     * - logovĂˇnĂ­ nĂˇvratovĂ˝ch hodnot
+     *
+     * @param joinPoint kontext volanĂ© metody
+     * @param result    nĂˇvratovĂˇ hodnota metody
+     */
+    @AfterReturning(
+            pointcut = "serviceMethods()",
+            returning = "result"
+    )
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
+
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
 
         Long userId = null;
         Long playerId = null;
 
+        /*
+         * Pokus o extrakci zajĂ­mavĂ˝ch business identifikĂˇtorĹŻ
+         * z parametrĹŻ metody.
+         *
+         * CĂ­lem je mĂ­t auditnĂ­ stopu:
+         * - KTERĂť HRĂÄŚ
+         * - JAKĂ OPERACE
+         */
         for (Object arg : args) {
             if (arg instanceof PlayerEntity player) {
                 playerId = player.getId();
             } else if (arg instanceof MatchRegistrationEntity registration) {
                 playerId = registration.getPlayer().getId();
             } else if (arg instanceof Long id) {
-                // pokud mĂˇ metoda Long parametry, mĹŻĹľeĹˇ urÄŤit podle poĹ™adĂ­
-                // tĹ™eba prvnĂ­ Long = matchId, druhĂ˝ = playerId
+                // zde mĹŻĹľeĹˇ pĹ™Ă­padnÄ› rozliĹˇovat:
+                // - prvnĂ­ Long = matchId
+                // - druhĂ˝ Long = playerId
+                // dle konvence signatur metod
             }
         }
 
-        // logovĂˇnĂ­
-        logger.info("END {} - userId={} playerId={} returned [{}] at {}",
-                methodName, userId, playerId, result, LocalDateTime.now());
+        logger.info(
+                "END {} - userId={} playerId={} returned [{}] at {}",
+                methodName,
+                userId,
+                playerId,
+                result,
+                LocalDateTime.now()
+        );
     }
 }
-
 
 
 
@@ -123,67 +226,169 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-// filtr pro REST login
+/**
+ * VlastnĂ­ autentizaÄŤnĂ­ filtr pro REST pĹ™ihlĂˇĹˇenĂ­ (JSON / FORM).
+ *
+ * ĂšÄŚEL:
+ * <ul>
+ *     <li>umoĹľĹuje pĹ™ihlĂˇĹˇenĂ­ pomocĂ­ JSON (application/json),</li>
+ *     <li>zachovĂˇvĂˇ podporu klasickĂ©ho form loginu (x-www-form-urlencoded),</li>
+ *     <li>nahrazuje standardnĂ­ redirect chovĂˇnĂ­ Spring Security JSON odpovÄ›ÄŹmi,</li>
+ *     <li>vytvĂˇĹ™Ă­ HTTP session a uklĂˇdĂˇ SecurityContext (stateful autentizace).</li>
+ * </ul>
+ *
+ * PROÄŚ JE POTĹEBA:
+ * <ul>
+ *     <li>{@link UsernamePasswordAuthenticationFilter} standardnÄ› oÄŤekĂˇvĂˇ
+ *         pouze form data,</li>
+ *     <li>SPA frontend (React / Vite) posĂ­lĂˇ JSON,</li>
+ *     <li>REST API nemĂˇ pouĹľĂ­vat redirecty, ale strukturovanĂ© JSON odpovÄ›di.</li>
+ * </ul>
+ *
+ * BEZPEÄŚNOST:
+ * <ul>
+ *     <li>autentizace probĂ­hĂˇ vĂ˝hradnÄ› pĹ™es {@link AuthenticationManager},</li>
+ *     <li>heslo se nikdy neloguje ani nevracĂ­ klientovi,</li>
+ *     <li>po ĂşspÄ›chu je vytvoĹ™en {@link org.springframework.security.core.context.SecurityContext}
+ *         uloĹľenĂ˝ v HTTP session.</li>
+ * </ul>
+ *
+ * POZNĂMKA:
+ * <ul>
+ *     <li>tento filtr je urÄŤen pro stateful (session-based) autentizaci,</li>
+ *     <li>pro JWT / stateless pĹ™Ă­stup by byl nahrazen jinĂ˝m Ĺ™eĹˇenĂ­m.</li>
+ * </ul>
+ */
 public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter {
 
+    /**
+     * Jackson ObjectMapper pro ÄŤtenĂ­ JSON z request body.
+     */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * Konstruktor filtru.
+     *
+     * @param loginUrl    URL endpointu pro login (napĹ™. /api/auth/login)
+     * @param authManager Spring Security {@link AuthenticationManager}
+     */
     public CustomJsonLoginFilter(String loginUrl, AuthenticationManager authManager) {
         setFilterProcessesUrl(loginUrl);
         setAuthenticationManager(authManager);
     }
 
+    // =====================================================
+    // POKUS O AUTENTIZACI (LOGIN)
+    // =====================================================
+
+    /**
+     * PokusĂ­ se autentizovat uĹľivatele na zĂˇkladÄ› requestu.
+     *
+     * PodporovanĂ© formĂˇty:
+     * <ul>
+     *     <li>application/x-www-form-urlencoded</li>
+     *     <li>application/json</li>
+     * </ul>
+     *
+     * OÄŤekĂˇvanĂˇ pole:
+     * <ul>
+     *     <li>email (username)</li>
+     *     <li>password</li>
+     * </ul>
+     *
+     * @throws AuthenticationException pĹ™i chybÄ› pĹ™ihlĂˇĹˇenĂ­
+     */
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request,
+                                                HttpServletResponse response)
+            throws AuthenticationException {
+
         try {
-            // x-www-form-urlencoded i JSON
             String email = null;
             String password = null;
 
-// x-www-form-urlencoded
+            // -------------------------------------------------
+            // FORM LOGIN (x-www-form-urlencoded)
+            // -------------------------------------------------
             if (request.getContentType() != null &&
                     request.getContentType().contains("application/x-www-form-urlencoded")) {
+
                 email = request.getParameter("username");
                 password = request.getParameter("password");
             }
 
-// JSON
+            // -------------------------------------------------
+            // JSON LOGIN (application/json)
+            // -------------------------------------------------
             if ((email == null || password == null) &&
                     request.getContentType() != null &&
                     request.getContentType().contains("application/json")) {
-                Map<String, String> json = objectMapper.readValue(request.getInputStream(), Map.class);
+
+                Map<String, String> json =
+                        objectMapper.readValue(request.getInputStream(), Map.class);
+
                 email = json.get("email");
                 password = json.get("password");
             }
 
-            if (email == null || password == null || email.isBlank() || password.isBlank()) {
+            // -------------------------------------------------
+            // VALIDACE VSTUPĹ®
+            // -------------------------------------------------
+            if (email == null || password == null ||
+                    email.isBlank() || password.isBlank()) {
+
                 throw new BadCredentialsException("BE - ChybĂ­ pĹ™ihlaĹˇovacĂ­ Ăşdaje");
             }
 
-            UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(email, password);
+            // -------------------------------------------------
+            // VYTVOĹENĂŤ AUTHENTICATION TOKENU
+            // -------------------------------------------------
+            UsernamePasswordAuthenticationToken authRequest =
+                    new UsernamePasswordAuthenticationToken(email, password);
+
             setDetails(request, authRequest);
 
+            // delegace autentizace na AuthenticationManager
             return this.getAuthenticationManager().authenticate(authRequest);
+
         } catch (IOException e) {
+            // chyba pĹ™i ÄŤtenĂ­ JSON body (malformed JSON apod.)
             throw new RuntimeException(e);
         }
     }
 
-    // ĂšspÄ›ĹˇnĂ˝ login
+    // =====================================================
+    // ĂšSPÄšĹ NĂť LOGIN
+    // =====================================================
+
+    /**
+     * ZavolĂˇ se po ĂşspÄ›ĹˇnĂ© autentizaci.
+     *
+     * Co se zde dÄ›je:
+     * <ul>
+     *     <li>uloĹľĂ­ se {@link Authentication} do {@link SecurityContextHolder},</li>
+     *     <li>vytvoĹ™Ă­ se HTTP session (pokud neexistuje),</li>
+     *     <li>do session se uloĹľĂ­ SPRING_SECURITY_CONTEXT,</li>
+     *     <li>vrĂˇtĂ­ se JSON odpovÄ›ÄŹ mĂ­sto redirectu.</li>
+     * </ul>
+     */
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                            FilterChain chain, Authentication authResult)
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult)
             throws IOException, ServletException {
 
-        // UloĹľenĂ­ do SecurityContextHolder
+        // nastavenĂ­ SecurityContext
         SecurityContextHolder.getContext().setAuthentication(authResult);
 
-        // VytvoĹ™enĂ­ session a uloĹľenĂ­ SPRING_SECURITY_CONTEXT
+        // vytvoĹ™enĂ­ session a uloĹľenĂ­ kontextu
         request.getSession(true).setAttribute(
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 SecurityContextHolder.getContext()
         );
 
+        // JSON odpovÄ›ÄŹ
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
@@ -194,9 +399,28 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         objectMapper.writeValue(response.getWriter(), result);
     }
 
-    // NeĂşspÄ›ĹˇnĂ˝ login
+    // =====================================================
+    // NEĂšSPÄšĹ NĂť LOGIN
+    // =====================================================
+
+    /**
+     * ZavolĂˇ se pĹ™i neĂşspÄ›ĹˇnĂ©m pĹ™ihlĂˇĹˇenĂ­.
+     *
+     * VracĂ­ JSON odpovÄ›ÄŹ s HTTP 401.
+     *
+     * RozliĹˇuje:
+     * <ul>
+     *     <li>neaktivovanĂ˝ ĂşÄŤet,</li>
+     *     <li>neplatnĂ© pĹ™ihlaĹˇovacĂ­ Ăşdaje,</li>
+     *     <li>ostatnĂ­ chyby autentizace.</li>
+     * </ul>
+     */
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request,
+                                              HttpServletResponse response,
+                                              AuthenticationException failed)
+            throws IOException, ServletException {
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -204,9 +428,8 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         Map<String, Object> result = new HashMap<>();
         result.put("status", "error");
 
-        // RozliĹˇenĂ­ neaktivovanĂ©ho ĂşÄŤtu
         if (failed.getCause() instanceof cz.phsoft.hokej.exceptions.AccountNotActivatedException) {
-            result.put("message", failed.getCause().getMessage()); // napĹ™. "ĂšÄŤet nenĂ­ aktivovĂˇn. Zkontrolujte email."
+            result.put("message", failed.getCause().getMessage());
         } else if (failed instanceof BadCredentialsException) {
             result.put("message", "BE - NeplatnĂ© pĹ™ihlaĹˇovacĂ­ Ăşdaje");
         } else {
@@ -226,43 +449,115 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
 package cz.phsoft.hokej.config;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import cz.phsoft.hokej.exceptions.AccountNotActivatedException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import cz.phsoft.hokej.exceptions.AccountNotActivatedException;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
+/**
+ * {@link UserDetailsService} implementace napojujĂ­cĂ­ Spring Security
+ * na vlastnĂ­ databĂˇzovĂ˝ model uĹľivatele ({@link AppUserEntity}).
+ *
+ * ĂšÄŚEL:
+ * <ul>
+ *     <li>pĹ™i pĹ™ihlĂˇĹˇenĂ­ naÄŤĂ­st uĹľivatele z DB podle emailu,</li>
+ *     <li>ovÄ›Ĺ™it existenci ĂşÄŤtu a jeho aktivaci,</li>
+ *     <li>namapovat {@link AppUserEntity} na {@link UserDetails} objekt,
+ *         kterĂ˝ Spring Security pouĹľĂ­vĂˇ pĹ™i autentizaci.</li>
+ * </ul>
+ *
+ * JAK JE TO POUĹ˝ITĂ‰ VE SPRING SECURITY:
+ * <ul>
+ *     <li>pĹ™i loginu Spring Security zavolĂˇ {@link #loadUserByUsername(String)},</li>
+ *     <li>vrĂˇcenĂ˝ {@link UserDetails} obsahuje:</li>
+ *     <ul>
+ *         <li>username (email),</li>
+ *         <li>heslo (hashovanĂ©),</li>
+ *         <li>role / autority.</li>
+ *     </ul>
+ * </ul>
+ *
+ * BEZPEÄŚNOST:
+ * <ul>
+ *     <li>heslo se porovnĂˇvĂˇ automaticky pĹ™es {@code PasswordEncoder},</li>
+ *     <li>pokud ĂşÄŤet nenĂ­ aktivovĂˇn ({@code enabled == false}),
+ *         vyhodĂ­ se {@link AccountNotActivatedException},</li>
+ *     <li>typ vyhozenĂ© vĂ˝jimky pĹ™Ă­mo ovlivĹuje vĂ˝sledek pĹ™ihlĂˇĹˇenĂ­
+ *         (napĹ™. jinĂˇ hlĂˇĹˇka pro â€žneaktivovanĂ˝ ĂşÄŤetâ€ś vs. â€žuĹľivatel nenalezenâ€ś).</li>
+ * </ul>
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
+    /**
+     * RepozitĂˇĹ™ uĹľivatelĹŻ â€“ pouĹľĂ­vĂˇ se pouze pro naÄŤtenĂ­ dat pro autentizaci.
+     */
     private final AppUserRepository appUserRepository;
 
     public CustomUserDetailsService(AppUserRepository appUserRepository) {
         this.appUserRepository = appUserRepository;
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        AppUserEntity user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("BE - UĹľivatel nenalezen"));
+    // =====================================================
+    // NAÄŚTENĂŤ UĹ˝IVATELE PRO SPRING SECURITY
+    // =====================================================
 
-        if (!user.isEnabled()) { // nebo podle status == PENDING
+    /**
+     * NaÄŤte uĹľivatele podle emailu (username) pro potĹ™eby autentizace.
+     * <p>
+     * Tato metoda je volĂˇna Spring Security pĹ™i pĹ™ihlĂˇĹˇenĂ­.
+     *
+     * @param email email zadanĂ˝ uĹľivatelem pĹ™i loginu (username)
+     * @return {@link UserDetails} objekt pouĹľitĂ˝ pro autentizaci
+     *
+     * @throws UsernameNotFoundException    pokud uĹľivatel s danĂ˝m emailem neexistuje
+     * @throws AccountNotActivatedException pokud ĂşÄŤet existuje, ale nenĂ­ aktivnĂ­
+     */
+    @Override
+    public UserDetails loadUserByUsername(String email)
+            throws UsernameNotFoundException {
+
+        // -------------------------------------------------
+        // NAÄŚTENĂŤ UĹ˝IVATELE Z DB
+        // -------------------------------------------------
+        AppUserEntity user = appUserRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("BE - UĹľivatel nenalezen")
+                );
+
+        // -------------------------------------------------
+        // KONTROLA AKTIVACE ĂšÄŚTU
+        // -------------------------------------------------
+        if (!user.isEnabled()) {
+            // vlastnĂ­ vĂ˝jimka â€“ typicky se zachytĂˇvĂˇ ve filtru pro login
+            // a pĹ™eloĹľĂ­ se na vhodnou odpovÄ›ÄŹ pro FE
             throw new AccountNotActivatedException();
         }
 
-        return org.springframework.security.core.userdetails.User.builder()
+        // -------------------------------------------------
+        // MAPOVĂNĂŤ NA UserDetails
+        // -------------------------------------------------
+        return User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                .roles(user.getRole().name().replace("ROLE_", "")) // "ADMIN", "PLAYER", ...
-                .disabled(!user.isEnabled()) // neaktivnĂ­ - nelze se pĹ™Ă­hlĂˇsit
+                /*
+                 * role se uloĹľĂ­ bez prefixu (ADMIN / MANAGER / PLAYER),
+                 * Spring si automaticky pĹ™idĂˇ prefix "ROLE_".
+                 * PĹ™Ă­klad:
+                 *   user.getRole() = "ROLE_ADMIN"
+                 *   â†’ .roles("ADMIN")
+                 *   â†’ vĂ˝slednĂˇ autorita: "ROLE_ADMIN"
+                 */
+                .roles(user.getRole().name().replace("ROLE_", ""))
+                /*
+                 * disabled = true â†’ ĂşÄŤet se nemĹŻĹľe pĹ™ihlĂˇsit.
+                 * V praxi je to zde trochu redundantnĂ­ (uĹľ jsme ovÄ›Ĺ™ili enabled),
+                 * ale drĹľĂ­me flag konzistentnĂ­ se stavem v DB.
+                 */
+                .disabled(!user.isEnabled())
                 .build();
     }
 }
@@ -642,10 +937,47 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * GlobĂˇlnĂ­ handler vĂ˝jimek pro REST API.
+ * <p>
+ * ĂšÄŤel:
+ * <ul>
+ *     <li>centralizovanÄ› zachytĂˇvat vĂ˝jimky z controllerĹŻ a service vrstvy,</li>
+ *     <li>pĹ™evĂ©st je na jednotnou JSON odpovÄ›ÄŹ typu {@link ApiError},</li>
+ *     <li>zajistit konzistentnĂ­ HTTP status kĂłd pro jednotlivĂ© typy chyb.</li>
+ * </ul>
+ *
+ * Tato tĹ™Ă­da:
+ * <ul>
+ *     <li>neĹ™eĹˇĂ­ logovĂˇnĂ­ (to lze doplnit do jednotlivĂ˝ch handlerĹŻ),</li>
+ *     <li>neĹ™eĹˇĂ­ business logiku â€“ pouze mapuje vĂ˝jimky na HTTP odpovÄ›di.</li>
+ * </ul>
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 1) VĹˇechny domĂ©novĂ© / business chyby (extends BusinessException)
+    // ==========================================
+    // 1) BUSINESS / DOMĂ‰NOVĂ‰ VĂťJIMKY
+    // ==========================================
+
+    /**
+     * ZachytĂ­ vĹˇechny vĂ˝jimky dÄ›dĂ­cĂ­ z {@link BusinessException}.
+     * <p>
+     * Typicky:
+     * <ul>
+     *     <li>PlayerNotFoundException,</li>
+     *     <li>InvalidPlayerStatusException,</li>
+     *     <li>SeasonNotFoundException,</li>
+     *     <li>MatchNotFoundException, â€¦</li>
+     * </ul>
+     *
+     * KaĹľdĂˇ {@link BusinessException} sama nese:
+     * <ul>
+     *     <li>HTTP status ({@link BusinessException#getStatus()}),</li>
+     *     <li>uĹľivatelskou chybovou zprĂˇvu (message),</li>
+     *     <li>typ chyby (implicitnÄ› pĹ™es status a nĂˇzev vĂ˝jimky).</li>
+     * </ul>
+     */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(
             BusinessException ex,
@@ -658,10 +990,27 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
-        return ResponseEntity.status(ex.getStatus()).body(error);
+
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(error);
     }
 
-    // 2) PĹ™Ă­stup odepĹ™en (Spring Security)
+    // ==========================================
+    // 2) PĹĂŤSTUP ODEPĹEN (Spring Security)
+    // ==========================================
+
+    /**
+     * ZachytĂ­ {@link AccessDeniedException} vyhozenou Spring Security.
+     * <p>
+     * Typicky jde o situace:
+     * <ul>
+     *     <li>uĹľivatel nemĂˇ roli ADMIN / MANAGER pro danĂ˝ endpoint,</li>
+     *     <li>pokus o pĹ™Ă­stup k chrĂˇnÄ›nĂ©mu zdroji bez oprĂˇvnÄ›nĂ­.</li>
+     * </ul>
+     *
+     * HTTP status: 403 Forbidden
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex,
                                                        HttpServletRequest request) {
@@ -673,10 +1022,27 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(error);
     }
 
-    // 3) ValidaÄŤnĂ­ chyby - ĹˇpatnĂ© vstupy (napĹ™. hesla se neshodujĂ­, ĹˇpatnĂ© datum)
+    // ==========================================
+    // 3) ILLEGAL ARGUMENT â€“ CHYBNĂ‰ VSTUPY
+    // ==========================================
+
+    /**
+     * ZachytĂ­ {@link IllegalArgumentException}.
+     * <p>
+     * PouĹľitĂ­:
+     * <ul>
+     *     <li>obecnĂ© validaÄŤnĂ­ chyby vstupĹŻ,</li>
+     *     <li>nesmyslnĂ© parametry pĹ™edanĂ© do service vrstvy.</li>
+     * </ul>
+     *
+     * HTTP status: 400 Bad Request
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex,
                                                           HttpServletRequest request) {
@@ -688,10 +1054,27 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
     }
 
-    // 4) StavovĂ© chyby aplikace - typicky konflikty (napĹ™. nelze zvolit neschvĂˇlenĂ©ho hrĂˇÄŤe)
+    // ==========================================
+    // 4) ILLEGAL STATE â€“ NEPLATNĂť STAV APLIKACE
+    // ==========================================
+
+    /**
+     * ZachytĂ­ {@link IllegalStateException}.
+     * <p>
+     * Typicky:
+     * <ul>
+     *     <li>operace nenĂ­ povolena v aktuĂˇlnĂ­m stavu (napĹ™. deaktivace poslednĂ­ aktivnĂ­ sezĂłny),</li>
+     *     <li>poruĹˇenĂ­ vnitĹ™nĂ­ho invariantu aplikace.</li>
+     * </ul>
+     *
+     * HTTP status: 409 Conflict
+     */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiError> handleIllegalState(IllegalStateException ex,
                                                        HttpServletRequest request) {
@@ -703,10 +1086,33 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
     }
 
-    // 5) race condition
+    // ==========================================
+    // 5) DATA INTEGRITA (DB KONFLIKTY, RACE CONDITION)
+    // ==========================================
+
+    /**
+     * ZachytĂ­ {@link DataIntegrityViolationException} z perzistentnĂ­ vrstvy.
+     * <p>
+     * Typicky:
+     * <ul>
+     *     <li>poruĹˇenĂ­ unikĂˇtnĂ­ch omezenĂ­ v DB (unique constraint),</li>
+     *     <li>race condition pĹ™i paralelnĂ­m uklĂˇdĂˇnĂ­ stejnĂ˝ch dat.</li>
+     * </ul>
+     *
+     * Z bezpeÄŤnostnĂ­ch dĹŻvodĹŻ:
+     * <ul>
+     *     <li>nevracĂ­ detailnĂ­ DB zprĂˇvu,</li>
+     *     <li>pouĹľĂ­vĂˇ generickou, ale uĹľiteÄŤnou textovou hlĂˇĹˇku.</li>
+     * </ul>
+     *
+     * HTTP status: 409 Conflict
+     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(
             DataIntegrityViolationException ex,
@@ -720,11 +1126,27 @@ public class GlobalExceptionHandler {
                 request.getRemoteAddr()
         );
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
     }
 
+    // ==========================================
+    // 6) FALLBACK â€“ NEÄŚEKANĂ‰ CHYBY
+    // ==========================================
 
-    // 6) OstatnĂ­ neÄŤekanĂ© chyby (fallback)
+    /**
+     * Fallback handler pro vĹˇechny ostatnĂ­ neoĹˇetĹ™enĂ© vĂ˝jimky.
+     * <p>
+     * PouĹľitĂ­:
+     * <ul>
+     *     <li>zachytĂ­ runtime chyby, kterĂ© nebyly explicitnÄ› oĹˇetĹ™eny,</li>
+     *     <li>brĂˇnĂ­ pĂˇdu aplikace bez odpovÄ›di,</li>
+     *     <li>vracĂ­ jednotnĂ˝ formĂˇt {@link ApiError} pro FE.</li>
+     * </ul>
+     *
+     * HTTP status: 500 Internal Server Error
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAll(Exception ex,
                                               HttpServletRequest request) {
@@ -736,7 +1158,10 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
     }
 }
 
@@ -764,18 +1189,43 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.config.http.SessionCreationPolicy;
-
 
 import java.util.List;
 
+/**
+ * HlavnĂ­ konfigurace Spring Security pro backend aplikace.
+ *
+ * ZODPOVÄšDNOST:
+ * <ul>
+ *     <li>nastavenĂ­ autentizace (CustomUserDetailsService + BCrypt),</li>
+ *     <li>nastavenĂ­ autorizace endpointĹŻ (role / pĹ™ihlĂˇĹˇenĂ­),</li>
+ *     <li>konfigurace login mechanismu (CustomJsonLoginFilter),</li>
+ *     <li>session management (stateful pĹ™Ă­stup),</li>
+ *     <li>CORS konfigurace pro SPA frontend (React / Vite).</li>
+ * </ul>
+ *
+ * REĹ˝IMY PROVOZU:
+ * <ul>
+ *     <li><b>test-mode = true</b> â†’ vĹˇe povoleno, HTTP Basic (Postman, vĂ˝voj),</li>
+ *     <li><b>test-mode = false</b> â†’ produkÄŤnĂ­ reĹľim, REST login + role.</li>
+ * </ul>
+ */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity // povolĂ­ @PreAuthorize, @Secured, @RolesAllowed
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
 
+    /**
+     * PĹ™epĂ­naÄŤ testovacĂ­ho reĹľimu:
+     *
+     * app.test-mode=true
+     *
+     * PouĹľitĂ­:
+     * - lokĂˇlnĂ­ vĂ˝voj
+     * - Postman bez Ĺ™eĹˇenĂ­ session / loginu
+     */
     @Value("${app.test-mode:false}")
     private boolean isTestMode;
 
@@ -783,13 +1233,35 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    // Password encoder
+    // =====================================================
+    // 1) PASSWORD ENCODER
+    // =====================================================
+
+    /**
+     * BCrypt encoder pro uklĂˇdĂˇnĂ­ a ovÄ›Ĺ™ovĂˇnĂ­ hesel.
+     *
+     * PouĹľĂ­vĂˇ se:
+     * - pĹ™i registraci
+     * - pĹ™i zmÄ›nÄ› hesla
+     * - pĹ™i autentizaci (login)
+     */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Authentication provider
+    // =====================================================
+    // 2) AUTHENTICATION PROVIDER
+    // =====================================================
+
+    /**
+     * DaoAuthenticationProvider:
+     *
+     * - naÄŤĂ­tĂˇ uĹľivatele z databĂˇze pomocĂ­ CustomUserDetailsService
+     * - ovÄ›Ĺ™uje heslo pomocĂ­ BCryptPasswordEncoder
+     *
+     * PouĹľĂ­vĂˇ se pĹ™i loginu pĹ™es AuthenticationManager.
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -798,55 +1270,120 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // AuthenticationManager
+    // =====================================================
+    // 3) AUTHENTICATION MANAGER
+    // =====================================================
+
+    /**
+     * AuthenticationManager:
+     *
+     * - centrĂˇlnĂ­ bod autentizace ve Spring Security
+     * - pouĹľĂ­vĂˇ se v CustomJsonLoginFilter
+     */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig)
+            throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
-    // Security filter chain
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
+    // =====================================================
+    // 4) SECURITY FILTER CHAIN
+    // =====================================================
 
+    /**
+     * HlavnĂ­ bezpeÄŤnostnĂ­ konfigurace HTTP vrstvy.
+     *
+     * ĹeĹˇĂ­:
+     * <ul>
+     *     <li>CSRF / CORS</li>
+     *     <li>autorizaci endpointĹŻ</li>
+     *     <li>login (CustomJsonLoginFilter)</li>
+     *     <li>logout</li>
+     *     <li>session management</li>
+     * </ul>
+     */
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   AuthenticationManager authManager) throws Exception {
+
+        // REST API â†’ CSRF vypnuto (Ĺ™eĹˇeno pĹ™es session + CORS)
         http.csrf(csrf -> csrf.disable())
-                .cors(cors -> {
-                });
+                .cors(cors -> { /* pouĹľĂ­vĂˇ corsConfigurationSource() */ });
 
         if (isTestMode) {
-            // Test mode - vĹˇechno povoleno a HTTP Basic pro Postman
+            // =================================================
+            // TEST MODE
+            // =================================================
+            //
+            // - vĹˇechny endpointy povoleny
+            // - HTTP Basic autentizace
+            // - ĹľĂˇdnĂ˝ JSON login filtr
+            //
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .httpBasic();
+
         } else {
-            // Produkce - REST login pĹ™es CustomJsonLoginFilter
+            // =================================================
+            // PRODUKÄŚNĂŤ REĹ˝IM
+            // =================================================
+
             http
+                    // napojenĂ­ na CustomUserDetailsService + BCrypt
                     .authenticationProvider(authenticationProvider())
+
+                    // -------------------------------
+                    // AUTORIZACE ENDPOINTĹ®
+                    // -------------------------------
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/auth/register", "/api/auth/verify").permitAll()
-                            .requestMatchers("/api/login").permitAll()
-                            .requestMatchers("/api/logout").permitAll()
-                            .requestMatchers("/api/matches").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/matches/upcoming", "/api/matches/past").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/matches/**").authenticated()
-                            .requestMatchers("/api/players").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/players/**").authenticated()
-                            .requestMatchers("/api/registrations/all",
-                                    "/api/registrations/for-match/**",
-                                    "/api/registrations/no-response/**").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/registrations/**").authenticated()
-                            .requestMatchers("/api/inactivity/All",
-                                    "/api/inactivity/**").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/inactivity/player/**").authenticated()
+
+                            // ===== VEĹEJNĂ‰ ENDPOINTY =====
+                            .requestMatchers(
+                                    "/api/auth/register",
+                                    "/api/auth/verify",
+                                    "/api/login",
+                                    "/api/logout"
+                            ).permitAll()
+
+                            // ===== DEBUG / TEST =====
+                            .requestMatchers(
+                                    "/api/debug/me",
+                                    "/api/test/**"
+                            ).hasRole("ADMIN")
+
+                            // testovacĂ­ emaily
+                            .requestMatchers("/api/email/test/**").hasRole("ADMIN")
+
+                            // ===== ADMIN / MANAGER =====
+                            .requestMatchers("/api/admin/seasons/**").hasRole("ADMIN")
+                            .requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER")
+
+                            // ===== ZBYTEK API =====
+                            .requestMatchers("/api/**").authenticated()
+
                             .anyRequest().authenticated()
                     )
-                    //  TADY PĹESNÄš
+
+                    // -------------------------------
+                    // SESSION MANAGEMENT
+                    // -------------------------------
                     .sessionManagement(sm ->
                             sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     )
-                    //  a TEPRVE PAK login filter
+
+                    // -------------------------------
+                    // CUSTOM JSON LOGIN
+                    // -------------------------------
                     .addFilterAt(
                             new CustomJsonLoginFilter("/api/login", authManager),
                             UsernamePasswordAuthenticationFilter.class
                     )
+
+                    // -------------------------------
+                    // LOGOUT
+                    // -------------------------------
                     .logout(logout -> logout
                             .logoutUrl("/api/logout")
                             .deleteCookies("JSESSIONID")
@@ -854,7 +1391,8 @@ public class SecurityConfig {
                                 request.getSession().removeAttribute("CURRENT_PLAYER_ID");
                                 response.setContentType("application/json");
                                 response.setCharacterEncoding("UTF-8");
-                                response.getWriter().write("{\"status\":\"ok\",\"message\":\"OdhlĂˇĹˇeno\"}");
+                                response.getWriter()
+                                        .write("{\"status\":\"ok\",\"message\":\"OdhlĂˇĹˇeno\"}");
                             })
                     );
         }
@@ -862,16 +1400,30 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // CORS pro React dev server a cookies
+    // =====================================================
+    // 5) CORS KONFIGURACE
+    // =====================================================
+
+    /**
+     * CORS konfigurace pro SPA frontend (React / Vite).
+     *
+     * - povoluje http://localhost:5173
+     * - umoĹľĹuje cookies (JSESSIONID)
+     * - povoluje bÄ›ĹľnĂ© HTTP metody
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
+
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }

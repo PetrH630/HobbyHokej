@@ -5,49 +5,73 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 /**
  * Thread-local kontext pro „aktuálního hráče“.
  *
- * ÚČEL:
- * -----
- * Uchovává PlayerEntity, který je zvolený jako "current player"
- * PRO JEDEN KONKRÉTNÍ HTTP REQUEST.
+ * Slouží k uchování instance {@link PlayerEntity},
+ * která je zvolená jako „current player“
+ * v rámci jednoho konkrétního HTTP requestu.
  *
- * Tento kontext:
- * - je naplněn v CurrentPlayerFilter
- * - je dostupný v celém call stacku (controller → service → helper)
- * - je vyčištěn po dokončení requestu
+ * -------------------------------------------------
+ * ŽIVOTNÍ CYKLUS
+ * -------------------------------------------------
+ * <ul>
+ *     <li>naplněn v {@code CurrentPlayerFilter} na začátku requestu,</li>
+ *     <li>dostupný v celém call stacku
+ *         (controller → service → helper),</li>
+ *     <li>vyčištěn po dokončení requestu.</li>
+ * </ul>
  *
- * Proč ThreadLocal:
- * -----------------
- * Spring obsluhuje requesty paralelně ve vláknech.
- * ThreadLocal zaručuje, že:
- * - každý request má svůj vlastní PlayerEntity
- * - nedojde ke sdílení dat mezi uživateli
+ * -------------------------------------------------
+ * PROČ THREADLOCAL
+ * -------------------------------------------------
+ * Spring obsluhuje HTTP requesty paralelně ve vláknech.
+ * {@link ThreadLocal} zajišťuje, že:
+ * <ul>
+ *     <li>každý request má vlastní instanci {@code PlayerEntity},</li>
+ *     <li>nedochází ke sdílení dat mezi uživateli,</li>
+ *     <li>není nutné předávat hráče přes všechny metody.</li>
+ * </ul>
  *
- * DŮLEŽITÉ:
- * ThreadLocal MUSÍ být vždy vyčištěn,
- * jinak hrozí memory leak nebo přenos dat mezi requesty.
+ * -------------------------------------------------
+ * DŮLEŽITÉ
+ * -------------------------------------------------
+ * {@link ThreadLocal} MUSÍ být vždy vyčištěn pomocí {@link #clear()},
+ * jinak hrozí:
+ * <ul>
+ *     <li>memory leak v aplikačním serveru,</li>
+ *     <li>únik dat mezi jednotlivými requesty.</li>
+ * </ul>
  */
-public class CurrentPlayerContext {
+public final class CurrentPlayerContext {
 
     /**
-     * ThreadLocal držící aktuálního hráče pro právě běžící thread.
+     * ThreadLocal uchovávající aktuálního hráče
+     * pro právě zpracovávaný request.
      */
     private static final ThreadLocal<PlayerEntity> currentPlayer = new ThreadLocal<>();
+
+    private CurrentPlayerContext() {
+        // utility class – nelze instancovat
+    }
 
     /**
      * Nastaví aktuálního hráče do thread-local kontextu.
      *
-     * Volá se:
-     * - v CurrentPlayerFilter (na začátku requestu)
+     * Volá se typicky:
+     * <ul>
+     *     <li>na začátku requestu ve {@code CurrentPlayerFilter}.</li>
+     * </ul>
+     *
+     * @param player hráč zvolený jako aktuální pro daný request
      */
     public static void set(PlayerEntity player) {
         currentPlayer.set(player);
     }
 
     /**
-     * Vrátí aktuálního hráče pro daný request.
+     * Vrátí aktuálního hráče pro právě zpracovávaný request.
      *
-     * @return PlayerEntity nebo null,
-     *         pokud hráč nebyl zvolen nebo request nevyžaduje hráče
+     * @return {@link PlayerEntity} nebo {@code null},
+     *         pokud hráč nebyl zvolen nebo request
+     *         nevyžaduje kontext hráče
      */
     public static PlayerEntity get() {
         return currentPlayer.get();
@@ -57,11 +81,15 @@ public class CurrentPlayerContext {
      * Vyčistí thread-local kontext.
      *
      * MUSÍ se volat:
-     * - vždy po dokončení requestu (finally blok ve filtru)
+     * <ul>
+     *     <li>vždy po dokončení requestu (typicky ve {@code finally} bloku filtru).</li>
+     * </ul>
      *
-     * Použití remove() místo set(null):
-     * - uvolní referenci
-     * - zabrání memory leakům v aplikačním serveru
+     * Použití {@link ThreadLocal#remove()}:
+     * <ul>
+     *     <li>uvolní referenci na {@link PlayerEntity},</li>
+     *     <li>zabrání memory leakům při reuse vláken.</li>
+     * </ul>
      */
     public static void clear() {
         currentPlayer.remove();

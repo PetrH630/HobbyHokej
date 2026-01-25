@@ -56,19 +56,96 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+/**
+ * DTO reprezentujĂ­cĂ­ jednotnĂ˝ formĂˇt chybovĂ© odpovÄ›di backendu.
+ * <p>
+ * PouĹľĂ­vĂˇ se v {@link cz.phsoft.hokej.config.GlobalExceptionHandler} pro
+ * serializaci vĂ˝jimek do JSON odpovÄ›di, kterou zpracovĂˇvĂˇ frontend.
+ *
+ * Struktura:
+ * <ul>
+ *     <li>{@code timestamp} â€“ ÄŤas vzniku chyby na serveru,</li>
+ *     <li>{@code status} â€“ HTTP status kĂłd (napĹ™. 400, 403, 409, 500),</li>
+ *     <li>{@code error} â€“ struÄŤnĂ˝ textovĂ˝ popis statusu (napĹ™. "Bad Request"),</li>
+ *     <li>{@code message} â€“ detailnÄ›jĹˇĂ­ zprĂˇva (typicky z vĂ˝jimky),</li>
+ *     <li>{@code path} â€“ URL, kde k chybÄ› doĹˇlo,</li>
+ *     <li>{@code clientIp} â€“ IP adresa klienta, kterĂ˝ poĹľadavek poslal,</li>
+ *     <li>{@code details} â€“ volitelnĂ© doplĹujĂ­cĂ­ informace (napĹ™. validaÄŤnĂ­ chyby).</li>
+ * </ul>
+ *
+ * PĹ™Ă­klad JSON odpovÄ›di:
+ * <pre>
+ * {
+ *   "timestamp": "2026-01-24 22:21:09",
+ *   "status": 400,
+ *   "error": "Bad Request",
+ *   "message": "BE - Datum 'od' musĂ­ bĂ˝t pĹ™ed 'do'.",
+ *   "path": "/api/inactivity/admin",
+ *   "clientIp": "0:0:0:0:0:0:0:1",
+ *   "details": {
+ *     "field": "inactiveFrom",
+ *     "reason": "must be before inactiveTo"
+ *   }
+ * }
+ * </pre>
+ */
 public class ApiError {
 
+    /**
+     * Datum a ÄŤas vzniku chyby na serveru.
+     * <p>
+     * FormĂˇt {@code yyyy-MM-dd HH:mm:ss} usnadĹuje ÄŤitelnost v logu i ve FE.
+     */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
-    private int status;
-    private String error;
-    private String message;
-    private String path;
-    private String clientIp; // â† novÄ›
 
-    // VolitelnĂ©: podrobnosti (validace, vĂ­ce chyb, atd.)
+    /**
+     * HTTP status kĂłd (napĹ™. 400, 403, 404, 409, 500).
+     */
+    private int status;
+
+    /**
+     * StruÄŤnĂ˝ textovĂ˝ popis statusu (napĹ™. "Bad Request", "Forbidden", "Conflict").
+     */
+    private String error;
+
+    /**
+     * DetailnÄ›jĹˇĂ­ chybovĂˇ zprĂˇva â€“ typicky pochĂˇzĂ­ z {@link Exception#getMessage()}.
+     * <p>
+     * V domĂ©novĂ˝ch vĂ˝jimkĂˇch je zĂˇmÄ›rnÄ› formulovĂˇna tak,
+     * aby byla pouĹľitelnĂˇ pĹ™Ă­mo pro uĹľivatele (pĹ™es FE).
+     */
+    private String message;
+
+    /**
+     * URL (path) poĹľadavku, ve kterĂ©m chyba vznikla (napĹ™. {@code /api/matches/1}).
+     */
+    private String path;
+
+    /**
+     * IP adresa klienta, kterĂ˝ poĹľadavek odeslal.
+     * <p>
+     * HodĂ­ se pro audit / diagnostiku (napĹ™. pĹ™i Ĺ™eĹˇenĂ­ problĂ©mĹŻ uĹľivatelĹŻ).
+     */
+    private String clientIp;
+
+    /**
+     * VolitelnĂˇ mapa s doplĹujĂ­cĂ­mi detaily o chybÄ›.
+     * <p>
+     * TypickĂ© pouĹľitĂ­:
+     * <ul>
+     *     <li>validaÄŤnĂ­ chyby formulĂˇĹ™e (field â†’ message),</li>
+     *     <li>vĂ­ce chyb v jednom requestu (key â†’ popis problĂ©mu).</li>
+     * </ul>
+     * MĹŻĹľe bĂ˝t {@code null}.
+     */
     private Map<String, String> details;
 
+    /**
+     * ZĂˇkladnĂ­ konstruktor pro chybovou odpovÄ›ÄŹ bez detailnĂ­ mapy.
+     * <p>
+     * {@code timestamp} se nastavuje automaticky na aktuĂˇlnĂ­ ÄŤas.
+     */
     public ApiError(int status, String error, String message, String path,
                     String clientIp) {
         this.timestamp = LocalDateTime.now();
@@ -79,15 +156,22 @@ public class ApiError {
         this.clientIp = clientIp;
     }
 
+    /**
+     * RozĹˇĂ­Ĺ™enĂ˝ konstruktor umoĹľĹujĂ­cĂ­ doplnit i {@code details} mapu.
+     */
     public ApiError(int status,
-                            String error,
-                            String message,
-                            String path,
-                            String clientIp,
-                            Map<String, String> details) {
+                    String error,
+                    String message,
+                    String path,
+                    String clientIp,
+                    Map<String, String> details) {
         this(status, error, message, path, clientIp);
         this.details = details;
     }
+
+    // ======================
+    // GETTERY
+    // ======================
 
     public LocalDateTime getTimestamp() { return timestamp; }
     public int getStatus() { return status; }
