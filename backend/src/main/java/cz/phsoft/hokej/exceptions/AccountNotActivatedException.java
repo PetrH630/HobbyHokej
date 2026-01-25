@@ -2,9 +2,20 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Výjimka signalizující, že uživatelský účet není aktivován.
+ *
+ * <p>
+ * Vyhazuje se v případě, kdy se uživatel pokouší přihlásit nebo
+ * používat funkce vyžadující aktivovaný účet, aniž by dokončil
+ * aktivaci přes odkaz v e-mailu.
+ * </p>
+ *
+ * Typicky mapováno na HTTP 403 (Forbidden).
+ */
 public class AccountNotActivatedException extends BusinessException {
 
     public AccountNotActivatedException() {
-        super("První musíte aktivovat účet pomocí odkazu v emailu", HttpStatus.FORBIDDEN); // 403
+        super("BE - Nejprve musíte aktivovat účet pomocí odkazu v e-mailu.", HttpStatus.FORBIDDEN);
     }
 }

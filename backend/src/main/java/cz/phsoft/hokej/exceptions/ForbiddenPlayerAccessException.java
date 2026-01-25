@@ -2,6 +2,16 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Výjimka signalizující, že uživatel nemá oprávnění pracovat s daným hráčem.
+ *
+ * <p>
+ * Vyhazuje se, pokud se přihlášený uživatel snaží číst nebo měnit
+ * data hráče, který mu nepatří (není k němu přiřazen).
+ * </p>
+ *
+ * Typicky mapováno na HTTP 403 (Forbidden).
+ */
 public class ForbiddenPlayerAccessException extends BusinessException {
 
     public ForbiddenPlayerAccessException(Long playerId) {
