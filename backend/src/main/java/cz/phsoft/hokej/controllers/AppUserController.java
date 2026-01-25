@@ -11,6 +11,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller pro správu uživatelských účtů.
+ * <p>
+ * Zajišťuje:
+ * <ul>
+ *     <li>práci s přihlášeným uživatelem (profil, změna hesla),</li>
+ *     <li>administrativní správu uživatelů (pouze ADMIN).</li>
+ * </ul>
+ *
+ * Veškerá business logika je delegována do {@link AppUserService}.
+ */
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
@@ -22,36 +33,70 @@ public class AppUserController {
         this.appUserService = appUserService;
     }
 
-    // Přihlášený uživatel – bezpečné
+    /**
+     * Vrátí detail aktuálně přihlášeného uživatele.
+     * <p>
+     * Identifikace uživatele probíhá pomocí e-mailu (username)
+     * získaného z {@link Authentication}.
+     *
+     * @param authentication objekt s informacemi o přihlášeném uživateli
+     * @return detail přihlášeného uživatele
+     */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public AppUserDTO getCurrentUser(Authentication authentication) {
         return appUserService.getCurrentUser(authentication.getName());
     }
 
-    // Změna hesla přihlášeného uživatele
+    /**
+     * Změní heslo aktuálně přihlášeného uživatele.
+     *
+     * @param authentication objekt s informacemi o přihlášeném uživateli
+     * @param dto            DTO obsahující staré a nové heslo
+     * @return informace o úspěšném provedení změny
+     */
     @PostMapping("/me/change-password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> changePassword(Authentication authentication,
-                                                 @Valid @RequestBody ChangePasswordDTO dto) {
+    public ResponseEntity<String> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordDTO dto) {
+
         String email = authentication.getName();
-        appUserService.changePassword(email, dto.getOldPassword(), dto.getNewPassword(), dto.getNewPasswordConfirm());
+        appUserService.changePassword(
+                email,
+                dto.getOldPassword(),
+                dto.getNewPassword(),
+                dto.getNewPasswordConfirm()
+        );
         return ResponseEntity.ok("Heslo úspěšně změněno");
     }
 
-    // Změna přihlášeného uživatele
+    /**
+     * Aktualizuje údaje aktuálně přihlášeného uživatele.
+     *
+     * @param authentication objekt s informacemi o přihlášeném uživateli
+     * @param dto            aktualizovaná data uživatele
+     * @return informace o úspěšné aktualizaci
+     */
     @PutMapping("/me/update")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> updateUser(Authentication authentication,
-                                             @Valid @RequestBody AppUserDTO dto) {
+    public ResponseEntity<String> updateUser(
+            Authentication authentication,
+            @Valid @RequestBody AppUserDTO dto) {
+
         String email = authentication.getName();
         appUserService.updateUser(email, dto);
-
-        return ResponseEntity.ok("uživatel byl změněn");
+        return ResponseEntity.ok("Uživatel byl změněn");
     }
 
-
-    // reset hesla uživatele
+    /**
+     * Resetuje heslo uživatele na výchozí hodnotu.
+     * <p>
+     * Operace je vyhrazena pouze pro administrátora.
+     *
+     * @param id ID uživatele
+     * @return informace o úspěšném resetu hesla
+     */
     @PostMapping("/{id}/reset-password")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> resetPassword(@PathVariable Long id) {
@@ -59,12 +104,16 @@ public class AppUserController {
         return ResponseEntity.ok("Heslo resetováno na 'Player123'");
     }
 
-    // Seznam všech uživatelů – jen ADMIN
+    /**
+     * Vrátí seznam všech uživatelů v systému.
+     * <p>
+     * Endpoint je dostupný pouze pro administrátora.
+     *
+     * @return seznam uživatelů
+     */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<AppUserDTO> getAllUsers() {
         return appUserService.getAllUsers();
     }
-
-
 }

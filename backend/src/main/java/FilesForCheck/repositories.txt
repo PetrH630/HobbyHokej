@@ -117,14 +117,41 @@ package cz.phsoft.hokej.data.repositories;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
+
+    // --- podle data bez ohledu na sezĂłnu ---
     List<MatchEntity> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
+
     List<MatchEntity> findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime dateTime);
 
+
+    // --- vĹˇechny zĂˇpasy v konkrĂ©tnĂ­ sezĂłnÄ› ---
+    List<MatchEntity> findAllBySeasonIdOrderByDateTimeAsc(Long seasonId);
+
+    List<MatchEntity> findAllBySeasonIdOrderByDateTimeDesc(Long seasonId);
+
+
+    // --- zĂˇpasy v sezĂłnÄ› po danĂ©m ÄŤase (pouĹľĂ­vanĂ© ve sluĹľbÄ›) ---
+    List<MatchEntity> findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(
+            Long seasonId,
+            LocalDateTime from
+    );
+
+    // --- zĂˇpasy v sezĂłnÄ› pĹ™ed danĂ˝m ÄŤasem (pouĹľĂ­vanĂ© ve sluĹľbÄ›) ---
+    List<MatchEntity> findBySeasonIdAndDateTimeBeforeOrderByDateTimeDesc(
+            Long seasonId,
+            LocalDateTime to
+    );
+
+    // (VOLITELNĂ‰) pokud bys nÄ›kdy chtÄ›l >= mĂ­sto >
+    // List<MatchEntity> findAllBySeasonIdAndDateTimeGreaterThanEqualOrderByDateTimeAsc(
+    //         Long seasonId,
+    //         LocalDateTime from
+    // );
 }
 
 
@@ -209,8 +236,12 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
 
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate endDate, LocalDate startDate);
 
-    boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(LocalDate endDate, LocalDate startDate, Long id);
+    boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(
+            LocalDate endDate,
+            LocalDate startDate,
+            Long id);
 
+    long countByActiveTrue();
 }
 
 

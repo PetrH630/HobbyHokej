@@ -16,18 +16,43 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.config.http.SessionCreationPolicy;
-
 
 import java.util.List;
 
+/**
+ * Hlavní konfigurace Spring Security pro backend aplikace.
+ *
+ * ZODPOVĚDNOST:
+ * <ul>
+ *     <li>nastavení autentizace (CustomUserDetailsService + BCrypt),</li>
+ *     <li>nastavení autorizace endpointů (role / přihlášení),</li>
+ *     <li>konfigurace login mechanismu (CustomJsonLoginFilter),</li>
+ *     <li>session management (stateful přístup),</li>
+ *     <li>CORS konfigurace pro SPA frontend (React / Vite).</li>
+ * </ul>
+ *
+ * REŽIMY PROVOZU:
+ * <ul>
+ *     <li><b>test-mode = true</b> → vše povoleno, HTTP Basic (Postman, vývoj),</li>
+ *     <li><b>test-mode = false</b> → produkční režim, REST login + role.</li>
+ * </ul>
+ */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity // povolí @PreAuthorize, @Secured, @RolesAllowed
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
 
+    /**
+     * Přepínač testovacího režimu:
+     *
+     * app.test-mode=true
+     *
+     * Použití:
+     * - lokální vývoj
+     * - Postman bez řešení session / loginu
+     */
     @Value("${app.test-mode:false}")
     private boolean isTestMode;
 
@@ -35,13 +60,35 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    // Password encoder
+    // =====================================================
+    // 1) PASSWORD ENCODER
+    // =====================================================
+
+    /**
+     * BCrypt encoder pro ukládání a ověřování hesel.
+     *
+     * Používá se:
+     * - při registraci
+     * - při změně hesla
+     * - při autentizaci (login)
+     */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Authentication provider
+    // =====================================================
+    // 2) AUTHENTICATION PROVIDER
+    // =====================================================
+
+    /**
+     * DaoAuthenticationProvider:
+     *
+     * - načítá uživatele z databáze pomocí CustomUserDetailsService
+     * - ověřuje heslo pomocí BCryptPasswordEncoder
+     *
+     * Používá se při loginu přes AuthenticationManager.
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -50,55 +97,120 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // AuthenticationManager
+    // =====================================================
+    // 3) AUTHENTICATION MANAGER
+    // =====================================================
+
+    /**
+     * AuthenticationManager:
+     *
+     * - centrální bod autentizace ve Spring Security
+     * - používá se v CustomJsonLoginFilter
+     */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig)
+            throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
-    // Security filter chain
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
+    // =====================================================
+    // 4) SECURITY FILTER CHAIN
+    // =====================================================
 
+    /**
+     * Hlavní bezpečnostní konfigurace HTTP vrstvy.
+     *
+     * Řeší:
+     * <ul>
+     *     <li>CSRF / CORS</li>
+     *     <li>autorizaci endpointů</li>
+     *     <li>login (CustomJsonLoginFilter)</li>
+     *     <li>logout</li>
+     *     <li>session management</li>
+     * </ul>
+     */
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   AuthenticationManager authManager) throws Exception {
+
+        // REST API → CSRF vypnuto (řešeno přes session + CORS)
         http.csrf(csrf -> csrf.disable())
-                .cors(cors -> {
-                });
+                .cors(cors -> { /* používá corsConfigurationSource() */ });
 
         if (isTestMode) {
-            // Test mode - všechno povoleno a HTTP Basic pro Postman
+            // =================================================
+            // TEST MODE
+            // =================================================
+            //
+            // - všechny endpointy povoleny
+            // - HTTP Basic autentizace
+            // - žádný JSON login filtr
+            //
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .httpBasic();
+
         } else {
-            // Produkce - REST login přes CustomJsonLoginFilter
+            // =================================================
+            // PRODUKČNÍ REŽIM
+            // =================================================
+
             http
+                    // napojení na CustomUserDetailsService + BCrypt
                     .authenticationProvider(authenticationProvider())
+
+                    // -------------------------------
+                    // AUTORIZACE ENDPOINTŮ
+                    // -------------------------------
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/auth/register", "/api/auth/verify").permitAll()
-                            .requestMatchers("/api/login").permitAll()
-                            .requestMatchers("/api/logout").permitAll()
-                            .requestMatchers("/api/matches").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/matches/upcoming", "/api/matches/past").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/matches/**").authenticated()
-                            .requestMatchers("/api/players").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/players/**").authenticated()
-                            .requestMatchers("/api/registrations/all",
-                                    "/api/registrations/for-match/**",
-                                    "/api/registrations/no-response/**").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/registrations/**").authenticated()
-                            .requestMatchers("/api/inactivity/All",
-                                    "/api/inactivity/**").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/inactivity/player/**").authenticated()
+
+                            // ===== VEŘEJNÉ ENDPOINTY =====
+                            .requestMatchers(
+                                    "/api/auth/register",
+                                    "/api/auth/verify",
+                                    "/api/login",
+                                    "/api/logout"
+                            ).permitAll()
+
+                            // ===== DEBUG / TEST =====
+                            .requestMatchers(
+                                    "/api/debug/me",
+                                    "/api/test/**"
+                            ).hasRole("ADMIN")
+
+                            // testovací emaily
+                            .requestMatchers("/api/email/test/**").hasRole("ADMIN")
+
+                            // ===== ADMIN / MANAGER =====
+                            .requestMatchers("/api/admin/seasons/**").hasRole("ADMIN")
+                            .requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                            .requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER")
+
+                            // ===== ZBYTEK API =====
+                            .requestMatchers("/api/**").authenticated()
+
                             .anyRequest().authenticated()
                     )
-                    //  TADY PŘESNĚ
+
+                    // -------------------------------
+                    // SESSION MANAGEMENT
+                    // -------------------------------
                     .sessionManagement(sm ->
                             sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     )
-                    //  a TEPRVE PAK login filter
+
+                    // -------------------------------
+                    // CUSTOM JSON LOGIN
+                    // -------------------------------
                     .addFilterAt(
                             new CustomJsonLoginFilter("/api/login", authManager),
                             UsernamePasswordAuthenticationFilter.class
                     )
+
+                    // -------------------------------
+                    // LOGOUT
+                    // -------------------------------
                     .logout(logout -> logout
                             .logoutUrl("/api/logout")
                             .deleteCookies("JSESSIONID")
@@ -106,7 +218,8 @@ public class SecurityConfig {
                                 request.getSession().removeAttribute("CURRENT_PLAYER_ID");
                                 response.setContentType("application/json");
                                 response.setCharacterEncoding("UTF-8");
-                                response.getWriter().write("{\"status\":\"ok\",\"message\":\"Odhlášeno\"}");
+                                response.getWriter()
+                                        .write("{\"status\":\"ok\",\"message\":\"Odhlášeno\"}");
                             })
                     );
         }
@@ -114,16 +227,30 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // CORS pro React dev server a cookies
+    // =====================================================
+    // 5) CORS KONFIGURACE
+    // =====================================================
+
+    /**
+     * CORS konfigurace pro SPA frontend (React / Vite).
+     *
+     * - povoluje http://localhost:5173
+     * - umožňuje cookies (JSESSIONID)
+     * - povoluje běžné HTTP metody
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
+
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }

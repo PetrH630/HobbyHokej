@@ -4,13 +4,27 @@ import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.PlayerService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
 
 import java.util.List;
 
+/**
+ * REST controller pro administraci hráčů v systému.
+ * <p>
+ * Endpoints jsou určeny pro role ADMIN a MANAGER (dle konkrétní operace)
+ * a umožňují:
+ * <ul>
+ *     <li>správu hráčů (CRUD),</li>
+ *     <li>schvalování a zamítání hráčů,</li>
+ *     <li>získání detailu hráče nebo seznamu všech hráčů.</li>
+ * </ul>
+ *
+ * Controller neobsahuje business logiku – veškeré zpracování
+ * je delegováno do {@link PlayerService}.
+ */
 @RestController
 @RequestMapping("/api/players/admin")
 @CrossOrigin(origins = "*")
@@ -19,67 +33,102 @@ public class AdminPlayerController {
     private final PlayerService playerService;
     private final CurrentPlayerService currentPlayerService;
 
-    public AdminPlayerController(PlayerService playerService, CurrentPlayerService currentPlayerService) {
+    public AdminPlayerController(PlayerService playerService,
+                                 CurrentPlayerService currentPlayerService) {
         this.playerService = playerService;
         this.currentPlayerService = currentPlayerService;
     }
-    // všichni hráči
+
+    /**
+     * Vrátí seznam všech hráčů v systému.
+     *
+     * @return seznam hráčů
+     */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers();
     }
 
-    // hráč dle id
-
+    /**
+     * Vrátí detail hráče podle jeho ID.
+     *
+     * @param id ID hráče
+     * @return detail hráče
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public PlayerDTO getPlayerById(@PathVariable Long id) {
         return playerService.getPlayerById(id);
     }
 
-    // vytvoření hráče
+    /**
+     * Vytvoří nového hráče.
+     * <p>
+     * Používá se typicky administrátorem nebo manažerem
+     * při ručním zakládání hráče do systému.
+     *
+     * @param playerDTO data nového hráče
+     * @return vytvořený hráč
+     */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-        public PlayerDTO createPlayer(@Valid @RequestBody PlayerDTO playerDTO) {
+    public PlayerDTO createPlayer(@Valid @RequestBody PlayerDTO playerDTO) {
         return playerService.createPlayer(playerDTO);
     }
 
-    // úprava hráče administrátorem dle id hráče
+    /**
+     * Aktualizuje údaje hráče administrátorem.
+     *
+     * @param id  ID hráče
+     * @param dto aktualizovaná data hráče
+     * @return aktualizovaný hráč
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public PlayerDTO upatePlayerAdmin(@PathVariable Long id,  @Valid @RequestBody PlayerDTO dto) {
-
+    public PlayerDTO updatePlayerAdmin(@PathVariable Long id,
+                                       @Valid @RequestBody PlayerDTO dto) {
         return playerService.updatePlayer(id, dto);
     }
-    // odstraní hráče
-    @PreAuthorize("hasRole('ADMIN')")
+
+    /**
+     * Odstraní hráče ze systému.
+     * <p>
+     * Operace je vyhrazena pouze pro administrátora.
+     *
+     * @param id ID hráče
+     * @return informace o úspěšném provedení operace
+     */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponseDTO> deletePlayer(@PathVariable Long id) {
         SuccessResponseDTO response = playerService.deletePlayer(id);
         return ResponseEntity.ok(response);
     }
 
-    //
-    // SCHVÁLENÍ HRÁČE
-    @PreAuthorize("hasRole('ADMIN')")
+    /**
+     * Schválí hráče (změní jeho stav na APPROVED).
+     *
+     * @param id ID hráče
+     * @return informace o úspěšném schválení
+     */
     @PutMapping("/approve/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponseDTO> approvePlayer(@PathVariable Long id) {
         SuccessResponseDTO response = playerService.approvePlayer(id);
         return ResponseEntity.ok(response);
-
     }
-    // ZAMÍTNUTÍ HRÁČE
-    @PreAuthorize("hasRole('ADMIN')")
+
+    /**
+     * Zamítne hráče (změní jeho stav na REJECTED).
+     *
+     * @param id ID hráče
+     * @return informace o úspěšném zamítnutí
+     */
     @PutMapping("/reject/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponseDTO> rejectPlayer(@PathVariable Long id) {
         SuccessResponseDTO response = playerService.rejectPlayer(id);
         return ResponseEntity.ok(response);
-
     }
-
-
-
-
-
 }

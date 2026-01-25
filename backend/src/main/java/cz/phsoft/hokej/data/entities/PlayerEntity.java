@@ -5,6 +5,13 @@ import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.persistence.*;
 
+/**
+ * Entita reprezentující hráče v systému.
+ *
+ * Hráč představuje sportovní identitu uživatele a je
+ * používán při registracích na zápasy, notifikacích
+ * a statistikách.
+ */
 @Entity
 @Table(name = "player_entity")
 public class PlayerEntity {
@@ -19,135 +26,128 @@ public class PlayerEntity {
     @Column(nullable = false)
     private String surname;
 
+    /**
+     * Volitelná přezdívka hráče.
+     */
     private String nickName;
 
+    /**
+     * Typ hráče (např. BASIC, STANDARD, VIP).
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PlayerType type; // VIP, STANDARD, BASIC
+    private PlayerType type;
 
+    /**
+     * Celé jméno hráče (odvozené z name + surname).
+     */
     private String fullName;
+
+    /**
+     * Telefonní číslo hráče pro SMS notifikace.
+     */
     private String phoneNumber;
 
+    /**
+     * Tým, ke kterému je hráč přiřazen.
+     */
     @Enumerated(EnumType.STRING)
     private Team team;
 
+    /**
+     * Aktuální stav hráče v systému (např. PENDING, APPROVED).
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerStatus playerStatus = PlayerStatus.PENDING;
 
-    // Many-to-One: každý hráč patří jednomu uživateli
+    /**
+     * Uživatel, ke kterému hráč patří.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private AppUserEntity user;
 
+    /**
+     * Nastavení notifikací hráče.
+     */
     @Embedded
     private NotificationSettings notificationSettings = new NotificationSettings();
 
-    // ----------------- Konstruktor -----------------
+    // ==================================================
+    // KONSTRUKTORY
+    // ==================================================
+
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
     }
 
-    public PlayerEntity(String name, String surname, String nickName, PlayerType type, String phoneNumber, Team team, PlayerStatus playerStatus) {
+    public PlayerEntity(String name,
+                        String surname,
+                        String nickName,
+                        PlayerType type,
+                        String phoneNumber,
+                        Team team,
+                        PlayerStatus playerStatus) {
+
         this.name = name;
         this.surname = surname;
         this.nickName = nickName;
         this.type = type;
-        this.fullName = name + " " + surname;
         this.phoneNumber = phoneNumber;
         this.team = team;
         this.playerStatus = playerStatus;
-
+        updateFullName();
     }
 
-    // ----------------- Gettery a Settery -----------------
-    public Long getId() {
-        return id;
-    }
+    // ==================================================
+    // GETTERY / SETTERY
+    // ==================================================
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getName() {
-        return name;
-    }
-
+    public String getName() { return name; }
     public void setName(String name) {
         this.name = name;
         updateFullName();
     }
 
-    public String getSurname() {
-        return surname;
-    }
-
+    public String getSurname() { return surname; }
     public void setSurname(String surname) {
         this.surname = surname;
         updateFullName();
     }
 
-    public String getNickname() { return nickName;}
-    public void setNickname(String nickName) { this.nickName = nickName; }
+    public String getNickName() { return nickName; }
+    public void setNickName(String nickName) { this.nickName = nickName; }
 
-    public String getFullName() {
-        return fullName;
-    }
+    public String getFullName() { return fullName; }
 
-    public PlayerType getType() {
-        return type;
-    }
-    public void setType(PlayerType type) {
-        this.type = type;
-    }
+    public PlayerType getType() { return type; }
+    public void setType(PlayerType type) { this.type = type; }
 
-    private void updateFullName() {
-        this.fullName = name + " " + surname;
-    }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
 
-    public Team getTeam() {
-        return team;
-    }
-    public void setTeam(Team team) {
-        this.team = team;
-    }
+    public PlayerStatus getPlayerStatus() { return playerStatus; }
+    public void setPlayerStatus(PlayerStatus playerStatus) { this.playerStatus = playerStatus; }
 
-    public AppUserEntity getUser() {
-        return user;
-    }
-    public void setUser(AppUserEntity user) {
-        this.user = user;
-    }
+    public AppUserEntity getUser() { return user; }
+    public void setUser(AppUserEntity user) { this.user = user; }
 
-    public PlayerStatus getPlayerStatus() {
-        return playerStatus;
-    }
-
-    public void setPlayerStatus(PlayerStatus playerStatus) {
-        this.playerStatus = playerStatus;
-    }
-
-    public String getNickName() {
-        return nickName;
-    }
-
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
-    }
-    public NotificationSettings getNotificationSettings() {
-        return notificationSettings;
-    }
-
+    public NotificationSettings getNotificationSettings() { return notificationSettings; }
     public void setNotificationSettings(NotificationSettings notificationSettings) {
         this.notificationSettings = notificationSettings;
     }
+
+    // ==================================================
+    // NOTIFIKAČNÍ POMOCNÉ METODY
+    // ==================================================
+
     public boolean isNotifyByEmail() {
         return notificationSettings != null && notificationSettings.isEmailEnabled();
     }
@@ -170,4 +170,14 @@ public class PlayerEntity {
         notificationSettings.setSmsEnabled(notifyBySms);
     }
 
+    // ==================================================
+    // INTERNÍ LOGIKA
+    // ==================================================
+
+    /**
+     * Aktualizuje celé jméno hráče podle jména a příjmení.
+     */
+    private void updateFullName() {
+        this.fullName = name + " " + surname;
+    }
 }

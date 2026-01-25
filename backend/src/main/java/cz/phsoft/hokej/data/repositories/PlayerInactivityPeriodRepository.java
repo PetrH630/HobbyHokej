@@ -1,4 +1,3 @@
-
 package cz.phsoft.hokej.data.repositories;
 
 import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
@@ -9,16 +8,59 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Repozitář pro práci s entitou {@link PlayerInactivityPeriodEntity}.
+ *
+ * Slouží k evidenci a vyhledávání období neaktivity hráčů,
+ * zejména pro ověření dostupnosti hráče v konkrétním čase.
+ */
 @Repository
-public interface PlayerInactivityPeriodRepository extends JpaRepository<PlayerInactivityPeriodEntity, Long> {
+public interface PlayerInactivityPeriodRepository
+        extends JpaRepository<PlayerInactivityPeriodEntity, Long> {
 
-    // zjistí, zda hráč je aktuálně neaktivní
+    /**
+     * Ověří, zda je hráč v daném časovém okamžiku neaktivní.
+     *
+     * Používá se např. při registraci hráče na zápas
+     * nebo při kontrole jeho dostupnosti.
+     *
+     * @param player hráč, jehož neaktivita se ověřuje
+     * @param from   referenční čas (obvykle čas zápasu)
+     * @param to     referenční čas (obvykle shodný s {@code from})
+     * @return {@code true}, pokud hráč spadá do období neaktivity
+     */
     boolean existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
-            PlayerEntity player, LocalDateTime from, LocalDateTime to);
+            PlayerEntity player,
+            LocalDateTime from,
+            LocalDateTime to
+    );
 
-    // získá všechny neaktivní období hráče, které spadají do intervalu
-    List<PlayerInactivityPeriodEntity> findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
-            PlayerEntity player, LocalDateTime from, LocalDateTime to);
+    /**
+     * Vrátí všechna období neaktivity hráče, která
+     * se překrývají se zadaným časovým intervalem.
+     *
+     * Používá se zejména při validaci vytváření
+     * nebo úpravy období neaktivity.
+     *
+     * @param player hráč
+     * @param from   začátek kontrolovaného intervalu
+     * @param to     konec kontrolovaného intervalu
+     * @return seznam překrývajících se období neaktivity
+     */
+    List<PlayerInactivityPeriodEntity>
+    findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
+            PlayerEntity player,
+            LocalDateTime from,
+            LocalDateTime to
+    );
 
-    List<PlayerInactivityPeriodEntity> findByPlayerOrderByInactiveFromAsc(PlayerEntity player);
+    /**
+     * Vrátí všechna období neaktivity daného hráče
+     * seřazená vzestupně podle začátku neaktivity.
+     *
+     * @param player hráč
+     * @return seznam období neaktivity hráče
+     */
+    List<PlayerInactivityPeriodEntity>
+    findByPlayerOrderByInactiveFromAsc(PlayerEntity player);
 }

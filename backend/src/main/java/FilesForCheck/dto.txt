@@ -26,16 +26,28 @@ package cz.phsoft.hokej.models.dto;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.enums.Team;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.util.Set;
 
 public class AppUserDTO {
+
     private Long id;
-    private String name; // not null
+
+    @NotBlank(message = "KĹ™estnĂ­ jmĂ©no je povinnĂ©.")
+    @Size(min = 2, max = 50)
+    private String name;
+
+    @NotBlank(message = "PĹ™Ă­jmenĂ­ je povinnĂ©.")
+    @Size(min = 2, max = 50)
     private String surname;
+
+    @NotBlank(message = "Email je povinnĂ˝.")
+    @Email(message = "Email nenĂ­ ve sprĂˇvnĂ©m formĂˇtu.")
     private String email;
+
     private Role role;
     private boolean enabled;
     private Set<PlayerDTO> players; // jednostrannĂ©
@@ -102,10 +114,19 @@ public class AppUserDTO {
 
 package cz.phsoft.hokej.models.dto;
 
+import jakarta.validation.constraints.*;
+
 public class ChangePasswordDTO {
+    @NotBlank(message = "PĹŻvodnĂ­ heslo je povinnĂ©.")
     private String oldPassword;
+
+    @NotBlank(message = "NovĂ© heslo je povinnĂ©.")
+    @Size(min = 8, max = 64, message = "NovĂ© heslo musĂ­ mĂ­t 8â€“64 znakĹŻ.")
     private String newPassword;
+
+    @NotBlank(message = "PotvrzenĂ­ novĂ©ho hesla je povinnĂ©.")
     private String newPasswordConfirm;
+
 
     // gettery a settery
     public String getOldPassword() { return oldPassword; }
@@ -126,6 +147,9 @@ public class ChangePasswordDTO {
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 
@@ -147,8 +171,13 @@ public class MatchDetailDTO {
     private int noExcusedPlayersSum;
     private double pricePerRegisteredPlayer;
     private int remainingSlots;
-    private PlayerMatchStatus status;
+    private PlayerMatchStatus playerMatchStatus;
+    private ExcuseReason excuseReason;
+    private String excuseNote;
     private MatchStatus matchStatus;
+    private MatchCancelReason cancelReason;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long seasonId;
 
     List<PlayerDTO> registeredPlayers;
     List<PlayerDTO> reservedPlayers;
@@ -197,12 +226,35 @@ public class MatchDetailDTO {
         this.price = price;
     }
 
-    public PlayerMatchStatus getStatus() {
-        return status;
+    public PlayerMatchStatus getPlayerMatchStatus() {
+        return playerMatchStatus;
     }
 
-    public void setStatus(PlayerMatchStatus status) {
-        this.status = status;
+    public void setPlayerMatchStatus(PlayerMatchStatus playerMatchStatus) {
+        this.playerMatchStatus = playerMatchStatus;
+    }
+
+    public ExcuseReason getExcuseReason() {
+        return excuseReason;
+    }
+
+    public void setExcuseReason(ExcuseReason excuseReason) {
+        this.excuseReason = excuseReason;
+    }
+
+    public String getExcuseNote() {
+        return excuseNote;
+    }
+    public void setExcuseNote(String excuseNote) {
+        this.excuseNote = excuseNote;
+    }
+
+    public Long getSeasonId() {
+        return seasonId;
+    }
+
+    public void setSeasonId(Long seasonId) {
+        this.seasonId = seasonId;
     }
 
     public int getMaxPlayers() {
@@ -250,6 +302,14 @@ public class MatchDetailDTO {
 
     public void setMatchStatus(MatchStatus matchStatus) {
         this.matchStatus = matchStatus;
+    }
+
+    public MatchCancelReason getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(MatchCancelReason cancelReason) {
+        this.cancelReason = cancelReason;
     }
 
     public int getRemainingSlots() {
@@ -324,6 +384,7 @@ public class MatchDetailDTO {
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
 import jakarta.persistence.EnumType;
@@ -343,7 +404,7 @@ public class MatchDTO {
     private LocalDateTime dateTime;
 
     @NotBlank(message = "MĂ­sto zĂˇpasu je povinnĂ©.")
-    @Size(min = 3, max = 100)
+    @Size(min = 3, max = 70)
     private String location;
 
     @Size(max = 255, message = "Popis mĹŻĹľe mĂ­t max 255 znakĹŻ.")
@@ -356,10 +417,13 @@ public class MatchDTO {
     private Integer price;
 
     @Enumerated(EnumType.STRING)
-    private MatchStatus status;
+    private MatchStatus matchStatus;
 
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long seasonId;
 
     // gettery a settery
     public Long getId() { return id; }
@@ -385,12 +449,12 @@ public class MatchDTO {
         this.price = price;
     }
 
-    public MatchStatus getStatus() {
-        return status;
+    public MatchStatus getMatchStatus() {
+        return matchStatus;
     }
 
-    public void setStatus(MatchStatus status) {
-        this.status = status;
+    public void setMatchStatus(MatchStatus matchStatus) {
+        this.matchStatus = matchStatus;
     }
 
     public MatchCancelReason getCancelReason() {
@@ -399,6 +463,14 @@ public class MatchDTO {
 
     public void setCancelReason(MatchCancelReason cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public Long getSeasonId() {
+        return seasonId;
+    }
+
+    public void setSeasonId(Long seasonId) {
+        this.seasonId = seasonId;
     }
 }
 
@@ -411,7 +483,12 @@ public class MatchDTO {
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import java.time.LocalDateTime;
 
@@ -428,7 +505,16 @@ public class MatchOverviewDTO {
     private int maxPlayers;
     private int inGamePlayers;
     private double pricePerRegisteredPlayer;
-    private PlayerMatchStatus status;
+    private PlayerMatchStatus playerMatchStatus;
+    @Enumerated(EnumType.STRING)
+    private MatchStatus matchStatus;
+
+    @Enumerated(EnumType.STRING)
+    private MatchCancelReason cancelReason;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long seasonId;
+
 
     // Gettery a settery
     public Long getId() { return id; }
@@ -455,12 +541,36 @@ public class MatchOverviewDTO {
     public double getPricePerRegisteredPlayer() { return pricePerRegisteredPlayer; }
     public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) { this.pricePerRegisteredPlayer = pricePerRegisteredPlayer; }
 
-    public PlayerMatchStatus getStatus() {
-        return status;
+    public PlayerMatchStatus getPlayerMatchStatus() {
+        return playerMatchStatus;
     }
 
-    public void setStatus(PlayerMatchStatus status) {
-        this.status = status;
+    public void setPlayerMatchStatus(PlayerMatchStatus playerMatchStatus) {
+        this.playerMatchStatus = playerMatchStatus;
+    }
+
+    public MatchStatus getMatchStatus() {
+        return matchStatus;
+    }
+
+    public void setMatchStatus(MatchStatus matchStatus) {
+        this.matchStatus = matchStatus;
+    }
+
+    public MatchCancelReason getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(MatchCancelReason cancelReason) {
+        this.cancelReason = cancelReason;
+    }
+
+    public Long getSeasonId() {
+        return seasonId;
+    }
+
+    public void setSeasonId(Long seasonId) {
+        this.seasonId = seasonId;
     }
 }
 
@@ -563,7 +673,7 @@ public class PlayerDTO {
     private String phoneNumber;
     private PlayerType type; // not null, default BASIC
     private Team team;
-    private PlayerStatus status;
+    private PlayerStatus playerStatus;
     private boolean notifyByEmail;
     private boolean notifyBySms;
 
@@ -573,7 +683,7 @@ public class PlayerDTO {
 
     public PlayerDTO(Long id, String name, String surname,
                      String nickName, PlayerType type,
-                     Team team, PlayerStatus status,
+                     Team team, PlayerStatus playerStatus,
                      boolean notifyByEmail, boolean notifyBySms) {
         this.id = id;
         this.name = name;
@@ -582,7 +692,7 @@ public class PlayerDTO {
         this.type = type != null ? type : PlayerType.BASIC;
         this.updateFullName();
         this.team = team;
-        this.status = status != null ? status : PlayerStatus.PENDING;
+        this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
         this.notifyByEmail = notifyByEmail;
         this.notifyBySms = notifyBySms;
     }
@@ -615,8 +725,8 @@ public class PlayerDTO {
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public PlayerStatus getStatus() { return status; }
-    public void setStatus(PlayerStatus status) { this.status = status != null ? status : PlayerStatus.PENDING;
+    public PlayerStatus getPlayerStatus() { return playerStatus; }
+    public void setPlayerStatus(PlayerStatus playerStatus) { this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
     }
     public boolean isNotifyByEmail() {
         return notifyByEmail;
@@ -643,13 +753,17 @@ public class PlayerDTO {
 
 package cz.phsoft.hokej.models.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
 public class PlayerInactivityPeriodDTO {
 
     private Long id;
     private Long playerId;
+    @NotNull(message = "Datum zaÄŤĂˇtku neaktivity je povinnĂ©.")
     private LocalDateTime inactiveFrom;
+    @NotNull(message = "Datum konce neaktivity je povinnĂ©.")
     private LocalDateTime inactiveTo;
 
     public Long getId() {
@@ -847,6 +961,7 @@ package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
@@ -859,11 +974,11 @@ public class SeasonDTO {
     @NotBlank(message = "napĹ™. 2025/2026")
     private String name;
 
-    @NotBlank(message = "datum sezony OD musĂ­ bĂ˝t zadĂˇn")
+    @NotNull(message = "datum sezony OD musĂ­ bĂ˝t zadĂˇn")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
-    @NotBlank(message = "datum sezony DO musĂ­ bĂ˝t zadĂˇn")
+    @NotNull(message = "datum sezony DO musĂ­ bĂ˝t zadĂˇn")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 

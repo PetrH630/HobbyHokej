@@ -49,17 +49,21 @@ package cz.phsoft.hokej.models.dto.mappers;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.models.dto.MatchDTO;
-import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
+
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface MatchMapper {
 
+    @Mapping(source = "season.id", target = "seasonId")
     MatchDTO toDTO(MatchEntity entity);
 
+    @Mapping(target = "season", ignore = true)
     MatchEntity toEntity(MatchDTO dto);
 
+    @Mapping(target = "season", ignore = true)
     void updateEntity(MatchDTO dto, @MappingTarget MatchEntity entity);
 }
 
@@ -91,7 +95,7 @@ public interface MatchRegistrationMapper {
     @Mapping(target = "player", source = "player")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "excuseReason", source = "excuseReason")
-    @Mapping(target = "excuseNote", source = "note")
+    @Mapping(target = "excuseNote", source = "excuseNote")
     @Mapping(target = "team", source = "team")
     @Mapping(target = "adminNote", source = "adminNote")
     @Mapping(target = "createdBy", source = "createdBy")
@@ -101,7 +105,7 @@ public interface MatchRegistrationMapper {
             PlayerEntity player,
             PlayerMatchStatus status,
             ExcuseReason excuseReason,
-            String note,
+            String excuseNote,
             Team team,
             String adminNote,
             String createdBy
@@ -186,8 +190,8 @@ public interface PlayerMapper {
     @Mapping(target = "fullName", ignore = true)         // generuje si Entity sama
     @Mapping(target = "user", ignore = true)             // nastavujeĹˇ v service
     @Mapping(
-            target = "status",
-            expression = "java(dto.getStatus() != null ? dto.getStatus() : cz.phsoft.hokej.data.enums.PlayerStatus.PENDING)"
+            target = "playerStatus",
+            expression = "java(dto.getPlayerStatus() != null ? dto.getPlayerStatus() : cz.phsoft.hokej.data.enums.PlayerStatus.PENDING)"
     )
     // mapovĂˇnĂ­ do embedded NotificationSettings
     @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
@@ -204,8 +208,8 @@ public interface PlayerMapper {
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(
-            target = "status",
-            expression = "java(source.getStatus() != null ? source.getStatus() : target.getStatus())"
+            target = "playerStatus",
+            expression = "java(source.getPlayerStatus() != null ? source.getPlayerStatus() : target.getPlayerStatus())"
     )
     @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
     @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")

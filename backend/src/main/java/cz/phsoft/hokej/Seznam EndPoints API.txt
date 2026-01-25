@@ -48,14 +48,14 @@ AdminMatchController
 @GetMapping("/api/matches/admin")   - všechny zápasy        - Admin, Manager
 @GetMapping("/upcoming")            - nadcházející zápasy   - Admin, Manager
 @GetMapping("/past")                - uplynulé zápasy       - Admin, Manager
-@PostMapping("/api/matches/admin")  - přidat zápas      - Admin, Manager
+@PostMapping("/api/matches/admin")  - přidat zápas          - Admin
 @GetMapping("/{id}")                - zápas dle id zápasu   - Admin, Manager
 @PutMapping("/{id}")                - editovat zápas    - Admin, Manager
 @DeleteMapping("/{id}")             - smazat zápas      - Admin
 @GetMapping("/available-for-player/{playerId}")  - zápasy kde hráč není Neaktivní - Admin, Manager
 @PatchMapping("/{matchId}/cancel")    - označit zápas jako zrušený
 @PatchMapping("/{matchId}/uncancel")    - zrušit označení zápasu jako zrušený
-@PatchMapping("/{matchId}/players/{playerId}/no-excused")    - označit v registraci hráče u tohoto zápasu jako neomluveného
+
 
 
 MatchController
@@ -111,7 +111,7 @@ MatchRegistrationController
 --------------------------
 
 AKTIVNÍ / NEAKTIVNÍ HRÁČ - PlayerInactivity
-@RequestMapping("/api/inactivity/Admin")
+@RequestMapping("/api/inactivity/admin")
 
 @GetMapping("/all")                 - všechny záznamy s obdobím neaktivního hráče - Admin, Manager
 @GetMapping("/{id}")                - záznam dle id neaktivity                    - Admin, Manager

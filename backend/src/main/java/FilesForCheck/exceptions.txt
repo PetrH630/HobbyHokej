@@ -16,7 +16,9 @@ InvalidMatchStatusException.java
 InvalidOldPasswordException.java
 InvalidPlayerStatusException.java
 InvalidSeasonPeriodDateException.java
+InvalidSeasonStateException.java
 MatchNotFoundException.java
+MatchRegistrationNotFoundException.java
 PasswordsDoNotMatchException.java
 PlayerNotFoundException.java
 RegistrationNotFoundException.java
@@ -254,6 +256,8 @@ public class InvalidMatchStatusException extends BusinessException {
     public InvalidMatchStatusException(Long id, String message) {
         super("BE - ZĂˇpas s id: " + id + message, HttpStatus.CONFLICT);
     }
+
+
 }
 
 
@@ -306,6 +310,20 @@ public class InvalidSeasonPeriodDateException extends BusinessException {
 
 
 -----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InvalidSeasonStateException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+public class InvalidSeasonStateException extends RuntimeException {
+    public InvalidSeasonStateException(String message) {
+        super(message);
+    }
+}
+
+
+
+-----
 # Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\MatchNotFoundException.java
 -----
 
@@ -316,6 +334,21 @@ import org.springframework.http.HttpStatus;
 public class MatchNotFoundException extends BusinessException {
     public MatchNotFoundException(Long matchId) {
         super("BE - ZĂˇpas s ID " + matchId + " nenalezen.", HttpStatus.NOT_FOUND);
+    }
+}
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\MatchRegistrationNotFoundException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class MatchRegistrationNotFoundException extends BusinessException {
+    public MatchRegistrationNotFoundException(Long playerId, Long matchId) {
+        super("BE - Registrace hrĂˇÄŤe s ID " + playerId + " na zĂˇpas s ID " + matchId + " nenalezena.", HttpStatus.NOT_FOUND);
     }
 }
 

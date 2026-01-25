@@ -178,10 +178,14 @@ public class MatchEntity {
     private Integer price;
 
     @Enumerated(EnumType.STRING)
-    private MatchStatus status;
+    private MatchStatus matchStatus;
 
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "season_id", nullable = false)
+    private SeasonEntity season;
 
     public MatchEntity() {}
 
@@ -206,12 +210,12 @@ public class MatchEntity {
 
     public void setPrice(Integer price) { this.price = price; }
 
-    public MatchStatus getStatus() {
-        return status;
+    public MatchStatus getMatchStatus() {
+        return matchStatus;
     }
 
-    public void setStatus(MatchStatus status) {
-        this.status = status;
+    public void setMatchStatus(MatchStatus matchStatus) {
+        this.matchStatus = matchStatus;
     }
 
     public MatchCancelReason getCancelReason() {
@@ -220,6 +224,14 @@ public class MatchEntity {
 
     public void setCancelReason(MatchCancelReason cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public SeasonEntity getSeason() {
+        return season;
+    }
+
+    public void setSeason(SeasonEntity season) {
+        this.season = season;
     }
 }
 
@@ -620,8 +632,8 @@ public class PlayerEntity {
     private Team team;
 
     @Enumerated(EnumType.STRING)
-    private PlayerStatus status = PlayerStatus.PENDING;
-
+    @Column(nullable = false)
+    private PlayerStatus playerStatus = PlayerStatus.PENDING;
 
     // Many-to-One: kaĹľdĂ˝ hrĂˇÄŤ patĹ™Ă­ jednomu uĹľivateli
     @ManyToOne(fetch = FetchType.LAZY)
@@ -636,7 +648,7 @@ public class PlayerEntity {
         this.type = PlayerType.BASIC;
     }
 
-    public PlayerEntity(String name, String surname, String nickName, PlayerType type, String phoneNumber, Team team, PlayerStatus status) {
+    public PlayerEntity(String name, String surname, String nickName, PlayerType type, String phoneNumber, Team team, PlayerStatus playerStatus) {
         this.name = name;
         this.surname = surname;
         this.nickName = nickName;
@@ -644,7 +656,8 @@ public class PlayerEntity {
         this.fullName = name + " " + surname;
         this.phoneNumber = phoneNumber;
         this.team = team;
-        this.status = status;
+        this.playerStatus = playerStatus;
+
     }
 
     // ----------------- Gettery a Settery -----------------
@@ -713,12 +726,12 @@ public class PlayerEntity {
         this.user = user;
     }
 
-    public PlayerStatus getStatus() {
-        return status;
+    public PlayerStatus getPlayerStatus() {
+        return playerStatus;
     }
 
-    public void setStatus(PlayerStatus status) {
-        this.status = status;
+    public void setPlayerStatus(PlayerStatus playerStatus) {
+        this.playerStatus = playerStatus;
     }
 
     public String getNickName() {
@@ -734,6 +747,27 @@ public class PlayerEntity {
 
     public void setNotificationSettings(NotificationSettings notificationSettings) {
         this.notificationSettings = notificationSettings;
+    }
+    public boolean isNotifyByEmail() {
+        return notificationSettings != null && notificationSettings.isEmailEnabled();
+    }
+
+    public void setNotifyByEmail(boolean notifyByEmail) {
+        if (notificationSettings == null) {
+            notificationSettings = new NotificationSettings();
+        }
+        notificationSettings.setEmailEnabled(notifyByEmail);
+    }
+
+    public boolean isNotifyBySms() {
+        return notificationSettings != null && notificationSettings.isSmsEnabled();
+    }
+
+    public void setNotifyBySms(boolean notifyBySms) {
+        if (notificationSettings == null) {
+            notificationSettings = new NotificationSettings();
+        }
+        notificationSettings.setSmsEnabled(notifyBySms);
     }
 
 }

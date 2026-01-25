@@ -3404,3 +3404,48 @@
 2026-01-25 14:56:00 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-25T14:56:00.286262300 with args []
 2026-01-25 14:56:00 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@7edf66de] at 2026-01-25T14:56:00.291267900
 2026-01-25 14:56:00 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END createMatch - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.MatchDTO@29d1c1a1] at 2026-01-25T14:56:00.299266100
+2026-01-25 15:05:42 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-25T15:05:42.318110500 with args []
+2026-01-25 15:05:42 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-25T15:05:42.320110700
+2026-01-25 15:05:42 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-25T15:05:42.499112300 with args []
+2026-01-25 15:05:42 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@7836c06b] at 2026-01-25T15:05:42.544110800
+2026-01-25 15:05:55 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-25T15:05:55.237975 with args []
+2026-01-25 15:05:55 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-25T15:05:55.237975
+2026-01-25 15:05:55 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START MatchServiceImpl.createMatch(..) at 2026-01-25T15:05:55.497393800 with args [cz.phsoft.hokej.models.dto.MatchDTO@515bf9a3]
+2026-01-25 15:05:55 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-25T15:05:55.498394100 with args []
+2026-01-25 15:05:55 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@422ba68f] at 2026-01-25T15:05:55.504851
+2026-01-25 15:07:33 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-25T15:07:33.334385900 with args []
+2026-01-25 15:07:33 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-25T15:07:33.334385900
+2026-01-25 15:07:33 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START MatchServiceImpl.getAllMatches() at 2026-01-25T15:07:33.339387500 with args []
+2026-01-25 15:07:33 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-25T15:07:33.339387500 with args []
+2026-01-25 15:07:33 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@60655898] at 2026-01-25T15:07:33.349378800
+2026-01-25 15:07:33 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END getAllMatches - userId=null playerId=null returned [[]] at 2026-01-25T15:07:33.375198700
+2026-01-25 15:08:12 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-25T15:08:12.187444900 with args []
+2026-01-25 15:08:12 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-25T15:08:12.187444900
+2026-01-25 15:08:12 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getAllSeasons() at 2026-01-25T15:08:12.192439 with args []
+2026-01-25 15:08:12 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END getAllSeasons - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.SeasonDTO@19be2cf8, cz.phsoft.hokej.models.dto.SeasonDTO@5b13203f, cz.phsoft.hokej.models.dto.SeasonDTO@76a552e3, cz.phsoft.hokej.models.dto.SeasonDTO@33c02983]] at 2026-01-25T15:08:12.205440200
+2026-01-25 15:08:32 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-25T15:08:32.887851700 with args []
+2026-01-25 15:08:32 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-25T15:08:32.887851700
+2026-01-25 15:08:32 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START SeasonServiceImpl.setActiveSeason(..) at 2026-01-25T15:08:32.895854700 with args [2]
+2026-01-25 15:08:32 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END setActiveSeason - userId=null playerId=null returned [null] at 2026-01-25T15:08:32.965572600
+2026-01-25 15:08:33 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-25T15:08:33.022568100 with args []
+2026-01-25 15:08:33 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@4149c096] at 2026-01-25T15:08:33.026566400
+2026-01-25 15:08:37 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-25T15:08:37.839919800 with args []
+2026-01-25 15:08:37 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-25T15:08:37.840921300
+2026-01-25 15:08:37 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-25T15:08:37.842921 with args []
+2026-01-25 15:08:37 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@1b58af59] at 2026-01-25T15:08:37.849923800
+2026-01-25 15:09:17 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-25T15:09:17.004817900 with args []
+2026-01-25 15:09:17 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-25T15:09:17.004817900
+2026-01-25 15:09:17 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START MatchServiceImpl.getAllMatches() at 2026-01-25T15:09:17.008819600 with args []
+2026-01-25 15:09:17 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-25T15:09:17.008819600 with args []
+2026-01-25 15:09:17 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@45b464ef] at 2026-01-25T15:09:17.018820200
+2026-01-25 15:09:17 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getAllMatches - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.MatchDTO@69fff912, cz.phsoft.hokej.models.dto.MatchDTO@780486f6, cz.phsoft.hokej.models.dto.MatchDTO@5491335b, cz.phsoft.hokej.models.dto.MatchDTO@6fb04594, cz.phsoft.hokej.models.dto.MatchDTO@79110619, cz.phsoft.hokej.models.dto.MatchDTO@257e0cfb, cz.phsoft.hokej.models.dto.MatchDTO@78a8e8e4, cz.phsoft.hokej.models.dto.MatchDTO@15598e80, cz.phsoft.hokej.models.dto.MatchDTO@648973fc, cz.phsoft.hokej.models.dto.MatchDTO@3145b242, cz.phsoft.hokej.models.dto.MatchDTO@e158346, cz.phsoft.hokej.models.dto.MatchDTO@5761218a, cz.phsoft.hokej.models.dto.MatchDTO@7858ae09, cz.phsoft.hokej.models.dto.MatchDTO@6413d4e2, cz.phsoft.hokej.models.dto.MatchDTO@46be7495]] at 2026-01-25T15:09:17.033273100
+2026-01-25 15:09:57 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-25T15:09:57.392486800 with args []
+2026-01-25 15:09:57 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-25T15:09:57.393485100
+2026-01-25 15:09:57 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START MatchServiceImpl.updateMatch(..) at 2026-01-25T15:09:57.398486200 with args [16, cz.phsoft.hokej.models.dto.MatchDTO@7670fbab]
+2026-01-25 15:09:57 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-25T15:09:57.408487300 with args []
+2026-01-25 15:09:57 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@7b759aff] at 2026-01-25T15:09:57.414487400
+2026-01-25 15:10:17 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-25T15:10:17.988580500 with args []
+2026-01-25 15:10:17 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-25T15:10:17.988580500
+2026-01-25 15:10:17 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START MatchServiceImpl.updateMatch(..) at 2026-01-25T15:10:17.996585800 with args [16, cz.phsoft.hokej.models.dto.MatchDTO@7d9a98f0]
+2026-01-25 15:10:18 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-25T15:10:18.009582 with args []
+2026-01-25 15:10:18 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@124fbfea] at 2026-01-25T15:10:18.015585400

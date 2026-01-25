@@ -5,6 +5,12 @@ import jakarta.persistence.*;
 
 import java.util.Set;
 
+/**
+ * Entita reprezentující uživatelský účet aplikace.
+ *
+ * Slouží pro autentizaci a autorizaci uživatelů.
+ * Jeden uživatel může mít přiřazeno více hráčů.
+ */
 @Entity
 @Table(name = "app_users")
 public class AppUserEntity {
@@ -19,25 +25,46 @@ public class AppUserEntity {
     @Column(nullable = false)
     private String surname;
 
+    /**
+     * Unikátní email uživatele sloužící pro přihlášení.
+     */
     @Column(nullable = false, unique = true)
     private String email;
 
+    /**
+     * Hash hesla uživatele.
+     */
     @Column(nullable = false)
     private String password;
 
+    /**
+     * Role uživatele v systému.
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
+    /**
+     * Příznak aktivace účtu (např. po emailové aktivaci).
+     */
     @Column(nullable = false)
-    private boolean enabled = false; // výchozí hodnota false
+    private boolean enabled = false;
 
-
-    // One-to-Many: jeden uživatel → více hráčů
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    /**
+     * Hráči přiřazení k tomuto uživateli.
+     */
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private Set<PlayerEntity> players;
 
-    // gettery/settery
+    // gettery / settery
+
+
+
+// gettery/settery
 
 
     public Long getId() {return id;}

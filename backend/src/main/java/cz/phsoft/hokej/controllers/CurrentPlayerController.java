@@ -1,15 +1,9 @@
 package cz.phsoft.hokej.controllers;
 
-// REMOVED: importy na entity a repozitáře
-// import cz.phsoft.hokej.data.entities.AppUserEntity;
-// import cz.phsoft.hokej.data.entities.PlayerEntity;
-// import cz.phsoft.hokej.data.repositories.AppUserRepository;
-// import cz.phsoft.hokej.data.repositories.PlayerRepository;
-
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.services.PlayerService;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;   // NEW – správný import interface
+import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -17,7 +11,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// aktuální hráč
+/**
+ * REST controller pro práci s „aktuálním hráčem“ přihlášeného uživatele.
+ * <p>
+ * Aktuální hráč představuje kontext, ve kterém uživatel pracuje
+ * (např. registrace na zápasy, zobrazení statistik apod.).
+ * <p>
+ * Controller umožňuje:
+ * <ul>
+ *     <li>ruční nastavení aktuálního hráče,</li>
+ *     <li>automatický výběr aktuálního hráče po přihlášení,</li>
+ *     <li>získání aktuálního hráče,</li>
+ *     <li>získání seznamu hráčů přihlášeného uživatele.</li>
+ * </ul>
+ *
+ * Veškerá business logika je delegována do {@link PlayerService}
+ * a {@link CurrentPlayerService}.
+ */
 @RestController
 @RequestMapping("/api/current-player")
 public class CurrentPlayerController {
@@ -31,13 +41,21 @@ public class CurrentPlayerController {
         this.playerService = playerService;
     }
 
-    // -----------------------------------------------------
-    // Nastavení aktuálního hráče
-    // -----------------------------------------------------
+    /**
+     * Nastaví aktuálního hráče pro přihlášeného uživatele.
+     * <p>
+     * Používá se zejména v případech, kdy má uživatel
+     * přiřazeno více hráčů a chce mezi nimi ručně přepínat.
+     *
+     * @param playerId ID hráče, který má být nastaven jako aktuální
+     * @param auth     autentizační kontext přihlášeného uživatele
+     * @return informace o úspěšném nastavení aktuálního hráče
+     */
     @PostMapping("/{playerId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<SuccessResponseDTO> setCurrentPlayer(@PathVariable Long playerId,
-                                                               Authentication auth) {
+    public ResponseEntity<SuccessResponseDTO> setCurrentPlayer(
+            @PathVariable Long playerId,
+            Authentication auth) {
 
         SuccessResponseDTO response =
                 playerService.setCurrentPlayerForUser(auth.getName(), playerId);
@@ -45,9 +63,18 @@ public class CurrentPlayerController {
         return ResponseEntity.ok(response);
     }
 
-    // -----------------------------------------------------
-    // Automatický výběr aktuálního hráče po loginu
-    // -----------------------------------------------------
+    /**
+     * Automaticky zvolí aktuálního hráče pro přihlášeného uživatele.
+     * <p>
+     * Typicky se volá po přihlášení uživatele:
+     * <ul>
+     *     <li>pokud má uživatel právě jednoho hráče, je vybrán automaticky,</li>
+     *     <li>pokud má více hráčů, výběr závisí na pravidlech ve service vrstvě.</li>
+     * </ul>
+     *
+     * @param auth autentizační kontext přihlášeného uživatele
+     * @return informace o výsledku automatického výběru
+     */
     @PostMapping("/auto-select")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<SuccessResponseDTO> autoSelectCurrentPlayer(Authentication auth) {
@@ -58,9 +85,14 @@ public class CurrentPlayerController {
         return ResponseEntity.ok(response);
     }
 
-    // -----------------------------------------------------
-    // Získání aktuálního hráče
-    // -----------------------------------------------------
+    /**
+     * Vrátí aktuálně zvoleného hráče přihlášeného uživatele.
+     * <p>
+     * Pokud uživatel nemá aktuálního hráče nastaveného,
+     * je vrácena hodnota {@code null}.
+     *
+     * @return aktuální hráč nebo {@code null}, pokud není nastaven
+     */
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PlayerDTO> getCurrentPlayer() {
@@ -74,9 +106,14 @@ public class CurrentPlayerController {
         return ResponseEntity.ok(player);
     }
 
-    // -----------------------------------------------------
-    // Pomocný endpoint – seznam hráčů aktuálního uživatele
-    // -----------------------------------------------------
+    /**
+     * Vrátí seznam všech hráčů patřících přihlášenému uživateli.
+     * <p>
+     * Slouží zejména pro výběr aktuálního hráče na frontendu.
+     *
+     * @param auth autentizační kontext přihlášeného uživatele
+     * @return seznam hráčů aktuálního uživatele
+     */
     @GetMapping("/my-players")
     @PreAuthorize("isAuthenticated()")
     public List<PlayerDTO> getMyPlayers(Authentication auth) {

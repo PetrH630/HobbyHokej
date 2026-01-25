@@ -13,15 +13,49 @@ import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import cz.phsoft.hokej.models.dto.mappers.AppUserMapper;
 import cz.phsoft.hokej.models.services.email.EmailService;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
+/**
+ * Service pro správu aplikačních uživatelských účtů.
+ * <p>
+ * Odpovědnosti:
+ * <ul>
+ *     <li>registrace nových uživatelů,</li>
+ *     <li>aktivace účtů pomocí emailového ověřovacího tokenu,</li>
+ *     <li>změna a reset hesla,</li>
+ *     <li>správa základních údajů uživatelského účtu.</li>
+ * </ul>
+ *
+ * Bezpečnost:
+ * <ul>
+ *     <li>hesla jsou vždy ukládána hashovaná pomocí BCrypt,</li>
+ *     <li>nově registrovaný účet je neaktivní, dokud není ověřen email.</li>
+ * </ul>
+ *
+ * Tato service neřeší:
+ * <ul>
+ *     <li>autentizaci (řeší Spring Security),</li>
+ *     <li>správu hráčů (řeší {@link PlayerService}).</li>
+ * </ul>
+ */
 @Service
 public class AppUserServiceImpl implements AppUserService {
 
+    private static final Logger log = LoggerFactory.getLogger(AppUserServiceImpl.class);
+
+    /** Výchozí heslo při resetu účtu administrátorem */
+    private static final String DEFAULT_RESET_PASSWORD = "Player123";
+
+    /** Base URL aplikace – používá se pro generování aktivačních odkazů */
     @Value("${app.base-url}")
     private String baseUrl;
 
@@ -32,8 +66,10 @@ public class AppUserServiceImpl implements AppUserService {
     private final EmailVerificationTokenRepository tokenRepository;
 
     public AppUserServiceImpl(AppUserRepository userRepository,
-                              BCryptPasswordEncoder passwordEncoder, AppUserMapper appUserMapper,
-                              EmailService emailService, EmailVerificationTokenRepository tokenRepository) {
+                              BCryptPasswordEncoder passwordEncoder,
+                              AppUserMapper appUserMapper,
+                              EmailService emailService,
+                              EmailVerificationTokenRepository tokenRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.appUserMapper = appUserMapper;
@@ -41,83 +77,105 @@ public class AppUserServiceImpl implements AppUserService {
         this.tokenRepository = tokenRepository;
     }
 
+    /**
+     * Zaregistruje nového uživatele.
+     * <p>
+     * Průběh registrace:
+     * <ol>
+     *     <li>ověření shody hesel,</li>
+     *     <li>kontrola duplicity emailu,</li>
+     *     <li>vytvoření neaktivního uživatele,</li>
+     *     <li>vytvoření ověřovacího tokenu,</li>
+     *     <li>odeslání aktivačního emailu.</li>
+     * </ol>
+     *
+     * @param dto registrační údaje uživatele
+     */
     @Override
+    @Transactional
     public void register(RegisterUserDTO dto) {
-        if (!dto.getPassword().equals(dto.getPasswordConfirm())) {
-            throw new PasswordsDoNotMatchException();
-        }
 
-        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("BE - Uživatel s tímto emailem již existuje");
-        }
+        ensurePasswordsMatch(dto.getPassword(), dto.getPasswordConfirm(), null);
+        ensureEmailNotUsed(dto.getEmail(), null);
 
-        AppUserEntity user = new AppUserEntity();
-        user.setName(dto.getName());
-        user.setSurname(dto.getSurname());
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(Role.ROLE_PLAYER);
-        user.setEnabled(false); // NEaktivní při registraci
-
+        AppUserEntity user = createUserFromRegisterDto(dto);
         AppUserEntity savedUser = userRepository.save(user);
 
-        // Generování tokenu
-        String token = java.util.UUID.randomUUID().toString();
-        EmailVerificationTokenEntity verificationToken = new EmailVerificationTokenEntity();
-        verificationToken.setToken(token);
-        verificationToken.setUser(savedUser);
-        verificationToken.setExpiresAt(java.time.LocalDateTime.now().plusHours(24));
+        EmailVerificationTokenEntity verificationToken =
+                createVerificationToken(savedUser);
 
-        tokenRepository.save(verificationToken);
-
-
-        // Odeslání aktivačního emailu
-        String activationLink = baseUrl + "/api/auth/verify?token=" + token;
-        // Pro test lokálně: vypíše odkaz do konzole
-        System.out.println("Aktivační odkaz: " + activationLink);
-
-        emailService.sendActivationEmailHTML(savedUser.getEmail(), activationLink);
+        sendActivationEmail(savedUser, verificationToken);
     }
 
+    /**
+     * Aktivuje uživatelský účet na základě ověřovacího tokenu.
+     *
+     * @param token aktivační token z emailu
+     * @return {@code true} pokud byl účet úspěšně aktivován,
+     *         {@code false} pokud je token neplatný nebo expirovaný
+     */
     @Override
+    @Transactional
     public boolean activateUser(String token) {
-        EmailVerificationTokenEntity verificationToken = tokenRepository.findByToken(token)
-                .orElse(null);
 
-        if (verificationToken == null || verificationToken.getExpiresAt().isBefore(java.time.LocalDateTime.now())) {
-            return false; // neplatný token nebo vypršel
+        EmailVerificationTokenEntity verificationToken =
+                tokenRepository.findByToken(token).orElse(null);
+
+        if (verificationToken == null ||
+                verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            return false;
         }
 
         AppUserEntity user = verificationToken.getUser();
-        user.setEnabled(true); // aktivujeme uživatele
+        user.setEnabled(true);
         userRepository.save(user);
 
-        // Po aktivaci token smažeme (není potřeba jej uchovávat)
         tokenRepository.delete(verificationToken);
-
         return true;
     }
 
+    /**
+     * Aktualizuje základní údaje přihlášeného uživatele.
+     *
+     * @param email email aktuálního uživatele
+     * @param dto   aktualizovaná data účtu
+     */
     @Override
+    @Transactional
     public void updateUser(String email, AppUserDTO dto) {
 
         AppUserEntity user = findUserByEmailOrThrow(email);
 
-        // Nastavení nového hesla
+        if (!user.getEmail().equals(dto.getEmail())) {
+            ensureEmailNotUsed(dto.getEmail(), user.getId());
+        }
+
         user.setName(dto.getName());
         user.setSurname(dto.getSurname());
         user.setEmail(dto.getEmail());
+
         userRepository.save(user);
     }
 
+    /**
+     * Vrátí detail aktuálně přihlášeného uživatele.
+     *
+     * @param email email uživatele
+     * @return DTO uživatele
+     */
     @Override
     public AppUserDTO getCurrentUser(String email) {
         AppUserEntity user = findUserByEmailOrThrow(email);
-
-        // ← využití mapperu
         return appUserMapper.toDTO(user);
     }
 
+    /**
+     * Vrátí seznam všech uživatelů v systému.
+     * <p>
+     * Určeno pouze pro administrátora.
+     *
+     * @return seznam uživatelů
+     */
     @Override
     public List<AppUserDTO> getAllUsers() {
         return userRepository.findAll().stream()
@@ -125,33 +183,56 @@ public class AppUserServiceImpl implements AppUserService {
                 .toList();
     }
 
+    /**
+     * Změní heslo přihlášeného uživatele.
+     *
+     * @param email              email uživatele
+     * @param oldPassword        původní heslo
+     * @param newPassword        nové heslo
+     * @param newPasswordConfirm potvrzení nového hesla
+     */
     @Override
-    public void changePassword(String email, String oldPassword, String newPassword, String newPasswordConfirm) {
-        if (!newPassword.equals(newPasswordConfirm)) {
-            throw new PasswordsDoNotMatchException("BE - Nové heslo a potvrzení nového hesla se neshodují");
-        }
+    @Transactional
+    public void changePassword(String email,
+                               String oldPassword,
+                               String newPassword,
+                               String newPasswordConfirm) {
+
+        ensurePasswordsMatch(
+                newPassword,
+                newPasswordConfirm,
+                "BE - Nové heslo a potvrzení nového hesla se neshodují"
+        );
 
         AppUserEntity user = findUserByEmailOrThrow(email);
 
-        // Ověření starého hesla
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new InvalidOldPasswordException();
         }
 
-        // Nastavení nového hesla
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 
-    // reset hesla
+    /**
+     * Resetuje heslo uživatele na výchozí hodnotu.
+     * <p>
+     * Operace dostupná pouze administrátorovi.
+     *
+     * @param userId ID uživatele
+     */
     @Override
+    @Transactional
     public void resetPassword(Long userId) {
         AppUserEntity user = findUserByIdOrThrow(userId);
-
-        // Nastavení nového hesla na "Player123"
-        user.setPassword(passwordEncoder.encode("Player123"));
+        user.setPassword(passwordEncoder.encode(DEFAULT_RESET_PASSWORD));
         userRepository.save(user);
     }
+
+    // ==================================================
+    // HELPER METODY
+    // ==================================================
+
     private AppUserEntity findUserByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
@@ -162,5 +243,70 @@ public class AppUserServiceImpl implements AppUserService {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
+    /**
+     * Ověří shodu hesla a potvrzení hesla.
+     */
+    private void ensurePasswordsMatch(String password,
+                                      String confirm,
+                                      String customMessage) {
 
+        if (password == null || confirm == null || !password.equals(confirm)) {
+            if (customMessage == null) {
+                throw new PasswordsDoNotMatchException();
+            }
+            throw new PasswordsDoNotMatchException(customMessage);
+        }
+    }
+
+    /**
+     * Ověří, že email není používán jiným uživatelem.
+     *
+     * @param email         nový email
+     * @param currentUserId ID uživatele, který je ignorován (při update),
+     *                      při registraci {@code null}
+     */
+    private void ensureEmailNotUsed(String email, Long currentUserId) {
+        userRepository.findByEmail(email).ifPresent(existing -> {
+            if (currentUserId == null || !existing.getId().equals(currentUserId)) {
+                throw new UserAlreadyExistsException(
+                        "BE - Uživatel s tímto emailem již existuje"
+                );
+            }
+        });
+    }
+
+    /**
+     * Vytvoří nového uživatele z registračního DTO.
+     */
+    private AppUserEntity createUserFromRegisterDto(RegisterUserDTO dto) {
+        AppUserEntity user = appUserMapper.fromRegisterDto(dto);
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(Role.ROLE_PLAYER);
+        user.setEnabled(false);
+        return user;
+    }
+
+    /**
+     * Vytvoří a uloží emailový ověřovací token.
+     */
+    private EmailVerificationTokenEntity createVerificationToken(AppUserEntity user) {
+        EmailVerificationTokenEntity token = new EmailVerificationTokenEntity();
+        token.setToken(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setExpiresAt(LocalDateTime.now().plusHours(24));
+        return tokenRepository.save(token);
+    }
+
+    /**
+     * Odešle aktivační email s ověřovacím odkazem.
+     */
+    private void sendActivationEmail(AppUserEntity user,
+                                     EmailVerificationTokenEntity token) {
+
+        String activationLink =
+                baseUrl + "/api/auth/verify?token=" + token.getToken();
+
+        log.info("Aktivační odkaz pro {}: {}", user.getEmail(), activationLink);
+        emailService.sendActivationEmailHTML(user.getEmail(), activationLink);
+    }
 }

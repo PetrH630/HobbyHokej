@@ -1,6 +1,5 @@
 package cz.phsoft.hokej.data.repositories;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,22 +8,74 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-    @Repository
-    public interface MatchRegistrationRepository extends JpaRepository<MatchRegistrationEntity, Long> {
+/**
+ * Repozitář pro práci s entitou {@link MatchRegistrationEntity}.
+ *
+ * Slouží k načítání a správě registrací hráčů k zápasům,
+ * včetně kontroly existence registrace, počtů hráčů
+ * a vyhledávání dle zápasu nebo hráče.
+ */
+@Repository
+public interface MatchRegistrationRepository
+        extends JpaRepository<MatchRegistrationEntity, Long> {
 
-        // Vrátí poslední status pro daného hráče a zápas
-        Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
+    /**
+     * Ověří, zda existuje registrace hráče k danému zápasu.
+     *
+     * Používá se zejména k rychlé kontrole existence
+     * registrace bez nutnosti načítat celou entitu.
+     *
+     * @param playerId ID hráče
+     * @param matchId  ID zápasu
+     * @return {@code true}, pokud registrace existuje
+     */
+    Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
 
-        // Volitelně: všechny registrace pro určitý zápas
-        List<MatchRegistrationEntity> findByMatchId(Long matchId);
+    /**
+     * Vrátí všechny registrace k danému zápasu.
+     *
+     * @param matchId ID zápasu
+     * @return seznam registrací
+     */
+    List<MatchRegistrationEntity> findByMatchId(Long matchId);
 
-        // Volitelně: všechny registrace pro určitého hráče
-        List<MatchRegistrationEntity> findByPlayerId(Long playerId);
+    /**
+     * Vrátí všechny registrace daného hráče.
+     *
+     * @param playerId ID hráče
+     * @return seznam registrací
+     */
+    List<MatchRegistrationEntity> findByPlayerId(Long playerId);
 
-        // --- Nová metoda pro hledání konkrétní registrace ---
-        Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
+    /**
+     * Najde konkrétní registraci hráče k zápasu.
+     *
+     * @param playerId ID hráče
+     * @param matchId  ID zápasu
+     * @return registrace zabalená v {@link Optional}, pokud existuje
+     */
+    Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
 
-        long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
+    /**
+     * Spočítá počet registrací daného zápasu podle stavu.
+     *
+     * Typicky se používá pro zjištění aktuální
+     * obsazenosti zápasu.
+     *
+     * @param matchId ID zápasu
+     * @param status  stav registrace
+     * @return počet registrací
+     */
+    long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
 
-        List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
-    }
+    /**
+     * Vrátí registrace pro více zápasů najednou.
+     *
+     * Používá se např. při hromadném načítání
+     * registrací pro přehledy a statistiky.
+     *
+     * @param matchIds seznam ID zápasů
+     * @return seznam registrací
+     */
+    List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
+}

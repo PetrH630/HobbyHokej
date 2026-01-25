@@ -3,9 +3,8 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
@@ -17,18 +16,33 @@ import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
 import cz.phsoft.hokej.models.services.sms.SmsService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.models.services.NotificationService;
-
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-
+/**
+ * Service pro správu registrací hráčů na zápasy.
+ * <p>
+ * Odpovědnosti:
+ * <ul>
+ *     <li>vytváření a změna registrací (REGISTER, RESERVED, UNREGISTERED, EXCUSED, NO_EXCUSED),</li>
+ *     <li>přepočet pořadí REGISTERED/RESERVED podle kapacity zápasu,</li>
+ *     <li>získávání přehledů o registracích (pro zápas, hráče, NO_RESPONSE hráče),</li>
+ *     <li>spouštění notifikací (email/SMS) podle změny statusu.</li>
+ * </ul>
+ *
+ * Tato service:
+ * <ul>
+ *     <li>řeší byznys logiku registrací a stavových přechodů,</li>
+ *     <li>neřeší UI, security ani výběr aktuálního hráče (to řeší jiné vrstvy).</li>
+ * </ul>
+ */
 @Service
 public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
@@ -63,135 +77,74 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         this.notificationService = notificationService;
     }
 
-    private MatchEntity getMatchOrThrow(Long matchId) {
-        return matchRepository.findById(matchId)
-                .orElseThrow(() -> new MatchNotFoundException(matchId));
-    }
+    // ==========================================
+    // HLAVNÍ METODA – UPSERT REGISTRACE HRÁČE
+    // ==========================================
 
-    private PlayerEntity getPlayerOrThrow(Long playerId) {
-        return playerRepository.findById(playerId)
-                .orElseThrow(() -> new PlayerNotFoundException(playerId));
-    }
-
-    private boolean isSlotAvailable(MatchEntity match) {
-        long registeredCount = registrationRepository.countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
-        return registeredCount < match.getMaxPlayers();
-    }
-
-    private void sendSms(MatchRegistrationEntity registration, String message) {
-        if (registration == null || registration.getPlayer() == null) {
-            return;
-        }
-
-        try {
-            smsService.sendSms(registration.getPlayer().getPhoneNumber(), message);
-        } catch (Exception e) {
-            log.error(
-                    "Chyba při odesílání SMS pro registraci {}: {}",
-                    registration.getId(),
-                    e.getMessage(),
-                    e
-            );
-        }
-    }
-
-    private MatchRegistrationEntity updateRegistrationStatus(
-            MatchRegistrationEntity registration, PlayerMatchStatus status, String updatedBy, boolean updateTimestamp) {
-
-        registration.setStatus(PlayerMatchStatus.valueOf(status.name()));
-        registration.setCreatedBy(updatedBy);
-        if (updateTimestamp) {
-            registration.setTimestamp(LocalDateTime.now());
-        }
-        return registrationRepository.saveAndFlush(registration);
-    }
-
-    // -------------------- REGISTRATION --------------------
+    /**
+     * Vytvoří nebo aktualizuje registraci hráče na zápas.
+     * <p>
+     * Postup:
+     * <ol>
+     *     <li>načte zápas a hráče,</li>
+     *     <li>najde existující registraci (pokud existuje),</li>
+     *     <li>podle obsahu {@link MatchRegistrationRequest} větví na:
+     *         <ul>
+     *             <li>UNREGISTER → {@link #handleUnregister},</li>
+     *             <li>EXCUSE → {@link #handleExcuse},</li>
+     *             <li>REGISTER/RESERVE → {@link #handleRegisterOrReserve},</li>
+     *         </ul>
+     *     </li>
+     *     <li>aplikuje společné detaily z requestu ({@link #applyRequestDetails}),</li>
+     *     <li>uloží registraci,</li>
+     *     <li>po UNREGISTER přepočítá pořadí REGISTERED/RESERVED,</li>
+     *     <li>podle výsledného statusu spustí notifikace.</li>
+     * </ol>
+     *
+     * @param playerId ID hráče
+     * @param request  požadavek na změnu registrace
+     * @return DTO výsledné registrace
+     */
     @Transactional
     @Override
-    public MatchRegistrationDTO upsertRegistration(
-            Long playerId, MatchRegistrationRequest request) {
+    public MatchRegistrationDTO upsertRegistration(Long playerId, MatchRegistrationRequest request) {
 
         MatchEntity match = getMatchOrThrow(request.getMatchId());
         PlayerEntity player = getPlayerOrThrow(playerId);
 
-        MatchRegistrationEntity registration = registrationRepository
-                .findByPlayerIdAndMatchId(playerId, request.getMatchId())
-                .orElse(null);
+        MatchRegistrationEntity registration =
+                getRegistrationOrNull(playerId, request.getMatchId());
 
         PlayerMatchStatus newStatus;
 
-        // UNREGISTER: lze pouze když hráč má aktuálně REGISTERED
         if (request.isUnregister()) {
-            if (registration == null || registration.getStatus() != PlayerMatchStatus.REGISTERED) {
-                throw new RegistrationNotFoundException(request.getMatchId(), playerId);
-            }
-            registration.setExcuseReason(null);
-            registration.setExcuseNote(null);
-            newStatus = PlayerMatchStatus.UNREGISTERED;
-
-            // EXCUSE: lze vytvořit pouze pokud hráč NEMÁ status REGISTERED
+            // UNREGISTER – pouze z REGISTERED
+            newStatus = handleUnregister(request, playerId, registration);
         } else if (request.getExcuseReason() != null) {
-            if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
-                throw new DuplicateRegistrationException(request.getMatchId(), playerId);
-            }
-            // pokud neexistuje, vytvoříme pozici; pokud existuje a není REGISTERED, povolíme EXCUSED
-            if (registration == null) {
-                registration = new MatchRegistrationEntity();
-                registration.setMatch(match);
-                registration.setPlayer(player);
-            }
-            registration.setExcuseReason(request.getExcuseReason());
-            registration.setExcuseNote(request.getExcuseNote());
-            newStatus = PlayerMatchStatus.EXCUSED;
-
-            // REGISTER / RESERVE: lze vytvořit pokud hráč NEMÁ status REGISTERED (tedy i když má EXCUSED)
+            // EXCUSE – pouze pokud aktuálně NENÍ REGISTERED
+            newStatus = handleExcuse(request, match, player, registration);
         } else {
-            // pokud už je registrován, nepovolíme duplicitu
-            if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
-                throw new DuplicateRegistrationException(request.getMatchId(), playerId);
-            }
-
-            newStatus = isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
-
-            if (registration == null) {
-                registration = new MatchRegistrationEntity();
-                registration.setMatch(match);
-                registration.setPlayer(player);
-            } else {
-                // při přechodu na register/reserve zrušíme případnou výmluvu
-                registration.setExcuseReason(null);
-                registration.setExcuseNote(null);
-            }
+            // REGISTER / RESERVE
+            newStatus = handleRegisterOrReserve(request, match, player, registration);
         }
 
-        registration.setStatus(newStatus);
-        registration.setTimestamp(LocalDateTime.now());
-        registration.setCreatedBy("user");
+        // společné nastavení detailů z requestu (team, admin poznámka, excuse...)
+        applyRequestDetails(registration, request);
 
-        if (request.getTeam() != null) registration.setTeam(request.getTeam());
-        if (request.getAdminNote() != null) registration.setAdminNote(request.getAdminNote());
-        // excuseReason už jsme nastavili výše (pokud to byl EXCUSED případ)
-        if (request.getExcuseReason() != null) registration.setExcuseReason(request.getExcuseReason());
+        // finální nastavení – status, timestamp, kdo vytvořil
+        registration.setStatus(newStatus);
+        registration.setTimestamp(now());
+        registration.setCreatedBy("user");
 
         registration = registrationRepository.save(registration);
 
+        // po UNREGISTER přepočítáme REGISTERED/RESERVED (náhradníky)
         if (request.isUnregister()) {
             recalcStatusesForMatch(request.getMatchId());
         }
 
-        // starší verze notifikace
-        // sendSms(registration, smsMessageBuilder.buildMessageRegistration(registration));
-
-        // Odesílání notifikace - sms, email
-        NotificationType notificationType = switch (newStatus) {
-            case REGISTERED -> NotificationType.PLAYER_REGISTERED;
-            case UNREGISTERED -> NotificationType.PLAYER_UNREGISTERED;
-            case EXCUSED -> NotificationType.PLAYER_EXCUSED;
-            case RESERVED -> NotificationType.PLAYER_RESERVED;
-            default -> null;
-        };
-
+        // notifikace (email/SMS) podle typu změny
+        NotificationType notificationType = resolveNotificationType(newStatus);
         if (notificationType != null) {
             notificationService.notifyPlayer(player, notificationType, registration);
         }
@@ -199,12 +152,136 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return matchRegistrationMapper.toDTO(registration);
     }
 
-    // -------------------- FETCH --------------------
-    @Override
-    public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
-        return matchRegistrationMapper.toDTOList(registrationRepository.findByMatchId(matchId));
+    /**
+     * Větev pro UNREGISTER:
+     * <ul>
+     *     <li>povoleno pouze, pokud registrace existuje a je REGISTERED,</li>
+     *     <li>smaže případnou omluvu,</li>
+     *     <li>vrací nový status UNREGISTERED.</li>
+     * </ul>
+     */
+    private PlayerMatchStatus handleUnregister(
+            MatchRegistrationRequest request,
+            Long playerId,
+            MatchRegistrationEntity registration
+    ) {
+        if (registration == null || registration.getStatus() != PlayerMatchStatus.REGISTERED) {
+            throw new RegistrationNotFoundException(request.getMatchId(), playerId);
+        }
+
+        registration.setExcuseReason(null);
+        registration.setExcuseNote(null);
+
+        return PlayerMatchStatus.UNREGISTERED;
     }
 
+    /**
+     * Větev pro EXCUSE (omluva z účasti):
+     * <ul>
+     *     <li>nelze, pokud má hráč aktuálně REGISTERED,</li>
+     *     <li>pokud registrace neexistuje, vytvoří novou,</li>
+     *     <li>nastaví excuseReason a excuseNote,</li>
+     *     <li>vrací status EXCUSED.</li>
+     * </ul>
+     */
+    private PlayerMatchStatus handleExcuse(
+            MatchRegistrationRequest request,
+            MatchEntity match,
+            PlayerEntity player,
+            MatchRegistrationEntity registration
+    ) {
+        if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
+            throw new DuplicateRegistrationException(request.getMatchId(), player.getId());
+        }
+
+        if (registration == null) {
+            registration = new MatchRegistrationEntity();
+            registration.setMatch(match);
+            registration.setPlayer(player);
+        }
+
+        registration.setExcuseReason(request.getExcuseReason());
+        registration.setExcuseNote(request.getExcuseNote());
+
+        return PlayerMatchStatus.EXCUSED;
+    }
+
+    /**
+     * Větev pro REGISTER / RESERVE:
+     * <ul>
+     *     <li>pokud je hráč už REGISTERED, další registrace není povolena,</li>
+     *     <li>pokud je volné místo → REGISTERED, jinak RESERVED,</li>
+     *     <li>při přechodu z EXCUSED smaže excuseReason / excuseNote.</li>
+     * </ul>
+     */
+    private PlayerMatchStatus handleRegisterOrReserve(
+            MatchRegistrationRequest request,
+            MatchEntity match,
+            PlayerEntity player,
+            MatchRegistrationEntity registration
+    ) {
+        if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
+            throw new DuplicateRegistrationException(request.getMatchId(), player.getId());
+        }
+
+        PlayerMatchStatus newStatus =
+                isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+
+        if (registration == null) {
+            registration = new MatchRegistrationEntity();
+            registration.setMatch(match);
+            registration.setPlayer(player);
+        } else {
+            registration.setExcuseReason(null);
+            registration.setExcuseNote(null);
+        }
+
+        return newStatus;
+    }
+
+    /**
+     * Společné nastavení detailů registrace podle requestu:
+     * <ul>
+     *     <li>team (světlý/tmavý),</li>
+     *     <li>adminNote,</li>
+     *     <li>případná aktualizace excuseReason.</li>
+     * </ul>
+     */
+    private void applyRequestDetails(MatchRegistrationEntity registration,
+                                     MatchRegistrationRequest request) {
+
+        if (request.getTeam() != null) {
+            registration.setTeam(request.getTeam());
+        }
+
+        if (request.getAdminNote() != null) {
+            registration.setAdminNote(request.getAdminNote());
+        }
+
+        if (request.getExcuseReason() != null) {
+            registration.setExcuseReason(request.getExcuseReason());
+        }
+    }
+
+    // =========================
+    // FETCH – ČTECÍ METODY
+    // =========================
+
+    /**
+     * Vrátí všechny registrace pro daný zápas.
+     */
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
+        return matchRegistrationMapper.toDTOList(
+                registrationRepository.findByMatchId(matchId)
+        );
+    }
+
+    /**
+     * Vrátí všechny registrace pro zadané zápasy.
+     * <p>
+     * Pokud je seznam ID prázdný nebo null, vrací prázdný seznam.
+     */
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds) {
         if (matchIds == null || matchIds.isEmpty()) {
@@ -216,24 +293,34 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         );
     }
 
+    /**
+     * Vrátí všechny registrace v systému.
+     */
     @Override
     public List<MatchRegistrationDTO> getAllRegistrations() {
         return matchRegistrationMapper.toDTOList(registrationRepository.findAll());
     }
 
+    /**
+     * Vrátí všechny registrace konkrétního hráče.
+     */
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId) {
-        return matchRegistrationMapper.toDTOList(registrationRepository.findByPlayerId(playerId));
+        return matchRegistrationMapper.toDTOList(
+                registrationRepository.findByPlayerId(playerId)
+        );
     }
 
+    /**
+     * Vrátí hráče, kteří na daný zápas nijak nereagovali
+     * (nemají žádnou registraci bez ohledu na status).
+     */
     @Override
     public List<PlayerDTO> getNoResponsePlayers(Long matchId) {
-        List<Long> responded = registrationRepository.findByMatchId(matchId).stream()
-                .map(r -> r.getPlayer().getId())
-                .toList();
+        Set<Long> respondedIds = getRespondedPlayerIds(matchId);
 
         List<PlayerEntity> noResponsePlayers = playerRepository.findAll().stream()
-                .filter(p -> !responded.contains(p.getId()))
+                .filter(p -> !respondedIds.contains(p.getId()))
                 .toList();
 
         return noResponsePlayers.stream()
@@ -241,7 +328,36 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 .toList();
     }
 
-    // -------------------- RECALC --------------------
+    /**
+     * Vrátí množinu ID hráčů, kteří mají k zápasu nějakou registraci.
+     */
+    private Set<Long> getRespondedPlayerIds(Long matchId) {
+        return registrationRepository.findByMatchId(matchId).stream()
+                .map(r -> r.getPlayer().getId())
+                .collect(Collectors.toSet());
+    }
+
+    // =========================
+    // RECALC – PŘEPOČET POŘADÍ
+    // =========================
+
+    /**
+     * Přepočítá statusy REGISTERED/RESERVED pro daný zápas.
+     * <p>
+     * Postup:
+     * <ul>
+     *     <li>vybere registrace se statusem REGISTERED/RESERVED,</li>
+     *     <li>seřadí je podle timestampu,</li>
+     *     <li>prvních maxPlayers nastaví na REGISTERED, ostatní na RESERVED.</li>
+     * </ul>
+     *
+     * Příklad:
+     * <pre>
+     * maxPlayers = 10
+     * 15 hráčů má status REGISTERED/RESERVED
+     * → prvních 10 = REGISTERED, zbylých 5 = RESERVED
+     * </pre>
+     */
     @Override
     @Transactional
     public void recalcStatusesForMatch(Long matchId) {
@@ -256,18 +372,28 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         for (int i = 0; i < regs.size(); i++) {
             MatchRegistrationEntity reg = regs.get(i);
-            PlayerMatchStatus newStatus = (i < maxPlayers) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
-            if (reg.getStatus() != newStatus) updateRegistrationStatus(reg, newStatus, "system", false);
+            PlayerMatchStatus newStatus =
+                    (i < maxPlayers) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+
+            if (reg.getStatus() != newStatus) {
+                updateRegistrationStatus(reg, newStatus, "system", false);
+            }
         }
     }
 
-    // -------------------- SMS --------------------
+    // =========================
+    // SMS – HROMADNÉ ODESÍLÁNÍ
+    // =========================
+
+    /**
+     * Odešle SMS všem hráčům, kteří jsou REGISTERED na daný zápas
+     * a mají povolené SMS notifikace.
+     */
     @Transactional
     public void sendSmsToRegisteredPlayers(Long matchId) {
         registrationRepository.findByMatchId(matchId).stream()
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
                 .forEach(r -> {
-                    // NEW – respektuj preferenci hráče pro SMS
                     var player = r.getPlayer();
                     var ns = player.getNotificationSettings();
                     if (ns != null && ns.isSmsEnabled()) {
@@ -276,6 +402,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 });
     }
 
+    /**
+     * Odešle připomínkovou SMS všem hráčům, kteří na zápas nijak nereagovali
+     * (NO_RESPONSE) a mají povolené SMS notifikace.
+     */
     public void sendNoResponseSmsForMatch(Long matchId) {
         var match = getMatchOrThrow(matchId);
 
@@ -283,14 +413,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
 
             try {
-                // respektuj notifyBySms v PlayerDTO (mapované z NotificationSettings)
                 if (player.isNotifyBySms()) {
                     smsService.sendSms(player.getPhoneNumber(), smsMsg);
                 }
             } catch (Exception e) {
-                // CHANGED: žádný System.err, jen strukturovaný log se stacktrace
                 log.error(
-                        "Chyba při odeslání SMS hráči {} ({}) pro zápas {}: {}",
+                        "Chyba při odesílání SMS hráči {} ({}) pro zápas {}: {}",
                         player.getFullName(),
                         player.getPhoneNumber(),
                         matchId,
@@ -301,50 +429,66 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         });
     }
 
+    // ================================================
+    // ADMIN – RUČNÍ ZMĚNA STATUSU / NO_EXCUSED LOGIKA
+    // ================================================
+
+    /**
+     * Obecná admin operace pro změnu statusu registrace hráče na zápas.
+     * <p>
+     * Nepovoluje nastavení statusu NO_EXCUSED – ten má vlastní logiku.
+     *
+     * @param matchId  ID zápasu
+     * @param playerId ID hráče
+     * @param status   cílový status (mimo NO_EXCUSED)
+     * @return DTO aktualizované registrace
+     */
     @Override
     @Transactional
     public MatchRegistrationDTO updateStatus(Long matchId, Long playerId, PlayerMatchStatus status) {
 
-        MatchEntity match = getMatchOrThrow(matchId);
-        PlayerEntity player = getPlayerOrThrow(playerId);
+        getMatchOrThrow(matchId);
+        getPlayerOrThrow(playerId);
 
         if (status == PlayerMatchStatus.NO_EXCUSED) {
             throw new InvalidPlayerStatusException(
-                    "Status NO_EXCUSED musí být nastaven přes speciální endpoint /logiku."
+                    "Status NO_EXCUSED musí být nastaven přes speciální endpoint / logiku."
             );
         }
 
-        MatchRegistrationEntity registration = registrationRepository
-                .findByPlayerIdAndMatchId(playerId, matchId)
-                .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
+        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
 
-        // můžeme případně řešit další pravidla, tady jen prostý update
         MatchRegistrationEntity updated =
                 updateRegistrationStatus(registration, status, "admin", true);
 
         return matchRegistrationMapper.toDTO(updated);
     }
 
+    /**
+     * Speciální admin logika pro nastavení statusu NO_EXCUSED:
+     * <ul>
+     *     <li>zápas musí být v minulosti,</li>
+     *     <li>původní status musí být REGISTERED,</li>
+     *     <li>smaže se excuseReason a excuseNote,</li>
+     *     <li>nastaví se adminNote (z parametru nebo defaultní).</li>
+     * </ul>
+     */
     @Override
     @Transactional
-    public MatchRegistrationDTO markNoExcused(
-            Long matchId,
-            Long playerId,
-            String adminNote
-    ) {
+    public MatchRegistrationDTO markNoExcused(Long matchId,
+                                              Long playerId,
+                                              String adminNote) {
 
         MatchEntity match = getMatchOrThrow(matchId);
-        PlayerEntity player = getPlayerOrThrow(playerId);
+        getPlayerOrThrow(playerId);
 
-        if (match.getDateTime().isAfter(LocalDateTime.now())) {
+        if (match.getDateTime().isAfter(now())) {
             throw new InvalidPlayerStatusException(
                     "Status NO_EXCUSED lze nastavit pouze u již proběhlého zápasu."
             );
         }
 
-        MatchRegistrationEntity registration = registrationRepository
-                .findByPlayerIdAndMatchId(playerId, matchId)
-                .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
+        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
 
         if (registration.getStatus() != PlayerMatchStatus.REGISTERED) {
             throw new InvalidPlayerStatusException(
@@ -352,11 +496,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             );
         }
 
-        // doménová logika NO_EXCUSED
         registration.setExcuseReason(null);
         registration.setExcuseNote(null);
 
-        // adminNote – default fallback
         if (adminNote == null || adminNote.isBlank()) {
             registration.setAdminNote("Nedostavil se bez omluvy");
         } else {
@@ -374,5 +516,121 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return matchRegistrationMapper.toDTO(updated);
     }
 
+    // ====================================================
+    // PRIVÁTNÍ HELPERY – NAČÍTÁNÍ ENTIT A ZÁKLADNÍ LOGIKA
+    // ====================================================
 
+    /**
+     * Najde zápas podle ID nebo vyhodí {@link MatchNotFoundException}.
+     */
+    private MatchEntity getMatchOrThrow(Long matchId) {
+        return matchRepository.findById(matchId)
+                .orElseThrow(() -> new MatchNotFoundException(matchId));
+    }
+
+    /**
+     * Najde hráče podle ID nebo vyhodí {@link PlayerNotFoundException}.
+     */
+    private PlayerEntity getPlayerOrThrow(Long playerId) {
+        return playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+    }
+
+    /**
+     * Vrátí registraci hráče na zápas, pokud existuje, jinak {@code null}.
+     */
+    private MatchRegistrationEntity getRegistrationOrNull(Long playerId, Long matchId) {
+        return registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElse(null);
+    }
+
+    /**
+     * Vrátí registraci hráče na zápas, pokud existuje,
+     * jinak vyhodí {@link RegistrationNotFoundException}.
+     */
+    private MatchRegistrationEntity getRegistrationOrThrow(Long playerId, Long matchId) {
+        return registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
+    }
+
+    /**
+     * Zjistí, zda je ve zápase ještě volné místo pro status REGISTERED.
+     */
+    private boolean isSlotAvailable(MatchEntity match) {
+        long registeredCount = registrationRepository
+                .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
+        return registeredCount < match.getMaxPlayers();
+    }
+
+    /**
+     * Bezpečně odešle SMS hráči z registrace.
+     * <p>
+     * Pokud je registrace nebo hráč null, nic neudělá.
+     * Chyby při odesílání pouze zaloguje.
+     */
+    private void sendSms(MatchRegistrationEntity registration, String message) {
+        if (registration == null || registration.getPlayer() == null) {
+            return;
+        }
+
+        try {
+            smsService.sendSms(registration.getPlayer().getPhoneNumber(), message);
+        } catch (Exception e) {
+            log.error(
+                    "Chyba při odesílání SMS pro registraci {}: {}",
+                    registration.getId(),
+                    e.getMessage(),
+                    e
+            );
+        }
+    }
+
+    /**
+     * Společná metoda pro změnu statusu registrace.
+     *
+     * @param registration    registrace ke změně
+     * @param status          nový status
+     * @param updatedBy       kdo změnu provedl (user/admin/system)
+     * @param updateTimestamp zda přepsat timestamp na aktuální čas
+     */
+    private MatchRegistrationEntity updateRegistrationStatus(
+            MatchRegistrationEntity registration,
+            PlayerMatchStatus status,
+            String updatedBy,
+            boolean updateTimestamp
+    ) {
+        registration.setStatus(status);
+        registration.setCreatedBy(updatedBy);
+        if (updateTimestamp) {
+            registration.setTimestamp(LocalDateTime.now());
+        }
+        return registrationRepository.saveAndFlush(registration);
+    }
+
+    /**
+     * Převede výsledný {@link PlayerMatchStatus} na typ notifikace.
+     *
+     * @return odpovídající {@link NotificationType}, nebo {@code null},
+     * pokud se pro daný status notifikace neposílá
+     */
+    private NotificationType resolveNotificationType(PlayerMatchStatus newStatus) {
+        return switch (newStatus) {
+            case REGISTERED -> NotificationType.PLAYER_REGISTERED;
+            case UNREGISTERED -> NotificationType.PLAYER_UNREGISTERED;
+            case EXCUSED -> NotificationType.PLAYER_EXCUSED;
+            case RESERVED -> NotificationType.PLAYER_RESERVED;
+            default -> null;
+        };
+    }
+
+    /**
+     * Pomocná metoda pro získání aktuálního času.
+     * <p>
+     * Odděleno kvůli lepší testovatelnosti.
+     */
+    private LocalDateTime now() {
+        return LocalDateTime.now();
+    }
 }
