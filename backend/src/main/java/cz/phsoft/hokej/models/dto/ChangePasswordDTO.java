@@ -1,8 +1,26 @@
 package cz.phsoft.hokej.models.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
+/**
+ * DTO pro změnu hesla přihlášeného uživatele.
+ *
+ * Používá se při:
+ * <ul>
+ *     <li>změně hesla z uživatelského profilu,</li>
+ *     <li>ověření původního hesla před nastavením nového.</li>
+ * </ul>
+ *
+ * Validace:
+ * <ul>
+ *     <li>všechna pole jsou povinná,</li>
+ *     <li>nové heslo musí splňovat minimální délku,</li>
+ *     <li>shoda nového hesla a potvrzení se kontroluje v servisní vrstvě.</li>
+ * </ul>
+ */
 public class ChangePasswordDTO {
+
     @NotBlank(message = "Původní heslo je povinné.")
     private String oldPassword;
 
@@ -13,13 +31,14 @@ public class ChangePasswordDTO {
     @NotBlank(message = "Potvrzení nového hesla je povinné.")
     private String newPasswordConfirm;
 
+    // gettery / settery
 
-    // gettery a settery
     public String getOldPassword() { return oldPassword; }
     public void setOldPassword(String oldPassword) { this.oldPassword = oldPassword; }
+
     public String getNewPassword() { return newPassword; }
     public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
+
     public String getNewPasswordConfirm() { return newPasswordConfirm; }
     public void setNewPasswordConfirm(String newPasswordConfirm) { this.newPasswordConfirm = newPasswordConfirm; }
 }
-

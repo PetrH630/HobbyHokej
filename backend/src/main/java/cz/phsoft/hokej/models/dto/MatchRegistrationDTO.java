@@ -6,8 +6,28 @@ import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+/**
+ * DTO reprezentující registraci hráče k zápasu.
+ *
+ * Slouží k přenosu informací o stavu účasti hráče
+ * na konkrétním zápasu mezi backendem a klientem.
+ *
+ * Používá se zejména:
+ * <ul>
+ *     <li>při registraci / odhlášení / omluvě hráče,</li>
+ *     <li>v přehledech registrací zápasu,</li>
+ *     <li>v administraci účasti hráčů.</li>
+ * </ul>
+ */
 public class MatchRegistrationDTO {
-    private Long id; // volitelné, při GET
+
+    /**
+     * ID registrace.
+     *
+     * Vyplněno při načítání dat (GET),
+     * při vytváření nové registrace může být {@code null}.
+     */
+    private Long id;
 
     @NotNull(message = "ID zápasu je povinné.")
     @Positive(message = "ID zápasu musí být kladné.")
@@ -17,20 +37,43 @@ public class MatchRegistrationDTO {
     @Positive(message = "ID hráče musí být kladné.")
     private Long playerId;
 
+    /**
+     * Aktuální stav registrace hráče k zápasu.
+     */
     private PlayerMatchStatus status;
-    private ExcuseReason excuseReason; // pouze pokud status = EXCUSED
+
+    /**
+     * Důvod omluvy – vyplněn pouze pokud je
+     * {@link #status} nastaven na {@code EXCUSED}.
+     */
+    private ExcuseReason excuseReason;
+
     private String excuseNote;
     private String adminNote;
     private Team team;
 
+    /**
+     * Informace o původu registrace.
+     *
+     * Typické hodnoty:
+     * <ul>
+     *     <li>{@code "user"} – akce provedená hráčem,</li>
+     *     <li>{@code "system"} – automatická změna systémem.</li>
+     * </ul>
+     */
     @NotNull
-    private String createdBy; // "user" nebo "system"
+    private String createdBy;
 
+    /**
+     * Detail hráče – používá se pro prezentační účely
+     * v přehledech registrací.
+     */
     private PlayerDTO playerDTO;
 
     public MatchRegistrationDTO() {}
 
-    // Gettery a settery
+    // gettery / settery
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -53,9 +96,11 @@ public class MatchRegistrationDTO {
     public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
 
     public Team getTeam() { return team; }
-    public void setTeam (Team team) { this.team = team; }
+    public void setTeam(Team team) { this.team = team; }
 
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-}
 
+    public PlayerDTO getPlayerDTO() { return playerDTO; }
+    public void setPlayerDTO(PlayerDTO playerDTO) { this.playerDTO = playerDTO; }
+}

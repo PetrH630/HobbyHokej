@@ -6,11 +6,21 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
+/**
+ * DTO reprezentující sezónu v aplikaci.
+ *
+ * Slouží k přenosu informací o sezónách mezi backendem
+ * a klientem (správa sezón, výběr aktivní sezóny).
+ *
+ * Sezóna vymezuje časové období, ve kterém
+ * se konají zápasy a ke kterému se vztahují statistiky.
+ */
 public class SeasonDTO {
 
     private Long id;
+
     /**
-     * Např. "2024/2025"
+     * Název sezóny (např. "2024/2025").
      */
     @NotBlank(message = "např. 2025/2026")
     private String name;
@@ -24,22 +34,23 @@ public class SeasonDTO {
     private LocalDate endDate;
 
     /**
-     * Je tato sezóna aktuálně aktivní
+     * Určuje, zda je sezóna aktuálně aktivní.
+     *
+     * V systému může být v daném okamžiku
+     * aktivní maximálně jedna sezóna.
      */
     private boolean active;
 
-    // --- konstruktory ---
+    // konstruktory
 
-    public SeasonDTO() {
-    }
+    public SeasonDTO() {}
 
-    public SeasonDTO(
-            Long id,
-            String name,
-            LocalDate startDate,
-            LocalDate endDate,
-            boolean active
-    ) {
+    public SeasonDTO(Long id,
+                     String name,
+                     LocalDate startDate,
+                     LocalDate endDate,
+                     boolean active) {
+
         this.id = id;
         this.name = name;
         this.startDate = startDate;
@@ -47,47 +58,20 @@ public class SeasonDTO {
         this.active = active;
     }
 
-    // --- gettery / settery ---
+    // gettery / settery
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 }
-
-

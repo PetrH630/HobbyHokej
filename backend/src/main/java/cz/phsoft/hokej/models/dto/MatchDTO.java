@@ -6,16 +6,27 @@ import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO reprezentující zápas.
+ *
+ * Slouží k přenosu dat o zápasech mezi backendem
+ * a klientem (vytváření, editace, přehledy).
+ *
+ * Neobsahuje žádnou business logiku ani vazby na entity.
+ */
 public class MatchDTO {
 
     private Long id;
+
+    /**
+     * Datum a čas konání zápasu.
+     */
     @NotNull(message = "Datum a čas zápasu je povinné.")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;
@@ -33,16 +44,28 @@ public class MatchDTO {
     @NotNull(message = "Cena je povinná")
     private Integer price;
 
+    /**
+     * Aktuální stav zápasu (např. aktivní, zrušený).
+     */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
+    /**
+     * Důvod zrušení zápasu, pokud byl zrušen.
+     */
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
 
+    /**
+     * ID sezóny, do které zápas patří.
+     *
+     * Pouze pro čtení – nastavuje server.
+     */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
-    // gettery a settery
+    // gettery / settery
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -58,35 +81,15 @@ public class MatchDTO {
     public Integer getMaxPlayers() { return maxPlayers; }
     public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 
-    public Integer getPrice() {
-        return price;
-    }
+    public Integer getPrice() { return price; }
+    public void setPrice(Integer price) { this.price = price; }
 
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
+    public MatchStatus getMatchStatus() { return matchStatus; }
+    public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
 
-    public MatchStatus getMatchStatus() {
-        return matchStatus;
-    }
+    public MatchCancelReason getCancelReason() { return cancelReason; }
+    public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
 
-    public void setMatchStatus(MatchStatus matchStatus) {
-        this.matchStatus = matchStatus;
-    }
-
-    public MatchCancelReason getCancelReason() {
-        return cancelReason;
-    }
-
-    public void setCancelReason(MatchCancelReason cancelReason) {
-        this.cancelReason = cancelReason;
-    }
-
-    public Long getSeasonId() {
-        return seasonId;
-    }
-
-    public void setSeasonId(Long seasonId) {
-        this.seasonId = seasonId;
-    }
+    public Long getSeasonId() { return seasonId; }
+    public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
 }

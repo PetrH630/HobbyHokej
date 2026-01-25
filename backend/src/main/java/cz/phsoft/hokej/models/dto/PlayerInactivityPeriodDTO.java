@@ -4,44 +4,35 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO reprezentující období neaktivity hráče.
+ *
+ * Používá se k přenosu informací o časovém intervalu,
+ * ve kterém hráč není k dispozici pro zápasy
+ * (např. zranění, dlouhodobá absence).
+ */
 public class PlayerInactivityPeriodDTO {
 
     private Long id;
     private Long playerId;
+
     @NotNull(message = "Datum začátku neaktivity je povinné.")
     private LocalDateTime inactiveFrom;
+
     @NotNull(message = "Datum konce neaktivity je povinné.")
     private LocalDateTime inactiveTo;
 
-    public Long getId() {
-        return id;
-    }
+    // gettery / settery
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getPlayerId() {
-        return playerId;
-    }
+    public Long getPlayerId() { return playerId; }
+    public void setPlayerId(Long playerId) { this.playerId = playerId; }
 
-    public void setPlayerId(Long playerId) {
-        this.playerId = playerId;
-    }
+    public LocalDateTime getInactiveFrom() { return inactiveFrom; }
+    public void setInactiveFrom(LocalDateTime inactiveFrom) { this.inactiveFrom = inactiveFrom; }
 
-    public LocalDateTime getInactiveFrom() {
-        return inactiveFrom;
-    }
-
-    public void setInactiveFrom(LocalDateTime inactiveFrom) {
-        this.inactiveFrom = inactiveFrom;
-    }
-
-    public LocalDateTime getInactiveTo() {
-        return inactiveTo;
-    }
-
-    public void setInactiveTo(LocalDateTime inactiveTo) {
-        this.inactiveTo = inactiveTo;
-    }
+    public LocalDateTime getInactiveTo() { return inactiveTo; }
+    public void setInactiveTo(LocalDateTime inactiveTo) { this.inactiveTo = inactiveTo; }
 }

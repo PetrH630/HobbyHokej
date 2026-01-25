@@ -4,17 +4,27 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * DTO pro registraci nového uživatele.
+ *
+ * Slouží k přenosu registračních údajů z klienta
+ * do backendu při vytváření nového uživatelského účtu.
+ *
+ * DTO obsahuje pouze validační pravidla základního formátu dat.
+ * Kontrola shody hesel a další business validace
+ * jsou řešeny v servisní vrstvě.
+ */
 public class RegisterUserDTO {
 
     @NotBlank(message = "Křestní jméno je povinné.")
     @Size(min = 2, max = 50)
-    private String name; // not null
+    private String name;
 
     @NotBlank(message = "Příjmení je povinné.")
     @Size(min = 2, max = 50)
     private String surname;
 
-    @NotBlank(message = "email je povinný.")
+    @NotBlank(message = "Email je povinný.")
     @Email
     private String email;
 
@@ -25,44 +35,20 @@ public class RegisterUserDTO {
     @NotBlank
     private String passwordConfirm;
 
+    // gettery / settery
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; }
 
-    public String getSurname() {
-        return surname;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPasswordConfirm() {
-        return passwordConfirm;
-    }
-
-    public void setPasswordConfirm(String passwordConfirm) {
-        this.passwordConfirm = passwordConfirm;
-    }
+    public String getPasswordConfirm() { return passwordConfirm; }
+    public void setPasswordConfirm(String passwordConfirm) { this.passwordConfirm = passwordConfirm; }
 }

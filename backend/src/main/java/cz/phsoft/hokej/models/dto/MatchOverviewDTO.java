@@ -10,6 +10,20 @@ import jakarta.persistence.Enumerated;
 
 import java.time.LocalDateTime;
 
+/**
+ * Přehledové DTO reprezentující zápas v seznamu.
+ *
+ * Používá se zejména:
+ * <ul>
+ *     <li>v přehledech nadcházejících a minulých zápasů,</li>
+ *     <li>v seznamu zápasů hráče,</li>
+ *     <li>na dashboardu nebo úvodních obrazovkách.</li>
+ * </ul>
+ *
+ * Obsahuje zjednodušený pohled na zápas
+ * doplněný o kontext přihlášeného hráče
+ * a základní agregační informace.
+ */
 public class MatchOverviewDTO {
 
     private Long id;
@@ -20,21 +34,43 @@ public class MatchOverviewDTO {
     private String location;
     private String description;
     private Integer price;
+
+    /**
+     * Základní agregační údaje zápasu.
+     */
     private int maxPlayers;
     private int inGamePlayers;
+
+    /**
+     * Cena přepočtená na jednoho přihlášeného hráče.
+     * Hodnota je počítána serverem.
+     */
     private double pricePerRegisteredPlayer;
+
+    /**
+     * Stav přihlášeného hráče k danému zápasu.
+     */
     private PlayerMatchStatus playerMatchStatus;
+
+    /**
+     * Stav zápasu a případný důvod jeho zrušení.
+     */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
 
+    /**
+     * ID sezóny, do které zápas patří.
+     *
+     * Pouze pro čtení – nastavuje server.
+     */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
+    // gettery / settery
 
-    // Gettery a settery
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -57,37 +93,21 @@ public class MatchOverviewDTO {
     public void setInGamePlayers(int inGamePlayers) { this.inGamePlayers = inGamePlayers; }
 
     public double getPricePerRegisteredPlayer() { return pricePerRegisteredPlayer; }
-    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) { this.pricePerRegisteredPlayer = pricePerRegisteredPlayer; }
-
-    public PlayerMatchStatus getPlayerMatchStatus() {
-        return playerMatchStatus;
+    public void setPricePerRegisteredPlayer(double pricePerRegisteredPlayer) {
+        this.pricePerRegisteredPlayer = pricePerRegisteredPlayer;
     }
 
+    public PlayerMatchStatus getPlayerMatchStatus() { return playerMatchStatus; }
     public void setPlayerMatchStatus(PlayerMatchStatus playerMatchStatus) {
         this.playerMatchStatus = playerMatchStatus;
     }
 
-    public MatchStatus getMatchStatus() {
-        return matchStatus;
-    }
+    public MatchStatus getMatchStatus() { return matchStatus; }
+    public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
 
-    public void setMatchStatus(MatchStatus matchStatus) {
-        this.matchStatus = matchStatus;
-    }
+    public MatchCancelReason getCancelReason() { return cancelReason; }
+    public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
 
-    public MatchCancelReason getCancelReason() {
-        return cancelReason;
-    }
-
-    public void setCancelReason(MatchCancelReason cancelReason) {
-        this.cancelReason = cancelReason;
-    }
-
-    public Long getSeasonId() {
-        return seasonId;
-    }
-
-    public void setSeasonId(Long seasonId) {
-        this.seasonId = seasonId;
-    }
+    public Long getSeasonId() { return seasonId; }
+    public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
 }
