@@ -6,10 +6,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Map;
 
 /**
  * Globální handler výjimek pro REST API.
@@ -27,7 +30,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *     <li>neřeší business logiku – pouze mapuje výjimky na HTTP odpovědi.</li>
  * </ul>
  */
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     // ==========================================
@@ -228,13 +231,67 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
-                ex.getMessage(),
+                "BE - Došlo k neočekávané chybě na serveru.",
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+    // ==========================================
+    // 7) VALIDACE VSTUPŮ (@Valid, Bean Validation)
+    // ==========================================
+
+    /**
+     * Zachytí validační chyby z anotace {@code @Valid}.
+     * <p>
+     * Typické scénáře:
+     * <ul>
+     *     <li>nevyplněné povinné pole,</li>
+     *     <li>neplatný formát (např. e-mail),</li>
+     *     <li>porušení délkových nebo rozsahových omezení.</li>
+     * </ul>
+     *
+     * Do pole {@code details} se vrací mapa {@code field → message},
+     * kde klíčem je název pole v DTO a hodnotou text validační chyby.
+     *
+     * HTTP status: 400 Bad Request
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        // Mapa field → message (použijeme LinkedHashMap pro zachování pořadí chyb)
+        Map<String, String> fieldErrors = new java.util.LinkedHashMap<>();
+
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            String fieldName = fieldError.getField();
+            String errorMessage = fieldError.getDefaultMessage();
+
+            // Pokud je pro jedno pole více chyb, můžeme je spojit do jedné zprávy
+            fieldErrors.merge(
+                    fieldName,
+                    errorMessage,
+                    (existing, added) -> existing + "; " + added
+            );
+        }
+
+        ApiError error = new ApiError(
+                status.value(),
+                status.getReasonPhrase(),
+                "BE - Neplatná vstupní data.",
+                request.getRequestURI(),
+                request.getRemoteAddr(),
+                fieldErrors
+        );
+
+        return ResponseEntity
+                .status(status)
                 .body(error);
     }
 }

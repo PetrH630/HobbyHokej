@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
  *
  * Poznámka:
  * ---------
- * V aktuální verzi využíváš hlavně endpointy typu {@code /me}
+ * V aktuální verzi využívám hlavně endpointy typu {@code /me}
  * a {@link CurrentPlayerContext}, ale tato třída je připravena
  * pro případné rozšíření autorizace na úrovni konkrétních hráčů.
  */

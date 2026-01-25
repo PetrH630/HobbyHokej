@@ -128,4 +128,8 @@ public class ApiError {
     public String getPath() { return path; }
     public String getClientIp() { return clientIp; }
     public Map<String, String> getDetails() { return details; }
+
+    public void setDetails(Map<String, String> details) {
+        this.details = details;
+    }
 }
