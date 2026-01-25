@@ -1,19 +1,21 @@
 package cz.phsoft.hokej.exceptions;
 
+import org.springframework.http.HttpStatus;
+
 /**
- * Výjimka signalizující neplatný stav sezóny.
+ * Výjimka signalizující nepovolený stavový přechod sezóny.
  *
  * <p>
  * Používá se v situacích, kdy operace nad sezónou není povolena
- * vzhledem k jejímu aktuálnímu stavu (např. nelze aktivovat již
- * aktivní sezónu, nelze upravovat archivovanou sezónu apod.).
+ * vzhledem k jejímu aktuálnímu stavu (např. deaktivace poslední
+ * aktivní sezóny nebo neplatná změna aktivace).
  * </p>
  *
- * Typicky mapováno na HTTP 400 nebo 409 podle konkrétního handleru.
+ * Typicky mapováno na HTTP 409 (Conflict).
  */
-public class InvalidSeasonStateException extends RuntimeException {
+public class InvalidSeasonStateException extends BusinessException {
 
     public InvalidSeasonStateException(String message) {
-        super(message);
+        super(message, HttpStatus.CONFLICT);
     }
 }

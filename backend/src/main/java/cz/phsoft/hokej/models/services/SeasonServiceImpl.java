@@ -131,9 +131,7 @@ public class SeasonServiceImpl implements SeasonService {
     public SeasonDTO updateSeason(Long id, SeasonDTO seasonDTO) {
         // 1) najít existující sezónu
         SeasonEntity existing = seasonRepository.findById(id)
-                .orElseThrow(() -> new SeasonNotFoundException(
-                        "BE - Sezóna s ID " + id + " nebyla nalezena."
-                ));
+                .orElseThrow(() -> new SeasonNotFoundException(id));
 
         // 2) validace dat s ignorováním této sezóny (aby se nepočítala jako překryv sama se sebou)
         validateDates(seasonDTO, id);
@@ -147,7 +145,7 @@ public class SeasonServiceImpl implements SeasonService {
             if (activeCount <= 1) {
                 throw new InvalidSeasonStateException(
                         "BE - Nelze deaktivovat jedinou aktivní sezónu. " +
-                                "Nejprve nastavte jinou sezónu jako aktivní."
+                        "Nejprve nastavte jinou sezónu jako aktivní."
                 );
             }
         }
@@ -227,8 +225,7 @@ public class SeasonServiceImpl implements SeasonService {
     public void setActiveSeason(Long seasonId) {
         // 1) ověř, že existuje
         SeasonEntity toActivate = seasonRepository.findById(seasonId)
-                .orElseThrow(() -> new SeasonNotFoundException(
-                        "BE - Sezóna s ID " + seasonId + " nebyla nalezena."
+                .orElseThrow(() -> new SeasonNotFoundException(seasonId
                 ));
 
         // 2) nastavíme ji jako jedinou aktivní
