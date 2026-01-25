@@ -29,6 +29,18 @@ AppUserController
 @PostMapping("/{id}/reset-password")    - reset hesla na Player123 - Admin
 
 ----------------------------------------
+SEASON
+AdminSeasonController
+@RequestMapping("/api/admin/seasons")
+@PreAuthorize("hasAnyRole('ADMIN') // celý controller jen pro Admin
+
+@PostMapping("/api/admin/seasons")              - vytvoří sezonu
+@PutMapping("/api/admin/seasons/{id}")          - změní sezonu
+@GetMapping("/api/admin/seasons/all")           - vrátí všechny sezony
+@GetMapping("/api/admin/seasons/active")        - vrátí aktivní sezonu
+@PutMapping("/api/admin/seasons//{id}/active")  - nastaví aktivní sezonu dle ID
+
+----------------------------------------
 MATCH
 
 AdminMatchController
@@ -41,7 +53,9 @@ AdminMatchController
 @PutMapping("/{id}")                - editovat zápas    - Admin, Manager
 @DeleteMapping("/{id}")             - smazat zápas      - Admin
 @GetMapping("/available-for-player/{playerId}")  - zápasy kde hráč není Neaktivní - Admin, Manager
-
+@PatchMapping("/{matchId}/cancel")    - označit zápas jako zrušený
+@PatchMapping("/{matchId}/uncancel")    - zrušit označení zápasu jako zrušený
+@PatchMapping("/{matchId}/players/{playerId}/no-excused")    - označit v registraci hráče u tohoto zápasu jako neomluveného
 
 
 MatchController

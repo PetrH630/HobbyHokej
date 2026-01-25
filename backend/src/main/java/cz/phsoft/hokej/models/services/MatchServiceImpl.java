@@ -10,10 +10,7 @@ import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.exceptions.InvalidMatchStatusException;
-import cz.phsoft.hokej.exceptions.MatchNotFoundException;
-import cz.phsoft.hokej.exceptions.MatchRegistrationNotFoundException;
-import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.*;
 import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
 import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
@@ -108,6 +105,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     public MatchDTO createMatch(MatchDTO dto) {
         MatchEntity entity = matchMapper.toEntity(dto);
+        validateMatchDateInActiveSeason(entity.getDateTime());
 
         entity.setSeason(seasonService.getActiveSeason());
 
@@ -117,18 +115,21 @@ public class MatchServiceImpl implements MatchService {
     // metoda pro úpravu zápasu
     @Override
     public MatchDTO updateMatch(Long id, MatchDTO dto) {
-        MatchEntity match = findMatchOrThrow(id);
+        MatchEntity entity = findMatchOrThrow(id);
 
         Long activeSeasonId = seasonService.getActiveSeason().getId();
-        if (!match.getSeason().getId().equals(activeSeasonId)) {
+        if (!entity.getSeason().getId().equals(activeSeasonId)) {
             // můžeš mít vlastní exception, třeba:
             throw new InvalidMatchStatusException(
                     id, " - Zápas nepatří do aktuální sezóny, nelze ho upravit."
             );
         }
-        int oldMaxPlayers = match.getMaxPlayers();
-        matchMapper.updateEntity(dto, match);
-        MatchEntity saved = matchRepository.save(match);
+        int oldMaxPlayers = entity.getMaxPlayers();
+        matchMapper.updateEntity(dto, entity);
+
+        validateMatchDateInActiveSeason(entity.getDateTime());
+
+        MatchEntity saved = matchRepository.save(entity);
 
         // Přepočet registrací pokud došlo ke změně maxPlayers
         if (saved.getMaxPlayers() != oldMaxPlayers) {
@@ -299,9 +300,6 @@ public class MatchServiceImpl implements MatchService {
 
         // hráči bez registrace = NO_RESPONSE (pokud to používáš)
         List<PlayerDTO> noResponsePlayers = registrationService.getNoResponsePlayers(match.getId());
-
-        // ❗ TADY byla chyba – tohle pole bylo předtím spočítané stejně jako noResponsePlayers.
-        // Už ho nepotřebujeme jako zvláštní kolekci, NO_EXCUSED bereme z mapy statusů.
 
         // --- POČTY HRÁČŮ ---
 
@@ -589,10 +587,12 @@ public class MatchServiceImpl implements MatchService {
         return registrationService.markNoExcused(matchId, playerId, adminNote);
     }
 
+
+
     //TODO ENDPOINT
     @Override
     @Transactional
-    public Void cancelMatch(Long matchId, MatchCancelReason reason) {
+    public SuccessResponseDTO cancelMatch(Long matchId, MatchCancelReason reason) {
         MatchEntity match = findMatchOrThrow(matchId);
         String message = " je již zrušen";
 
@@ -600,16 +600,19 @@ public class MatchServiceImpl implements MatchService {
             throw new InvalidMatchStatusException(matchId, message);
         }
 
-
         match.setMatchStatus(MatchStatus.CANCELLED);
         match.setCancelReason(reason);
 
-        return null;
+        return new SuccessResponseDTO(
+                "BE - Zápas " + match.getId() + match.getDateTime() + " byl úspěšně zrušen",
+                match.getId(),
+                LocalDateTime.now().toString()
+        );
     }
-
+    //TODO ENDPOINT
     @Override
     @Transactional
-    public Void unCancelMatch(Long matchId) {
+    public SuccessResponseDTO unCancelMatch(Long matchId) {
         MatchEntity match = findMatchOrThrow(matchId);
         String message = " ještě nebyl zrušen";
 
@@ -620,8 +623,26 @@ public class MatchServiceImpl implements MatchService {
         match.setMatchStatus(null);
         match.setCancelReason(null);
 
-        return null;
+        return new SuccessResponseDTO(
+                "BE - Zápas " + match.getId() + match.getDateTime() + " byl úspěšně obnoven",
+                match.getId(),
+                LocalDateTime.now().toString()
+        );
     }
 
+    // POMOCNÁ METODA PRO OVĚŘENÍ DATA ZÁPASU V AKTIVNÍ SEZONĚ
+    private void validateMatchDateInActiveSeason(LocalDateTime dateTime) {
+        var activeSeason = seasonService.getActiveSeason();
+        var date = dateTime.toLocalDate();
+
+        if (date.isBefore(activeSeason.getStartDate()) ||
+                date.isAfter(activeSeason.getEndDate())) {
+
+            throw new InvalidSeasonPeriodDateException(
+                    "BE - Datum zápasu musí být v rozmezí aktivní sezóny (" +
+                            activeSeason.getStartDate() + " - " + activeSeason.getEndDate() + ")."
+            );
+        }
+    }
 
 }

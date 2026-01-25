@@ -22,7 +22,7 @@ public interface MatchService {
     List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId);
     List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId);
     MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote);
-    Void cancelMatch(Long matchId, MatchCancelReason reason);
-    Void unCancelMatch(Long matchId);
+    SuccessResponseDTO cancelMatch(Long matchId, MatchCancelReason reason);
+    SuccessResponseDTO unCancelMatch(Long matchId);
 
 }
