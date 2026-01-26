@@ -71,15 +71,13 @@ public interface AppUserMapper {
      * Převede entitu hráče na {@link PlayerDTO}.
      *
      * <p>
-     * Mapuje rozdílné názvy atributů (např. {@code nickname} → {@code nickName})
-     * a ignoruje pole {@code fullName}, které se typicky sestavuje jinde
+     * ignoruje pole {@code fullName}, které se typicky sestavuje jinde
      * (například v doménové logice nebo přímo v DTO).
      * </p>
      *
      * @param entity hráčská entita
      * @return DTO reprezentace hráče
      */
-    @Mapping(source = "nickname", target = "nickName")
     @Mapping(target = "fullName", ignore = true)
     PlayerDTO toPlayerDTO(PlayerEntity entity);
 

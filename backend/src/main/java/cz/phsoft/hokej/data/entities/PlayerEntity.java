@@ -29,7 +29,7 @@ public class PlayerEntity {
     /**
      * Volitelná přezdívka hráče.
      */
-    private String nickName;
+    private String nickname;
 
     /**
      * Typ hráče (např. BASIC, STANDARD, VIP).
@@ -92,7 +92,7 @@ public class PlayerEntity {
 
         this.name = name;
         this.surname = surname;
-        this.nickName = nickName;
+        this.nickname = nickname;
         this.type = type;
         this.phoneNumber = phoneNumber;
         this.team = team;
@@ -119,8 +119,8 @@ public class PlayerEntity {
         updateFullName();
     }
 
-    public String getNickName() { return nickName; }
-    public void setNickName(String nickName) { this.nickName = nickName; }
+    public String getNickname() { return nickname; }
+    public void setNickname(String nickName) { this.nickname = nickname; }
 
     public String getFullName() { return fullName; }
 

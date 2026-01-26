@@ -16,6 +16,6 @@ import org.springframework.http.HttpStatus;
 public class AccountNotActivatedException extends BusinessException {
 
     public AccountNotActivatedException() {
-        super("BE - Nejprve musíte aktivovat účet pomocí odkazu v e-mailu.", HttpStatus.FORBIDDEN);
+        super("BE - Nejprve musíte aktivovat účet pomocí odkazu v e-mailu, nebo kontaktujte administrátora.", HttpStatus.FORBIDDEN);
     }
 }

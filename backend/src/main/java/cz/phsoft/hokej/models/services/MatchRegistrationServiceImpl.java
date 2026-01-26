@@ -115,6 +115,13 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         MatchRegistrationEntity registration =
                 getRegistrationOrNull(playerId, request.getMatchId());
 
+        if (registration == null && !request.isUnregister()) {
+            registration = new MatchRegistrationEntity();
+            registration.setMatch(match);
+            registration.setPlayer(player);
+        }
+
+
         PlayerMatchStatus newStatus;
 
         if (request.isUnregister()) {
@@ -191,13 +198,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             MatchRegistrationEntity registration
     ) {
         if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
-            throw new DuplicateRegistrationException(request.getMatchId(), player.getId());
-        }
-
-        if (registration == null) {
-            registration = new MatchRegistrationEntity();
-            registration.setMatch(match);
-            registration.setPlayer(player);
+            throw new DuplicateRegistrationException(request.getMatchId(), player.getId(), "BE - Hráč má registraci na zápas, už se může jen odregistrovat");
         }
 
         registration.setExcuseReason(request.getExcuseReason());
@@ -227,14 +228,14 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         PlayerMatchStatus newStatus =
                 isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
 
-        if (registration == null) {
-            registration = new MatchRegistrationEntity();
-            registration.setMatch(match);
-            registration.setPlayer(player);
-        } else {
+
+        // Registrace je v této větvi vždy nenull (viz upsertRegistration).
+        // Pokud přecházíme z EXCUSED, smažeme omluvu:
+        if (registration.getExcuseReason() != null || registration.getExcuseNote() != null) {
             registration.setExcuseReason(null);
             registration.setExcuseNote(null);
         }
+
 
         return newStatus;
     }
@@ -452,7 +453,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         if (status == PlayerMatchStatus.NO_EXCUSED) {
             throw new InvalidPlayerStatusException(
-                    "Status NO_EXCUSED musí být nastaven přes speciální endpoint / logiku."
+                    "BE - Status NO_EXCUSED musí být nastaven přes speciální endpoint / logiku."
             );
         }
 
@@ -484,7 +485,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         if (match.getDateTime().isAfter(now())) {
             throw new InvalidPlayerStatusException(
-                    "Status NO_EXCUSED lze nastavit pouze u již proběhlého zápasu."
+                    "BE - Status NO_EXCUSED lze nastavit pouze u již proběhlého zápasu."
             );
         }
 
@@ -492,7 +493,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         if (registration.getStatus() != PlayerMatchStatus.REGISTERED) {
             throw new InvalidPlayerStatusException(
-                    "Status NO_EXCUSED lze nastavit pouze z registrace REGISTERED."
+                    "BE - Status NO_EXCUSED lze nastavit pouze z registrace REGISTERED."
             );
         }
 

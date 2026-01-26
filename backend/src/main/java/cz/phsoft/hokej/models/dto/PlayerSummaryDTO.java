@@ -16,7 +16,7 @@ public class PlayerSummaryDTO {
     private String name;
     private String surname;
     private String fullName;
-    private String nickName;
+    private String nickname;
     private PlayerType type;
     private Team team;
 
@@ -34,8 +34,8 @@ public class PlayerSummaryDTO {
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
 
-    public String getNickName() { return nickName; }
-    public void setNickName(String nickName) { this.nickName = nickName; }
+    public String getNickname() { return nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
 
     public PlayerType getType() { return type; }
     public void setType(PlayerType type) { this.type = type; }

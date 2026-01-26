@@ -27,6 +27,8 @@ AppUserController
 @PutMapping("/me/update")               - úprava přihlášeného uživatele - isAuthenticated
 @GetMapping("/api/users")               - seznam uživatelů - Admin
 @PostMapping("/{id}/reset-password")    - reset hesla na Player123 - Admin
+@PatchMapping("/{id}/activate")         - aktivace uživatele administrátorem
+@PatchMapping("/{id}/deactivate")       - deaktivace uživatele administrátorem
 
 ----------------------------------------
 SEASON

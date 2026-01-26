@@ -5,10 +5,7 @@ import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
-import cz.phsoft.hokej.exceptions.InvalidOldPasswordException;
-import cz.phsoft.hokej.exceptions.PasswordsDoNotMatchException;
-import cz.phsoft.hokej.exceptions.UserAlreadyExistsException;
-import cz.phsoft.hokej.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import cz.phsoft.hokej.models.dto.mappers.AppUserMapper;
@@ -17,8 +14,10 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -106,34 +105,6 @@ public class AppUserServiceImpl implements AppUserService {
 
         sendActivationEmail(savedUser, verificationToken);
     }
-
-    /**
-     * Aktivuje uživatelský účet na základě ověřovacího tokenu.
-     *
-     * @param token aktivační token z emailu
-     * @return {@code true} pokud byl účet úspěšně aktivován,
-     *         {@code false} pokud je token neplatný nebo expirovaný
-     */
-    @Override
-    @Transactional
-    public boolean activateUser(String token) {
-
-        EmailVerificationTokenEntity verificationToken =
-                tokenRepository.findByToken(token).orElse(null);
-
-        if (verificationToken == null ||
-                verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            return false;
-        }
-
-        AppUserEntity user = verificationToken.getUser();
-        user.setEnabled(true);
-        userRepository.save(user);
-
-        tokenRepository.delete(verificationToken);
-        return true;
-    }
-
     /**
      * Aktualizuje základní údaje přihlášeného uživatele.
      *
@@ -228,6 +199,65 @@ public class AppUserServiceImpl implements AppUserService {
         user.setPassword(passwordEncoder.encode(DEFAULT_RESET_PASSWORD));
         userRepository.save(user);
     }
+    /**
+     * Aktivuje uživatelský účet na základě ověřovacího tokenu.
+     *
+     * @param token aktivační token z emailu
+     * @return {@code true} pokud byl účet úspěšně aktivován,
+     *         {@code false} pokud je token neplatný nebo expirovaný
+     */
+    @Override
+    @Transactional
+    public boolean activateUser(String token) {
+
+        EmailVerificationTokenEntity verificationToken =
+                tokenRepository.findByToken(token).orElse(null);
+
+        if (verificationToken == null ||
+                verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        AppUserEntity user = verificationToken.getUser();
+        user.setEnabled(true);
+        userRepository.save(user);
+
+        tokenRepository.delete(verificationToken);
+        return true;
+    }
+
+    /**
+     * Aktivuje uživatelský účet na základě aktivace Administrátorem.
+     */
+    @Override
+    public void activateUserByAdmin(Long id) {
+        AppUserEntity user = findUserByIdOrThrow(id);
+        if (user.isEnabled()){
+            throw new InvalidUserActivationException(
+                    "BE - Aktivace účtu již byla provedena"
+            );
+        }
+
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    /**
+     * Deaktivuj uživatelský účet na základě deaktivace Administrátorem.
+     */
+    @Override
+    public void deactivateUserByAdmin(Long id) {
+        AppUserEntity user = findUserByIdOrThrow(id);
+
+        if (!user.isEnabled()){
+            throw new InvalidUserActivationException(
+                    "BE - Deaktivace účtu již byla provedena"
+            );
+        }
+        user.setEnabled(false);
+        userRepository.save(user);
+    }
+
 
     // ==================================================
     // HELPER METODY

@@ -33,7 +33,7 @@ public class PlayerDTO {
     @Size(min = 2, max = 50)
     private String surname;
 
-    private String nickName;
+    private String nickname;
 
     /**
      * Celé jméno hráče.
@@ -74,7 +74,7 @@ public class PlayerDTO {
     public PlayerDTO(Long id,
                      String name,
                      String surname,
-                     String nickName,
+                     String nickname,
                      PlayerType type,
                      Team team,
                      PlayerStatus playerStatus,
@@ -84,7 +84,7 @@ public class PlayerDTO {
         this.id = id;
         this.name = name;
         this.surname = surname;
-        this.nickName = nickName;
+        this.nickname = this.nickname;
         this.type = type != null ? type : PlayerType.BASIC;
         this.team = team;
         this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
@@ -104,8 +104,8 @@ public class PlayerDTO {
     public String getSurname() { return surname; }
     public void setSurname(String surname) { this.surname = surname; updateFullName(); }
 
-    public String getNickName() { return nickName; }
-    public void setNickName(String nickName) { this.nickName = nickName; }
+    public String getNickname() { return nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
 
     public String getFullName() { return fullName; }
 

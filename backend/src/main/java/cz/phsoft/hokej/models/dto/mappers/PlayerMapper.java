@@ -28,7 +28,6 @@ import java.util.List;
  *
  * <h3>Implementační poznámky</h3>
  * <ul>
- *     <li>v DTO se používá vlastnost {@code nickName} místo {@code nickname},</li>
  *     <li>pole {@code fullName} se negeneruje v mapperu, ale v entitě/DTO logice,</li>
  *     <li>vazba na uživatele ({@code user}) se nastavuje výhradně v servisní vrstvě,</li>
  *     <li>notifikační nastavení se mapují do embedded objektu {@link NotificationSettings}.</li>
@@ -42,7 +41,7 @@ public interface PlayerMapper {
      *
      * <p>
      * Rozdílné názvy atributů jsou mapovány explicitně
-     * ({@code nickname} → {@code nickName}). Celé jméno hráče
+     * Celé jméno hráče
      * ({@code fullName}) se v této fázi neplní a předpokládá se jeho
      * sestavení jinde (např. z křestního jména a příjmení).
      * </p>
@@ -56,7 +55,6 @@ public interface PlayerMapper {
      * @param entity entita hráče načtená z databáze
      * @return DTO reprezentace hráče
      */
-    @Mapping(source = "nickname", target = "nickName")
     @Mapping(target = "fullName", ignore = true)
     @Mapping(source = "notificationSettings.emailEnabled", target = "notifyByEmail")
     @Mapping(source = "notificationSettings.smsEnabled", target = "notifyBySms")
@@ -65,14 +63,7 @@ public interface PlayerMapper {
     /**
      * Převede DTO hráče na novou entitu.
      *
-     * <p>
-     * Rozdílné názvy atributů jsou mapovány explicitně
-     * ({@code nickName} → {@code nickname}). Pole {@code fullName}
-     * se ignoruje a předpokládá se, že entita si ho generuje sama
-     * (např. v setteru nebo v logice entitní vrstvy).
-     * </p>
-     *
-     * <p>
+     <p>
      * Vazba na uživatele ({@code user}) se nemapuje – je plně spravována
      * servisní vrstvou. Status hráče se nastavuje podle hodnoty v DTO;
      * pokud není vyplněn, použije se výchozí hodnota {@code PENDING}.
@@ -86,7 +77,6 @@ public interface PlayerMapper {
      * @param dto DTO reprezentace hráče
      * @return nová entita hráče připravená k uložení
      */
-    @Mapping(source = "nickName", target = "nickname")
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(
@@ -117,8 +107,7 @@ public interface PlayerMapper {
      * Aktualizuje existující entitu hráče na základě hodnot z DTO.
      *
      * <p>
-     * Rozdílný název atributu {@code nickName} → {@code nickname} je
-     * mapován explicitně. Celé jméno hráče ({@code fullName}) se
+     * Celé jméno hráče ({@code fullName}) se
      * ignoruje, stejně tak vazba na uživatele ({@code user}), která je
      * spravována servisní vrstvou.
      * </p>
@@ -136,7 +125,6 @@ public interface PlayerMapper {
      * @param source zdrojové DTO s novými hodnotami
      * @param target cílová entita hráče, která má být aktualizována
      */
-    @Mapping(source = "nickName", target = "nickname")
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(

@@ -20,4 +20,7 @@ public class DuplicateRegistrationException extends BusinessException {
                 HttpStatus.CONFLICT
         );
     }
+    public DuplicateRegistrationException(Long matchId, Long playerId, String message) {
+        super(message, HttpStatus.NOT_FOUND);
+    }
 }

@@ -19,7 +19,7 @@ import java.util.List;
  *     <li>práci s přihlášeným uživatelem (profil, změna hesla),</li>
  *     <li>administrativní správu uživatelů (pouze ADMIN).</li>
  * </ul>
- *
+ * <p>
  * Veškerá business logika je delegována do {@link AppUserService}.
  */
 @RestController
@@ -115,5 +115,29 @@ public class AppUserController {
     @PreAuthorize("hasRole('ADMIN')")
     public List<AppUserDTO> getAllUsers() {
         return appUserService.getAllUsers();
+    }
+
+    /**
+     * Aktivuje účet uživatele.
+     * <p>
+     * Endpoint je dostupný pouze pro administrátora.
+     */
+    @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> activateUserByAdmin(@PathVariable Long id) {
+        appUserService.activateUserByAdmin(id);
+        return ResponseEntity.ok("Uživatel byl úspěšně aktivován");
+    }
+
+    /**
+     * Dektivuje účet uživatele.
+     * <p>
+     * Endpoint je dostupný pouze pro administrátora.
+     */
+    @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> deactivateUserByAdmin(@PathVariable Long id) {
+        appUserService.deactivateUserByAdmin(id);
+        return ResponseEntity.ok("Uživatel byl úspěšně deaktivován");
     }
 }

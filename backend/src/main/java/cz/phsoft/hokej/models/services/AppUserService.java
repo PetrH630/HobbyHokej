@@ -2,6 +2,7 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -54,7 +55,17 @@ public interface AppUserService {
      *                                  nebo hesla nejsou shodná
      */
     void register(RegisterUserDTO registerUserDTO);
-
+    /**
+     * Aktualizuje údaje uživatele.
+     * <p>
+     * Metoda umožňuje změnu uživatelských údajů,
+     * které nevyžadují změnu hesla (např. jméno, role, stav).
+     * </p>
+     *
+     * @param email email uživatele, který má být aktualizován
+     * @param dto   nové hodnoty uživatelských údajů
+     */
+    void updateUser(String email, AppUserDTO dto);
     /**
      * Vrátí aktuálně přihlášeného uživatele podle emailu.
      * <p>
@@ -114,17 +125,7 @@ public interface AppUserService {
      */
     void resetPassword(Long userId);
 
-    /**
-     * Aktualizuje údaje uživatele.
-     * <p>
-     * Metoda umožňuje změnu uživatelských údajů,
-     * které nevyžadují změnu hesla (např. jméno, role, stav).
-     * </p>
-     *
-     * @param email email uživatele, který má být aktualizován
-     * @param dto   nové hodnoty uživatelských údajů
-     */
-    void updateUser(String email, AppUserDTO dto);
+
 
     /**
      * Aktivuje uživatelský účet pomocí aktivačního tokenu.
@@ -138,4 +139,22 @@ public interface AppUserService {
      *         jinak {@code false}
      */
     boolean activateUser(String token);
+
+    /**
+     * Aktivuje uživatelský účet
+     * <p>
+     * Používá se po registraci uživatele
+     * v administrátorském prostředí (uživatel má problémy s tokenem)
+     * </p>
+     */
+   void activateUserByAdmin(Long id);
+    /**
+     * Deaktivuje uživatelský účet
+     * <p>
+     * Používá se v administrátorském prostředí
+     * pro deaktivaci účtu,nechci uživatele mazat, ale nechci
+     * aby měl dočasně přístup do aplikace.
+     * </p>
+     */
+    void deactivateUserByAdmin(Long id);
 }
