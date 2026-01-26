@@ -2,6 +2,7 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.dto.requests.ChangePlayerUserRequest;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.PlayerService;
 import jakarta.validation.Valid;
@@ -131,4 +132,24 @@ public class AdminPlayerController {
         SuccessResponseDTO response = playerService.rejectPlayer(id);
         return ResponseEntity.ok(response);
     }
+    /**
+    * TODO
+     */
+    @PostMapping("/{playerId}/change-user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> changePlayerUser (
+            @PathVariable Long playerId, @RequestBody ChangePlayerUserRequest request) {
+
+        System.out.println("=== CONTROLLER HIT ===");
+        System.out.println("playerId = " + playerId);
+        System.out.println("request = " + request);
+        System.out.println("newUserId = " +
+                (request != null ? request.getNewUserId() : "REQUEST IS NULL"));
+
+
+        playerService.changePlayerUser(playerId, request.getNewUserId());
+        System.out.println("=== CONTROLLER END ===");
+        return ResponseEntity.ok("Hráč s id: " + playerId + " byl úspěšně přiřazen uživateli s ID: " + request.getNewUserId());
+    }
+
 }

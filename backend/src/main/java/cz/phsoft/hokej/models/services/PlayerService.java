@@ -147,4 +147,9 @@ public interface PlayerService {
      * @return odpověď s výsledkem operace
      */
     SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail);
+
+    /**
+     * TODO
+     */
+    void changePlayerUser(Long id, Long newUserId);
 }

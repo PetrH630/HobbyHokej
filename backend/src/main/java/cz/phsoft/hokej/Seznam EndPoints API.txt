@@ -80,7 +80,7 @@ AdminPlayerController
 @DeleteMapping("/{id}")                 - vymaže hráče s id     - Admin (cizí klíče)
 @PutMapping("/approve/{id}")            - schválí vytvořeného hráče  - Admin
 @PutMapping("/reject/{id}")             - zamítne vytvořeného hráče  - Admin
-
+@PutMapping("/{player-id}/change-user") - přiřadí hráče s ID jimému uživateli s ID
 
 PlayerController
 @RequestMapping("/api/players")

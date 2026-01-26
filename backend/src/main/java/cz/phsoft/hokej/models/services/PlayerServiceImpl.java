@@ -322,6 +322,33 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, null);
     }
 
+    /**
+     * TODO
+     */
+    @Transactional
+    public void changePlayerUser(Long id, Long newUserId) {
+        System.out.println(">>> SERVICE HIT <<<");
+        System.out.println("playerId = " + id);
+        System.out.println("newUserId = " + newUserId);
+
+        PlayerEntity player = findPlayerOrThrow(id);
+        System.out.println("player FOUND, id = " + player.getId());
+        AppUserEntity newUser = findUserOrThrow(newUserId);
+        System.out.println("newUser FOUND, id = " + newUser.getId());
+        AppUserEntity oldUser = player.getUser();
+        System.out.println("oldUser = " +
+                (oldUser != null ? oldUser.getId() : "NULL"));
+
+
+        if (oldUser != null && oldUser.getId().equals(newUserId)) {
+            System.out.println("!!! SAME USER – THROWING EXCEPTION");
+            throw new InvalidChangePlayerUserException();
+
+        }
+        player.setUser(newUser);
+        System.out.println(">>> USER CHANGED <<<");
+    }
+
     // ======================
     // PRIVATE HELPERY – ENTITY / DUPLICITY
     // ======================
@@ -329,9 +356,16 @@ public class PlayerServiceImpl implements PlayerService {
     /**
      * Najde hráče podle ID, nebo vyhodí {@link PlayerNotFoundException}.
      */
-    private PlayerEntity findPlayerOrThrow(Long playerId) {
-        return playerRepository.findById(playerId)
-                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+    private PlayerEntity findPlayerOrThrow(Long Id) {
+        return playerRepository.findById(Id)
+                .orElseThrow(() -> new PlayerNotFoundException(Id));
+    }
+    /**
+     * Najde uživatele podle ID, nebo vyhodí {@link UserNotFoundException}.
+     */
+    private AppUserEntity findUserOrThrow(Long Id) {
+        return appUserRepository.findById(Id)
+                .orElseThrow(() -> new UserNotFoundException(Id));
     }
 
     /**
