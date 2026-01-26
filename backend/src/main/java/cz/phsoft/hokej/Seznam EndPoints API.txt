@@ -42,6 +42,13 @@ AdminSeasonController
 @GetMapping("/api/admin/seasons/active")        - vrátí aktivní sezonu
 @PutMapping("/api/admin/seasons//{id}/active")  - nastaví aktivní sezonu dle ID
 
+SeasonController
+@RequestMapping("/api/seasons/me")
+@GetMapping("/all")                     - všechny sezony
+@GetMapping("/current")                 - vybraná sezona uživatelem - current
+@PostMapping("/current/{seasonId}")     - nastaví sezonu dle ID - current
+
+
 ----------------------------------------
 MATCH
 

@@ -216,6 +216,8 @@ public class SecurityConfig {
                             .deleteCookies("JSESSIONID")
                             .logoutSuccessHandler((request, response, auth) -> {
                                 request.getSession().removeAttribute("CURRENT_PLAYER_ID");
+                                request.getSession().removeAttribute("CURRENT_SEASON_ID");
+                                request.getSession().removeAttribute("CURRENT_SEASON_CUSTOM");
                                 response.setContentType("application/json");
                                 response.setCharacterEncoding("UTF-8");
                                 response.getWriter()

@@ -87,4 +87,8 @@ public interface SeasonService {
      * @param seasonId ID sezóny, která má být nastavena jako aktivní
      */
     void setActiveSeason(Long seasonId);
+
+    SeasonDTO getActiveSeasonOrNull();
+
+    SeasonDTO getSeasonById(Long id);
 }

@@ -180,6 +180,20 @@ public class SeasonServiceImpl implements SeasonService {
                 ));
     }
 
+    @Override
+    public SeasonDTO getActiveSeasonOrNull() {
+        return seasonRepository.findByActiveTrue()
+                .map(mapper::toDTO)
+                .orElse(null);
+    }
+
+    @Override
+    public SeasonDTO getSeasonById(Long id) {
+        SeasonEntity entity = seasonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Season not found: " + id));
+        return mapper.toDTO(entity);
+    }
+
     // ======================
     // SEZNAM VŠECH SEZÓN
     // ======================
@@ -201,6 +215,8 @@ public class SeasonServiceImpl implements SeasonService {
                 .map(mapper::toDTO)
                 .toList();
     }
+
+
 
     // ======================
     // NASTAVENÍ AKTIVNÍ SEZÓNY
@@ -231,6 +247,8 @@ public class SeasonServiceImpl implements SeasonService {
         // 2) nastavíme ji jako jedinou aktivní
         setOnlyActiveSeason(toActivate.getId());
     }
+
+
 
     // ======================
     // PRIVÁTNÍ VALIDACE DAT

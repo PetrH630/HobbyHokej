@@ -59,6 +59,8 @@ public class MatchServiceImpl implements MatchService {
     private final PlayerMapper playerMapper;
     private final CurrentPlayerService currentPlayerService;
     private final SeasonService seasonService;
+    private final CurrentSeasonService currentSeasonService;
+
 
     public MatchServiceImpl(MatchRepository matchRepository,
                             MatchRegistrationRepository matchRegistrationRepository,
@@ -68,7 +70,8 @@ public class MatchServiceImpl implements MatchService {
                             PlayerInactivityPeriodService playerInactivityPeriodService,
                             PlayerMapper playerMapper,
                             CurrentPlayerService currentPlayerService,
-                            SeasonService seasonService) {
+                            SeasonService seasonService,
+                            CurrentSeasonService currentSeasonService){
         this.matchRepository = matchRepository;
         this.matchRegistrationRepository = matchRegistrationRepository;
         this.matchMapper = matchMapper;
@@ -78,6 +81,7 @@ public class MatchServiceImpl implements MatchService {
         this.playerMapper = playerMapper;
         this.currentPlayerService = currentPlayerService;
         this.seasonService = seasonService;
+        this.currentSeasonService = currentSeasonService;
     }
 
     // ======================
@@ -90,7 +94,8 @@ public class MatchServiceImpl implements MatchService {
      */
     @Override
     public List<MatchDTO> getAllMatches() {
-        return matchRepository.findAllBySeasonIdOrderByDateTimeAsc(getActiveSeasonId())
+        Long seasonId = getCurrentSeasonIdOrActive();
+        return matchRepository.findAllBySeasonIdOrderByDateTimeAsc(seasonId)
                 .stream()
                 .map(matchMapper::toDTO)
                 .toList();
@@ -102,7 +107,7 @@ public class MatchServiceImpl implements MatchService {
      */
     @Override
     public List<MatchDTO> getUpcomingMatches() {
-        return findUpcomingMatchesForActiveSeason()
+        return findUpcomingMatchesForCurrentSeason()
                 .stream()
                 .map(matchMapper::toDTO)
                 .toList();
@@ -115,7 +120,7 @@ public class MatchServiceImpl implements MatchService {
      */
     @Override
     public List<MatchDTO> getPastMatches() {
-        return findPastMatchesForActiveSeason()
+        return findPastMatchesForCurrentSeason()
                 .stream()
                 .map(matchMapper::toDTO)
                 .toList();
@@ -127,7 +132,7 @@ public class MatchServiceImpl implements MatchService {
      */
     @Override
     public MatchDTO getNextMatch() {
-        return findUpcomingMatchesForActiveSeason()
+        return findUpcomingMatchesForCurrentSeason()
                 .stream()
                 .findFirst()
                 .map(matchMapper::toDTO)
@@ -555,7 +560,7 @@ public class MatchServiceImpl implements MatchService {
         PlayerEntity player = findPlayerOrThrow(playerId);
         PlayerType type = player.getType();
 
-        List<MatchEntity> upcomingAll = findUpcomingMatchesForActiveSeason();
+        List<MatchEntity> upcomingAll = findUpcomingMatchesForCurrentSeason();
         List<MatchEntity> limited = limitMatchesByPlayerType(upcomingAll, type);
 
         return limited.stream()
@@ -573,7 +578,7 @@ public class MatchServiceImpl implements MatchService {
         PlayerEntity player = findPlayerOrThrow(playerId);
         PlayerType type = player.getType();
 
-        List<MatchEntity> upcomingAll = findUpcomingMatchesForActiveSeason();
+        List<MatchEntity> upcomingAll = findUpcomingMatchesForCurrentSeason();
         List<MatchEntity> limited = limitMatchesByPlayerType(upcomingAll, type);
 
         return limited.stream()
@@ -598,7 +603,7 @@ public class MatchServiceImpl implements MatchService {
         PlayerEntity player = findPlayerOrThrow(playerId);
 
         List<MatchEntity> availableMatches =
-                findPastMatchesForActiveSeason().stream()
+                findPastMatchesForCurrentSeason().stream()
                         .filter(match -> isPlayerActiveForMatch(player, match.getDateTime()))
                         .toList();
 
@@ -722,11 +727,7 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(() -> new MatchRegistrationNotFoundException(playerId, matchId));
     }
 
-    private Long getActiveSeasonId() {
-        return seasonService.getActiveSeason().getId();
-    }
-
-    private LocalDateTime now() {
+   private LocalDateTime now() {
         return LocalDateTime.now();
     }
 
@@ -805,9 +806,9 @@ public class MatchServiceImpl implements MatchService {
      * Všechny nadcházející zápasy v aktivní sezóně (datum > teď),
      * seřazené podle data vzestupně.
      */
-    private List<MatchEntity> findUpcomingMatchesForActiveSeason() {
+    private List<MatchEntity> findUpcomingMatchesForCurrentSeason() {
         return matchRepository.findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(
-                getActiveSeasonId(),
+                getCurrentSeasonIdOrActive(),
                 now()
         );
     }
@@ -816,9 +817,9 @@ public class MatchServiceImpl implements MatchService {
      * Všechny proběhlé zápasy v aktivní sezóně (datum < teď),
      * seřazené podle data sestupně.
      */
-    private List<MatchEntity> findPastMatchesForActiveSeason() {
+    private List<MatchEntity> findPastMatchesForCurrentSeason() {
         return matchRepository.findBySeasonIdAndDateTimeBeforeOrderByDateTimeDesc(
-                getActiveSeasonId(),
+                getCurrentSeasonIdOrActive(),
                 now()
         );
     }
@@ -890,4 +891,17 @@ public class MatchServiceImpl implements MatchService {
             );
         }
     }
+
+    /**
+     * Sezona pro uživatele
+     */
+    private Long getCurrentSeasonIdOrActive() {
+        Long id = currentSeasonService.getCurrentSeasonIdOrDefault();
+        if (id != null) {
+            return id;
+        }
+        // fallback – kdyby náhodou nebyla v session ani globálně aktivní
+        return seasonService.getActiveSeason().getId();
+    }
+
 }

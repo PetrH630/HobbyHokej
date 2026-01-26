@@ -8,10 +8,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class DataInitializer {
@@ -24,6 +28,7 @@ public class DataInitializer {
     private final SeasonRepository seasonRepository;
     private final JdbcTemplate jdbcTemplate;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private int j;
 
     public DataInitializer(PlayerRepository playerRepository,
                            MatchRepository matchRepository,
@@ -85,11 +90,11 @@ public class DataInitializer {
                 new PlayerEntity("Hráč_2", "Dva", "", PlayerType.VIP, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
                 new PlayerEntity("Hráč_3", "Tři", "", PlayerType.VIP, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
                 new PlayerEntity("Hráč_4", "Čtyři", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_5", "Pět", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.PENDING),
-                new PlayerEntity("Hráč_6", "Šest", "", PlayerType.STANDARD, "+420776609956", Team.DARK, PlayerStatus.PENDING),
-                new PlayerEntity("Hráč_7", "Sedm", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.PENDING),
-                new PlayerEntity("Hráč_8", "Osum", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING),
-                new PlayerEntity("Hráč_9", "Devět", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING),
+                new PlayerEntity("Hráč_5", "Pět", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
+                new PlayerEntity("Hráč_6", "Šest", "", PlayerType.STANDARD, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
+                new PlayerEntity("Hráč_7", "Sedm", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
+                new PlayerEntity("Hráč_8", "Osum", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
+                new PlayerEntity("Hráč_9", "Devět", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
                 new PlayerEntity("Hráč_10", "Deset", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING)
         ));
 
@@ -143,14 +148,14 @@ public class DataInitializer {
         // Sezóna 2024/2025: 1.11.2024 – 31.3.2025
         SeasonEntity season2024_2025 = new SeasonEntity();
         season2024_2025.setName("2024/2025");
-        season2024_2025.setStartDate(LocalDate.of(2024, 11, 1));
+        season2024_2025.setStartDate(LocalDate.of(2024, 11, 20));
         season2024_2025.setEndDate(LocalDate.of(2025, 3, 31));
         season2024_2025.setActive(false);
 
         // Sezóna 2025/2026: 1.11.2025 – 31.3.2026 (aktuální – nastavíme jako active)
         SeasonEntity season2025_2026 = new SeasonEntity();
         season2025_2026.setName("2025/2026");
-        season2025_2026.setStartDate(LocalDate.of(2025, 11, 1));
+        season2025_2026.setStartDate(LocalDate.of(2025, 11, 21));
         season2025_2026.setEndDate(LocalDate.of(2026, 3, 31));
         season2025_2026.setActive(true);
 
@@ -181,75 +186,60 @@ public class DataInitializer {
         }
 
         // Sezóny MUSÍ existovat, jinak nemáme co přiřadit
-        java.util.List<SeasonEntity> seasons = seasonRepository.findAll();
+        List<SeasonEntity> seasons = seasonRepository.findAll();
         if (seasons.isEmpty()) {
             throw new IllegalStateException("BE - Nelze inicializovat zápasy, neexistuje žádná sezóna.");
         }
 
+
         System.out.println("Initializing matches...");
+        for (int j = 0; j < 2; j++) {
+            SeasonEntity actualSeason = seasons.get(j);
+            System.out.println("Nastavuji aktální sezonu" + j);
+            LocalDate startSeasonDate = actualSeason.getStartDate();
+            LocalDate endSeasonDate = actualSeason.getEndDate();
+            LocalDateTime startDate = startSeasonDate
+                    .with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
+                    .atTime(18, 45);
+            int fridaysCount = countFridays(startSeasonDate, endSeasonDate);
 
-        // výchozí datum prvního zápasu
-        java.time.LocalDateTime startDate = java.time.LocalDateTime.of(2025, 11, 21, 18, 45);
+            System.out.println("jdu vytvářet zápasy");
+            for (int i = 0; i < fridaysCount; i++) {
+                MatchEntity match = new MatchEntity();
+                LocalDateTime dateTime = startDate.plusWeeks(i);
+                match.setDateTime(dateTime);
+                match.setLocation("WOODARÉNA");
+                match.setDescription("");
+                match.setMaxPlayers(12);
+                match.setPrice(2200);
+                match.setMatchStatus(null);
+                match.setCancelReason(null);
+                match.setSeason(actualSeason);
+                // uložíme zápas
+                matchRepository.save(match);
 
-        for (int i = 0; i < 15; i++) {
-            MatchEntity match = new MatchEntity();
-
-            java.time.LocalDateTime dateTime = startDate.plusWeeks(i);
-
-            match.setDateTime(dateTime);
-            match.setLocation("WOODARÉNA");
-            match.setDescription("");
-            match.setMaxPlayers(12);
-            match.setPrice(2200);
-            match.setMatchStatus(null);
-            match.setCancelReason(null);
-
-            // 🔹 TADY je KLÍČ: vždy najdeme sezónu a nastavíme ji
-            SeasonEntity season = findSeasonForDate(dateTime.toLocalDate(), seasons);
-            if (season == null) {
-                // Tohle by za normálních okolností nemělo nastat, ale když jo, chceme failnout srozumitelně
-                throw new IllegalStateException(
-                        "BE - Nepodařilo se najít sezónu pro datum zápasu " + dateTime.toLocalDate()
-                );
             }
-            match.setSeason(season);
-
-            // uložíme zápas
-            matchRepository.save(match);
+            System.out.println("Zápasy v sezoně byly vytvořeny");
         }
 
-        System.out.println("Matches initialized.");
+        System.out.println("Zápasy vytvořeny");
     }
+// POMOCNÁ PRO SPOČÍTÁNÍ PÁTKU
 
-    // POMOCNÁ METODA PRO INIT MATCHES - Nastavení sezony
-    private SeasonEntity findSeasonForDate(
-            java.time.LocalDate date,
-            java.util.List<SeasonEntity> seasons
-    ) {
-        // 1) Zkusíme najít sezónu, do které datum spadá (startDate <= date <= endDate)
-        for (SeasonEntity season : seasons) {
-            boolean startsBeforeOrSame = !date.isBefore(season.getStartDate()); // date >= start
-            boolean endsAfterOrSame = !date.isAfter(season.getEndDate());       // date <= end
+   private int countFridays(LocalDate from, LocalDate to) {
+        if (to.isBefore(from)) {return 0;}
+        LocalDate firstFriday = from.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
 
-            if (startsBeforeOrSame && endsAfterOrSame) {
-                return season;
-            }
+        if (firstFriday.isAfter(to)) {return 0; }
+        int count = 0;
+        for (LocalDate date = firstFriday;
+             !date.isAfter(to);
+             date = date.plusWeeks(1)) {
+            count++;
         }
 
-        // 2) Pokud žádná nesedí intervalem, vezmeme aktivní sezónu (pokud nějaká je)
-        for (SeasonEntity season : seasons) {
-            if (season.isActive()) {
-                return season;
-            }
-        }
-
-        // 3) Jako úplný fallback vezmeme první sezónu v seznamu
-        //    (k tomuhle by se to nemělo moc dostávat, ale je to bezpečná pojistka)
-        return seasons.get(0);
+        return count;
     }
-
-
-
     // =====================
     // REGISTRATIONS
     // =====================
@@ -260,26 +250,64 @@ public class DataInitializer {
         }
 
         List<MatchEntity> matches = matchRepository.findAll();
-        List<PlayerEntity> players = playerRepository.findAll();
+
+        List<PlayerEntity> players = playerRepository.findAll().stream()
+                .filter(p -> p.getId() != null)
+                .filter(p -> p.getPlayerStatus() == PlayerStatus.APPROVED)
+                .toList();
 
         if (matches.isEmpty() || players.size() < 6) {
-            System.out.println("Not enough data to create registrations – skipping.");
+            System.out.println("Nedostatek dat pro vytvoření registrací – skipping.");
             return;
         }
 
-        MatchEntity match = matches.get(2); // „třetí“ vytvořený zápas
-        for (int i = 0; i < 6; i++) {
-            PlayerEntity player = players.get(i);
+        for (MatchEntity match : matches) {
 
-            MatchRegistrationEntity reg = new MatchRegistrationEntity();
-            reg.setMatch(match);
-            reg.setPlayer(player);
-            reg.setStatus(PlayerMatchStatus.REGISTERED);
-            reg.setTeam(i < 3 ? Team.DARK : Team.LIGHT);
-            reg.setTimestamp(LocalDateTime.now());
-            reg.setCreatedBy("initializer");
+            // Náhodný výběr 8 unikátních hráčů
+            List<PlayerEntity> shuffledPlayers = new ArrayList<>(players);
+            Collections.shuffle(shuffledPlayers);
+            List<PlayerEntity> selectedPlayers = shuffledPlayers.subList(0, 8);
 
-            matchRegistrationRepository.save(reg);
+            // Náhodné indexy pro statusy
+            List<Integer> indexes = new ArrayList<>();
+            for (int i = 0; i < selectedPlayers.size(); i++) {
+                indexes.add(i);
+            }
+            Collections.shuffle(indexes);
+
+            int excusedIndex = indexes.get(0);
+            int unregisteredIndex1 = indexes.get(1);
+            int unregisteredIndex2 = indexes.get(2);
+
+            for (int i = 0; i < selectedPlayers.size(); i++) {
+                PlayerEntity player = selectedPlayers.get(i);
+
+                MatchRegistrationEntity reg = new MatchRegistrationEntity();
+                reg.setMatch(match);
+                reg.setPlayer(player);
+
+                if (i == excusedIndex) {
+                    reg.setStatus(PlayerMatchStatus.EXCUSED);
+                    reg.setExcuseReason(ExcuseReason.NEMOC);
+                    reg.setExcuseNote("chřipka");
+                } else if (i == unregisteredIndex1 || i == unregisteredIndex2) {
+                    reg.setStatus(PlayerMatchStatus.UNREGISTERED);
+                    reg.setExcuseReason(null);
+                    reg.setExcuseNote(null);
+                } else {
+                    reg.setStatus(PlayerMatchStatus.REGISTERED);
+                    reg.setExcuseReason(null);
+                    reg.setExcuseNote(null);
+                }
+
+                // Zachována původní logika týmů
+                reg.setTeam(i < 4 ? Team.DARK : Team.LIGHT);
+
+                reg.setTimestamp(LocalDateTime.now());
+                reg.setCreatedBy("initializer");
+
+                matchRegistrationRepository.save(reg);
+            }
         }
 
         System.out.println("Sample registrations initialized.");
