@@ -3,10 +3,7 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.MatchCancelReason;
-import cz.phsoft.hokej.data.enums.MatchStatus;
-import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.enums.PlayerType;
+import cz.phsoft.hokej.data.enums.*;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
@@ -272,11 +269,16 @@ public class MatchServiceImpl implements MatchService {
         dto.setPlayerMatchStatus(playerMatchStatus);
 
         // 4) omluva aktuálního hráče (pokud existuje registrace)
-        MatchRegistrationEntity matchRegistrationEntity =
-                findMatchRegistrationOrThrow(currentPlayerId, match.getId());
-
-        dto.setExcuseReason(matchRegistrationEntity.getExcuseReason());
-        dto.setExcuseNote(matchRegistrationEntity.getExcuseNote());
+        if (currentPlayerId != null) {
+            matchRegistrationRepository.findByPlayerIdAndMatchId(currentPlayerId, match.getId())
+                    .ifPresent(reg -> {
+                        dto.setExcuseReason(reg.getExcuseReason());
+                        dto.setExcuseNote(reg.getExcuseNote());
+                    });
+        } else {
+            dto.setExcuseReason(null);
+            dto.setExcuseNote(null);
+        }
 
         // 5) stav zápasu
         dto.setMatchStatus(match.getMatchStatus());
@@ -407,6 +409,18 @@ public class MatchServiceImpl implements MatchService {
         int inGamePlayers =
                 statusToPlayersMap.getOrDefault(PlayerMatchStatus.REGISTERED, List.of()).size();
 
+        int inGamePlayersDark =
+                (int) registrations.stream()
+                        .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                        .filter(r -> r.getTeam() == Team.DARK)
+                        .count();
+
+        int inGamePlayersLight =
+                (int) registrations.stream()
+                        .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                        .filter(r -> r.getTeam() == Team.LIGHT)
+                        .count();
+
         int outGamePlayers =
                 statusToPlayersMap.getOrDefault(PlayerMatchStatus.UNREGISTERED, List.of()).size()
                         + statusToPlayersMap.getOrDefault(PlayerMatchStatus.EXCUSED, List.of()).size()
@@ -433,6 +447,8 @@ public class MatchServiceImpl implements MatchService {
         dto.setPrice(match.getPrice());
         dto.setMaxPlayers(match.getMaxPlayers());
         dto.setInGamePlayers(inGamePlayers);
+        dto.setInGamePlayersDark(inGamePlayersDark);
+        dto.setInGamePlayersLight(inGamePlayersLight);
         dto.setOutGamePlayers(outGamePlayers);
         dto.setWaitingPlayers(waitingPlayers);
         dto.setNoExcusedPlayersSum(noExcusedPlayersSum);
@@ -487,6 +503,8 @@ public class MatchServiceImpl implements MatchService {
         return players != null
                 && players.stream().anyMatch(p -> p.getId().equals(playerId));
     }
+
+
 
     // ======================
     // DALŠÍ PUBLIC METODY

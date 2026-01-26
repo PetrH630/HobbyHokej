@@ -133,22 +133,29 @@ public class AdminPlayerController {
         return ResponseEntity.ok(response);
     }
     /**
-    * TODO
+     * Změní přiřazení hráče k aplikačnímu uživateli.
+     * <p>
+     * Slouží k administrátorské korekci vazby mezi {@code Player} a {@code AppUser},
+     * typicky v případech:
+     * <ul>
+     *     <li>chybně spárovaného uživatelského účtu,</li>
+     *     <li>sloučení duplicitních hráčů nebo uživatelů,</li>
+     *     <li>ruční administrátorské opravy dat.</li>
+     * </ul>
+     *
+     * Operace je vyhrazena pouze pro roli ADMIN.
+     *
+     * @param playerId ID hráče, kterému má být změněn přiřazený uživatel
+     * @param request request obsahující ID nového uživatele
+     * @return textová informace o úspěšném provedení operace
      */
     @PostMapping("/{playerId}/change-user")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> changePlayerUser (
             @PathVariable Long playerId, @RequestBody ChangePlayerUserRequest request) {
 
-        System.out.println("=== CONTROLLER HIT ===");
-        System.out.println("playerId = " + playerId);
-        System.out.println("request = " + request);
-        System.out.println("newUserId = " +
-                (request != null ? request.getNewUserId() : "REQUEST IS NULL"));
-
-
         playerService.changePlayerUser(playerId, request.getNewUserId());
-        System.out.println("=== CONTROLLER END ===");
+
         return ResponseEntity.ok("Hráč s id: " + playerId + " byl úspěšně přiřazen uživateli s ID: " + request.getNewUserId());
     }
 

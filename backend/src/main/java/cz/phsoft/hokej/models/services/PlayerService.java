@@ -149,7 +149,26 @@ public interface PlayerService {
     SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail);
 
     /**
-     * TODO
+     * Změní přiřazeného uživatele k existujícímu hráči.
+     * <p>
+     * Slouží k administrátorské úpravě vazby mezi hráčem a
+     * uživatelským účtem, zejména v případech:
+     * <ul>
+     *     <li>opravy chybného přiřazení hráče k uživateli,</li>
+     *     <li>převodu hráče pod jiný uživatelský účet,</li>
+     *     <li>řešení duplicit nebo technických korekcí dat.</li>
+     * </ul>
+     *
+     * Metoda:
+     * <ul>
+     *     <li>mění pouze vazbu hráč → uživatel,</li>
+     *     <li>neprovádí žádné notifikace,</li>
+     *     <li>neřeší nastavení aktuálního hráče (řeší volající).</li>
+     * </ul>
+     *
+     * @param id        ID hráče, kterému se má změnit přiřazený uživatel
+     * @param newUserId ID nového uživatele, ke kterému má být hráč přiřazen
      */
     void changePlayerUser(Long id, Long newUserId);
+
 }

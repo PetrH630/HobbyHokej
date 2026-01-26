@@ -44,6 +44,8 @@ public class MatchDetailDTO {
      */
     private int maxPlayers;
     private int inGamePlayers;
+    private int inGamePlayersDark;
+    private int inGamePlayersLight;
     private int outGamePlayers;
     private int waitingPlayers;
     private int noActionPlayers;
@@ -111,6 +113,14 @@ public class MatchDetailDTO {
 
     public int getInGamePlayers() { return inGamePlayers; }
     public void setInGamePlayers(int inGamePlayers) { this.inGamePlayers = inGamePlayers; }
+
+    public int getInGamePlayersDark() { return inGamePlayersDark; }
+
+    public void setInGamePlayersDark(int inGamePlayersDark) { this.inGamePlayersDark = inGamePlayersDark; }
+
+    public int getInGamePlayersLight() { return inGamePlayersLight; }
+
+    public void setInGamePlayersLight(int inGamePlayersLight) { this.inGamePlayersLight = inGamePlayersLight; }
 
     public int getOutGamePlayers() { return outGamePlayers; }
     public void setOutGamePlayers(int outGamePlayers) { this.outGamePlayers = outGamePlayers; }

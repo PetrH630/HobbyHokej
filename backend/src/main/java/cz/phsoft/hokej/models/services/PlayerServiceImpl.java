@@ -19,7 +19,7 @@ import java.util.Optional;
 
 /**
  * Service vrstva pro práci s hráči ({@link PlayerEntity}).
- *
+ * <p>
  * Zodpovídá za:
  * <ul>
  *     <li>CRUD operace nad hráči (create/update/delete),</li>
@@ -28,7 +28,7 @@ import java.util.Optional;
  *     <li>změnu statusu hráče (APPROVED / REJECTED) včetně notifikací,</li>
  *     <li>nastavení „aktuálního hráče“ v {@link CurrentPlayerService} pro přihlášeného uživatele.</li>
  * </ul>
- *
+ * <p>
  * Co tato service NEřeší:
  * <ul>
  *     <li>HTTP/session vrstvu – to obstarávají controllery + CurrentPlayerService,</li>
@@ -143,8 +143,8 @@ public class PlayerServiceImpl implements PlayerService {
      *
      * @param dto       data hráče
      * @param userEmail email uživatele, kterému má hráč patřit
-     * @throws UserNotFoundException           pokud uživatel neexistuje
-     * @throws DuplicateNameSurnameException   pokud existuje hráč se stejným jménem a příjmením
+     * @throws UserNotFoundException         pokud uživatel neexistuje
+     * @throws DuplicateNameSurnameException pokud existuje hráč se stejným jménem a příjmením
      */
     @Override
     @Transactional
@@ -173,8 +173,8 @@ public class PlayerServiceImpl implements PlayerService {
      *     <li>uloží hráče a odešle notifikaci {@link NotificationType#PLAYER_UPDATED}.</li>
      * </ol>
      *
-     * @throws PlayerNotFoundException         pokud hráč neexistuje
-     * @throws DuplicateNameSurnameException   pokud nová kombinace jméno+příjmení koliduje s jiným hráčem
+     * @throws PlayerNotFoundException       pokud hráč neexistuje
+     * @throws DuplicateNameSurnameException pokud nová kombinace jméno+příjmení koliduje s jiným hráčem
      */
     @Override
     @Transactional
@@ -280,7 +280,6 @@ public class PlayerServiceImpl implements PlayerService {
      *
      * @param userEmail email přihlášeného uživatele
      * @param playerId  ID hráče, který má být nastaven jako aktuální
-     *
      * @throws PlayerNotFoundException        pokud hráč neexistuje
      * @throws ForbiddenPlayerAccessException pokud hráč nepatří uživateli
      */
@@ -323,30 +322,48 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * TODO
+     * Změní přiřazeného aplikačního uživatele k hráči.
+     * <p>
+     * Typické použití:
+     * <ul>
+     *     <li>oprava chybně spárovaného hráče a uživatele,</li>
+     *     <li>převod hráče pod jiný účet (např. rodič → jiný rodič),</li>
+     *     <li>úklid dat po sloučení / změně uživatelských účtů.</li>
+     * </ul>
+     *
+     * Kroky:
+     * <ol>
+     *     <li>najde hráče podle ID ({@link #findPlayerOrThrow(Long)}),</li>
+     *     <li>najde nového uživatele podle ID ({@link #findUserOrThrow(Long)}),</li>
+     *     <li>ověří, zda už není hráč přiřazen tomuto uživateli,</li>
+     *     <li>pokud ano → vyhodí {@link InvalidChangePlayerUserException},</li>
+     *     <li>pokud ne → přepíše vazbu {@code player.user} na nového uživatele.</li>
+     * </ol>
+     *
+     * Metoda:
+     * <ul>
+     *     <li>neposílá žádné notifikace,</li>
+     *     <li>nezasahuje do nastavení „current player“ – to případně řeší volající.</li>
+     * </ul>
+     *
+     * @param id        ID hráče, kterému se mění vazba na uživatele
+     * @param newUserId ID nového {@link AppUserEntity}, ke kterému má být hráč přiřazen
+     * @throws PlayerNotFoundException           pokud hráč s daným ID neexistuje
+     * @throws UserNotFoundException             pokud uživatel s daným ID neexistuje
+     * @throws InvalidChangePlayerUserException  pokud je hráč již přiřazen tomuto uživateli
      */
     @Transactional
     public void changePlayerUser(Long id, Long newUserId) {
-        System.out.println(">>> SERVICE HIT <<<");
-        System.out.println("playerId = " + id);
-        System.out.println("newUserId = " + newUserId);
-
         PlayerEntity player = findPlayerOrThrow(id);
-        System.out.println("player FOUND, id = " + player.getId());
         AppUserEntity newUser = findUserOrThrow(newUserId);
-        System.out.println("newUser FOUND, id = " + newUser.getId());
         AppUserEntity oldUser = player.getUser();
-        System.out.println("oldUser = " +
-                (oldUser != null ? oldUser.getId() : "NULL"));
-
-
         if (oldUser != null && oldUser.getId().equals(newUserId)) {
-            System.out.println("!!! SAME USER – THROWING EXCEPTION");
+
             throw new InvalidChangePlayerUserException();
 
         }
         player.setUser(newUser);
-        System.out.println(">>> USER CHANGED <<<");
+
     }
 
     // ======================
@@ -360,6 +377,7 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findById(Id)
                 .orElseThrow(() -> new PlayerNotFoundException(Id));
     }
+
     /**
      * Najde uživatele podle ID, nebo vyhodí {@link UserNotFoundException}.
      */

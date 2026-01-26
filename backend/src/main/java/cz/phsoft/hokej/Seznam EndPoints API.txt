@@ -89,7 +89,6 @@ PlayerController
 @PutMapping("/me")                      - upraví hráče uživatelem   - isAuthenticated
 
 
-
 ----------------------
 REGISTRACE NA ZÁPAS -
 
