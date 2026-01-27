@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  *     <li>získávání přehledů o registracích (pro zápas, hráče, NO_RESPONSE hráče),</li>
  *     <li>spouštění notifikací (email/SMS) podle změny statusu.</li>
  * </ul>
- *
+ * <p>
  * Tato service:
  * <ul>
  *     <li>řeší byznys logiku registrací a stavových přechodů,</li>
@@ -125,10 +125,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         PlayerMatchStatus newStatus;
 
         if (request.isUnregister()) {
-            // UNREGISTER – pouze z REGISTERED
+            // UNREGISTER – pouze z REGISTERED/RESERVED
             newStatus = handleUnregister(request, playerId, registration);
         } else if (request.getExcuseReason() != null) {
-            // EXCUSE – pouze pokud aktuálně NENÍ REGISTERED
+            // EXCUSE – pouze pokud ještě nemá žádnou registraci
             newStatus = handleExcuse(request, match, player, registration);
         } else {
             // REGISTER / RESERVE
@@ -162,8 +162,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     /**
      * Větev pro UNREGISTER:
      * <ul>
-     *     <li>povoleno pouze, pokud registrace existuje a je REGISTERED,</li>
-     *     <li>smaže případnou omluvu,</li>
+     *     <li>povoleno pouze, pokud registrace/rezervace existuje a je REGISTERED/RESERVED,</li>
+     *     <li>nastaví excuseReason a excuseNote,</li>
      *     <li>vrací nový status UNREGISTERED.</li>
      * </ul>
      */
@@ -172,12 +172,17 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             Long playerId,
             MatchRegistrationEntity registration
     ) {
-        if (registration == null || registration.getStatus() != PlayerMatchStatus.REGISTERED) {
+        boolean isAllowedUnregisterStatus =
+                registration != null &&
+                        (registration.getStatus() == PlayerMatchStatus.REGISTERED
+                                || registration.getStatus() == PlayerMatchStatus.RESERVED);
+
+        if (!isAllowedUnregisterStatus) {
             throw new RegistrationNotFoundException(request.getMatchId(), playerId);
         }
 
-        registration.setExcuseReason(null);
-        registration.setExcuseNote(null);
+        registration.setExcuseReason(request.getExcuseReason());
+        registration.setExcuseNote(request.getExcuseNote());
 
         return PlayerMatchStatus.UNREGISTERED;
     }
@@ -197,10 +202,16 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             PlayerEntity player,
             MatchRegistrationEntity registration
     ) {
-        if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
-            throw new DuplicateRegistrationException(request.getMatchId(), player.getId(), "BE - Hráč má registraci na zápas, už se může jen odregistrovat");
-        }
+        // NO_RESPONSE = registrace bez statusu
+        boolean isNoResponse = (registration == null || registration.getStatus() == null);
 
+        if (!isNoResponse) {
+            throw new DuplicateRegistrationException(
+                    request.getMatchId(),
+                    player.getId(),
+                    "BE - Omluva je možná pouze pokud hráč dosud nereagoval na zápas."
+            );
+        }
         registration.setExcuseReason(request.getExcuseReason());
         registration.setExcuseNote(request.getExcuseNote());
 
@@ -221,7 +232,11 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             PlayerEntity player,
             MatchRegistrationEntity registration
     ) {
-        if (registration != null && registration.getStatus() == PlayerMatchStatus.REGISTERED) {
+        boolean isAlreadyRegistered =
+                registration != null &&
+                        registration.getStatus() == PlayerMatchStatus.REGISTERED;
+
+        if (isAlreadyRegistered) {
             throw new DuplicateRegistrationException(request.getMatchId(), player.getId());
         }
 
@@ -246,6 +261,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      *     <li>team (světlý/tmavý),</li>
      *     <li>adminNote,</li>
      *     <li>případná aktualizace excuseReason.</li>
+     *     <li>případná aktualizace excuseReason.</li>
      * </ul>
      */
     private void applyRequestDetails(MatchRegistrationEntity registration,
@@ -261,6 +277,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         if (request.getExcuseReason() != null) {
             registration.setExcuseReason(request.getExcuseReason());
+        }
+
+        if (request.getExcuseNote() != null) {
+            registration.setExcuseNote(request.getExcuseNote());
         }
     }
 
@@ -351,7 +371,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      *     <li>seřadí je podle timestampu,</li>
      *     <li>prvních maxPlayers nastaví na REGISTERED, ostatní na RESERVED.</li>
      * </ul>
-     *
+     * <p>
      * Příklad:
      * <pre>
      * maxPlayers = 10

@@ -53,7 +53,9 @@ public class MatchRegistrationRequest {
     private Team team;
 
     /**
-     * Důvod omluvy – používá se pouze při statusu {@code EXCUSED}.
+     * Důvod omluvy – používá se pouze při statusu
+     * {@code EXCUSED}
+     * {@code UNREGISTER}
      */
     private ExcuseReason excuseReason;
 

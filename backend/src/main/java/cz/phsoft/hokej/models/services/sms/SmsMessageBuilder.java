@@ -74,7 +74,6 @@ public class SmsMessageBuilder {
      * </p>
      * <ul>
      *     <li>{@link PlayerMatchStatus#REGISTERED},</li>
-     *     <li>{@link PlayerMatchStatus#UNREGISTERED},</li>
      *     <li>{@link PlayerMatchStatus#EXCUSED}.</li>
      * </ul>
      *
@@ -95,7 +94,6 @@ public class SmsMessageBuilder {
 
         String statusText = switch (status) {
             case REGISTERED -> "přihlásil se k zápasu";
-            case UNREGISTERED -> "odhlásil se ze zápasu";
             case EXCUSED -> "omluven";
             default -> "neznámý stav";
         };
