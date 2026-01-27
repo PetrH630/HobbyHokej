@@ -184,20 +184,31 @@ public class MatchServiceImpl implements MatchService {
     public MatchDTO updateMatch(Long id, MatchDTO dto) {
         MatchEntity entity = findMatchOrThrow(id);
 
-        Long activeSeasonId = seasonService.getActiveSeason().getId();
-        if (!entity.getSeason().getId().equals(activeSeasonId)) {
-            throw new InvalidMatchStatusException(
-                    id, " - Zápas nepatří do aktuální sezóny, nelze ho upravit."
-            );
+        // zjistíme roli uživatele
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdminOrManager = hasAdminOrManagerRole(auth);
+
+        // Kontrola sezóny jen pro "běžné" uživatele (kdyby se tahle metoda někdy použila i pro ně)
+        if (!isAdminOrManager) {
+            Long activeSeasonId = seasonService.getActiveSeason().getId();
+            if (!entity.getSeason().getId().equals(activeSeasonId)) {
+                throw new InvalidMatchStatusException(
+                        id, " - Zápas nepatří do aktuální sezóny, nelze ho upravit."
+                );
+            }
         }
 
         int oldMaxPlayers = entity.getMaxPlayers();
+
         matchMapper.updateEntity(dto, entity);
 
-        validateMatchDateInActiveSeason(entity.getDateTime());
+        // validace data v aktivní sezóně jen pro ne-adminy
+        if (!isAdminOrManager) {
+            validateMatchDateInActiveSeason(entity.getDateTime());
+        }
 
         MatchEntity saved = matchRepository.save(entity);
-
+        //pokud se změnil maxPlayers, přepočet REGISTERED/RESERVED
         if (saved.getMaxPlayers() != oldMaxPlayers) {
             registrationService.recalcStatusesForMatch(saved.getId());
         }
@@ -640,16 +651,6 @@ public class MatchServiceImpl implements MatchService {
                     return overview;
                 })
                 .toList();
-    }
-
-    /**
-     * Delegace na {@link MatchRegistrationService#markNoExcused(Long, Long, String)}.
-     * <p>
-     * Speciální logika pro nastavení statusu NO_EXCUSED na registraci hráče.
-     */
-    @Override
-    public MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote) {
-        return registrationService.markNoExcused(matchId, playerId, adminNote);
     }
 
     /**

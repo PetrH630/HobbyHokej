@@ -167,8 +167,8 @@ public class SecurityConfig {
                             .requestMatchers(
                                     "/api/auth/register",
                                     "/api/auth/verify",
-                                    "/api/login",
-                                    "/api/logout"
+                                    "/api/auth/login",
+                                    "/api/auth/logout"
                             ).permitAll()
 
                             // ===== DEBUG / TEST =====
@@ -204,7 +204,7 @@ public class SecurityConfig {
                     // CUSTOM JSON LOGIN
                     // -------------------------------
                     .addFilterAt(
-                            new CustomJsonLoginFilter("/api/login", authManager),
+                            new CustomJsonLoginFilter("/api/auth/login", authManager),
                             UsernamePasswordAuthenticationFilter.class
                     )
 
@@ -212,7 +212,7 @@ public class SecurityConfig {
                     // LOGOUT
                     // -------------------------------
                     .logout(logout -> logout
-                            .logoutUrl("/api/logout")
+                            .logoutUrl("/api/auth/logout")
                             .deleteCookies("JSESSIONID")
                             .logoutSuccessHandler((request, response, auth) -> {
                                 request.getSession().removeAttribute("CURRENT_PLAYER_ID");

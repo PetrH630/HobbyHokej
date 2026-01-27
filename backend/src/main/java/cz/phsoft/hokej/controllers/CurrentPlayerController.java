@@ -105,18 +105,4 @@ public class CurrentPlayerController {
         PlayerDTO player = playerService.getPlayerById(playerId);
         return ResponseEntity.ok(player);
     }
-
-    /**
-     * Vrátí seznam všech hráčů patřících přihlášenému uživateli.
-     * <p>
-     * Slouží zejména pro výběr aktuálního hráče na frontendu.
-     *
-     * @param auth autentizační kontext přihlášeného uživatele
-     * @return seznam hráčů aktuálního uživatele
-     */
-    @GetMapping("/my-players")
-    @PreAuthorize("isAuthenticated()")
-    public List<PlayerDTO> getMyPlayers(Authentication auth) {
-        return playerService.getPlayersByUser(auth.getName());
-    }
 }

@@ -1,0 +1,166 @@
+------------------------------------------------------
+LOGIN/LOGOUT
+------------------------------------------------------
+SecurityConfig:
+(/api/auth)
+POST /api/auth/login      – login (formLogin / JSON)
+POST /api/auth/logout     – logout
+
+------------------------------------------------------
+REGISTRACE - AUTHENTIZACE
+------------------------------------------------------
+AuthController
+(/api/auth)
+User / Public
+POST /api/auth/register                 – registrace nového uživatele
+GET /api/auth/me (isAuthenticated)      – detail aktuálně přihlášeného uživatele
+GET /api/auth/verify?token=...          – aktivace účtu pomocí verifikačního tokenu z e-mailu
+
+------------------------------------------------------
+UŽIVATEL
+------------------------------------------------------
+AppUserController
+(/api/users)
+_________________
+User
+GET /api/users/me (isAuthenticated)             – detail aktuálně přihlášeného uživatele
+PUT /api/users/me/update (isAuthenticated)      – update profilu přihlášeného uživatele
+POST /api/users/me/change-password (isAuthenticated)    - změna hesla (old + new + confirm)
+_________________
+Admin
+GET /api/users (ROLE_ADMIN)         – seznam všech uživatelů
+GET /api/users/{id} (ROLE_ADMIN)    – detail konkrétního uživatele podle ID
+POST /api/users/{id}/reset-password (ROLE_ADMIN)    – reset hesla na výchozí hodnotu (např. Player123)
+PATCH /api/users/{id}/activate (ROLE_ADMIN) – aktivace účtu uživatele
+PATCH /api/users/{id}/deactivate (ROLE_ADMIN)   – deaktivace účtu uživatele
+
+------------------------------------------------------
+CURRENT PLAYER
+------------------------------------------------------
+CurrentPlayerController
+(/api/current-player)
+User
+POST /api/current-player/{playerId} (isAuthenticated)   – nastavení aktuálního hráče pro přihlášeného uživatele
+POST /api/current-player/auto-select (isAuthenticated)  – automatický výběr aktuálního hráče (např. když má uživatel jen jednoho)
+GET /api/current-player (isAuthenticated)               – vrátí aktuálně zvoleného hráče (nebo null)
+------------------------------------------------------
+
+------------------------------------------------------
+PLAYER
+------------------------------------------------------
+PlayerController
+(/api/players)
+_________________
+Admin / Manager
+GET /api/players (ROLE_ADMIN nebo ROLE_MANAGER)     – všichni hráči v systému
+GET /api/players/{id} (ROLE_ADMIN nebo ROLE_MANAGER)– detail hráče podle ID
+POST /api/players (ROLE_ADMIN nebo ROLE_MANAGER)    – vytvoření nového hráče (admin / manager)
+PUT /api/players/{id} (ROLE_ADMIN)                  – administrátorská editace hráče podle ID
+DELETE /api/players/{id} (ROLE_ADMIN)               – smazání hráče
+PUT /api/players/{id}/approve (ROLE_ADMIN)          – schválení hráče (stav APPROVED)
+PUT /api/players/{id}/reject (ROLE_ADMIN)           – zamítnutí hráče (stav REJECTED)
+POST /api/players/{playerId}/change-user (ROLE_ADMIN)   – změna přiřazeného AppUsera pro daného hráče
+_________________
+User
+(/me)
+POST /api/players/me (isAuthenticated)      – vytvoření hráče pro aktuálně přihlášeného uživatele
+GET /api/players/me (isAuthenticated)       – seznam hráčů přihlášeného uživatele
+PUT /api/players/me (isAuthenticated)       – update aktuálně zvoleného hráče (currentPlayer)
+
+------------------------------------------------------
+PLAYER INACTIVITY
+------------------------------------------------------
+PlayerInactivityPeriodController
+(/api/inactivity/admin)
+Admin / Manager
+
+GET /api/inactivity/admin/all (ROLE_ADMIN nebo ROLE_MANAGER)    – všechny záznamy neaktivity všech hráčů
+GET /api/inactivity/admin/{id} (ROLE_ADMIN nebo ROLE_MANAGER)   – detail konkrétního záznamu neaktivity
+GET /api/inactivity/admin/player/{playerId} (ROLE_ADMIN nebo ROLE_MANAGER)  – všechna období neaktivity daného hráče
+_________________
+Admin
+POST /api/inactivity/admin (ROLE_ADMIN)     – vytvoření nového období neaktivity
+PUT /api/inactivity/admin/{id} (ROLE_ADMIN) – update existujícího záznamu neaktivity
+DELETE /api/inactivity/admin/{id} (ROLE_ADMIN)  – smazání záznamu neaktivity
+
+------------------------------------------------------
+MATCH
+------------------------------------------------------
+MatchController
+(/api/matches)
+_________________
+Admin / Manager
+GET /api/matches (ROLE_ADMIN nebo ROLE_MANAGER)             – seznam všech zápasů
+GET /api/matches/upcoming (ROLE_ADMIN nebo ROLE_MANAGER)    – všechny nadcházející zápasy
+GET /api/matches/past (ROLE_ADMIN nebo ROLE_MANAGER)        – všechny uplynulé zápasy
+POST /api/matches (ROLE_ADMIN)                              – vytvoření nového zápasu
+GET /api/matches/{id} (ROLE_ADMIN nebo ROLE_MANAGER)        – základní detail zápasu (admin pohled, MatchDTO)
+PUT /api/matches/{id} (ROLE_ADMIN nebo ROLE_MANAGER)        – update zápasu
+DELETE /api/matches/{id} (ROLE_ADMIN)                       – smazání zápasu
+GET /api/matches/available-for-player/{playerId} (ROLE_ADMIN nebo ROLE_MANAGER)     – zápasy dostupné pro konkrétního hráče
+PATCH /api/matches/{matchId}/cancel?reason=... (ROLE_ADMIN nebo ROLE_MANAGER)       – zrušení zápasu s důvodem (MatchCancelReason)
+PATCH /api/matches/{matchId}/uncancel (ROLE_ADMIN nebo ROLE_MANAGER)                – obnovení dříve zrušeného zápasu
+_________________
+User
+(/me)
+GET /api/matches/{id}/detail (isAuthenticated)  – detail zápasu z pohledu hráče (MatchDetailDTO)
+GET /api/matches/next (isAuthenticated)         – nejbližší nadcházející zápas (globálně)
+GET /api/matches/me/upcoming (isAuthenticated)  – nadcházející zápasy aktuálního hráče
+GET /api/matches/me/upcoming-overview (isAuthenticated)     – přehled nadcházejících zápasů aktuálního hráče (MatchOverviewDTO)
+GET /api/matches/me/all-passed (isAuthenticated)            – uplynulé zápasy aktuálního hráče (MatchOverviewDTO)
+
+------------------------------------------------------
+MATCH REGISTRATION
+------------------------------------------------------
+MatchRegistrationController
+(/api/registrations)
+_________________
+Admin / Manager
+GET /api/registrations (ROLE_ADMIN nebo ROLE_MANAGER)                   – všechny registrace všech hráčů na všechny zápasy
+GET /api/registrations/match/{matchId} (ROLE_ADMIN nebo ROLE_MANAGER)   – registrace pro konkrétní zápas
+GET /api/registrations/player/{playerId} (ROLE_ADMIN nebo ROLE_MANAGER) – registrace konkrétního hráče napříč zápasy
+GET /api/registrations/match/{matchId}/no-response (ROLE_ADMIN nebo ROLE_MANAGER)  – hráči, kteří na daný zápas vůbec nereagovali
+POST /api/registrations/upsert/{playerId} (ROLE_ADMIN nebo ROLE_MANAGER)    – upsert registrace za konkrétního hráče (request tělem)
+PATCH /api/registrations/match/{matchId}/players/{playerId}/no-excused?adminNote=... (ROLE_ADMIN nebo ROLE_MANAGER) – označení hráče v zápase jako neomluveného (NO_EXCUSED)
+_________________
+User
+(/me)
+POST /api/registrations/me/upsert (isAuthenticated)             – upsert registrace pro aktuálního hráče (currentPlayer)
+GET /api/registrations/me/for-current-player (isAuthenticated)  - všechny registrace aktuálního hráče
+
+------------------------------------------------------
+SEASON
+------------------------------------------------------
+SeasonController
+(/api/seasons)
+_________________
+Admin
+POST /api/seasons (ROLE_ADMIN)      – vytvoření nové sezóny
+PUT /api/seasons/{id} (ROLE_ADMIN)  – update sezóny
+GET /api/seasons (ROLE_ADMIN)       – seznam všech sezón
+GET /api/seasons/active (ROLE_ADMIN)   – aktuálně globálně aktivní sezóna
+PUT /api/seasons/{id}/active (ROLE_ADMIN)   – nastavení dané sezóny jako globálně aktivní
+_________________
+User
+(/me)
+GET /api/seasons/me (isAuthenticated)           – všechny sezóny (pro výběr na frontendu)
+GET /api/seasons/me/current (isAuthenticated)   – aktuálně zvolená sezóna pro přihlášeného uživatele (nebo null)
+POST /api/seasons/me/current/{seasonId} (isAuthenticated)   – nastavení current sezóny pro přihlášeného uživatele
+
+------------------------------------------------------
+OSTATNÍ
+------------------------------------------------------
+
+Test / Debug controllery
+DebugController
+GET /api/debug/me   – vrátí Authentication objekt přihlášeného uživatele (debug účely)
+(doporučeno zakázat v produkci nebo chránit rolemi)
+
+TestController (/api/test)
+GET /api/test (ROLE_ADMIN)  – jednoduchý test: "Backend je online!"
+
+TestEmailController (/api/email/test)
+POST /api/email/test/send-mail  – odešle testovací e-mail na pevně danou adresu
+
+TestSmsController
+momentálně zakomentovaný, endpoint by byl:GET /api/test-sms – odeslání testovací SMS (ale celý controller je v komentáři)

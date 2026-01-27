@@ -196,7 +196,9 @@ public class PlayerServiceImpl implements PlayerService {
         existing.setPhoneNumber(dto.getPhoneNumber());
         existing.setType(dto.getType());
         existing.setTeam(dto.getTeam());
-        existing.setPlayerStatus(dto.getPlayerStatus());
+        if (dto.getPlayerStatus() != null) {
+            existing.setPlayerStatus(dto.getPlayerStatus());
+        }
 
         PlayerEntity saved = saveAndNotify(existing, NotificationType.PLAYER_UPDATED);
 

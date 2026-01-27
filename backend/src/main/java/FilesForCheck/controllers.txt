@@ -2,10 +2,6 @@
 Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\controllers
 
 Seznam souborů:
-AdminMatchController.java
-AdminMatchRegistrationController.java
-AdminPlayerController.java
-AdminSeasonController.java
 AppUserController.java
 AuthController.java
 CurrentPlayerController.java
@@ -18,611 +14,6 @@ SeasonController.java
 TestController.java
 TestEmailController.java
 TestSmsController.java
-
-
-
------
-# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\controllers\AdminMatchController.java
------
-
-package cz.phsoft.hokej.controllers;
-
-import cz.phsoft.hokej.data.enums.MatchCancelReason;
-import cz.phsoft.hokej.models.dto.MatchDTO;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import cz.phsoft.hokej.models.services.MatchService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-/**
- * REST controller pro administraci zĂˇpasĹŻ.
- * <p>
- * Endpoints jsou urÄŤeny pro role ADMIN a MANAGER a umoĹľĹujĂ­:
- * <ul>
- *     <li>sprĂˇvu zĂˇpasĹŻ (CRUD),</li>
- *     <li>zĂ­skĂˇnĂ­ seznamu nadchĂˇzejĂ­cĂ­ch a minulĂ˝ch zĂˇpasĹŻ,</li>
- *     <li>vyhodnocenĂ­ dostupnosti zĂˇpasĹŻ pro konkrĂ©tnĂ­ho hrĂˇÄŤe,</li>
- *     <li>zruĹˇenĂ­ a opÄ›tovnĂ© obnovenĂ­ zĂˇpasu.</li>
- * </ul>
- *
- * VeĹˇkerĂˇ business logika je delegovĂˇna do {@link MatchService}.
- */
-@RestController
-@RequestMapping("/api/matches/admin")
-
-public class AdminMatchController {
-
-    private final MatchService matchService;
-    private final CurrentPlayerService currentPlayerService;
-
-    public AdminMatchController(MatchService matchService,
-                                CurrentPlayerService currentPlayerService) {
-        this.matchService = matchService;
-        this.currentPlayerService = currentPlayerService;
-    }
-
-    /**
-     * VrĂˇtĂ­ seznam vĹˇech zĂˇpasĹŻ v systĂ©mu.
-     *
-     * @return seznam vĹˇech zĂˇpasĹŻ
-     */
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchDTO> getAllMatches() {
-        return matchService.getAllMatches();
-    }
-
-    /**
-     * VrĂˇtĂ­ seznam vĹˇech nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ.
-     *
-     * @return seznam budoucĂ­ch zĂˇpasĹŻ
-     */
-    @GetMapping("/upcoming")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchDTO> getUpcomingMatches() {
-        return matchService.getUpcomingMatches();
-    }
-
-    /**
-     * VrĂˇtĂ­ seznam vĹˇech jiĹľ odehranĂ˝ch (minulĂ˝ch) zĂˇpasĹŻ.
-     *
-     * @return seznam minulĂ˝ch zĂˇpasĹŻ
-     */
-    @GetMapping("/past")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchDTO> getPastMatches() {
-        return matchService.getPastMatches();
-    }
-
-    /**
-     * VytvoĹ™Ă­ novĂ˝ zĂˇpas.
-     *
-     * @param matchDTO data novĂ©ho zĂˇpasu
-     * @return vytvoĹ™enĂ˝ zĂˇpas
-     */
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public MatchDTO createMatch(@Valid @RequestBody MatchDTO matchDTO) {
-        return matchService.createMatch(matchDTO);
-    }
-
-    /**
-     * VrĂˇtĂ­ detail zĂˇpasu podle jeho ID.
-     *
-     * @param id ID zĂˇpasu
-     * @return detail zĂˇpasu
-     */
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public MatchDTO getMatch(@PathVariable Long id) {
-        return matchService.getMatchById(id);
-    }
-
-    /**
-     * Aktualizuje existujĂ­cĂ­ zĂˇpas.
-     *
-     * @param id  ID zĂˇpasu
-     * @param dto aktualizovanĂˇ data zĂˇpasu
-     * @return aktualizovanĂ˝ zĂˇpas
-     */
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public MatchDTO updateMatch(@PathVariable Long id,
-                                @Valid @RequestBody MatchDTO dto) {
-        return matchService.updateMatch(id, dto);
-    }
-
-    /**
-     * OdstranĂ­ zĂˇpas ze systĂ©mu.
-     * <p>
-     * Operace je vyhrazena pouze pro administrĂˇtora.
-     *
-     * @param id ID zĂˇpasu
-     * @return informace o ĂşspÄ›ĹˇnĂ©m smazĂˇnĂ­
-     */
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponseDTO> deleteMatch(@PathVariable Long id) {
-        SuccessResponseDTO response = matchService.deleteMatch(id);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * VrĂˇtĂ­ seznam zĂˇpasĹŻ, kterĂ© jsou dostupnĂ© pro konkrĂ©tnĂ­ho hrĂˇÄŤe.
-     *
-     * @param playerId ID hrĂˇÄŤe
-     * @return seznam dostupnĂ˝ch zĂˇpasĹŻ
-     */
-    @GetMapping("/available-for-player/{playerId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchDTO> getAvailableMatchesForPlayer(@PathVariable Long playerId) {
-        return matchService.getAvailableMatchesForPlayer(playerId);
-    }
-
-    /**
-     * ZruĹˇĂ­ zĂˇpas a uloĹľĂ­ dĹŻvod zruĹˇenĂ­.
-     *
-     * @param matchId ID zĂˇpasu
-     * @param reason  dĹŻvod zruĹˇenĂ­ zĂˇpasu
-     * @return informace o ĂşspÄ›ĹˇnĂ©m zruĹˇenĂ­
-     */
-    @PatchMapping("/{matchId}/cancel")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<SuccessResponseDTO> cancelMatch(
-            @PathVariable Long matchId,
-            @RequestParam MatchCancelReason reason
-    ) {
-        SuccessResponseDTO response = matchService.cancelMatch(matchId, reason);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * ObnovĂ­ dĹ™Ă­ve zruĹˇenĂ˝ zĂˇpas.
-     *
-     * @param matchId ID zĂˇpasu
-     * @return informace o ĂşspÄ›ĹˇnĂ©m obnovenĂ­
-     */
-    @PatchMapping("/{matchId}/uncancel")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<SuccessResponseDTO> unCancelMatch(@PathVariable Long matchId) {
-        SuccessResponseDTO response = matchService.unCancelMatch(matchId);
-        return ResponseEntity.ok(response);
-    }
-}
-
-
-
------
-# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\controllers\AdminMatchRegistrationController.java
------
-
-package cz.phsoft.hokej.controllers;
-
-import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import cz.phsoft.hokej.models.services.MatchRegistrationService;
-import cz.phsoft.hokej.models.services.MatchService;
-import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-/**
- * REST controller pro administraci registracĂ­ hrĂˇÄŤĹŻ na zĂˇpasy.
- * <p>
- * Endpoints zde jsou urÄŤeny pro role ADMIN a MANAGER a umoĹľĹujĂ­:
- * <ul>
- *     <li>zĂ­skat seznam vĹˇech registracĂ­,</li>
- *     <li>zĂ­skat registrace pro konkrĂ©tnĂ­ zĂˇpas nebo hrĂˇÄŤe,</li>
- *     <li>zĂ­skat hrĂˇÄŤe, kteĹ™Ă­ na zĂˇpas vĹŻbec nereagovali,</li>
- *     <li>provĂ©st registraci / odhlĂˇĹˇenĂ­ / omluvu hrĂˇÄŤe za nÄ›j,</li>
- *     <li>oznaÄŤit hrĂˇÄŤe v zĂˇpase jako neomluvenÄ› nepĹ™Ă­tomnĂ©ho.</li>
- * </ul>
- */
-@RestController
-@RequestMapping("/api/registrations/admin")
-
-public class AdminMatchRegistrationController {
-
-    private final MatchRegistrationService service;
-    private final CurrentPlayerService currentPlayerService;
-    private final MatchService matchService;
-
-    public AdminMatchRegistrationController(MatchRegistrationService service,
-                                            CurrentPlayerService currentPlayerService,
-                                            MatchService matchService) {
-        this.service = service;
-        this.currentPlayerService = currentPlayerService;
-        this.matchService = matchService;
-    }
-
-    /**
-     * VrĂˇtĂ­ vĹˇechny registrace vĹˇech hrĂˇÄŤĹŻ na vĹˇechny zĂˇpasy.
-     * <p>
-     * UrÄŤeno pro administrativnĂ­ pĹ™ehled a statistiky.
-     *
-     * @return seznam vĹˇech registracĂ­
-     */
-    @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchRegistrationDTO> getAllRegistrations() {
-        return service.getAllRegistrations();
-    }
-
-    /**
-     * VrĂˇtĂ­ vĹˇechny registrace hrĂˇÄŤĹŻ pro konkrĂ©tnĂ­ zĂˇpas.
-     *
-     * @param matchId ID zĂˇpasu
-     * @return seznam registracĂ­ pro danĂ˝ zĂˇpas
-     */
-    @GetMapping("/for-match/{matchId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchRegistrationDTO> forMatch(@PathVariable Long matchId) {
-        return service.getRegistrationsForMatch(matchId);
-    }
-
-    /**
-     * VrĂˇtĂ­ vĹˇechny registrace konkrĂ©tnĂ­ho hrĂˇÄŤe napĹ™Ă­ÄŤ zĂˇpasy.
-     *
-     * @param playerId ID hrĂˇÄŤe
-     * @return seznam registracĂ­ danĂ©ho hrĂˇÄŤe
-     */
-    @GetMapping("/for-player/{playerId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchRegistrationDTO> forPlayer(@PathVariable Long playerId) {
-        return service.getRegistrationsForPlayer(playerId);
-    }
-
-    /**
-     * VrĂˇtĂ­ seznam hrĂˇÄŤĹŻ, kteĹ™Ă­ na pozvĂˇnku k danĂ©mu zĂˇpasu
-     * zatĂ­m vĹŻbec nereagovali (ĹľĂˇdnĂˇ registrace ani omluva).
-     *
-     * @param matchId ID zĂˇpasu
-     * @return seznam hrĂˇÄŤĹŻ bez reakce
-     */
-    @GetMapping("/no-response/{matchId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<PlayerDTO> getNoResponse(@PathVariable Long matchId) {
-        return service.getNoResponsePlayers(matchId);
-    }
-
-    /**
-     * UniverzĂˇlnĂ­ endpoint pro vytvoĹ™enĂ­ nebo aktualizaci registrace
-     * za konkrĂ©tnĂ­ho hrĂˇÄŤe.
-     * <p>
-     * UmoĹľĹuje ADMIN / MANAGER:
-     * <ul>
-     *     <li>registrovat hrĂˇÄŤe na zĂˇpas,</li>
-     *     <li>odregistrovat ho,</li>
-     *     <li>vytvoĹ™it nebo upravit omluvu.</li>
-     * </ul>
-     * KonkrĂ©tnĂ­ chovĂˇnĂ­ zĂˇvisĂ­ na obsahu {@link MatchRegistrationRequest}.
-     *
-     * @param playerId ID hrĂˇÄŤe, za kterĂ©ho se zmÄ›na provĂˇdĂ­
-     * @param request  poĹľadavek na zmÄ›nu registrace (register / unregister / excuse)
-     * @return aktuĂˇlnĂ­ stav registrace po provedenĂ­ operace
-     */
-    @PostMapping("/upsert/{playerId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public MatchRegistrationDTO upsert(@PathVariable Long playerId,
-                                       @Valid @RequestBody MatchRegistrationRequest request) {
-        return service.upsertRegistration(playerId, request);
-    }
-
-    /**
-     * OznaÄŤĂ­ hrĂˇÄŤe v konkrĂ©tnĂ­m zĂˇpase jako neomluvenÄ› nepĹ™Ă­tomnĂ©ho.
-     * <p>
-     * TypickĂ© pouĹľitĂ­ po odehrĂˇnĂ­ zĂˇpasu, kdy ADMIN/MANAGER vyhodnocuje dochĂˇzku.
-     * Status registrace je aktualizovĂˇn v {@link MatchService#markNoExcused(Long, Long, String)}.
-     *
-     * @param matchId   ID zĂˇpasu
-     * @param playerId  ID hrĂˇÄŤe
-     * @param adminNote volitelnĂˇ poznĂˇmka administrĂˇtora (napĹ™. dĹŻvod oznaÄŤenĂ­)
-     * @return aktualizovanĂˇ registrace hrĂˇÄŤe v danĂ©m zĂˇpase
-     */
-    @PatchMapping("/{matchId}/players/{playerId}/no-excused")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public MatchRegistrationDTO markNoExcused(
-            @PathVariable Long matchId,
-            @PathVariable Long playerId,
-            @RequestParam(required = false) String adminNote
-    ) {
-        return matchService.markNoExcused(matchId, playerId, adminNote);
-    }
-}
-
-
-
------
-# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\controllers\AdminPlayerController.java
------
-
-package cz.phsoft.hokej.controllers;
-
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.dto.requests.ChangePlayerUserRequest;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import cz.phsoft.hokej.models.services.PlayerService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-/**
- * REST controller pro administraci hrĂˇÄŤĹŻ v systĂ©mu.
- * <p>
- * Endpoints jsou urÄŤeny pro role ADMIN a MANAGER (dle konkrĂ©tnĂ­ operace)
- * a umoĹľĹujĂ­:
- * <ul>
- *     <li>sprĂˇvu hrĂˇÄŤĹŻ (CRUD),</li>
- *     <li>schvalovĂˇnĂ­ a zamĂ­tĂˇnĂ­ hrĂˇÄŤĹŻ,</li>
- *     <li>zĂ­skĂˇnĂ­ detailu hrĂˇÄŤe nebo seznamu vĹˇech hrĂˇÄŤĹŻ.</li>
- * </ul>
- *
- * Controller neobsahuje business logiku â€“ veĹˇkerĂ© zpracovĂˇnĂ­
- * je delegovĂˇno do {@link PlayerService}.
- */
-@RestController
-@RequestMapping("/api/players/admin")
-
-public class AdminPlayerController {
-
-    private final PlayerService playerService;
-    private final CurrentPlayerService currentPlayerService;
-
-    public AdminPlayerController(PlayerService playerService,
-                                 CurrentPlayerService currentPlayerService) {
-        this.playerService = playerService;
-        this.currentPlayerService = currentPlayerService;
-    }
-
-    /**
-     * VrĂˇtĂ­ seznam vĹˇech hrĂˇÄŤĹŻ v systĂ©mu.
-     *
-     * @return seznam hrĂˇÄŤĹŻ
-     */
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<PlayerDTO> getAllPlayers() {
-        return playerService.getAllPlayers();
-    }
-
-    /**
-     * VrĂˇtĂ­ detail hrĂˇÄŤe podle jeho ID.
-     *
-     * @param id ID hrĂˇÄŤe
-     * @return detail hrĂˇÄŤe
-     */
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public PlayerDTO getPlayerById(@PathVariable Long id) {
-        return playerService.getPlayerById(id);
-    }
-
-    /**
-     * VytvoĹ™Ă­ novĂ©ho hrĂˇÄŤe.
-     * <p>
-     * PouĹľĂ­vĂˇ se typicky administrĂˇtorem nebo manaĹľerem
-     * pĹ™i ruÄŤnĂ­m zaklĂˇdĂˇnĂ­ hrĂˇÄŤe do systĂ©mu.
-     *
-     * @param playerDTO data novĂ©ho hrĂˇÄŤe
-     * @return vytvoĹ™enĂ˝ hrĂˇÄŤ
-     */
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public PlayerDTO createPlayer(@Valid @RequestBody PlayerDTO playerDTO) {
-        return playerService.createPlayer(playerDTO);
-    }
-
-    /**
-     * Aktualizuje Ăşdaje hrĂˇÄŤe administrĂˇtorem.
-     *
-     * @param id  ID hrĂˇÄŤe
-     * @param dto aktualizovanĂˇ data hrĂˇÄŤe
-     * @return aktualizovanĂ˝ hrĂˇÄŤ
-     */
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public PlayerDTO updatePlayerAdmin(@PathVariable Long id,
-                                       @Valid @RequestBody PlayerDTO dto) {
-        return playerService.updatePlayer(id, dto);
-    }
-
-    /**
-     * OdstranĂ­ hrĂˇÄŤe ze systĂ©mu.
-     * <p>
-     * Operace je vyhrazena pouze pro administrĂˇtora.
-     *
-     * @param id ID hrĂˇÄŤe
-     * @return informace o ĂşspÄ›ĹˇnĂ©m provedenĂ­ operace
-     */
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponseDTO> deletePlayer(@PathVariable Long id) {
-        SuccessResponseDTO response = playerService.deletePlayer(id);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * SchvĂˇlĂ­ hrĂˇÄŤe (zmÄ›nĂ­ jeho stav na APPROVED).
-     *
-     * @param id ID hrĂˇÄŤe
-     * @return informace o ĂşspÄ›ĹˇnĂ©m schvĂˇlenĂ­
-     */
-    @PutMapping("/approve/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponseDTO> approvePlayer(@PathVariable Long id) {
-        SuccessResponseDTO response = playerService.approvePlayer(id);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * ZamĂ­tne hrĂˇÄŤe (zmÄ›nĂ­ jeho stav na REJECTED).
-     *
-     * @param id ID hrĂˇÄŤe
-     * @return informace o ĂşspÄ›ĹˇnĂ©m zamĂ­tnutĂ­
-     */
-    @PutMapping("/reject/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponseDTO> rejectPlayer(@PathVariable Long id) {
-        SuccessResponseDTO response = playerService.rejectPlayer(id);
-        return ResponseEntity.ok(response);
-    }
-    /**
-     * ZmÄ›nĂ­ pĹ™iĹ™azenĂ­ hrĂˇÄŤe k aplikaÄŤnĂ­mu uĹľivateli.
-     * <p>
-     * SlouĹľĂ­ k administrĂˇtorskĂ© korekci vazby mezi {@code Player} a {@code AppUser},
-     * typicky v pĹ™Ă­padech:
-     * <ul>
-     *     <li>chybnÄ› spĂˇrovanĂ©ho uĹľivatelskĂ©ho ĂşÄŤtu,</li>
-     *     <li>slouÄŤenĂ­ duplicitnĂ­ch hrĂˇÄŤĹŻ nebo uĹľivatelĹŻ,</li>
-     *     <li>ruÄŤnĂ­ administrĂˇtorskĂ© opravy dat.</li>
-     * </ul>
-     *
-     * Operace je vyhrazena pouze pro roli ADMIN.
-     *
-     * @param playerId ID hrĂˇÄŤe, kterĂ©mu mĂˇ bĂ˝t zmÄ›nÄ›n pĹ™iĹ™azenĂ˝ uĹľivatel
-     * @param request request obsahujĂ­cĂ­ ID novĂ©ho uĹľivatele
-     * @return textovĂˇ informace o ĂşspÄ›ĹˇnĂ©m provedenĂ­ operace
-     */
-    @PostMapping("/{playerId}/change-user")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> changePlayerUser (
-            @PathVariable Long playerId, @RequestBody ChangePlayerUserRequest request) {
-
-        playerService.changePlayerUser(playerId, request.getNewUserId());
-
-        return ResponseEntity.ok("HrĂˇÄŤ s id: " + playerId + " byl ĂşspÄ›ĹˇnÄ› pĹ™iĹ™azen uĹľivateli s ID: " + request.getNewUserId());
-    }
-
-}
-
-
-
------
-# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\controllers\AdminSeasonController.java
------
-
-package cz.phsoft.hokej.controllers;
-
-import cz.phsoft.hokej.models.dto.SeasonDTO;
-import cz.phsoft.hokej.models.dto.mappers.SeasonMapper;
-import cz.phsoft.hokej.models.services.SeasonService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-/**
- * REST controller pro administraci sezĂłn.
- * <p>
- * Controller je dostupnĂ˝ vĂ˝hradnÄ› pro roli ADMIN a umoĹľĹuje:
- * <ul>
- *     <li>vytvĂˇĹ™enĂ­ a Ăşpravu sezĂłn,</li>
- *     <li>zĂ­skĂˇnĂ­ seznamu vĹˇech sezĂłn,</li>
- *     <li>zjiĹˇtÄ›nĂ­ aktuĂˇlnÄ› aktivnĂ­ sezĂłny,</li>
- *     <li>nastavenĂ­ aktivnĂ­ sezĂłny v systĂ©mu.</li>
- * </ul>
- *
- * VeĹˇkerĂˇ business logika je delegovĂˇna do {@link SeasonService}.
- */
-@RestController
-@RequestMapping("/api/admin/seasons")
-@PreAuthorize("hasAnyRole('ADMIN')") // celĂ˝ controller je pĹ™Ă­stupnĂ˝ pouze pro ADMIN
-public class AdminSeasonController {
-
-    private final SeasonService seasonService;
-    private final SeasonMapper seasonMapper;
-
-    public AdminSeasonController(SeasonService seasonService,
-                                 SeasonMapper seasonMapper) {
-        this.seasonService = seasonService;
-        this.seasonMapper = seasonMapper;
-    }
-
-    /**
-     * VytvoĹ™Ă­ novou sezĂłnu.
-     *
-     * @param seasonDTO data novĂ© sezĂłny
-     * @return vytvoĹ™enĂˇ sezĂłna
-     */
-    @PostMapping
-    public ResponseEntity<SeasonDTO> createSeason(
-            @Valid @RequestBody SeasonDTO seasonDTO) {
-
-        SeasonDTO created = seasonService.createSeason(seasonDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
-    }
-
-    /**
-     * Aktualizuje existujĂ­cĂ­ sezĂłnu.
-     *
-     * @param id        ID sezĂłny
-     * @param seasonDTO aktualizovanĂˇ data sezĂłny
-     * @return aktualizovanĂˇ sezĂłna
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<SeasonDTO> updateSeason(
-            @PathVariable Long id,
-            @Valid @RequestBody SeasonDTO seasonDTO
-    ) {
-        SeasonDTO updated = seasonService.updateSeason(id, seasonDTO);
-        return ResponseEntity.ok(updated);
-    }
-
-    /**
-     * VrĂˇtĂ­ seznam vĹˇech sezĂłn v systĂ©mu.
-     *
-     * @return seznam sezĂłn
-     */
-    @GetMapping("/all")
-    public ResponseEntity<List<SeasonDTO>> getAllSeasons() {
-        List<SeasonDTO> seasons = seasonService.getAllSeasons();
-        return ResponseEntity.ok(seasons);
-    }
-
-    /**
-     * VrĂˇtĂ­ aktuĂˇlnÄ› aktivnĂ­ sezĂłnu.
-     * <p>
-     * Service vracĂ­ entitu, kterĂˇ je v controlleru mapovĂˇna na DTO.
-     *
-     * @return aktivnĂ­ sezĂłna
-     */
-    @GetMapping("/active")
-    public ResponseEntity<SeasonDTO> getActiveSeason() {
-        SeasonDTO dto = seasonMapper.toDTO(seasonService.getActiveSeason());
-        return ResponseEntity.ok(dto);
-    }
-
-    /**
-     * NastavĂ­ zadanou sezĂłnu jako aktivnĂ­.
-     * <p>
-     * Po ĂşspÄ›ĹˇnĂ©m nastavenĂ­ je vrĂˇcena aktuĂˇlnÄ› aktivnĂ­ sezĂłna.
-     *
-     * @param id ID sezĂłny, kterĂˇ mĂˇ bĂ˝t nastavena jako aktivnĂ­
-     * @return novÄ› aktivnĂ­ sezĂłna
-     */
-    @PutMapping("/{id}/active")
-    public ResponseEntity<SeasonDTO> setActiveSeason(@PathVariable Long id) {
-        seasonService.setActiveSeason(id);
-        SeasonDTO active = seasonMapper.toDTO(seasonService.getActiveSeason());
-        return ResponseEntity.ok(active);
-    }
-}
 
 
 
@@ -656,7 +47,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/users")
-
 public class AppUserController {
 
     private final AppUserService appUserService;
@@ -678,6 +68,24 @@ public class AppUserController {
     @PreAuthorize("isAuthenticated()")
     public AppUserDTO getCurrentUser(Authentication authentication) {
         return appUserService.getCurrentUser(authentication.getName());
+    }
+
+    /**
+     * Aktualizuje Ăşdaje aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+     *
+     * @param authentication objekt s informacemi o pĹ™ihlĂˇĹˇenĂ©m uĹľivateli
+     * @param dto            aktualizovanĂˇ data uĹľivatele
+     * @return informace o ĂşspÄ›ĹˇnĂ© aktualizaci
+     */
+    @PutMapping("/me/update")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> updateUser(
+            Authentication authentication,
+            @Valid @RequestBody AppUserDTO dto) {
+
+        String email = authentication.getName();
+        appUserService.updateUser(email, dto);
+        return ResponseEntity.ok("UĹľivatel byl zmÄ›nÄ›n");
     }
 
     /**
@@ -703,22 +111,25 @@ public class AppUserController {
         return ResponseEntity.ok("Heslo ĂşspÄ›ĹˇnÄ› zmÄ›nÄ›no");
     }
 
+    //ADMIN
     /**
-     * Aktualizuje Ăşdaje aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+     * VrĂˇtĂ­ seznam vĹˇech uĹľivatelĹŻ v systĂ©mu.
+     * <p>
+     * Endpoint je dostupnĂ˝ pouze pro administrĂˇtora.
      *
-     * @param authentication objekt s informacemi o pĹ™ihlĂˇĹˇenĂ©m uĹľivateli
-     * @param dto            aktualizovanĂˇ data uĹľivatele
-     * @return informace o ĂşspÄ›ĹˇnĂ© aktualizaci
+     * @return seznam uĹľivatelĹŻ
      */
-    @PutMapping("/me/update")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> updateUser(
-            Authentication authentication,
-            @Valid @RequestBody AppUserDTO dto) {
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<AppUserDTO> getAllUsers() {
+        return appUserService.getAllUsers();
+    }
 
-        String email = authentication.getName();
-        appUserService.updateUser(email, dto);
-        return ResponseEntity.ok("UĹľivatel byl zmÄ›nÄ›n");
+    // TODO - NOVĂť ENDPOINT
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public AppUserDTO getUserById(@PathVariable Long id ) {
+        return appUserService.getUserById(id);
     }
 
     /**
@@ -734,19 +145,6 @@ public class AppUserController {
     public ResponseEntity<String> resetPassword(@PathVariable Long id) {
         appUserService.resetPassword(id);
         return ResponseEntity.ok("Heslo resetovĂˇno na 'Player123'");
-    }
-
-    /**
-     * VrĂˇtĂ­ seznam vĹˇech uĹľivatelĹŻ v systĂ©mu.
-     * <p>
-     * Endpoint je dostupnĂ˝ pouze pro administrĂˇtora.
-     *
-     * @return seznam uĹľivatelĹŻ
-     */
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<AppUserDTO> getAllUsers() {
-        return appUserService.getAllUsers();
     }
 
     /**
@@ -807,7 +205,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/auth")
-
 public class AuthController {
 
     private final AppUserService appUserService;
@@ -985,20 +382,6 @@ public class CurrentPlayerController {
         PlayerDTO player = playerService.getPlayerById(playerId);
         return ResponseEntity.ok(player);
     }
-
-    /**
-     * VrĂˇtĂ­ seznam vĹˇech hrĂˇÄŤĹŻ patĹ™Ă­cĂ­ch pĹ™ihlĂˇĹˇenĂ©mu uĹľivateli.
-     * <p>
-     * SlouĹľĂ­ zejmĂ©na pro vĂ˝bÄ›r aktuĂˇlnĂ­ho hrĂˇÄŤe na frontendu.
-     *
-     * @param auth autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
-     * @return seznam hrĂˇÄŤĹŻ aktuĂˇlnĂ­ho uĹľivatele
-     */
-    @GetMapping("/my-players")
-    @PreAuthorize("isAuthenticated()")
-    public List<PlayerDTO> getMyPlayers(Authentication auth) {
-        return playerService.getPlayersByUser(auth.getName());
-    }
 }
 
 
@@ -1051,11 +434,15 @@ public class DebugController {
 
 package cz.phsoft.hokej.controllers;
 
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.MatchDetailDTO;
 import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.MatchService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -1063,22 +450,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller pro prĂˇci se zĂˇpasy z pohledu pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele / hrĂˇÄŤe.
- * <p>
- * Controller poskytuje:
+ * REST controller pro prĂˇci se zĂˇpasy.
+ *
+ * ZajiĹˇĹĄuje:
  * <ul>
- *     <li>detail zĂˇpasu,</li>
- *     <li>seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ pro aktuĂˇlnĂ­ho hrĂˇÄŤe,</li>
- *     <li>pĹ™ehled nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ (overview),</li>
- *     <li>seznam jiĹľ odehranĂ˝ch zĂˇpasĹŻ aktuĂˇlnĂ­ho hrĂˇÄŤe.</li>
+ *     <li>administraci zĂˇpasĹŻ (CRUD, zruĹˇenĂ­ / obnovenĂ­) pro role ADMIN/MANAGER,</li>
+ *     <li>pohled na zĂˇpasy z perspektivy aktuĂˇlnĂ­ho hrĂˇÄŤe,</li>
+ *     <li>detail zĂˇpasu vÄŤetnÄ› stavĹŻ registracĂ­ pro aktuĂˇlnĂ­ho hrĂˇÄŤe.</li>
  * </ul>
  *
- * Controller pracuje vĹľdy v kontextu â€žaktuĂˇlnĂ­ho hrĂˇÄŤeâ€ś,
- * kterĂ˝ je spravovĂˇn pomocĂ­ {@link CurrentPlayerService}.
+ * Business logika je delegovĂˇna do {@link MatchService}.
  */
 @RestController
 @RequestMapping("/api/matches")
-
 public class MatchController {
 
     private final MatchService matchService;
@@ -1090,26 +474,149 @@ public class MatchController {
         this.currentPlayerService = currentPlayerService;
     }
 
+    // =========================================================
+    //  ADMIN / MANAGER â€“ GLOBĂLNĂŤ SPRĂVA ZĂPASĹ®
+    // =========================================================
+
     /**
-     * VrĂˇtĂ­ detail konkrĂ©tnĂ­ho zĂˇpasu.
-     *
-     * @param id ID zĂˇpasu
-     * @return detail zĂˇpasu
+     * VrĂˇtĂ­ seznam vĹˇech zĂˇpasĹŻ v systĂ©mu.
      */
-    @GetMapping("/matchDetail/{id}")
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getAllMatches() {
+        return matchService.getAllMatches();
+    }
+
+    /**
+     * VrĂˇtĂ­ seznam vĹˇech nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ.
+     */
+    @GetMapping("/upcoming")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getUpcomingMatches() {
+        return matchService.getUpcomingMatches();
+    }
+
+    /**
+     * VrĂˇtĂ­ seznam vĹˇech jiĹľ odehranĂ˝ch (minulĂ˝ch) zĂˇpasĹŻ.
+     */
+    @GetMapping("/past")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getPastMatches() {
+        return matchService.getPastMatches();
+    }
+
+    /**
+     * VytvoĹ™Ă­ novĂ˝ zĂˇpas.
+     *
+     * @param matchDTO data novĂ©ho zĂˇpasu
+     * @return vytvoĹ™enĂ˝ zĂˇpas
+     */
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public MatchDTO createMatch(@Valid @RequestBody MatchDTO matchDTO) {
+        return matchService.createMatch(matchDTO);
+    }
+
+    /**
+     * VrĂˇtĂ­ zĂˇkladnĂ­ detail zĂˇpasu podle jeho ID
+     * (admin / manager pohled â€“ DTO bez hrĂˇÄŤskĂ©ho kontextu).
+     */
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchDTO getMatch(@PathVariable Long id) {
+        return matchService.getMatchById(id);
+    }
+
+    /**
+     * Aktualizuje existujĂ­cĂ­ zĂˇpas.
+     *
+     * @param id  ID zĂˇpasu
+     * @param dto aktualizovanĂˇ data zĂˇpasu
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchDTO updateMatch(@PathVariable Long id,
+                                @Valid @RequestBody MatchDTO dto) {
+        return matchService.updateMatch(id, dto);
+    }
+
+    /**
+     * OdstranĂ­ zĂˇpas ze systĂ©mu.
+     *
+     * Operace je vyhrazena pouze pro administrĂˇtora.
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SuccessResponseDTO> deleteMatch(@PathVariable Long id) {
+        SuccessResponseDTO response = matchService.deleteMatch(id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * VrĂˇtĂ­ seznam zĂˇpasĹŻ, kterĂ© jsou dostupnĂ© pro konkrĂ©tnĂ­ho hrĂˇÄŤe.
+     *
+     * @param playerId ID hrĂˇÄŤe
+     */
+    @GetMapping("/available-for-player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getAvailableMatchesForPlayer(@PathVariable Long playerId) {
+        return matchService.getAvailableMatchesForPlayer(playerId);
+    }
+
+    /**
+     * ZruĹˇĂ­ zĂˇpas a uloĹľĂ­ dĹŻvod zruĹˇenĂ­.
+     *
+     * @param matchId ID zĂˇpasu
+     * @param reason  dĹŻvod zruĹˇenĂ­ zĂˇpasu
+     */
+    @PatchMapping("/{matchId}/cancel")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<SuccessResponseDTO> cancelMatch(
+            @PathVariable Long matchId,
+            @RequestParam MatchCancelReason reason
+    ) {
+        SuccessResponseDTO response = matchService.cancelMatch(matchId, reason);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * ObnovĂ­ dĹ™Ă­ve zruĹˇenĂ˝ zĂˇpas.
+     *
+     * @param matchId ID zĂˇpasu
+     */
+    @PatchMapping("/{matchId}/uncancel")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<SuccessResponseDTO> unCancelMatch(@PathVariable Long matchId) {
+        SuccessResponseDTO response = matchService.unCancelMatch(matchId);
+        return ResponseEntity.ok(response);
+    }
+
+    // =========================================================
+    //  HRĂÄŚ â€“ ENDPOINTY V KONTEXTU AKTUĂLNĂŤHO PLAYERA
+    // =========================================================
+
+    /**
+     * VrĂˇtĂ­ detail konkrĂ©tnĂ­ho zĂˇpasu z pohledu hrĂˇÄŤe
+     * (vÄŤetnÄ› stavu registracĂ­, prĂˇv, atd.).
+     *
+     * ZmÄ›nil jsem URL na /{id}/detail kvĹŻli konzistenci s ostatnĂ­mi
+     * endpointy; pokud potĹ™ebujeĹˇ zachovat /matchDetail/{id},
+     * mĹŻĹľeĹˇ pĹ™idat alias.
+     */
+    @GetMapping("/{id}/detail")
     @PreAuthorize("isAuthenticated()")
     public MatchDetailDTO getMatchDetail(@PathVariable Long id) {
         return matchService.getMatchDetail(id);
     }
 
+    // VolitelnĂ˝ alias pro zpÄ›tnou kompatibilitu:
+    // @GetMapping("/matchDetail/{id}")
+    // public MatchDetailDTO getMatchDetailAlias(@PathVariable Long id) {
+    //     return getMatchDetail(id);
+    // }
+
     /**
-     * VrĂˇtĂ­ nejbliĹľĹˇĂ­ nadchĂˇzejĂ­cĂ­ zĂˇpas.
-     * <p>
-     * Endpoint je zachovĂˇn spĂ­Ĺˇe pro internĂ­ nebo zpÄ›tnou kompatibilitu.
-     * Pro prĂˇci v kontextu hrĂˇÄŤe se doporuÄŤuje pouĹľĂ­vat endpointy
-     * zaloĹľenĂ© na â€žaktuĂˇlnĂ­m hrĂˇÄŤiâ€ś.
-     *
-     * @return nejbliĹľĹˇĂ­ nadchĂˇzejĂ­cĂ­ zĂˇpas
+     * VrĂˇtĂ­ nejbliĹľĹˇĂ­ nadchĂˇzejĂ­cĂ­ zĂˇpas (globĂˇlnÄ›).
      */
     @GetMapping("/next")
     @PreAuthorize("isAuthenticated()")
@@ -1119,11 +626,6 @@ public class MatchController {
 
     /**
      * VrĂˇtĂ­ seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ pro aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
-     * <p>
-     * VyĹľaduje, aby mÄ›l uĹľivatel nastavenĂ©ho aktuĂˇlnĂ­ho hrĂˇÄŤe.
-     *
-     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
-     * @return seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ
      */
     @GetMapping("/me/upcoming")
     @PreAuthorize("isAuthenticated()")
@@ -1134,13 +636,7 @@ public class MatchController {
     }
 
     /**
-     * VrĂˇtĂ­ pĹ™ehled (overview) nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ pro aktuĂˇlnĂ­ho hrĂˇÄŤe.
-     * <p>
-     * PĹ™ehled obsahuje zjednoduĹˇenĂˇ data urÄŤenĂˇ pro seznamovĂ© zobrazenĂ­
-     * na frontendu.
-     *
-     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
-     * @return seznam pĹ™ehledĹŻ nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ
+     * VrĂˇtĂ­ pĹ™ehled nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ pro aktuĂˇlnĂ­ho hrĂˇÄŤe.
      */
     @GetMapping("/me/upcoming-overview")
     @PreAuthorize("isAuthenticated()")
@@ -1152,9 +648,6 @@ public class MatchController {
 
     /**
      * VrĂˇtĂ­ seznam vĹˇech jiĹľ odehranĂ˝ch zĂˇpasĹŻ pro aktuĂˇlnĂ­ho hrĂˇÄŤe.
-     *
-     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
-     * @return seznam odehranĂ˝ch zĂˇpasĹŻ (overview)
      */
     @GetMapping("/me/all-passed")
     @PreAuthorize("isAuthenticated()")
@@ -1175,9 +668,11 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.exceptions.CurrentPlayerNotSelectedException;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.MatchRegistrationService;
+import cz.phsoft.hokej.models.services.MatchService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -1185,49 +680,127 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller pro sprĂˇvu registracĂ­ hrĂˇÄŤe na zĂˇpasy
- * v kontextu pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
- * <p>
- * Controller pracuje vĂ˝hradnÄ› s â€žaktuĂˇlnĂ­m hrĂˇÄŤemâ€ś vybranĂ˝m
- * pĹ™ihlĂˇĹˇenĂ˝m uĹľivatelem a umoĹľĹuje:
+ * REST controller pro sprĂˇvu registracĂ­ hrĂˇÄŤĹŻ na zĂˇpasy.
+ *
+ * ZajiĹˇĹĄuje:
  * <ul>
- *     <li>vytvoĹ™enĂ­ nebo aktualizaci registrace na zĂˇpas,</li>
- *     <li>zĂ­skĂˇnĂ­ pĹ™ehledu registracĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe.</li>
+ *     <li>administraci registracĂ­ (ADMIN / MANAGER),</li>
+ *     <li>sprĂˇvu registracĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe (/me).</li>
  * </ul>
  *
- * VeĹˇkerĂˇ business logika je delegovĂˇna do {@link MatchRegistrationService}.
+ * Business logika je delegovĂˇna do {@link MatchRegistrationService}
+ * a ÄŤĂˇsteÄŤnÄ› do {@link MatchService}.
  */
 @RestController
 @RequestMapping("/api/registrations")
-
 public class MatchRegistrationController {
 
     private final MatchRegistrationService matchRegistrationService;
     private final CurrentPlayerService currentPlayerService;
+    private final MatchService matchService;
 
     public MatchRegistrationController(MatchRegistrationService matchRegistrationService,
-                                       CurrentPlayerService currentPlayerService) {
+                                       CurrentPlayerService currentPlayerService,
+                                       MatchService matchService) {
         this.matchRegistrationService = matchRegistrationService;
         this.currentPlayerService = currentPlayerService;
+        this.matchService = matchService;
+    }
+
+    // =========================================================
+    //  ADMIN / MANAGER â€“ GLOBĂLNĂŤ SPRĂVA REGISTRACĂŤ
+    // =========================================================
+
+    /**
+     * VrĂˇtĂ­ vĹˇechny registrace vĹˇech hrĂˇÄŤĹŻ na vĹˇechny zĂˇpasy.
+     */
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchRegistrationDTO> getAllRegistrations() {
+        return matchRegistrationService.getAllRegistrations();
     }
 
     /**
-     * UniverzĂˇlnĂ­ endpoint pro sprĂˇvu registrace aktuĂˇlnĂ­ho hrĂˇÄŤe na zĂˇpas.
-     * <p>
-     * Endpoint automaticky pracuje s aktuĂˇlnÄ› zvolenĂ˝m hrĂˇÄŤem
-     * pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
-     * <p>
-     * KonkrĂ©tnĂ­ chovĂˇnĂ­ (registrace, odhlĂˇĹˇenĂ­, omluva) je Ĺ™Ă­zeno
-     * obsahem {@link MatchRegistrationRequest}.
+     * VrĂˇtĂ­ vĹˇechny registrace hrĂˇÄŤĹŻ pro konkrĂ©tnĂ­ zĂˇpas.
      *
-     * @param request poĹľadavek na zmÄ›nu registrace
-     * @return aktuĂˇlnĂ­ stav registrace
-     * @throws CurrentPlayerNotSelectedException pokud nenĂ­ zvolen aktuĂˇlnĂ­ hrĂˇÄŤ
+     * @param matchId ID zĂˇpasu
+     */
+    @GetMapping("/match/{matchId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchRegistrationDTO> getRegistrationsForMatch(@PathVariable Long matchId) {
+        return matchRegistrationService.getRegistrationsForMatch(matchId);
+    }
+
+    /**
+     * VrĂˇtĂ­ vĹˇechny registrace konkrĂ©tnĂ­ho hrĂˇÄŤe napĹ™Ă­ÄŤ zĂˇpasy.
+     *
+     * @param playerId ID hrĂˇÄŤe
+     */
+    @GetMapping("/player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchRegistrationDTO> getRegistrationsForPlayer(@PathVariable Long playerId) {
+        return matchRegistrationService.getRegistrationsForPlayer(playerId);
+    }
+
+    /**
+     * VrĂˇtĂ­ seznam hrĂˇÄŤĹŻ, kteĹ™Ă­ na pozvĂˇnku k danĂ©mu zĂˇpasu
+     * zatĂ­m vĹŻbec nereagovali (ĹľĂˇdnĂˇ registrace ani omluva).
+     *
+     * @param matchId ID zĂˇpasu
+     */
+    @GetMapping("/match/{matchId}/no-response")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<PlayerDTO> getNoResponsePlayers(@PathVariable Long matchId) {
+        return matchRegistrationService.getNoResponsePlayers(matchId);
+    }
+
+    /**
+     * UniverzĂˇlnĂ­ endpoint pro vytvoĹ™enĂ­ nebo aktualizaci registrace
+     * za konkrĂ©tnĂ­ho hrĂˇÄŤe (ADMIN / MANAGER).
+     *
+     * @param playerId ID hrĂˇÄŤe, za kterĂ©ho se zmÄ›na provĂˇdĂ­
+     * @param request  poĹľadavek na zmÄ›nu registrace
+     */
+    @PostMapping("/upsert/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO upsertForPlayer(
+            @PathVariable Long playerId,
+            @Valid @RequestBody MatchRegistrationRequest request
+    ) {
+        return matchRegistrationService.upsertRegistration(playerId, request);
+    }
+
+    /**
+     * OznaÄŤĂ­ hrĂˇÄŤe v konkrĂ©tnĂ­m zĂˇpase jako neomluvenÄ› nepĹ™Ă­tomnĂ©ho.
+     *
+     * @param matchId   ID zĂˇpasu
+     * @param playerId  ID hrĂˇÄŤe
+     * @param adminNote volitelnĂˇ poznĂˇmka administrĂˇtora
+     */
+    @PatchMapping("/match/{matchId}/players/{playerId}/no-excused")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO markNoExcused(
+            @PathVariable Long matchId,
+            @PathVariable Long playerId,
+            @RequestParam(required = false) String adminNote
+    ) {
+        return matchService.markNoExcused(matchId, playerId, adminNote);
+    }
+
+    // =========================================================
+    //  USER â€“ REGISTRACE AKTUĂLNĂŤHO HRĂÄŚE (/me)
+    // =========================================================
+
+    /**
+     * UniverzĂˇlnĂ­ endpoint pro sprĂˇvu registrace aktuĂˇlnĂ­ho hrĂˇÄŤe na zĂˇpas.
+     *
+     * Pracuje automaticky s aktuĂˇlnÄ› zvolenĂ˝m hrĂˇÄŤem.
      */
     @PostMapping("/me/upsert")
     @PreAuthorize("isAuthenticated()")
-    public MatchRegistrationDTO upsert(@Valid @RequestBody MatchRegistrationRequest request) {
-
+    public MatchRegistrationDTO upsertForCurrentPlayer(
+            @Valid @RequestBody MatchRegistrationRequest request
+    ) {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
 
@@ -1240,17 +813,12 @@ public class MatchRegistrationController {
 
     /**
      * VrĂˇtĂ­ vĹˇechny registrace aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
-     *
-     * @return seznam registracĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe
-     * @throws CurrentPlayerNotSelectedException pokud nenĂ­ zvolen aktuĂˇlnĂ­ hrĂˇÄŤ
      */
     @GetMapping("/me/for-current-player")
     @PreAuthorize("isAuthenticated()")
-    public List<MatchRegistrationDTO> forCurrentPlayer() {
-
+    public List<MatchRegistrationDTO> getRegistrationsForCurrentPlayer() {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
-
         return matchRegistrationService.getRegistrationsForPlayer(currentPlayerId);
     }
 }
@@ -1264,9 +832,12 @@ public class MatchRegistrationController {
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.dto.requests.ChangePlayerUserRequest;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.PlayerService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -1274,21 +845,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller pro sprĂˇvu hrĂˇÄŤĹŻ z pohledu pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
- * <p>
- * Controller umoĹľĹuje uĹľivateli:
+ * REST controller pro sprĂˇvu hrĂˇÄŤĹŻ.
+ *
+ * ZajiĹˇĹĄuje:
  * <ul>
- *     <li>vytvoĹ™it vlastnĂ­ho hrĂˇÄŤe,</li>
- *     <li>zĂ­skat seznam svĂ˝ch hrĂˇÄŤĹŻ,</li>
- *     <li>upravit aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.</li>
+ *     <li>administraci hrĂˇÄŤĹŻ (CRUD, schvĂˇlenĂ­ / zamĂ­tnutĂ­, zmÄ›na uĹľivatele) pro role ADMIN/MANAGER,</li>
+ *     <li>sprĂˇvu hrĂˇÄŤĹŻ z pohledu pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele (moji hrĂˇÄŤi /me).</li>
  * </ul>
  *
- * Operace probĂ­hajĂ­ vĹľdy v kontextu pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
- * a (v pĹ™Ă­padÄ› Ăşprav) takĂ© v kontextu â€žaktuĂˇlnĂ­ho hrĂˇÄŤeâ€ś.
+ * VeĹˇkerĂˇ business logika je delegovĂˇna do {@link PlayerService}.
  */
 @RestController
 @RequestMapping("/api/players")
-
 public class PlayerController {
 
     private final PlayerService playerService;
@@ -1300,52 +868,143 @@ public class PlayerController {
         this.currentPlayerService = currentPlayerService;
     }
 
+    // =========================================================
+    //  ADMIN / MANAGER â€“ GLOBĂLNĂŤ SPRĂVA HRĂÄŚĹ®
+    // =========================================================
+
+    /**
+     * VrĂˇtĂ­ seznam vĹˇech hrĂˇÄŤĹŻ v systĂ©mu.
+     */
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<PlayerDTO> getAllPlayers() {
+        return playerService.getAllPlayers();
+    }
+
+    /**
+     * VrĂˇtĂ­ detail hrĂˇÄŤe podle jeho ID.
+     *
+     * @param id ID hrĂˇÄŤe
+     */
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public PlayerDTO getPlayerById(@PathVariable Long id) {
+        return playerService.getPlayerById(id);
+    }
+
+    /**
+     * VytvoĹ™Ă­ novĂ©ho hrĂˇÄŤe (administrĂˇtor/manaĹľer).
+     *
+     * PouĹľĂ­vĂˇ se pĹ™i ruÄŤnĂ­m zaklĂˇdĂˇnĂ­ hrĂˇÄŤe do systĂ©mu.
+     */
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public PlayerDTO createPlayer(@Valid @RequestBody PlayerDTO playerDTO) {
+        return playerService.createPlayer(playerDTO);
+    }
+
+    /**
+     * Aktualizuje Ăşdaje hrĂˇÄŤe administrĂˇtorem.
+     *
+     * @param id  ID hrĂˇÄŤe
+     * @param dto aktualizovanĂˇ data hrĂˇÄŤe
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public PlayerDTO updatePlayerAdmin(@PathVariable Long id,
+                                       @Valid @RequestBody PlayerDTO dto) {
+        return playerService.updatePlayer(id, dto);
+    }
+
+    /**
+     * OdstranĂ­ hrĂˇÄŤe ze systĂ©mu.
+     *
+     * Operace je vyhrazena pouze pro administrĂˇtora.
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SuccessResponseDTO> deletePlayer(@PathVariable Long id) {
+        SuccessResponseDTO response = playerService.deletePlayer(id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * SchvĂˇlĂ­ hrĂˇÄŤe (zmÄ›nĂ­ jeho stav na APPROVED).
+     */
+    @PutMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SuccessResponseDTO> approvePlayer(@PathVariable Long id) {
+        SuccessResponseDTO response = playerService.approvePlayer(id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * ZamĂ­tne hrĂˇÄŤe (zmÄ›nĂ­ jeho stav na REJECTED).
+     */
+    @PutMapping("/{id}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SuccessResponseDTO> rejectPlayer(@PathVariable Long id) {
+        SuccessResponseDTO response = playerService.rejectPlayer(id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * ZmÄ›nĂ­ pĹ™iĹ™azenĂ­ hrĂˇÄŤe k aplikaÄŤnĂ­mu uĹľivateli.
+     *
+     * Operace je vyhrazena pouze pro roli ADMIN.
+     *
+     * @param playerId ID hrĂˇÄŤe, kterĂ©mu mĂˇ bĂ˝t zmÄ›nÄ›n pĹ™iĹ™azenĂ˝ uĹľivatel
+     * @param request  request obsahujĂ­cĂ­ ID novĂ©ho uĹľivatele
+     */
+    @PostMapping("/{playerId}/change-user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> changePlayerUser(
+            @PathVariable Long playerId,
+            @RequestBody ChangePlayerUserRequest request
+    ) {
+        playerService.changePlayerUser(playerId, request.getNewUserId());
+        return ResponseEntity.ok(
+                "HrĂˇÄŤ s id: " + playerId + " byl ĂşspÄ›ĹˇnÄ› pĹ™iĹ™azen uĹľivateli s ID: " + request.getNewUserId()
+        );
+    }
+
+    // =========================================================
+    //  USER â€“ HRĂÄŚI PĹIHLĂĹ ENĂ‰HO UĹ˝IVATELE (/me)
+    // =========================================================
+
     /**
      * VytvoĹ™Ă­ novĂ©ho hrĂˇÄŤe pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
-     *
-     * @param playerDTO      data novĂ©ho hrĂˇÄŤe
-     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
-     * @return vytvoĹ™enĂ˝ hrĂˇÄŤ
      */
     @PostMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public PlayerDTO createMyPlayer(
             @Valid @RequestBody PlayerDTO playerDTO,
-            Authentication authentication) {
-
+            Authentication authentication
+    ) {
         String email = authentication.getName();
         return playerService.createPlayerForUser(playerDTO, email);
     }
 
     /**
      * VrĂˇtĂ­ seznam vĹˇech hrĂˇÄŤĹŻ patĹ™Ă­cĂ­ch pĹ™ihlĂˇĹˇenĂ©mu uĹľivateli.
-     *
-     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
-     * @return seznam hrĂˇÄŤĹŻ pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public List<PlayerDTO> getMyPlayers(Authentication authentication) {
-
         String email = authentication.getName();
         return playerService.getPlayersByUser(email);
     }
 
     /**
      * Aktualizuje Ăşdaje aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
-     * <p>
-     * VyĹľaduje, aby mÄ›l uĹľivatel nastavenĂ©ho â€žaktuĂˇlnĂ­ho hrĂˇÄŤeâ€ś.
      *
-     * @param dto aktualizovanĂˇ data hrĂˇÄŤe
-     * @return aktualizovanĂ˝ hrĂˇÄŤ
+     * VyĹľaduje, aby mÄ›l uĹľivatel nastavenĂ©ho â€žaktuĂˇlnĂ­ho hrĂˇÄŤeâ€ś.
      */
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public PlayerDTO updatePlayer(@Valid @RequestBody PlayerDTO dto) {
-
+    public PlayerDTO updateMyCurrentPlayer(@Valid @RequestBody PlayerDTO dto) {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
-
         return playerService.updatePlayer(currentPlayerId, dto);
     }
 }
@@ -1380,7 +1039,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/inactivity/admin")
-
 public class PlayerInactivityPeriodController {
 
     private final PlayerInactivityPeriodService service;
@@ -1486,40 +1144,138 @@ public class PlayerInactivityPeriodController {
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.SeasonDTO;
+import cz.phsoft.hokej.models.dto.mappers.SeasonMapper;
 import cz.phsoft.hokej.models.services.CurrentSeasonService;
 import cz.phsoft.hokej.models.services.SeasonService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller pro sprĂˇvu sezĂłn.
+ *
+ * ZajiĹˇĹĄuje:
+ * <ul>
+ *     <li>administraci sezĂłn (CRUD, nastavenĂ­ aktivnĂ­ sezĂłny) pro roli ADMIN,</li>
+ *     <li>prĂˇci s â€žaktuĂˇlnĂ­ sezĂłnouâ€ś pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele (/me).</li>
+ * </ul>
+ *
+ * VeĹˇkerĂˇ business logika je delegovĂˇna do {@link SeasonService}
+ * a {@link CurrentSeasonService}.
+ */
 @RestController
-@RequestMapping("/api/seasons/me")
-
+@RequestMapping("/api/seasons")
 public class SeasonController {
 
-    private final CurrentSeasonService currentSeasonService;
     private final SeasonService seasonService;
+    private final SeasonMapper seasonMapper;
+    private final CurrentSeasonService currentSeasonService;
 
-    public SeasonController(CurrentSeasonService currentSeasonService,
-                                   SeasonService seasonService) {
-        this.currentSeasonService = currentSeasonService;
+    public SeasonController(SeasonService seasonService,
+                            SeasonMapper seasonMapper,
+                            CurrentSeasonService currentSeasonService) {
         this.seasonService = seasonService;
+        this.seasonMapper = seasonMapper;
+        this.currentSeasonService = currentSeasonService;
     }
+
+    // =========================================================
+    //  ADMIN â€“ GLOBĂLNĂŤ SPRĂVA SEZĂ“N
+    // =========================================================
+
     /**
-     * VrĂˇtĂ­ vĹˇechny sezony
+     * VytvoĹ™Ă­ novou sezĂłnu.
+     *
+     * @param seasonDTO data novĂ© sezĂłny
+     * @return vytvoĹ™enĂˇ sezĂłna
+     */
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SeasonDTO> createSeason(
+            @Valid @RequestBody SeasonDTO seasonDTO) {
+
+        SeasonDTO created = seasonService.createSeason(seasonDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    /**
+     * Aktualizuje existujĂ­cĂ­ sezĂłnu.
+     *
+     * @param id        ID sezĂłny
+     * @param seasonDTO aktualizovanĂˇ data sezĂłny
+     * @return aktualizovanĂˇ sezĂłna
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SeasonDTO> updateSeason(
+            @PathVariable Long id,
+            @Valid @RequestBody SeasonDTO seasonDTO
+    ) {
+        SeasonDTO updated = seasonService.updateSeason(id, seasonDTO);
+        return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * VrĂˇtĂ­ seznam vĹˇech sezĂłn v systĂ©mu.
+     *
+     * Tady mĹŻĹľeĹˇ nechat jen ADMIN, nebo klidnÄ› vĹˇem pĹ™ihlĂˇĹˇenĂ˝m.
+     * AktuĂˇlnÄ› omezeno na ADMIN kvĹŻli pĹŻvodnĂ­mu chovĂˇnĂ­.
      */
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<SeasonDTO>> getAllSeasonsAdmin() {
+        List<SeasonDTO> seasons = seasonService.getAllSeasons();
+        return ResponseEntity.ok(seasons);
+    }
+
+    /**
+     * VrĂˇtĂ­ aktuĂˇlnÄ› aktivnĂ­ globĂˇlnĂ­ sezĂłnu.
+     */
+    @GetMapping("/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SeasonDTO> getActiveSeason() {
+        SeasonDTO dto = seasonMapper.toDTO(seasonService.getActiveSeason());
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * NastavĂ­ zadanou sezĂłnu jako globĂˇlnÄ› aktivnĂ­.
+     *
+     * @param id ID sezĂłny, kterĂˇ mĂˇ bĂ˝t nastavena jako aktivnĂ­
+     * @return novÄ› aktivnĂ­ sezĂłna
+     */
+    @PutMapping("/{id}/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SeasonDTO> setActiveSeason(@PathVariable Long id) {
+        seasonService.setActiveSeason(id);
+        SeasonDTO active = seasonMapper.toDTO(seasonService.getActiveSeason());
+        return ResponseEntity.ok(active);
+    }
+
+    // =========================================================
+    //  USER â€“ PRĂCE S â€žMOJĂŤâ€ś SEZĂ“NOU (/me)
+    // =========================================================
+
+    /**
+     * VrĂˇtĂ­ vĹˇechny sezĂłny pro ĂşÄŤely vĂ˝bÄ›ru na frontendu.
+     *
+     * Toto je user-friendly varianta (pĹŻvodnĂ­ /api/seasons/me GET).
+     */
+    @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public List<SeasonDTO> getAllSeasons() {
+    public List<SeasonDTO> getAllSeasonsForUser() {
         return seasonService.getAllSeasons();
     }
 
     /**
-     * VrĂˇtĂ­ sezonu, kterĂˇ je aktuĂˇlnÄ› vybranĂˇ pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
-     * Pokud nenĂ­ vybrĂˇna vrĂˇtĂ­ @Null.
+     * VrĂˇtĂ­ sezĂłnu, kterĂˇ je aktuĂˇlnÄ› vybranĂˇ pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+     * Pokud nenĂ­ vybranĂˇ, vrĂˇtĂ­ null (nebo default dle CurrentSeasonService).
      */
-    @GetMapping("/current")
+    @GetMapping("/me/current")
     @PreAuthorize("isAuthenticated()")
     public SeasonDTO getCurrentSeasonForUser() {
         Long id = currentSeasonService.getCurrentSeasonIdOrDefault();
@@ -1527,17 +1283,17 @@ public class SeasonController {
     }
 
     /**
-     * NastavenĂ­ sezony dle id
+     * NastavĂ­ aktuĂˇlnĂ­ sezĂłnu pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+     *
+     * @param seasonId ID sezĂłny, kterĂˇ mĂˇ bĂ˝t nastavena jako current pro uĹľivatele
      */
-    @PostMapping("/current/{seasonId}")
+    @PostMapping("/me/current/{seasonId}")
     @PreAuthorize("isAuthenticated()")
     public void setCurrentSeasonForUser(@PathVariable Long seasonId) {
-        // jednoduchĂˇ validace â€“ jen ovÄ›Ĺ™Ă­me, Ĺľe sezĂłna existuje
+        // jednoduchĂˇ validace â€“ ovÄ›Ĺ™Ă­me, Ĺľe sezĂłna existuje
         seasonService.getSeasonById(seasonId);
         currentSeasonService.setCurrentSeasonId(seasonId);
     }
-
-
 }
 
 
@@ -1549,7 +1305,6 @@ public class SeasonController {
 package cz.phsoft.hokej.controllers;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -1557,7 +1312,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/test")
 @PreAuthorize("hasRole('ADMIN')")
-
 public class TestController {
 
     @GetMapping

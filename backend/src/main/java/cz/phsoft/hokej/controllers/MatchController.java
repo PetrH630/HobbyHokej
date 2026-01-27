@@ -1,10 +1,14 @@
 package cz.phsoft.hokej.controllers;
 
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.MatchDetailDTO;
 import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
+import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.MatchService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -12,18 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller pro práci se zápasy z pohledu přihlášeného uživatele / hráče.
- * <p>
- * Controller poskytuje:
+ * REST controller pro práci se zápasy.
+ *
+ * Zajišťuje:
  * <ul>
- *     <li>detail zápasu,</li>
- *     <li>seznam nadcházejících zápasů pro aktuálního hráče,</li>
- *     <li>přehled nadcházejících zápasů (overview),</li>
- *     <li>seznam již odehraných zápasů aktuálního hráče.</li>
+ *     <li>administraci zápasů (CRUD, zrušení / obnovení) pro role ADMIN/MANAGER,</li>
+ *     <li>pohled na zápasy z perspektivy aktuálního hráče,</li>
+ *     <li>detail zápasu včetně stavů registrací pro aktuálního hráče.</li>
  * </ul>
  *
- * Controller pracuje vždy v kontextu „aktuálního hráče“,
- * který je spravován pomocí {@link CurrentPlayerService}.
+ * Business logika je delegována do {@link MatchService}.
  */
 @RestController
 @RequestMapping("/api/matches")
@@ -38,26 +40,149 @@ public class MatchController {
         this.currentPlayerService = currentPlayerService;
     }
 
+    // =========================================================
+    //  ADMIN / MANAGER – GLOBÁLNÍ SPRÁVA ZÁPASŮ
+    // =========================================================
+
     /**
-     * Vrátí detail konkrétního zápasu.
-     *
-     * @param id ID zápasu
-     * @return detail zápasu
+     * Vrátí seznam všech zápasů v systému.
      */
-    @GetMapping("/matchDetail/{id}")
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getAllMatches() {
+        return matchService.getAllMatches();
+    }
+
+    /**
+     * Vrátí seznam všech nadcházejících zápasů.
+     */
+    @GetMapping("/upcoming")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getUpcomingMatches() {
+        return matchService.getUpcomingMatches();
+    }
+
+    /**
+     * Vrátí seznam všech již odehraných (minulých) zápasů.
+     */
+    @GetMapping("/past")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getPastMatches() {
+        return matchService.getPastMatches();
+    }
+
+    /**
+     * Vytvoří nový zápas.
+     *
+     * @param matchDTO data nového zápasu
+     * @return vytvořený zápas
+     */
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public MatchDTO createMatch(@Valid @RequestBody MatchDTO matchDTO) {
+        return matchService.createMatch(matchDTO);
+    }
+
+    /**
+     * Vrátí základní detail zápasu podle jeho ID
+     * (admin / manager pohled – DTO bez hráčského kontextu).
+     */
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchDTO getMatch(@PathVariable Long id) {
+        return matchService.getMatchById(id);
+    }
+
+    /**
+     * Aktualizuje existující zápas.
+     *
+     * @param id  ID zápasu
+     * @param dto aktualizovaná data zápasu
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchDTO updateMatch(@PathVariable Long id,
+                                @Valid @RequestBody MatchDTO dto) {
+        return matchService.updateMatch(id, dto);
+    }
+
+    /**
+     * Odstraní zápas ze systému.
+     *
+     * Operace je vyhrazena pouze pro administrátora.
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SuccessResponseDTO> deleteMatch(@PathVariable Long id) {
+        SuccessResponseDTO response = matchService.deleteMatch(id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Vrátí seznam zápasů, které jsou dostupné pro konkrétního hráče.
+     *
+     * @param playerId ID hráče
+     */
+    @GetMapping("/available-for-player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getAvailableMatchesForPlayer(@PathVariable Long playerId) {
+        return matchService.getAvailableMatchesForPlayer(playerId);
+    }
+
+    /**
+     * Zruší zápas a uloží důvod zrušení.
+     *
+     * @param matchId ID zápasu
+     * @param reason  důvod zrušení zápasu
+     */
+    @PatchMapping("/{matchId}/cancel")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<SuccessResponseDTO> cancelMatch(
+            @PathVariable Long matchId,
+            @RequestParam MatchCancelReason reason
+    ) {
+        SuccessResponseDTO response = matchService.cancelMatch(matchId, reason);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obnoví dříve zrušený zápas.
+     *
+     * @param matchId ID zápasu
+     */
+    @PatchMapping("/{matchId}/uncancel")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<SuccessResponseDTO> unCancelMatch(@PathVariable Long matchId) {
+        SuccessResponseDTO response = matchService.unCancelMatch(matchId);
+        return ResponseEntity.ok(response);
+    }
+
+    // =========================================================
+    //  HRÁČ – ENDPOINTY V KONTEXTU AKTUÁLNÍHO PLAYERA
+    // =========================================================
+
+    /**
+     * Vrátí detail konkrétního zápasu z pohledu hráče
+     * (včetně stavu registrací, práv, atd.).
+     *
+     * Změnil jsem URL na /{id}/detail kvůli konzistenci s ostatními
+     * endpointy; pokud potřebuješ zachovat /matchDetail/{id},
+     * můžeš přidat alias.
+     */
+    @GetMapping("/{id}/detail")
     @PreAuthorize("isAuthenticated()")
     public MatchDetailDTO getMatchDetail(@PathVariable Long id) {
         return matchService.getMatchDetail(id);
     }
 
+    // Volitelný alias pro zpětnou kompatibilitu:
+    // @GetMapping("/matchDetail/{id}")
+    // public MatchDetailDTO getMatchDetailAlias(@PathVariable Long id) {
+    //     return getMatchDetail(id);
+    // }
+
     /**
-     * Vrátí nejbližší nadcházející zápas.
-     * <p>
-     * Endpoint je zachován spíše pro interní nebo zpětnou kompatibilitu.
-     * Pro práci v kontextu hráče se doporučuje používat endpointy
-     * založené na „aktuálním hráči“.
-     *
-     * @return nejbližší nadcházející zápas
+     * Vrátí nejbližší nadcházející zápas (globálně).
      */
     @GetMapping("/next")
     @PreAuthorize("isAuthenticated()")
@@ -67,11 +192,6 @@ public class MatchController {
 
     /**
      * Vrátí seznam nadcházejících zápasů pro aktuálně zvoleného hráče.
-     * <p>
-     * Vyžaduje, aby měl uživatel nastaveného aktuálního hráče.
-     *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam nadcházejících zápasů
      */
     @GetMapping("/me/upcoming")
     @PreAuthorize("isAuthenticated()")
@@ -82,13 +202,7 @@ public class MatchController {
     }
 
     /**
-     * Vrátí přehled (overview) nadcházejících zápasů pro aktuálního hráče.
-     * <p>
-     * Přehled obsahuje zjednodušená data určená pro seznamové zobrazení
-     * na frontendu.
-     *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam přehledů nadcházejících zápasů
+     * Vrátí přehled nadcházejících zápasů pro aktuálního hráče.
      */
     @GetMapping("/me/upcoming-overview")
     @PreAuthorize("isAuthenticated()")
@@ -100,9 +214,6 @@ public class MatchController {
 
     /**
      * Vrátí seznam všech již odehraných zápasů pro aktuálního hráče.
-     *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam odehraných zápasů (overview)
      */
     @GetMapping("/me/all-passed")
     @PreAuthorize("isAuthenticated()")

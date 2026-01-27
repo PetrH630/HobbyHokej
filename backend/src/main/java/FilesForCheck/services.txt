@@ -118,6 +118,16 @@ public interface AppUserService {
     List<AppUserDTO> getAllUsers();
 
     /**
+     * VrĂˇtĂ­ uĹľivatele v systĂ©mu dle ID.
+     * <p>
+     * Typicky dostupnĂ© pouze pro administrĂˇtorskĂ© role.
+     * </p>
+     * @param userId ID uĹľivatele
+     * @return uĹľivatel ve formÄ› DTO
+     */
+    AppUserDTO getUserById(Long userId);
+
+    /**
      * ZmÄ›nĂ­ heslo uĹľivatele.
      * <p>
      * Metoda slouĹľĂ­ pro standardnĂ­ zmÄ›nu hesla,
@@ -198,6 +208,7 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
@@ -454,6 +465,10 @@ public class AppUserServiceImpl implements AppUserService {
         userRepository.save(user);
     }
 
+    public AppUserDTO getUserById (Long id){
+        AppUserEntity user = findUserByIdOrThrow(id);
+        return appUserMapper.toDTO(user);
+    }
 
     // ==================================================
     // HELPER METODY

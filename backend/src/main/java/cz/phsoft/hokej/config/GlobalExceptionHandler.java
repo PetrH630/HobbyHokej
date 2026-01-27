@@ -208,6 +208,8 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
+
+
     // ==========================================
     // 6) FALLBACK – NEČEKANÉ CHYBY
     // ==========================================

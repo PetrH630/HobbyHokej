@@ -89,6 +89,16 @@ public interface AppUserService {
     List<AppUserDTO> getAllUsers();
 
     /**
+     * Vrátí uživatele v systému dle ID.
+     * <p>
+     * Typicky dostupné pouze pro administrátorské role.
+     * </p>
+     * @param userId ID uživatele
+     * @return uživatel ve formě DTO
+     */
+    AppUserDTO getUserById(Long userId);
+
+    /**
      * Změní heslo uživatele.
      * <p>
      * Metoda slouží pro standardní změnu hesla,

@@ -2,6 +2,7 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
@@ -258,6 +259,10 @@ public class AppUserServiceImpl implements AppUserService {
         userRepository.save(user);
     }
 
+    public AppUserDTO getUserById (Long id){
+        AppUserEntity user = findUserByIdOrThrow(id);
+        return appUserMapper.toDTO(user);
+    }
 
     // ==================================================
     // HELPER METODY

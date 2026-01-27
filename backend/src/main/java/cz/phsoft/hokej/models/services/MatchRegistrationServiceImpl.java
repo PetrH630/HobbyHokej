@@ -560,7 +560,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                                               String adminNote) {
 
         MatchEntity match = getMatchOrThrow(matchId);
-        getPlayerOrThrow(playerId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
 
         if (match.getDateTime().isAfter(now())) {
             throw new InvalidPlayerStatusException(

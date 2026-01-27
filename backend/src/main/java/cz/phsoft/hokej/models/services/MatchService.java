@@ -191,20 +191,6 @@ public interface MatchService {
     List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId);
 
     /**
-     * Označí hráče u daného zápasu jako „neomluveného“.
-     * <p>
-     * Typicky používáno v administrátorském kontextu po zápase,
-     * kdy je potřeba vyhodnotit docházku hráče.
-     * </p>
-     *
-     * @param matchId   ID zápasu
-     * @param playerId  ID hráče
-     * @param adminNote poznámka administrátora
-     * @return aktualizovaná registrace hráče k zápasu
-     */
-    MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote);
-
-    /**
      * Zruší zápas a nastaví důvod zrušení.
      * <p>
      * Zápas je označen jako zrušený s uvedeným důvodem.

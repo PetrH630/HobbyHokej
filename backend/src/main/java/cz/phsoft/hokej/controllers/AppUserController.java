@@ -48,6 +48,24 @@ public class AppUserController {
     }
 
     /**
+     * Aktualizuje údaje aktuálně přihlášeného uživatele.
+     *
+     * @param authentication objekt s informacemi o přihlášeném uživateli
+     * @param dto            aktualizovaná data uživatele
+     * @return informace o úspěšné aktualizaci
+     */
+    @PutMapping("/me/update")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> updateUser(
+            Authentication authentication,
+            @Valid @RequestBody AppUserDTO dto) {
+
+        String email = authentication.getName();
+        appUserService.updateUser(email, dto);
+        return ResponseEntity.ok("Uživatel byl změněn");
+    }
+
+    /**
      * Změní heslo aktuálně přihlášeného uživatele.
      *
      * @param authentication objekt s informacemi o přihlášeném uživateli
@@ -70,22 +88,25 @@ public class AppUserController {
         return ResponseEntity.ok("Heslo úspěšně změněno");
     }
 
+    //ADMIN
     /**
-     * Aktualizuje údaje aktuálně přihlášeného uživatele.
+     * Vrátí seznam všech uživatelů v systému.
+     * <p>
+     * Endpoint je dostupný pouze pro administrátora.
      *
-     * @param authentication objekt s informacemi o přihlášeném uživateli
-     * @param dto            aktualizovaná data uživatele
-     * @return informace o úspěšné aktualizaci
+     * @return seznam uživatelů
      */
-    @PutMapping("/me/update")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> updateUser(
-            Authentication authentication,
-            @Valid @RequestBody AppUserDTO dto) {
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<AppUserDTO> getAllUsers() {
+        return appUserService.getAllUsers();
+    }
 
-        String email = authentication.getName();
-        appUserService.updateUser(email, dto);
-        return ResponseEntity.ok("Uživatel byl změněn");
+    // TODO - NOVÝ ENDPOINT
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public AppUserDTO getUserById(@PathVariable Long id ) {
+        return appUserService.getUserById(id);
     }
 
     /**
@@ -101,19 +122,6 @@ public class AppUserController {
     public ResponseEntity<String> resetPassword(@PathVariable Long id) {
         appUserService.resetPassword(id);
         return ResponseEntity.ok("Heslo resetováno na 'Player123'");
-    }
-
-    /**
-     * Vrátí seznam všech uživatelů v systému.
-     * <p>
-     * Endpoint je dostupný pouze pro administrátora.
-     *
-     * @return seznam uživatelů
-     */
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<AppUserDTO> getAllUsers() {
-        return appUserService.getAllUsers();
     }
 
     /**
