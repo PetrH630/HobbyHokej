@@ -24,7 +24,7 @@ public class SeasonController {
     /**
      * Vrátí všechny sezony
      */
-    @GetMapping("/all")
+    @GetMapping
     @PreAuthorize("isAuthenticated()")
     public List<SeasonDTO> getAllSeasons() {
         return seasonService.getAllSeasons();

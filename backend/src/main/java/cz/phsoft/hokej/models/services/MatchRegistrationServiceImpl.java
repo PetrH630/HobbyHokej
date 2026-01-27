@@ -19,6 +19,8 @@ import cz.phsoft.hokej.models.services.sms.SmsService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -56,6 +58,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     private final SmsService smsService;
     private final SmsMessageBuilder smsMessageBuilder;
     private final NotificationService notificationService;
+    private final SeasonService seasonService;
+    private final CurrentSeasonService currentSeasonService;
 
     public MatchRegistrationServiceImpl(
             MatchRegistrationRepository registrationRepository,
@@ -65,7 +69,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             PlayerMapper playerMapper,
             SmsService smsService,
             SmsMessageBuilder smsMessageBuilder,
-            NotificationService notificationService
+            NotificationService notificationService,
+            SeasonService seasonService,
+            CurrentSeasonService currentSeasonService
     ) {
         this.registrationRepository = registrationRepository;
         this.matchRepository = matchRepository;
@@ -75,6 +81,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         this.smsService = smsService;
         this.smsMessageBuilder = smsMessageBuilder;
         this.notificationService = notificationService;
+        this.seasonService = seasonService;
+        this.currentSeasonService = currentSeasonService;
     }
 
     // ==========================================
@@ -111,6 +119,19 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         MatchEntity match = getMatchOrThrow(request.getMatchId());
         PlayerEntity player = getPlayerOrThrow(playerId);
+
+        /**
+         * Ověření, že zápas patří do aktuálně aktivní sezóny.
+         * Zápisy do neaktivní sezóny nejsou povoleny.
+         */
+        assertMatchInActiveSeason(match);
+
+        /**
+         * Ověření, zda aktuální uživatel smí měnit registraci
+         *  s ohledem na svou roli a čas zápasu.
+         */
+        assertPlayerCanModifyMatch(match);
+
 
         MatchRegistrationEntity registration =
                 getRegistrationOrNull(playerId, request.getMatchId());
@@ -290,18 +311,32 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Vrátí všechny registrace pro daný zápas.
+     * <p>
+     * Pokud zápas nepatří do aktuálně vybrané sezóny (currentSeason/active),
+     * vrací prázdný seznam.
+     * </p>
      */
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
+        MatchEntity match = getMatchOrThrow(matchId);
+
+        if (!isMatchInCurrentSeason(match)) {
+            // Zápas je mimo currentSeason – pro účely přehledů vracíme prázdný seznam
+            return List.of();
+        }
+
         return matchRegistrationMapper.toDTOList(
                 registrationRepository.findByMatchId(matchId)
         );
     }
 
     /**
-     * Vrátí všechny registrace pro zadané zápasy.
+     * Vrátí všechny registrace pro zadané zápasy,
+     * omezené na aktuálně vybranou sezónu.
+     *
      * <p>
-     * Pokud je seznam ID prázdný nebo null, vrací prázdný seznam.
+     * Pokud je seznam ID prázdný nebo {@code null}, vrací prázdný seznam.
+     * </p>
      */
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds) {
@@ -309,35 +344,59 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             return List.of();
         }
 
-        return matchRegistrationMapper.toDTOList(
-                registrationRepository.findByMatchIdIn(matchIds)
-        );
+        List<MatchRegistrationEntity> regsInSeason = registrationRepository
+                .findByMatchIdIn(matchIds).stream()
+                .filter(this::isRegistrationInCurrentSeason)
+                .toList();
+
+        return matchRegistrationMapper.toDTOList(regsInSeason);
     }
 
     /**
-     * Vrátí všechny registrace v systému.
+     * Vrátí všechny registrace v systému
+     * omezené na aktuálně vybranou sezónu.
      */
     @Override
     public List<MatchRegistrationDTO> getAllRegistrations() {
-        return matchRegistrationMapper.toDTOList(registrationRepository.findAll());
+        List<MatchRegistrationEntity> regsInSeason = registrationRepository
+                .findAll().stream()
+                .filter(this::isRegistrationInCurrentSeason)
+                .toList();
+
+        return matchRegistrationMapper.toDTOList(regsInSeason);
     }
 
     /**
-     * Vrátí všechny registrace konkrétního hráče.
+     * Vrátí všechny registrace konkrétního hráče
+     * omezené na aktuálně vybranou sezónu.
      */
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId) {
-        return matchRegistrationMapper.toDTOList(
-                registrationRepository.findByPlayerId(playerId)
-        );
+        List<MatchRegistrationEntity> regsInSeason = registrationRepository
+                .findByPlayerId(playerId).stream()
+                .filter(this::isRegistrationInCurrentSeason)
+                .toList();
+
+        return matchRegistrationMapper.toDTOList(regsInSeason);
     }
 
     /**
      * Vrátí hráče, kteří na daný zápas nijak nereagovali
      * (nemají žádnou registraci bez ohledu na status).
+     *
+     * <p>
+     * Pokud zápas nepatří do aktuálně vybrané sezóny,
+     * vrací prázdný seznam.
+     * </p>
      */
     @Override
     public List<PlayerDTO> getNoResponsePlayers(Long matchId) {
+        MatchEntity match = getMatchOrThrow(matchId);
+
+        if (!isMatchInCurrentSeason(match)) {
+            return List.of();
+        }
+
         Set<Long> respondedIds = getRespondedPlayerIds(matchId);
 
         List<PlayerEntity> noResponsePlayers = playerRepository.findAll().stream()
@@ -654,4 +713,159 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     private LocalDateTime now() {
         return LocalDateTime.now();
     }
+
+    /**
+     * Ověří, že zápas patří do aktivní sezóny.
+     * <p>
+     * Používá se před zápisem (upsert registrace), aby hráči nemohli
+     * měnit registrace v neaktivních sezónách.
+     */
+    private void assertMatchInActiveSeason(MatchEntity match) {
+        if (match.getSeason() == null || !match.getSeason().isActive()) {
+            // InvalidSeasonStateException už v projektu máš (používáš ji v SeasonService),
+            // případně si sem můžeš doplnit vlastní zprávu/typ výjimky.
+            throw new InvalidSeasonStateException(
+                    "BE - Registrace lze měnit pouze u zápasů v aktivní sezóně."
+            );
+        }
+    }
+    /**
+     * Ověří, zda aktuálně přihlášený uživatel může měnit
+     * registraci na daný zápas.
+     *
+     * <p>
+     * Pravidla:
+     * <ul>
+     *     <li>uživatel s rolí ADMIN / MANAGER není časově omezen,</li>
+     *     <li>uživatel s rolí PLAYER může měnit registraci pouze
+     *         do 30 minut po začátku zápasu.</li>
+     * </ul>
+     * </p>
+     *
+     * @param match zápas, pro který se registrace mění
+     * @throws InvalidPlayerStatusException pokud hráč překročil
+     *         povolené časové okno pro změnu registrace
+     */
+    private void assertPlayerCanModifyMatch(MatchEntity match) {
+        if (!isCurrentUserPlayer()) {
+            // Admin / manager – žádné časové omezení
+            return;
+        }
+
+        if (!isMatchEditableForPlayer(match)) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Jako hráč můžeš měnit registraci pouze do 30 minut po začátku zápasu."
+            );
+        }
+    }
+    /**
+     * Zjistí, zda je zápas ještě v časovém okně,
+     * ve kterém může hráč (ROLE_PLAYER) upravovat svou registraci.
+     *
+     * <p>
+     * Logika:
+     * <pre>
+     * now() &lt; match.dateTime + 30 minut
+     * </pre>
+     *
+     * Tzn.:
+     * <ul>
+     *     <li>před zápasem → povoleno,</li>
+     *     <li>během zápasu → povoleno do 30. minuty,</li>
+     *     <li>30+ minut po začátku zápasu → zakázáno.</li>
+     * </ul>
+     * </p>
+     *
+     * @param match zápas, ke kterému se vztahuje registrace
+     * @return {@code true}, pokud je změna registrace ještě povolena
+     */
+    private boolean isMatchEditableForPlayer(MatchEntity match) {
+        LocalDateTime editLimit = match.getDateTime().plusMinutes(30);
+        return now().isBefore(editLimit);
+    }
+
+    /**
+     * Zjistí, zda má aktuálně přihlášený uživatel roli {@code ROLE_PLAYER}.
+     *
+     * <p>
+     * Používá se pro rozlišení chování:
+     * <ul>
+     *     <li>ROLE_PLAYER – omezené časem zápasu,</li>
+     *     <li>ostatní role (ADMIN, MANAGER) – bez časového omezení.</li>
+     * </ul>
+     * </p>
+     *
+     * @return {@code true}, pokud má uživatel roli PLAYER,
+     *         jinak {@code false}
+     */
+    private boolean isCurrentUserPlayer() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            return false;
+        }
+
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_PLAYER".equals(a.getAuthority()));
+    }
+
+    // ======================================
+    // SEASON – POMOCNÉ METODY PRO CURRENT SEASON
+    // ======================================
+
+    /**
+     * Zjistí, zda daný zápas patří do aktuálně vybrané sezóny
+     * (currentSeason z {@link CurrentSeasonService} nebo aktivní sezóny).
+     *
+     * @param match zápas, který se kontroluje
+     * @return {@code true}, pokud má zápas sezónu shodnou
+     *         s hodnotou {@link #getCurrentSeasonIdOrActive()},
+     *         jinak {@code false}
+     */
+    private boolean isMatchInCurrentSeason(MatchEntity match) {
+        if (match == null || match.getSeason() == null) {
+            return false;
+        }
+        Long seasonId = getCurrentSeasonIdOrActive();
+        return seasonId.equals(match.getSeason().getId());
+    }
+
+    /**
+     * Zjistí, zda daná registrace patří k zápasu v aktuálně vybrané sezóně.
+     *
+     * @param registration registrace, která se kontroluje
+     * @return {@code true}, pokud je registrace navázaná na zápas,
+     *         jehož sezóna odpovídá {@link #getCurrentSeasonIdOrActive()},
+     *         jinak {@code false}
+     */
+    private boolean isRegistrationInCurrentSeason(MatchRegistrationEntity registration) {
+        if (registration == null) {
+            return false;
+        }
+        return isMatchInCurrentSeason(registration.getMatch());
+    }
+    /**
+     * Vrátí ID sezóny, která se má použít pro filtrování registrací.
+     *
+     * <p>
+     * Postup:
+     * <ul>
+     *     <li>nejprve se pokusí použít uživatelem zvolenou currentSeason
+     *         (uloženou v {@link CurrentSeasonService}),</li>
+     *     <li>pokud není k dispozici, spadne na globálně aktivní sezónu
+     *         {@link SeasonService#getActiveSeason()}.</li>
+     * </ul>
+     * </p>
+     *
+     * @return ID aktuální (uživatelské) nebo aktivní sezóny
+     */
+    private Long getCurrentSeasonIdOrActive() {
+        Long id = currentSeasonService.getCurrentSeasonIdOrDefault();
+        if (id != null) {
+            return id;
+        }
+        return seasonService.getActiveSeason().getId();
+    }
+
+
+
 }
