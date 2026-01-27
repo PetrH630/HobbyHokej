@@ -202,7 +202,6 @@ public class DataInitializer {
                     .with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
                     .atTime(18, 45);
             int fridaysCount = countFridays(startSeasonDate, endSeasonDate);
-
             System.out.println("jdu vytvářet zápasy");
             for (int i = 0; i < fridaysCount; i++) {
                 MatchEntity match = new MatchEntity();
@@ -249,7 +248,11 @@ public class DataInitializer {
             return;
         }
 
-        List<MatchEntity> matches = matchRepository.findAll();
+        LocalDateTime finalDate = LocalDateTime.now().plusWeeks(1);
+
+        List<MatchEntity> matches = matchRepository.findAll().stream()
+                .filter(m -> m.getDateTime().isBefore(finalDate))
+                .toList();
 
         List<PlayerEntity> players = playerRepository.findAll().stream()
                 .filter(p -> p.getId() != null)
@@ -301,7 +304,7 @@ public class DataInitializer {
                 }
 
                 // Zachována původní logika týmů
-                reg.setTeam(i < 4 ? Team.DARK : Team.LIGHT);
+                // reg.setTeam(i < 4 ? Team.DARK : Team.LIGHT);
 
                 reg.setTimestamp(LocalDateTime.now());
                 reg.setCreatedBy("initializer");

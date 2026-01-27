@@ -337,6 +337,13 @@ public class MatchServiceImpl implements MatchService {
             return;
         }
 
+        Long currentSeasonId = getCurrentSeasonIdOrActive();
+        if (match.getSeason() == null || !match.getSeason().getId().equals(currentSeasonId)) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "BE - K detailu zápasu z jiné sezóny nemáte přístup."
+            );
+        }
+
         Object principal = auth.getPrincipal();
         if (!(principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails)) {
             throw new org.springframework.security.access.AccessDeniedException(
