@@ -22,7 +22,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/inactivity/admin")
-@CrossOrigin(origins = "*")
 public class PlayerInactivityPeriodController {
 
     private final PlayerInactivityPeriodService service;

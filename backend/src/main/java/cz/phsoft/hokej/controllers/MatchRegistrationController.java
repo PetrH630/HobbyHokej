@@ -26,7 +26,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/registrations")
-@CrossOrigin(origins = "*")
 public class MatchRegistrationController {
 
     private final MatchRegistrationService matchRegistrationService;

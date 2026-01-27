@@ -88,15 +88,13 @@ public interface AppUserMapper {
      * PĹ™evede entitu hrĂˇÄŤe na {@link PlayerDTO}.
      *
      * <p>
-     * Mapuje rozdĂ­lnĂ© nĂˇzvy atributĹŻ (napĹ™. {@code nickname} â†’ {@code nickName})
-     * a ignoruje pole {@code fullName}, kterĂ© se typicky sestavuje jinde
+     * ignoruje pole {@code fullName}, kterĂ© se typicky sestavuje jinde
      * (napĹ™Ă­klad v domĂ©novĂ© logice nebo pĹ™Ă­mo v DTO).
      * </p>
      *
      * @param entity hrĂˇÄŤskĂˇ entita
      * @return DTO reprezentace hrĂˇÄŤe
      */
-    @Mapping(source = "nickname", target = "nickName")
     @Mapping(target = "fullName", ignore = true)
     PlayerDTO toPlayerDTO(PlayerEntity entity);
 
@@ -525,7 +523,6 @@ import java.util.List;
  *
  * <h3>ImplementaÄŤnĂ­ poznĂˇmky</h3>
  * <ul>
- *     <li>v DTO se pouĹľĂ­vĂˇ vlastnost {@code nickName} mĂ­sto {@code nickname},</li>
  *     <li>pole {@code fullName} se negeneruje v mapperu, ale v entitÄ›/DTO logice,</li>
  *     <li>vazba na uĹľivatele ({@code user}) se nastavuje vĂ˝hradnÄ› v servisnĂ­ vrstvÄ›,</li>
  *     <li>notifikaÄŤnĂ­ nastavenĂ­ se mapujĂ­ do embedded objektu {@link NotificationSettings}.</li>
@@ -539,7 +536,7 @@ public interface PlayerMapper {
      *
      * <p>
      * RozdĂ­lnĂ© nĂˇzvy atributĹŻ jsou mapovĂˇny explicitnÄ›
-     * ({@code nickname} â†’ {@code nickName}). CelĂ© jmĂ©no hrĂˇÄŤe
+     * CelĂ© jmĂ©no hrĂˇÄŤe
      * ({@code fullName}) se v tĂ©to fĂˇzi neplnĂ­ a pĹ™edpoklĂˇdĂˇ se jeho
      * sestavenĂ­ jinde (napĹ™. z kĹ™estnĂ­ho jmĂ©na a pĹ™Ă­jmenĂ­).
      * </p>
@@ -553,7 +550,6 @@ public interface PlayerMapper {
      * @param entity entita hrĂˇÄŤe naÄŤtenĂˇ z databĂˇze
      * @return DTO reprezentace hrĂˇÄŤe
      */
-    @Mapping(source = "nickname", target = "nickName")
     @Mapping(target = "fullName", ignore = true)
     @Mapping(source = "notificationSettings.emailEnabled", target = "notifyByEmail")
     @Mapping(source = "notificationSettings.smsEnabled", target = "notifyBySms")
@@ -562,14 +558,7 @@ public interface PlayerMapper {
     /**
      * PĹ™evede DTO hrĂˇÄŤe na novou entitu.
      *
-     * <p>
-     * RozdĂ­lnĂ© nĂˇzvy atributĹŻ jsou mapovĂˇny explicitnÄ›
-     * ({@code nickName} â†’ {@code nickname}). Pole {@code fullName}
-     * se ignoruje a pĹ™edpoklĂˇdĂˇ se, Ĺľe entita si ho generuje sama
-     * (napĹ™. v setteru nebo v logice entitnĂ­ vrstvy).
-     * </p>
-     *
-     * <p>
+     <p>
      * Vazba na uĹľivatele ({@code user}) se nemapuje â€“ je plnÄ› spravovĂˇna
      * servisnĂ­ vrstvou. Status hrĂˇÄŤe se nastavuje podle hodnoty v DTO;
      * pokud nenĂ­ vyplnÄ›n, pouĹľije se vĂ˝chozĂ­ hodnota {@code PENDING}.
@@ -583,7 +572,6 @@ public interface PlayerMapper {
      * @param dto DTO reprezentace hrĂˇÄŤe
      * @return novĂˇ entita hrĂˇÄŤe pĹ™ipravenĂˇ k uloĹľenĂ­
      */
-    @Mapping(source = "nickName", target = "nickname")
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(
@@ -614,8 +602,7 @@ public interface PlayerMapper {
      * Aktualizuje existujĂ­cĂ­ entitu hrĂˇÄŤe na zĂˇkladÄ› hodnot z DTO.
      *
      * <p>
-     * RozdĂ­lnĂ˝ nĂˇzev atributu {@code nickName} â†’ {@code nickname} je
-     * mapovĂˇn explicitnÄ›. CelĂ© jmĂ©no hrĂˇÄŤe ({@code fullName}) se
+     * CelĂ© jmĂ©no hrĂˇÄŤe ({@code fullName}) se
      * ignoruje, stejnÄ› tak vazba na uĹľivatele ({@code user}), kterĂˇ je
      * spravovĂˇna servisnĂ­ vrstvou.
      * </p>
@@ -633,7 +620,6 @@ public interface PlayerMapper {
      * @param source zdrojovĂ© DTO s novĂ˝mi hodnotami
      * @param target cĂ­lovĂˇ entita hrĂˇÄŤe, kterĂˇ mĂˇ bĂ˝t aktualizovĂˇna
      */
-    @Mapping(source = "nickName", target = "nickname")
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(

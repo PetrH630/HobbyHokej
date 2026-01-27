@@ -11,12 +11,14 @@ DuplicateRegistrationException.java
 ForbiddenPlayerAccessException.java
 InactivityPeriodNotFoundException.java
 InactivityPeriodOverlapException.java
+InvalidChangePlayerUserException.java
 InvalidInactivityPeriodDateException.java
 InvalidMatchStatusException.java
 InvalidOldPasswordException.java
 InvalidPlayerStatusException.java
 InvalidSeasonPeriodDateException.java
 InvalidSeasonStateException.java
+InvalidUserActivationException.java
 MatchNotFoundException.java
 MatchRegistrationNotFoundException.java
 PasswordsDoNotMatchException.java
@@ -37,10 +39,21 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe uĹľivatelskĂ˝ ĂşÄŤet nenĂ­ aktivovĂˇn.
+ *
+ * <p>
+ * Vyhazuje se v pĹ™Ă­padÄ›, kdy se uĹľivatel pokouĹˇĂ­ pĹ™ihlĂˇsit nebo
+ * pouĹľĂ­vat funkce vyĹľadujĂ­cĂ­ aktivovanĂ˝ ĂşÄŤet, aniĹľ by dokonÄŤil
+ * aktivaci pĹ™es odkaz v e-mailu.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 403 (Forbidden).
+ */
 public class AccountNotActivatedException extends BusinessException {
 
     public AccountNotActivatedException() {
-        super("PrvnĂ­ musĂ­te aktivovat ĂşÄŤet pomocĂ­ odkazu v emailu", HttpStatus.FORBIDDEN); // 403
+        super("BE - Nejprve musĂ­te aktivovat ĂşÄŤet pomocĂ­ odkazu v e-mailu, nebo kontaktujte administrĂˇtora.", HttpStatus.FORBIDDEN);
     }
 }
 
@@ -180,6 +193,10 @@ public class ApiError {
     public String getPath() { return path; }
     public String getClientIp() { return clientIp; }
     public Map<String, String> getDetails() { return details; }
+
+    public void setDetails(Map<String, String> details) {
+        this.details = details;
+    }
 }
 
 
@@ -192,20 +209,43 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * ZĂˇkladnĂ­ domĂ©novĂˇ vĂ˝jimka pro business chyby v aplikaci.
+ *
+ * <p>
+ * SlouĹľĂ­ jako spoleÄŤnĂ˝ pĹ™edek pro aplikaÄŤnĂ­ vĂ˝jimky, kterĂ© nesou
+ * informaci o odpovĂ­dajĂ­cĂ­m HTTP status kĂłdu. Tento status
+ * je nĂˇslednÄ› pouĹľit v globĂˇlnĂ­m handleru vĂ˝jimek pro tvorbu
+ * jednotnĂ© chybovĂ© odpovÄ›di.
+ * </p>
+ */
 public class BusinessException extends RuntimeException {
 
+    /**
+     * HTTP status kĂłd, kterĂ˝ mĂˇ bĂ˝t vrĂˇcen klientovi.
+     */
     private final HttpStatus status;
 
+    /**
+     * VytvoĹ™Ă­ novou business vĂ˝jimku s danou zprĂˇvou a HTTP statusem.
+     *
+     * @param message chybovĂˇ zprĂˇva urÄŤenĂˇ typicky pĹ™Ă­mo pro uĹľivatele
+     * @param status  HTTP status kĂłd odpovĂ­dajĂ­cĂ­ danĂ© chybÄ›
+     */
     protected BusinessException(String message, HttpStatus status) {
         super(message);
         this.status = status;
     }
 
+    /**
+     * VrĂˇtĂ­ HTTP status kĂłd spojenĂ˝ s touto vĂ˝jimkou.
+     *
+     * @return HTTP status kĂłd
+     */
     public HttpStatus getStatus() {
         return status;
     }
 }
-
 
 
 
@@ -217,12 +257,21 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe nenĂ­ zvolen aktuĂˇlnĂ­ hrĂˇÄŤ.
+ *
+ * <p>
+ * Vyhazuje se v situaci, kdy klient volĂˇ endpoint, kterĂ˝ vyĹľaduje
+ * nastavenĂ©ho "current player", ale ĹľĂˇdnĂ˝ hrĂˇÄŤ nenĂ­ pro danĂ©ho
+ * uĹľivatele vybrĂˇn.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 400 (Bad Request).
+ */
 public class CurrentPlayerNotSelectedException extends BusinessException {
 
     public CurrentPlayerNotSelectedException() {
         super("BE - NenĂ­ zvolen aktuĂˇlnĂ­ hrĂˇÄŤ.", HttpStatus.BAD_REQUEST);
-        // alternativnÄ› by Ĺˇel i HttpStatus.CONFLICT, ale BAD_REQUEST dĂˇvĂˇ smysl:
-        // klient volĂˇ endpoint, kterĂ˝ vyĹľaduje current player, ale ĹľĂˇdnĂ©ho nenastavil
     }
 }
 
@@ -236,7 +285,18 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe hrĂˇÄŤ se stejnĂ˝m jmĂ©nem a pĹ™Ă­jmenĂ­m jiĹľ existuje.
+ *
+ * <p>
+ * PouĹľĂ­vĂˇ se pĹ™i vytvĂˇĹ™enĂ­ nebo registraci hrĂˇÄŤe, pokud by doĹˇlo
+ * k duplicitÄ› podle kombinace jmĂ©no + pĹ™Ă­jmenĂ­.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 409 (Conflict).
+ */
 public class DuplicateNameSurnameException extends BusinessException {
+
     public DuplicateNameSurnameException(String name, String surname) {
         super(
                 "BE - HrĂˇÄŤ se jmĂ©nem " + name + " " + surname + " jiĹľ existuje.",
@@ -255,12 +315,29 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe hrĂˇÄŤ mĂˇ jiĹľ aktivnĂ­ registraci na danĂ˝ zĂˇpas.
+ *
+ * <p>
+ * Vyhazuje se pĹ™i pokusu o vytvoĹ™enĂ­ novĂ© registrace na zĂˇpas,
+ * pokud uĹľ existuje platnĂˇ registrace pro stejnĂ©ho hrĂˇÄŤe a zĂˇpas.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 409 (Conflict).
+ */
 public class DuplicateRegistrationException extends BusinessException {
+
     public DuplicateRegistrationException(Long matchId, Long playerId) {
-        super("BE - HrĂˇÄŤ " + playerId + " jiĹľ mĂˇ aktivnĂ­ registraci na zĂˇpas " + matchId,
-                HttpStatus.CONFLICT); // 409
+        super(
+                "BE - HrĂˇÄŤ " + playerId + " jiĹľ mĂˇ aktivnĂ­ registraci na zĂˇpas " + matchId + ".",
+                HttpStatus.CONFLICT
+        );
+    }
+    public DuplicateRegistrationException(Long matchId, Long playerId, String message) {
+        super(message, HttpStatus.NOT_FOUND);
     }
 }
+
 
 
 -----
@@ -271,6 +348,16 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe uĹľivatel nemĂˇ oprĂˇvnÄ›nĂ­ pracovat s danĂ˝m hrĂˇÄŤem.
+ *
+ * <p>
+ * Vyhazuje se, pokud se pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel snaĹľĂ­ ÄŤĂ­st nebo mÄ›nit
+ * data hrĂˇÄŤe, kterĂ˝ mu nepatĹ™Ă­ (nenĂ­ k nÄ›mu pĹ™iĹ™azen).
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 403 (Forbidden).
+ */
 public class ForbiddenPlayerAccessException extends BusinessException {
 
     public ForbiddenPlayerAccessException(Long playerId) {
@@ -288,11 +375,23 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe poĹľadovanĂ© obdobĂ­ neaktivity nebylo nalezeno.
+ *
+ * <p>
+ * Vyhazuje se pĹ™i prĂˇci s ID obdobĂ­ neaktivity, kterĂ© neexistuje
+ * v databĂˇzi.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 404 (Not Found).
+ */
 public class InactivityPeriodNotFoundException extends BusinessException {
+
     public InactivityPeriodNotFoundException(Long id) {
         super("BE - ObdobĂ­ neaktivity s ID " + id + " neexistuje.", HttpStatus.NOT_FOUND);
     }
 }
+
 
 
 -----
@@ -303,14 +402,64 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ pĹ™ekryv obdobĂ­ neaktivity pro danĂ©ho hrĂˇÄŤe.
+ *
+ * <p>
+ * Vyhazuje se v pĹ™Ă­padÄ›, kdy novĂ© obdobĂ­ neaktivity koliduje
+ * s jiĹľ existujĂ­cĂ­m obdobĂ­m tĂ©hoĹľ hrĂˇÄŤe.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 409 (Conflict).
+ */
 public class InactivityPeriodOverlapException extends BusinessException {
+
     public InactivityPeriodOverlapException() {
         super("BE - NovĂ© obdobĂ­ se pĹ™ekrĂ˝vĂˇ s existujĂ­cĂ­m obdobĂ­m neaktivity hrĂˇÄŤe.", HttpStatus.CONFLICT);
     }
+
     public InactivityPeriodOverlapException(String message) {
         super(message, HttpStatus.CONFLICT);
     }
 }
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InvalidChangePlayerUserException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ neplatnĂ˝ pokus o zmÄ›nu pĹ™iĹ™azenĂ­ hrĂˇÄŤe k uĹľivateli.
+ * <p>
+ * Vyhazuje se v pĹ™Ă­padÄ›, kdy se aplikace pokusĂ­ pĹ™iĹ™adit hrĂˇÄŤe
+ * ke stejnĂ©mu uĹľivateli, ke kterĂ©mu jiĹľ patĹ™Ă­.
+ * </p>
+ *
+ * Tato vĂ˝jimka:
+ * <ul>
+ *     <li>rozĹˇiĹ™uje {@link BusinessException},</li>
+ *     <li>mapuje se na HTTP status {@link HttpStatus#CONFLICT} (409),</li>
+ *     <li>oznaÄŤuje logickĂ˝ konflikt ve stavu dat.</li>
+ * </ul>
+ *
+ * PouĹľĂ­vĂˇ se v service vrstvÄ› jako ochrana proti zbyteÄŤnĂ©
+ * nebo neplatnĂ© zmÄ›nÄ› vazby hrĂˇÄŤ â†’ uĹľivatel.
+ */
+public class InvalidChangePlayerUserException extends BusinessException {
+
+    /**
+     * VytvoĹ™Ă­ vĂ˝jimku s pĹ™eddefinovanou chybovou zprĂˇvou.
+     */
+    public InvalidChangePlayerUserException() {
+        super("HrĂˇÄŤ uĹľ je pĹ™iĹ™azen tomuto uĹľivateli", HttpStatus.CONFLICT);
+    }
+}
+
 
 
 -----
@@ -321,11 +470,23 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ neplatnĂ© datumovĂ© rozmezĂ­ obdobĂ­ neaktivity.
+ *
+ * <p>
+ * Typicky se pouĹľĂ­vĂˇ, pokud datum "od" je po datu "do" nebo jinak
+ * nesplĹuje logickĂˇ validaÄŤnĂ­ pravidla.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 400 (Bad Request).
+ */
 public class InvalidInactivityPeriodDateException extends BusinessException {
+
     public InvalidInactivityPeriodDateException(String message) {
         super(message, HttpStatus.BAD_REQUEST);
     }
 }
+
 
 
 -----
@@ -336,12 +497,21 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ neplatnou zmÄ›nu stavu zĂˇpasu.
+ *
+ * <p>
+ * Vyhazuje se pĹ™i pokusu o pĹ™echod zĂˇpasu do stavu, kterĂ˝ nenĂ­
+ * povolen vzhledem k aktuĂˇlnĂ­mu stavu nebo business pravidlĹŻm.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 409 (Conflict).
+ */
 public class InvalidMatchStatusException extends BusinessException {
+
     public InvalidMatchStatusException(Long id, String message) {
-        super("BE - ZĂˇpas s id: " + id + message, HttpStatus.CONFLICT);
+        super("BE - ZĂˇpas s ID " + id + " - " + message, HttpStatus.CONFLICT);
     }
-
-
 }
 
 
@@ -354,12 +524,23 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ nesprĂˇvnĂ© pĹŻvodnĂ­ heslo pĹ™i zmÄ›nÄ› hesla.
+ *
+ * <p>
+ * Vyhazuje se v pĹ™Ă­padÄ›, kdy uĹľivatel zadĂˇ ĹˇpatnĂ© aktuĂˇlnĂ­ heslo
+ * pĹ™i pokusu o zmÄ›nu hesla.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 400 (Bad Request).
+ */
 public class InvalidOldPasswordException extends BusinessException {
 
     public InvalidOldPasswordException() {
-        super("BE - StarĂ© heslo je nesprĂˇvnĂ©", HttpStatus.BAD_REQUEST);
+        super("BE - StarĂ© heslo je nesprĂˇvnĂ©.", HttpStatus.BAD_REQUEST);
     }
 }
+
 
 
 -----
@@ -370,11 +551,23 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ neplatnĂ˝ nebo nepovolenĂ˝ stav hrĂˇÄŤe.
+ *
+ * <p>
+ * PouĹľĂ­vĂˇ se pĹ™i zmÄ›nÄ› nebo vyhodnocovĂˇnĂ­ stavu hrĂˇÄŤe, pokud
+ * poĹľadovanĂˇ operace nenĂ­ v danĂ©m stavu povolena.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 400 (Bad Request).
+ */
 public class InvalidPlayerStatusException extends BusinessException {
+
     public InvalidPlayerStatusException(String message) {
-        super(message, HttpStatus.BAD_REQUEST); // 400
+        super(message, HttpStatus.BAD_REQUEST);
     }
 }
+
 
 
 -----
@@ -385,8 +578,19 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ neplatnĂ© datumovĂ© rozmezĂ­ sezĂłny.
+ *
+ * <p>
+ * Typicky se pouĹľĂ­vĂˇ v pĹ™Ă­padÄ›, kdy datum zaÄŤĂˇtku sezĂłny
+ * nenĂ­ pĹ™ed datem konce nebo poruĹˇuje jinĂˇ logickĂˇ pravidla.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 400 (Bad Request).
+ */
 public class InvalidSeasonPeriodDateException extends BusinessException {
-    public InvalidSeasonPeriodDateException(String message){
+
+    public InvalidSeasonPeriodDateException(String message) {
         super(message, HttpStatus.BAD_REQUEST);
     }
 }
@@ -399,9 +603,65 @@ public class InvalidSeasonPeriodDateException extends BusinessException {
 
 package cz.phsoft.hokej.exceptions;
 
-public class InvalidSeasonStateException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ nepovolenĂ˝ stavovĂ˝ pĹ™echod sezĂłny.
+ *
+ * <p>
+ * PouĹľĂ­vĂˇ se v situacĂ­ch, kdy operace nad sezĂłnou nenĂ­ povolena
+ * vzhledem k jejĂ­mu aktuĂˇlnĂ­mu stavu (napĹ™. deaktivace poslednĂ­
+ * aktivnĂ­ sezĂłny nebo neplatnĂˇ zmÄ›na aktivace).
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 409 (Conflict).
+ */
+public class InvalidSeasonStateException extends BusinessException {
+
     public InvalidSeasonStateException(String message) {
-        super(message);
+        super(message, HttpStatus.CONFLICT);
+    }
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\exceptions\InvalidUserActivationException.java
+-----
+
+package cz.phsoft.hokej.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ neplatnou nebo nepovolenou zmÄ›nu
+ * aktivaÄŤnĂ­ho stavu uĹľivatelskĂ©ho ĂşÄŤtu.
+ * <p>
+ * Typicky se vyhazuje v situacĂ­ch, kdy:
+ * <ul>
+ *     <li>je uĹľivatel jiĹľ aktivnĂ­ a pokusĂ­me se ho znovu aktivovat,</li>
+ *     <li>je uĹľivatel neaktivnĂ­ a operace neodpovĂ­dĂˇ jeho aktuĂˇlnĂ­mu stavu,</li>
+ *     <li>dojde k poruĹˇenĂ­ pravidel ĹľivotnĂ­ho cyklu uĹľivatele.</li>
+ * </ul>
+ *
+ * Tato vĂ˝jimka:
+ * <ul>
+ *     <li>rozĹˇiĹ™uje {@link BusinessException},</li>
+ *     <li>mapuje se na HTTP status {@link HttpStatus#CONFLICT} (409),</li>
+ *     <li>signalizuje logickĂ˝ konflikt stavu zdroje.</li>
+ * </ul>
+ *
+ * PouĹľĂ­vĂˇ se v service vrstvÄ›, nikoli pĹ™Ă­mo v controllerech.
+ */
+public class InvalidUserActivationException extends BusinessException {
+
+    /**
+     * VytvoĹ™Ă­ vĂ˝jimku s popisnou chybovou zprĂˇvou.
+     *
+     * @param message detailnĂ­ popis dĹŻvodu neplatnĂ© aktivace
+     */
+    public InvalidUserActivationException(String message) {
+        super(message, HttpStatus.CONFLICT);
     }
 }
 
@@ -415,11 +675,22 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe poĹľadovanĂ˝ zĂˇpas nebyl nalezen.
+ *
+ * <p>
+ * Vyhazuje se pĹ™i prĂˇci s ID zĂˇpasu, kterĂ© neexistuje v databĂˇzi.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 404 (Not Found).
+ */
 public class MatchNotFoundException extends BusinessException {
+
     public MatchNotFoundException(Long matchId) {
         super("BE - ZĂˇpas s ID " + matchId + " nenalezen.", HttpStatus.NOT_FOUND);
     }
 }
+
 
 
 -----
@@ -430,11 +701,27 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe registrace hrĂˇÄŤe na danĂ˝ zĂˇpas nebyla nalezena.
+ *
+ * <p>
+ * Vyhazuje se pĹ™i prĂˇci s registracĂ­, kterĂˇ neexistuje pro kombinaci
+ * hrĂˇÄŤ + zĂˇpas.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 404 (Not Found).
+ */
 public class MatchRegistrationNotFoundException extends BusinessException {
+
     public MatchRegistrationNotFoundException(Long playerId, Long matchId) {
-        super("BE - Registrace hrĂˇÄŤe s ID " + playerId + " na zĂˇpas s ID " + matchId + " nenalezena.", HttpStatus.NOT_FOUND);
+        super(
+                "BE - Registrace hrĂˇÄŤe s ID " + playerId +
+                        " na zĂˇpas s ID " + matchId + " nenalezena.",
+                HttpStatus.NOT_FOUND
+        );
     }
 }
+
 
 
 -----
@@ -445,16 +732,27 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe zadanĂˇ hesla se neshodujĂ­.
+ *
+ * <p>
+ * PouĹľĂ­vĂˇ se pĹ™i registraci nebo zmÄ›nÄ› hesla, pokud novĂ© heslo
+ * a jeho potvrzenĂ­ nejsou stejnĂ©.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 400 (Bad Request).
+ */
 public class PasswordsDoNotMatchException extends BusinessException {
 
     public PasswordsDoNotMatchException() {
-        super("BE - Hesla se neshodujĂ­", HttpStatus.BAD_REQUEST);
+        super("BE - Hesla se neshodujĂ­.", HttpStatus.BAD_REQUEST);
     }
 
     public PasswordsDoNotMatchException(String message) {
         super(message, HttpStatus.BAD_REQUEST);
     }
 }
+
 
 
 -----
@@ -465,13 +763,23 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe poĹľadovanĂ˝ hrĂˇÄŤ nebyl nalezen.
+ *
+ * <p>
+ * MĹŻĹľe bĂ˝t vyhozena jak pĹ™i hledĂˇnĂ­ podle ID, tak pĹ™i hledĂˇnĂ­ podle e-mailu.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 404 (Not Found).
+ */
 public class PlayerNotFoundException extends BusinessException {
+
     public PlayerNotFoundException(Long playerId) {
         super("BE - HrĂˇÄŤ s ID " + playerId + " nenalezen.", HttpStatus.NOT_FOUND);
     }
 
     public PlayerNotFoundException(String email) {
-        super("BE - HrĂˇÄŤ s emailem " + email + " nenalezen.", HttpStatus.NOT_FOUND);
+        super("BE - HrĂˇÄŤ s e-mailem " + email + " nenalezen.", HttpStatus.NOT_FOUND);
     }
 }
 
@@ -485,12 +793,26 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe hrĂˇÄŤ nemĂˇ registraci na danĂ˝ zĂˇpas.
+ *
+ * <p>
+ * Vyhazuje se pĹ™i pokusu o prĂˇci s registracĂ­, kterĂˇ pro kombinaci
+ * hrĂˇÄŤ + zĂˇpas neexistuje (napĹ™. pĹ™i odhlĂˇĹˇenĂ­ neexistujĂ­cĂ­ registrace).
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 404 (Not Found).
+ */
 public class RegistrationNotFoundException extends BusinessException {
+
     public RegistrationNotFoundException(Long matchId, Long playerId) {
-        super("BE - HrĂˇÄŤ " + playerId + " nemĂˇ registraci na zĂˇpas " + matchId,
-                HttpStatus.NOT_FOUND);
+        super(
+                "BE - HrĂˇÄŤ " + playerId + " nemĂˇ registraci na zĂˇpas " + matchId + ".",
+                HttpStatus.NOT_FOUND
+        );
     }
 }
+
 
 
 -----
@@ -501,19 +823,37 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe poĹľadovanĂˇ sezĂłna nebyla nalezena.
+ *
+ * <p>
+ * PouĹľĂ­vĂˇ se jak pĹ™i hledĂˇnĂ­ sezĂłny podle ID, tak v situaci,
+ * kdy nenĂ­ nastavena ĹľĂˇdnĂˇ aktivnĂ­ sezĂłna.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 404 (Not Found).
+ */
 public class SeasonNotFoundException extends BusinessException {
-    public SeasonNotFoundException() {
-        super("BE - SezĂłna nebyla nalezena.", HttpStatus.CONFLICT);
+
+    /**
+     * SezĂłna s konkrĂ©tnĂ­m ID nebyla nalezena.
+     *
+     * @param id ID sezĂłny
+     */
+    public SeasonNotFoundException(Long id) {
+        super("BE - SezĂłna s ID " + id + " nebyla nalezena.", HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * ObecnÄ›jĹˇĂ­ varianta s custom zprĂˇvou.
+     *
+     * Typicky pouĹľitĂˇ pro situaci typu â€žnenĂ­ nastavena ĹľĂˇdnĂˇ aktivnĂ­ sezĂłnaâ€ś.
+     *
+     * @param message chybovĂˇ zprĂˇva
+     */
     public SeasonNotFoundException(String message) {
-        super(message, HttpStatus.CONFLICT);
+        super(message, HttpStatus.NOT_FOUND);
     }
-
-
-
-
-
 }
 
 
@@ -526,9 +866,19 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­ pĹ™ekryv obdobĂ­ mezi sezĂłnami.
+ *
+ * <p>
+ * Vyhazuje se pĹ™i vytvĂˇĹ™enĂ­ nebo ĂşpravÄ› sezĂłny, pokud jejĂ­ obdobĂ­
+ * zasahuje do obdobĂ­ jinĂ© existujĂ­cĂ­ sezĂłny.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 409 (Conflict).
+ */
 public class SeasonPeriodOverlapException extends BusinessException {
 
-       public SeasonPeriodOverlapException(String message) {
+    public SeasonPeriodOverlapException(String message) {
         super(message, HttpStatus.CONFLICT);
     }
 }
@@ -543,10 +893,20 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe uĹľivatel jiĹľ existuje.
+ *
+ * <p>
+ * Typicky se pouĹľĂ­vĂˇ pĹ™i registraci, pokud je e-mail nebo jinĂ˝
+ * identifikĂˇtor uĹľivatele jiĹľ obsazen.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 409 (Conflict).
+ */
 public class UserAlreadyExistsException extends BusinessException {
 
     public UserAlreadyExistsException(String message) {
-        super(message, HttpStatus.CONFLICT); // 409
+        super(message, HttpStatus.CONFLICT);
     }
 }
 
@@ -560,10 +920,19 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe poĹľadovanĂ˝ uĹľivatel nebyl nalezen.
+ *
+ * <p>
+ * MĹŻĹľe bĂ˝t vyhozena pĹ™i hledĂˇnĂ­ podle e-mailu nebo podle ID uĹľivatele.
+ * </p>
+ *
+ * Typicky mapovĂˇno na HTTP 404 (Not Found).
+ */
 public class UserNotFoundException extends BusinessException {
 
     public UserNotFoundException(String email) {
-        super("BE - UĹľivatel s emailem " + email + " nenalezen.", HttpStatus.NOT_FOUND);
+        super("BE - UĹľivatel s e-mailem " + email + " nenalezen.", HttpStatus.NOT_FOUND);
     }
 
     public UserNotFoundException(Long id) {

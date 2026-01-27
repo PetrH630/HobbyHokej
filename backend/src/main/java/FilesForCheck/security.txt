@@ -250,7 +250,7 @@ import org.springframework.stereotype.Component;
  *
  * PoznĂˇmka:
  * ---------
- * V aktuĂˇlnĂ­ verzi vyuĹľĂ­vĂˇĹˇ hlavnÄ› endpointy typu {@code /me}
+ * V aktuĂˇlnĂ­ verzi vyuĹľĂ­vĂˇm hlavnÄ› endpointy typu {@code /me}
  * a {@link CurrentPlayerContext}, ale tato tĹ™Ă­da je pĹ™ipravena
  * pro pĹ™Ă­padnĂ© rozĹˇĂ­Ĺ™enĂ­ autorizace na Ăşrovni konkrĂ©tnĂ­ch hrĂˇÄŤĹŻ.
  */

@@ -27,7 +27,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/matches/admin")
-@CrossOrigin(origins = "*")
 public class AdminMatchController {
 
     private final MatchService matchService;

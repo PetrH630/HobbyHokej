@@ -2,7 +2,67 @@
 Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\dto\requests
 
 Seznam souborů:
+ChangePlayerUserRequest.java
 MatchRegistrationRequest.java
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\dto\requests\ChangePlayerUserRequest.java
+-----
+
+package cz.phsoft.hokej.models.dto.requests;
+
+import jakarta.validation.constraints.NotNull;
+
+/**
+ * Request DTO pro zmÄ›nu pĹ™iĹ™azenĂ©ho uĹľivatele k hrĂˇÄŤi.
+ * <p>
+ * SlouĹľĂ­ jako vstupnĂ­ objekt pro administrĂˇtorskĂ© endpointy,
+ * kterĂ© umoĹľĹujĂ­ zmÄ›nit vazbu mezi hrĂˇÄŤem a aplikaÄŤnĂ­m uĹľivatelem.
+ * </p>
+ *
+ * TypickĂ© pouĹľitĂ­:
+ * <ul>
+ *     <li>oprava chybnÄ› pĹ™iĹ™azenĂ©ho uĹľivatelskĂ©ho ĂşÄŤtu k hrĂˇÄŤi,</li>
+ *     <li>pĹ™evod hrĂˇÄŤe pod jinĂ˝ ĂşÄŤet,</li>
+ *     <li>technickĂ© nebo datovĂ© korekce provĂˇdÄ›nĂ© administrĂˇtorem.</li>
+ * </ul>
+ *
+ * Validace:
+ * <ul>
+ *     <li>{@link NotNull} â€“ ID novĂ©ho uĹľivatele musĂ­ bĂ˝t vĹľdy uvedeno.</li>
+ * </ul>
+ *
+ * TĹ™Ă­da neobsahuje ĹľĂˇdnou business logiku â€“ slouĹľĂ­ vĂ˝hradnÄ›
+ * jako pĹ™enosovĂ˝ objekt mezi klientem a API vrstvou.
+ */
+public class ChangePlayerUserRequest {
+
+    /**
+     * ID novĂ©ho uĹľivatele, ke kterĂ©mu mĂˇ bĂ˝t hrĂˇÄŤ pĹ™iĹ™azen.
+     */
+    @NotNull
+    private Long newUserId;
+
+    /**
+     * VrĂˇtĂ­ ID novĂ©ho uĹľivatele.
+     *
+     * @return ID uĹľivatele
+     */
+    public Long getNewUserId() {
+        return newUserId;
+    }
+
+    /**
+     * NastavĂ­ ID novĂ©ho uĹľivatele.
+     *
+     * @param newUserId ID uĹľivatele, ke kterĂ©mu mĂˇ bĂ˝t hrĂˇÄŤ pĹ™iĹ™azen
+     */
+    public void setNewUserId(Long newUserId) {
+        this.newUserId = newUserId;
+    }
+}
 
 
 
@@ -65,7 +125,9 @@ public class MatchRegistrationRequest {
     private Team team;
 
     /**
-     * DĹŻvod omluvy â€“ pouĹľĂ­vĂˇ se pouze pĹ™i statusu {@code EXCUSED}.
+     * DĹŻvod omluvy â€“ pouĹľĂ­vĂˇ se pouze pĹ™i statusu
+     * {@code EXCUSED}
+     * {@code UNREGISTER}
      */
     private ExcuseReason excuseReason;
 

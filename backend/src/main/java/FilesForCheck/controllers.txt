@@ -14,6 +14,7 @@ MatchController.java
 MatchRegistrationController.java
 PlayerController.java
 PlayerInactivityPeriodController.java
+SeasonController.java
 TestController.java
 TestEmailController.java
 TestSmsController.java
@@ -53,7 +54,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/matches/admin")
-@CrossOrigin(origins = "*")
+
 public class AdminMatchController {
 
     private final MatchService matchService;
@@ -228,7 +229,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/registrations/admin")
-@CrossOrigin(origins = "*")
+
 public class AdminMatchRegistrationController {
 
     private final MatchRegistrationService service;
@@ -348,6 +349,7 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.dto.requests.ChangePlayerUserRequest;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.PlayerService;
 import jakarta.validation.Valid;
@@ -373,7 +375,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/players/admin")
-@CrossOrigin(origins = "*")
+
 public class AdminPlayerController {
 
     private final PlayerService playerService;
@@ -477,6 +479,33 @@ public class AdminPlayerController {
         SuccessResponseDTO response = playerService.rejectPlayer(id);
         return ResponseEntity.ok(response);
     }
+    /**
+     * ZmÄ›nĂ­ pĹ™iĹ™azenĂ­ hrĂˇÄŤe k aplikaÄŤnĂ­mu uĹľivateli.
+     * <p>
+     * SlouĹľĂ­ k administrĂˇtorskĂ© korekci vazby mezi {@code Player} a {@code AppUser},
+     * typicky v pĹ™Ă­padech:
+     * <ul>
+     *     <li>chybnÄ› spĂˇrovanĂ©ho uĹľivatelskĂ©ho ĂşÄŤtu,</li>
+     *     <li>slouÄŤenĂ­ duplicitnĂ­ch hrĂˇÄŤĹŻ nebo uĹľivatelĹŻ,</li>
+     *     <li>ruÄŤnĂ­ administrĂˇtorskĂ© opravy dat.</li>
+     * </ul>
+     *
+     * Operace je vyhrazena pouze pro roli ADMIN.
+     *
+     * @param playerId ID hrĂˇÄŤe, kterĂ©mu mĂˇ bĂ˝t zmÄ›nÄ›n pĹ™iĹ™azenĂ˝ uĹľivatel
+     * @param request request obsahujĂ­cĂ­ ID novĂ©ho uĹľivatele
+     * @return textovĂˇ informace o ĂşspÄ›ĹˇnĂ©m provedenĂ­ operace
+     */
+    @PostMapping("/{playerId}/change-user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> changePlayerUser (
+            @PathVariable Long playerId, @RequestBody ChangePlayerUserRequest request) {
+
+        playerService.changePlayerUser(playerId, request.getNewUserId());
+
+        return ResponseEntity.ok("HrĂˇÄŤ s id: " + playerId + " byl ĂşspÄ›ĹˇnÄ› pĹ™iĹ™azen uĹľivateli s ID: " + request.getNewUserId());
+    }
+
 }
 
 
@@ -622,12 +651,12 @@ import java.util.List;
  *     <li>prĂˇci s pĹ™ihlĂˇĹˇenĂ˝m uĹľivatelem (profil, zmÄ›na hesla),</li>
  *     <li>administrativnĂ­ sprĂˇvu uĹľivatelĹŻ (pouze ADMIN).</li>
  * </ul>
- *
+ * <p>
  * VeĹˇkerĂˇ business logika je delegovĂˇna do {@link AppUserService}.
  */
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
+
 public class AppUserController {
 
     private final AppUserService appUserService;
@@ -719,6 +748,30 @@ public class AppUserController {
     public List<AppUserDTO> getAllUsers() {
         return appUserService.getAllUsers();
     }
+
+    /**
+     * Aktivuje ĂşÄŤet uĹľivatele.
+     * <p>
+     * Endpoint je dostupnĂ˝ pouze pro administrĂˇtora.
+     */
+    @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> activateUserByAdmin(@PathVariable Long id) {
+        appUserService.activateUserByAdmin(id);
+        return ResponseEntity.ok("UĹľivatel byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn");
+    }
+
+    /**
+     * Dektivuje ĂşÄŤet uĹľivatele.
+     * <p>
+     * Endpoint je dostupnĂ˝ pouze pro administrĂˇtora.
+     */
+    @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> deactivateUserByAdmin(@PathVariable Long id) {
+        appUserService.deactivateUserByAdmin(id);
+        return ResponseEntity.ok("UĹľivatel byl ĂşspÄ›ĹˇnÄ› deaktivovĂˇn");
+    }
 }
 
 
@@ -754,7 +807,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+
 public class AuthController {
 
     private final AppUserService appUserService;
@@ -1025,7 +1078,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/matches")
-@CrossOrigin(origins = "*")
+
 public class MatchController {
 
     private final MatchService matchService;
@@ -1146,7 +1199,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/registrations")
-@CrossOrigin(origins = "*")
+
 public class MatchRegistrationController {
 
     private final MatchRegistrationService matchRegistrationService;
@@ -1235,7 +1288,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/players")
-@CrossOrigin(origins = "*")
+
 public class PlayerController {
 
     private final PlayerService playerService;
@@ -1327,7 +1380,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/inactivity/admin")
-@CrossOrigin(origins = "*")
+
 public class PlayerInactivityPeriodController {
 
     private final PlayerInactivityPeriodService service;
@@ -1427,6 +1480,69 @@ public class PlayerInactivityPeriodController {
 
 
 -----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\controllers\SeasonController.java
+-----
+
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.SeasonDTO;
+import cz.phsoft.hokej.models.services.CurrentSeasonService;
+import cz.phsoft.hokej.models.services.SeasonService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/seasons/me")
+
+public class SeasonController {
+
+    private final CurrentSeasonService currentSeasonService;
+    private final SeasonService seasonService;
+
+    public SeasonController(CurrentSeasonService currentSeasonService,
+                                   SeasonService seasonService) {
+        this.currentSeasonService = currentSeasonService;
+        this.seasonService = seasonService;
+    }
+    /**
+     * VrĂˇtĂ­ vĹˇechny sezony
+     */
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public List<SeasonDTO> getAllSeasons() {
+        return seasonService.getAllSeasons();
+    }
+
+    /**
+     * VrĂˇtĂ­ sezonu, kterĂˇ je aktuĂˇlnÄ› vybranĂˇ pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+     * Pokud nenĂ­ vybrĂˇna vrĂˇtĂ­ @Null.
+     */
+    @GetMapping("/current")
+    @PreAuthorize("isAuthenticated()")
+    public SeasonDTO getCurrentSeasonForUser() {
+        Long id = currentSeasonService.getCurrentSeasonIdOrDefault();
+        return (id != null) ? seasonService.getSeasonById(id) : null;
+    }
+
+    /**
+     * NastavenĂ­ sezony dle id
+     */
+    @PostMapping("/current/{seasonId}")
+    @PreAuthorize("isAuthenticated()")
+    public void setCurrentSeasonForUser(@PathVariable Long seasonId) {
+        // jednoduchĂˇ validace â€“ jen ovÄ›Ĺ™Ă­me, Ĺľe sezĂłna existuje
+        seasonService.getSeasonById(seasonId);
+        currentSeasonService.setCurrentSeasonId(seasonId);
+    }
+
+
+}
+
+
+
+-----
 # Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\controllers\TestController.java
 -----
 
@@ -1441,7 +1557,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/test")
 @PreAuthorize("hasRole('ADMIN')")
-@CrossOrigin(origins = "*")
+
 public class TestController {
 
     @GetMapping

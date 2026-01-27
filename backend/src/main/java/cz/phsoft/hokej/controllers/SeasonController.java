@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/seasons/me")
-@CrossOrigin(origins = "*")
 public class SeasonController {
 
     private final CurrentSeasonService currentSeasonService;

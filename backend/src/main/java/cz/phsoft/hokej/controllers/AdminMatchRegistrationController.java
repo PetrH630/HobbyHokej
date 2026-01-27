@@ -26,7 +26,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/registrations/admin")
-@CrossOrigin(origins = "*")
 public class AdminMatchRegistrationController {
 
     private final MatchRegistrationService service;

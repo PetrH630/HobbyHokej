@@ -578,10 +578,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class DataInitializer {
@@ -594,6 +598,7 @@ public class DataInitializer {
     private final SeasonRepository seasonRepository;
     private final JdbcTemplate jdbcTemplate;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private int j;
 
     public DataInitializer(PlayerRepository playerRepository,
                            MatchRepository matchRepository,
@@ -655,11 +660,11 @@ public class DataInitializer {
                 new PlayerEntity("HrĂˇÄŤ_2", "Dva", "", PlayerType.VIP, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
                 new PlayerEntity("HrĂˇÄŤ_3", "TĹ™i", "", PlayerType.VIP, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
                 new PlayerEntity("HrĂˇÄŤ_4", "ÄŚtyĹ™i", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
-                new PlayerEntity("HrĂˇÄŤ_5", "PÄ›t", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.PENDING),
-                new PlayerEntity("HrĂˇÄŤ_6", "Ĺ est", "", PlayerType.STANDARD, "+420776609956", Team.DARK, PlayerStatus.PENDING),
-                new PlayerEntity("HrĂˇÄŤ_7", "Sedm", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.PENDING),
-                new PlayerEntity("HrĂˇÄŤ_8", "Osum", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING),
-                new PlayerEntity("HrĂˇÄŤ_9", "DevÄ›t", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING),
+                new PlayerEntity("HrĂˇÄŤ_5", "PÄ›t", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
+                new PlayerEntity("HrĂˇÄŤ_6", "Ĺ est", "", PlayerType.STANDARD, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
+                new PlayerEntity("HrĂˇÄŤ_7", "Sedm", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
+                new PlayerEntity("HrĂˇÄŤ_8", "Osum", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
+                new PlayerEntity("HrĂˇÄŤ_9", "DevÄ›t", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
                 new PlayerEntity("HrĂˇÄŤ_10", "Deset", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING)
         ));
 
@@ -713,14 +718,14 @@ public class DataInitializer {
         // SezĂłna 2024/2025: 1.11.2024 â€“ 31.3.2025
         SeasonEntity season2024_2025 = new SeasonEntity();
         season2024_2025.setName("2024/2025");
-        season2024_2025.setStartDate(LocalDate.of(2024, 11, 1));
+        season2024_2025.setStartDate(LocalDate.of(2024, 11, 20));
         season2024_2025.setEndDate(LocalDate.of(2025, 3, 31));
         season2024_2025.setActive(false);
 
         // SezĂłna 2025/2026: 1.11.2025 â€“ 31.3.2026 (aktuĂˇlnĂ­ â€“ nastavĂ­me jako active)
         SeasonEntity season2025_2026 = new SeasonEntity();
         season2025_2026.setName("2025/2026");
-        season2025_2026.setStartDate(LocalDate.of(2025, 11, 1));
+        season2025_2026.setStartDate(LocalDate.of(2025, 11, 21));
         season2025_2026.setEndDate(LocalDate.of(2026, 3, 31));
         season2025_2026.setActive(true);
 
@@ -751,75 +756,60 @@ public class DataInitializer {
         }
 
         // SezĂłny MUSĂŤ existovat, jinak nemĂˇme co pĹ™iĹ™adit
-        java.util.List<SeasonEntity> seasons = seasonRepository.findAll();
+        List<SeasonEntity> seasons = seasonRepository.findAll();
         if (seasons.isEmpty()) {
             throw new IllegalStateException("BE - Nelze inicializovat zĂˇpasy, neexistuje ĹľĂˇdnĂˇ sezĂłna.");
         }
 
+
         System.out.println("Initializing matches...");
+        for (int j = 0; j < 2; j++) {
+            SeasonEntity actualSeason = seasons.get(j);
+            System.out.println("Nastavuji aktĂˇlnĂ­ sezonu" + j);
+            LocalDate startSeasonDate = actualSeason.getStartDate();
+            LocalDate endSeasonDate = actualSeason.getEndDate();
+            LocalDateTime startDate = startSeasonDate
+                    .with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
+                    .atTime(18, 45);
+            int fridaysCount = countFridays(startSeasonDate, endSeasonDate);
 
-        // vĂ˝chozĂ­ datum prvnĂ­ho zĂˇpasu
-        java.time.LocalDateTime startDate = java.time.LocalDateTime.of(2025, 11, 21, 18, 45);
+            System.out.println("jdu vytvĂˇĹ™et zĂˇpasy");
+            for (int i = 0; i < fridaysCount; i++) {
+                MatchEntity match = new MatchEntity();
+                LocalDateTime dateTime = startDate.plusWeeks(i);
+                match.setDateTime(dateTime);
+                match.setLocation("WOODARĂ‰NA");
+                match.setDescription("");
+                match.setMaxPlayers(12);
+                match.setPrice(2200);
+                match.setMatchStatus(null);
+                match.setCancelReason(null);
+                match.setSeason(actualSeason);
+                // uloĹľĂ­me zĂˇpas
+                matchRepository.save(match);
 
-        for (int i = 0; i < 15; i++) {
-            MatchEntity match = new MatchEntity();
-
-            java.time.LocalDateTime dateTime = startDate.plusWeeks(i);
-
-            match.setDateTime(dateTime);
-            match.setLocation("WOODARĂ‰NA");
-            match.setDescription("");
-            match.setMaxPlayers(12);
-            match.setPrice(2200);
-            match.setMatchStatus(null);
-            match.setCancelReason(null);
-
-            // đź”ą TADY je KLĂŤÄŚ: vĹľdy najdeme sezĂłnu a nastavĂ­me ji
-            SeasonEntity season = findSeasonForDate(dateTime.toLocalDate(), seasons);
-            if (season == null) {
-                // Tohle by za normĂˇlnĂ­ch okolnostĂ­ nemÄ›lo nastat, ale kdyĹľ jo, chceme failnout srozumitelnÄ›
-                throw new IllegalStateException(
-                        "BE - NepodaĹ™ilo se najĂ­t sezĂłnu pro datum zĂˇpasu " + dateTime.toLocalDate()
-                );
             }
-            match.setSeason(season);
-
-            // uloĹľĂ­me zĂˇpas
-            matchRepository.save(match);
+            System.out.println("ZĂˇpasy v sezonÄ› byly vytvoĹ™eny");
         }
 
-        System.out.println("Matches initialized.");
+        System.out.println("ZĂˇpasy vytvoĹ™eny");
     }
+// POMOCNĂ PRO SPOÄŚĂŤTĂNĂŤ PĂTKU
 
-    // POMOCNĂ METODA PRO INIT MATCHES - NastavenĂ­ sezony
-    private SeasonEntity findSeasonForDate(
-            java.time.LocalDate date,
-            java.util.List<SeasonEntity> seasons
-    ) {
-        // 1) ZkusĂ­me najĂ­t sezĂłnu, do kterĂ© datum spadĂˇ (startDate <= date <= endDate)
-        for (SeasonEntity season : seasons) {
-            boolean startsBeforeOrSame = !date.isBefore(season.getStartDate()); // date >= start
-            boolean endsAfterOrSame = !date.isAfter(season.getEndDate());       // date <= end
+   private int countFridays(LocalDate from, LocalDate to) {
+        if (to.isBefore(from)) {return 0;}
+        LocalDate firstFriday = from.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
 
-            if (startsBeforeOrSame && endsAfterOrSame) {
-                return season;
-            }
+        if (firstFriday.isAfter(to)) {return 0; }
+        int count = 0;
+        for (LocalDate date = firstFriday;
+             !date.isAfter(to);
+             date = date.plusWeeks(1)) {
+            count++;
         }
 
-        // 2) Pokud ĹľĂˇdnĂˇ nesedĂ­ intervalem, vezmeme aktivnĂ­ sezĂłnu (pokud nÄ›jakĂˇ je)
-        for (SeasonEntity season : seasons) {
-            if (season.isActive()) {
-                return season;
-            }
-        }
-
-        // 3) Jako ĂşplnĂ˝ fallback vezmeme prvnĂ­ sezĂłnu v seznamu
-        //    (k tomuhle by se to nemÄ›lo moc dostĂˇvat, ale je to bezpeÄŤnĂˇ pojistka)
-        return seasons.get(0);
+        return count;
     }
-
-
-
     // =====================
     // REGISTRATIONS
     // =====================
@@ -830,26 +820,64 @@ public class DataInitializer {
         }
 
         List<MatchEntity> matches = matchRepository.findAll();
-        List<PlayerEntity> players = playerRepository.findAll();
+
+        List<PlayerEntity> players = playerRepository.findAll().stream()
+                .filter(p -> p.getId() != null)
+                .filter(p -> p.getPlayerStatus() == PlayerStatus.APPROVED)
+                .toList();
 
         if (matches.isEmpty() || players.size() < 6) {
-            System.out.println("Not enough data to create registrations â€“ skipping.");
+            System.out.println("Nedostatek dat pro vytvoĹ™enĂ­ registracĂ­ â€“ skipping.");
             return;
         }
 
-        MatchEntity match = matches.get(2); // â€žtĹ™etĂ­â€ś vytvoĹ™enĂ˝ zĂˇpas
-        for (int i = 0; i < 6; i++) {
-            PlayerEntity player = players.get(i);
+        for (MatchEntity match : matches) {
 
-            MatchRegistrationEntity reg = new MatchRegistrationEntity();
-            reg.setMatch(match);
-            reg.setPlayer(player);
-            reg.setStatus(PlayerMatchStatus.REGISTERED);
-            reg.setTeam(i < 3 ? Team.DARK : Team.LIGHT);
-            reg.setTimestamp(LocalDateTime.now());
-            reg.setCreatedBy("initializer");
+            // NĂˇhodnĂ˝ vĂ˝bÄ›r 8 unikĂˇtnĂ­ch hrĂˇÄŤĹŻ
+            List<PlayerEntity> shuffledPlayers = new ArrayList<>(players);
+            Collections.shuffle(shuffledPlayers);
+            List<PlayerEntity> selectedPlayers = shuffledPlayers.subList(0, 8);
 
-            matchRegistrationRepository.save(reg);
+            // NĂˇhodnĂ© indexy pro statusy
+            List<Integer> indexes = new ArrayList<>();
+            for (int i = 0; i < selectedPlayers.size(); i++) {
+                indexes.add(i);
+            }
+            Collections.shuffle(indexes);
+
+            int excusedIndex = indexes.get(0);
+            int unregisteredIndex1 = indexes.get(1);
+            int unregisteredIndex2 = indexes.get(2);
+
+            for (int i = 0; i < selectedPlayers.size(); i++) {
+                PlayerEntity player = selectedPlayers.get(i);
+
+                MatchRegistrationEntity reg = new MatchRegistrationEntity();
+                reg.setMatch(match);
+                reg.setPlayer(player);
+
+                if (i == excusedIndex) {
+                    reg.setStatus(PlayerMatchStatus.EXCUSED);
+                    reg.setExcuseReason(ExcuseReason.NEMOC);
+                    reg.setExcuseNote("chĹ™ipka");
+                } else if (i == unregisteredIndex1 || i == unregisteredIndex2) {
+                    reg.setStatus(PlayerMatchStatus.UNREGISTERED);
+                    reg.setExcuseReason(null);
+                    reg.setExcuseNote(null);
+                } else {
+                    reg.setStatus(PlayerMatchStatus.REGISTERED);
+                    reg.setExcuseReason(null);
+                    reg.setExcuseNote(null);
+                }
+
+                // ZachovĂˇna pĹŻvodnĂ­ logika tĂ˝mĹŻ
+                reg.setTeam(i < 4 ? Team.DARK : Team.LIGHT);
+
+                reg.setTimestamp(LocalDateTime.now());
+                reg.setCreatedBy("initializer");
+
+                matchRegistrationRepository.save(reg);
+            }
         }
 
         System.out.println("Sample registrations initialized.");
@@ -932,10 +960,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Map;
 
 /**
  * GlobĂˇlnĂ­ handler vĂ˝jimek pro REST API.
@@ -953,7 +984,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *     <li>neĹ™eĹˇĂ­ business logiku â€“ pouze mapuje vĂ˝jimky na HTTP odpovÄ›di.</li>
  * </ul>
  */
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     // ==========================================
@@ -1154,13 +1185,67 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
-                ex.getMessage(),
+                "BE - DoĹˇlo k neoÄŤekĂˇvanĂ© chybÄ› na serveru.",
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+    // ==========================================
+    // 7) VALIDACE VSTUPĹ® (@Valid, Bean Validation)
+    // ==========================================
+
+    /**
+     * ZachytĂ­ validaÄŤnĂ­ chyby z anotace {@code @Valid}.
+     * <p>
+     * TypickĂ© scĂ©nĂˇĹ™e:
+     * <ul>
+     *     <li>nevyplnÄ›nĂ© povinnĂ© pole,</li>
+     *     <li>neplatnĂ˝ formĂˇt (napĹ™. e-mail),</li>
+     *     <li>poruĹˇenĂ­ dĂ©lkovĂ˝ch nebo rozsahovĂ˝ch omezenĂ­.</li>
+     * </ul>
+     *
+     * Do pole {@code details} se vracĂ­ mapa {@code field â†’ message},
+     * kde klĂ­ÄŤem je nĂˇzev pole v DTO a hodnotou text validaÄŤnĂ­ chyby.
+     *
+     * HTTP status: 400 Bad Request
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        // Mapa field â†’ message (pouĹľijeme LinkedHashMap pro zachovĂˇnĂ­ poĹ™adĂ­ chyb)
+        Map<String, String> fieldErrors = new java.util.LinkedHashMap<>();
+
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            String fieldName = fieldError.getField();
+            String errorMessage = fieldError.getDefaultMessage();
+
+            // Pokud je pro jedno pole vĂ­ce chyb, mĹŻĹľeme je spojit do jednĂ© zprĂˇvy
+            fieldErrors.merge(
+                    fieldName,
+                    errorMessage,
+                    (existing, added) -> existing + "; " + added
+            );
+        }
+
+        ApiError error = new ApiError(
+                status.value(),
+                status.getReasonPhrase(),
+                "BE - NeplatnĂˇ vstupnĂ­ data.",
+                request.getRequestURI(),
+                request.getRemoteAddr(),
+                fieldErrors
+        );
+
+        return ResponseEntity
+                .status(status)
                 .body(error);
     }
 }
@@ -1389,6 +1474,8 @@ public class SecurityConfig {
                             .deleteCookies("JSESSIONID")
                             .logoutSuccessHandler((request, response, auth) -> {
                                 request.getSession().removeAttribute("CURRENT_PLAYER_ID");
+                                request.getSession().removeAttribute("CURRENT_SEASON_ID");
+                                request.getSession().removeAttribute("CURRENT_SEASON_CUSTOM");
                                 response.setContentType("application/json");
                                 response.setCharacterEncoding("UTF-8");
                                 response.getWriter()
