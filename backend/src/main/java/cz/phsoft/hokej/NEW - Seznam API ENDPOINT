@@ -129,6 +129,22 @@ POST /api/registrations/me/upsert (isAuthenticated)             – upsert regis
 GET /api/registrations/me/for-current-player (isAuthenticated)  - všechny registrace aktuálního hráče
 
 ------------------------------------------------------
+MATCH REGISTRATION HISTORY
+------------------------------------------------------
+MatchRegistrationHistoryController
+(/api/registrations/history)
+_________________
+User
+(/me)
+GET (/api/registrations/history/me/matches/{matchId})     - získá registrace k zápasu aktuálního hráče z historie
+
+Admin
+_________________
+GET (/api/registrations/history/admin/matches/{matchId}/players/{playerId) - dle match a playerId - pro admin
+
+
+
+------------------------------------------------------
 SEASON
 ------------------------------------------------------
 SeasonController

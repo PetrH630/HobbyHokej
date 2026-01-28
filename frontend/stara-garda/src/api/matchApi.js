@@ -22,3 +22,9 @@ export const getMatchDetail = async (id) => {
     });
     return res.data; // očekáváme DTO s detailem + statusem hráče
 };
+
+
+
+
+
+

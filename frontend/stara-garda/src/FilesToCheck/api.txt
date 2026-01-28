@@ -1,0 +1,134 @@
+
+
+===== FILE: \authApi.js =====
+
+import api from "./axios";
+
+/**
+ * Přihlášení uživatele
+ */
+export const loginUser = (email, password) =>
+    api.post("auth/login", { email, password });
+
+/**
+ * Odhlášení
+ */
+export const logoutUser = () =>
+    api.post("auth/logout");
+
+/**
+ * Načtení aktuálního uživatele
+ */
+export const fetchCurrentUser = () =>
+    api.get("/auth/me");
+
+/**
+ * Rychlá kontrola přihlášení
+ */
+export const checkAuthentication = async () => {
+    try {
+        await fetchCurrentUser();
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+/**
+ * Registrace nového uživatele
+ */
+export const registerUser = (data) =>
+    api.post("/auth/register", data);
+
+===== FILE: \axios.js =====
+
+import axios from "axios";
+
+axios.defaults.withCredentials = true;
+
+const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL + "/api", // backend
+    withCredentials: true,  
+});
+
+export default api;
+
+===== FILE: \matchApi.js =====
+
+import api from "./axios";
+
+// nadcházející zápasy pro currentPlayer
+export const getMyUpcomingMatchesOverview = async () => {
+    const res = await api.get("/matches/me/upcoming-overview", {
+        withCredentials: true,
+    });
+    return res.data; // List<MatchOverviewDTO>
+};
+
+// uplynulé zápasy pro currentPlayer
+export const getMyPassedMatchesOverview = async () => {
+    const res = await api.get("/matches/me/all-passed", {
+        withCredentials: true,
+    });
+    return res.data; // List<MatchOverviewDTO>
+};
+
+export const getMatchDetail = async (id) => {
+    const res = await api.get(`/matches/${id}/detail`, {
+        withCredentials: true,
+    });
+    return res.data; // očekáváme DTO s detailem + statusem hráče
+};
+
+===== FILE: \matchRegistrationApi.js =====
+
+// src/api/registrationApi.js
+import api from "./axios";
+
+/**
+ * Upsert registrace pro AKTUÁLNÍHO hráče (/me/upsert)
+ * - matchId: ID zápasu
+ * - team: tým (např. "DARK" / "LIGHT") nebo null
+ * - excuseReason: důvod omluvy (např. "ILLNESS") nebo null
+ * - excuseNote: text omluvy nebo null
+ * - unregister: true → odhlásit, false → registrovat / omluvit
+ */
+export const upsertMyRegistration = async ({
+    matchId,
+    team = null,
+    excuseReason = null,
+    excuseNote = null,
+    unregister = false,
+}) => {
+    const res = await api.post(
+        "/registrations/me/upsert",
+        {
+            matchId,
+            team,
+            adminNote: null,       // hráč nic nevyplňuje
+            excuseReason,
+            excuseNote,
+            unregister,
+        },
+        { withCredentials: true }
+    );
+
+    // backend vrací MatchRegistrationDTO
+    return res.data;
+};
+
+===== FILE: \playerApi.js =====
+
+import api from "./axios";
+
+export const getMyPlayers = () => 
+    api.get("/players/me");
+
+export const setCurrentPlayer = (playerId) =>
+    api.post(`/current-player/${playerId}`);
+
+export const getCurrentPlayer = () =>
+    api.get(`/current-player`);
+
+export const createPlayer = (data) => 
+    api.post("/players/me", data);

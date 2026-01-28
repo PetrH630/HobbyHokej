@@ -1,4 +1,4 @@
-//logika oddělena od komponenty UI.
+// logika oddělena od komponenty UI
 import { useState, useEffect } from "react";
 import { getMyPlayers } from "../api/playerApi";
 
@@ -8,19 +8,38 @@ export const usePlayers = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        setError(null);
-        setLoading(true);
+        let isMounted = true;
 
-        getMyPlayers()
-            .then(res => setPlayers(res.data))
-            .catch(err => {
-                const msg =
+        const loadPlayers = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const data = await getMyPlayers(); // přímo data
+                if (isMounted) {
+                    setPlayers(data);
+                }
+            } catch (err) {
+                if (!isMounted) return;
+
+                const message =
                     err?.response?.data?.message ||
-                    err.message ||
+                    err?.message ||
                     "Nepodařilo se načíst hráče";
-                setError(msg);
-            })
-            .finally(() => setLoading(false));
+
+                setError(message);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        loadPlayers();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     return { players, loading, error };

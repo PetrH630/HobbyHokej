@@ -1,4 +1,4 @@
-// src/api/registrationApi.js
+// src/api/matchRegistrationApi.js
 import api from "./axios";
 
 /**

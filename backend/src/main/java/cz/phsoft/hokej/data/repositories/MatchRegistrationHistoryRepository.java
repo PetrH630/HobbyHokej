@@ -48,4 +48,7 @@ public interface MatchRegistrationHistoryRepository
      */
     List<MatchRegistrationHistoryEntity>
     findByPlayerIdOrderByChangedAtDesc(Long playerId);
+
+    List<MatchRegistrationHistoryEntity>
+    findByMatchIdAndPlayerIdOrderByChangedAtDesc(Long matchId, Long playerId);
 }

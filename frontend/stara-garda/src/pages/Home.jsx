@@ -1,10 +1,10 @@
 import MatchCard from "../components/matches/MatchCard";
 import Players from "../components/players/Players";
-import { useMatches } from "../hooks/useMatches";
+import { useMyUpcomingMatches } from "../hooks/useMyUpcomingMatches";
 import { useAuth } from "../hooks/useAuth";
 
 const Home = () => {
-    const { matches, loading } = useMatches();
+    const { matches, loading } = useUpcomingMatches();
     const { user } = useAuth();
 
     if (loading) return <p>Načítám data…</p>;
