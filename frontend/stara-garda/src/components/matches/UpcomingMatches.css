@@ -1,0 +1,18 @@
+/* =========================
+   KONTEJNER SEZNAMU ZÁPASŮ
+   ========================= */
+.match-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+
+.match-item {
+    display: flex;
+}
+
+/* jméno hráče nad seznamem */
+.player-name {
+    color: #010e5a;
+}

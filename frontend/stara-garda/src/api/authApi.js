@@ -4,13 +4,13 @@ import api from "./axios";
  * Přihlášení uživatele
  */
 export const loginUser = (email, password) =>
-    api.post("/login", { email, password });
+    api.post("auth/login", { email, password });
 
 /**
  * Odhlášení
  */
 export const logoutUser = () =>
-    api.post("/logout");
+    api.post("auth/logout");
 
 /**
  * Načtení aktuálního uživatele

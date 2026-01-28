@@ -6,7 +6,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import RegisterPage from "./pages/RegisterPage";
 import RequireAuth from "./RequireAuth";
 import Matches from "./pages/MatchesPage";
-import Players from "./pages/Players";
+import Players from "./pages/PlayersPage";
 import CreatePlayer from "./pages/CreatePlayer";
 import MatchDetailPage from "./pages/MatchDetailPage";
 

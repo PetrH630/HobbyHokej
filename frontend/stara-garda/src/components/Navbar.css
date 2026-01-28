@@ -24,7 +24,11 @@
 .nav-logo {
     width: 150px;
     display: block;
+}
 
+.logo-text{
+    text-decoration: none;
+    
 }
 
 /* toggle (hamburger) - default hide (desktop) */

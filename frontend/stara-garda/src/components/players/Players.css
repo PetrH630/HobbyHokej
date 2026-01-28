@@ -1,0 +1,14 @@
+/* =========================
+   KONTEJNER SEZNAMU HRÁČŮ
+   ========================= */
+.player-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+
+.player-item {
+    display: flex;
+    max-width: 360px;
+}

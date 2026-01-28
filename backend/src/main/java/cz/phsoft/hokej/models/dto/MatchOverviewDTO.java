@@ -24,7 +24,16 @@ import java.time.LocalDateTime;
  * doplněný o kontext přihlášeného hráče
  * a základní agregační informace.
  */
-public class MatchOverviewDTO {
+public class MatchOverviewDTO implements NumberedMatchDTO {
+
+    /**
+     * Pořadové číslo zápasu v sezóně (1..N),
+     * počítané podle data zápasu v rámci dané sezóny.
+     * <p>
+     * Pouze pro čtení – nastavuje server.
+     */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Integer matchNumber;
 
     private Long id;
 
@@ -63,13 +72,15 @@ public class MatchOverviewDTO {
 
     /**
      * ID sezóny, do které zápas patří.
-     *
+     * <p>
      * Pouze pro čtení – nastavuje server.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
+    // ================
     // gettery / settery
+    // ================
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -110,4 +121,18 @@ public class MatchOverviewDTO {
 
     public Long getSeasonId() { return seasonId; }
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
+
+    // ================
+    // NumberedMatchDTO
+    // ================
+
+    @Override
+    public void setMatchNumber(Integer matchNumber) {
+        this.matchNumber = matchNumber;
+    }
+
+    @Override
+    public Integer getMatchNumber() {
+        return matchNumber;
+    }
 }

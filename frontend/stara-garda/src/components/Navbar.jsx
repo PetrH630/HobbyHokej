@@ -32,7 +32,9 @@ const Navbar = () => {
     return (
         <nav className="navbar navbar-light bg-light">
             <div className="container">
-                <span className="navbar-brand">Hokej App</span>
+                <span className="navbar-brand">
+                    <NavLink to="/" className="navbar-brand">Hokej App </NavLink>
+                    </span>
 
                 <button
                     className="nav-toggle"

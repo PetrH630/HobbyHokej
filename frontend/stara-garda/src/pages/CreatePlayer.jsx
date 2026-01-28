@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPlayer } from "../api/playerApi";
-import CreatePlayerForm from "../components/CreatePlayerForm";
+import CreatePlayerForm from "../components/players/CreatePlayerForm";
 
 const CreatePlayer = () => {
     const navigate = useNavigate();

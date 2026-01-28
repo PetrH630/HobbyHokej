@@ -28,7 +28,16 @@ import java.util.List;
  *     <li>stav přihlášeného hráče k danému zápasu.</li>
  * </ul>
  */
-public class MatchDetailDTO {
+public class MatchDetailDTO implements NumberedMatchDTO {
+
+    /**
+     * Pořadové číslo zápasu v sezóně (1..N),
+     * počítané podle data v rámci dané sezóny.
+     * <p>
+     * Pouze pro čtení – nastavuje server.
+     */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)   // klient to neposílá
+    private Integer matchNumber;
 
     private Long id;
 
@@ -91,7 +100,9 @@ public class MatchDetailDTO {
     private List<PlayerDTO> noExcusedPlayers;
     private List<PlayerDTO> noResponsePlayers;
 
+    // ================
     // gettery / settery
+    // ================
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -115,11 +126,9 @@ public class MatchDetailDTO {
     public void setInGamePlayers(int inGamePlayers) { this.inGamePlayers = inGamePlayers; }
 
     public int getInGamePlayersDark() { return inGamePlayersDark; }
-
     public void setInGamePlayersDark(int inGamePlayersDark) { this.inGamePlayersDark = inGamePlayersDark; }
 
     public int getInGamePlayersLight() { return inGamePlayersLight; }
-
     public void setInGamePlayersLight(int inGamePlayersLight) { this.inGamePlayersLight = inGamePlayersLight; }
 
     public int getOutGamePlayers() { return outGamePlayers; }
@@ -190,5 +199,19 @@ public class MatchDetailDTO {
     public List<PlayerDTO> getNoResponsePlayers() { return noResponsePlayers; }
     public void setNoResponsePlayers(List<PlayerDTO> noResponsePlayers) {
         this.noResponsePlayers = noResponsePlayers;
+    }
+
+    // ================
+    // NumberedMatchDTO
+    // ================
+
+    @Override
+    public void setMatchNumber(Integer matchNumber) {
+        this.matchNumber = matchNumber;
+    }
+
+    @Override
+    public Integer getMatchNumber() {
+        return matchNumber;
     }
 }

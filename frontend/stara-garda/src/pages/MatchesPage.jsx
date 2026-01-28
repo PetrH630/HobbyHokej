@@ -1,6 +1,6 @@
 import React from 'react'
-import UpcomingMatches from "../components/UpcomingMatches";
-import PastMatches from "../components/PastMatches";
+import UpcomingMatches from "../components/matches/UpcomingMatches";
+import PastMatches from "../components/matches/PastMatches";
 import { useCurrentPlayer } from "../hooks/useCurrentPlayer";
 
 const matches = () => {

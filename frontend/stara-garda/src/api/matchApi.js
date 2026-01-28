@@ -17,7 +17,7 @@ export const getMyPassedMatchesOverview = async () => {
 };
 
 export const getMatchDetail = async (id) => {
-    const res = await api.get(`/matches/matchDetail/${id}`, {
+    const res = await api.get(`/matches/${id}/detail`, {
         withCredentials: true,
     });
     return res.data; // očekáváme DTO s detailem + statusem hráče

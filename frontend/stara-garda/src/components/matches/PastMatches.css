@@ -1,0 +1,15 @@
+/* =========================
+   KONTEJNER SEZNAMU UPLYNULÝCH ZÁPASŮ
+   ========================= */
+.past-match-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 16px;
+}
+
+.past-match-item {
+    display: flex;
+    max-width: 360px;
+}
+

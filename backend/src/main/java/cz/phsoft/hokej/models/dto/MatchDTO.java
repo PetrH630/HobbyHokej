@@ -14,13 +14,22 @@ import java.time.LocalDateTime;
 
 /**
  * DTO reprezentující zápas.
- *
+ * <p>
  * Slouží k přenosu dat o zápasech mezi backendem
  * a klientem (vytváření, editace, přehledy).
- *
+ * <p>
  * Neobsahuje žádnou business logiku ani vazby na entity.
  */
-public class MatchDTO {
+public class MatchDTO implements NumberedMatchDTO {
+
+    /**
+     * Pořadové číslo zápasu v sezóně (1..N),
+     * počítané podle data zápasu v rámci dané sezóny.
+     * <p>
+     * Pouze pro čtení – nastavuje server.
+     */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)   // NOVÉ – klient to nesmí posílat
+    private Integer matchNumber;                           // NOVÉ
 
     private Long id;
 
@@ -58,38 +67,63 @@ public class MatchDTO {
 
     /**
      * ID sezóny, do které zápas patří.
-     *
+     * <p>
      * Pouze pro čtení – nastavuje server.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
+    // ================
     // gettery / settery
+    // ================
 
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public LocalDateTime getDateTime() { return dateTime; }
+
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
     public String getLocation() { return location; }
+
     public void setLocation(String location) { this.location = location; }
 
     public String getDescription() { return description; }
+
     public void setDescription(String description) { this.description = description; }
 
     public Integer getMaxPlayers() { return maxPlayers; }
+
     public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 
     public Integer getPrice() { return price; }
+
     public void setPrice(Integer price) { this.price = price; }
 
     public MatchStatus getMatchStatus() { return matchStatus; }
+
     public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
 
     public MatchCancelReason getCancelReason() { return cancelReason; }
+
     public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
 
     public Long getSeasonId() { return seasonId; }
+
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
+
+    // ================
+    // NumberedMatchDTO
+    // ================
+
+    @Override
+    public void setMatchNumber(Integer matchNumber) {
+        this.matchNumber = matchNumber;
+    }
+
+    @Override
+    public Integer getMatchNumber() {
+        return matchNumber;
+    }
 }

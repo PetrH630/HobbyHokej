@@ -1,0 +1,184 @@
+/* =========================
+   KARTA HRÁČE – ZÁKLAD
+   ========================= */
+.player-card {
+    box-sizing: border-box;
+    flex: 0 0 250px;
+    position: relative;
+    max-width: 250px;
+    width: 240px;
+    margin-top: 20px;
+    padding: 20px;
+
+    display: flex;
+
+    background-color: #ffffff;
+    border: 2px solid #dee2e6;
+    /* bootstrap gray-300 */
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+
+    border-radius: 12px;
+
+    transition:
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.player-card--active {
+    border: 3px solid #0d6efd;
+    /* Bootstrap primary */
+    box-shadow: 0 0 0 4px #0e489e;
+}
+
+/* =========================
+   OVERLAY TOOLTIP
+   ========================= */
+.player-card-tooltip {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+/* zobrazit overlay po najetí */
+.player-card--disabled:hover .player-card-tooltip {
+    opacity: 1;
+}
+
+/* =========================
+   Kolečko u vybraného hráče
+   ========================= */
+.active-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.5rem;
+}
+
+/* aktivní hráč */
+.active-indicator.active {
+    color: #1329a1;
+}
+
+/* neaktivní hráč */
+.active-indicator.inactive {
+    color: #a0a5aa;
+}
+
+/* =========================
+   INTERAKCE – JEN APPROVED
+   ========================= */
+.player-card.clickable {
+    cursor: pointer;
+}
+
+.player-card.clickable:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+.player-card.clickable:active {
+    transform: scale(1.01);
+}
+
+.player-card.clickable:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.4);
+}
+
+/* =========================
+   ZAKÁZANÉ KARTY
+   ========================= */
+.player-card--disabled {
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+.player-card--disabled:hover,
+.player-card--disabled:active,
+.player-card--disabled:focus-visible {
+    transform: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   STAVY HRÁČE (BARVY)
+   ========================= */
+.player-approved {
+    background-color: #64e98a;
+    border-color: #3da361;
+}
+
+.player-pending {
+    background-color: #fff4e5;
+    border-color: #ffd8a8;
+}
+
+.player-rejected {
+    background-color: #fdecea;
+    border-color: #f5c2c7;
+}
+
+/* =========================
+   IKONA TÝMU (OVERLAY)
+   ========================= */
+.team-icon-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 42px;
+}
+
+.team-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 42px;
+    line-height: 1;
+    background: transparent;
+}
+
+.team-icon.base {
+    color: #045ee6;
+}
+
+.team-icon.overlay {
+    color: #001833;
+}
+
+/* DARK tým */
+.team-icon-wrapper.team-dark .team-icon.base {
+    color: #045ee6;
+}
+
+/* LIGHT tým */
+.team-icon-wrapper.team-light .team-icon.base {
+    color: #ffffff;
+}
+
+/* =========================
+   TELEFON
+   ========================= */
+.phone-icon {
+    color: #0d6efd;
+    margin-right: 6px;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 576px) {
+    .player-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
