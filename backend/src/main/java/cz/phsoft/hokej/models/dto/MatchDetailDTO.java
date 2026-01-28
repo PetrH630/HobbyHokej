@@ -55,6 +55,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private int inGamePlayers;
     private int inGamePlayersDark;
     private int inGamePlayersLight;
+    private int substitutePlayers;
     private int outGamePlayers;
     private int waitingPlayers;
     private int noActionPlayers;
@@ -97,6 +98,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private List<PlayerDTO> reservedPlayers;
     private List<PlayerDTO> unregisteredPlayers;
     private List<PlayerDTO> excusedPlayers;
+    private List<PlayerDTO> substitutedPlayers;
     private List<PlayerDTO> noExcusedPlayers;
     private List<PlayerDTO> noResponsePlayers;
 
@@ -130,6 +132,9 @@ public class MatchDetailDTO implements NumberedMatchDTO {
 
     public int getInGamePlayersLight() { return inGamePlayersLight; }
     public void setInGamePlayersLight(int inGamePlayersLight) { this.inGamePlayersLight = inGamePlayersLight; }
+
+    public int getSubstitutePlayers() { return substitutePlayers; }
+    public void setSubstitutePlayers(int substitutePlayers) { this.substitutePlayers = substitutePlayers; }
 
     public int getOutGamePlayers() { return outGamePlayers; }
     public void setOutGamePlayers(int outGamePlayers) { this.outGamePlayers = outGamePlayers; }
@@ -189,6 +194,11 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     public List<PlayerDTO> getExcusedPlayers() { return excusedPlayers; }
     public void setExcusedPlayers(List<PlayerDTO> excusedPlayers) {
         this.excusedPlayers = excusedPlayers;
+    }
+
+    public List<PlayerDTO> getSubstitutedPlayers() { return substitutedPlayers; }
+    public void setSubstitutedPlayers(List<PlayerDTO> substitutedPlayers) {
+        this.substitutedPlayers = substitutedPlayers;
     }
 
     public List<PlayerDTO> getNoExcusedPlayers() { return noExcusedPlayers; }

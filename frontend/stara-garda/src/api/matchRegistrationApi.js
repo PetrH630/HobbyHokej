@@ -15,6 +15,7 @@ export const upsertMyRegistration = async ({
     excuseReason = null,
     excuseNote = null,
     unregister = false,
+    substitute = false,
 }) => {
     const res = await api.post(
         "/registrations/me/upsert",
@@ -25,6 +26,7 @@ export const upsertMyRegistration = async ({
             excuseReason,
             excuseNote,
             unregister,
+            substitute,
         },
         { withCredentials: true }
     );

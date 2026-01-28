@@ -19,11 +19,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;                    // NOVÉ
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;                       // NOVÉ
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
+
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -101,8 +101,8 @@ public class MatchServiceImpl implements MatchService {
         List<MatchEntity> matches =
                 matchRepository.findAllBySeasonIdOrderByDateTimeAsc(seasonId);
 
-        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);        // NOVÉ
-        return assignMatchNumbers(matches, matchMapper::toDTO, matchNumberMap);            // NOVÉ
+        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);        
+        return assignMatchNumbers(matches, matchMapper::toDTO, matchNumberMap);            
     }
 
     /**
@@ -111,11 +111,11 @@ public class MatchServiceImpl implements MatchService {
      */
     @Override
     public List<MatchDTO> getUpcomingMatches() {
-        Long seasonId = getCurrentSeasonIdOrActive();                                      // NOVÉ
+        Long seasonId = getCurrentSeasonIdOrActive();                                      
         List<MatchEntity> upcomingMatches = findUpcomingMatchesForCurrentSeason();
 
-        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);        // NOVÉ
-        return assignMatchNumbers(upcomingMatches, matchMapper::toDTO, matchNumberMap);    // NOVÉ
+        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);        
+        return assignMatchNumbers(upcomingMatches, matchMapper::toDTO, matchNumberMap);    
     }
 
     /**
@@ -125,11 +125,11 @@ public class MatchServiceImpl implements MatchService {
      */
     @Override
     public List<MatchDTO> getPastMatches() {
-        Long seasonId = getCurrentSeasonIdOrActive();                                      // NOVÉ
+        Long seasonId = getCurrentSeasonIdOrActive();                                      
         List<MatchEntity> pastMatches = findPastMatchesForCurrentSeason();
 
-        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);        // NOVÉ
-        return assignMatchNumbers(pastMatches, matchMapper::toDTO, matchNumberMap);        // NOVÉ
+        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);        
+        return assignMatchNumbers(pastMatches, matchMapper::toDTO, matchNumberMap);        
     }
 
     /**
@@ -306,13 +306,13 @@ public class MatchServiceImpl implements MatchService {
         dto.setMatchStatus(match.getMatchStatus());
         dto.setCancelReason(match.getCancelReason());
 
-        // 6) číslo zápasu v sezóně podle globálního pořadí v sezóně   // NOVÉ
-        if (match.getSeason() != null && match.getSeason().getId() != null) {                // NOVÉ
-            Long seasonId = match.getSeason().getId();                                        // NOVÉ
-            Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);      // NOVÉ
-            Integer number = matchNumberMap.get(match.getId());                              // NOVÉ
-            dto.setMatchNumber(number);                                                      // NOVÉ
-        }                                                                                    // NOVÉ
+        // 6) číslo zápasu v sezóně podle globálního pořadí v sezóně   
+        if (match.getSeason() != null && match.getSeason().getId() != null) {                
+            Long seasonId = match.getSeason().getId();                                        
+            Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);      
+            Integer number = matchNumberMap.get(match.getId());                              
+            dto.setMatchNumber(number);                                                      
+        }                                                                                    
 
         return dto;
     }
@@ -457,6 +457,9 @@ public class MatchServiceImpl implements MatchService {
                         .filter(r -> r.getTeam() == Team.LIGHT)
                         .count();
 
+        int substitutePlayers =
+                statusToPlayersMap.getOrDefault(PlayerMatchStatus.SUBSTITUTE, List.of()).size();
+
         int outGamePlayers =
                 statusToPlayersMap.getOrDefault(PlayerMatchStatus.UNREGISTERED, List.of()).size()
                         + statusToPlayersMap.getOrDefault(PlayerMatchStatus.EXCUSED, List.of()).size()
@@ -485,6 +488,7 @@ public class MatchServiceImpl implements MatchService {
         dto.setInGamePlayers(inGamePlayers);
         dto.setInGamePlayersDark(inGamePlayersDark);
         dto.setInGamePlayersLight(inGamePlayersLight);
+        dto.setSubstitutePlayers(substitutePlayers);
         dto.setOutGamePlayers(outGamePlayers);
         dto.setWaitingPlayers(waitingPlayers);
         dto.setNoExcusedPlayersSum(noExcusedPlayersSum);
@@ -496,6 +500,7 @@ public class MatchServiceImpl implements MatchService {
         dto.setReservedPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.RESERVED, List.of()));
         dto.setUnregisteredPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.UNREGISTERED, List.of()));
         dto.setExcusedPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.EXCUSED, List.of()));
+        dto.setSubstitutedPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.SUBSTITUTE, List.of()));
         dto.setNoExcusedPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.NO_EXCUSED, List.of()));
 
         dto.setNoResponsePlayers(isAdminOrManager ? noResponsePlayers : null);
@@ -522,6 +527,10 @@ public class MatchServiceImpl implements MatchService {
         if (isIn(dto.getExcusedPlayers(), playerId)) {
             return PlayerMatchStatus.EXCUSED;
         }
+        if (isIn(dto.getSubstitutedPlayers(), playerId)) {
+            return PlayerMatchStatus.SUBSTITUTE;
+        }
+
         if (isIn(dto.getUnregisteredPlayers(), playerId)) {
             return PlayerMatchStatus.UNREGISTERED;
         }
@@ -554,7 +563,7 @@ public class MatchServiceImpl implements MatchService {
      * </ul>
      * <p>
      * POZOR: tady se zápasy tahají přes všechny sezóny, takže globální
-     * "číslo v sezóně" nedává smysl – DTO se nečíslují.             // NOVÉ
+     * "číslo v sezóně" nedává smysl – DTO se nečíslují.             
      */
     @Override
     public List<MatchDTO> getAvailableMatchesForPlayer(Long playerId) {
@@ -562,7 +571,7 @@ public class MatchServiceImpl implements MatchService {
 
         return matchRepository.findAll().stream()
                 .filter(match -> isPlayerActiveForMatch(player, match.getDateTime()))
-                .map(matchMapper::toDTO)                                   // NOVÉ (bez číslování)
+                .map(matchMapper::toDTO)
                 .toList();
     }
 
@@ -600,13 +609,13 @@ public class MatchServiceImpl implements MatchService {
                 .filter(match -> isPlayerActiveForMatch(player, match.getDateTime()))
                 .toList();
 
-        Long seasonId = getCurrentSeasonIdOrActive();                                       // NOVÉ
-        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);         // NOVÉ
+        Long seasonId = getCurrentSeasonIdOrActive();                                       
+        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);         
 
         return assignMatchNumbers(
                 activeMatches,
                 match -> toOverviewDTO(match, playerId),
-                matchNumberMap                                                                  // NOVÉ
+                matchNumberMap                                                                  
         );
     }
 
@@ -626,10 +635,10 @@ public class MatchServiceImpl implements MatchService {
                 .filter(match -> isPlayerActiveForMatch(player, match.getDateTime()))
                 .toList();
 
-        Long seasonId = getCurrentSeasonIdOrActive();                                       // NOVÉ
-        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);         // NOVÉ
+        Long seasonId = getCurrentSeasonIdOrActive();                                       
+        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);         
 
-        return assignMatchNumbers(activeMatches, matchMapper::toDTO, matchNumberMap);       // NOVÉ
+        return assignMatchNumbers(activeMatches, matchMapper::toDTO, matchNumberMap);       
     }
 
     /**
@@ -673,8 +682,8 @@ public class MatchServiceImpl implements MatchService {
                         )
                 ));
 
-        // původní logika + globální číslo zápasu v sezóně                 // NOVÉ
-        List<MatchOverviewDTO> overviews = availableMatches.stream()       // NOVÉ
+        // původní logika + globální číslo zápasu v sezóně
+        List<MatchOverviewDTO> overviews = availableMatches.stream()
                 .map(match -> {
                     MatchOverviewDTO overview = toOverviewDTO(match);
                     PlayerMatchStatus playerMatchStatus = Optional.ofNullable(statusMap.get(match.getId()))
@@ -683,14 +692,14 @@ public class MatchServiceImpl implements MatchService {
                     overview.setPlayerMatchStatus(playerMatchStatus);
                     return overview;
                 })
-                .toList();                                                 // NOVÉ
+                .toList();
 
-        Long seasonId = getCurrentSeasonIdOrActive();                      // NOVÉ
-        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId); // NOVÉ
+        Long seasonId = getCurrentSeasonIdOrActive();
+        Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);
 
-        overviews.forEach(o -> o.setMatchNumber(matchNumberMap.get(o.getId())));    // NOVÉ
+        overviews.forEach(o -> o.setMatchNumber(matchNumberMap.get(o.getId())));
 
-        return overviews;                                                 // NOVÉ
+        return overviews;
     }
 
     /**
@@ -909,6 +918,7 @@ public class MatchServiceImpl implements MatchService {
             case REGISTERED,
                  UNREGISTERED,
                  EXCUSED,
+                 SUBSTITUTE,
                  RESERVED,
                  NO_EXCUSED -> status;
             default -> PlayerMatchStatus.NO_RESPONSE;
@@ -947,14 +957,14 @@ public class MatchServiceImpl implements MatchService {
 
     /**
      * Generická metoda pro číslování zápasů:
-     * číslo se bere z mapy matchId -> pořadí v sezóně.         // NOVÉ
+     * číslo se bere z mapy matchId -> pořadí v sezóně.
      */
-    private <D extends NumberedMatchDTO> List<D> assignMatchNumbers(        // NOVÉ
-                                                                            List<MatchEntity> matches,
-                                                                            Function<MatchEntity, D> mapper,
-                                                                            Map<Long, Integer> matchNumberMap                              // NOVÉ
+    private <D extends NumberedMatchDTO> List<D> assignMatchNumbers(
+        List<MatchEntity> matches,
+        Function<MatchEntity, D> mapper,
+        Map<Long, Integer> matchNumberMap
     ) {
-        return matches.stream()                                             // NOVÉ
+        return matches.stream()
                 .map(entity -> {
                     D dto = mapper.apply(entity);
                     Integer number = matchNumberMap.get(entity.getId());
@@ -969,16 +979,16 @@ public class MatchServiceImpl implements MatchService {
      * matchId -> pořadové číslo zápasu v sezóně (1..N)
      * Pořadí je podle dateTime ASC.
      */
-    private Map<Long, Integer> buildMatchNumberMapForSeason(Long seasonId) { // NOVÉ
+    private Map<Long, Integer> buildMatchNumberMapForSeason(Long seasonId) {
         List<MatchEntity> allMatchesInSeason =
-                matchRepository.findAllBySeasonIdOrderByDateTimeAsc(seasonId); // NOVÉ
+                matchRepository.findAllBySeasonIdOrderByDateTimeAsc(seasonId);
 
-        Map<Long, Integer> map = new HashMap<>();                            // NOVÉ
-        int counter = 1;                                                     // NOVÉ
-        for (MatchEntity m : allMatchesInSeason) {                           // NOVÉ
-            map.put(m.getId(), counter++);                                   // NOVÉ
+        Map<Long, Integer> map = new HashMap<>();
+        int counter = 1;
+        for (MatchEntity m : allMatchesInSeason) {
+            map.put(m.getId(), counter++);
         }
-        return map;                                                          // NOVÉ
+        return map;
     }
 
 }

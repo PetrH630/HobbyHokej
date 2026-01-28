@@ -152,8 +152,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             // EXCUSE – pouze pokud ještě nemá žádnou registraci
             newStatus = handleExcuse(request, match, player, registration);
         } else {
-            // REGISTER / RESERVE
-            newStatus = handleRegisterOrReserve(request, match, player, registration);
+            // REGISTER / RESERVE / SUBSTITUTE
+            newStatus = handleRegisterOrReserveOrSubstitute(request, match, player, registration);
         }
 
         // společné nastavení detailů z requestu (team, admin poznámka, excuse...)
@@ -224,13 +224,17 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             MatchRegistrationEntity registration
     ) {
         // NO_RESPONSE = registrace bez statusu
-        boolean isNoResponse = (registration == null || registration.getStatus() == null);
+        boolean isNoResponseOrSubstitute =
+                (registration == null
+                        || registration.getStatus() == null
+                        || registration.getStatus() == PlayerMatchStatus.SUBSTITUTE);
 
-        if (!isNoResponse) {
+
+        if (!isNoResponseOrSubstitute) {
             throw new DuplicateRegistrationException(
                     request.getMatchId(),
                     player.getId(),
-                    "BE - Omluva je možná pouze pokud hráč dosud nereagoval na zápas."
+                    "BE - Omluva je možná pouze pokud hráč dosud nereagoval na zápas, nebo byl náhradník."
             );
         }
         registration.setExcuseReason(request.getExcuseReason());
@@ -240,14 +244,16 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Větev pro REGISTER / RESERVE:
+     * Větev pro REGISTER / RESERVE / SUBSTITUTE (náhradník „možná“):
      * <ul>
      *     <li>pokud je hráč už REGISTERED, další registrace není povolena,</li>
      *     <li>pokud je volné místo → REGISTERED, jinak RESERVED,</li>
-     *     <li>při přechodu z EXCUSED smaže excuseReason / excuseNote.</li>
+     *     <li>při přechodu z EXCUSED smaže excuseReason / excuseNote,</li>
+     *     <li>SUBSTITUTE se chová jako NO_RESPONSE:
+     *         hráč může kdykoliv přejít na REGISTER/RESERVE nebo EXCUSED.</li>
      * </ul>
      */
-    private PlayerMatchStatus handleRegisterOrReserve(
+    private PlayerMatchStatus handleRegisterOrReserveOrSubstitute(
             MatchRegistrationRequest request,
             MatchEntity match,
             PlayerEntity player,
@@ -257,20 +263,31 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 registration != null &&
                         registration.getStatus() == PlayerMatchStatus.REGISTERED;
 
-        if (isAlreadyRegistered) {
+        boolean isAlreadySubstitute =
+                registration != null &&
+                        registration.getStatus() == PlayerMatchStatus.SUBSTITUTE;
+
+        if (isAlreadyRegistered){
             throw new DuplicateRegistrationException(request.getMatchId(), player.getId());
+            } else if (isAlreadySubstitute) {
+            throw new DuplicateRegistrationException(request.getMatchId(), player.getId(), "Hráč již má zaregistrováno - možná");
+            }
+
+        // explicitní registrace jako „možná“ (SUBSTITUTE)
+        // Hráč se označí jako náhradník / možná, neblokuje kapacitu,
+        // neúčastní se auto-přepočtů a může později:
+        //  - přejít na REGISTER/RESERVED,
+        //  - nebo se omluvit (EXCUSED).
+        if (request.isSubstitute()) { // --- NEW
+            clearExcuseIfNeeded(registration);  // --- NEW helper
+            return PlayerMatchStatus.SUBSTITUTE;
         }
+
 
         PlayerMatchStatus newStatus =
                 isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
 
-
-        // Registrace je v této větvi vždy nenull (viz upsertRegistration).
-        // Pokud přecházíme z EXCUSED, smažeme omluvu:
-        if (registration.getExcuseReason() != null || registration.getExcuseNote() != null) {
-            registration.setExcuseReason(null);
-            registration.setExcuseNote(null);
-        }
+            clearExcuseIfNeeded(registration);
 
 
         return newStatus;
@@ -304,6 +321,19 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             registration.setExcuseNote(request.getExcuseNote());
         }
     }
+    /*
+     společný pro všechny přechody, kde nechceme zachovat omluvu
+     */
+    private void clearExcuseIfNeeded(MatchRegistrationEntity registration) {
+        if (registration == null) {
+            return;
+        }
+        if (registration.getExcuseReason() != null || registration.getExcuseNote() != null) {
+            registration.setExcuseReason(null);
+            registration.setExcuseNote(null);
+        }
+    }
+
 
     // =========================
     // FETCH – ČTECÍ METODY
@@ -408,6 +438,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 .toList();
     }
 
+
+
     /**
      * Vrátí množinu ID hráčů, kteří mají k zápasu nějakou registraci.
      */
@@ -445,6 +477,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         int maxPlayers = match.getMaxPlayers();
 
         List<MatchRegistrationEntity> regs = registrationRepository.findByMatchId(matchId).stream()
+                // do auto-přepočtu jdou pouze REGISTERED/RESERVED,
+                // SUBSTITUTE (možná) se ignoruje – neblokuje místo ani frontu
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED
                         || r.getStatus() == PlayerMatchStatus.RESERVED)
                 .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))

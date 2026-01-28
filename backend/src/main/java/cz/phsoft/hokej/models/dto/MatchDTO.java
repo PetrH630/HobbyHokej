@@ -28,8 +28,8 @@ public class MatchDTO implements NumberedMatchDTO {
      * <p>
      * Pouze pro čtení – nastavuje server.
      */
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)   // NOVÉ – klient to nesmí posílat
-    private Integer matchNumber;                           // NOVÉ
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)    // – klient to nesmí posílat
+    private Integer matchNumber;                           
 
     private Long id;
 

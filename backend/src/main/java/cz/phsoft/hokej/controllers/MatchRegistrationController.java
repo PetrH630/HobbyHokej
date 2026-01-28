@@ -127,7 +127,7 @@ public class MatchRegistrationController {
 
     /**
      * Univerzální endpoint pro správu registrace aktuálního hráče na zápas.
-     *
+     * register/unregister/excuse/substitute
      * Pracuje automaticky s aktuálně zvoleným hráčem.
      */
     @PostMapping("/me/upsert")

@@ -77,6 +77,13 @@ public class MatchRegistrationRequest {
      */
     private boolean unregister;
 
+    /**
+     * Příznak náhradníka do zápasu (možná příjde - už nějak reagoval).
+     *
+     * Pokud je {@code true}, request reprezentuje akci SUBSTITUTE.
+     */
+    private boolean substitute;
+
     // --- gettery ---
 
     public Long getPlayerId() { return playerId; }
@@ -86,4 +93,6 @@ public class MatchRegistrationRequest {
     public String getExcuseNote() { return excuseNote; }
     public String getAdminNote() { return adminNote; }
     public boolean isUnregister() { return unregister; }
+    public boolean isSubstitute() { return substitute; }
+    public void setSubstitute(boolean substitute) { this.substitute = substitute; }
 }
