@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 import { useMatchDetail } from "../hooks/useMatchDetail";
-import { upsertMyRegistration } from "../api/MatchRegistrationApi";
+import { upsertMyRegistration } from "../api/matchRegistrationApi";
 import MatchDetail from "../components/matches/MatchDetail";
 import { useNotification } from "../context/NotificationContext";
 import { useCurrentPlayer } from "../hooks/useCurrentPlayer";
@@ -26,7 +26,7 @@ const MatchDetailPage = () => {
     // jestli jde o uplynulý zápas (přijde z router state)
     const isPast = location.state?.isPast === true;
 
-    // 🔹 sjednocení s backendem – pojmenování přesně jako DTO
+    // sjednocení s backendem – pojmenování přesně jako DTO
     const playerMatchStatus = match?.playerMatchStatus ?? "NO_RESPONSE";
     const matchStatus = match?.matchStatus ?? null;      // např. SCHEDULED / CANCELED / PLAYED
 
@@ -60,6 +60,38 @@ const MatchDetailPage = () => {
             setActionError(
                 err?.response?.data?.message ||
                 "Nepodařilo se přihlásit na zápas."
+            );
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // handler pro "Možná" / SUBSTITUTE
+    const handleSubstitute = async () => {
+        if (!match) return;
+        try {
+            setSaving(true);
+            setActionError(null);
+
+            await upsertMyRegistration({
+                matchId: match.id,
+                team: null,
+                excuseReason: null,
+                excuseNote: null,
+                unregister: false,   // není odhlášení
+                substitute: true,    // KLÍČOVÉ – backend z toho udělá SUBSTITUTE
+            });
+
+            showNotification(
+                `${playerName} se přihlásil jako náhradník - možná příjde).`,
+                "info"
+            );
+            navigate("/matches");
+        } catch (err) {
+            console.error(err);
+            setActionError(
+                err?.response?.data?.message ||
+                "Nepodařilo se nastavit stav 'Možná'."
             );
         } finally {
             setSaving(false);
@@ -168,14 +200,15 @@ const MatchDetailPage = () => {
         <>
             <MatchDetail
                 match={match}
-                playerMatchStatus={playerMatchStatus}  // 🔹 jednoznačný název
-                matchStatus={matchStatus}             // 🔹 stav zápasu
+                playerMatchStatus={playerMatchStatus}  // jednoznačný název
+                matchStatus={matchStatus}             // stav zápasu Cancel/
                 loading={loading}
                 error={error}
                 actionError={actionError}
                 onRegister={handleRegister}
                 onUnregister={handleUnregister}
                 onExcuse={openExcuseModal}
+                onSubstitute={handleSubstitute}
                 saving={saving}
                 isPast={isPast}
             />

@@ -1,55 +1,131 @@
+// src/components/MatchActions.jsx
+import "./MatchActions.css";
 
+const MatchActions = ({
+    playerMatchStatus,
+    onRegister,
+    onUnregister,
+    onExcuse,
+    onSubstitute,
+    disabled,
+}) => {
+    console.log(
+        "MatchActions status:",
+        playerMatchStatus,
+        "disabled:",
+        disabled
+    );
 
-const formatDateTime = (dateTime) => {
-    if (!dateTime) return null;
+    const renderButtons = () => {
+        switch (playerMatchStatus) {
+            case "NO_RESPONSE":
+                // žádná registrace – Budu / Nemohu (omluva) / možná
+                return (
+                    <div className="d-flex gap-2 justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Budu
+                        </button>
 
-    const iso = dateTime.replace(" ", "T");
-    const d = new Date(iso);
+                        <button
+                            type="button"
+                            className="btn btn-outline-danger action-btn"
+                            onClick={onExcuse}
+                            disabled={disabled}
+                        >
+                            Nemohu
+                        </button>
 
-    const dayName = new Intl.DateTimeFormat("cs-CZ", {
-        weekday: "long",
-    }).format(d);
+                        <button
+                            type="button"
+                            className="btn btn-outline-warning action-btn"
+                            onClick={onSubstitute}
+                            disabled={disabled}
+                        >
+                            Možná
+                        </button>
 
-    const datePart = new Intl.DateTimeFormat("cs-CZ", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    }).format(d);
+                    </div>
+                );
 
-    const timePart = d.toLocaleTimeString("cs-CZ", {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+            case "REGISTERED":
+            case "RESERVED":
+                // přihlášen nebo náhradník – může se jen odhlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-outline-danger action-btn"
+                            onClick={onUnregister}
+                            disabled={disabled}
+                        >
+                            Nakonec nebudu
+                        </button>
+                    </div>
+                );
 
-    return {
-        day: dayName.charAt(0).toUpperCase() + dayName.slice(1),
-        dateTime: `${datePart} ${"  "} ${timePart}`,
+            case "EXCUSED":
+            case "UNREGISTERED":
+                // omluven / odhlášen – může se znova přihlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Nakonec budu
+                        </button>
+                    </div>
+                );
+
+            case "SUBSTITUTE":
+                // možná - náhradník – může se znova přihlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Tak budu
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-danger action-btn"
+                            onClick={onUnregister}
+                            disabled={disabled}
+                        >
+                            Tak nebudu
+                        </button>
+                    </div>
+                );
+
+            case "NO_EXCUSED":
+                // neomluven – stav uzavřen
+                return null;
+
+            default:
+                console.warn(
+                    "Neznámý status v MatchActions:",
+                    playerMatchStatus
+                );
+                return null;
+        }
     };
-};
 
-
-const MatchHeader = ({ match }) => {
-    const formatted = formatDateTime(match.dateTime);
     return (
-        <div className="mb-3 text-center">
-        { formatted && (
-            <>
-                <h4 className="card-title text-muted text-center mb-1 match-day">
-                        {formatted.day} {" - "} {match.matchNumber}
-                </h4>
-
-                <h5 className="text-center mb-2 match-date">
-                    {formatted.dateTime}
-                </h5>
-            </>
-        )}
-        
-            <p className="mb-1">
-                <strong>Místo:</strong> {match.location}
-            </p>
-            
+        <div className="d-flex flex-wrap gap-2 justify-content-center mb-4">
+            {renderButtons()}
         </div>
     );
 };
 
-export default MatchHeader;
+export default MatchActions;

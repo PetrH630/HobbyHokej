@@ -1,7 +1,7 @@
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.Embeddable;
-
+// TODO - ASI SMAZAT PO OTESTOVÁNÍ Z SETTINGS
 /**
  * Vnořitelný objekt reprezentující nastavení notifikací uživatele / hráče.
  *

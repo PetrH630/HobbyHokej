@@ -1,7 +1,7 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.SeasonDTO;
-import cz.phsoft.hokej.models.dto.mappers.SeasonMapper;
+import cz.phsoft.hokej.models.mappers.SeasonMapper;
 import cz.phsoft.hokej.models.services.CurrentSeasonService;
 import cz.phsoft.hokej.models.services.SeasonService;
 import jakarta.validation.Valid;

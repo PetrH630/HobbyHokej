@@ -1,12 +1,11 @@
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationHistoryRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.exceptions.MatchNotFoundException;
 import cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO;
-import cz.phsoft.hokej.models.dto.mappers.MatchRegistrationHistoryMapper;
+import cz.phsoft.hokej.models.mappers.MatchRegistrationHistoryMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -72,6 +72,23 @@ public class MatchRegistrationDTO {
 
     public MatchRegistrationDTO() {}
 
+    public MatchRegistrationDTO(Long id,
+                                Long playerId,
+                                PlayerMatchStatus status,
+                                ExcuseReason excuseReason,
+                                String excuseNote,
+                                String adminNote,
+                                Team team
+    ) {
+        this.id = id;
+        this.playerId = playerId;
+        this.status = status;
+        this.excuseReason = excuseReason;
+        this.excuseNote = excuseNote;
+        this.adminNote = adminNote;
+        this.team = team;
+    }
+
     // gettery / settery
 
     public Long getId() { return id; }

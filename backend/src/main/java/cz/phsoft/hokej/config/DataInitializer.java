@@ -303,9 +303,10 @@ public class DataInitializer {
                     reg.setExcuseNote(null);
                 }
 
-                // Zachována původní logika týmů
+                // půl na půl - logika týmů
                 // reg.setTeam(i < 4 ? Team.DARK : Team.LIGHT);
 
+                reg.setTeam(player.getTeam());
                 reg.setTimestamp(LocalDateTime.now());
                 reg.setCreatedBy("initializer");
 

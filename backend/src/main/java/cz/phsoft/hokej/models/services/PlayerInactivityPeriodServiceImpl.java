@@ -9,7 +9,7 @@ import cz.phsoft.hokej.exceptions.InactivityPeriodOverlapException;
 import cz.phsoft.hokej.exceptions.InvalidInactivityPeriodDateException;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
-import cz.phsoft.hokej.models.dto.mappers.PlayerInactivityPeriodMapper;
+import cz.phsoft.hokej.models.mappers.PlayerInactivityPeriodMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

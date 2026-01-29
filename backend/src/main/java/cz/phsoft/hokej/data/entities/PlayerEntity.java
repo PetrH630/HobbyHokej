@@ -69,10 +69,12 @@ public class PlayerEntity {
     private AppUserEntity user;
 
     /**
-     * Nastavení notifikací hráče.
+     * Nastavení hráče – kontakty a notifikační preference.
+     *
+     * Jeden hráč má právě jedno PlayerSettingsEntity.
      */
-    @Embedded
-    private NotificationSettings notificationSettings = new NotificationSettings();
+    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private PlayerSettingsEntity settings;
 
     // ==================================================
     // KONSTRUKTORY
@@ -139,39 +141,17 @@ public class PlayerEntity {
     public AppUserEntity getUser() { return user; }
     public void setUser(AppUserEntity user) { this.user = user; }
 
-    public NotificationSettings getNotificationSettings() { return notificationSettings; }
-    public void setNotificationSettings(NotificationSettings notificationSettings) {
-        this.notificationSettings = notificationSettings;
-    }
 
-    // ==================================================
-    // NOTIFIKAČNÍ POMOCNÉ METODY
-    // ==================================================
+    public PlayerSettingsEntity getSettings() { return settings; }
 
-    public boolean isNotifyByEmail() {
-        return notificationSettings != null && notificationSettings.isEmailEnabled();
-    }
-
-    public void setNotifyByEmail(boolean notifyByEmail) {
-        if (notificationSettings == null) {
-            notificationSettings = new NotificationSettings();
+    public void setSettings(PlayerSettingsEntity settings) { this.settings = settings;
+        if (settings != null) {
+            settings.setPlayer(this);
         }
-        notificationSettings.setEmailEnabled(notifyByEmail);
-    }
-
-    public boolean isNotifyBySms() {
-        return notificationSettings != null && notificationSettings.isSmsEnabled();
-    }
-
-    public void setNotifyBySms(boolean notifyBySms) {
-        if (notificationSettings == null) {
-            notificationSettings = new NotificationSettings();
-        }
-        notificationSettings.setSmsEnabled(notifyBySms);
     }
 
     // ==================================================
-    // INTERNÍ LOGIKA
+    // HELPER
     // ==================================================
 
     /**
@@ -180,4 +160,6 @@ public class PlayerEntity {
     private void updateFullName() {
         this.fullName = name + " " + surname;
     }
+
+
 }

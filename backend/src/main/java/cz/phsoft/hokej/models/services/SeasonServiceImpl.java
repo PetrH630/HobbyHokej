@@ -7,7 +7,7 @@ import cz.phsoft.hokej.exceptions.InvalidSeasonStateException;
 import cz.phsoft.hokej.exceptions.SeasonNotFoundException;
 import cz.phsoft.hokej.exceptions.SeasonPeriodOverlapException;
 import cz.phsoft.hokej.models.dto.SeasonDTO;
-import cz.phsoft.hokej.models.dto.mappers.SeasonMapper;
+import cz.phsoft.hokej.models.mappers.SeasonMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

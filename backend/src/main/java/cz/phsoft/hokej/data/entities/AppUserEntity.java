@@ -60,11 +60,14 @@ public class AppUserEntity {
     )
     private Set<PlayerEntity> players;
 
-    // gettery / settery
-
-
-
-// gettery/settery
+    // nastavení uživatele (AppUserSettingsEntity)
+    /**
+     * Nastavení uživatele (způsob výběru hráče, notifikace atd.).
+     *
+     * Jeden uživatel má právě jedno AppUserSettingsEntity.
+     */
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private AppUserSettingsEntity settings;
 
 
     public Long getId() {return id;}
@@ -98,4 +101,14 @@ public class AppUserEntity {
     public Set<PlayerEntity> getPlayers() {return players;}
 
     public void setPlayers(Set<PlayerEntity> players) {this.players = players;}
+
+    public AppUserSettingsEntity getSettings() { return settings; }
+
+    public void setSettings(AppUserSettingsEntity settings) {
+        this.settings = settings;
+        if (settings != null) {
+            settings.setUser(this);
+        }
+    }
+
 }

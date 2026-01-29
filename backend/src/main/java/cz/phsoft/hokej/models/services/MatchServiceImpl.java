@@ -9,8 +9,8 @@ import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.*;
-import cz.phsoft.hokej.models.dto.mappers.MatchMapper;
-import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import cz.phsoft.hokej.models.mappers.MatchMapper;
+import cz.phsoft.hokej.models.mappers.PlayerMapper;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -427,10 +424,11 @@ public class MatchServiceImpl implements MatchService {
         List<MatchRegistrationDTO> registrations =
                 registrationService.getRegistrationsForMatch(match.getId());
 
+
         var statusToPlayersMap = registrations.stream()
                 .map(r -> playerRepository.findById(r.getPlayerId())
                         .map(playerMapper::toDTO)
-                        .map(dto -> new java.util.AbstractMap.SimpleEntry<>(r.getStatus(), dto))
+                        .map(dto -> new AbstractMap.SimpleEntry<>(r.getStatus(), dto))
                 )
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -444,6 +442,13 @@ public class MatchServiceImpl implements MatchService {
 
         int inGamePlayers =
                 statusToPlayersMap.getOrDefault(PlayerMatchStatus.REGISTERED, List.of()).size();
+
+
+        registrations.forEach(r -> {
+            System.out.println("Reg: status=" + r.getStatus()
+                    + ", team=" + r.getTeam());
+        });
+
 
         int inGamePlayersDark =
                 (int) registrations.stream()
@@ -877,7 +882,7 @@ public class MatchServiceImpl implements MatchService {
     /**
      * Omezení seznamu nadcházejících zápasů podle typu hráče.
      * <ul>
-     *     <li>VIP → všechny zápasy,</li>
+     *     <li>VIP → max 3 zápasy,</li>
      *     <li>STANDARD → max 2 zápasy,</li>
      *     <li>BASIC → pouze nejbližší zápas.</li>
      * </ul>
@@ -888,7 +893,7 @@ public class MatchServiceImpl implements MatchService {
         }
 
         return switch (type) {
-            case VIP -> upcomingAll;
+            case VIP -> upcomingAll.stream().limit(3).toList();
             case STANDARD -> upcomingAll.stream().limit(2).toList();
             case BASIC -> List.of(upcomingAll.get(0));
         };

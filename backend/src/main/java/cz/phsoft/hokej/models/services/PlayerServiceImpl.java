@@ -8,7 +8,7 @@ import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import cz.phsoft.hokej.models.mappers.PlayerMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.models.dto.PlayerDTO;

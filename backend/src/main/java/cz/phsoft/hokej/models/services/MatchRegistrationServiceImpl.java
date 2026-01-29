@@ -11,8 +11,8 @@ import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.mappers.MatchRegistrationMapper;
-import cz.phsoft.hokej.models.dto.mappers.PlayerMapper;
+import cz.phsoft.hokej.models.mappers.MatchRegistrationMapper;
+import cz.phsoft.hokej.models.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
 import cz.phsoft.hokej.models.services.sms.SmsService;
@@ -100,7 +100,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      *         <ul>
      *             <li>UNREGISTER → {@link #handleUnregister},</li>
      *             <li>EXCUSE → {@link #handleExcuse},</li>
-     *             <li>REGISTER/RESERVE → {@link #handleRegisterOrReserve},</li>
+     *             <li>REGISTER/RESERVE → {@link #handleRegisterOrReserveOrSubstitute},</li>
      *         </ul>
      *     </li>
      *     <li>aplikuje společné detaily z requestu ({@link #applyRequestDetails}),</li>
@@ -259,18 +259,13 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             PlayerEntity player,
             MatchRegistrationEntity registration
     ) {
-        boolean isAlreadyRegistered =
-                registration != null &&
-                        registration.getStatus() == PlayerMatchStatus.REGISTERED;
+        PlayerMatchStatus currentStatus =
+                (registration != null) ? registration.getStatus() : null;
 
-        boolean isAlreadySubstitute =
-                registration != null &&
-                        registration.getStatus() == PlayerMatchStatus.SUBSTITUTE;
+        boolean isAlreadyRegistered = currentStatus == PlayerMatchStatus.REGISTERED;
 
         if (isAlreadyRegistered){
             throw new DuplicateRegistrationException(request.getMatchId(), player.getId());
-            } else if (isAlreadySubstitute) {
-            throw new DuplicateRegistrationException(request.getMatchId(), player.getId(), "Hráč již má zaregistrováno - možná");
             }
 
         // explicitní registrace jako „možná“ (SUBSTITUTE)
@@ -278,7 +273,11 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         // neúčastní se auto-přepočtů a může později:
         //  - přejít na REGISTER/RESERVED,
         //  - nebo se omluvit (EXCUSED).
-        if (request.isSubstitute()) { // --- NEW
+        if (request.isSubstitute()) {
+            if (currentStatus == PlayerMatchStatus.SUBSTITUTE){
+                throw new DuplicateRegistrationException(request.getMatchId(), player.getId(), "Hráč již má zaregistrováno - možná");
+            }
+
             clearExcuseIfNeeded(registration);  // --- NEW helper
             return PlayerMatchStatus.SUBSTITUTE;
         }

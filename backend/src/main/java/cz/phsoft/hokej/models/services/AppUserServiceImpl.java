@@ -2,23 +2,20 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
 import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
-import cz.phsoft.hokej.models.dto.mappers.AppUserMapper;
+import cz.phsoft.hokej.models.mappers.AppUserMapper;
 import cz.phsoft.hokej.models.services.email.EmailService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;

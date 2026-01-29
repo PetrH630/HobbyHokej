@@ -26,7 +26,8 @@ const statusTextUpcomingMap = {
     UNREGISTERED: "ODHLÁŠEN",
     EXCUSED: "NEMŮŽU",
     RESERVED: "ČEKÁM",
-    NO_RESPONSE: "NEVÍM",
+    SUBSTITUTE: "MOŽNÁ",
+    NO_RESPONSE: "",
     NO_EXCUSED: "NEOMLUVEN",
 };
 

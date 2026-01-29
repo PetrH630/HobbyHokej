@@ -15,6 +15,10 @@ const MatchInfo = ({ match }) => {
                     <strong>Hráči: </strong>
                     {match.inGamePlayers} / {match.maxPlayers}
                 </p>
+                <p className="card-text mb-2">
+                    <strong>Hráči: </strong>
+                    {match.inGamePlayersDark} / {match.maxPlayersLight}
+                </p>
 
                 {match.price != null && (
                     <p className="card-text mb-2">

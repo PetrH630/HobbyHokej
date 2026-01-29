@@ -6,6 +6,7 @@ const MatchActions = ({
     onRegister,
     onUnregister,
     onExcuse,
+    onSubstitute,
     disabled,
 }) => {
     console.log(
@@ -18,7 +19,7 @@ const MatchActions = ({
     const renderButtons = () => {
         switch (playerMatchStatus) {
             case "NO_RESPONSE":
-                // žádná registrace – Budu / Nemohu (omluva)
+                // žádná registrace – Budu / Nemohu (omluva) / možná
                 return (
                     <div className="d-flex gap-2 justify-content-center">
                         <button
@@ -27,7 +28,7 @@ const MatchActions = ({
                             onClick={onRegister}
                             disabled={disabled}
                         >
-                            Budu
+                            Přijdu
                         </button>
 
                         <button
@@ -36,8 +37,18 @@ const MatchActions = ({
                             onClick={onExcuse}
                             disabled={disabled}
                         >
-                            Nemohu
+                            Nemůžu
                         </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-outline-warning action-btn"
+                            onClick={onSubstitute}
+                            disabled={disabled}
+                        >
+                            Možná
+                        </button>
+                      
                     </div>
                 );
 
@@ -52,7 +63,7 @@ const MatchActions = ({
                             onClick={onUnregister}
                             disabled={disabled}
                         >
-                            Nakonec nebudu
+                            Nakonec nepříjdu
                         </button>
                     </div>
                 );
@@ -68,7 +79,31 @@ const MatchActions = ({
                             onClick={onRegister}
                             disabled={disabled}
                         >
-                            Nakonec budu
+                            Tak příjdu
+                        </button>
+                    </div>
+                );
+
+            case "SUBSTITUTE":
+            // možná - náhradník – může se znova přihlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Tak příjdu
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-danger action-btn"
+                            onClick={onUnregister}
+                            disabled={disabled}
+                        >
+                            Nemůžu
                         </button>
                     </div>
                 );

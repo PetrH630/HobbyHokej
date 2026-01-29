@@ -44,6 +44,7 @@ const MatchDetail = ({
     onRegister,
     onUnregister,
     onExcuse,
+    onSubstitute, 
     saving,
     isPast,
 }) => {
@@ -89,6 +90,7 @@ const MatchDetail = ({
                     onRegister={onRegister}
                     onUnregister={onUnregister}
                     onExcuse={onExcuse}
+                    onSubstitute={onSubstitute}
                     disabled={saving}
                 />
             )}
