@@ -137,14 +137,15 @@ public interface PlayerService {
     SuccessResponseDTO setCurrentPlayerForUser(String userEmail, Long playerId);
 
     /**
-     * Automaticky zvolí aktuálního hráče pro uživatele.
-     * <p>
-     * Typicky se používá v případech, kdy má uživatel
-     * přiřazen pouze jeden hráč.
-     * </p>
+     * Automaticky zvolí aktuálního hráče pro daného uživatele
+     * podle jeho nastavení (AppUserSettings.playerSelectionMode).
      *
-     * @param userEmail email uživatele
-     * @return odpověď s výsledkem operace
+     * Používá se typicky:
+     * - po přihlášení uživatele,
+     * - při explicitním volání z FE (např. tlačítko "Vybrat výchozího hráče").
+     *
+     * @param userEmail email přihlášeného uživatele (auth.getName())
+     * @return jednoduchá zpráva o výsledku
      */
     SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail);
 

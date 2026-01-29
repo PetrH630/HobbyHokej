@@ -61,11 +61,6 @@ public class PlayerDTO {
      */
     private PlayerStatus playerStatus;
 
-    /**
-     * Nastavení notifikací hráče.
-     */
-    private boolean notifyByEmail;
-    private boolean notifyBySms;
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
@@ -76,20 +71,20 @@ public class PlayerDTO {
                      String surname,
                      String nickname,
                      PlayerType type,
+                     String phoneNumber,
                      Team team,
-                     PlayerStatus playerStatus,
-                     boolean notifyByEmail,
-                     boolean notifyBySms) {
+                     PlayerStatus playerStatus
+                  ) {
 
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.nickname = this.nickname;
         this.type = type != null ? type : PlayerType.BASIC;
+        this.phoneNumber = phoneNumber;
         this.team = team;
         this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
-        this.notifyByEmail = notifyByEmail;
-        this.notifyBySms = notifyBySms;
+
         updateFullName();
     }
 
@@ -125,11 +120,7 @@ public class PlayerDTO {
         this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
     }
 
-    public boolean isNotifyByEmail() { return notifyByEmail; }
-    public void setNotifyByEmail(boolean notifyByEmail) { this.notifyByEmail = notifyByEmail; }
 
-    public boolean isNotifyBySms() { return notifyBySms; }
-    public void setNotifyBySms(boolean notifyBySms) { this.notifyBySms = notifyBySms; }
 
     // ==================================================
     // INTERNÍ LOGIKA

@@ -1,5 +1,11 @@
 package cz.phsoft.hokej.models.services.sms;
 
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import org.springframework.stereotype.Component;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
@@ -7,7 +13,10 @@ import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 /**
  * Builder pro generování textů SMS zpráv.
@@ -16,28 +25,28 @@ import java.time.format.DateTimeFormatter;
  * používaných v aplikaci. Řeší pouze textovou podobu zprávy, nikoliv
  * odesílání nebo business logiku.
  * </p>
- *
+ * <p>
  * Odpovědnost:
  * <ul>
  *     <li>sestavení lidsky čitelného obsahu SMS,</li>
  *     <li>centrální místo pro formátování zpráv (princip DRY),</li>
  *     <li>oddělení textové logiky od business logiky a schedulingu.</li>
  * </ul>
- *
+ * <p>
  * Třída vytváří SMS texty pro:
  * <ul>
  *     <li>registraci / odhlášení / omluvu hráče,</li>
  *     <li>připomenutí hráčům, kteří nereagovali,</li>
  *     <li>finální připomínku v den zápasu.</li>
  * </ul>
- *
+ * <p>
  * Třída neřeší:
  * <ul>
  *     <li>odesílání SMS (to zajišťuje {@link SmsService}),</li>
  *     <li>změny v databázi,</li>
  *     <li>oprávnění ani validace (předpokládá validní vstup).</li>
  * </ul>
- *
+ * <p>
  * Architektura:
  * <ul>
  *     <li>je anotována jako {@link Component} → lze ji snadno injektovat,</li>
@@ -52,6 +61,8 @@ public class SmsMessageBuilder {
      * (např. aktuální počet hráčů se statusem REGISTERED).
      */
     private final MatchRegistrationRepository matchRegistrationRepository;
+    private final MatchRepository matchRepository;
+    private final PlayerRepository playerRepository;
 
     /**
      * Jednotný formát data používaný v SMS zprávách.
@@ -59,8 +70,12 @@ public class SmsMessageBuilder {
     private final DateTimeFormatter dateFormatter =
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public SmsMessageBuilder(MatchRegistrationRepository matchRegistrationRepository) {
+    public SmsMessageBuilder(MatchRegistrationRepository matchRegistrationRepository,
+                             MatchRepository matchRepository,
+                             PlayerRepository playerRepository) {
         this.matchRegistrationRepository = matchRegistrationRepository;
+        this.matchRepository = matchRepository;
+        this.playerRepository = playerRepository;
     }
 
     // ====================================================
@@ -76,7 +91,7 @@ public class SmsMessageBuilder {
      *     <li>{@link PlayerMatchStatus#REGISTERED},</li>
      *     <li>{@link PlayerMatchStatus#EXCUSED}.</li>
      * </ul>
-     *
+     * <p>
      * Logika:
      * <ul>
      *     <li>podle statusu se zvolí text (přihlásil / odhlásil / omluven),</li>
@@ -90,13 +105,32 @@ public class SmsMessageBuilder {
      */
     public String buildMessageRegistration(MatchRegistrationEntity registration) {
 
-        PlayerMatchStatus status = registration.getStatus();
+        // TODO - KONKRÉTNÍ ZPRÁVY S KONKRÉTNÍM TEXTEM FULL NAME + DATUM ZÁPASU + POČET HRÁČŮ
 
-        String statusText = switch (status) {
-            case REGISTERED -> "přihlásil se k zápasu";
-            case EXCUSED -> "omluven";
-            default -> "neznámý stav";
-        };
+        PlayerMatchStatus status = registration.getStatus();
+        boolean createdByUser = registration.getCreatedBy().equals("user");
+
+        String statusText = "";
+
+        if (createdByUser) {
+            statusText = switch (status) {
+                case REGISTERED -> "přihlásil se";
+                case UNREGISTERED -> "odhlásil se";
+                case EXCUSED -> "omluvil se";
+                case SUBSTITUTE -> "možná bude";
+                case RESERVED -> "byl z důvodu snížení kapacity přesunut mezi náhradníky";
+                default -> "neznámý stav";
+            };
+        } else {
+            statusText = switch (status) {
+                case REGISTERED -> "byl systémem po uvolnění kapacity přihlášen";
+                case UNREGISTERED -> "byl systémem odhlášen";
+                case EXCUSED -> "byl systémem omluven";
+                case SUBSTITUTE -> "byl systémem nastaven že možná bude";
+                case RESERVED -> "byl z důvodu snížení kapacity přesunut mezi náhradníky";
+                default -> "neznámý stav";
+            };
+        }
 
         Long registeredCount = matchRegistrationRepository
                 .countByMatchIdAndStatus(
@@ -106,7 +140,7 @@ public class SmsMessageBuilder {
 
         StringBuilder sb = new StringBuilder();
         sb.append("app_hokej - datum: ")
-                .append(registration.getMatch().getDateTime().toLocalDate());
+                .append(registration.getMatch().getDateTime().toLocalDate().format(dateFormatter));
 
         // Obsazenost se neuvádí u EXCUSED – hráč se nepočítá mezi přihlášené.
         if (status != PlayerMatchStatus.EXCUSED) {
@@ -135,7 +169,7 @@ public class SmsMessageBuilder {
      * Používá se typicky několik dní před zápasem v rámci
      * scheduleru, který připomíná blížící se zápasy.
      * </p>
-     *
+     * <p>
      * Obsah zprávy:
      * <ul>
      *     <li>datum zápasu,</li>
@@ -165,6 +199,36 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
+
+    public String buildMessageMatchInfo(Object type, MatchEntity match) {
+        MatchStatus matchStatus = match.getMatchStatus();
+        MatchCancelReason cancelReason = match.getCancelReason();
+
+        String statusText = switch (matchStatus) {
+            case CANCELLED -> "byl zrušen";
+            case UNCANCELED -> "byl obnoven";
+            default -> "neznámý stav";
+        };
+
+        String cancelReasonText = switch (cancelReason) {
+            case NOT_ENOUGH_PLAYERS -> "málo hráčů";
+            case TECHNICAL_ISSUE -> "technické problémy (led, hala)";
+            case WEATHER -> "počasí";
+            case ORGANIZER_DECISION -> "rozhodnutí organizátora";
+            case OTHER -> "jiný důvod";
+            default -> "neznámý důvod";
+        };
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_hokej - UPOZORNĚNÍ : zápas ")
+                .append(match.getDateTime().format(dateFormatter))
+                .append(" - byl -")
+                .append(statusText)
+                .append(cancelReasonText);
+
+        return sb.toString();
+
+    }
     // ====================================================
     // FINÁLNÍ SMS – DEN ZÁPASU
     // ====================================================
@@ -177,14 +241,14 @@ public class SmsMessageBuilder {
      * aktuální informace o obsazenosti a orientační cenu
      * na jednoho hráče.
      * </p>
-     *
+     * <p>
      * Obsah:
      * <ul>
      *     <li>datum zápasu,</li>
      *     <li>aktuální počet přihlášených hráčů / maximální kapacita,</li>
      *     <li>cena na jednoho hráče (celková cena / počet přihlášených).</li>
      * </ul>
-     *
+     * <p>
      * Ochrana:
      * <ul>
      *     <li>při výpočtu ceny na hráče se používá ochrana proti dělení nulou

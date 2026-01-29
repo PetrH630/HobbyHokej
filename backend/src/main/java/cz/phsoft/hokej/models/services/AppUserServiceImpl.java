@@ -61,17 +61,20 @@ public class AppUserServiceImpl implements AppUserService {
     private final AppUserMapper appUserMapper;
     private final EmailService emailService;
     private final EmailVerificationTokenRepository tokenRepository;
+    private final AppUserSettingsService appUserSettingsService;
 
     public AppUserServiceImpl(AppUserRepository userRepository,
                               BCryptPasswordEncoder passwordEncoder,
                               AppUserMapper appUserMapper,
                               EmailService emailService,
-                              EmailVerificationTokenRepository tokenRepository) {
+                              EmailVerificationTokenRepository tokenRepository,
+                              AppUserSettingsService appUserSettingsService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.appUserMapper = appUserMapper;
         this.emailService = emailService;
         this.tokenRepository = tokenRepository;
+        this.appUserSettingsService = appUserSettingsService;
     }
 
     /**
@@ -217,10 +220,18 @@ public class AppUserServiceImpl implements AppUserService {
         }
 
         AppUserEntity user = verificationToken.getUser();
-        user.setEnabled(true);
-        userRepository.save(user);
+        if (!user.isEnabled()) {
+            user.setEnabled(true);
 
+            // pokud user ještě nemá settings → vytvoř default
+            if (user.getSettings() == null) {
+                appUserSettingsService.createDefaultSettingsForUser(user);
+            }
+
+            userRepository.save(user);
+        }
         tokenRepository.delete(verificationToken);
+
         return true;
     }
 

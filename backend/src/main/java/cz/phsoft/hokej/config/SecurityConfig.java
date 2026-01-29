@@ -168,7 +168,9 @@ public class SecurityConfig {
                                     "/api/auth/register",
                                     "/api/auth/verify",
                                     "/api/auth/login",
-                                    "/api/auth/logout"
+                                    "/api/auth/logout",
+                                    "/error",
+                                    "/favicon.ico"
                             ).permitAll()
 
                             // ===== DEBUG / TEST =====

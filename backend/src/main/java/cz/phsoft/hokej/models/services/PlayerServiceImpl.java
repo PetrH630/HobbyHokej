@@ -2,6 +2,8 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
+import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
 import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
@@ -44,19 +46,25 @@ public class PlayerServiceImpl implements PlayerService {
     private final AppUserRepository appUserRepository;
     private final NotificationService notificationService;
     private final CurrentPlayerService currentPlayerService;
+    private final AppUserSettingsService appUserSettingsService;
+    private final PlayerSettingsService playerSettingsService;
 
     public PlayerServiceImpl(
             PlayerRepository playerRepository,
             PlayerMapper playerMapper,
             AppUserRepository appUserRepository,
             NotificationService notificationService,
-            CurrentPlayerService currentPlayerService
+            CurrentPlayerService currentPlayerService,
+            AppUserSettingsService appUserSettingsService,
+            PlayerSettingsService playerSettingsService
     ) {
         this.playerRepository = playerRepository;
         this.playerMapper = playerMapper;
         this.appUserRepository = appUserRepository;
         this.notificationService = notificationService;
         this.currentPlayerService = currentPlayerService;
+        this.appUserSettingsService = appUserSettingsService;
+        this.playerSettingsService = playerSettingsService;
     }
 
     // ======================
@@ -236,13 +244,15 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public SuccessResponseDTO approvePlayer(Long id) {
-        return changePlayerStatus(
+    return changePlayerStatus(
                 id,
                 PlayerStatus.APPROVED,          // cílový status
                 PlayerStatus.APPROVED,          // status, při kterém hlásíme "už je schválen"
                 NotificationType.PLAYER_APPROVED,
                 "BE - Hráč už je schválen.",
                 "Hráč %s byl úspěšně aktivován"
+
+
         );
     }
 
@@ -297,34 +307,109 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, playerId);
     }
 
-    /**
-     * Automaticky vybere aktuálního hráče pro uživatele po přihlášení.
-     * <ul>
-     *     <li>pokud má přesně 1 hráče → nastaví ho jako aktuálního,</li>
-     *     <li>pokud má 0 nebo více hráčů → nic nenastaví, FE musí vybrat hráče ručně.</li>
-     * </ul>
-     *
-     * @param userEmail email přihlášeného uživatele
-     */
+    // NOVÁ LOGIKA AUTO-SELECTU HRÁČE PODLE AppUserSettings.playerSelectionMode
     @Override
     public SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail) {
-        List<PlayerDTO> players = getPlayersByUser(userEmail);
 
-        if (players.size() == 1) {
-            PlayerDTO player = players.get(0);
-            currentPlayerService.setCurrentPlayerId(player.getId());
+        // zjistit nastavení uživatele (včetně playerSelectionMode)
+        var userSettingsDto = appUserSettingsService.getSettingsForUser(userEmail);
 
-            String message = "BE - Automaticky nastaven aktuální hráč na ID: " + player.getId();
-            return buildSuccessResponse(message, player.getId());
+        PlayerSelectionMode mode = PlayerSelectionMode.FIRST_PLAYER; // bezpečný default
+
+        if (userSettingsDto.getPlayerSelectionMode() != null) {
+            mode = PlayerSelectionMode.valueOf(userSettingsDto.getPlayerSelectionMode());
         }
 
-        // 0 nebo více hráčů – necháme na FE, ať si uživatel zvolí hráče
-        String message = "BE - Uživatel má více (nebo žádné) hráče, je nutný ruční výběr.";
-        return buildSuccessResponse(message, null);
+
+        // podle režimu nastavení se rozhodnout, co udělat
+        switch (mode) {
+            case FIRST_PLAYER:
+                return autoSelectFirstPlayer(userEmail);
+
+            case ALWAYS_CHOOSE:
+                // - pokud má uživatel přesně 1 hráče -> vybere se automaticky
+                // - pokud má 0 nebo více než 1 hráče -> nevybere se nikdo a FE má nabídnout ruční výběr
+                return autoSelectIfSinglePlayer(userEmail);
+
+            default:
+                // bezpečnostní fallback – chová se jako FIRST_PLAYER
+                return autoSelectFirstPlayer(userEmail);
+        }
     }
 
     /**
-     * Změní přiřazeného aplikačního uživatele k hráči.
+     * Pomocná metoda: najde prvního hráče uživatele (podle ID)
+     * a nastaví ho jako aktuálního hráče v CurrentPlayerService.
+     */
+    private SuccessResponseDTO autoSelectFirstPlayer(String userEmail) {
+        // najdeme všechny hráče uživatele seřazené podle ID vzestupně
+        var players = playerRepository.findByUser_EmailOrderByIdAsc(userEmail);
+
+        if (players.isEmpty()) {
+            // nemá žádného hráče – currentPlayer vyčistíme
+            currentPlayerService.clear();
+            throw new PlayerNotFoundException(
+                    "Uživatel nemá přiřazeného žádného hráče. Nelze automaticky vybrat."
+            );
+        }
+
+        // vezmeme prvního hráče (nejstarší ID)
+        PlayerEntity firstPlayer = players.get(0);
+
+        if (firstPlayer.getPlayerStatus() != PlayerStatus.APPROVED) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Nelze zvolit hráče, který není schválen administrátorem."
+            );
+        }
+
+            currentPlayerService.setCurrentPlayerId(firstPlayer.getId());
+            String message = "Automaticky byl vybrán první hráč: " + firstPlayer.getFullName();
+            return buildSuccessResponse(message,firstPlayer.getId());
+
+    }
+    /**
+     * Pokud má uživatel přesně jednoho hráče, automaticky ho vybere
+     * jako currentPlayer.
+     *
+     * Používá se v režimu ALWAYS_CHOOSE:
+     *  - 0 hráčů  -> nevybere se nikdo, FE má nabídnout vytvoření hráče
+     *  - 1 hráč   -> hráč se automaticky vybere
+     *  - 2+ hráčů -> nevybere se nikdo, FE má nabídnout ruční výběr
+     */
+    private SuccessResponseDTO autoSelectIfSinglePlayer(String userEmail) {
+        var players = playerRepository.findByUser_EmailOrderByIdAsc(userEmail);
+
+        if (players.isEmpty()) {
+            // žádný hráč -> nemáme co vybrat
+            currentPlayerService.clear();
+            throw new PlayerNotFoundException(
+                    "Uživatel nemá přiřazeného žádného hráče. Nelze automaticky vybrat."
+            );
+        }
+        if (players.size() == 1) {
+            // přesně jeden hráč -> vybereme ho i v režimu ALWAYS_CHOOSE
+            var onlyPlayer = players.get(0);
+
+            if (onlyPlayer.getPlayerStatus() != PlayerStatus.APPROVED) {
+                throw new InvalidPlayerStatusException(
+                        "BE - Uživatel ještě nemá hráče schváleného administrátorem."
+                );
+            }
+            currentPlayerService.setCurrentPlayerId(onlyPlayer.getId());
+
+            String message = "Automaticky byl vybrán první hráč: " + onlyPlayer.getFullName();
+            return buildSuccessResponse(message,onlyPlayer.getId());
+            }
+
+    // TODO PRO FRONTEND
+        // více hráčů -> nevybíráme, FE musí nabídnout výběr hráče
+        currentPlayerService.clear();
+        return null;
+    }
+
+
+    /**
+     * Změní přiřazeného uživatele k hráči.
      * <p>
      * Typické použití:
      * <ul>
@@ -354,6 +439,7 @@ public class PlayerServiceImpl implements PlayerService {
      * @throws UserNotFoundException             pokud uživatel s daným ID neexistuje
      * @throws InvalidChangePlayerUserException  pokud je hráč již přiřazen tomuto uživateli
      */
+
     @Transactional
     public void changePlayerUser(Long id, Long newUserId) {
         PlayerEntity player = findPlayerOrThrow(id);
@@ -418,6 +504,7 @@ public class PlayerServiceImpl implements PlayerService {
      *     <li>approve/reject hráče.</li>
      * </ul>
      */
+    // TODO
     private PlayerEntity saveAndNotify(PlayerEntity player, NotificationType type) {
         PlayerEntity saved = playerRepository.save(player);
         notificationService.notifyPlayer(saved, type, null);
@@ -475,11 +562,19 @@ public class PlayerServiceImpl implements PlayerService {
         }
 
         player.setPlayerStatus(targetStatus);
+
+        if (targetStatus == PlayerStatus.APPROVED && player.getSettings() == null) {
+            PlayerSettingsEntity settings =
+                    playerSettingsService.createDefaultSettingsForPlayer(player);
+            player.setSettings(settings); // obousměrný vztah, cascade se postará o persist
+        }
+
         PlayerEntity saved = saveAndNotify(player, notificationType);
 
         String message = String.format(successMessageTemplate, saved.getFullName());
         return buildSuccessResponse(message, id);
     }
 
-
 }
+
+

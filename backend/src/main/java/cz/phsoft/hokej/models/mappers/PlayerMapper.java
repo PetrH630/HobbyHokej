@@ -56,8 +56,6 @@ public interface PlayerMapper {
      * @return DTO reprezentace hráče
      */
     @Mapping(target = "fullName", ignore = true)
-    @Mapping(source = "notificationSettings.emailEnabled", target = "notifyByEmail")
-    @Mapping(source = "notificationSettings.smsEnabled", target = "notifyBySms")
     PlayerDTO toDTO(PlayerEntity entity);
 
     /**
@@ -83,8 +81,7 @@ public interface PlayerMapper {
             target = "playerStatus",
             expression = "java(dto.getPlayerStatus() != null ? dto.getPlayerStatus() : cz.phsoft.hokej.data.enums.PlayerStatus.PENDING)"
     )
-    @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
-    @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")
+
     PlayerEntity toEntity(PlayerDTO dto);
 
     /**
@@ -131,8 +128,7 @@ public interface PlayerMapper {
             target = "playerStatus",
             expression = "java(source.getPlayerStatus() != null ? source.getPlayerStatus() : target.getPlayerStatus())"
     )
-    @Mapping(target = "notificationSettings.emailEnabled", source = "notifyByEmail")
-    @Mapping(target = "notificationSettings.smsEnabled", source = "notifyBySms")
+
     void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
 
     /**
@@ -149,25 +145,5 @@ public interface PlayerMapper {
      */
     List<PlayerDTO> toDTOList(List<PlayerEntity> players);
 
-    /**
-     * Zajistí inicializaci notifikačního nastavení po mapování.
-     *
-     * <p>
-     * Pokud během mapování nevznikne instance {@link NotificationSettings},
-     * vytvoří se výchozí objekt s vypnutými notifikacemi. Tím se eliminuje
-     * nutnost kontrolovat {@code null} v dalších částech aplikace.
-     * </p>
-     *
-     * @param entity cílová entita hráče po dokončení mapování
-     */
-    @AfterMapping
-    default void ensureNotificationSettings(@MappingTarget PlayerEntity entity) {
-        if (entity.getNotificationSettings() == null) {
-            NotificationSettings ns = new NotificationSettings();
-            ns.setEmailEnabled(false);
-            ns.setSmsEnabled(false);
-            entity.setNotificationSettings(ns);
-        }
-    }
 
 }

@@ -64,16 +64,11 @@ public class CurrentPlayerController {
     }
 
     /**
-     * Automaticky zvolí aktuálního hráče pro přihlášeného uživatele.
-     * <p>
-     * Typicky se volá po přihlášení uživatele:
-     * <ul>
-     *     <li>pokud má uživatel právě jednoho hráče, je vybrán automaticky,</li>
-     *     <li>pokud má více hráčů, výběr závisí na pravidlech ve service vrstvě.</li>
-     * </ul>
+     * Automaticky zvolí aktuálního hráče pro přihlášeného uživatele
+     * podle jeho nastavení v AppUserSettings (playerSelectionMode).
      *
-     * @param auth autentizační kontext přihlášeného uživatele
-     * @return informace o výsledku automatického výběru
+     * - FIRST_PLAYER  → vybere prvního hráče podle ID
+     * - ALWAYS_CHOOSE → hráče nevybere, FE má nabídnout manuální výběr
      */
     @PostMapping("/auto-select")
     @PreAuthorize("isAuthenticated()")

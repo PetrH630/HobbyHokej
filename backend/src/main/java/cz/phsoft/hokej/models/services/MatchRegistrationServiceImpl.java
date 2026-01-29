@@ -507,18 +507,29 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         registrationRepository.findByMatchId(matchId).stream()
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
                 .forEach(r -> {
-                    var player = r.getPlayer();
-                    var ns = player.getNotificationSettings();
-                    if (ns != null && ns.isSmsEnabled()) {
-                        sendSms(r, smsMessageBuilder.buildMessageFinal(r));
+                    PlayerEntity player = r.getPlayer();
+                    if (player == null) {
+                        return;
                     }
+
+                    var settings = player.getSettings();
+                    // pokud nemá settings nebo má SMS vypnuté → nic neposíláme
+                    if (settings == null || !settings.isSmsEnabled()) {
+                        return;
+                    }
+
+                    // samotné odeslání (pomocí helperu níž)
+                    sendSms(r, smsMessageBuilder.buildMessageFinal(r));
                 });
     }
+
+
 
     /**
      * Odešle připomínkovou SMS všem hráčům, kteří na zápas nijak nereagovali
      * (NO_RESPONSE) a mají povolené SMS notifikace.
      */
+    /**
     public void sendNoResponseSmsForMatch(Long matchId) {
         var match = getMatchOrThrow(matchId);
 
@@ -541,6 +552,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             }
         });
     }
+    /*
 
     // ================================================
     // ADMIN – RUČNÍ ZMĚNA STATUSU / NO_EXCUSED LOGIKA
@@ -626,6 +638,11 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                         true
                 );
 
+        NotificationType notificationType = resolveNotificationType(PlayerMatchStatus.NO_EXCUSED);
+        if (notificationType != null) {
+            notificationService.notifyPlayer(player, notificationType, updated);
+        }
+
         return matchRegistrationMapper.toDTO(updated);
     }
 
@@ -688,8 +705,25 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             return;
         }
 
+        PlayerEntity player = registration.getPlayer();
+        var settings = player.getSettings();
+
+        // 1) upřednostni contactPhone z PlayerSettings
+        String phone = null;
+        if (settings != null && settings.getContactPhone() != null && !settings.getContactPhone().isBlank()) {
+            phone = settings.getContactPhone();
+        } else if (player.getPhoneNumber() != null && !player.getPhoneNumber().isBlank()) {
+            // 2) fallback – telefon přímo na hráči
+            phone = player.getPhoneNumber();
+        }
+
+        if (phone == null || phone.isBlank()) {
+            log.debug("sendSms: hráč {} nemá žádné telefonní číslo – SMS se nepošle", player.getId());
+            return;
+        }
+
         try {
-            smsService.sendSms(registration.getPlayer().getPhoneNumber(), message);
+            smsService.sendSms(phone, message);
         } catch (Exception e) {
             log.error(
                     "Chyba při odesílání SMS pro registraci {}: {}",
@@ -699,6 +733,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             );
         }
     }
+
+
 
     /**
      * Společná metoda pro změnu statusu registrace.
@@ -730,13 +766,15 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      */
     private NotificationType resolveNotificationType(PlayerMatchStatus newStatus) {
         return switch (newStatus) {
-            case REGISTERED -> NotificationType.PLAYER_REGISTERED;
-            case UNREGISTERED -> NotificationType.PLAYER_UNREGISTERED;
-            case EXCUSED -> NotificationType.PLAYER_EXCUSED;
-            case RESERVED -> NotificationType.PLAYER_RESERVED;
+            case REGISTERED, RESERVED -> NotificationType.MATCH_REGISTRATION_CREATED;
+            case UNREGISTERED        -> NotificationType.MATCH_REGISTRATION_CANCELED;
+            case EXCUSED             -> NotificationType.PLAYER_EXCUSED;
+            case NO_EXCUSED          -> NotificationType.PLAYER_NO_EXCUSED;
             default -> null;
         };
     }
+
+
 
     /**
      * Pomocná metoda pro získání aktuálního času.

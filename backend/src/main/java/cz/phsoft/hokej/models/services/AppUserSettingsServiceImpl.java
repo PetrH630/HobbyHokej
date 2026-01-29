@@ -76,8 +76,8 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
                 .orElseThrow(() -> new UserNotFoundException(email));
     }
 
-
-    private AppUserSettingsEntity createDefaultSettingsForUser(AppUserEntity user) {
+    @Override
+    public AppUserSettingsEntity createDefaultSettingsForUser(AppUserEntity user) {
         AppUserSettingsEntity settings = new AppUserSettingsEntity();
         settings.setUser(user);
 
@@ -91,6 +91,8 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
         settings.setUiLanguage("cs");
         settings.setTimezone("Europe/Prague");
         settings.setDefaultLandingPage("DASHBOARD");
+
+        appUserSettingsRepository.save(settings);
 
         return settings;
 

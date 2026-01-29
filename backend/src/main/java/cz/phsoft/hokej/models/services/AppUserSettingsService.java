@@ -1,5 +1,7 @@
 package cz.phsoft.hokej.models.services;
 
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
 import cz.phsoft.hokej.models.dto.AppUserSettingsDTO;
 
 /**
@@ -26,4 +28,7 @@ public interface AppUserSettingsService {
      * @return aktualizované nastavení
      */
     AppUserSettingsDTO updateSettingsForUser(String userEmail, AppUserSettingsDTO dto);
+
+    AppUserSettingsEntity createDefaultSettingsForUser(AppUserEntity user);
+
 }

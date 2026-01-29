@@ -67,7 +67,7 @@ public class PlayerSettingsController {
     // /api/current-player/settings
     // =========================
 
-    @GetMapping("/current-player/settings")
+    @GetMapping("/me/settings")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PlayerSettingsDTO> getCurrentPlayerSettings() {
 
@@ -79,7 +79,7 @@ public class PlayerSettingsController {
         return ResponseEntity.ok(dto);
     }
 
-    @PatchMapping("/current-player/settings")
+    @PatchMapping("/me/settings")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PlayerSettingsDTO> updateCurrentPlayerSettings(
             @RequestBody PlayerSettingsDTO requestDto

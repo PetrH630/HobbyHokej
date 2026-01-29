@@ -70,7 +70,7 @@ public class PlayerSettingsEntity {
     private boolean smsEnabled = false;
 
     // =========================================
-    // TYPY NOTIFIKACÍ
+    // TYPY NOTIFIKACÍ (detailní flagy)
     // =========================================
 
     /**
@@ -123,6 +123,46 @@ public class PlayerSettingsEntity {
      */
     @Column(name = "reminder_hours_before")
     private Integer reminderHoursBefore = 24;
+
+    // =========================================
+    // "KATEGORIE" – odvozené pohledy pro NotificationType
+    // =========================================
+
+    /**
+     * Kategorie REGISTRATION – registrování / odhlašování na zápas.
+     */
+    @Transient
+    public boolean isRegistrationNotificationsEnabled() {
+        return notifyOnRegistration;
+    }
+
+    /**
+     * Kategorie EXCUSE – omluvy a neomluvení.
+     */
+    @Transient
+    public boolean isExcuseNotificationsEnabled() {
+        return notifyOnExcuse;
+    }
+
+    /**
+     * Kategorie MATCH_INFO – info o zápase:
+     * změna času/místa, zrušení, připomínky.
+     */
+    @Transient
+    public boolean isMatchInfoNotificationsEnabled() {
+        return notifyOnMatchChange
+                || notifyOnMatchCancel
+                || notifyReminders;
+    }
+
+    /**
+     * Kategorie SYSTEM – systémové věci (např. platby, do budoucna další).
+     * Zatím svážeme s notifyOnPayment.
+     */
+    @Transient
+    public boolean isSystemNotificationsEnabled() {
+        return notifyOnPayment;
+    }
 
     // =========================================
     // GETTERY / SETTERY

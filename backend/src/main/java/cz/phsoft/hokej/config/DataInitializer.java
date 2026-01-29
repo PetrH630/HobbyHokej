@@ -98,11 +98,6 @@ public class DataInitializer {
                 new PlayerEntity("Hráč_10", "Deset", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING)
         ));
 
-        for (PlayerEntity player : players) {
-            player.setNotifyByEmail(true);
-            player.setNotifyBySms(true);
-        }
-
         int playerCounter = 1;
         for (PlayerEntity player : players) {
             String email = "player" + playerCounter + "@example.com";

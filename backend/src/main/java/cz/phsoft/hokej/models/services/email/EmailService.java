@@ -103,7 +103,10 @@ public class EmailService {
             message.setText(text);
             message.setFrom(fromEmail);
 
+
             mailSender.send(message);
+
+            System.out.println("Email byl odeslán na " + to);
 
         } catch (Exception e) {
             // chyby při odesílání emailů NESMÍ shodit aplikaci
@@ -150,6 +153,7 @@ public class EmailService {
             helper.setFrom(fromEmail);
 
             mailSender.send(mimeMessage);
+            System.out.println("Email byl odeslán na " + to);
 
             log.debug(
                     "HTML email odeslán na {} se subjectem '{}'",

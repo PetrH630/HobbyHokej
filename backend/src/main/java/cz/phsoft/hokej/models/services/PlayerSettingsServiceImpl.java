@@ -71,8 +71,8 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
     }
-
-    private PlayerSettingsEntity createDefaultSettingsForPlayer(PlayerEntity player) {
+    @Override
+    public PlayerSettingsEntity createDefaultSettingsForPlayer(PlayerEntity player) {
         PlayerSettingsEntity settings = new PlayerSettingsEntity();
         settings.setPlayer(player);
 
@@ -83,9 +83,6 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
 
         // POZOR: tady je přesun staré logiky z PlayerEntity.emailEnabled / smsEnabled
         // Původně jsi měl tyto příznaky v PlayerEntity – teď žijí tady:
-        settings.setEmailEnabled(true);   // dříve player.emailEnabled
-        settings.setSmsEnabled(false);    // dříve player.smsEnabled
-
         settings.setNotifyOnRegistration(true);
         settings.setNotifyOnExcuse(true);
         settings.setNotifyOnMatchChange(true);
@@ -97,4 +94,6 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
 
         return settings;
     }
+
+
 }

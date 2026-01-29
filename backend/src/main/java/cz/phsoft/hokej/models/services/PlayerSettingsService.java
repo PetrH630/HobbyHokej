@@ -1,5 +1,7 @@
 package cz.phsoft.hokej.models.services;
 
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
 import cz.phsoft.hokej.models.dto.PlayerSettingsDTO;
 
 /**
@@ -29,4 +31,6 @@ public interface PlayerSettingsService {
      * @return aktualizované nastavení
      */
     PlayerSettingsDTO updateSettingsForPlayer(Long playerId, PlayerSettingsDTO dto);
+
+    PlayerSettingsEntity createDefaultSettingsForPlayer(PlayerEntity player);
 }

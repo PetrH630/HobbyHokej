@@ -1,7 +1,6 @@
 package cz.phsoft.hokej.models.services;
-
+import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.NotificationSettings;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.models.services.email.EmailService;
@@ -51,15 +50,18 @@ public class NotificationServiceImpl implements NotificationService {
     private final EmailService emailService;
     private final SmsService smsService;
     private final SmsMessageBuilder smsMessageBuilder;
+    private final NotificationPreferencesService notificationPreferencesService;
 
     public NotificationServiceImpl(
             EmailService emailService,
             SmsService smsService,
-            SmsMessageBuilder smsMessageBuilder
+            SmsMessageBuilder smsMessageBuilder,
+            NotificationPreferencesService notificationPreferencesService
     ) {
         this.emailService = emailService;
         this.smsService = smsService;
         this.smsMessageBuilder = smsMessageBuilder;
+        this.notificationPreferencesService = notificationPreferencesService;
     }
 
     /**
@@ -81,26 +83,45 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        // preference notifikací hráče
-        NotificationSettings settings = player.getNotificationSettings();
-        if (settings == null) {
-            // hráč nemá nastavené preference → nic neposíláme
-            log.debug(
-                    "Player {} nemá NotificationSettings – žádné notifikace se neposílají",
-                    player.getId()
-            );
-            return;
+        // PŮVODNÍ LOGIKA PŘES NotificationSettings – NYNÍ NAHRAZENA PREFERENCES SERVICE
+//        NotificationSettings settings = player.getNotificationSettings();
+//        if (settings == null) {
+//            // hráč nemá nastavené preference → nic neposíláme
+//            log.debug(
+//                    "Player {} nemá NotificationSettings – žádné notifikace se neposílají",
+//                    player.getId()
+//            );
+//            return;
+//        }
+//
+//        // ================= EMAIL =================
+//        if (settings.isEmailEnabled() && player.getUser() != null) {
+//            sendEmail(player, type, context);
+//        }
+//
+//        // ================= SMS =================
+//        if (settings.isSmsEnabled() && player.getPhoneNumber() != null) {
+//            sendSms(player, type, context);
+//        }
+
+        // NOVÁ LOGIKA – PREFERENCES PŘES AppUserSettings + PlayerSettingsEntity
+        NotificationDecision decision = notificationPreferencesService.evaluate(player, type);
+
+        // EMAILY
+        // USER
+        if (decision.isSendEmailToUser() && decision.getUserEmail() != null) {
+            sendEmailToUser(decision.getUserEmail(), player, type, context);
+        }
+        // PLAYER
+        if (decision.isSendEmailToPlayer() && decision.getPlayerEmail() != null) {
+            sendEmailToPlayer(decision.getPlayerEmail(), player, type, context);
         }
 
-        // ================= EMAIL =================
-        if (settings.isEmailEnabled() && player.getUser() != null) {
-            sendEmail(player, type, context);
+        // SMS
+        if (decision.isSendSmsToPlayer() && decision.getPlayerPhone() != null) {
+            sendSmsToPhone(decision.getPlayerPhone(), player, type, context);
         }
 
-        // ================= SMS =================
-        if (settings.isSmsEnabled() && player.getPhoneNumber() != null) {
-            sendSms(player, type, context);
-        }
     }
 
     // ----------------------------------------------------
@@ -108,30 +129,17 @@ public class NotificationServiceImpl implements NotificationService {
     // ----------------------------------------------------
 
     /**
-     * Odeslání emailové notifikace podle typu.
-     * <p>
-     * Email se používá především pro:
-     * <ul>
-     *     <li>změny účtu,</li>
-     *     <li>změny stavu hráče (schválení / zamítnutí / úpravy údajů).</li>
-     * </ul>
-     *
-     * Notifikace spojené se zápasem (registrace, omluva, rezervace)
-     * jsou primárně řešeny přes SMS.
+     * Odeslání emailu uživateli (AppUser) – typicky na email účtu.
      */
-    private void sendEmail(PlayerEntity player,
-                           NotificationType type,
-                           Object context) {
+    private void sendEmailToUser(String email,
+                                 PlayerEntity player,
+                                 NotificationType type,
+                                 Object context) {
 
-        if (player.getUser() == null || player.getUser().getEmail() == null) {
-            log.debug(
-                    "Player {} nemá email v uživateli – email se nepošle",
-                    player.getId()
-            );
+        if (email == null || email.isBlank()) {
+            log.debug("sendEmailToUser: prázdný email, nic se neposílá");
             return;
         }
-
-        String email = player.getUser().getEmail();
 
         switch (type) {
             case PLAYER_CREATED -> emailService.sendSimpleEmail(
@@ -163,19 +171,55 @@ public class NotificationServiceImpl implements NotificationService {
                     "Účet byl aktualizován",
                     "Údaje vašeho účtu byly aktualizovány."
             );
+            // účetní / bezpečnostní věci – můžeš doplnit vlastní texty
+            case PASSWORD_RESET -> emailService.sendSimpleEmail(
+                    email,
+                    "Reset hesla",
+                    "Byl proveden reset vašeho hesla. Pokud jste o něj nežádal(a), kontaktujte podporu."
+            );
 
-            // ostatní typy notifikací emailem neposíláme
+            case SECURITY_ALERT -> emailService.sendSimpleEmail(
+                    email,
+                    "Bezpečnostní upozornění",
+                    "Byla zaznamenána neobvyklá aktivita na vašem účtu."
+            );
+
+
+            // další typy – podle potřeby
             default -> log.debug(
-                    "Typ {} nemá definovanou email notifikaci, nic se neposílá",
+                    "Typ {} nemá definovanou email notifikaci pro uživatele, nic se neposílá",
                     type
             );
         }
     }
 
+    /**
+     * Odeslání emailu hráči (na jeho kontakt z PlayerSettings).
+     *
+     * Zatím může používat stejné texty jako pro uživatele,
+     * nebo je můžeš časem odlišit.
+     */
+    private void sendEmailToPlayer(String email,
+                                   PlayerEntity player,
+                                   NotificationType type,
+                                   Object context) {
+
+        if (email == null || email.isBlank()) {
+            log.debug("sendEmailToPlayer: prázdný email, nic se neposílá");
+            return;
+        }
+
+        // Pro začátek můžeme použít stejné šablony jako pro uživatele:
+        sendEmailToUser(email, player, type, context);
+
+
+    }
+
+
+
     // ----------------------------------------------------
     // SMS
     // ----------------------------------------------------
-
     /**
      * Odeslání SMS notifikace podle typu.
      * <p>
@@ -191,22 +235,26 @@ public class NotificationServiceImpl implements NotificationService {
      * {@link MatchRegistrationEntity} v parametru {@code context},
      * protože obsahuje detailní informace o zápasu a registraci.
      */
-    private void sendSms(PlayerEntity player,
-                         NotificationType type,
-                         Object context) {
+    private void sendSmsToPhone(String phone,
+                                PlayerEntity player,
+                                NotificationType type,
+                                Object context) {
 
-        String phone = player.getPhoneNumber();
         if (phone == null || phone.isBlank()) {
-            log.debug("Player {} nemá telefon – SMS se nepošle", player.getId());
+            log.debug("sendSmsToPhone: prázdný telefon – SMS se nepošle (player {})", player.getId());
             return;
         }
 
         switch (type) {
 
-            // registrace / odhlášení / omluva – vyžadují MatchRegistrationEntity
-            case PLAYER_REGISTERED,
-                 PLAYER_UNREGISTERED,
-                 PLAYER_EXCUSED -> {
+            // Registrace / odhlášení / přesun ve frontě / omluvy
+            case MATCH_REGISTRATION_CREATED,
+                 MATCH_REGISTRATION_UPDATED,
+                 MATCH_REGISTRATION_CANCELED,
+                 MATCH_REGISTRATION_RESERVED,
+                 MATCH_WAITING_LIST_MOVED_UP,
+                 PLAYER_EXCUSED,
+                 PLAYER_NO_EXCUSED -> {
 
                 if (!(context instanceof MatchRegistrationEntity registration)) {
                     log.warn(
@@ -217,21 +265,27 @@ public class NotificationServiceImpl implements NotificationService {
                     return;
                 }
 
+                // Můžeš podle typu zvolit různé buildery, zatím necháme jeden:
                 String msg = smsMessageBuilder.buildMessageRegistration(registration);
                 smsService.sendSms(phone, msg);
             }
 
-            // rezervace hráče (náhradník)
-            case PLAYER_RESERVED -> {
-                if (context instanceof MatchRegistrationEntity registration) {
-                    String msg = smsMessageBuilder.buildMessageRegistration(registration);
-                    smsService.sendSms(phone, msg);
-                } else {
-                    // Fallback zpráva, pokud kontext není k dispozici
-                    String msg = "app_hokej - hráč " + player.getFullName()
-                            + " je nyní v režimu NÁHRADNÍKA na zápas.";
-                    smsService.sendSms(phone, msg);
+            // Obecné info / připomínky k zápasu
+            case MATCH_REMINDER,
+                 MATCH_CANCELED,
+                 MATCH_TIME_CHANGED -> {
+
+                if (!(context instanceof MatchEntity match)) {
+                    log.warn(
+                            "NotificationType {} očekává MatchEntity v context, ale dostal {}",
+                            type,
+                            (context != null ? context.getClass().getName() : "null")
+                    );
+                    return;
                 }
+
+                String msg = smsMessageBuilder.buildMessageMatchInfo(type, match);
+                smsService.sendSms(phone, msg);
             }
 
             // tyto typy přes SMS neposíláme – jsou čistě emailové
@@ -239,16 +293,19 @@ public class NotificationServiceImpl implements NotificationService {
                  PLAYER_UPDATED,
                  PLAYER_APPROVED,
                  PLAYER_REJECTED,
-                 USER_UPDATED -> log.debug(
+                 USER_UPDATED,
+                 PASSWORD_RESET,
+                 SECURITY_ALERT -> log.debug(
                     "Typ {} nemá definovanou SMS notifikaci, nic se neposílá",
                     type
             );
 
-            // neznámý / nový typ – raději neposílat
             default -> log.debug(
                     "Neznámý NotificationType {} – SMS se neposílá",
                     type
             );
         }
     }
+
+
 }
