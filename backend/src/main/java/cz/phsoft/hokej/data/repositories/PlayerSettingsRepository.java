@@ -14,4 +14,6 @@ public interface PlayerSettingsRepository extends JpaRepository<PlayerSettingsEn
     Optional<PlayerSettingsEntity> findByPlayer(PlayerEntity player);
 
     Optional<PlayerSettingsEntity> findByPlayerId(Long playerId);
+
+    boolean existsByPlayer(PlayerEntity player);
 }

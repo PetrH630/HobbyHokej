@@ -11,7 +11,9 @@ import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.mappers.PlayerMapper;
+import cz.phsoft.hokej.models.services.notification.NotificationService;
 import jakarta.transaction.Transactional;
+import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 
@@ -318,17 +320,20 @@ public class PlayerServiceImpl implements PlayerService {
 
         if (userSettingsDto.getPlayerSelectionMode() != null) {
             mode = PlayerSelectionMode.valueOf(userSettingsDto.getPlayerSelectionMode());
+            System.out.println("mode " + mode);
         }
 
 
         // podle režimu nastavení se rozhodnout, co udělat
         switch (mode) {
             case FIRST_PLAYER:
+                System.out.println("First Player spouštím firstPlayer");
                 return autoSelectFirstPlayer(userEmail);
 
             case ALWAYS_CHOOSE:
                 // - pokud má uživatel přesně 1 hráče -> vybere se automaticky
                 // - pokud má 0 nebo více než 1 hráče -> nevybere se nikdo a FE má nabídnout ruční výběr
+                System.out.println("Vždy vybrat spouštím ifSinglePlayer");
                 return autoSelectIfSinglePlayer(userEmail);
 
             default:
@@ -343,18 +348,18 @@ public class PlayerServiceImpl implements PlayerService {
      */
     private SuccessResponseDTO autoSelectFirstPlayer(String userEmail) {
         // najdeme všechny hráče uživatele seřazené podle ID vzestupně
-        var players = playerRepository.findByUser_EmailOrderByIdAsc(userEmail);
+        List<PlayerEntity> players = playerRepository.findByUser_EmailOrderByIdAsc(userEmail);
 
         if (players.isEmpty()) {
             // nemá žádného hráče – currentPlayer vyčistíme
             currentPlayerService.clear();
-            throw new PlayerNotFoundException(
-                    "Uživatel nemá přiřazeného žádného hráče. Nelze automaticky vybrat."
-            );
+
+            throw new PlayerNotFoundException("BE - Uživatel nemá přiřazeného žádného hráče. Nelze automaticky vybrat.", userEmail);
         }
 
         // vezmeme prvního hráče (nejstarší ID)
         PlayerEntity firstPlayer = players.get(0);
+        System.out.println("firstplayer: " + firstPlayer);
 
         if (firstPlayer.getPlayerStatus() != PlayerStatus.APPROVED) {
             throw new InvalidPlayerStatusException(
@@ -377,33 +382,36 @@ public class PlayerServiceImpl implements PlayerService {
      *  - 2+ hráčů -> nevybere se nikdo, FE má nabídnout ruční výběr
      */
     private SuccessResponseDTO autoSelectIfSinglePlayer(String userEmail) {
-        var players = playerRepository.findByUser_EmailOrderByIdAsc(userEmail);
+        List<PlayerEntity> players = playerRepository
+                .findByUser_EmailOrderByIdAsc(userEmail).stream()
+                        .filter(p -> p.getPlayerStatus() == PlayerStatus.APPROVED)
+                        .toList();
 
+
+        System.out.println("hráči: " + players);
         if (players.isEmpty()) {
             // žádný hráč -> nemáme co vybrat
             currentPlayerService.clear();
             throw new PlayerNotFoundException(
-                    "Uživatel nemá přiřazeného žádného hráče. Nelze automaticky vybrat."
+                    "BE - Uživatel nemá přiřazeného žádného hráče schváleného Administrátorem. Nelze automaticky vybrat."
             );
         }
         if (players.size() == 1) {
+            System.out.println("Jeden hráč: ");
             // přesně jeden hráč -> vybereme ho i v režimu ALWAYS_CHOOSE
-            var onlyPlayer = players.get(0);
+            PlayerEntity onlyPlayer = players.get(0);
+            System.out.println("jeden - " + onlyPlayer);
 
-            if (onlyPlayer.getPlayerStatus() != PlayerStatus.APPROVED) {
-                throw new InvalidPlayerStatusException(
-                        "BE - Uživatel ještě nemá hráče schváleného administrátorem."
-                );
-            }
             currentPlayerService.setCurrentPlayerId(onlyPlayer.getId());
 
-            String message = "Automaticky byl vybrán první hráč: " + onlyPlayer.getFullName();
+            String message = "Byl vybrán jediný schválený hráč: " + onlyPlayer.getFullName();
             return buildSuccessResponse(message,onlyPlayer.getId());
             }
 
     // TODO PRO FRONTEND
         // více hráčů -> nevybíráme, FE musí nabídnout výběr hráče
         currentPlayerService.clear();
+        System.out.println("Je více hráčů, musí se vybrat manuálně");
         return null;
     }
 

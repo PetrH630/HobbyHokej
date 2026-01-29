@@ -1,4 +1,4 @@
-package cz.phsoft.hokej.models.services;
+package cz.phsoft.hokej.models.services.notification;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;

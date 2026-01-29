@@ -3,6 +3,8 @@ package cz.phsoft.hokej.config;
 import cz.phsoft.hokej.data.entities.*;
 import cz.phsoft.hokej.data.enums.*;
 import cz.phsoft.hokej.data.repositories.*;
+import cz.phsoft.hokej.models.services.AppUserSettingsService;
+import cz.phsoft.hokej.models.services.PlayerSettingsService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,21 +28,33 @@ public class DataInitializer {
     private final MatchRegistrationRepository matchRegistrationRepository;
     private final AppUserRepository appUserRepository;
     private final SeasonRepository seasonRepository;
+    private final AppUserSettingsRepository appUserSettingsRepository;
+    private final PlayerSettingsRepository playerSettingsRepository;
+    private final AppUserSettingsService appUserSettingService;
+    private final PlayerSettingsService playerSettingService;
     private final JdbcTemplate jdbcTemplate;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    private int j;
+
 
     public DataInitializer(PlayerRepository playerRepository,
                            MatchRepository matchRepository,
                            MatchRegistrationRepository matchRegistrationRepository,
                            AppUserRepository appUserRepository,
                            SeasonRepository seasonRepository,
+                           AppUserSettingsRepository appUserSettingsRepository,
+                           PlayerSettingsRepository playerSettingsRepository,
+                           AppUserSettingsService appUserSettingService,
+                           PlayerSettingsService playerSettingService,
                            JdbcTemplate jdbcTemplate) {
         this.playerRepository = playerRepository;
         this.matchRepository = matchRepository;
         this.matchRegistrationRepository = matchRegistrationRepository;
         this.appUserRepository = appUserRepository;
         this.seasonRepository = seasonRepository;
+        this.appUserSettingsRepository = appUserSettingsRepository;
+        this.playerSettingsRepository = playerSettingsRepository;
+        this.appUserSettingService = appUserSettingService;
+        this.playerSettingService = playerSettingService;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -48,6 +62,8 @@ public class DataInitializer {
     public void init() {
         initAdmin();
         initPlayersAndUsers();
+        initUserSettings();
+        initPlayerSettings();
         initSeasons();
         initMatches();
         initRegistrations();
@@ -99,6 +115,7 @@ public class DataInitializer {
         ));
 
         int playerCounter = 1;
+
         for (PlayerEntity player : players) {
             String email = "player" + playerCounter + "@example.com";
             String password = "Player123";
@@ -127,6 +144,61 @@ public class DataInitializer {
         playerRepository.saveAll(players);
 
         System.out.println("Players and users initialized.");
+    }
+
+    // =====================
+    // User and Player Settings
+    // =====================
+    private void initUserSettings(){
+
+        System.out.println("Initializing userSettings...");
+        // vezmeme všechny uživatele
+        List<AppUserEntity> users = appUserRepository.findAll();
+
+        for (AppUserEntity user : users) {
+
+            // jestli už má nastavení, přeskočíme
+            boolean hasSettings = appUserSettingsRepository.existsByUser(user);
+            // případně, pokud máš metodu existsByUserId:
+            // boolean hasSettings = appUserSettingsRepository.existsByUserId(user.getId());
+
+            if (hasSettings) {
+                continue;
+            }
+
+            // vytvořit defaultní settings přes tvou metodu
+            AppUserSettingsEntity settings =
+                    appUserSettingService.createDefaultSettingsForUser(user);
+
+            // navázat uživatele, pokud to nedělá přímo metoda createDefault...
+
+            // uložit
+            appUserSettingsRepository.save(settings);
+        }
+
+        System.out.println("User settings initialized.");
+    }
+    private void initPlayerSettings() {
+        System.out.println("Initializing player settings...");
+
+        List<PlayerEntity> players = playerRepository.findAll();
+
+        for (PlayerEntity player : players) {
+
+            boolean hasSettings = playerSettingsRepository.existsByPlayer(player);
+            // nebo existsByPlayerId(player.getId());
+
+            if (hasSettings) {
+                continue;
+            }
+
+            PlayerSettingsEntity settings =
+                    playerSettingService.createDefaultSettingsForPlayer(player);
+
+            playerSettingsRepository.save(settings);
+        }
+
+        System.out.println("Player settings initialized.");
     }
 
     // =====================
@@ -220,11 +292,15 @@ public class DataInitializer {
     }
 // POMOCNÁ PRO SPOČÍTÁNÍ PÁTKU
 
-   private int countFridays(LocalDate from, LocalDate to) {
-        if (to.isBefore(from)) {return 0;}
+    private int countFridays(LocalDate from, LocalDate to) {
+        if (to.isBefore(from)) {
+            return 0;
+        }
         LocalDate firstFriday = from.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
 
-        if (firstFriday.isAfter(to)) {return 0; }
+        if (firstFriday.isAfter(to)) {
+            return 0;
+        }
         int count = 0;
         for (LocalDate date = firstFriday;
              !date.isAfter(to);
@@ -234,6 +310,7 @@ public class DataInitializer {
 
         return count;
     }
+
     // =====================
     // REGISTRATIONS
     // =====================

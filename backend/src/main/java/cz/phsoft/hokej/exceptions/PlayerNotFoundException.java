@@ -20,4 +20,10 @@ public class PlayerNotFoundException extends BusinessException {
     public PlayerNotFoundException(String email) {
         super("BE - Hráč s e-mailem " + email + " nenalezen.", HttpStatus.NOT_FOUND);
     }
+
+    public PlayerNotFoundException(String message, String Email) {
+        super(message, HttpStatus.NOT_FOUND);
+    }
+
+
 }

@@ -24,6 +24,10 @@ public class NotificationDecision {
     private String userEmail;
 
     /**
+     * fullname uživatele (AppUser.email).
+     */
+    private String fullname;
+    /**
      * Poslat email hráči na jeho kontakt (PlayerSettings.contactEmail)?
      */
     private boolean sendEmailToPlayer;
@@ -94,4 +98,6 @@ public class NotificationDecision {
     public void setPlayerPhone(String playerPhone) {
         this.playerPhone = playerPhone;
     }
+
+
 }

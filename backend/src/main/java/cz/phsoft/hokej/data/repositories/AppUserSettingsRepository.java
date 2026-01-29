@@ -14,4 +14,6 @@ public interface AppUserSettingsRepository extends JpaRepository<AppUserSettings
     Optional<AppUserSettingsEntity> findByUser(AppUserEntity user);
 
     Optional<AppUserSettingsEntity> findByUserEmail(String email);
+
+    Boolean existsByUser(AppUserEntity user);
 }

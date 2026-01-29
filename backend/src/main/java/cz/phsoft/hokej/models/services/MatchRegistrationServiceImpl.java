@@ -14,6 +14,7 @@ import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.mappers.MatchRegistrationMapper;
 import cz.phsoft.hokej.models.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
+import cz.phsoft.hokej.models.services.notification.NotificationService;
 import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
 import cz.phsoft.hokej.models.services.sms.SmsService;
 import jakarta.transaction.Transactional;

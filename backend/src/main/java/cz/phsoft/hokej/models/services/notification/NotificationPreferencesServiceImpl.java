@@ -1,4 +1,4 @@
-package cz.phsoft.hokej.models.services;
+package cz.phsoft.hokej.models.services.notification;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
@@ -7,6 +7,7 @@ import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
 import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
 import cz.phsoft.hokej.data.enums.NotificationCategory;
 import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.models.services.NotificationDecision;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -20,7 +21,7 @@ import org.springframework.util.StringUtils;
 @Service
 public class NotificationPreferencesServiceImpl implements NotificationPreferencesService {
 
-    @Override
+
     public NotificationDecision evaluate(PlayerEntity player,
                                          NotificationType type) {
 
