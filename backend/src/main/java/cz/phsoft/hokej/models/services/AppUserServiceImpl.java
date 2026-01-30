@@ -2,6 +2,7 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
+import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
@@ -10,6 +11,8 @@ import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import cz.phsoft.hokej.models.mappers.AppUserMapper;
 import cz.phsoft.hokej.models.services.email.EmailService;
+import cz.phsoft.hokej.models.services.notification.NotificationService;
+import cz.phsoft.hokej.models.services.notification.UserActivationContext;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +34,13 @@ import java.util.UUID;
  *     <li>změna a reset hesla,</li>
  *     <li>správa základních údajů uživatelského účtu.</li>
  * </ul>
- *
+ * <p>
  * Bezpečnost:
  * <ul>
  *     <li>hesla jsou vždy ukládána hashovaná pomocí BCrypt,</li>
  *     <li>nově registrovaný účet je neaktivní, dokud není ověřen email.</li>
  * </ul>
- *
+ * <p>
  * Tato service neřeší:
  * <ul>
  *     <li>autentizaci (řeší Spring Security),</li>
@@ -49,12 +52,20 @@ public class AppUserServiceImpl implements AppUserService {
 
     private static final Logger log = LoggerFactory.getLogger(AppUserServiceImpl.class);
 
-    /** Výchozí heslo při resetu účtu administrátorem */
+    /**
+     * Výchozí heslo při resetu účtu administrátorem
+     */
     private static final String DEFAULT_RESET_PASSWORD = "Player123";
 
-    /** Base URL aplikace – používá se pro generování aktivačních odkazů */
+    /**
+     * Base URL aplikace – používá se pro generování aktivačních odkazů
+     */
     @Value("${app.base-url}")
     private String baseUrl;
+
+    private String buildActivationLink(EmailVerificationTokenEntity token) {
+        return baseUrl + "/api/auth/verify?token=" + token.getToken();
+    }
 
     private final AppUserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -62,19 +73,22 @@ public class AppUserServiceImpl implements AppUserService {
     private final EmailService emailService;
     private final EmailVerificationTokenRepository tokenRepository;
     private final AppUserSettingsService appUserSettingsService;
+    private final NotificationService notificationService;
 
     public AppUserServiceImpl(AppUserRepository userRepository,
                               BCryptPasswordEncoder passwordEncoder,
                               AppUserMapper appUserMapper,
                               EmailService emailService,
                               EmailVerificationTokenRepository tokenRepository,
-                              AppUserSettingsService appUserSettingsService) {
+                              AppUserSettingsService appUserSettingsService,
+                              NotificationService notificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.appUserMapper = appUserMapper;
         this.emailService = emailService;
         this.tokenRepository = tokenRepository;
         this.appUserSettingsService = appUserSettingsService;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -104,8 +118,68 @@ public class AppUserServiceImpl implements AppUserService {
         EmailVerificationTokenEntity verificationToken =
                 createVerificationToken(savedUser);
 
-        sendActivationEmail(savedUser, verificationToken);
+        // ⬅ TADY ZÍSKÁŠ activationLink
+        String activationLink = buildActivationLink(verificationToken);
+        log.info("Aktivační odkaz pro {}: {}", user.getEmail(), activationLink);
+        // 1) Pošleme aktivační email přes EmailService (stávající logika)
+//        emailService.sendActivationEmail(
+//                savedUser.getEmail(),
+//                savedUser.getName(),         // nebo full name, jak to máš
+//                activationLink
+//        );
+
+        // 2) Pošleme notifikaci přes NotificationService (user + manažeři)
+        notificationService.notifyUser(
+                savedUser,
+                NotificationType.USER_CREATED,
+                new UserActivationContext(savedUser, activationLink)
+        );
     }
+
+    @Override
+    @Transactional
+    public boolean activateUser(String token) {
+
+        EmailVerificationTokenEntity verificationToken =
+                tokenRepository.findByToken(token).orElse(null);
+
+        if (verificationToken == null ||
+                verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        AppUserEntity user = verificationToken.getUser();
+        boolean newlyActivated = false;
+
+        if (!user.isEnabled()) {
+            user.setEnabled(true);
+            newlyActivated = true;
+
+            // pokud user ještě nemá settings → vytvoř default
+            if (user.getSettings() == null) {
+                appUserSettingsService.createDefaultSettingsForUser(user);
+            }
+
+            userRepository.save(user);
+            // původní ruční HTML mail už není potřeba
+            // sendSuccesActivationEmail(user);
+        }
+
+        // token vždy smažeme, pokud byl platný
+        tokenRepository.delete(verificationToken);
+
+        // pokud se opravdu nově aktivoval, pošleme notifikaci USER_ACTIVATED
+        if (newlyActivated) {
+            notificationService.notifyUser(
+                    user,
+                    NotificationType.USER_ACTIVATED,
+                    null   // zatím žádný extra context nepotřebujeme
+            );
+        }
+
+        return true;
+    }
+
     /**
      * Aktualizuje základní údaje přihlášeného uživatele.
      *
@@ -200,40 +274,16 @@ public class AppUserServiceImpl implements AppUserService {
         user.setPassword(passwordEncoder.encode(DEFAULT_RESET_PASSWORD));
         userRepository.save(user);
     }
+
     /**
      * Aktivuje uživatelský účet na základě ověřovacího tokenu.
      *
      * @param token aktivační token z emailu
      * @return {@code true} pokud byl účet úspěšně aktivován,
-     *         {@code false} pokud je token neplatný nebo expirovaný
+     * {@code false} pokud je token neplatný nebo expirovaný
      */
-    @Override
-    @Transactional
-    public boolean activateUser(String token) {
 
-        EmailVerificationTokenEntity verificationToken =
-                tokenRepository.findByToken(token).orElse(null);
 
-        if (verificationToken == null ||
-                verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            return false;
-        }
-
-        AppUserEntity user = verificationToken.getUser();
-        if (!user.isEnabled()) {
-            user.setEnabled(true);
-
-            // pokud user ještě nemá settings → vytvoř default
-            if (user.getSettings() == null) {
-                appUserSettingsService.createDefaultSettingsForUser(user);
-            }
-
-            userRepository.save(user);
-        }
-        tokenRepository.delete(verificationToken);
-
-        return true;
-    }
 
     /**
      * Aktivuje uživatelský účet na základě aktivace Administrátorem.
@@ -241,7 +291,7 @@ public class AppUserServiceImpl implements AppUserService {
     @Override
     public void activateUserByAdmin(Long id) {
         AppUserEntity user = findUserByIdOrThrow(id);
-        if (user.isEnabled()){
+        if (user.isEnabled()) {
             throw new InvalidUserActivationException(
                     "BE - Aktivace účtu již byla provedena"
             );
@@ -258,7 +308,7 @@ public class AppUserServiceImpl implements AppUserService {
     public void deactivateUserByAdmin(Long id) {
         AppUserEntity user = findUserByIdOrThrow(id);
 
-        if (!user.isEnabled()){
+        if (!user.isEnabled()) {
             throw new InvalidUserActivationException(
                     "BE - Deaktivace účtu již byla provedena"
             );
@@ -267,7 +317,7 @@ public class AppUserServiceImpl implements AppUserService {
         userRepository.save(user);
     }
 
-    public AppUserDTO getUserById (Long id){
+    public AppUserDTO getUserById(Long id) {
         AppUserEntity user = findUserByIdOrThrow(id);
         return appUserMapper.toDTO(user);
     }
@@ -343,13 +393,53 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Odešle aktivační email s ověřovacím odkazem.
      */
-    private void sendActivationEmail(AppUserEntity user,
-                                     EmailVerificationTokenEntity token) {
+//    private void sendActivationEmail(AppUserEntity user,
+//                                     EmailVerificationTokenEntity token) {
+//
+//
+//        List<AppUserEntity> managers = userRepository.findAll().stream()
+//                .filter(m -> m.getRole() == Role.ROLE_MANAGER)
+//                .toList();
+//
+//        String activationLink =
+//                baseUrl + "/api/auth/verify?token=" + token.getToken();
+//
+//        log.info("Aktivační odkaz pro {}: {}", user.getEmail(), activationLink);
+//
+//        String salutation;
+//
+//        for (AppUserEntity manager : managers) {
+//            salutation = "Zpráva pro Manažera - " + manager.getName() + " " + manager.getSurname() + " - <br> Uživatel - " + user.getName() + " " + user.getSurname();
+//            System.out.println("Manager: " + manager.getName() + " " + manager.getSurname() + " vybrán");
+//            System.out.println(salutation);
+//            emailService.sendActivationEmailHTML(manager.getEmail(), salutation, activationLink);
+//
+//        }
+//        salutation = user.getName() + " " + user.getSurname();
+//        System.out.println(salutation);
+//        emailService.sendActivationEmailHTML(user.getEmail(), salutation, activationLink);
+//    }
 
-        String activationLink =
-                baseUrl + "/api/auth/verify?token=" + token.getToken();
+    // Úspěšná aktivace
 
-        log.info("Aktivační odkaz pro {}: {}", user.getEmail(), activationLink);
-        emailService.sendActivationEmailHTML(user.getEmail(), activationLink);
-    }
+//    private void sendSuccesActivationEmail(AppUserEntity user) {
+//
+//        List<AppUserEntity> managers = userRepository.findAll().stream()
+//                .filter(m -> m.getRole() == Role.ROLE_MANAGER)
+//                .toList();
+//
+//        log.info("Účet uživatele {} + byl úspěšně aktivován", user.getEmail());
+//
+//        String salutation;
+//        for (AppUserEntity manager : managers) {
+//            salutation = "Zpráva pro Manažera - " + manager.getName() + " " + manager.getSurname() + "- <br> Uživatel - " + user.getName() + " " + user.getSurname();
+//            System.out.println("Manager: " + manager.getName() + " " + manager.getSurname() + " vybrán");
+//            System.out.println(salutation);
+//            emailService.sendSuccesActivationEmailHTML(manager.getEmail(), salutation);
+//        }
+//
+//        salutation = user.getName() + " " + user.getSurname();
+//        System.out.println(salutation);
+//        emailService.sendSuccesActivationEmailHTML(user.getEmail(), salutation);
+//    }
 }

@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.models.services.notification;
 
+import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
 
@@ -61,4 +62,9 @@ public interface NotificationService {
      */
     void notifyPlayer(PlayerEntity player, NotificationType type, Object context);
 
+    void notifyUser(AppUserEntity user,
+                    NotificationType type,
+                    Object context);
 }
+
+

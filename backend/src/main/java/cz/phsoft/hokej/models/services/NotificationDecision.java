@@ -13,7 +13,8 @@ public class NotificationDecision {
 
     // ===== EMAIL =====
 
-    /**
+
+     /**
      * Poslat email uživateli (AppUser)?
      */
     private boolean sendEmailToUser;
@@ -50,6 +51,7 @@ public class NotificationDecision {
     private String playerPhone;
 
     // ===== GETTERY / SETTERY =====
+
 
     public boolean isSendEmailToUser() {
         return sendEmailToUser;

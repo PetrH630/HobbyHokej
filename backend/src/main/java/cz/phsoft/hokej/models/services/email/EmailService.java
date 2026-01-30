@@ -43,7 +43,7 @@ public interface EmailService {
      * @param to             cílový email
      * @param activationLink aktivační odkaz
      */
-    void sendActivationEmail(String to, String activationLink);
+    void sendActivationEmail(String to, String salutation, String activationLink);
 
     /**
      * Odešle HTML aktivační email.
@@ -51,5 +51,21 @@ public interface EmailService {
      * @param to             cílový email
      * @param activationLink aktivační odkaz
      */
-    void sendActivationEmailHTML(String to, String activationLink);
+    void sendActivationEmailHTML(String to, String salutation, String activationLink);
+
+    /**
+     * Odešle jednoduchý textový aktivační email.
+     *
+     * @param to             cílový email
+     *
+     */
+    void sendSuccesActivationEmail(String to, String salutation);
+
+    /**
+     * Odešle HTML aktivační email.
+     *
+     * @param to             cílový email
+     *
+     */
+    void sendSuccesActivationEmailHTML(String to, String salutation);
 }

@@ -164,6 +164,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         ensureUniqueNameSurname(dto.getName(), dto.getSurname(), null);
 
+
         PlayerEntity player = playerMapper.toEntity(dto);
         player.setUser(user);
 
@@ -246,7 +247,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public SuccessResponseDTO approvePlayer(Long id) {
-    return changePlayerStatus(
+        return changePlayerStatus(
                 id,
                 PlayerStatus.APPROVED,          // cílový status
                 PlayerStatus.APPROVED,          // status, při kterém hlásíme "už je schválen"
@@ -317,25 +318,19 @@ public class PlayerServiceImpl implements PlayerService {
         var userSettingsDto = appUserSettingsService.getSettingsForUser(userEmail);
 
         PlayerSelectionMode mode = PlayerSelectionMode.FIRST_PLAYER; // bezpečný default
-
         if (userSettingsDto.getPlayerSelectionMode() != null) {
             mode = PlayerSelectionMode.valueOf(userSettingsDto.getPlayerSelectionMode());
-            System.out.println("mode " + mode);
-        }
 
+        }
 
         // podle režimu nastavení se rozhodnout, co udělat
         switch (mode) {
             case FIRST_PLAYER:
-                System.out.println("First Player spouštím firstPlayer");
                 return autoSelectFirstPlayer(userEmail);
-
             case ALWAYS_CHOOSE:
                 // - pokud má uživatel přesně 1 hráče -> vybere se automaticky
                 // - pokud má 0 nebo více než 1 hráče -> nevybere se nikdo a FE má nabídnout ruční výběr
-                System.out.println("Vždy vybrat spouštím ifSinglePlayer");
                 return autoSelectIfSinglePlayer(userEmail);
-
             default:
                 // bezpečnostní fallback – chová se jako FIRST_PLAYER
                 return autoSelectFirstPlayer(userEmail);
@@ -353,66 +348,72 @@ public class PlayerServiceImpl implements PlayerService {
         if (players.isEmpty()) {
             // nemá žádného hráče – currentPlayer vyčistíme
             currentPlayerService.clear();
-
             throw new PlayerNotFoundException("BE - Uživatel nemá přiřazeného žádného hráče. Nelze automaticky vybrat.", userEmail);
         }
 
         // vezmeme prvního hráče (nejstarší ID)
         PlayerEntity firstPlayer = players.get(0);
-        System.out.println("firstplayer: " + firstPlayer);
-
         if (firstPlayer.getPlayerStatus() != PlayerStatus.APPROVED) {
             throw new InvalidPlayerStatusException(
                     "BE - Nelze zvolit hráče, který není schválen administrátorem."
             );
         }
 
-            currentPlayerService.setCurrentPlayerId(firstPlayer.getId());
-            String message = "Automaticky byl vybrán první hráč: " + firstPlayer.getFullName();
-            return buildSuccessResponse(message,firstPlayer.getId());
+        currentPlayerService.setCurrentPlayerId(firstPlayer.getId());
+        String message = "BE - Automaticky byl vybrán první hráč: " + firstPlayer.getFullName();
+        return buildSuccessResponse(message, firstPlayer.getId());
 
     }
+
     /**
      * Pokud má uživatel přesně jednoho hráče, automaticky ho vybere
      * jako currentPlayer.
-     *
+     * <p>
      * Používá se v režimu ALWAYS_CHOOSE:
-     *  - 0 hráčů  -> nevybere se nikdo, FE má nabídnout vytvoření hráče
-     *  - 1 hráč   -> hráč se automaticky vybere
-     *  - 2+ hráčů -> nevybere se nikdo, FE má nabídnout ruční výběr
+     * - 0 hráčů  -> nevybere se nikdo, FE má nabídnout vytvoření hráče
+     * - 1 hráč   -> hráč se automaticky vybere
+     * - 2+ hráčů -> nevybere se nikdo, FE má nabídnout ruční výběr
      */
     private SuccessResponseDTO autoSelectIfSinglePlayer(String userEmail) {
         List<PlayerEntity> players = playerRepository
                 .findByUser_EmailOrderByIdAsc(userEmail).stream()
-                        .filter(p -> p.getPlayerStatus() == PlayerStatus.APPROVED)
-                        .toList();
+                .filter(p -> p.getPlayerStatus() == PlayerStatus.APPROVED)
+                .toList();
 
-
-        System.out.println("hráči: " + players);
         if (players.isEmpty()) {
             // žádný hráč -> nemáme co vybrat
             currentPlayerService.clear();
+
             throw new PlayerNotFoundException(
-                    "BE - Uživatel nemá přiřazeného žádného hráče schváleného Administrátorem. Nelze automaticky vybrat."
+                    "BE - Uživatel nemá přiřazeného žádného hráče schváleného Administrátorem. Nelze automaticky vybrat.",
+                    userEmail
             );
         }
         if (players.size() == 1) {
-            System.out.println("Jeden hráč: ");
             // přesně jeden hráč -> vybereme ho i v režimu ALWAYS_CHOOSE
             PlayerEntity onlyPlayer = players.get(0);
-            System.out.println("jeden - " + onlyPlayer);
 
             currentPlayerService.setCurrentPlayerId(onlyPlayer.getId());
 
-            String message = "Byl vybrán jediný schválený hráč: " + onlyPlayer.getFullName();
-            return buildSuccessResponse(message,onlyPlayer.getId());
-            }
+            String message = "BE - Byl vybrán jediný schválený hráč: " + onlyPlayer.getFullName();
+            return buildSuccessResponse(message, onlyPlayer.getId());
+        }
 
-    // TODO PRO FRONTEND
+        // TODO PRO FRONTEND
         // více hráčů -> nevybíráme, FE musí nabídnout výběr hráče
         currentPlayerService.clear();
-        System.out.println("Je více hráčů, musí se vybrat manuálně");
-        return null;
+
+        StringBuilder sb = new StringBuilder();
+        for (PlayerEntity player : players) {
+            sb.append(players.indexOf(player) + 1);
+            sb.append(". - ");
+            sb.append(player.getFullName());
+            sb.append(" / ");
+        }
+
+
+        String message = "BE - uživatel má více hráču a musí je vybrat manuálně dle nastavení: " + sb;
+        return buildSuccessResponse(message, 0L);
     }
 
 
@@ -425,7 +426,7 @@ public class PlayerServiceImpl implements PlayerService {
      *     <li>převod hráče pod jiný účet (např. rodič → jiný rodič),</li>
      *     <li>úklid dat po sloučení / změně uživatelských účtů.</li>
      * </ul>
-     *
+     * <p>
      * Kroky:
      * <ol>
      *     <li>najde hráče podle ID ({@link #findPlayerOrThrow(Long)}),</li>
@@ -434,7 +435,7 @@ public class PlayerServiceImpl implements PlayerService {
      *     <li>pokud ano → vyhodí {@link InvalidChangePlayerUserException},</li>
      *     <li>pokud ne → přepíše vazbu {@code player.user} na nového uživatele.</li>
      * </ol>
-     *
+     * <p>
      * Metoda:
      * <ul>
      *     <li>neposílá žádné notifikace,</li>
@@ -443,9 +444,9 @@ public class PlayerServiceImpl implements PlayerService {
      *
      * @param id        ID hráče, kterému se mění vazba na uživatele
      * @param newUserId ID nového {@link AppUserEntity}, ke kterému má být hráč přiřazen
-     * @throws PlayerNotFoundException           pokud hráč s daným ID neexistuje
-     * @throws UserNotFoundException             pokud uživatel s daným ID neexistuje
-     * @throws InvalidChangePlayerUserException  pokud je hráč již přiřazen tomuto uživateli
+     * @throws PlayerNotFoundException          pokud hráč s daným ID neexistuje
+     * @throws UserNotFoundException            pokud uživatel s daným ID neexistuje
+     * @throws InvalidChangePlayerUserException pokud je hráč již přiřazen tomuto uživateli
      */
 
     @Transactional
@@ -462,9 +463,9 @@ public class PlayerServiceImpl implements PlayerService {
 
     }
 
-    // ======================
-    // PRIVATE HELPERY – ENTITY / DUPLICITY
-    // ======================
+// ======================
+// PRIVATE HELPERY – ENTITY / DUPLICITY
+// ======================
 
     /**
      * Najde hráče podle ID, nebo vyhodí {@link PlayerNotFoundException}.
@@ -512,7 +513,7 @@ public class PlayerServiceImpl implements PlayerService {
      *     <li>approve/reject hráče.</li>
      * </ul>
      */
-    // TODO
+// TODO
     private PlayerEntity saveAndNotify(PlayerEntity player, NotificationType type) {
         PlayerEntity saved = playerRepository.save(player);
         notificationService.notifyPlayer(saved, type, null);

@@ -24,7 +24,7 @@ import java.util.List;
  *     <li>získání aktuálního hráče,</li>
  *     <li>získání seznamu hráčů přihlášeného uživatele.</li>
  * </ul>
- *
+ * <p>
  * Veškerá business logika je delegována do {@link PlayerService}
  * a {@link CurrentPlayerService}.
  */
@@ -66,14 +66,13 @@ public class CurrentPlayerController {
     /**
      * Automaticky zvolí aktuálního hráče pro přihlášeného uživatele
      * podle jeho nastavení v AppUserSettings (playerSelectionMode).
-     *
+     * <p>
      * - FIRST_PLAYER  → vybere prvního hráče podle ID
      * - ALWAYS_CHOOSE → hráče nevybere, FE má nabídnout manuální výběr
      */
     @PostMapping("/auto-select")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<SuccessResponseDTO> autoSelectCurrentPlayer(Authentication auth) {
-
         SuccessResponseDTO response =
                 playerService.autoSelectCurrentPlayerForUser(auth.getName());
 

@@ -265,9 +265,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
         boolean isAlreadyRegistered = currentStatus == PlayerMatchStatus.REGISTERED;
 
-        if (isAlreadyRegistered){
+        if (isAlreadyRegistered) {
             throw new DuplicateRegistrationException(request.getMatchId(), player.getId());
-            }
+        }
 
         // explicitní registrace jako „možná“ (SUBSTITUTE)
         // Hráč se označí jako náhradník / možná, neblokuje kapacitu,
@@ -275,7 +275,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         //  - přejít na REGISTER/RESERVED,
         //  - nebo se omluvit (EXCUSED).
         if (request.isSubstitute()) {
-            if (currentStatus == PlayerMatchStatus.SUBSTITUTE){
+            if (currentStatus == PlayerMatchStatus.SUBSTITUTE) {
                 throw new DuplicateRegistrationException(request.getMatchId(), player.getId(), "Hráč již má zaregistrováno - možná");
             }
 
@@ -287,7 +287,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         PlayerMatchStatus newStatus =
                 isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
 
-            clearExcuseIfNeeded(registration);
+        clearExcuseIfNeeded(registration);
 
 
         return newStatus;
@@ -321,6 +321,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             registration.setExcuseNote(request.getExcuseNote());
         }
     }
+
     /*
      společný pro všechny přechody, kde nechceme zachovat omluvu
      */
@@ -439,7 +440,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
 
-
     /**
      * Vrátí množinu ID hráčů, kteří mají k zápasu nějakou registraci.
      */
@@ -525,41 +525,40 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
 
-
     /**
      * Odešle připomínkovou SMS všem hráčům, kteří na zápas nijak nereagovali
      * (NO_RESPONSE) a mají povolené SMS notifikace.
      */
     /**
-    public void sendNoResponseSmsForMatch(Long matchId) {
-        var match = getMatchOrThrow(matchId);
-
-        getNoResponsePlayers(matchId).forEach(player -> {
-            String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
-
-            try {
-                if (player.isNotifyBySms()) {
-                    smsService.sendSms(player.getPhoneNumber(), smsMsg);
-                }
-            } catch (Exception e) {
-                log.error(
-                        "Chyba při odesílání SMS hráči {} ({}) pro zápas {}: {}",
-                        player.getFullName(),
-                        player.getPhoneNumber(),
-                        matchId,
-                        e.getMessage(),
-                        e
-                );
-            }
-        });
-    }
-    /*
-
-    // ================================================
-    // ADMIN – RUČNÍ ZMĚNA STATUSU / NO_EXCUSED LOGIKA
-    // ================================================
-
-    /**
+     * public void sendNoResponseSmsForMatch(Long matchId) {
+     * var match = getMatchOrThrow(matchId);
+     * <p>
+     * getNoResponsePlayers(matchId).forEach(player -> {
+     * String smsMsg = smsMessageBuilder.buildMessageNoResponse(player, match);
+     * <p>
+     * try {
+     * if (player.isNotifyBySms()) {
+     * smsService.sendSms(player.getPhoneNumber(), smsMsg);
+     * }
+     * } catch (Exception e) {
+     * log.error(
+     * "Chyba při odesílání SMS hráči {} ({}) pro zápas {}: {}",
+     * player.getFullName(),
+     * player.getPhoneNumber(),
+     * matchId,
+     * e.getMessage(),
+     * e
+     * );
+     * }
+     * });
+     * }
+     * /*
+     * <p>
+     * // ================================================
+     * // ADMIN – RUČNÍ ZMĚNA STATUSU / NO_EXCUSED LOGIKA
+     * // ================================================
+     * <p>
+     * /**
      * Obecná admin operace pro změnu statusu registrace hráče na zápas.
      * <p>
      * Nepovoluje nastavení statusu NO_EXCUSED – ten má vlastní logiku.
@@ -736,7 +735,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
 
-
     /**
      * Společná metoda pro změnu statusu registrace.
      *
@@ -767,14 +765,16 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      */
     private NotificationType resolveNotificationType(PlayerMatchStatus newStatus) {
         return switch (newStatus) {
-            case REGISTERED, RESERVED -> NotificationType.MATCH_REGISTRATION_CREATED;
-            case UNREGISTERED        -> NotificationType.MATCH_REGISTRATION_CANCELED;
-            case EXCUSED             -> NotificationType.PLAYER_EXCUSED;
-            case NO_EXCUSED          -> NotificationType.PLAYER_NO_EXCUSED;
+            case REGISTERED -> NotificationType.MATCH_REGISTRATION_CREATED;
+            case UNREGISTERED -> NotificationType.MATCH_REGISTRATION_CANCELED;
+            case EXCUSED -> NotificationType.PLAYER_EXCUSED;
+            case RESERVED -> NotificationType.MATCH_REGISTRATION_RESERVED;
+            case NO_RESPONSE -> NotificationType.MATCH_REGISTRATION_NO_RESPONSE;
+            case SUBSTITUTE -> NotificationType.MATCH_REGISTRATION_SUBSTITUTE;
+            case NO_EXCUSED -> NotificationType.PLAYER_NO_EXCUSED;
             default -> null;
         };
     }
-
 
 
     /**
@@ -801,6 +801,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             );
         }
     }
+
     /**
      * Ověří, zda aktuálně přihlášený uživatel může měnit
      * registraci na daný zápas.
@@ -816,7 +817,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      *
      * @param match zápas, pro který se registrace mění
      * @throws InvalidPlayerStatusException pokud hráč překročil
-     *         povolené časové okno pro změnu registrace
+     *                                      povolené časové okno pro změnu registrace
      */
     private void assertPlayerCanModifyMatch(MatchEntity match) {
         if (!isCurrentUserPlayer()) {
@@ -830,6 +831,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
             );
         }
     }
+
     /**
      * Zjistí, zda je zápas ještě v časovém okně,
      * ve kterém může hráč (ROLE_PLAYER) upravovat svou registraci.
@@ -839,7 +841,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      * <pre>
      * now() &lt; match.dateTime + 30 minut
      * </pre>
-     *
+     * <p>
      * Tzn.:
      * <ul>
      *     <li>před zápasem → povoleno,</li>
@@ -868,7 +870,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      * </p>
      *
      * @return {@code true}, pokud má uživatel roli PLAYER,
-     *         jinak {@code false}
+     * jinak {@code false}
      */
     private boolean isCurrentUserPlayer() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -890,8 +892,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      *
      * @param match zápas, který se kontroluje
      * @return {@code true}, pokud má zápas sezónu shodnou
-     *         s hodnotou {@link #getCurrentSeasonIdOrActive()},
-     *         jinak {@code false}
+     * s hodnotou {@link #getCurrentSeasonIdOrActive()},
+     * jinak {@code false}
      */
     private boolean isMatchInCurrentSeason(MatchEntity match) {
         if (match == null || match.getSeason() == null) {
@@ -906,8 +908,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      *
      * @param registration registrace, která se kontroluje
      * @return {@code true}, pokud je registrace navázaná na zápas,
-     *         jehož sezóna odpovídá {@link #getCurrentSeasonIdOrActive()},
-     *         jinak {@code false}
+     * jehož sezóna odpovídá {@link #getCurrentSeasonIdOrActive()},
+     * jinak {@code false}
      */
     private boolean isRegistrationInCurrentSeason(MatchRegistrationEntity registration) {
         if (registration == null) {
@@ -915,6 +917,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         }
         return isMatchInCurrentSeason(registration.getMatch());
     }
+
     /**
      * Vrátí ID sezóny, která se má použít pro filtrování registrací.
      *
@@ -937,7 +940,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         }
         return seasonService.getActiveSeason().getId();
     }
-
 
 
 }

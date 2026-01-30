@@ -7,7 +7,9 @@ public enum NotificationType {
     MATCH_REGISTRATION_UPDATED(NotificationCategory.REGISTRATION, false),
     MATCH_REGISTRATION_CANCELED(NotificationCategory.REGISTRATION, true),
     MATCH_REGISTRATION_RESERVED(NotificationCategory.REGISTRATION, true),
+    MATCH_REGISTRATION_SUBSTITUTE(NotificationCategory.REGISTRATION, true),
     MATCH_WAITING_LIST_MOVED_UP(NotificationCategory.REGISTRATION, true),
+    MATCH_REGISTRATION_NO_RESPONSE(NotificationCategory.REGISTRATION, true),
 
     // EXCUSE
     PLAYER_EXCUSED(NotificationCategory.EXCUSE, false),
@@ -23,9 +25,11 @@ public enum NotificationType {
     PLAYER_UPDATED(NotificationCategory.SYSTEM, false),
     PLAYER_APPROVED(NotificationCategory.SYSTEM, true),
     PLAYER_REJECTED(NotificationCategory.SYSTEM, true),
+    USER_CREATED(NotificationCategory.SYSTEM, true),
+    USER_ACTIVATED(NotificationCategory.SYSTEM, true),
     USER_UPDATED(NotificationCategory.SYSTEM, true),
 
-    // SYSTEM – „čistě účetní“ události
+    // SYSTEM –
     PASSWORD_RESET(NotificationCategory.SYSTEM, true),
     SECURITY_ALERT(NotificationCategory.SYSTEM, true);
 

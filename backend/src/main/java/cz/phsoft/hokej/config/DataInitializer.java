@@ -126,9 +126,15 @@ public class DataInitializer {
             user.setEmail(email);
             user.setPassword(encoder.encode(password));
 
+            // TODO ODMAZAT EMAIL
             switch (playerCounter) {
-                case 1 -> user.setRole(Role.ROLE_ADMIN);
-                case 2 -> user.setRole(Role.ROLE_MANAGER);
+                case 1 -> {
+                    user.setRole(Role.ROLE_MANAGER);
+                    user.setEmail("petrhlista@seznam.cz");
+                    user.setName("Petr");
+                    user.setSurname("Hlista");
+                }
+                case 2 -> user.setRole(Role.ROLE_PLAYER);
                 default -> user.setRole(Role.ROLE_PLAYER);
             }
             user.setEnabled(true);

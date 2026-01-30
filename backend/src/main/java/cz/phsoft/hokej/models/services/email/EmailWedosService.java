@@ -115,6 +115,7 @@ public class EmailWedosService implements EmailService {
         }
 
         try {
+            System.out.println("email existuje - jdu zkusit poslat zprávu");
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper =
                     new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -123,7 +124,7 @@ public class EmailWedosService implements EmailService {
             helper.setSubject(subject);
             helper.setText(htmlContent, true); // true = HTML obsah
             helper.setFrom(fromEmail);
-
+            System.out.println("teď budu posílat");
             mailSender.send(mimeMessage);
             System.out.println("Email byl odeslán na " + to);
 
@@ -153,10 +154,10 @@ public class EmailWedosService implements EmailService {
      * {@inheritDoc}
      */
     @Override
-    public void sendActivationEmail(String to, String activationLink) {
-        String subject = "Potvrďte svůj účet";
+    public void sendActivationEmail(String to, String salutation, String activationLink) {
+        String subject = "Potvrzení registrace - App - Hokej Stará Garda";
         String text =
-                "Dobrý den,\n\n" +
+                "Dobrý den, " + salutation + " \n\n" +
                         "Klikněte na tento odkaz pro aktivaci účtu:\n" +
                         activationLink + "\n\n" +
                         "Platnost odkazu: 24 hodin.\n\n" +
@@ -170,14 +171,47 @@ public class EmailWedosService implements EmailService {
      */
     @Override
     @Async
-    public void sendActivationEmailHTML(String to, String activationLink) {
+    public void sendActivationEmailHTML(String to, String salutation, String activationLink) {
         String subject = "Potvrzení registrace - App - Hokej Stará Garda";
         String html =
+                "<p>Dobrý den, <br>" + salutation + ",</p>" +
                 "<p>Děkujeme za registraci účtu.</p><br><br>" +
                         "<p>Klikněte na odkaz pro aktivaci účtu:</p>" +
                         "<p>Platnost odkazu: 24 hodin</p>" +
                         "<a href=\"" + activationLink + "\">Aktivovat účet</a>";
 
+        sendHtmlEmail(to, subject, html);
+    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Async
+    public void sendSuccesActivationEmail(String to, String salutation) {
+        String subject = "Aktivace účtu - App - Hokej Stará Garda";
+        String text =
+                "Dobrý den, " + salutation + " " +
+                       "váš účet byl úspěšně aktivován" +
+                        "Děkujeme!";
+
+        sendSimpleEmail(to, subject, text);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Async
+    public void sendSuccesActivationEmailHTML(String to, String salutation) {
+        System.out.println("jdu posílat email na " + to);
+        String subject = "Aktivace účtu - App - Hokej Stará Garda";
+        String html =
+                "<p>Dobrý den</p><br><br>" +
+                        "<p>" + salutation + "<br></p>" +
+                        "<p>Váš účet byl úspěšně aktivován</p><br><br>" +
+                        "<p> Děkujeme </p>";
+
+        System.out.println("Zpráva vytvořena : " + html);
         sendHtmlEmail(to, subject, html);
     }
 }

@@ -79,7 +79,7 @@ public class PlayerDTO {
         this.id = id;
         this.name = name;
         this.surname = surname;
-        this.nickname = this.nickname;
+        this.nickname = nickname;
         this.type = type != null ? type : PlayerType.BASIC;
         this.phoneNumber = phoneNumber;
         this.team = team;

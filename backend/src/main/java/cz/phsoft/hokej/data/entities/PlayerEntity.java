@@ -86,7 +86,7 @@ public class PlayerEntity {
 
     public PlayerEntity(String name,
                         String surname,
-                        String nickName,
+                        String nickname,
                         PlayerType type,
                         String phoneNumber,
                         Team team,
@@ -122,7 +122,7 @@ public class PlayerEntity {
     }
 
     public String getNickname() { return nickname; }
-    public void setNickname(String nickName) { this.nickname = nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
 
     public String getFullName() { return fullName; }
 

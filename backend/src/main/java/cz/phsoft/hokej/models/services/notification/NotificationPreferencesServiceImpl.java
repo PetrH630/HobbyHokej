@@ -59,6 +59,8 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
             playerPhone = player.getPhoneNumber();
         }
 
+
+
         // ===== GLOBALNÍ NASTAVENÍ USERA =====
 
         GlobalNotificationLevel globalLevel =
