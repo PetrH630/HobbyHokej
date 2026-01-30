@@ -2,15 +2,19 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
+import cz.phsoft.hokej.data.entities.ForgottenPasswordResetTokenEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
+import cz.phsoft.hokej.data.repositories.ForgottenPasswordResetTokenRepository;
 import cz.phsoft.hokej.exceptions.*;
 import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.ForgottenPasswordResetDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import cz.phsoft.hokej.models.mappers.AppUserMapper;
 import cz.phsoft.hokej.models.services.email.EmailService;
+import cz.phsoft.hokej.models.services.notification.ForgottenPasswordResetContext;
 import cz.phsoft.hokej.models.services.notification.NotificationService;
 import cz.phsoft.hokej.models.services.notification.UserActivationContext;
 import jakarta.transaction.Transactional;
@@ -74,6 +78,7 @@ public class AppUserServiceImpl implements AppUserService {
     private final EmailVerificationTokenRepository tokenRepository;
     private final AppUserSettingsService appUserSettingsService;
     private final NotificationService notificationService;
+    private final ForgottenPasswordResetTokenRepository forgottenPasswordResetTokenRepository;
 
     public AppUserServiceImpl(AppUserRepository userRepository,
                               BCryptPasswordEncoder passwordEncoder,
@@ -81,7 +86,8 @@ public class AppUserServiceImpl implements AppUserService {
                               EmailService emailService,
                               EmailVerificationTokenRepository tokenRepository,
                               AppUserSettingsService appUserSettingsService,
-                              NotificationService notificationService) {
+                              NotificationService notificationService,
+                              ForgottenPasswordResetTokenRepository forgottenPasswordResetTokenRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.appUserMapper = appUserMapper;
@@ -89,6 +95,7 @@ public class AppUserServiceImpl implements AppUserService {
         this.tokenRepository = tokenRepository;
         this.appUserSettingsService = appUserSettingsService;
         this.notificationService = notificationService;
+        this.forgottenPasswordResetTokenRepository = forgottenPasswordResetTokenRepository;
     }
 
     /**
@@ -337,6 +344,90 @@ public class AppUserServiceImpl implements AppUserService {
         AppUserEntity user = findUserByIdOrThrow(id);
         return appUserMapper.toDTO(user);
     }
+
+    @Override
+    @Transactional
+    public void requestForgottenPasswordReset(String email) {
+
+        AppUserEntity user = userRepository.findByEmail(email)
+                .orElse(null);
+
+        // Bezpečnost: i když user neexistuje, neřekneme to klientovi.
+        if (user == null) {
+            log.info("Požadavek na forgotten password reset pro neexistující email: {}", email);
+            return;
+        }
+
+        // Smažeme staré reset tokeny
+        forgottenPasswordResetTokenRepository.deleteByUser(user);
+
+        // Vytvoříme nový reset token
+        ForgottenPasswordResetTokenEntity token = new ForgottenPasswordResetTokenEntity();
+        token.setToken(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setExpiresAt(LocalDateTime.now().plusHours(1));
+
+        ForgottenPasswordResetTokenEntity savedToken =
+                forgottenPasswordResetTokenRepository.save(token);
+
+        String resetLink = baseUrl + "/forgotten-password/reset?token=" + savedToken.getToken();
+
+        log.info("Forgotten password reset link pro {}: {}", user.getEmail(), resetLink);
+
+        notifyUser(
+                user,
+                NotificationType.FORGOTTEN_PASSWORD_RESET_REQUEST,
+                new ForgottenPasswordResetContext(user, resetLink)
+        );
+    }
+    @Override
+    @Transactional
+    public String getForgottenPasswordResetEmail(String token) {
+
+        ForgottenPasswordResetTokenEntity resetToken =
+                forgottenPasswordResetTokenRepository.findByToken(token)
+                        .orElseThrow(() -> new InvalidResetTokenException());
+
+        if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new InvalidResetTokenException("Reset token expiroval.");
+        }
+
+        return resetToken.getUser().getEmail();
+    }
+    @Override
+    @Transactional
+    public void forgottenPasswordReset(ForgottenPasswordResetDTO dto) {
+
+        ensurePasswordsMatch(
+                dto.getNewPassword(),
+                dto.getNewPasswordConfirm(),
+                "BE - Nové heslo a potvrzení nového hesla se neshodují"
+        );
+
+        ForgottenPasswordResetTokenEntity resetToken =
+                forgottenPasswordResetTokenRepository.findByToken(dto.getToken())
+                        .orElseThrow(() -> new InvalidResetTokenException());
+
+        if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new InvalidResetTokenException("Reset token expiroval.");
+        }
+
+        AppUserEntity user = resetToken.getUser();
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+
+        // token zneplatníme – smažeme
+        forgottenPasswordResetTokenRepository.delete(resetToken);
+
+        // Notifikace – heslo změněno (můžeš použít buď USER_CHANGE_PASSWORD, nebo speciální FORGOTTEN_PASSWORD_RESET_COMPLETED)
+        //notifyUser(user, NotificationType.USER_CHANGE_PASSWORD);
+        // nebo:
+        notifyUser(user, NotificationType.FORGOTTEN_PASSWORD_RESET_COMPLETED);
+    }
+
+
+
 
     // ==================================================
     // HELPER METODY

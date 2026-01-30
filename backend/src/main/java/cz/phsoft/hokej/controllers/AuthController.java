@@ -1,6 +1,8 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.EmailDTO;
+import cz.phsoft.hokej.models.dto.ForgottenPasswordResetDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import cz.phsoft.hokej.models.services.AppUserService;
 import jakarta.validation.Valid;
@@ -87,4 +89,25 @@ public class AuthController {
 
         return ResponseEntity.ok("Účet byl úspěšně aktivován.");
     }
+    // TODO MOŽNÁ DO APPUSERSETTINGS CONTROLLER
+    @PostMapping("/forgotten-password")
+    public ResponseEntity<Void> requestForgottenPassword(@RequestBody @Valid EmailDTO dto) {
+        appUserService.requestForgottenPasswordReset(dto.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/forgotten-password/info")
+    public ResponseEntity<Map<String, String>> getForgottenPasswordInfo(@RequestParam String token) {
+        String email = appUserService.getForgottenPasswordResetEmail(token);
+        return ResponseEntity.ok(Map.of("email", email));
+    }
+
+    @PostMapping("/forgotten-password/reset")
+    public ResponseEntity<Void> forgottenPasswordReset(@RequestBody @Valid ForgottenPasswordResetDTO dto) {
+        appUserService.forgottenPasswordReset(dto);
+        return ResponseEntity.ok().build();
+    }
 }
+
+
+

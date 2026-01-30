@@ -169,6 +169,9 @@ public class SecurityConfig {
                                     "/api/auth/verify",
                                     "/api/auth/login",
                                     "/api/auth/logout",
+                                    "/api/auth/forgotten-password",
+                                    "/api/auth/forgotten-password/info",
+                                    "/api/auth/forgotten-password/reset",
                                     "/error",
                                     "/favicon.ico"
                             ).permitAll()

@@ -1,3 +1,9 @@
+TODO NOVÉ ENDPOINTY
+@PostMapping("/forgotten-password")
+@GetMapping("/forgotten-password/info")
+@PostMapping("/forgotten-password/reset")
+
+
 ------------------------------------------------------
 LOGIN/LOGOUT
 ------------------------------------------------------

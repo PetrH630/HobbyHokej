@@ -7,6 +7,7 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.models.services.notification.ForgottenPasswordResetContext;
 import cz.phsoft.hokej.models.services.notification.UserActivationContext;
 import org.springframework.stereotype.Component;
 
@@ -119,25 +120,39 @@ public class EmailMessageBuilder {
      * @param type      typ notifikace
      * @param player    hráč, kterého se notifikace týká (přes něj se dostaneme k AppUser)
      * @param userEmail email uživatele (z NotificationDecision nebo přímo z AppUser)
-     * @param context   kontext (např. {@link UserActivationContext} nebo přímo AppUserEntity)
+     * @param context   kontext (např. {@link UserActivationContext} nebo {@link ForgottenPasswordResetContext} nebo přímo AppUserEntity)
      */
     public EmailContent buildForUser(NotificationType type,
                                      PlayerEntity player,
                                      String userEmail,
                                      Object context) {
 
-        // *** ZMĚNA: uživatele bereme z kontextu (UserActivationContext / AppUser),
-        // jinak případně z player.getUser()
+        // vytáhneme AppUserEntity z kontextu / hráče
         AppUserEntity user = resolveUser(player, context);
 
-        String userName = fullUserName(user);
-        String playerName = fullPlayerName(player);
+        // bezpečný email – z parametru, nebo z usera, nebo placeholder
         String safeUserEmail =
                 userEmail != null
                         ? userEmail
                         : (user != null && user.getEmail() != null
                         ? user.getEmail()
                         : "(neznámý email)");
+
+        // jméno uživatele – pokud není, použijeme email jako fallback
+        String userName;
+        if (user != null) {
+            userName = fullUserName(user);
+            if ("(neznámý uživatel)".equals(userName)
+                    && !"(neznámý email)".equals(safeUserEmail)) {
+                userName = safeUserEmail;
+            }
+        } else {
+            userName = !"(neznámý email)".equals(safeUserEmail)
+                    ? safeUserEmail
+                    : "(neznámý uživatel)";
+        }
+
+        String playerName = fullPlayerName(player);
 
         // případný aktivační odkaz (použijeme u USER_CREATED)
         String activationLink = resolveActivationLink(context);
@@ -315,6 +330,50 @@ public class EmailMessageBuilder {
                 );
 
                 String footer = "Pokud jste o reset hesla nežádal(a), ihned kontaktujte administrátora a zkontrolujte zabezpečení účtu.";
+                String html = buildSimpleHtml(subject, greeting, main, footer);
+                yield new EmailContent(subject, html, true);
+            }
+
+            case FORGOTTEN_PASSWORD_RESET_REQUEST -> {
+                ForgottenPasswordResetContext ctx =
+                        castContext(context, ForgottenPasswordResetContext.class);
+
+                String resetLink = ctx != null ? ctx.resetLink() : null;
+
+                String subject = "Obnovení zapomenutého hesla";
+
+                String linkBlock = "";
+                if (resetLink != null && !resetLink.isBlank()) {
+                    linkBlock = """
+                        <p>Pro nastavení nového hesla klikněte na následující odkaz:</p>
+                        <p><a href="%1$s">%1$s</a></p>
+                        <p>Odkaz je platný po omezenou dobu. Pokud vyprší, požádejte prosím o nový reset hesla.</p>
+                        """.formatted(escape(resetLink));
+                }
+
+                String main = """
+                <p>obdrželi jsme žádost o <strong>obnovení zapomenutého hesla</strong> k vašemu účtu v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+                %s
+                <p>Pokud jste o obnovení hesla nežádal(a) vy, můžete tento e-mail ignorovat.</p>
+                <p>S pozdravem<br/>App Hokej – Stará Garda</p>
+                """.formatted(linkBlock);
+
+                String footer = "Pokud jste o reset hesla nežádal(a), zvažte prosím změnu hesla k vašemu e-mailu a zkontrolujte zabezpečení účtů.";
+
+                String html = buildSimpleHtml(subject, greeting, main, footer);
+                yield new EmailContent(subject, html, true);
+            }
+
+            case FORGOTTEN_PASSWORD_RESET_COMPLETED -> {
+                String subject = "Heslo bylo úspěšně změněno";
+
+                String main = """
+                <p>vaše heslo bylo <strong>úspěšně změněno</strong> na základě žádosti o obnovení zapomenutého hesla.</p>
+                <p>Pokud jste tuto změnu neprováděl(a) vy, neprodleně kontaktujte administrátora a změňte své heslo.</p>
+                <p>S pozdravem<br/>App Hokej – Stará Garda</p>
+                """;
+
+                String footer = "Pro zvýšení bezpečnosti doporučujeme používat silné heslo a nepoužívat stejné heslo pro více služeb.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
@@ -744,11 +803,19 @@ public class EmailMessageBuilder {
     /**
      * Zjistí AppUserEntity:
      * 1) z UserActivationContext (USER_CREATED / USER_ACTIVATED),
-     * 2) nebo z player.getUser().
+     * 2) z ForgottenPasswordResetContext (forgotten password reset),
+     * 3) přímo z AppUserEntity v contextu,
+     * 4) nebo z player.getUser().
      */
     private AppUserEntity resolveUser(PlayerEntity player, Object context) {
         if (context instanceof UserActivationContext uac && uac.user() != null) {
             return uac.user();
+        }
+        if (context instanceof ForgottenPasswordResetContext fprc && fprc.user() != null) {
+            return fprc.user();
+        }
+        if (context instanceof AppUserEntity u) {
+            return u;
         }
         if (player != null && player.getUser() != null) {
             return player.getUser();

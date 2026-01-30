@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.ForgottenPasswordResetDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import org.springframework.http.ResponseEntity;
 
@@ -167,4 +168,10 @@ public interface AppUserService {
      * </p>
      */
     void deactivateUserByAdmin(Long id);
+
+    void requestForgottenPasswordReset(String email);
+
+    String getForgottenPasswordResetEmail(String token);
+
+    void forgottenPasswordReset(ForgottenPasswordResetDTO dto);
 }

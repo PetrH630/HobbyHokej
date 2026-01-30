@@ -30,11 +30,13 @@ public enum NotificationType {
     USER_ACTIVATED(NotificationCategory.SYSTEM, true),
     USER_DEACTIVATED(NotificationCategory.SYSTEM, true),
     USER_UPDATED(NotificationCategory.SYSTEM, true),
-    USER_CHANGE_PASSWORD(NotificationCategory.SYSTEM, true),
 
 
-    // SYSTEM –
+    // SYSTEM – SECURITY
     PASSWORD_RESET(NotificationCategory.SYSTEM, true),
+    USER_CHANGE_PASSWORD(NotificationCategory.SYSTEM, true),
+    FORGOTTEN_PASSWORD_RESET_REQUEST(NotificationCategory.SYSTEM, true),
+    FORGOTTEN_PASSWORD_RESET_COMPLETED(NotificationCategory.SYSTEM, true),
     SECURITY_ALERT(NotificationCategory.SYSTEM, true);
 
     private final NotificationCategory category;
