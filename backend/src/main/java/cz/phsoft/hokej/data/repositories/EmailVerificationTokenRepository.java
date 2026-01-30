@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.data.repositories;
 
+import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -23,4 +24,7 @@ public interface EmailVerificationTokenRepository
      * @return token zabalený v {@link Optional}, pokud existuje
      */
     Optional<EmailVerificationTokenEntity> findByToken(String token);
+
+    void deleteByUser(AppUserEntity user);
+
 }

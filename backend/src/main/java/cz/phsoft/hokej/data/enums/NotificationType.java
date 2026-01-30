@@ -25,9 +25,13 @@ public enum NotificationType {
     PLAYER_UPDATED(NotificationCategory.SYSTEM, false),
     PLAYER_APPROVED(NotificationCategory.SYSTEM, true),
     PLAYER_REJECTED(NotificationCategory.SYSTEM, true),
+    //USER
     USER_CREATED(NotificationCategory.SYSTEM, true),
     USER_ACTIVATED(NotificationCategory.SYSTEM, true),
+    USER_DEACTIVATED(NotificationCategory.SYSTEM, true),
     USER_UPDATED(NotificationCategory.SYSTEM, true),
+    USER_CHANGE_PASSWORD(NotificationCategory.SYSTEM, true),
+
 
     // SYSTEM –
     PASSWORD_RESET(NotificationCategory.SYSTEM, true),

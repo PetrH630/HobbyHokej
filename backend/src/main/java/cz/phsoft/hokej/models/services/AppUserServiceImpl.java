@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
 
 /**
  * Service pro správu aplikačních uživatelských účtů.
@@ -136,6 +136,13 @@ public class AppUserServiceImpl implements AppUserService {
         );
     }
 
+    /**
+     * Aktivuje uživatelský účet na základě ověřovacího tokenu.
+     *
+     * @param token aktivační token z emailu
+     * @return {@code true} pokud byl účet úspěšně aktivován,
+     * {@code false} pokud je token neplatný nebo expirovaný
+     */
     @Override
     @Transactional
     public boolean activateUser(String token) {
@@ -159,25 +166,53 @@ public class AppUserServiceImpl implements AppUserService {
             if (user.getSettings() == null) {
                 appUserSettingsService.createDefaultSettingsForUser(user);
             }
-
             userRepository.save(user);
-            // původní ruční HTML mail už není potřeba
-            // sendSuccesActivationEmail(user);
         }
-
         // token vždy smažeme, pokud byl platný
         tokenRepository.delete(verificationToken);
-
-        // pokud se opravdu nově aktivoval, pošleme notifikaci USER_ACTIVATED
+        // pokud se opravdu podaří nově aktivoval, pošleme notifikaci USER_ACTIVATED
         if (newlyActivated) {
-            notificationService.notifyUser(
-                    user,
-                    NotificationType.USER_ACTIVATED,
-                    null   // zatím žádný extra context nepotřebujeme
+            notifyUser(user, NotificationType.USER_ACTIVATED);
+        }
+        return true;
+    }
+
+    /**
+     * Aktivuje uživatelský účet na základě aktivace Administrátorem.
+     */
+    @Override
+    public void activateUserByAdmin(Long id) {
+        AppUserEntity user = findUserByIdOrThrow(id);
+        if (user.isEnabled()) {
+            throw new InvalidUserActivationException(
+                    "BE - Aktivace účtu již byla provedena"
             );
         }
+        boolean newlyActivated = false;
 
-        return true;
+        // aktivace účtu
+        if (!user.isEnabled()) {
+            user.setEnabled(true);
+            newlyActivated = true;
+
+            // pokud user ještě nemá settings → vytvoř default
+            if (user.getSettings() == null) {
+                appUserSettingsService.createDefaultSettingsForUser(user);
+            }
+
+            userRepository.save(user);
+        }
+
+        // smazání všech tokenu uživatele
+        tokenRepository.deleteByUser(user);
+        // případně: tokenRepository.deleteByUserId(user.getId());
+
+        // pokud se opravdu nově aktivoval, pošleme notifikaci USER_ACTIVATED
+        // pokud se opravdu nově aktivoval, pošleme notifikaci USER_ACTIVATED
+        if (newlyActivated) {
+            notifyUser(user, NotificationType.USER_ACTIVATED);
+        }
+
     }
 
     /**
@@ -201,6 +236,7 @@ public class AppUserServiceImpl implements AppUserService {
         user.setEmail(dto.getEmail());
 
         userRepository.save(user);
+        notifyUser(user, NotificationType.USER_UPDATED);
     }
 
     /**
@@ -258,6 +294,8 @@ public class AppUserServiceImpl implements AppUserService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+
+        notifyUser(user, NotificationType.USER_CHANGE_PASSWORD);
     }
 
     /**
@@ -273,33 +311,9 @@ public class AppUserServiceImpl implements AppUserService {
         AppUserEntity user = findUserByIdOrThrow(userId);
         user.setPassword(passwordEncoder.encode(DEFAULT_RESET_PASSWORD));
         userRepository.save(user);
-    }
 
-    /**
-     * Aktivuje uživatelský účet na základě ověřovacího tokenu.
-     *
-     * @param token aktivační token z emailu
-     * @return {@code true} pokud byl účet úspěšně aktivován,
-     * {@code false} pokud je token neplatný nebo expirovaný
-     */
-
-
-
-    /**
-     * Aktivuje uživatelský účet na základě aktivace Administrátorem.
-     */
-    @Override
-    public void activateUserByAdmin(Long id) {
-        AppUserEntity user = findUserByIdOrThrow(id);
-        if (user.isEnabled()) {
-            throw new InvalidUserActivationException(
-                    "BE - Aktivace účtu již byla provedena"
-            );
-        }
-
-        user.setEnabled(true);
-        userRepository.save(user);
-    }
+        notifyUser(user, NotificationType.PASSWORD_RESET);
+       }
 
     /**
      * Deaktivuj uživatelský účet na základě deaktivace Administrátorem.
@@ -315,6 +329,8 @@ public class AppUserServiceImpl implements AppUserService {
         }
         user.setEnabled(false);
         userRepository.save(user);
+        notifyUser(user, NotificationType.USER_DEACTIVATED);
+
     }
 
     public AppUserDTO getUserById(Long id) {
@@ -335,6 +351,7 @@ public class AppUserServiceImpl implements AppUserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
+
 
     /**
      * Ověří shodu hesla a potvrzení hesla.
@@ -390,56 +407,13 @@ public class AppUserServiceImpl implements AppUserService {
         return tokenRepository.save(token);
     }
 
-    /**
-     * Odešle aktivační email s ověřovacím odkazem.
-     */
-//    private void sendActivationEmail(AppUserEntity user,
-//                                     EmailVerificationTokenEntity token) {
-//
-//
-//        List<AppUserEntity> managers = userRepository.findAll().stream()
-//                .filter(m -> m.getRole() == Role.ROLE_MANAGER)
-//                .toList();
-//
-//        String activationLink =
-//                baseUrl + "/api/auth/verify?token=" + token.getToken();
-//
-//        log.info("Aktivační odkaz pro {}: {}", user.getEmail(), activationLink);
-//
-//        String salutation;
-//
-//        for (AppUserEntity manager : managers) {
-//            salutation = "Zpráva pro Manažera - " + manager.getName() + " " + manager.getSurname() + " - <br> Uživatel - " + user.getName() + " " + user.getSurname();
-//            System.out.println("Manager: " + manager.getName() + " " + manager.getSurname() + " vybrán");
-//            System.out.println(salutation);
-//            emailService.sendActivationEmailHTML(manager.getEmail(), salutation, activationLink);
-//
-//        }
-//        salutation = user.getName() + " " + user.getSurname();
-//        System.out.println(salutation);
-//        emailService.sendActivationEmailHTML(user.getEmail(), salutation, activationLink);
-//    }
+    // metody pro notifikaci
+    private void notifyUser(AppUserEntity user, NotificationType type) {
+        notificationService.notifyUser(user, type, null);
+    }
 
-    // Úspěšná aktivace
-
-//    private void sendSuccesActivationEmail(AppUserEntity user) {
-//
-//        List<AppUserEntity> managers = userRepository.findAll().stream()
-//                .filter(m -> m.getRole() == Role.ROLE_MANAGER)
-//                .toList();
-//
-//        log.info("Účet uživatele {} + byl úspěšně aktivován", user.getEmail());
-//
-//        String salutation;
-//        for (AppUserEntity manager : managers) {
-//            salutation = "Zpráva pro Manažera - " + manager.getName() + " " + manager.getSurname() + "- <br> Uživatel - " + user.getName() + " " + user.getSurname();
-//            System.out.println("Manager: " + manager.getName() + " " + manager.getSurname() + " vybrán");
-//            System.out.println(salutation);
-//            emailService.sendSuccesActivationEmailHTML(manager.getEmail(), salutation);
-//        }
-//
-//        salutation = user.getName() + " " + user.getSurname();
-//        System.out.println(salutation);
-//        emailService.sendSuccesActivationEmailHTML(user.getEmail(), salutation);
-//    }
+    private void notifyUser(AppUserEntity user, NotificationType type, Object context) {
+        notificationService.notifyUser(user, type, context);
+    }
 }
+
