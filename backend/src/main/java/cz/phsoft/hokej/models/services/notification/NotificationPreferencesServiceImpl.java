@@ -110,7 +110,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
             // REGISTRACE / OMLUVY / ZÁPASOVÉ INFO
             // (PLAYER_REGISTERED, PLAYER_UNREGISTERED, PLAYER_RESERVED, PLAYER_EXCUSED, ...)
             // ----------------------------------
-            case REGISTRATION, EXCUSE, MATCH_INFO -> {
+            case REGISTRATION, MATCH_INFO -> {
 
                 // EMAIL – hráč
                 if (emailChannelEnabled
@@ -191,7 +191,6 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
 
         return switch (type.getCategory()) {
             case REGISTRATION -> playerSettings.isRegistrationNotificationsEnabled();
-            case EXCUSE       -> playerSettings.isExcuseNotificationsEnabled();
             case MATCH_INFO   -> playerSettings.isMatchInfoNotificationsEnabled();
             case SYSTEM       -> playerSettings.isSystemNotificationsEnabled();
         };

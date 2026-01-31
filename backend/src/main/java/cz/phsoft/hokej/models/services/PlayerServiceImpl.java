@@ -13,9 +13,10 @@ import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.services.notification.NotificationService;
 import jakarta.transaction.Transactional;
-import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+import static cz.phsoft.hokej.data.enums.PlayerStatus.APPROVED;
+import static cz.phsoft.hokej.data.enums.PlayerStatus.REJECTED;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -74,46 +75,6 @@ public class PlayerServiceImpl implements PlayerService {
     // ======================
 
     /**
-     * Vrátí všechny hráče v systému namapované na {@link PlayerDTO}.
-     */
-    @Override
-    public List<PlayerDTO> getAllPlayers() {
-        return playerRepository.findAll().stream()
-                .map(playerMapper::toDTO)
-                .toList();
-    }
-
-    /**
-     * Vrátí jednoho hráče podle ID.
-     *
-     * @param id ID hráče
-     * @return {@link PlayerDTO} odpovídající hráči
-     * @throws PlayerNotFoundException pokud hráč s daným ID neexistuje
-     */
-    @Override
-    public PlayerDTO getPlayerById(Long id) {
-        PlayerEntity player = findPlayerOrThrow(id);
-        return playerMapper.toDTO(player);
-    }
-
-    /**
-     * Vrátí všechny hráče, kteří patří uživateli s daným emailem
-     * ({@link AppUserEntity#getEmail()}), seřazené podle ID vzestupně.
-     *
-     * @param email email uživatele
-     */
-    @Override
-    public List<PlayerDTO> getPlayersByUser(String email) {
-        return playerRepository.findByUser_EmailOrderByIdAsc(email).stream()
-                .map(playerMapper::toDTO)
-                .toList();
-    }
-
-    // ======================
-    // CREATE / UPDATE / DELETE
-    // ======================
-
-    /**
      * Vytvoří nového hráče bez vazby na uživatele.
      * <p>
      * Kroky:
@@ -164,11 +125,11 @@ public class PlayerServiceImpl implements PlayerService {
 
         ensureUniqueNameSurname(dto.getName(), dto.getSurname(), null);
 
-
         PlayerEntity player = playerMapper.toEntity(dto);
         player.setUser(user);
+        PlayerEntity saved = playerRepository.save(player);
 
-        PlayerEntity saved = saveAndNotify(player, NotificationType.PLAYER_CREATED);
+        notifyPlayer(saved, NotificationType.PLAYER_CREATED, saved);
 
         return playerMapper.toDTO(saved);
     }
@@ -211,7 +172,8 @@ public class PlayerServiceImpl implements PlayerService {
             existing.setPlayerStatus(dto.getPlayerStatus());
         }
 
-        PlayerEntity saved = saveAndNotify(existing, NotificationType.PLAYER_UPDATED);
+        PlayerEntity saved =  playerRepository.save(existing);
+        notifyPlayer(saved, NotificationType.PLAYER_UPDATED, saved);
 
         return playerMapper.toDTO(saved);
     }
@@ -230,6 +192,8 @@ public class PlayerServiceImpl implements PlayerService {
         playerRepository.delete(player);
 
         String message = "Hráč " + player.getFullName() + " byl úspěšně smazán";
+        notifyPlayer(player, NotificationType.PLAYER_DELETED, player);
+
         return buildSuccessResponse(message, id);
     }
 
@@ -271,12 +235,64 @@ public class PlayerServiceImpl implements PlayerService {
     public SuccessResponseDTO rejectPlayer(Long id) {
         return changePlayerStatus(
                 id,
-                PlayerStatus.REJECTED,           // cílový status
-                PlayerStatus.REJECTED,           // status, při kterém hlásíme "už je zamítnut"
+                REJECTED,           // cílový status
+                REJECTED,           // status, při kterém hlásíme "už je zamítnut"
                 NotificationType.PLAYER_REJECTED,
                 "BE - Hráč už je zamítnut.",
                 "Hráč %s byl úspěšně zamítnut"
         );
+    }
+    // TODO - msg builder - dvě zprávy
+    @Transactional
+    public void changePlayerUser(Long id, Long newUserId) {
+        PlayerEntity player = findPlayerOrThrow(id);
+        AppUserEntity newUser = findUserOrThrow(newUserId);
+        AppUserEntity oldUser = player.getUser();
+
+        if (oldUser != null && oldUser.getId().equals(newUserId)) {
+            throw new InvalidChangePlayerUserException();
+        }
+        player.setUser(newUser);
+        PlayerEntity saved = playerRepository.save(player);
+
+        notifyPlayer(saved, NotificationType.PLAYER_CHANGE_USER, newUser);
+        notifyUser(newUser, NotificationType.PLAYER_CHANGE_USER, player);
+    }
+
+    /**
+     * Vrátí všechny hráče v systému namapované na {@link PlayerDTO}.
+     */
+    @Override
+    public List<PlayerDTO> getAllPlayers() {
+        return playerRepository.findAll().stream()
+                .map(playerMapper::toDTO)
+                .toList();
+    }
+
+    /**
+     * Vrátí jednoho hráče podle ID.
+     *
+     * @param id ID hráče
+     * @return {@link PlayerDTO} odpovídající hráči
+     * @throws PlayerNotFoundException pokud hráč s daným ID neexistuje
+     */
+    @Override
+    public PlayerDTO getPlayerById(Long id) {
+        PlayerEntity player = findPlayerOrThrow(id);
+        return playerMapper.toDTO(player);
+    }
+
+    /**
+     * Vrátí všechny hráče, kteří patří uživateli s daným emailem
+     * ({@link AppUserEntity#getEmail()}), seřazené podle ID vzestupně.
+     *
+     * @param email email uživatele
+     */
+    @Override
+    public List<PlayerDTO> getPlayersByUser(String email) {
+        return playerRepository.findByUser_EmailOrderByIdAsc(email).stream()
+                .map(playerMapper::toDTO)
+                .toList();
     }
 
     // ======================
@@ -353,7 +369,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         // vezmeme prvního hráče (nejstarší ID)
         PlayerEntity firstPlayer = players.get(0);
-        if (firstPlayer.getPlayerStatus() != PlayerStatus.APPROVED) {
+        if (firstPlayer.getPlayerStatus() != APPROVED) {
             throw new InvalidPlayerStatusException(
                     "BE - Nelze zvolit hráče, který není schválen administrátorem."
             );
@@ -362,7 +378,6 @@ public class PlayerServiceImpl implements PlayerService {
         currentPlayerService.setCurrentPlayerId(firstPlayer.getId());
         String message = "BE - Automaticky byl vybrán první hráč: " + firstPlayer.getFullName();
         return buildSuccessResponse(message, firstPlayer.getId());
-
     }
 
     /**
@@ -377,7 +392,7 @@ public class PlayerServiceImpl implements PlayerService {
     private SuccessResponseDTO autoSelectIfSinglePlayer(String userEmail) {
         List<PlayerEntity> players = playerRepository
                 .findByUser_EmailOrderByIdAsc(userEmail).stream()
-                .filter(p -> p.getPlayerStatus() == PlayerStatus.APPROVED)
+                .filter(p -> p.getPlayerStatus() == APPROVED)
                 .toList();
 
         if (players.isEmpty()) {
@@ -410,12 +425,9 @@ public class PlayerServiceImpl implements PlayerService {
             sb.append(player.getFullName());
             sb.append(" / ");
         }
-
-
         String message = "BE - uživatel má více hráču a musí je vybrat manuálně dle nastavení: " + sb;
         return buildSuccessResponse(message, 0L);
     }
-
 
     /**
      * Změní přiřazeného uživatele k hráči.
@@ -449,19 +461,6 @@ public class PlayerServiceImpl implements PlayerService {
      * @throws InvalidChangePlayerUserException pokud je hráč již přiřazen tomuto uživateli
      */
 
-    @Transactional
-    public void changePlayerUser(Long id, Long newUserId) {
-        PlayerEntity player = findPlayerOrThrow(id);
-        AppUserEntity newUser = findUserOrThrow(newUserId);
-        AppUserEntity oldUser = player.getUser();
-        if (oldUser != null && oldUser.getId().equals(newUserId)) {
-
-            throw new InvalidChangePlayerUserException();
-
-        }
-        player.setUser(newUser);
-
-    }
 
 // ======================
 // PRIVATE HELPERY – ENTITY / DUPLICITY
@@ -502,22 +501,6 @@ public class PlayerServiceImpl implements PlayerService {
                 throw new DuplicateNameSurnameException(name, surname);
             }
         }
-    }
-
-    /**
-     * Uloží hráče a odešle notifikaci daného typu.
-     * <p>
-     * Použití:
-     * <ul>
-     *     <li>create/update hráče,</li>
-     *     <li>approve/reject hráče.</li>
-     * </ul>
-     */
-// TODO
-    private PlayerEntity saveAndNotify(PlayerEntity player, NotificationType type) {
-        PlayerEntity saved = playerRepository.save(player);
-        notificationService.notifyPlayer(saved, type, null);
-        return saved;
     }
 
     /**
@@ -572,16 +555,49 @@ public class PlayerServiceImpl implements PlayerService {
 
         player.setPlayerStatus(targetStatus);
 
-        if (targetStatus == PlayerStatus.APPROVED && player.getSettings() == null) {
+        if (targetStatus == APPROVED && player.getSettings() == null) {
             PlayerSettingsEntity settings =
                     playerSettingsService.createDefaultSettingsForPlayer(player);
             player.setSettings(settings); // obousměrný vztah, cascade se postará o persist
         }
 
-        PlayerEntity saved = saveAndNotify(player, notificationType);
+        PlayerEntity saved = playerRepository.save(player);
+
+        notificationType = resolveNotificationType(targetStatus);
+        if (notificationType != null) {
+            notifyPlayer(saved, notificationType, saved);
+        }
+
 
         String message = String.format(successMessageTemplate, saved.getFullName());
         return buildSuccessResponse(message, id);
+    }
+
+    // ====================================================
+    // PRIVÁTNÍ HELPERY – NAČÍTÁNÍ ENTIT A ZÁKLADNÍ LOGIKA
+    // ====================================================
+    //TODO - možná změnit Object context
+    private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {
+        notificationService.notifyPlayer(player, type, context);
+    }
+
+    private void notifyUser(AppUserEntity user, NotificationType type, Object context) {
+        notificationService.notifyUser(user, type, context);
+    }
+
+    /**
+     * Převede výsledný {@link PlayerStatus} na typ notifikace.
+     *
+     * @return odpovídající {@link NotificationType}, nebo {@code null},
+     * pokud se pro daný status notifikace neposílá
+     * PENDING - nevyužíváme - zasláno při vytvoření hráče
+     */
+    private NotificationType resolveNotificationType(PlayerStatus newStatus) {
+        return switch (newStatus) {
+            case APPROVED -> NotificationType.PLAYER_APPROVED;
+            case REJECTED -> NotificationType.MATCH_REGISTRATION_CANCELED;
+            default -> null;
+        };
     }
 
 }

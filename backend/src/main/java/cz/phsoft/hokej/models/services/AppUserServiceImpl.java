@@ -426,9 +426,6 @@ public class AppUserServiceImpl implements AppUserService {
         notifyUser(user, NotificationType.FORGOTTEN_PASSWORD_RESET_COMPLETED);
     }
 
-
-
-
     // ==================================================
     // HELPER METODY
     // ==================================================

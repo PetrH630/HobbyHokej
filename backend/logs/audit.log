@@ -1342,3 +1342,1598 @@ Email: (neuvedeno)</p>
 2026-01-31 00:39:48 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START MatchRegistrationServiceImpl.recalcStatusesForMatch(..) at 2026-01-31T00:39:48.738043700 with args [33]
 2026-01-31 00:39:48 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END recalcStatusesForMatch - userId=null playerId=null returned [null] at 2026-01-31T00:39:48.782249400
 2026-01-31 00:39:48 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END updateMatch - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.MatchDTO@16b3902a] at 2026-01-31T00:39:48.791274200
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.421219400 with args [cz.phsoft.hokej.data.entities.AppUserEntity@1495f70]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@4de14c58] at 2026-01-31T15:09:36.447222
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.546219900 with args [cz.phsoft.hokej.data.entities.AppUserEntity@2f29046b]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@1e6a8d01] at 2026-01-31T15:09:36.555230300
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.577219500 with args [cz.phsoft.hokej.data.entities.AppUserEntity@588b02a0]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@4434eb51] at 2026-01-31T15:09:36.580220400
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.595222200 with args [cz.phsoft.hokej.data.entities.AppUserEntity@83b39c3]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@678db8be] at 2026-01-31T15:09:36.598219
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.612219500 with args [cz.phsoft.hokej.data.entities.AppUserEntity@1737acc0]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@1985f8e3] at 2026-01-31T15:09:36.642520500
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.680629800 with args [cz.phsoft.hokej.data.entities.AppUserEntity@23b4f0a9]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@24eb71f6] at 2026-01-31T15:09:36.686778200
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.724105700 with args [cz.phsoft.hokej.data.entities.AppUserEntity@22ab3e3b]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@5a75bad4] at 2026-01-31T15:09:36.728106100
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.747103 with args [cz.phsoft.hokej.data.entities.AppUserEntity@132f1d85]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@7475f57e] at 2026-01-31T15:09:36.753103500
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.767103100 with args [cz.phsoft.hokej.data.entities.AppUserEntity@7e641005]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@f7a8a7b] at 2026-01-31T15:09:36.769101900
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.785257100 with args [cz.phsoft.hokej.data.entities.AppUserEntity@cf315f1]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@495cac83] at 2026-01-31T15:09:36.792257300
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:09:36.805251700 with args [cz.phsoft.hokej.data.entities.AppUserEntity@3c5de17c]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@48149568] at 2026-01-31T15:09:36.808252600
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:36.863396400 with args [cz.phsoft.hokej.data.entities.PlayerEntity@e4b9a64]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=1 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@63f093a] at 2026-01-31T15:09:36.863396400
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:36.881397200 with args [cz.phsoft.hokej.data.entities.PlayerEntity@7a3c541e]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=2 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@4cb641a5] at 2026-01-31T15:09:36.881397200
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:36.901398200 with args [cz.phsoft.hokej.data.entities.PlayerEntity@43f23338]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=3 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@6f2f4b9e] at 2026-01-31T15:09:36.902402800
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:36.928398900 with args [cz.phsoft.hokej.data.entities.PlayerEntity@7ef8cfbb]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=4 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@2045a469] at 2026-01-31T15:09:36.928398900
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:36.947993600 with args [cz.phsoft.hokej.data.entities.PlayerEntity@1484cb57]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=5 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@140e003e] at 2026-01-31T15:09:36.947993600
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:36.961991400 with args [cz.phsoft.hokej.data.entities.PlayerEntity@cb03360]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=6 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@6ee0ef34] at 2026-01-31T15:09:36.962992500
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:36.977992 with args [cz.phsoft.hokej.data.entities.PlayerEntity@32ff3c98]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=7 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@36d8ddc5] at 2026-01-31T15:09:36.978997600
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:36.991992900 with args [cz.phsoft.hokej.data.entities.PlayerEntity@1d7914a5]
+2026-01-31 15:09:36 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=8 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@1d8e9f22] at 2026-01-31T15:09:36.992992800
+2026-01-31 15:09:37 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:37.003992100 with args [cz.phsoft.hokej.data.entities.PlayerEntity@54bf2319]
+2026-01-31 15:09:37 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=9 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@5ec75178] at 2026-01-31T15:09:37.003992100
+2026-01-31 15:09:37 [main] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:09:37.015995 with args [cz.phsoft.hokej.data.entities.PlayerEntity@c358f32]
+2026-01-31 15:09:37 [main] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=10 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@892f1fa] at 2026-01-31T15:09:37.015995
+2026-01-31 15:11:19 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:11:19.435198400 with args []
+2026-01-31 15:11:19 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:11:19.702201200
+2026-01-31 15:11:20 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START AppUserServiceImpl.register(..) at 2026-01-31T15:11:20.516323900 with args [cz.phsoft.hokej.models.dto.RegisterUserDTO@39fa1b12]
+2026-01-31 15:11:20 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyUser(..) at 2026-01-31T15:11:20.727325900 with args [cz.phsoft.hokej.data.entities.AppUserEntity@7d91ac09, USER_CREATED, UserActivationContext[user=cz.phsoft.hokej.data.entities.AppUserEntity@7d91ac09, activationLink=http://localhost:8080/api/auth/verify?token=7ee55209-a50a-452f-bcff-74d1561d2e6e]]
+2026-01-31 15:11:20 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:11:20.729326200 with args [USER_CREATED, null, petrhlista630@gmail.com, UserActivationContext[user=cz.phsoft.hokej.data.entities.AppUserEntity@7d91ac09, activationLink=http://localhost:8080/api/auth/verify?token=7ee55209-a50a-452f-bcff-74d1561d2e6e]]
+2026-01-31 15:11:20 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=null returned [EmailContent[subject=Uživatel vytvořen, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Uživatel vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>byl pro vás vytvořen uživatelský účet v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pro dokončení registrace klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/api/auth/verify?token=7ee55209-a50a-452f-bcff-74d1561d2e6e">http://localhost:8080/api/auth/verify?token=7ee55209-a50a-452f-bcff-74d1561d2e6e</a></p>
+<p>Odkaz je platný 24 hodin.</p>
+
+<p>Pokud jste o vytvoření účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o vytvoření účtu nežádal(a), neprodleně kontaktujte administrátora.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:11:20.736325900
+2026-01-31 15:11:20 [task-1] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:11:20.856335900 with args [petrhlista630@gmail.com, Uživatel vytvořen, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Uživatel vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>byl pro vás vytvořen uživatelský účet v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pro dokončení registrace klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/api/auth/verify?token=7ee55209-a50a-452f-bcff-74d1561d2e6e">http://localhost:8080/api/auth/verify?token=7ee55209-a50a-452f-bcff-74d1561d2e6e</a></p>
+<p>Odkaz je platný 24 hodin.</p>
+
+<p>Pokud jste o vytvoření účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o vytvoření účtu nežádal(a), neprodleně kontaktujte administrátora.</p>
+</body>
+</html>
+]
+2026-01-31 15:11:20 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:11:20.942330500 with args [USER_CREATED, null, cz.phsoft.hokej.data.entities.AppUserEntity@604e4956, UserActivationContext[user=cz.phsoft.hokej.data.entities.AppUserEntity@7d91ac09, activationLink=http://localhost:8080/api/auth/verify?token=7ee55209-a50a-452f-bcff-74d1561d2e6e]]
+2026-01-31 15:11:20 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=null returned [null] at 2026-01-31T15:11:20.943323800
+2026-01-31 15:11:20 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END notifyUser - userId=null playerId=null returned [null] at 2026-01-31T15:11:20.944330200
+2026-01-31 15:11:20 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END register - userId=null playerId=null returned [null] at 2026-01-31T15:11:20.944330200
+2026-01-31 15:11:27 [task-1] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:11:27.884368300
+2026-01-31 15:28:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:28:12.604431100 with args []
+2026-01-31 15:28:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:28:12.783426
+2026-01-31 15:28:13 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START AppUserServiceImpl.register(..) at 2026-01-31T15:28:13.487431600 with args [cz.phsoft.hokej.models.dto.RegisterUserDTO@435e48ea]
+2026-01-31 15:28:14 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyUser(..) at 2026-01-31T15:28:14.030432100 with args [cz.phsoft.hokej.data.entities.AppUserEntity@13a0b2eb, USER_CREATED, UserActivationContext[user=cz.phsoft.hokej.data.entities.AppUserEntity@13a0b2eb, activationLink=http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c]]
+2026-01-31 15:28:14 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:28:14.033430200 with args [USER_CREATED, null, petrhlista630@gmail.com, UserActivationContext[user=cz.phsoft.hokej.data.entities.AppUserEntity@13a0b2eb, activationLink=http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c]]
+2026-01-31 15:28:14 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=null returned [EmailContent[subject=Uživatel vytvořen, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Uživatel vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>byl pro vás vytvořen uživatelský účet v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pro dokončení registrace klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c">http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c</a></p>
+<p>Odkaz je platný 24 hodin.</p>
+
+<p>Pokud jste o vytvoření účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o vytvoření účtu nežádal(a), neprodleně kontaktujte administrátora.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:28:14.041428500
+2026-01-31 15:28:14 [task-1] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:28:14.069432 with args [petrhlista630@gmail.com, Uživatel vytvořen, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Uživatel vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>byl pro vás vytvořen uživatelský účet v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pro dokončení registrace klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c">http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c</a></p>
+<p>Odkaz je platný 24 hodin.</p>
+
+<p>Pokud jste o vytvoření účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o vytvoření účtu nežádal(a), neprodleně kontaktujte administrátora.</p>
+</body>
+</html>
+]
+2026-01-31 15:28:14 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:28:14.286428600 with args [USER_CREATED, null, cz.phsoft.hokej.data.entities.AppUserEntity@26493c69, UserActivationContext[user=cz.phsoft.hokej.data.entities.AppUserEntity@13a0b2eb, activationLink=http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c]]
+2026-01-31 15:28:14 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=null returned [EmailContent[subject=[Kopie pro manažera] Uživatel vytvořen, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Uživatel vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>byl pro vás vytvořen uživatelský účet v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pro dokončení registrace klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c">http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c</a></p>
+<p>Odkaz je platný 24 hodin.</p>
+
+<p>Pokud jste o vytvoření účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o vytvoření účtu nežádal(a), neprodleně kontaktujte administrátora.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:28:14.287427400
+2026-01-31 15:28:14 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END notifyUser - userId=null playerId=null returned [null] at 2026-01-31T15:28:14.289429700
+2026-01-31 15:28:14 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END register - userId=null playerId=null returned [null] at 2026-01-31T15:28:14.289429700
+2026-01-31 15:28:14 [task-2] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:28:14.292432100 with args [petrhlista@seznam.cz, [Kopie pro manažera] Uživatel vytvořen, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Uživatel vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>byl pro vás vytvořen uživatelský účet v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pro dokončení registrace klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c">http://localhost:8080/api/auth/verify?token=463a2f42-269e-47b4-ac66-32f2d903f59c</a></p>
+<p>Odkaz je platný 24 hodin.</p>
+
+<p>Pokud jste o vytvoření účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o vytvoření účtu nežádal(a), neprodleně kontaktujte administrátora.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:28:16 [task-1] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:28:16.183962500
+2026-01-31 15:28:16 [task-2] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:28:16.319725
+2026-01-31 15:28:34 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:28:34.084159300 with args []
+2026-01-31 15:28:34 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:28:34.085154500
+2026-01-31 15:28:34 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START AppUserServiceImpl.activateUser(..) at 2026-01-31T15:28:34.317158700 with args [463a2f42-269e-47b4-ac66-32f2d903f59c]
+2026-01-31 15:28:34 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.createDefaultSettingsForUser(..) at 2026-01-31T15:28:34.360159800 with args [cz.phsoft.hokej.data.entities.AppUserEntity@7c01d6c4]
+2026-01-31 15:28:34 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END createDefaultSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.AppUserSettingsEntity@ce30586] at 2026-01-31T15:28:34.380159100
+2026-01-31 15:28:34 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyUser(..) at 2026-01-31T15:28:34.410156200 with args [cz.phsoft.hokej.data.entities.AppUserEntity@7c01d6c4, USER_ACTIVATED, null]
+2026-01-31 15:28:34 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:28:34.410156200 with args [USER_ACTIVATED, null, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.AppUserEntity@7c01d6c4]
+2026-01-31 15:28:34 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=null returned [EmailContent[subject=Účet byl aktivován, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktivován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>váš uživatelský účet byl úspěšně <strong>aktivován</strong>.</p>
+<p>Nyní se můžete přihlásit do aplikace Hokej – Stará Garda a spravovat své hráče a přihlášky na zápasy.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste o aktivaci účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o aktivaci účtu nežádal(a), změňte si heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:28:34.412158800
+2026-01-31 15:28:34 [task-3] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:28:34.419159200 with args [petrhlista630@gmail.com, Účet byl aktivován, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktivován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>váš uživatelský účet byl úspěšně <strong>aktivován</strong>.</p>
+<p>Nyní se můžete přihlásit do aplikace Hokej – Stará Garda a spravovat své hráče a přihlášky na zápasy.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste o aktivaci účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o aktivaci účtu nežádal(a), změňte si heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+]
+2026-01-31 15:28:35 [task-3] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:28:35.340154200
+2026-01-31 15:28:35 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:28:35.620153900 with args [USER_ACTIVATED, null, cz.phsoft.hokej.data.entities.AppUserEntity@129220f4, cz.phsoft.hokej.data.entities.AppUserEntity@7c01d6c4]
+2026-01-31 15:28:35 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=null returned [EmailContent[subject=[Kopie pro manažera] Účet byl aktivován, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktivován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>váš uživatelský účet byl úspěšně <strong>aktivován</strong>.</p>
+<p>Nyní se můžete přihlásit do aplikace Hokej – Stará Garda a spravovat své hráče a přihlášky na zápasy.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste o aktivaci účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o aktivaci účtu nežádal(a), změňte si heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:28:35.620153900
+2026-01-31 15:28:35 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END notifyUser - userId=null playerId=null returned [null] at 2026-01-31T15:28:35.623188300
+2026-01-31 15:28:35 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END activateUser - userId=null playerId=null returned [true] at 2026-01-31T15:28:35.624154
+2026-01-31 15:28:35 [task-4] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:28:35.628156800 with args [petrhlista@seznam.cz, [Kopie pro manažera] Účet byl aktivován, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktivován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>váš uživatelský účet byl úspěšně <strong>aktivován</strong>.</p>
+<p>Nyní se můžete přihlásit do aplikace Hokej – Stará Garda a spravovat své hráče a přihlášky na zápasy.</p>
+<p>Přihlašovací email:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste o aktivaci účtu nežádal(a), kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o aktivaci účtu nežádal(a), změňte si heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:28:35 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:28:35.861157300 with args []
+2026-01-31 15:28:35 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:28:35.862159900
+2026-01-31 15:28:36 [task-4] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:28:36.443153
+2026-01-31 15:31:15 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:31:15.883774400 with args []
+2026-01-31 15:31:15 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:31:15.883774400
+2026-01-31 15:31:15 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START AppUserServiceImpl.requestForgottenPasswordReset(..) at 2026-01-31T15:31:15.896782600 with args [petrhlista630@gmail.com]
+2026-01-31 15:31:16 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyUser(..) at 2026-01-31T15:31:16.002778300 with args [cz.phsoft.hokej.data.entities.AppUserEntity@4f6b902, FORGOTTEN_PASSWORD_RESET_REQUEST, ForgottenPasswordResetContext[user=cz.phsoft.hokej.data.entities.AppUserEntity@4f6b902, resetLink=http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a]]
+2026-01-31 15:31:16 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:31:16.003784700 with args [FORGOTTEN_PASSWORD_RESET_REQUEST, null, petrhlista630@gmail.com, ForgottenPasswordResetContext[user=cz.phsoft.hokej.data.entities.AppUserEntity@4f6b902, resetLink=http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a]]
+2026-01-31 15:31:16 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=null returned [EmailContent[subject=Obnovení zapomenutého hesla, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Obnovení zapomenutého hesla</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>obdrželi jsme žádost o <strong>obnovení zapomenutého hesla</strong> k vašemu účtu v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Pro nastavení nového hesla klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a">http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a</a></p>
+<p>Odkaz je platný po omezenou dobu. Pokud vyprší, požádejte prosím o nový reset hesla.</p>
+
+<p>Pokud jste o obnovení hesla nežádal(a) vy, můžete tento e-mail ignorovat.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o reset hesla nežádal(a), zvažte prosím změnu hesla k vašemu e-mailu a zkontrolujte zabezpečení účtů.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:31:16.003784700
+2026-01-31 15:31:16 [task-5] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:31:16.005782500 with args [petrhlista630@gmail.com, Obnovení zapomenutého hesla, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Obnovení zapomenutého hesla</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>obdrželi jsme žádost o <strong>obnovení zapomenutého hesla</strong> k vašemu účtu v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Pro nastavení nového hesla klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a">http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a</a></p>
+<p>Odkaz je platný po omezenou dobu. Pokud vyprší, požádejte prosím o nový reset hesla.</p>
+
+<p>Pokud jste o obnovení hesla nežádal(a) vy, můžete tento e-mail ignorovat.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o reset hesla nežádal(a), zvažte prosím změnu hesla k vašemu e-mailu a zkontrolujte zabezpečení účtů.</p>
+</body>
+</html>
+]
+2026-01-31 15:31:16 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:31:16.079779 with args [FORGOTTEN_PASSWORD_RESET_REQUEST, null, cz.phsoft.hokej.data.entities.AppUserEntity@28f055e0, ForgottenPasswordResetContext[user=cz.phsoft.hokej.data.entities.AppUserEntity@4f6b902, resetLink=http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a]]
+2026-01-31 15:31:16 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=null returned [EmailContent[subject=[Kopie pro manažera] Obnovení zapomenutého hesla, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Obnovení zapomenutého hesla</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>obdrželi jsme žádost o <strong>obnovení zapomenutého hesla</strong> k vašemu účtu v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Pro nastavení nového hesla klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a">http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a</a></p>
+<p>Odkaz je platný po omezenou dobu. Pokud vyprší, požádejte prosím o nový reset hesla.</p>
+
+<p>Pokud jste o obnovení hesla nežádal(a) vy, můžete tento e-mail ignorovat.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o reset hesla nežádal(a), zvažte prosím změnu hesla k vašemu e-mailu a zkontrolujte zabezpečení účtů.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:31:16.080779400
+2026-01-31 15:31:16 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END notifyUser - userId=null playerId=null returned [null] at 2026-01-31T15:31:16.084776900
+2026-01-31 15:31:16 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END requestForgottenPasswordReset - userId=null playerId=null returned [null] at 2026-01-31T15:31:16.085783500
+2026-01-31 15:31:16 [task-6] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:31:16.096776300 with args [petrhlista@seznam.cz, [Kopie pro manažera] Obnovení zapomenutého hesla, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Obnovení zapomenutého hesla</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>obdrželi jsme žádost o <strong>obnovení zapomenutého hesla</strong> k vašemu účtu v aplikaci <strong>Hokej – Stará Garda</strong>.</p>
+<p>Pro nastavení nového hesla klikněte na následující odkaz:</p>
+<p><a href="http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a">http://localhost:8080/forgotten-password/reset?token=9354c39b-db97-41d4-ba9a-9fcc4120141a</a></p>
+<p>Odkaz je platný po omezenou dobu. Pokud vyprší, požádejte prosím o nový reset hesla.</p>
+
+<p>Pokud jste o obnovení hesla nežádal(a) vy, můžete tento e-mail ignorovat.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste o reset hesla nežádal(a), zvažte prosím změnu hesla k vašemu e-mailu a zkontrolujte zabezpečení účtů.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:31:16 [task-6] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:31:16.850779
+2026-01-31 15:31:16 [task-5] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:31:16.911778400
+2026-01-31 15:32:15 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:32:15.765750700 with args []
+2026-01-31 15:32:15 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:32:15.765750700
+2026-01-31 15:32:15 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getForgottenPasswordResetEmail(..) at 2026-01-31T15:32:15.770748700 with args [9354c39b-db97-41d4-ba9a-9fcc4120141a]
+2026-01-31 15:32:15 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getForgottenPasswordResetEmail - userId=null playerId=null returned [petrhlista630@gmail.com] at 2026-01-31T15:32:15.790749500
+2026-01-31 15:32:28 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:32:28.845991300 with args []
+2026-01-31 15:32:28 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:32:28.845991300
+2026-01-31 15:32:28 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START AppUserServiceImpl.forgottenPasswordReset(..) at 2026-01-31T15:32:28.867987100 with args [cz.phsoft.hokej.models.dto.ForgottenPasswordResetDTO@da6b63a]
+2026-01-31 15:32:29 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyUser(..) at 2026-01-31T15:32:29.009989600 with args [cz.phsoft.hokej.data.entities.AppUserEntity@7cde783b, FORGOTTEN_PASSWORD_RESET_COMPLETED, null]
+2026-01-31 15:32:29 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:32:29.010989200 with args [FORGOTTEN_PASSWORD_RESET_COMPLETED, null, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.AppUserEntity@7cde783b]
+2026-01-31 15:32:29 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=null returned [EmailContent[subject=Heslo bylo úspěšně změněno, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Heslo bylo úspěšně změněno</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>vaše heslo bylo <strong>úspěšně změněno</strong> na základě žádosti o obnovení zapomenutého hesla.</p>
+<p>Pokud jste tuto změnu neprováděl(a) vy, neprodleně kontaktujte administrátora a změňte své heslo.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pro zvýšení bezpečnosti doporučujeme používat silné heslo a nepoužívat stejné heslo pro více služeb.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:32:29.010989200
+2026-01-31 15:32:29 [task-7] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:32:29.011989100 with args [petrhlista630@gmail.com, Heslo bylo úspěšně změněno, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Heslo bylo úspěšně změněno</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>vaše heslo bylo <strong>úspěšně změněno</strong> na základě žádosti o obnovení zapomenutého hesla.</p>
+<p>Pokud jste tuto změnu neprováděl(a) vy, neprodleně kontaktujte administrátora a změňte své heslo.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pro zvýšení bezpečnosti doporučujeme používat silné heslo a nepoužívat stejné heslo pro více služeb.</p>
+</body>
+</html>
+]
+2026-01-31 15:32:29 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:32:29.174992300 with args [FORGOTTEN_PASSWORD_RESET_COMPLETED, null, cz.phsoft.hokej.data.entities.AppUserEntity@7685db3c, cz.phsoft.hokej.data.entities.AppUserEntity@7cde783b]
+2026-01-31 15:32:29 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=null returned [EmailContent[subject=[Kopie pro manažera] Heslo bylo úspěšně změněno, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Heslo bylo úspěšně změněno</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>vaše heslo bylo <strong>úspěšně změněno</strong> na základě žádosti o obnovení zapomenutého hesla.</p>
+<p>Pokud jste tuto změnu neprováděl(a) vy, neprodleně kontaktujte administrátora a změňte své heslo.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pro zvýšení bezpečnosti doporučujeme používat silné heslo a nepoužívat stejné heslo pro více služeb.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:32:29.175989800
+2026-01-31 15:32:29 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END notifyUser - userId=null playerId=null returned [null] at 2026-01-31T15:32:29.176988400
+2026-01-31 15:32:29 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END forgottenPasswordReset - userId=null playerId=null returned [null] at 2026-01-31T15:32:29.176988400
+2026-01-31 15:32:29 [task-8] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:32:29.178992600 with args [petrhlista@seznam.cz, [Kopie pro manažera] Heslo bylo úspěšně změněno, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Heslo bylo úspěšně změněno</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Karel novák,</p>
+    <p>vaše heslo bylo <strong>úspěšně změněno</strong> na základě žádosti o obnovení zapomenutého hesla.</p>
+<p>Pokud jste tuto změnu neprováděl(a) vy, neprodleně kontaktujte administrátora a změňte své heslo.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pro zvýšení bezpečnosti doporučujeme používat silné heslo a nepoužívat stejné heslo pro více služeb.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:32:29 [task-7] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:32:29.856838700
+2026-01-31 15:32:30 [task-8] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:32:30.052816
+2026-01-31 15:33:27 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:33:27.634454500 with args []
+2026-01-31 15:33:27 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:33:27.635451500
+2026-01-31 15:33:27 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-31T15:33:27.774451800 with args [petrhlista630@gmail.com]
+2026-01-31 15:33:27 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@33d1ceb4] at 2026-01-31T15:33:27.810451600
+2026-01-31 15:33:35 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:33:35.458812 with args []
+2026-01-31 15:33:35 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:33:35.458812
+2026-01-31 15:33:35 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-31T15:33:35.461815800 with args [petrhlista630@gmail.com]
+2026-01-31 15:33:35 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@446b0f91] at 2026-01-31T15:33:35.472815
+2026-01-31 15:34:01 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:34:01.983261700 with args []
+2026-01-31 15:34:01 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:34:01.984263200
+2026-01-31 15:34:02 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START AppUserServiceImpl.updateUser(..) at 2026-01-31T15:34:02.029261300 with args [petrhlista630@gmail.com, cz.phsoft.hokej.models.dto.AppUserDTO@44416447]
+2026-01-31 15:34:23 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:34:23.942859600 with args []
+2026-01-31 15:34:23 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:34:23.942859600
+2026-01-31 15:34:23 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START AppUserServiceImpl.updateUser(..) at 2026-01-31T15:34:23.948859600 with args [petrhlista630@gmail.com, cz.phsoft.hokej.models.dto.AppUserDTO@592538a4]
+2026-01-31 15:34:23 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyUser(..) at 2026-01-31T15:34:23.955859200 with args [cz.phsoft.hokej.data.entities.AppUserEntity@72be22d5, USER_UPDATED, null]
+2026-01-31 15:34:23 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:34:23.956860800 with args [USER_UPDATED, null, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.AppUserEntity@72be22d5]
+2026-01-31 15:34:23 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=null returned [EmailContent[subject=Účet byl aktualizován, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktualizován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Tomáš Hlista,</p>
+    <p>údaje vašeho účtu byly <strong>aktualizovány</strong>.</p>
+<p>Aktuální email účtu:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste změny neprováděl(a) vy, co nejdříve změňte heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:34:23.956860800
+2026-01-31 15:34:23 [task-9] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:34:23.959863600 with args [petrhlista630@gmail.com, Účet byl aktualizován, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktualizován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Tomáš Hlista,</p>
+    <p>údaje vašeho účtu byly <strong>aktualizovány</strong>.</p>
+<p>Aktuální email účtu:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste změny neprováděl(a) vy, co nejdříve změňte heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+]
+2026-01-31 15:34:24 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:34:24.054928600 with args [USER_UPDATED, null, cz.phsoft.hokej.data.entities.AppUserEntity@12b04568, cz.phsoft.hokej.data.entities.AppUserEntity@72be22d5]
+2026-01-31 15:34:24 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=null returned [EmailContent[subject=[Kopie pro manažera] Účet byl aktualizován, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktualizován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Tomáš Hlista,</p>
+    <p>údaje vašeho účtu byly <strong>aktualizovány</strong>.</p>
+<p>Aktuální email účtu:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste změny neprováděl(a) vy, co nejdříve změňte heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:34:24.055860400
+2026-01-31 15:34:24 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END notifyUser - userId=null playerId=null returned [null] at 2026-01-31T15:34:24.056863500
+2026-01-31 15:34:24 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END updateUser - userId=null playerId=null returned [null] at 2026-01-31T15:34:24.056863500
+2026-01-31 15:34:24 [task-10] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:34:24.056863500 with args [petrhlista@seznam.cz, [Kopie pro manažera] Účet byl aktualizován, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktualizován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Tomáš Hlista,</p>
+    <p>údaje vašeho účtu byly <strong>aktualizovány</strong>.</p>
+<p>Aktuální email účtu:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste změny neprováděl(a) vy, co nejdříve změňte heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:34:24 [task-9] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:34:24.764859
+2026-01-31 15:34:24 [task-10] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:34:24.895903400
+2026-01-31 15:34:29 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:34:29.554317500 with args []
+2026-01-31 15:34:29 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:34:29.555314300
+2026-01-31 15:34:29 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START AppUserServiceImpl.getCurrentUser(..) at 2026-01-31T15:34:29.556313200 with args [petrhlista630@gmail.com]
+2026-01-31 15:34:29 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END getCurrentUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserDTO@58a0dc16] at 2026-01-31T15:34:29.572318200
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:34:52.115588 with args []
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:34:52.115588
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START AppUserServiceImpl.updateUser(..) at 2026-01-31T15:34:52.120593 with args [petrhlista630@gmail.com, cz.phsoft.hokej.models.dto.AppUserDTO@52979a70]
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyUser(..) at 2026-01-31T15:34:52.130590300 with args [cz.phsoft.hokej.data.entities.AppUserEntity@517ab349, USER_UPDATED, null]
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:34:52.130590300 with args [USER_UPDATED, null, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.AppUserEntity@517ab349]
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=null returned [EmailContent[subject=Účet byl aktualizován, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktualizován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>údaje vašeho účtu byly <strong>aktualizovány</strong>.</p>
+<p>Aktuální email účtu:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste změny neprováděl(a) vy, co nejdříve změňte heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:34:52.130590300
+2026-01-31 15:34:52 [task-11] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:34:52.131591300 with args [petrhlista630@gmail.com, Účet byl aktualizován, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktualizován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>údaje vašeho účtu byly <strong>aktualizovány</strong>.</p>
+<p>Aktuální email účtu:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste změny neprováděl(a) vy, co nejdříve změňte heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+]
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:34:52.223592200 with args [USER_UPDATED, null, cz.phsoft.hokej.data.entities.AppUserEntity@43484999, cz.phsoft.hokej.data.entities.AppUserEntity@517ab349]
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=null returned [EmailContent[subject=[Kopie pro manažera] Účet byl aktualizován, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktualizován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>údaje vašeho účtu byly <strong>aktualizovány</strong>.</p>
+<p>Aktuální email účtu:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste změny neprováděl(a) vy, co nejdříve změňte heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:34:52.224614200
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END notifyUser - userId=null playerId=null returned [null] at 2026-01-31T15:34:52.224614200
+2026-01-31 15:34:52 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END updateUser - userId=null playerId=null returned [null] at 2026-01-31T15:34:52.225592200
+2026-01-31 15:34:52 [task-12] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:34:52.226592100 with args [petrhlista@seznam.cz, [Kopie pro manažera] Účet byl aktualizován, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Účet byl aktualizován</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>údaje vašeho účtu byly <strong>aktualizovány</strong>.</p>
+<p>Aktuální email účtu:</p>
+<ul>
+    <li>petrhlista630@gmail.com</li>
+</ul>
+<p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Pokud jste změny neprováděl(a) vy, co nejdříve změňte heslo a kontaktujte administrátora.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:34:52 [task-11] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:34:52.914589800
+2026-01-31 15:34:53 [task-12] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:34:53.022592500
+2026-01-31 15:35:22 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:35:22.498806 with args []
+2026-01-31 15:35:22 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:35:22.498806
+2026-01-31 15:35:22 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START AppUserServiceImpl.changePassword(..) at 2026-01-31T15:35:22.556799 with args [petrhlista630@gmail.com, Heslo123, NoveHeslo123, NoveHeslo123]
+2026-01-31 15:35:23 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyUser(..) at 2026-01-31T15:35:23.000796500 with args [cz.phsoft.hokej.data.entities.AppUserEntity@9594119, USER_CHANGE_PASSWORD, null]
+2026-01-31 15:35:23 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:35:23.001798100 with args [USER_CHANGE_PASSWORD, null, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.AppUserEntity@9594119]
+2026-01-31 15:35:23 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=null returned [null] at 2026-01-31T15:35:23.001798100
+2026-01-31 15:35:23 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:35:23.118794500 with args [USER_CHANGE_PASSWORD, null, cz.phsoft.hokej.data.entities.AppUserEntity@4f154d5b, cz.phsoft.hokej.data.entities.AppUserEntity@9594119]
+2026-01-31 15:35:23 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=null returned [null] at 2026-01-31T15:35:23.123832500
+2026-01-31 15:35:23 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END notifyUser - userId=null playerId=null returned [null] at 2026-01-31T15:35:23.124796600
+2026-01-31 15:35:23 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END changePassword - userId=null playerId=null returned [null] at 2026-01-31T15:35:23.124796600
+2026-01-31 15:36:00 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:36:00.526652800 with args []
+2026-01-31 15:36:00 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:36:00.526652800
+2026-01-31 15:36:00 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START PlayerServiceImpl.autoSelectCurrentPlayerForUser(..) at 2026-01-31T15:36:00.529653200 with args [petrhlista630@gmail.com]
+2026-01-31 15:36:00 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.getSettingsForUser(..) at 2026-01-31T15:36:00.531651700 with args [petrhlista630@gmail.com]
+2026-01-31 15:36:00 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserSettingsDTO@3f38cc0e] at 2026-01-31T15:36:00.557656800
+2026-01-31 15:36:00 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.clear() at 2026-01-31T15:36:00.588651900 with args []
+2026-01-31 15:36:00 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END clear - userId=null playerId=null returned [null] at 2026-01-31T15:36:00.588651900
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:36:38.032865500 with args []
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:36:38.032865500
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START PlayerServiceImpl.createPlayerForUser(..) at 2026-01-31T15:36:38.063866600 with args [cz.phsoft.hokej.models.dto.PlayerDTO@6d59985c, petrhlista630@gmail.com]
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyPlayer(..) at 2026-01-31T15:36:38.088867800 with args [cz.phsoft.hokej.data.entities.PlayerEntity@877d9b5, PLAYER_CREATED, cz.phsoft.hokej.data.entities.PlayerEntity@877d9b5]
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START NotificationPreferencesServiceImpl.evaluate(..) at 2026-01-31T15:36:38.090869100 with args [cz.phsoft.hokej.data.entities.PlayerEntity@877d9b5, PLAYER_CREATED]
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END evaluate - userId=null playerId=11 returned [cz.phsoft.hokej.models.services.NotificationDecision@5766a436] at 2026-01-31T15:36:38.091878400
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:36:38.092866800 with args [PLAYER_CREATED, cz.phsoft.hokej.data.entities.PlayerEntity@877d9b5, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.PlayerEntity@877d9b5]
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=11 returned [EmailContent[subject=Hráč vytvořen, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Hráč vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>hráč <strong>Petr Hlista</strong> byl úspěšně vytvořen.</p>
+<p>Počkejte prosím na schválení administrátorem.</p>
+<p>Budete o schválení informován e-mailem.</p>
+<p>Vaše kontaktní údaje:</p>
+<ul>
+    <li>Jméno a příjmení: Petr Hlista</li>
+    <li>Email: petrhlista630@gmail.com</li>
+</ul>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:36:38.092866800
+2026-01-31 15:36:38 [task-13] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:36:38.097870700 with args [petrhlista630@gmail.com, Hráč vytvořen, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Hráč vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>hráč <strong>Petr Hlista</strong> byl úspěšně vytvořen.</p>
+<p>Počkejte prosím na schválení administrátorem.</p>
+<p>Budete o schválení informován e-mailem.</p>
+<p>Vaše kontaktní údaje:</p>
+<ul>
+    <li>Jméno a příjmení: Petr Hlista</li>
+    <li>Email: petrhlista630@gmail.com</li>
+</ul>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+]
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:36:38.173871 with args [PLAYER_CREATED, cz.phsoft.hokej.data.entities.PlayerEntity@877d9b5, cz.phsoft.hokej.data.entities.AppUserEntity@2e43ef3a, cz.phsoft.hokej.data.entities.PlayerEntity@877d9b5]
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=11 returned [EmailContent[subject=[Kopie pro manažera] Hráč vytvořen, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Hráč vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>hráč <strong>Petr Hlista</strong> byl úspěšně vytvořen.</p>
+<p>Počkejte prosím na schválení administrátorem.</p>
+<p>Budete o schválení informován e-mailem.</p>
+<p>Vaše kontaktní údaje:</p>
+<ul>
+    <li>Jméno a příjmení: Petr Hlista</li>
+    <li>Email: petrhlista630@gmail.com</li>
+</ul>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:36:38.174875100
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END notifyPlayer - userId=null playerId=11 returned [null] at 2026-01-31T15:36:38.175875700
+2026-01-31 15:36:38 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END createPlayerForUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.PlayerDTO@7410b6af] at 2026-01-31T15:36:38.175875700
+2026-01-31 15:36:38 [task-14] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:36:38.192869700 with args [petrhlista@seznam.cz, [Kopie pro manažera] Hráč vytvořen, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Hráč vytvořen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>hráč <strong>Petr Hlista</strong> byl úspěšně vytvořen.</p>
+<p>Počkejte prosím na schválení administrátorem.</p>
+<p>Budete o schválení informován e-mailem.</p>
+<p>Vaše kontaktní údaje:</p>
+<ul>
+    <li>Jméno a příjmení: Petr Hlista</li>
+    <li>Email: petrhlista630@gmail.com</li>
+</ul>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:36:39 [task-13] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:36:39.078298200
+2026-01-31 15:36:39 [task-14] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:36:39.126496400
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:37:25.586878800 with args []
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:37:25.586878800
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START PlayerServiceImpl.approvePlayer(..) at 2026-01-31T15:37:25.594883100 with args [11]
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START PlayerSettingsServiceImpl.createDefaultSettingsForPlayer(..) at 2026-01-31T15:37:25.609876500 with args [cz.phsoft.hokej.data.entities.PlayerEntity@94a82bd]
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END createDefaultSettingsForPlayer - userId=null playerId=11 returned [cz.phsoft.hokej.data.entities.PlayerSettingsEntity@2153832e] at 2026-01-31T15:37:25.610877200
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyPlayer(..) at 2026-01-31T15:37:25.628875400 with args [cz.phsoft.hokej.data.entities.PlayerEntity@94a82bd, PLAYER_APPROVED, cz.phsoft.hokej.data.entities.PlayerEntity@94a82bd]
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START NotificationPreferencesServiceImpl.evaluate(..) at 2026-01-31T15:37:25.628875400 with args [cz.phsoft.hokej.data.entities.PlayerEntity@94a82bd, PLAYER_APPROVED]
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END evaluate - userId=null playerId=11 returned [cz.phsoft.hokej.models.services.NotificationDecision@68584b1b] at 2026-01-31T15:37:25.634876800
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForUser(..) at 2026-01-31T15:37:25.635877100 with args [PLAYER_APPROVED, cz.phsoft.hokej.data.entities.PlayerEntity@94a82bd, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.PlayerEntity@94a82bd]
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END buildForUser - userId=null playerId=11 returned [EmailContent[subject=Hráč schválen, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Hráč schválen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>hráč <strong>Petr Hlista</strong> byl schválen administrátorem.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail má pouze informační charakter.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:37:25.635877100
+2026-01-31 15:37:25 [task-15] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:37:25.637883400 with args [petrhlista630@gmail.com, Hráč schválen, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Hráč schválen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>hráč <strong>Petr Hlista</strong> byl schválen administrátorem.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail má pouze informační charakter.</p>
+</body>
+</html>
+]
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:37:25.706878100 with args [PLAYER_APPROVED, cz.phsoft.hokej.data.entities.PlayerEntity@94a82bd, cz.phsoft.hokej.data.entities.AppUserEntity@5fd2af97, cz.phsoft.hokej.data.entities.PlayerEntity@94a82bd]
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=11 returned [EmailContent[subject=[Kopie pro manažera] Hráč schválen, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Hráč schválen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>hráč <strong>Petr Hlista</strong> byl schválen administrátorem.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail má pouze informační charakter.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:37:25.706878100
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END notifyPlayer - userId=null playerId=11 returned [null] at 2026-01-31T15:37:25.707877800
+2026-01-31 15:37:25 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END approvePlayer - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SuccessResponseDTO@5bdf2e44] at 2026-01-31T15:37:25.707877800
+2026-01-31 15:37:25 [task-16] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:37:25.708876 with args [petrhlista@seznam.cz, [Kopie pro manažera] Hráč schválen, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Hráč schválen</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>hráč <strong>Petr Hlista</strong> byl schválen administrátorem.</p>
+<p>S pozdravem<br/>App Hokej – Stará Garda</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail má pouze informační charakter.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:37:26 [task-15] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:37:26.474955300
+2026-01-31 15:37:26 [task-16] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:37:26.483959600
+2026-01-31 15:37:47 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:37:47.270136400 with args []
+2026-01-31 15:37:47 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:37:47.271136500
+2026-01-31 15:37:47 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START PlayerServiceImpl.autoSelectCurrentPlayerForUser(..) at 2026-01-31T15:37:47.273136300 with args [petrhlista630@gmail.com]
+2026-01-31 15:37:47 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.getSettingsForUser(..) at 2026-01-31T15:37:47.275138400 with args [petrhlista630@gmail.com]
+2026-01-31 15:37:47 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserSettingsDTO@7d049127] at 2026-01-31T15:37:47.285143900
+2026-01-31 15:37:47 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.setCurrentPlayerId(..) at 2026-01-31T15:37:47.296135800 with args [11]
+2026-01-31 15:37:47 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END setCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:37:47.300136400
+2026-01-31 15:37:47 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END autoSelectCurrentPlayerForUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SuccessResponseDTO@550a6626] at 2026-01-31T15:37:47.300136400
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:38:02.899221500 with args []
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:38:02.899221500
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:38:02.918221600 with args []
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:38:02.918221600
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:38:02.919220300 with args []
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:38:02.919220300
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START MatchServiceImpl.getUpcomingMatchesOverviewForPlayer(..) at 2026-01-31T15:38:02.919220300 with args [11]
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:38:02.936220400 with args []
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:38:02.936220400 with args []
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@3eae44d0] at 2026-01-31T15:38:02.960218700
+2026-01-31 15:38:02 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:38:02.961226400
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START PlayerInactivityPeriodServiceImpl.isActive(..) at 2026-01-31T15:38:03.094220300 with args [cz.phsoft.hokej.data.entities.PlayerEntity@14eede70, 2026-02-06T18:45]
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END isActive - userId=null playerId=11 returned [true] at 2026-01-31T15:38:03.103220200
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:38:03.103220200 with args []
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:38:03.103220200 with args []
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@5a7dcc81] at 2026-01-31T15:38:03.108217200
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:38:03.109224400
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START MatchRegistrationServiceImpl.getRegistrationsForMatch(..) at 2026-01-31T15:38:03.125218600 with args [31]
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:38:03.138235700 with args []
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:38:03.139220300 with args []
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@330a2540] at 2026-01-31T15:38:03.143218500
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:38:03.143218500
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getRegistrationsForMatch - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.MatchRegistrationDTO@75e7d13d, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@1090c6c3, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@24499043, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@564e184, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@4e41b62c, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@5871c7f9, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@30d29f3c, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@12982063]] at 2026-01-31T15:38:03.274218800
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START MatchRegistrationServiceImpl.getRegistrationsForMatch(..) at 2026-01-31T15:38:03.303270600 with args [31]
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:38:03.310220600 with args []
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:38:03.310220600 with args []
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@215ada4c] at 2026-01-31T15:38:03.324222300
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:38:03.324222300
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getRegistrationsForMatch - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.MatchRegistrationDTO@7d49ec75, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@2c33e830, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@73941864, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@788f69d2, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@4a9708f2, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@79561bf8, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@2a526b8e, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@299046ef]] at 2026-01-31T15:38:03.334226
+2026-01-31 15:38:03 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getUpcomingMatchesOverviewForPlayer - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.MatchOverviewDTO@c9c980]] at 2026-01-31T15:38:03.336220500
+2026-01-31 15:38:11 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:38:11.996138600 with args []
+2026-01-31 15:38:11 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:38:11.997139900
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:38:12.005138400 with args []
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:38:12.005138400
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:38:12.006136100 with args []
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:38:12.006136100
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START MatchServiceImpl.getUpcomingMatchesForPlayer(..) at 2026-01-31T15:38:12.006136100 with args [11]
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:38:12.017138 with args []
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:38:12.017138 with args []
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@2b6f678f] at 2026-01-31T15:38:12.020139100
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:38:12.020139100
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START PlayerInactivityPeriodServiceImpl.isActive(..) at 2026-01-31T15:38:12.031137600 with args [cz.phsoft.hokej.data.entities.PlayerEntity@19af9f2, 2026-02-06T18:45]
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END isActive - userId=null playerId=11 returned [true] at 2026-01-31T15:38:12.035141300
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:38:12.035141300 with args []
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:38:12.035141300 with args []
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@1e26a1aa] at 2026-01-31T15:38:12.038136
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:38:12.038136
+2026-01-31 15:38:12 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getUpcomingMatchesForPlayer - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.MatchDTO@3f7470]] at 2026-01-31T15:38:12.053139700
+2026-01-31 15:39:13 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:39:13.892709900 with args []
+2026-01-31 15:39:13 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:39:13.892709900
+2026-01-31 15:39:14 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START MatchServiceImpl.createMatch(..) at 2026-01-31T15:39:14.090709400 with args [cz.phsoft.hokej.models.dto.MatchDTO@63804199]
+2026-01-31 15:39:14 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-31T15:39:14.090709400 with args []
+2026-01-31 15:39:14 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@559cbf4a] at 2026-01-31T15:39:14.098711300
+2026-01-31 15:39:14 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-31T15:39:14.099714300 with args []
+2026-01-31 15:39:14 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@559cbf4a] at 2026-01-31T15:39:14.102709700
+2026-01-31 15:39:14 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END createMatch - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.MatchDTO@42fb5018] at 2026-01-31T15:39:14.160708300
+2026-01-31 15:39:24 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:39:24.817303500 with args []
+2026-01-31 15:39:24 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:39:24.818280100
+2026-01-31 15:39:24 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START MatchServiceImpl.createMatch(..) at 2026-01-31T15:39:24.830282400 with args [cz.phsoft.hokej.models.dto.MatchDTO@206956c7]
+2026-01-31 15:39:24 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-31T15:39:24.831269 with args []
+2026-01-31 15:39:24 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@70a8f346] at 2026-01-31T15:39:24.838245700
+2026-01-31 15:39:24 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeason() at 2026-01-31T15:39:24.839242700 with args []
+2026-01-31 15:39:24 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END getActiveSeason - userId=null playerId=null returned [cz.phsoft.hokej.data.entities.SeasonEntity@70a8f346] at 2026-01-31T15:39:24.842241200
+2026-01-31 15:39:24 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END createMatch - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.MatchDTO@73a6b17e] at 2026-01-31T15:39:24.894244500
+2026-01-31 15:39:53 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:39:53.022137100 with args []
+2026-01-31 15:39:53 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:39:53.022137100
+2026-01-31 15:40:10 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:40:10.369157300 with args []
+2026-01-31 15:40:10 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:40:10.370157700
+2026-01-31 15:40:34 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:40:34.432480300 with args []
+2026-01-31 15:40:34 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:40:34.432480300
+2026-01-31 15:40:34 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:40:34.434478400 with args []
+2026-01-31 15:40:40 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:40:40.620289300 with args []
+2026-01-31 15:40:40 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:40:40.621287100
+2026-01-31 15:40:40 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START PlayerServiceImpl.autoSelectCurrentPlayerForUser(..) at 2026-01-31T15:40:40.622288100 with args [petrhlista630@gmail.com]
+2026-01-31 15:40:40 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START AppUserSettingsServiceImpl.getSettingsForUser(..) at 2026-01-31T15:40:40.623288400 with args [petrhlista630@gmail.com]
+2026-01-31 15:40:40 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getSettingsForUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.AppUserSettingsDTO@32a63f0b] at 2026-01-31T15:40:40.635289100
+2026-01-31 15:40:40 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.setCurrentPlayerId(..) at 2026-01-31T15:40:40.644289800 with args [11]
+2026-01-31 15:40:40 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END setCurrentPlayerId - userId=null playerId=null returned [null] at 2026-01-31T15:40:40.646287300
+2026-01-31 15:40:40 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END autoSelectCurrentPlayerForUser - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SuccessResponseDTO@68bfc423] at 2026-01-31T15:40:40.646287300
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:40:52.545302900 with args []
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:40:52.546304200
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:40:52.557308400 with args []
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:40:52.558349900
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:40:52.559373500 with args []
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:40:52.560377300
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START MatchServiceImpl.getUpcomingMatchesForPlayer(..) at 2026-01-31T15:40:52.562306500 with args [11]
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:40:52.579306300 with args []
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:40:52.580300500 with args []
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@1929cf11] at 2026-01-31T15:40:52.586306900
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:40:52.586306900
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START PlayerInactivityPeriodServiceImpl.isActive(..) at 2026-01-31T15:40:52.602305900 with args [cz.phsoft.hokej.data.entities.PlayerEntity@583d9e1e, 2026-02-06T18:45]
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END isActive - userId=null playerId=11 returned [true] at 2026-01-31T15:40:52.609302600
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:40:52.609302600 with args []
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:40:52.609302600 with args []
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@2d8fe8df] at 2026-01-31T15:40:52.613302500
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:40:52.613302500
+2026-01-31 15:40:52 [http-nio-8080-exec-4] INFO  AUDIT_LOGGER - END getUpcomingMatchesForPlayer - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.MatchDTO@53a3acb5]] at 2026-01-31T15:40:52.625304800
+2026-01-31 15:41:04 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:41:04.973967 with args []
+2026-01-31 15:41:04 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:41:04.974964300
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:41:05.001972200 with args []
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:41:05.002973600
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:41:05.002973600 with args []
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:41:05.002973600
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START MatchRegistrationServiceImpl.upsertRegistration(..) at 2026-01-31T15:41:05.008963600 with args [11, cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest@137b1d2e]
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyPlayer(..) at 2026-01-31T15:41:05.126820700 with args [cz.phsoft.hokej.data.entities.PlayerEntity@514969f7, MATCH_REGISTRATION_CREATED, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@35e5454b]
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START NotificationPreferencesServiceImpl.evaluate(..) at 2026-01-31T15:41:05.126820700 with args [cz.phsoft.hokej.data.entities.PlayerEntity@514969f7, MATCH_REGISTRATION_CREATED]
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END evaluate - userId=null playerId=11 returned [cz.phsoft.hokej.models.services.NotificationDecision@12da8df3] at 2026-01-31T15:41:05.137829
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForPlayer(..) at 2026-01-31T15:41:05.137829 with args [MATCH_REGISTRATION_CREATED, cz.phsoft.hokej.data.entities.PlayerEntity@514969f7, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@35e5454b]
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END buildForPlayer - userId=null playerId=11 returned [EmailContent[subject=Potvrzení přihlášení na zápas, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Přihlášení na zápas</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>přihlášen</strong> na zápas.</p>
+<p><strong>Termín zápasu:</strong> pátek 06.02.2026  18:45</p>
+<p>Aktuálně přihlášeno: <strong>6 hráčů</strong> / z 12 míst zbývá 6 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: petrhlista630@gmail.com</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:41:05.223017700
+2026-01-31 15:41:05 [task-17] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:41:05.241017600 with args [petrhlista630@gmail.com, Potvrzení přihlášení na zápas, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Přihlášení na zápas</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>přihlášen</strong> na zápas.</p>
+<p><strong>Termín zápasu:</strong> pátek 06.02.2026  18:45</p>
+<p>Aktuálně přihlášeno: <strong>6 hráčů</strong> / z 12 míst zbývá 6 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: petrhlista630@gmail.com</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+]
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:41:05.297012600 with args [MATCH_REGISTRATION_CREATED, cz.phsoft.hokej.data.entities.PlayerEntity@514969f7, cz.phsoft.hokej.data.entities.AppUserEntity@37412e22, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@35e5454b]
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=11 returned [EmailContent[subject=[Kopie pro manažera] Potvrzení přihlášení na zápas, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Přihlášení na zápas</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>přihlášen</strong> na zápas.</p>
+<p><strong>Termín zápasu:</strong> pátek 06.02.2026  18:45</p>
+<p>Aktuálně přihlášeno: <strong>6 hráčů</strong> / z 12 míst zbývá 6 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: (neuvedeno)</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:41:05.308010900
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END notifyPlayer - userId=null playerId=11 returned [null] at 2026-01-31T15:41:05.309014100
+2026-01-31 15:41:05 [http-nio-8080-exec-5] INFO  AUDIT_LOGGER - END upsertRegistration - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.MatchRegistrationDTO@2e6b2965] at 2026-01-31T15:41:05.309014100
+2026-01-31 15:41:05 [task-18] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:41:05.339012600 with args [petrhlista@seznam.cz, [Kopie pro manažera] Potvrzení přihlášení na zápas, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Přihlášení na zápas</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>přihlášen</strong> na zápas.</p>
+<p><strong>Termín zápasu:</strong> pátek 06.02.2026  18:45</p>
+<p>Aktuálně přihlášeno: <strong>6 hráčů</strong> / z 12 míst zbývá 6 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: (neuvedeno)</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:41:06 [task-17] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:41:06.135013600
+2026-01-31 15:41:06 [task-18] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:41:06.154014800
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:41:26.298990600 with args []
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:41:26.298990600
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:41:26.314992800 with args []
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:41:26.314992800
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:41:26.314992800 with args []
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:41:26.314992800
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START MatchRegistrationServiceImpl.upsertRegistration(..) at 2026-01-31T15:41:26.315984100 with args [11, cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest@71878268]
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyPlayer(..) at 2026-01-31T15:41:26.337005200 with args [cz.phsoft.hokej.data.entities.PlayerEntity@5f932fe9, MATCH_REGISTRATION_SUBSTITUTE, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@7607a416]
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START NotificationPreferencesServiceImpl.evaluate(..) at 2026-01-31T15:41:26.337984800 with args [cz.phsoft.hokej.data.entities.PlayerEntity@5f932fe9, MATCH_REGISTRATION_SUBSTITUTE]
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END evaluate - userId=null playerId=11 returned [cz.phsoft.hokej.models.services.NotificationDecision@6162fd89] at 2026-01-31T15:41:26.342989400
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForPlayer(..) at 2026-01-31T15:41:26.342989400 with args [MATCH_REGISTRATION_SUBSTITUTE, cz.phsoft.hokej.data.entities.PlayerEntity@5f932fe9, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@7607a416]
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END buildForPlayer - userId=null playerId=11 returned [EmailContent[subject=Registrace – možná účast (SUBSTITUTE), body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Možná účast na zápase</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>vaše registrace na zápas je nastavena jako <strong>„možná“ (SUBSTITUTE)</strong>.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Můžete se kdykoliv přihlásit nebo omluvit.</p>
+<p>Aktuálně přihlášeno: <strong>0 hráčů</strong> / kapacita 12 hráčů</p>
+<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:41:26.346987500
+2026-01-31 15:41:26 [task-19] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:41:26.348987700 with args [petrhlista630@gmail.com, Registrace – možná účast (SUBSTITUTE), <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Možná účast na zápase</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>vaše registrace na zápas je nastavena jako <strong>„možná“ (SUBSTITUTE)</strong>.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Můžete se kdykoliv přihlásit nebo omluvit.</p>
+<p>Aktuálně přihlášeno: <strong>0 hráčů</strong> / kapacita 12 hráčů</p>
+<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+]
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:41:26.423991 with args [MATCH_REGISTRATION_SUBSTITUTE, cz.phsoft.hokej.data.entities.PlayerEntity@5f932fe9, cz.phsoft.hokej.data.entities.AppUserEntity@1ef56c95, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@7607a416]
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=11 returned [EmailContent[subject=[Kopie pro manažera] Registrace – možná účast (SUBSTITUTE), body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Možná účast na zápase</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>vaše registrace na zápas je nastavena jako <strong>„možná“ (SUBSTITUTE)</strong>.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Můžete se kdykoliv přihlásit nebo omluvit.</p>
+<p>Aktuálně přihlášeno: <strong>0 hráčů</strong> / kapacita 12 hráčů</p>
+<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:41:26.435020300
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END notifyPlayer - userId=null playerId=11 returned [null] at 2026-01-31T15:41:26.437992100
+2026-01-31 15:41:26 [http-nio-8080-exec-6] INFO  AUDIT_LOGGER - END upsertRegistration - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.MatchRegistrationDTO@4d802595] at 2026-01-31T15:41:26.437992100
+2026-01-31 15:41:26 [task-20] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:41:26.481988500 with args [petrhlista@seznam.cz, [Kopie pro manažera] Registrace – možná účast (SUBSTITUTE), <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Možná účast na zápase</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>vaše registrace na zápas je nastavena jako <strong>„možná“ (SUBSTITUTE)</strong>.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Můžete se kdykoliv přihlásit nebo omluvit.</p>
+<p>Aktuálně přihlášeno: <strong>0 hráčů</strong> / kapacita 12 hráčů</p>
+<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:41:27 [task-19] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:41:27.175022500
+2026-01-31 15:41:27 [task-20] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:41:27.295353600
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:41:59.358045700 with args []
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:41:59.359037900
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:41:59.374041300 with args []
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:41:59.374041300
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:41:59.374041300 with args []
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:41:59.374041300
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START MatchRegistrationServiceImpl.upsertRegistration(..) at 2026-01-31T15:41:59.375048300 with args [11, cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest@4ed205be]
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyPlayer(..) at 2026-01-31T15:41:59.449039600 with args [cz.phsoft.hokej.data.entities.PlayerEntity@67f2b72b, MATCH_REGISTRATION_CANCELED, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@5ba9e7f7]
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START NotificationPreferencesServiceImpl.evaluate(..) at 2026-01-31T15:41:59.449039600 with args [cz.phsoft.hokej.data.entities.PlayerEntity@67f2b72b, MATCH_REGISTRATION_CANCELED]
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END evaluate - userId=null playerId=11 returned [cz.phsoft.hokej.models.services.NotificationDecision@e62b7da] at 2026-01-31T15:41:59.456043700
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForPlayer(..) at 2026-01-31T15:41:59.456043700 with args [MATCH_REGISTRATION_CANCELED, cz.phsoft.hokej.data.entities.PlayerEntity@67f2b72b, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@5ba9e7f7]
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END buildForPlayer - userId=null playerId=11 returned [EmailContent[subject=Odhlášení ze zápasu, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Odhlášení ze zápasu</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>odhlášen</strong> ze zápasu.</p>
+<p><strong>Termín zápasu:</strong> pátek 06.02.2026  18:45</p>
+<p>Důvod:   PRACE - musím něco dodělat</p>
+<p>Aktuálně přihlášeno: <strong>5 hráčů</strong> / z 12 míst zbývá 7 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: petrhlista630@gmail.com</p>
+<p>Mrzí nás, že nepřijdete.</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">V případě, že se situace změní, můžete se na zápas zkusit znovu přihlásit, pokud bude volné místo.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:41:59.462040400
+2026-01-31 15:41:59 [task-21] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:41:59.463044900 with args [petrhlista630@gmail.com, Odhlášení ze zápasu, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Odhlášení ze zápasu</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>odhlášen</strong> ze zápasu.</p>
+<p><strong>Termín zápasu:</strong> pátek 06.02.2026  18:45</p>
+<p>Důvod:   PRACE - musím něco dodělat</p>
+<p>Aktuálně přihlášeno: <strong>5 hráčů</strong> / z 12 míst zbývá 7 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: petrhlista630@gmail.com</p>
+<p>Mrzí nás, že nepřijdete.</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">V případě, že se situace změní, můžete se na zápas zkusit znovu přihlásit, pokud bude volné místo.</p>
+</body>
+</html>
+]
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:41:59.516039700 with args [MATCH_REGISTRATION_CANCELED, cz.phsoft.hokej.data.entities.PlayerEntity@67f2b72b, cz.phsoft.hokej.data.entities.AppUserEntity@4eb242ad, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@5ba9e7f7]
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=11 returned [EmailContent[subject=[Kopie pro manažera] Odhlášení ze zápasu, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Odhlášení ze zápasu</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>odhlášen</strong> ze zápasu.</p>
+<p><strong>Termín zápasu:</strong> pátek 06.02.2026  18:45</p>
+<p>Důvod:   PRACE - musím něco dodělat</p>
+<p>Aktuálně přihlášeno: <strong>5 hráčů</strong> / z 12 míst zbývá 7 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: (neuvedeno)</p>
+<p>Mrzí nás, že nepřijdete.</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">V případě, že se situace změní, můžete se na zápas zkusit znovu přihlásit, pokud bude volné místo.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:41:59.527046800
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END notifyPlayer - userId=null playerId=11 returned [null] at 2026-01-31T15:41:59.528046200
+2026-01-31 15:41:59 [http-nio-8080-exec-8] INFO  AUDIT_LOGGER - END upsertRegistration - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.MatchRegistrationDTO@591e800] at 2026-01-31T15:41:59.528046200
+2026-01-31 15:41:59 [task-22] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:41:59.529042500 with args [petrhlista@seznam.cz, [Kopie pro manažera] Odhlášení ze zápasu, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Odhlášení ze zápasu</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>odhlášen</strong> ze zápasu.</p>
+<p><strong>Termín zápasu:</strong> pátek 06.02.2026  18:45</p>
+<p>Důvod:   PRACE - musím něco dodělat</p>
+<p>Aktuálně přihlášeno: <strong>5 hráčů</strong> / z 12 míst zbývá 7 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: (neuvedeno)</p>
+<p>Mrzí nás, že nepřijdete.</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">V případě, že se situace změní, můžete se na zápas zkusit znovu přihlásit, pokud bude volné místo.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:42:00 [task-21] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:42:00.382157800
+2026-01-31 15:42:00 [task-22] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:42:00.429301800
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:08.421972600 with args []
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:08.421972600
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:42:08.430976500 with args []
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:42:08.430976500
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:08.430976500 with args []
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:08.431976300
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START MatchRegistrationServiceImpl.upsertRegistration(..) at 2026-01-31T15:42:08.432977 with args [11, cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest@5e677e14]
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyPlayer(..) at 2026-01-31T15:42:08.449979600 with args [cz.phsoft.hokej.data.entities.PlayerEntity@eeffd24, PLAYER_EXCUSED, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@267e314c]
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START NotificationPreferencesServiceImpl.evaluate(..) at 2026-01-31T15:42:08.449979600 with args [cz.phsoft.hokej.data.entities.PlayerEntity@eeffd24, PLAYER_EXCUSED]
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END evaluate - userId=null playerId=11 returned [cz.phsoft.hokej.models.services.NotificationDecision@550e159e] at 2026-01-31T15:42:08.455974500
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForPlayer(..) at 2026-01-31T15:42:08.455974500 with args [PLAYER_EXCUSED, cz.phsoft.hokej.data.entities.PlayerEntity@eeffd24, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@267e314c]
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END buildForPlayer - userId=null playerId=11 returned [EmailContent[subject=Omluva ze zápasu potvrzena, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Omluva ze zápasu</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>vaše <strong>omluva ze zápasu</strong> byla zaznamenána.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Důvod:   NEMOC - Něco na mne leze</p>
+<p>Děkujeme, že dáváte vědět včas.</p>
+<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Omluva pomáhá lépe plánovat sestavu na zápas.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:42:08.582056
+2026-01-31 15:42:08 [task-23] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:42:08.583052900 with args [petrhlista630@gmail.com, Omluva ze zápasu potvrzena, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Omluva ze zápasu</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>vaše <strong>omluva ze zápasu</strong> byla zaznamenána.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Důvod:   NEMOC - Něco na mne leze</p>
+<p>Děkujeme, že dáváte vědět včas.</p>
+<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Omluva pomáhá lépe plánovat sestavu na zápas.</p>
+</body>
+</html>
+]
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:42:08.622054700 with args [PLAYER_EXCUSED, cz.phsoft.hokej.data.entities.PlayerEntity@eeffd24, cz.phsoft.hokej.data.entities.AppUserEntity@335ee3f, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@267e314c]
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=11 returned [EmailContent[subject=[Kopie pro manažera] Omluva ze zápasu potvrzena, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Omluva ze zápasu</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>vaše <strong>omluva ze zápasu</strong> byla zaznamenána.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Důvod:   NEMOC - Něco na mne leze</p>
+<p>Děkujeme, že dáváte vědět včas.</p>
+<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Omluva pomáhá lépe plánovat sestavu na zápas.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:42:08.639054100
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END notifyPlayer - userId=null playerId=11 returned [null] at 2026-01-31T15:42:08.639054100
+2026-01-31 15:42:08 [http-nio-8080-exec-7] INFO  AUDIT_LOGGER - END upsertRegistration - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.MatchRegistrationDTO@11a35161] at 2026-01-31T15:42:08.639054100
+2026-01-31 15:42:08 [task-24] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:42:08.640054500 with args [petrhlista@seznam.cz, [Kopie pro manažera] Omluva ze zápasu potvrzena, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Omluva ze zápasu</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>vaše <strong>omluva ze zápasu</strong> byla zaznamenána.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Důvod:   NEMOC - Něco na mne leze</p>
+<p>Děkujeme, že dáváte vědět včas.</p>
+<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Omluva pomáhá lépe plánovat sestavu na zápas.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:42:09 [task-24] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:42:09.507196800
+2026-01-31 15:42:09 [task-23] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:42:09.598952500
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:27.603438200 with args []
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:27.603438200
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:42:27.616432400 with args []
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:42:27.616432400
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:27.616432400 with args []
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:27.617432400
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START MatchRegistrationServiceImpl.getRegistrationsForPlayer(..) at 2026-01-31T15:42:27.617432400 with args [11]
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:42:27.637434900 with args []
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:42:27.637434900 with args []
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@4c110e32] at 2026-01-31T15:42:27.644435200
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:42:27.644435200
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START CurrentSeasonServiceImpl.getCurrentSeasonIdOrDefault() at 2026-01-31T15:42:27.645435200 with args []
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - START SeasonServiceImpl.getActiveSeasonOrNull() at 2026-01-31T15:42:27.645435200 with args []
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getActiveSeasonOrNull - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.SeasonDTO@561102f4] at 2026-01-31T15:42:27.649437300
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getCurrentSeasonIdOrDefault - userId=null playerId=null returned [2] at 2026-01-31T15:42:27.649437300
+2026-01-31 15:42:27 [http-nio-8080-exec-9] INFO  AUDIT_LOGGER - END getRegistrationsForPlayer - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.MatchRegistrationDTO@7a9ede29, cz.phsoft.hokej.models.dto.MatchRegistrationDTO@639c8efd]] at 2026-01-31T15:42:27.649437300
+2026-01-31 15:42:39 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:39.138133300 with args []
+2026-01-31 15:42:39 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:39.138133300
+2026-01-31 15:42:39 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START MatchRegistrationHistoryServiceImpl.getHistoryForCurrentPlayerAndMatch(..) at 2026-01-31T15:42:39.155136100 with args [30]
+2026-01-31 15:42:39 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:42:39.168133300 with args []
+2026-01-31 15:42:39 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:42:39.169141700
+2026-01-31 15:42:39 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:39.169141700 with args []
+2026-01-31 15:42:39 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:39.169141700
+2026-01-31 15:42:39 [http-nio-8080-exec-10] INFO  AUDIT_LOGGER - END getHistoryForCurrentPlayerAndMatch - userId=null playerId=null returned [[]] at 2026-01-31T15:42:39.174132900
+2026-01-31 15:42:44 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:44.666482400 with args []
+2026-01-31 15:42:44 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:44.666482400
+2026-01-31 15:42:44 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START MatchRegistrationHistoryServiceImpl.getHistoryForCurrentPlayerAndMatch(..) at 2026-01-31T15:42:44.673477800 with args [31]
+2026-01-31 15:42:44 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:42:44.683480500 with args []
+2026-01-31 15:42:44 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:42:44.683480500
+2026-01-31 15:42:44 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:44.683480500 with args []
+2026-01-31 15:42:44 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:44.683480500
+2026-01-31 15:42:44 [http-nio-8080-exec-2] INFO  AUDIT_LOGGER - END getHistoryForCurrentPlayerAndMatch - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO@5487eace, cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO@32e44915]] at 2026-01-31T15:42:44.690487100
+2026-01-31 15:42:52 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:52.629972100 with args []
+2026-01-31 15:42:52 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:52.629972100
+2026-01-31 15:42:52 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START MatchRegistrationHistoryServiceImpl.getHistoryForCurrentPlayerAndMatch(..) at 2026-01-31T15:42:52.638978300 with args [32]
+2026-01-31 15:42:52 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:42:52.643969200 with args []
+2026-01-31 15:42:52 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:42:52.643969200
+2026-01-31 15:42:52 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:42:52.644981100 with args []
+2026-01-31 15:42:52 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:42:52.644981100
+2026-01-31 15:42:52 [http-nio-8080-exec-1] INFO  AUDIT_LOGGER - END getHistoryForCurrentPlayerAndMatch - userId=null playerId=null returned [[cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO@491684cb, cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO@c29696f]] at 2026-01-31T15:42:52.648980400
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:43:11.678152100 with args []
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:43:11.678152100
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.requireCurrentPlayer() at 2026-01-31T15:43:11.705148700 with args []
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END requireCurrentPlayer - userId=null playerId=null returned [null] at 2026-01-31T15:43:11.705148700
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START CurrentPlayerServiceImpl.getCurrentPlayerId() at 2026-01-31T15:43:11.705148700 with args []
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END getCurrentPlayerId - userId=null playerId=null returned [11] at 2026-01-31T15:43:11.705148700
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START MatchRegistrationServiceImpl.upsertRegistration(..) at 2026-01-31T15:43:11.708146100 with args [11, cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest@554227bf]
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START NotificationServiceImpl.notifyPlayer(..) at 2026-01-31T15:43:11.736149800 with args [cz.phsoft.hokej.data.entities.PlayerEntity@79cd7a2b, MATCH_REGISTRATION_CREATED, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@761036a1]
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START NotificationPreferencesServiceImpl.evaluate(..) at 2026-01-31T15:43:11.736149800 with args [cz.phsoft.hokej.data.entities.PlayerEntity@79cd7a2b, MATCH_REGISTRATION_CREATED]
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END evaluate - userId=null playerId=11 returned [cz.phsoft.hokej.models.services.NotificationDecision@2ac916da] at 2026-01-31T15:43:11.741148300
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForPlayer(..) at 2026-01-31T15:43:11.741148300 with args [MATCH_REGISTRATION_CREATED, cz.phsoft.hokej.data.entities.PlayerEntity@79cd7a2b, petrhlista630@gmail.com, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@761036a1]
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END buildForPlayer - userId=null playerId=11 returned [EmailContent[subject=Potvrzení přihlášení na zápas, body=<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Přihlášení na zápas</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>přihlášen</strong> na zápas.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Aktuálně přihlášeno: <strong>1 hráčů</strong> / z 12 míst zbývá 11 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: petrhlista630@gmail.com</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+, html=true]] at 2026-01-31T15:43:11.756151800
+2026-01-31 15:43:11 [task-25] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:43:11.760213600 with args [petrhlista630@gmail.com, Potvrzení přihlášení na zápas, <!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Přihlášení na zápas</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>přihlášen</strong> na zápas.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Aktuálně přihlášeno: <strong>1 hráčů</strong> / z 12 míst zbývá 11 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: petrhlista630@gmail.com</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+]
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - START EmailMessageBuilder.buildForManager(..) at 2026-01-31T15:43:11.819151900 with args [MATCH_REGISTRATION_CREATED, cz.phsoft.hokej.data.entities.PlayerEntity@79cd7a2b, cz.phsoft.hokej.data.entities.AppUserEntity@4821f19c, cz.phsoft.hokej.data.entities.MatchRegistrationEntity@761036a1]
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END buildForManager - userId=null playerId=11 returned [EmailContent[subject=[Kopie pro manažera] Potvrzení přihlášení na zápas, body=<p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Přihlášení na zápas</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>přihlášen</strong> na zápas.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Aktuálně přihlášeno: <strong>1 hráčů</strong> / z 12 míst zbývá 11 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: (neuvedeno)</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+
+, html=true]] at 2026-01-31T15:43:11.830202200
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END notifyPlayer - userId=null playerId=11 returned [null] at 2026-01-31T15:43:11.831145800
+2026-01-31 15:43:11 [http-nio-8080-exec-3] INFO  AUDIT_LOGGER - END upsertRegistration - userId=null playerId=null returned [cz.phsoft.hokej.models.dto.MatchRegistrationDTO@34e7c2f6] at 2026-01-31T15:43:11.832153400
+2026-01-31 15:43:11 [task-26] INFO  AUDIT_LOGGER - START EmailWedosService.sendHtmlEmail(..) at 2026-01-31T15:43:11.836149200 with args [petrhlista@seznam.cz, [Kopie pro manažera] Potvrzení přihlášení na zápas, <p><strong>Zpráva pro manažera – Petr Hlista</strong></p>
+<hr>
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Přihlášení na zápas</title>
+</head>
+<body style="font-family: arial, sans-serif; font-size: 14px; color: #333333;">
+    <p>Dobrý den Petr Hlista,</p>
+    <p>byl jste <strong>přihlášen</strong> na zápas.</p>
+<p><strong>Termín zápasu:</strong> pátek 13.02.2026  18:45</p>
+<p>Aktuálně přihlášeno: <strong>1 hráčů</strong> / z 12 míst zbývá 11 míst</p>
+<p>Hráč: Petr Hlista<br/>
+Email: (neuvedeno)</p>
+<p>Těšíme se na vás.<br/>App Hokej – Stará Garda.</p>
+
+    <hr>
+    <p style="font-size: 12px; color: #777777;">Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.</p>
+</body>
+</html>
+
+]
+2026-01-31 15:43:12 [task-26] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:43:12.678022400
+2026-01-31 15:43:12 [task-25] INFO  AUDIT_LOGGER - END sendHtmlEmail - userId=null playerId=null returned [null] at 2026-01-31T15:43:12.735542700
