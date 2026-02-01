@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -69,6 +70,10 @@ public class AppUserServiceImpl implements AppUserService {
 
     private String buildActivationLink(EmailVerificationTokenEntity token) {
         return baseUrl + "/api/auth/verify?token=" + token.getToken();
+    }
+
+    private String buildResetPasswordlink(ForgottenPasswordResetTokenEntity token) {
+        return baseUrl + "/api/auth/reset-password?token=" + token.getToken();
     }
 
     private final AppUserRepository userRepository;
@@ -320,7 +325,7 @@ public class AppUserServiceImpl implements AppUserService {
         userRepository.save(user);
 
         notifyUser(user, NotificationType.PASSWORD_RESET);
-       }
+    }
 
     /**
      * Deaktivuj uživatelský účet na základě deaktivace Administrátorem.
@@ -362,24 +367,29 @@ public class AppUserServiceImpl implements AppUserService {
         forgottenPasswordResetTokenRepository.deleteByUser(user);
 
         // Vytvoříme nový reset token
-        ForgottenPasswordResetTokenEntity token = new ForgottenPasswordResetTokenEntity();
-        token.setToken(UUID.randomUUID().toString());
-        token.setUser(user);
-        token.setExpiresAt(LocalDateTime.now().plusHours(1));
+        ForgottenPasswordResetTokenEntity forgottenPasswordToken = createResetPasswordToken(user);
 
-        ForgottenPasswordResetTokenEntity savedToken =
-                forgottenPasswordResetTokenRepository.save(token);
+//        ForgottenPasswordResetTokenEntity token = new ForgottenPasswordResetTokenEntity();
+//        token.setToken(UUID.randomUUID().toString());
+//        token.setUser(user);
+//        token.setExpiresAt(LocalDateTime.now().plusHours(1));
+//
+//        ForgottenPasswordResetTokenEntity savedToken =
+//                forgottenPasswordResetTokenRepository.save(token);
 
-        String resetLink = baseUrl + "/forgotten-password/reset?token=" + savedToken.getToken();
+        // ⬅ TADY ZÍSKÁŠ activationLink
+        String resetPasswordlink = buildResetPasswordlink(forgottenPasswordToken);
 
-        log.info("Forgotten password reset link pro {}: {}", user.getEmail(), resetLink);
+        log.info("Odkaz pro reset hesla {}: {}", user.getEmail(), resetPasswordlink);
+
 
         notifyUser(
                 user,
                 NotificationType.FORGOTTEN_PASSWORD_RESET_REQUEST,
-                new ForgottenPasswordResetContext(user, resetLink)
+                new ForgottenPasswordResetContext(user, resetPasswordlink)
         );
     }
+
     @Override
     @Transactional
     public String getForgottenPasswordResetEmail(String token) {
@@ -389,11 +399,12 @@ public class AppUserServiceImpl implements AppUserService {
                         .orElseThrow(() -> new InvalidResetTokenException());
 
         if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new InvalidResetTokenException("Reset token expiroval.");
+            throw new InvalidResetTokenException("BE - Reset token expiroval.");
         }
 
         return resetToken.getUser().getEmail();
     }
+
     @Override
     @Transactional
     public void forgottenPasswordReset(ForgottenPasswordResetDTO dto) {
@@ -409,7 +420,7 @@ public class AppUserServiceImpl implements AppUserService {
                         .orElseThrow(() -> new InvalidResetTokenException());
 
         if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new InvalidResetTokenException("Reset token expiroval.");
+            throw new InvalidResetTokenException("BE - Reset token expiroval.");
         }
 
         AppUserEntity user = resetToken.getUser();
@@ -494,6 +505,18 @@ public class AppUserServiceImpl implements AppUserService {
         token.setExpiresAt(LocalDateTime.now().plusHours(24));
         return tokenRepository.save(token);
     }
+
+    /**
+     * Vytvoří a uloží emailový reset password token.
+     */
+    private ForgottenPasswordResetTokenEntity createResetPasswordToken(AppUserEntity user) {
+        ForgottenPasswordResetTokenEntity token = new ForgottenPasswordResetTokenEntity();
+        token.setToken(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setExpiresAt(LocalDateTime.now().plusHours(1));
+        return forgottenPasswordResetTokenRepository.save(token);
+    }
+
 
     // metody pro notifikaci
     private void notifyUser(AppUserEntity user, NotificationType type) {

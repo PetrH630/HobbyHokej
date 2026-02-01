@@ -6,6 +6,8 @@ import cz.phsoft.hokej.models.dto.ForgottenPasswordResetDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
 import cz.phsoft.hokej.models.services.AppUserService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -30,6 +32,16 @@ import java.util.Map;
 public class AuthController {
 
     private final AppUserService appUserService;
+
+    /**
+     * Base URL frontendové SPA aplikace (React / Vite).
+     * Používá se pro přesměrování při resetu hesla.
+     *
+     * Např.:
+     *   app.frontend-base-url=http://localhost:5173
+     */
+    @Value("${app.frontend-base-url:http://localhost:5173}")
+    private String frontendBaseUrl;
 
     public AuthController(AppUserService appUserService) {
         this.appUserService = appUserService;
@@ -89,6 +101,33 @@ public class AuthController {
 
         return ResponseEntity.ok("Účet byl úspěšně aktivován.");
     }
+
+    /**
+     * Přesměruje uživatele z odkazu v e-mailu na frontendovou stránku
+     * pro nastavení nového hesla.
+     * <p>
+     * Uživatel dostane e-mail s odkazem ve tvaru:
+     *   http://localhost:8080/api/auth/reset-password?token=XYZ
+     * Backend provede redirect (302) na:
+     *   {frontendBaseUrl}/reset-password?token=XYZ
+     * např.
+     *   http://localhost:5173/reset-password?token=XYZ
+     *
+     * Samotné ověření tokenu a změnu hesla pak řeší frontend
+     * přes REST endpointy:
+     *  - GET  /api/auth/forgotten-password/info
+     *  - POST /api/auth/forgotten-password/reset
+     */
+    @GetMapping("/reset-password")
+    public ResponseEntity<Void> redirectResetPassword(@RequestParam String token) {
+        String targetUrl = frontendBaseUrl + "/reset-password?token=" + token;
+
+        return ResponseEntity
+                .status(HttpStatus.FOUND) // 302
+                .header("Location", targetUrl)
+                .build();
+    }
+
     // TODO MOŽNÁ DO APPUSERSETTINGS CONTROLLER
     @PostMapping("/forgotten-password")
     public ResponseEntity<Void> requestForgottenPassword(@RequestBody @Valid EmailDTO dto) {
@@ -108,6 +147,3 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 }
-
-
-
