@@ -3,26 +3,33 @@ package cz.phsoft.hokej.data.enums;
 /**
  * Globální úroveň notifikací pro uživatele.
  *
- * Řeší, kolik toho chce uživatel dostávat
- * napříč všemi svými hráči.
+ * Určuje, v jakém rozsahu budou uživateli doručovány notifikace
+ * napříč všemi jeho hráči, bez ohledu na dílčí nastavení
+ * jednotlivých hráčů.
  */
 public enum GlobalNotificationLevel {
+
     /**
-     * Všechny běžné notifikace (registrace, omluvy,
-     * změny zápasů, zrušení, připomínky...).
+     * Všechny běžné notifikace.
+     *
+     * Zahrnují například registrace, omluvy, změny zápasů,
+     * zrušení, připomínky a další standardní události.
      */
     ALL,
+
     /**
-     * Pouze důležité události – typicky:
-     * - zrušení zápasu,
-     * - změna času/místa zápasu,
-     * - kritické informace.
+     * Pouze důležité události.
+     *
+     * Typicky se jedná o zrušení zápasu, změnu času nebo místa
+     * zápasu a další kritické informace.
      */
     IMPORTANT_ONLY,
+
     /**
      * Uživatel nechce žádné notifikace pro sebe.
-     * Hráči ale stále mohou mít své notifikace
-     * dle vlastního nastavení.
+     *
+     * Nastavení hráčů zůstává zachováno a může být použito
+     * pro doručování notifikací přímo hráčům.
      */
     NONE
 }
