@@ -1,78 +1,82 @@
 package cz.phsoft.hokej.models.dto;
 
 /**
- * DTO pro nastavení uživatele (AppUserSettingsEntity).
+ * DTO pro nastavení uživatele na úrovni aplikačního účtu.
  *
- * Slouží pro přenos dat mezi backendem a frontendem.
+ * Reprezentuje datový model entity AppUserSettingsEntity na úrovni API.
+ * Slouží pro přenos preferencí uživatele mezi backendem a frontendem,
+ * zejména v oblasti výběru hráče, globálních notifikací a uživatelského
+ * rozhraní.
  */
 public class AppUserSettingsDTO {
 
-    // ---- výběr hráče ----
+    // výběr hráče
 
     /**
-     * Způsob automatického výběru hráče.
+     * Způsob automatického výběru hráče po přihlášení.
      *
-     * Hodnoty odpovídají enumu PlayerSelectionMode:
-     * - FIRST_PLAYER
-     * - ALWAYS_CHOOSE
+     * Hodnoty odpovídají enumu PlayerSelectionMode,
+     * například FIRST_PLAYER nebo ALWAYS_CHOOSE.
      */
     private String playerSelectionMode;
 
-    // ---- globální notifikace ----
+    // globální notifikace
 
     /**
      * Globální úroveň notifikací pro uživatele.
      *
-     * Hodnoty odpovídají enumu GlobalNotificationLevel:
-     * - ALL
-     * - IMPORTANT_ONLY
-     * - NONE
+     * Hodnoty odpovídají enumu GlobalNotificationLevel,
+     * například ALL, IMPORTANT_ONLY nebo NONE.
      */
     private String globalNotificationLevel;
 
     /**
-     * Má uživatel dostávat kopie všech notifikací
-     * svých hráčů na svůj email?
+     * Určuje, zda má uživatel dostávat kopie všech notifikací
+     * svých hráčů na svůj email.
      */
     private boolean copyAllPlayerNotificationsToUserEmail;
 
     /**
-     * Má uživatel dostávat notifikace i za hráče,
-     * kteří mají vlastní email?
+     * Určuje, zda má uživatel dostávat notifikace i za hráče,
+     * kteří mají vlastní email.
      */
     private boolean receiveNotificationsForPlayersWithOwnEmail;
 
     /**
-     * Má uživatel preferovat denní souhrn (digest)
-     * místo jednotlivých notifikací?
+     * Určuje, zda je aktivní denní souhrn e-mailů místo
+     * jednotlivých notifikací.
      */
     private boolean emailDigestEnabled;
 
     /**
-     * Čas, kdy má chodit souhrnný email (pokud je digest aktivní).
-     * Reprezentovaný jako String, např. "20:00".
+     * Čas pro odeslání souhrnného e-mailu, pokud je denní digest aktivní.
+     *
+     * Hodnota se zadává jako řetězec, například "20:00".
      */
     private String emailDigestTime;
 
-    // ---- UX / UI ----
+    // UX / UI
 
     /**
-     * Preferovaný jazyk UI (např. "cs", "en").
+     * Preferovaný jazyk uživatelského rozhraní,
+     * například "cs" nebo "en".
      */
     private String uiLanguage;
 
     /**
-     * Časová zóna (např. "Europe/Prague").
+     * Časová zóna uživatele, například "Europe/Prague".
      */
     private String timezone;
 
     /**
      * Výchozí obrazovka po přihlášení.
-     * Např. "DASHBOARD", "MATCHES", "PLAYERS".
+     *
+     * Typicky odpovídá názvu sekce na frontendu,
+     * například "DASHBOARD", "MATCHES" nebo "PLAYERS".
      */
     private String defaultLandingPage;
 
-    // ===== Gettery / settery =====
+    // gettery / settery
 
     public String getPlayerSelectionMode() {
         return playerSelectionMode;

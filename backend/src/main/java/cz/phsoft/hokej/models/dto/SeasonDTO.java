@@ -9,18 +9,17 @@ import java.time.LocalDate;
 /**
  * DTO reprezentující sezónu v aplikaci.
  *
- * Slouží k přenosu informací o sezónách mezi backendem
- * a klientem (správa sezón, výběr aktivní sezóny).
- *
- * Sezóna vymezuje časové období, ve kterém
- * se konají zápasy a ke kterému se vztahují statistiky.
+ * Slouží k přenosu informací o sezónách mezi backendem a klientem,
+ * například při správě sezón nebo výběru aktivní sezóny. Sezóna vymezuje
+ * časové období, ve kterém se konají zápasy a ke kterému se vztahují
+ * statistiky a přehledy.
  */
 public class SeasonDTO {
 
     private Long id;
 
     /**
-     * Název sezóny (např. "2024/2025").
+     * Název sezóny, například "2024/2025".
      */
     @NotBlank(message = "např. 2025/2026")
     private String name;
@@ -34,10 +33,9 @@ public class SeasonDTO {
     private LocalDate endDate;
 
     /**
-     * Určuje, zda je sezóna aktuálně aktivní.
+     * Příznak, zda je sezóna aktuálně aktivní.
      *
-     * V systému může být v daném okamžiku
-     * aktivní maximálně jedna sezóna.
+     * V systému může být v daném okamžiku aktivní nejvýše jedna sezóna.
      */
     private boolean active;
 

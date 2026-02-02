@@ -4,7 +4,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * DTO pro zadání emailu (např. zapomenuté heslo).
+ * DTO pro zadání e-mailové adresy.
+ *
+ * Používá se u jednoduchých formulářů, kde uživatel zadává pouze email,
+ * například při požadavku na reset zapomenutého hesla.
  */
 public class EmailDTO {
 

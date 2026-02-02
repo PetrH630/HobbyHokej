@@ -6,9 +6,9 @@ import cz.phsoft.hokej.data.enums.Team;
 /**
  * Zjednodušené DTO reprezentující hráče.
  *
- * Slouží pro přehledové a seznamové pohledy,
- * kde není potřeba kompletní detail hráče
- * ani jeho stavové či notifikační informace.
+ * Slouží pro přehledové a seznamové pohledy, kde není potřeba kompletní
+ * detail hráče ani jeho stavové a notifikační informace. Typicky se používá
+ * v seznamech hráčů nebo pro rychlé výběry.
  */
 public class PlayerSummaryDTO {
 

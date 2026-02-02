@@ -9,21 +9,20 @@ import jakarta.validation.constraints.Size;
 import java.util.Locale;
 
 /**
- * DTO reprezentující hráče v systému.
+ * DTO, které reprezentuje hráče v systému.
  *
- * Slouží k přenosu dat o hráči mezi backendem a klientem
- * (registrace hráče, správa profilu, přehledy a registrace na zápasy).
- *
- * DTO neobsahuje žádnou perzistentní logiku
- * a je nezávislé na databázové vrstvě.
+ * Slouží k přenosu dat o hráči mezi backendem a klientem při registraci,
+ * správě profilu, přehledech a registracích na zápasy. DTO je nezávislé
+ * na databázové vrstvě a neobsahuje perzistentní logiku. Obsahuje však
+ * jednoduchou odvozenou hodnotu celého jména.
  */
 public class PlayerDTO {
 
     /**
      * ID hráče.
      *
-     * Při vytváření nového hráče může být {@code null},
-     * hodnota je generována serverem.
+     * Při vytváření nového hráče může být hodnota null.
+     * Hodnota se generuje na serveru.
      */
     private Long id;
 
@@ -40,29 +39,28 @@ public class PlayerDTO {
     /**
      * Celé jméno hráče.
      *
-     * Odvozená hodnota složená ze jména a příjmení.
+     * Hodnota se odvozuje z křestního jména a příjmení.
+     * Aktualizuje se při změně jména nebo příjmení.
      */
     private String fullName;
 
     private String phoneNumber;
 
     /**
-     * Typ hráče (např. BASIC, STANDARD, VIP).
+     * Typ hráče, například BASIC, STANDARD nebo VIP.
      *
-     * Pokud není explicitně nastaven,
-     * použije se výchozí hodnota {@link PlayerType#BASIC}.
+     * Pokud není explicitně nastaven, používá se výchozí hodnota BASIC.
      */
     private PlayerType type;
 
     private Team team;
 
     /**
-     * Stav hráče v systému (např. PENDING, APPROVED).
+     * Stav hráče v systému, například PENDING nebo APPROVED.
      *
-     * Pokud není nastaven, použije se výchozí stav {@link PlayerStatus#PENDING}.
+     * Pokud není explicitně nastaven, používá se výchozí stav PENDING.
      */
     private PlayerStatus playerStatus;
-
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
@@ -76,7 +74,7 @@ public class PlayerDTO {
                      String phoneNumber,
                      Team team,
                      PlayerStatus playerStatus
-                  ) {
+    ) {
 
         this.id = id;
         this.name = name;
@@ -122,15 +120,10 @@ public class PlayerDTO {
         this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
     }
 
-
-
-    // ==================================================
-    // INTERNÍ LOGIKA
-    // ==================================================
+    // interní logika
 
     /**
-     * Aktualizuje odvozené pole {@link #fullName}
-     * při změně jména nebo příjmení.
+     * Aktualizuje odvozené pole fullName při změně jména nebo příjmení.
      */
     private void updateFullName() {
         this.fullName = name + " " + surname;

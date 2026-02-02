@@ -6,6 +6,15 @@ import cz.phsoft.hokej.data.enums.Team;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO reprezentující historický záznam o registraci hráče k zápasu.
+ *
+ * Slouží pro auditní a přehledové účely. Obsahuje informace o tom,
+ * jak se registrace v čase měnila, včetně původního časového razítka,
+ * akce, autora změny a stavů registrace.
+ *
+ * Datový model odpovídá záznamu v tabulce historie registrací.
+ */
 public class MatchRegistrationHistoryDTO {
 
     private Long id;

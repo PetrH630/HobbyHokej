@@ -3,9 +3,10 @@ package cz.phsoft.hokej.models.dto;
 /**
  * DTO reprezentující standardizovanou úspěšnou odpověď API.
  *
- * Používá se jako návratová hodnota u operací,
- * které provedly změnu stavu systému
- * (např. vytvoření, aktualizace, smazání, schválení).
+ * Používá se jako návratová hodnota u operací, které provedly změnu
+ * stavu systému, například při vytvoření, aktualizaci, smazání
+ * nebo schválení entity. Umožňuje vrátit textovou zprávu, ID
+ * dotčené entity a čas vzniku odpovědi.
  */
 public class SuccessResponseDTO {
 
@@ -17,13 +18,15 @@ public class SuccessResponseDTO {
     /**
      * ID entity, které se operace týkala.
      *
-     * Může být {@code null}, pokud operace
-     * nemá přímou vazbu na konkrétní entitu.
+     * Může být null, pokud operace nemá přímou vazbu na konkrétní entitu.
      */
     private final Long id;
 
     /**
-     * Čas vytvoření odpovědi (typicky ve formátu ISO-8601).
+     * Čas vytvoření odpovědi.
+     *
+     * Čas se typicky předává ve formátu ISO-8601 a slouží
+     * k ladění nebo zobrazování v logu na frontendu.
      */
     private final String timestamp;
 

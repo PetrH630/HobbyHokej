@@ -7,12 +7,10 @@ import jakarta.validation.constraints.Size;
 /**
  * DTO pro registraci nového uživatele.
  *
- * Slouží k přenosu registračních údajů z klienta
- * do backendu při vytváření nového uživatelského účtu.
- *
- * DTO obsahuje pouze validační pravidla základního formátu dat.
- * Kontrola shody hesel a další business validace
- * jsou řešeny v servisní vrstvě.
+ * Slouží k přenosu registračních údajů z klienta do backendu
+ * při vytváření nového uživatelského účtu. DTO obsahuje základní
+ * validační pravidla pro formát dat. Kontrola shody hesel a další
+ * business validace se provádí v servisní vrstvě.
  */
 public class RegisterUserDTO {
 

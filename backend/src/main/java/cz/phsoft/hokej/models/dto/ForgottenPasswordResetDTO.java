@@ -4,7 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * DTO pro nastavení nového hesla na základě forgotten-password tokenu.
+ * DTO pro nastavení nového hesla na základě resetovacího tokenu.
+ *
+ * Používá se v procesu zapomenutého hesla. Obsahuje token, nové heslo
+ * a jeho potvrzení. Kontrola shody hesel se provádí v servisní vrstvě.
  */
 public class ForgottenPasswordResetDTO {
 
@@ -18,7 +21,8 @@ public class ForgottenPasswordResetDTO {
     @NotBlank(message = "Potvrzení nového hesla je povinné.")
     private String newPasswordConfirm;
 
-    // gettery/settery
+    // gettery / settery
+
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 

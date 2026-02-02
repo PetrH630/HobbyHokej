@@ -13,24 +13,16 @@ import java.time.LocalDateTime;
 /**
  * Přehledové DTO reprezentující zápas v seznamu.
  *
- * Používá se zejména:
- * <ul>
- *     <li>v přehledech nadcházejících a minulých zápasů,</li>
- *     <li>v seznamu zápasů hráče,</li>
- *     <li>na dashboardu nebo úvodních obrazovkách.</li>
- * </ul>
- *
- * Obsahuje zjednodušený pohled na zápas
- * doplněný o kontext přihlášeného hráče
- * a základní agregační informace.
+ * Používá se v přehledech nadcházejících a minulých zápasů, v případech,
+ * kdy stačí zjednodušený pohled na zápas doplněný o agregované informace
+ * a stav aktuálního hráče. Typicky se používá na úvodních obrazovkách,
+ * dashboardu nebo v kartách zápasů.
  */
 public class MatchOverviewDTO implements NumberedMatchDTO {
 
     /**
-     * Pořadové číslo zápasu v sezóně (1..N),
-     * počítané podle data zápasu v rámci dané sezóny.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
+     * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer matchNumber;
@@ -46,13 +38,16 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
 
     /**
      * Základní agregační údaje zápasu.
+     *
+     * Obsahují maximální počet hráčů a aktuální počet přihlášených
+     * hráčů v zápase.
      */
     private int maxPlayers;
     private int inGamePlayers;
 
     /**
      * Cena přepočtená na jednoho přihlášeného hráče.
-     * Hodnota je počítána serverem.
+     * Hodnota se počítá na serveru.
      */
     private double pricePerRegisteredPlayer;
 
@@ -72,15 +67,12 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
 
     /**
      * ID sezóny, do které zápas patří.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
-    // ================
     // gettery / settery
-    // ================
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -122,9 +114,7 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     public Long getSeasonId() { return seasonId; }
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
 
-    // ================
     // NumberedMatchDTO
-    // ================
 
     @Override
     public void setMatchNumber(Integer matchNumber) {

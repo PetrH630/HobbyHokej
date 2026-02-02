@@ -6,18 +6,12 @@ import jakarta.validation.constraints.Size;
 /**
  * DTO pro změnu hesla přihlášeného uživatele.
  *
- * Používá se při:
- * <ul>
- *     <li>změně hesla z uživatelského profilu,</li>
- *     <li>ověření původního hesla před nastavením nového.</li>
- * </ul>
+ * Používá se při změně hesla z uživatelského profilu, kde je potřeba
+ * ověřit původní heslo a nastavit nové. DTO obsahuje staré heslo,
+ * nové heslo a jeho potvrzení. Kontrola shody nového hesla a potvrzení
+ * se provádí v servisní vrstvě.
  *
- * Validace:
- * <ul>
- *     <li>všechna pole jsou povinná,</li>
- *     <li>nové heslo musí splňovat minimální délku,</li>
- *     <li>shoda nového hesla a potvrzení se kontroluje v servisní vrstvě.</li>
- * </ul>
+ * Všechna pole jsou povinná a nové heslo musí splňovat minimální délku.
  */
 public class ChangePasswordDTO {
 

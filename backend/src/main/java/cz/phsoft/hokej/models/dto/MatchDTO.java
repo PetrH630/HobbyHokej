@@ -13,23 +13,22 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 /**
- * DTO reprezentující zápas.
- * <p>
- * Slouží k přenosu dat o zápasech mezi backendem
- * a klientem (vytváření, editace, přehledy).
- * <p>
- * Neobsahuje žádnou business logiku ani vazby na entity.
+ * DTO, které reprezentuje základní informace o zápasu.
+ *
+ * Slouží k přenosu dat o zápasech mezi backendem a klientem,
+ * například při vytváření a editaci zápasů nebo v administrativních
+ * přehledech. DTO neobsahuje business logiku ani vazby na entity
+ * a slouží pouze jako transportní objekt.
  */
 public class MatchDTO implements NumberedMatchDTO {
 
     /**
-     * Pořadové číslo zápasu v sezóně (1..N),
-     * počítané podle data zápasu v rámci dané sezóny.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
+     * Hodnota se nastavuje pouze na serveru a na klienta se vrací jako
+     * read-only údaj.
      */
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)    // – klient to nesmí posílat
-    private Integer matchNumber;                           
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Integer matchNumber;
 
     private Long id;
 
@@ -54,28 +53,25 @@ public class MatchDTO implements NumberedMatchDTO {
     private Integer price;
 
     /**
-     * Aktuální stav zápasu (např. aktivní, zrušený).
+     * Aktuální stav zápasu, například plánovaný, zrušený nebo odehraný.
      */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
     /**
-     * Důvod zrušení zápasu, pokud byl zrušen.
+     * Důvod zrušení zápasu, pokud byl zápas zrušen.
      */
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
 
     /**
      * ID sezóny, do které zápas patří.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
-    // ================
     // gettery / settery
-    // ================
 
     public Long getId() { return id; }
 
@@ -113,9 +109,7 @@ public class MatchDTO implements NumberedMatchDTO {
 
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
 
-    // ================
     // NumberedMatchDTO
-    // ================
 
     @Override
     public void setMatchNumber(Integer matchNumber) {

@@ -8,10 +8,11 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 
 /**
- * DTO reprezentující uživatelský účet aplikace.
+ * DTO, které reprezentuje uživatelský účet aplikace.
  *
- * Slouží k přenosu uživatelských dat mezi backendem
- * a klientem (např. při správě uživatelů nebo přihlášení).
+ * Slouží k přenosu uživatelských dat mezi backendem a klientem.
+ * Používá se například při správě uživatelů, zobrazení profilu
+ * nebo při přihlášení a načítání základních informací o účtu.
  */
 public class AppUserDTO {
 
@@ -26,7 +27,7 @@ public class AppUserDTO {
     private String surname;
 
     /**
-     * Email uživatele sloužící jako přihlašovací identifikátor.
+     * Email uživatele, který se používá jako přihlašovací identifikátor.
      */
     @NotBlank(message = "Email je povinný.")
     @Email(message = "Email není ve správném formátu.")
@@ -34,19 +35,24 @@ public class AppUserDTO {
 
     /**
      * Role uživatele v systému.
+     *
+     * Ovlivňuje oprávnění k jednotlivým endpointům a funkcím.
      */
     private Role role;
 
     /**
-     * Příznak aktivace uživatelského účtu.
+     * Příznak, zda je uživatelský účet aktivní.
+     *
+     * Neaktivní účet se nemůže přihlásit do aplikace.
      */
     private boolean enabled;
 
     /**
      * Hráči přiřazení k uživateli.
      *
-     * Jedná se o jednostranný vztah používaný
-     * pouze pro prezentační účely.
+     * Jedná se o datový pohled využívaný pro prezentační účely
+     * na straně klienta. DTO nenese zodpovědnost za správu tohoto
+     * vztahu v databázi.
      */
     private Set<PlayerDTO> players;
 

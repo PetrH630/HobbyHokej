@@ -7,9 +7,8 @@ import java.time.LocalDateTime;
 /**
  * DTO reprezentující období neaktivity hráče.
  *
- * Používá se k přenosu informací o časovém intervalu,
- * ve kterém hráč není k dispozici pro zápasy
- * (např. zranění, dlouhodobá absence).
+ * Slouží k přenosu informací o časovém intervalu, ve kterém se hráč
+ * neúčastní zápasů, například z důvodu zranění nebo dlouhodobé absence.
  */
 public class PlayerInactivityPeriodDTO {
 

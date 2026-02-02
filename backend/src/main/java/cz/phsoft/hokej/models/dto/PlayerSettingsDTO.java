@@ -1,23 +1,25 @@
 package cz.phsoft.hokej.models.dto;
 
 /**
- * DTO pro nastavení hráče (PlayerSettingsEntity).
+ * DTO pro nastavení hráče na úrovni PlayerSettingsEntity.
  *
- * Slouží pro přenos dat mezi backendem a frontendem.
+ * Slouží k přenosu preferencí hráče mezi backendem a frontendem,
+ * zejména v oblasti kontaktních údajů a notifikačních kanálů.
+ * DTO se používá jak pro zobrazení nastavení, tak pro jejich aktualizaci.
  */
 public class PlayerSettingsDTO {
 
-    // KONTAKT
+    // kontaktní údaje
 
     private String contactEmail;
     private String contactPhone;
 
-    // KANÁLY
+    // kanály
 
     private boolean emailEnabled;
     private boolean smsEnabled;
 
-    // TYPY NOTIFIKACÍ
+    // typy notifikací
 
     private boolean notifyOnRegistration;
     private boolean notifyOnExcuse;
@@ -25,12 +27,12 @@ public class PlayerSettingsDTO {
     private boolean notifyOnMatchCancel;
     private boolean notifyOnPayment;
 
-    // PŘIPOMÍNKY
+    // připomínky
 
     private boolean notifyReminders;
     private Integer reminderHoursBefore;
 
-    // ===== GETTERY / SETTERY =====
+    // gettery / settery
 
     public String getContactEmail() {
         return contactEmail;

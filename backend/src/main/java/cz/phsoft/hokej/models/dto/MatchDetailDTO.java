@@ -11,32 +11,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Detailní DTO reprezentující zápas včetně
- * kontextu přihlášeného hráče a agregovaných statistik.
+ * Detailní DTO reprezentující jeden zápas včetně kontextu hráče
+ * a agregovaných statistik.
  *
- * Používá se zejména:
- * <ul>
- *     <li>na stránce detailu zápasu,</li>
- *     <li>pro zobrazení seznamů hráčů dle stavu registrace,</li>
- *     <li>pro zobrazení kapacity, ceny a stavu účasti.</li>
- * </ul>
- *
- * DTO obsahuje jak:
- * <ul>
- *     <li>základní informace o zápasu,</li>
- *     <li>agregované hodnoty (počty hráčů, ceny),</li>
- *     <li>stav přihlášeného hráče k danému zápasu.</li>
- * </ul>
+ * Používá se zejména na stránce detailu zápasu, pro zobrazení
+ * seznamů hráčů podle stavu registrace, pro zobrazení kapacity,
+ * ceny a aktuální účasti. Kromě základních informací o zápasu
+ * obsahuje i stav přihlášeného hráče a rozdělené seznamy hráčů
+ * podle jednotlivých kategorií účasti.
  */
 public class MatchDetailDTO implements NumberedMatchDTO {
 
     /**
-     * Pořadové číslo zápasu v sezóně (1..N),
-     * počítané podle data v rámci dané sezóny.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
+     * Hodnota se nastavuje pouze na serveru a na klienta se vrací jako
+     * read-only údaj.
      */
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)   // klient to neposílá
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer matchNumber;
 
     private Long id;
@@ -50,6 +41,10 @@ public class MatchDetailDTO implements NumberedMatchDTO {
 
     /**
      * Kapacitní a agregační údaje zápasu.
+     *
+     * Obsahují například maximální počet hráčů, počet přihlášených hráčů
+     * celkově a v jednotlivých týmech, počet náhradníků a počet hráčů
+     * v různých stavech účasti.
      */
     private int maxPlayers;
     private int inGamePlayers;
@@ -64,7 +59,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
 
     /**
      * Cena přepočtená na jednoho přihlášeného hráče.
-     * Hodnota je počítána serverem.
+     * Hodnota se počítá na serveru podle aktuálního stavu registrací.
      */
     private double pricePerRegisteredPlayer;
 
@@ -74,25 +69,30 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private PlayerMatchStatus playerMatchStatus;
 
     /**
-     * Informace o omluvě přihlášeného hráče (pokud existuje).
+     * Informace o omluvě přihlášeného hráče, pokud je k dispozici.
      */
     private ExcuseReason excuseReason;
     private String excuseNote;
 
     /**
-     * Stav zápasu a případný důvod zrušení.
+     * Stav zápasu a případný důvod jeho zrušení.
      */
     private MatchStatus matchStatus;
     private MatchCancelReason cancelReason;
 
     /**
-     * ID sezóny – pouze pro čtení.
+     * ID sezóny, do které zápas patří.
+     * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
     /**
      * Seznamy hráčů rozdělené podle stavu registrace.
+     *
+     * Seznamy se používají pro přehledné zobrazení v uživatelském rozhraní,
+     * například pro zvýraznění přihlášených hráčů, náhradníků nebo
+     * neomluvených hráčů.
      */
     private List<PlayerDTO> registeredPlayers;
     private List<PlayerDTO> reservedPlayers;
@@ -102,9 +102,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private List<PlayerDTO> noExcusedPlayers;
     private List<PlayerDTO> noResponsePlayers;
 
-    // ================
     // gettery / settery
-    // ================
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -211,9 +209,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
         this.noResponsePlayers = noResponsePlayers;
     }
 
-    // ================
     // NumberedMatchDTO
-    // ================
 
     @Override
     public void setMatchNumber(Integer matchNumber) {

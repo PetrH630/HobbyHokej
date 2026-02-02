@@ -3,46 +3,40 @@ package cz.phsoft.hokej.models.dto.requests;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Request DTO pro změnu přiřazeného uživatele k hráči.
- * <p>
- * Slouží jako vstupní objekt pro administrátorské endpointy,
- * které umožňují změnit vazbu mezi hráčem a aplikačním uživatelem.
- * </p>
+ * Request DTO používané pro změnu přiřazení hráče k aplikačnímu uživateli.
  *
- * Typické použití:
- * <ul>
- *     <li>oprava chybně přiřazeného uživatelského účtu k hráči,</li>
- *     <li>převod hráče pod jiný účet,</li>
- *     <li>technické nebo datové korekce prováděné administrátorem.</li>
- * </ul>
+ * Slouží jako vstupní objekt pro administrátorské endpointy, které umožňují
+ * změnit vazbu mezi entitou hráče a aplikačním uživatelským účtem.
+ * Používá se například při opravě chybného přiřazení nebo při převodu
+ * hráče pod jiný uživatelský účet.
  *
- * Validace:
- * <ul>
- *     <li>{@link NotNull} – ID nového uživatele musí být vždy uvedeno.</li>
- * </ul>
- *
- * Třída neobsahuje žádnou business logiku – slouží výhradně
- * jako přenosový objekt mezi klientem a API vrstvou.
+ * Třída je určena výhradně pro přenos dat z klienta do API vrstvy
+ * a neobsahuje žádnou business logiku ani validační rozhodování
+ * nad rámec základních validačních anotací.
  */
 public class ChangePlayerUserRequest {
 
     /**
-     * ID nového uživatele, ke kterému má být hráč přiřazen.
+     * ID uživatele, ke kterému má být hráč nově přiřazen.
+     *
+     * Hodnota je povinná a musí odpovídat existujícímu uživatelskému
+     * účtu v systému. Samotná kontrola existence uživatele se provádí
+     * v servisní vrstvě.
      */
     @NotNull
     private Long newUserId;
 
     /**
-     * Vrátí ID nového uživatele.
+     * Vrací ID nového uživatele.
      *
-     * @return ID uživatele
+     * @return ID uživatele, ke kterému má být hráč přiřazen
      */
     public Long getNewUserId() {
         return newUserId;
     }
 
     /**
-     * Nastaví ID nového uživatele.
+     * Nastavuje ID nového uživatele.
      *
      * @param newUserId ID uživatele, ke kterému má být hráč přiřazen
      */

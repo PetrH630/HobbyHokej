@@ -7,25 +7,19 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 /**
- * DTO reprezentující registraci hráče k zápasu.
+ * DTO, které reprezentuje registraci hráče k zápasu.
  *
- * Slouží k přenosu informací o stavu účasti hráče
- * na konkrétním zápasu mezi backendem a klientem.
- *
- * Používá se zejména:
- * <ul>
- *     <li>při registraci / odhlášení / omluvě hráče,</li>
- *     <li>v přehledech registrací zápasu,</li>
- *     <li>v administraci účasti hráčů.</li>
- * </ul>
+ * Slouží k přenosu informací o stavu účasti hráče na konkrétním zápase
+ * mezi backendem a klientem. Používá se při registraci, odhlášení,
+ * omluvě hráče, v přehledech registrací a v administraci účasti.
  */
 public class MatchRegistrationDTO {
 
     /**
      * ID registrace.
      *
-     * Vyplněno při načítání dat (GET),
-     * při vytváření nové registrace může být {@code null}.
+     * Při vytváření nové registrace může být hodnota null.
+     * Hodnota se generuje na serveru.
      */
     private Long id;
 
@@ -43,30 +37,37 @@ public class MatchRegistrationDTO {
     private PlayerMatchStatus status;
 
     /**
-     * Důvod omluvy – vyplněn pouze pokud je
-     * {@link #status} nastaven na {@code EXCUSED}.
+     * Důvod omluvy, pokud je registrace ve stavu omluvené účasti.
      */
     private ExcuseReason excuseReason;
 
+    /**
+     * Textová poznámka k omluvě zadaná hráčem.
+     */
     private String excuseNote;
+
+    /**
+     * Interní poznámka administrátora k dané registraci.
+     */
     private String adminNote;
+
+    /**
+     * Tým, do kterého je hráč přiřazen v daném zápase.
+     */
     private Team team;
 
     /**
      * Informace o původu registrace.
      *
-     * Typické hodnoty:
-     * <ul>
-     *     <li>{@code "user"} – akce provedená hráčem,</li>
-     *     <li>{@code "system"} – automatická změna systémem.</li>
-     * </ul>
+     * Typicky se používají hodnoty jako "user" pro akce hráče
+     * a "system" pro automatické změny provedené systémem.
      */
     @NotNull
     private String createdBy;
 
     /**
-     * Detail hráče – používá se pro prezentační účely
-     * v přehledech registrací.
+     * Detail hráče. Používá se pro prezentační účely v přehledech
+     * registrací, aby nebylo nutné dělat další dotazy na hráče.
      */
     private PlayerDTO playerDTO;
 
