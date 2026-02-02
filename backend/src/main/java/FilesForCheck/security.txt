@@ -18,92 +18,92 @@ package cz.phsoft.hokej.security;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 
 /**
- * Thread-local kontext pro â€žaktuĂˇlnĂ­ho hrĂˇÄŤeâ€ś.
+ * Thread-local kontext pro „aktuálního hráče“.
  *
- * SlouĹľĂ­ k uchovĂˇnĂ­ instance {@link PlayerEntity},
- * kterĂˇ je zvolenĂˇ jako â€žcurrent playerâ€ś
- * v rĂˇmci jednoho konkrĂ©tnĂ­ho HTTP requestu.
+ * Slouží k uchování instance {@link PlayerEntity},
+ * která je zvolená jako „current player“
+ * v rámci jednoho konkrétního HTTP requestu.
  *
  * -------------------------------------------------
- * Ĺ˝IVOTNĂŤ CYKLUS
+ * ŽIVOTNÍ CYKLUS
  * -------------------------------------------------
  * <ul>
- *     <li>naplnÄ›n v {@code CurrentPlayerFilter} na zaÄŤĂˇtku requestu,</li>
- *     <li>dostupnĂ˝ v celĂ©m call stacku
- *         (controller â†’ service â†’ helper),</li>
- *     <li>vyÄŤiĹˇtÄ›n po dokonÄŤenĂ­ requestu.</li>
+ *     <li>naplněn v {@code CurrentPlayerFilter} na začátku requestu,</li>
+ *     <li>dostupný v celém call stacku
+ *         (controller → service → helper),</li>
+ *     <li>vyčištěn po dokončení requestu.</li>
  * </ul>
  *
  * -------------------------------------------------
- * PROÄŚ THREADLOCAL
+ * PROČ THREADLOCAL
  * -------------------------------------------------
- * Spring obsluhuje HTTP requesty paralelnÄ› ve vlĂˇknech.
- * {@link ThreadLocal} zajiĹˇĹĄuje, Ĺľe:
+ * Spring obsluhuje HTTP requesty paralelně ve vláknech.
+ * {@link ThreadLocal} zajišťuje, že:
  * <ul>
- *     <li>kaĹľdĂ˝ request mĂˇ vlastnĂ­ instanci {@code PlayerEntity},</li>
- *     <li>nedochĂˇzĂ­ ke sdĂ­lenĂ­ dat mezi uĹľivateli,</li>
- *     <li>nenĂ­ nutnĂ© pĹ™edĂˇvat hrĂˇÄŤe pĹ™es vĹˇechny metody.</li>
+ *     <li>každý request má vlastní instanci {@code PlayerEntity},</li>
+ *     <li>nedochází ke sdílení dat mezi uživateli,</li>
+ *     <li>není nutné předávat hráče přes všechny metody.</li>
  * </ul>
  *
  * -------------------------------------------------
- * DĹ®LEĹ˝ITĂ‰
+ * DŮLEŽITÉ
  * -------------------------------------------------
- * {@link ThreadLocal} MUSĂŤ bĂ˝t vĹľdy vyÄŤiĹˇtÄ›n pomocĂ­ {@link #clear()},
- * jinak hrozĂ­:
+ * {@link ThreadLocal} MUSÍ být vždy vyčištěn pomocí {@link #clear()},
+ * jinak hrozí:
  * <ul>
- *     <li>memory leak v aplikaÄŤnĂ­m serveru,</li>
- *     <li>Ăşnik dat mezi jednotlivĂ˝mi requesty.</li>
+ *     <li>memory leak v aplikačním serveru,</li>
+ *     <li>únik dat mezi jednotlivými requesty.</li>
  * </ul>
  */
 public final class CurrentPlayerContext {
 
     /**
-     * ThreadLocal uchovĂˇvajĂ­cĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe
-     * pro prĂˇvÄ› zpracovĂˇvanĂ˝ request.
+     * ThreadLocal uchovávající aktuálního hráče
+     * pro právě zpracovávaný request.
      */
     private static final ThreadLocal<PlayerEntity> currentPlayer = new ThreadLocal<>();
 
     private CurrentPlayerContext() {
-        // utility class â€“ nelze instancovat
+        // utility class – nelze instancovat
     }
 
     /**
-     * NastavĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe do thread-local kontextu.
+     * Nastaví aktuálního hráče do thread-local kontextu.
      *
-     * VolĂˇ se typicky:
+     * Volá se typicky:
      * <ul>
-     *     <li>na zaÄŤĂˇtku requestu ve {@code CurrentPlayerFilter}.</li>
+     *     <li>na začátku requestu ve {@code CurrentPlayerFilter}.</li>
      * </ul>
      *
-     * @param player hrĂˇÄŤ zvolenĂ˝ jako aktuĂˇlnĂ­ pro danĂ˝ request
+     * @param player hráč zvolený jako aktuální pro daný request
      */
     public static void set(PlayerEntity player) {
         currentPlayer.set(player);
     }
 
     /**
-     * VrĂˇtĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe pro prĂˇvÄ› zpracovĂˇvanĂ˝ request.
+     * Vrátí aktuálního hráče pro právě zpracovávaný request.
      *
      * @return {@link PlayerEntity} nebo {@code null},
-     *         pokud hrĂˇÄŤ nebyl zvolen nebo request
-     *         nevyĹľaduje kontext hrĂˇÄŤe
+     *         pokud hráč nebyl zvolen nebo request
+     *         nevyžaduje kontext hráče
      */
     public static PlayerEntity get() {
         return currentPlayer.get();
     }
 
     /**
-     * VyÄŤistĂ­ thread-local kontext.
+     * Vyčistí thread-local kontext.
      *
-     * MUSĂŤ se volat:
+     * MUSÍ se volat:
      * <ul>
-     *     <li>vĹľdy po dokonÄŤenĂ­ requestu (typicky ve {@code finally} bloku filtru).</li>
+     *     <li>vždy po dokončení requestu (typicky ve {@code finally} bloku filtru).</li>
      * </ul>
      *
-     * PouĹľitĂ­ {@link ThreadLocal#remove()}:
+     * Použití {@link ThreadLocal#remove()}:
      * <ul>
-     *     <li>uvolnĂ­ referenci na {@link PlayerEntity},</li>
-     *     <li>zabrĂˇnĂ­ memory leakĹŻm pĹ™i reuse vlĂˇken.</li>
+     *     <li>uvolní referenci na {@link PlayerEntity},</li>
+     *     <li>zabrání memory leakům při reuse vláken.</li>
      * </ul>
      */
     public static void clear() {
@@ -131,39 +131,39 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Security / request filtr pro prĂˇci s â€žaktuĂˇlnĂ­m hrĂˇÄŤemâ€ś.
+ * Security / request filtr pro práci s „aktuálním hráčem“.
  *
- * ĂšÄŚEL:
+ * ÚČEL:
  * ------
- * Zajistit, aby byl v prĹŻbÄ›hu zpracovĂˇnĂ­ jednoho HTTP requestu
+ * Zajistit, aby byl v průběhu zpracování jednoho HTTP requestu
  * v thread-local kontextu ({@link CurrentPlayerContext})
- * dostupnĂ˝ hrĂˇÄŤ, kterĂ©ho si uĹľivatel vybral jako â€žcurrent playerâ€ś.
+ * dostupný hráč, kterého si uživatel vybral jako „current player“.
  *
- * DĹ®VOD EXISTENCE:
+ * DŮVOD EXISTENCE:
  * ----------------
  * <ul>
- *     <li>uĹľivatelskĂ˝ ĂşÄŤet ({@code AppUser}) mĹŻĹľe mĂ­t vĂ­ce hrĂˇÄŤĹŻ ({@code Player}),</li>
- *     <li>FE si zvolĂ­, kterĂ˝ hrĂˇÄŤ je prĂˇvÄ› aktivnĂ­,</li>
- *     <li>backend potĹ™ebuje mĂ­t v prĹŻbÄ›hu requestu pohodlnÄ› dostupnĂ©ho hrĂˇÄŤe
- *         bez nutnosti pracovat pĹ™Ă­mo s {@code HttpSession} v kaĹľdĂ© vrstvÄ›.</li>
+ *     <li>uživatelský účet ({@code AppUser}) může mít více hráčů ({@code Player}),</li>
+ *     <li>FE si zvolí, který hráč je právě aktivní,</li>
+ *     <li>backend potřebuje mít v průběhu requestu pohodlně dostupného hráče
+ *         bez nutnosti pracovat přímo s {@code HttpSession} v každé vrstvě.</li>
  * </ul>
  *
- * CHOVĂNĂŤ:
+ * CHOVÁNÍ:
  * --------
  * <ol>
- *     <li>zĂ­skĂˇ ID aktuĂˇlnĂ­ho hrĂˇÄŤe ze session pĹ™es {@link CurrentPlayerService},</li>
- *     <li>ovÄ›Ĺ™Ă­ existenci hrĂˇÄŤe v DB pĹ™es {@link PlayerRepository},</li>
- *     <li>uloĹľĂ­ {@code PlayerEntity} do {@link CurrentPlayerContext} (ThreadLocal),</li>
- *     <li>pĹ™edĂˇ Ĺ™Ă­zenĂ­ dĂˇl ve filter chainu,</li>
- *     <li>po dokonÄŤenĂ­ requestu vĹľdy kontext vyÄŤistĂ­.</li>
+ *     <li>získá ID aktuálního hráče ze session přes {@link CurrentPlayerService},</li>
+ *     <li>ověří existenci hráče v DB přes {@link PlayerRepository},</li>
+ *     <li>uloží {@code PlayerEntity} do {@link CurrentPlayerContext} (ThreadLocal),</li>
+ *     <li>předá řízení dál ve filter chainu,</li>
+ *     <li>po dokončení requestu vždy kontext vyčistí.</li>
  * </ol>
  *
  * THREAD-SAFETY:
  * --------------
  * <ul>
- *     <li>vyuĹľĂ­vĂˇ {@link ThreadLocal} â€“ kaĹľdĂ˝ request mĂˇ vlastnĂ­ kontext,</li>
- *     <li>v {@code finally} bloku se vĹľdy volĂˇ {@link CurrentPlayerContext#clear()},</li>
- *     <li>tĂ­m se pĹ™edchĂˇzĂ­ memory leakĹŻm a pĹ™enosu dat mezi requesty.</li>
+ *     <li>využívá {@link ThreadLocal} – každý request má vlastní kontext,</li>
+ *     <li>v {@code finally} bloku se vždy volá {@link CurrentPlayerContext#clear()},</li>
+ *     <li>tím se předchází memory leakům a přenosu dat mezi requesty.</li>
  * </ul>
  */
 @Component
@@ -179,16 +179,16 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
     }
 
     /**
-     * HlavnĂ­ filtraÄŤnĂ­ metoda â€“ volĂˇ se jednou pro kaĹľdĂ˝ HTTP request.
+     * Hlavní filtrační metoda – volá se jednou pro každý HTTP request.
      *
      * Postup:
      * <ol>
-     *     <li>naÄŤte {@code currentPlayerId} ze session
-     *         pomocĂ­ {@link CurrentPlayerService#getCurrentPlayerId()},</li>
-     *     <li>pokud ID existuje, ovÄ›Ĺ™Ă­ pĹ™Ă­tomnost hrĂˇÄŤe v databĂˇzi,</li>
-     *     <li>pokud je hrĂˇÄŤ nalezen, uloĹľĂ­ ho do {@link CurrentPlayerContext},</li>
-     *     <li>pokraÄŤuje ve filter chainu,</li>
-     *     <li>vĹľdy v {@code finally} bloku vyÄŤistĂ­ thread-local kontext.</li>
+     *     <li>načte {@code currentPlayerId} ze session
+     *         pomocí {@link CurrentPlayerService#getCurrentPlayerId()},</li>
+     *     <li>pokud ID existuje, ověří přítomnost hráče v databázi,</li>
+     *     <li>pokud je hráč nalezen, uloží ho do {@link CurrentPlayerContext},</li>
+     *     <li>pokračuje ve filter chainu,</li>
+     *     <li>vždy v {@code finally} bloku vyčistí thread-local kontext.</li>
      * </ol>
      */
     @Override
@@ -197,20 +197,20 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // ID aktuĂˇlnĂ­ho hrĂˇÄŤe uloĹľenĂ© v HTTP session
+        // ID aktuálního hráče uložené v HTTP session
         Long playerId = currentPlayerService.getCurrentPlayerId();
 
         if (playerId != null) {
-            // bezpeÄŤnostnĂ­ kontrola â€“ hrĂˇÄŤ musĂ­ existovat v DB
+            // bezpečnostní kontrola – hráč musí existovat v DB
             playerRepository.findById(playerId)
                     .ifPresent(CurrentPlayerContext::set);
         }
 
         try {
-            // pokraÄŤovĂˇnĂ­ ve zpracovĂˇnĂ­ requestu
+            // pokračování ve zpracování requestu
             filterChain.doFilter(request, response);
         } finally {
-            // dĹŻleĹľitĂ©: vĹľdy vyÄŤistit ThreadLocal kontext
+            // důležité: vždy vyčistit ThreadLocal kontext
             CurrentPlayerContext.clear();
         }
     }
@@ -233,14 +233,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 /**
- * BezpeÄŤnostnĂ­ helper pro kontrolu vlastnictvĂ­ hrĂˇÄŤe.
+ * Bezpečnostní helper pro kontrolu vlastnictví hráče.
  *
- * ĂšÄŚEL:
+ * ÚČEL:
  * -----
  * Poskytuje metody pro jemnozrnnou autorizaci nad entitou {@link PlayerEntity},
- * typicky ve SpEL vĂ˝razech v anotacĂ­ch jako {@code @PreAuthorize}.
+ * typicky ve SpEL výrazech v anotacích jako {@code @PreAuthorize}.
  *
- * TypickĂ© pouĹľitĂ­:
+ * Typické použití:
  * <pre>
  * {@code
  * @PreAuthorize("@playerSecurity.isOwner(authentication, #playerId)")
@@ -248,13 +248,13 @@ import org.springframework.stereotype.Component;
  * }
  * </pre>
  *
- * PoznĂˇmka:
+ * Poznámka:
  * ---------
- * V aktuĂˇlnĂ­ verzi vyuĹľĂ­vĂˇm hlavnÄ› endpointy typu {@code /me}
- * a {@link CurrentPlayerContext}, ale tato tĹ™Ă­da je pĹ™ipravena
- * pro pĹ™Ă­padnĂ© rozĹˇĂ­Ĺ™enĂ­ autorizace na Ăşrovni konkrĂ©tnĂ­ch hrĂˇÄŤĹŻ.
+ * V aktuální verzi využívám hlavně endpointy typu {@code /me}
+ * a {@link CurrentPlayerContext}, ale tato třída je připravena
+ * pro případné rozšíření autorizace na úrovni konkrétních hráčů.
  */
-@Component("playerSecurity") // nĂˇzev beany pro pouĹľitĂ­ ve SpEL vĂ˝razech
+@Component("playerSecurity") // název beany pro použití ve SpEL výrazech
 public class PlayerSecurity {
 
     private static final Logger logger =
@@ -267,34 +267,34 @@ public class PlayerSecurity {
     }
 
     /**
-     * OvÄ›Ĺ™Ă­, zda je aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel vlastnĂ­kem danĂ©ho hrĂˇÄŤe.
+     * Ověří, zda je aktuálně přihlášený uživatel vlastníkem daného hráče.
      *
      * LOGIKA:
      * -------
      * <ol>
-     *     <li>ovÄ›Ĺ™Ă­ existenci autentizace a jejĂ­ platnost,</li>
-     *     <li>ovÄ›Ĺ™Ă­, Ĺľe {@code principal} je typu {@link UserDetails},</li>
-     *     <li>naÄŤte hrĂˇÄŤe z DB podle {@code playerId},</li>
-     *     <li>porovnĂˇ email pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele (username)
-     *         s emailem uĹľivatele pĹ™iĹ™azenĂ©ho k hrĂˇÄŤi.</li>
+     *     <li>ověří existenci autentizace a její platnost,</li>
+     *     <li>ověří, že {@code principal} je typu {@link UserDetails},</li>
+     *     <li>načte hráče z DB podle {@code playerId},</li>
+     *     <li>porovná email přihlášeného uživatele (username)
+     *         s emailem uživatele přiřazeného k hráči.</li>
      * </ol>
      *
-     * BEZPEÄŚNOSTNĂŤ PRAVIDLO:
+     * BEZPEČNOSTNÍ PRAVIDLO:
      * ----------------------
-     * JakĂˇkoli chyba nebo nesrovnalost â†’ pĹ™Ă­stup je zamĂ­tnut
-     * (metoda vĹľdy vracĂ­ {@code false}, nikdy nevyhazuje vĂ˝jimku).
+     * Jakákoli chyba nebo nesrovnalost → přístup je zamítnut
+     * (metoda vždy vrací {@code false}, nikdy nevyhazuje výjimku).
      *
-     * @param authentication aktuĂˇlnĂ­ {@link Authentication} objekt
-     * @param playerId       ID hrĂˇÄŤe, ke kterĂ©mu se mĂˇ ovÄ›Ĺ™it vlastnictvĂ­
-     * @return {@code true}, pokud je uĹľivatel vlastnĂ­kem hrĂˇÄŤe; jinak {@code false}
+     * @param authentication aktuální {@link Authentication} objekt
+     * @param playerId       ID hráče, ke kterému se má ověřit vlastnictví
+     * @return {@code true}, pokud je uživatel vlastníkem hráče; jinak {@code false}
      */
     public boolean isOwner(Authentication authentication, Long playerId) {
 
         try {
-            // 1) zĂˇkladnĂ­ kontrola autentizace
+            // 1) základní kontrola autentizace
             if (authentication == null || !authentication.isAuthenticated()) {
                 logger.warn(
-                        "NeautorizovanĂ˝ pĹ™Ă­stup: ĹľĂˇdnĂˇ autentizace pro playerId {}",
+                        "Neautorizovaný přístup: žádná autentizace pro playerId {}",
                         playerId
                 );
                 return false;
@@ -304,13 +304,13 @@ public class PlayerSecurity {
             Object principal = authentication.getPrincipal();
             if (!(principal instanceof UserDetails userDetails)) {
                 logger.warn(
-                        "NeautorizovanĂ˝ pĹ™Ă­stup: principal nenĂ­ UserDetails pro playerId {}",
+                        "Neautorizovaný přístup: principal není UserDetails pro playerId {}",
                         playerId
                 );
                 return false;
             }
 
-            // 3) kontrola vlastnictvĂ­ hrĂˇÄŤe
+            // 3) kontrola vlastnictví hráče
             boolean isOwner = playerRepository.findById(playerId)
                     .map(player ->
                             player.getUser() != null
@@ -319,10 +319,10 @@ public class PlayerSecurity {
                     )
                     .orElse(false);
 
-            // 4) logovĂˇnĂ­ pokusu o neoprĂˇvnÄ›nĂ˝ pĹ™Ă­stup
+            // 4) logování pokusu o neoprávněný přístup
             if (!isOwner) {
                 logger.warn(
-                        "NeautorizovanĂ˝ pĹ™Ă­stup: uĹľivatel {} nenĂ­ vlastnĂ­kem hrĂˇÄŤe {}",
+                        "Neautorizovaný přístup: uživatel {} není vlastníkem hráče {}",
                         userDetails.getUsername(),
                         playerId
                 );
@@ -331,9 +331,9 @@ public class PlayerSecurity {
             return isOwner;
 
         } catch (Exception e) {
-            // NIKDY nepropouĹˇtÄ›t vĂ˝jimku do SpEL vĂ˝razu â€“ vĹľdy vracĂ­me boolean
+            // NIKDY nepropouštět výjimku do SpEL výrazu – vždy vracíme boolean
             logger.error(
-                    "Chyba pĹ™i kontrole vlastnĂ­ka hrĂˇÄŤe {}: {}",
+                    "Chyba při kontrole vlastníka hráče {}: {}",
                     playerId,
                     e.getMessage(),
                     e
@@ -352,42 +352,42 @@ public class PlayerSecurity {
 package cz.phsoft.hokej.security;
 
 /**
- * CentrĂˇlnĂ­ definice klĂ­ÄŤĹŻ pouĹľĂ­vanĂ˝ch v HTTP session.
+ * Centrální definice klíčů používaných v HTTP session.
  * <p>
- * Tato tĹ™Ă­da slouĹľĂ­ jako jednotnĂ© mĂ­sto pro uloĹľenĂ­ nĂˇzvĹŻ
- * session atributĹŻ, aby se zabrĂˇnilo:
+ * Tato třída slouží jako jednotné místo pro uložení názvů
+ * session atributů, aby se zabránilo:
  * </p>
  * <ul>
- *     <li>duplicitĂˇm Ĺ™etÄ›zcovĂ˝ch konstant,</li>
- *     <li>pĹ™eklepĹŻm v nĂˇzvech klĂ­ÄŤĹŻ,</li>
- *     <li>nekonzistenci napĹ™Ă­ÄŤ aplikacĂ­.</li>
+ *     <li>duplicitám řetězcových konstant,</li>
+ *     <li>překlepům v názvech klíčů,</li>
+ *     <li>nekonzistenci napříč aplikací.</li>
  * </ul>
  *
- * PouĹľitĂ­:
+ * Použití:
  * <ul>
- *     <li>vyuĹľĂ­vĂˇ se ve sluĹľbĂˇch pracujĂ­cĂ­ch s HTTP session,</li>
- *     <li>typicky v {@code CurrentPlayerService} a souvisejĂ­cĂ­ch tĹ™Ă­dĂˇch.</li>
+ *     <li>využívá se ve službách pracujících s HTTP session,</li>
+ *     <li>typicky v {@code CurrentPlayerService} a souvisejících třídách.</li>
  * </ul>
  *
- * TechnickĂˇ poznĂˇmka:
+ * Technická poznámka:
  * <ul>
- *     <li>tĹ™Ă­da je {@code final} a mĂˇ privĂˇtnĂ­ konstruktor,</li>
- *     <li>slouĹľĂ­ vĂ˝hradnÄ› jako drĹľĂˇk konstant (utility class).</li>
+ *     <li>třída je {@code final} a má privátní konstruktor,</li>
+ *     <li>slouží výhradně jako držák konstant (utility class).</li>
  * </ul>
  */
 public final class SessionKeys {
 
     /**
-     * KlĂ­ÄŤ session atributu pro ID aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
+     * Klíč session atributu pro ID aktuálně zvoleného hráče.
      * <p>
-     * Hodnota pĹ™edstavuje identifikĂˇtor hrĂˇÄŤe, se kterĂ˝m
-     * aktuĂˇlnÄ› pracuje pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel.
+     * Hodnota představuje identifikátor hráče, se kterým
+     * aktuálně pracuje přihlášený uživatel.
      * </p>
      */
     public static final String CURRENT_PLAYER_ID = "CURRENT_PLAYER_ID";
 
     /**
-     * PrivĂˇtnĂ­ konstruktor zabraĹujĂ­cĂ­ vytvoĹ™enĂ­ instance tĹ™Ă­dy.
+     * Privátní konstruktor zabraňující vytvoření instance třídy.
      */
     private SessionKeys() {
     }

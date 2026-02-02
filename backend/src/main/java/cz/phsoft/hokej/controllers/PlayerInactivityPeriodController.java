@@ -10,15 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller pro administraci období neaktivity hráčů.
- * <p>
- * Období neaktivity slouží k evidenci časových úseků, ve kterých
- * hráč dočasně nevystupuje v zápasech (např. zranění, dovolená).
- * <p>
- * Endpoints jsou určeny pro role ADMIN a MANAGER (dle typu operace)
- * a umožňují kompletní správu záznamů o neaktivitě.
+ * REST controller, který se používá pro administraci období neaktivity hráčů.
  *
- * Veškerá business logika je delegována do {@link PlayerInactivityPeriodService}.
+ * Období neaktivity slouží k evidenci časových úseků, ve kterých se hráč
+ * neúčastní zápasů, například z důvodu zranění nebo dovolené. Endpointy jsou
+ * určeny pro role ADMIN a MANAGER a umožňují úplnou správu záznamů o neaktivitě.
+ *
+ * Veškerá business logika se předává do {@link PlayerInactivityPeriodService}.
  */
 @RestController
 @RequestMapping("/api/inactivity/admin")
@@ -31,9 +29,9 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Vrátí seznam všech záznamů o neaktivitě hráčů.
+     * Vrací seznam všech záznamů o neaktivitě hráčů.
      *
-     * @return seznam období neaktivity
+     * @return seznam období neaktivity jako {@link PlayerInactivityPeriodDTO}
      */
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -42,10 +40,10 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Vrátí detail záznamu o neaktivitě podle jeho ID.
+     * Vrací detail záznamu o neaktivitě podle jeho ID.
      *
      * @param id ID záznamu o neaktivitě
-     * @return detail období neaktivity
+     * @return DTO {@link PlayerInactivityPeriodDTO} s detailem období neaktivity
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -55,10 +53,10 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Vrátí všechna období neaktivity pro konkrétního hráče.
+     * Vrací všechna období neaktivity pro konkrétního hráče.
      *
      * @param playerId ID hráče
-     * @return seznam období neaktivity hráče
+     * @return seznam období neaktivity pro daného hráče
      */
     @GetMapping("/player/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -67,12 +65,12 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Vytvoří nový záznam o neaktivitě hráče.
-     * <p>
-     * Operace je vyhrazena pouze pro administrátora.
+     * Vytváří nový záznam o neaktivitě hráče.
      *
-     * @param dto data období neaktivity
-     * @return vytvořený záznam o neaktivitě
+     * Operace je vyhrazena pouze pro roli ADMIN.
+     *
+     * @param dto DTO s daty období neaktivity
+     * @return vytvořený záznam jako {@link PlayerInactivityPeriodDTO}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -85,12 +83,12 @@ public class PlayerInactivityPeriodController {
 
     /**
      * Aktualizuje existující záznam o neaktivitě hráče.
-     * <p>
-     * Operace je vyhrazena pouze pro administrátora.
+     *
+     * Operace je vyhrazena pouze pro roli ADMIN.
      *
      * @param id  ID záznamu o neaktivitě
-     * @param dto aktualizovaná data období neaktivity
-     * @return aktualizovaný záznam o neaktivitě
+     * @param dto DTO s aktualizovanými daty období neaktivity
+     * @return aktualizovaný záznam jako {@link PlayerInactivityPeriodDTO}
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -103,12 +101,12 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Odstraní záznam o neaktivitě hráče.
-     * <p>
-     * Operace je vyhrazena pouze pro administrátora.
+     * Odstraňuje záznam o neaktivitě hráče.
+     *
+     * Operace je vyhrazena pouze pro roli ADMIN.
      *
      * @param id ID záznamu o neaktivitě
-     * @return HTTP 204 No Content
+     * @return HTTP odpověď 204 No Content v případě úspěchu
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

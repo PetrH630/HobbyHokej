@@ -9,14 +9,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * REST controller pro nastavení hráče (PlayerSettingsEntity).
+ * REST controller, který se používá pro správu nastavení hráče.
  *
- * API:
- *  GET   /api/players/{playerId}/settings         – nastavení konkrétního hráče
- *  PATCH /api/players/{playerId}/settings         – aktualizace nastavení konkrétního hráče
+ * Pracuje s nastavením navázaným na konkrétního hráče a na aktuálního
+ * hráče (currentPlayer). Umožňuje načítat a aktualizovat nastavení
+ * pro libovolného hráče podle ID a pro hráče, který je aktuálně
+ * vybrán v kontextu přihlášeného uživatele.
  *
- *  GET   /api/current-player/settings             – nastavení aktuálního hráče (currentPlayer)
- *  PATCH /api/current-player/settings             – aktualizace nastavení aktuálního hráče
+ * Veškerá business logika se předává do {@link PlayerSettingsService}.
  */
 @RestController
 @RequestMapping("/api")
@@ -31,25 +31,40 @@ public class PlayerSettingsController {
         this.currentPlayerService = currentPlayerService;
     }
 
-    // =========================
-    // /api/players/{id}/settings
-    // =========================
+    // Nastavení libovolného hráče podle ID
 
+    /**
+     * Vrací nastavení konkrétního hráče podle jeho ID.
+     *
+     * Ověření, zda hráč patří přihlášenému uživateli nebo zda má
+     * uživatel roli ADMIN či MANAGER, může být prováděno v této
+     * vrstvě nebo v service vrstvě.
+     *
+     * @param playerId ID hráče
+     * @param auth     autentizační kontext přihlášeného uživatele
+     * @return DTO {@link PlayerSettingsDTO} s nastavením hráče
+     */
     @GetMapping("/players/{playerId}/settings")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PlayerSettingsDTO> getPlayerSettings(
             @PathVariable Long playerId,
             Authentication auth
     ) {
-        // POZNÁMKA:
-        // Ověření, že hráč patří přihlášenému uživateli nebo že má roli ADMIN/MANAGER
-        // může být buď tady, nebo v PlayerService/PlayerSettingsService.
-        // Tady nechávám jen místo pro případnou kontrolu.
-
         PlayerSettingsDTO dto = playerSettingsService.getSettingsForPlayer(playerId);
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * Aktualizuje nastavení konkrétního hráče podle jeho ID.
+     *
+     * Kontrola vlastnictví hráče a oprávnění může být doplněna
+     * podle potřeb aplikace.
+     *
+     * @param playerId   ID hráče
+     * @param requestDto DTO s novým nastavením hráče
+     * @param auth       autentizační kontext přihlášeného uživatele
+     * @return DTO {@link PlayerSettingsDTO} s aktualizovaným nastavením
+     */
     @PatchMapping("/players/{playerId}/settings")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PlayerSettingsDTO> updatePlayerSettings(
@@ -63,10 +78,16 @@ public class PlayerSettingsController {
         return ResponseEntity.ok(updated);
     }
 
-    // =========================
-    // /api/current-player/settings
-    // =========================
+    // Nastavení aktuálního hráče (currentPlayer)
 
+    /**
+     * Vrací nastavení aktuálně vybraného hráče.
+     *
+     * Před čtením nastavení se vyžaduje, aby byl v kontextu
+     * nastaven aktuální hráč.
+     *
+     * @return DTO {@link PlayerSettingsDTO} s nastavením aktuálního hráče
+     */
     @GetMapping("/me/settings")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PlayerSettingsDTO> getCurrentPlayerSettings() {
@@ -79,6 +100,16 @@ public class PlayerSettingsController {
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * Aktualizuje nastavení aktuálně vybraného hráče.
+     *
+     * Informace o tom, který hráč je aktuální, se získává z
+     * {@link CurrentPlayerService}. Endpoint se používá například
+     * pro nastavení preferencí přímo z kontextu aktuálního hráče.
+     *
+     * @param requestDto DTO s novým nastavením aktuálního hráče
+     * @return DTO {@link PlayerSettingsDTO} s aktualizovaným nastavením
+     */
     @PatchMapping("/me/settings")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PlayerSettingsDTO> updateCurrentPlayerSettings(

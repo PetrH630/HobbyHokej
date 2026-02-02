@@ -13,15 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller pro správu sezón.
+ * REST controller, který se používá pro správu sezón.
  *
- * Zajišťuje:
- * <ul>
- *     <li>administraci sezón (CRUD, nastavení aktivní sezóny) pro roli ADMIN,</li>
- *     <li>práci s „aktuální sezónou“ pro přihlášeného uživatele (/me).</li>
- * </ul>
+ * Zajišťuje administrativní správu sezón pro roli ADMIN včetně
+ * vytváření, aktualizace a nastavení globálně aktivní sezóny.
+ * Dále poskytuje endpointy pro práci s aktuální sezónou uživatele
+ * pod prefixem /me.
  *
- * Veškerá business logika je delegována do {@link SeasonService}
+ * Veškerá business logika se předává do {@link SeasonService}
  * a {@link CurrentSeasonService}.
  */
 @RestController
@@ -40,15 +39,13 @@ public class SeasonController {
         this.currentSeasonService = currentSeasonService;
     }
 
-    // =========================================================
-    //  ADMIN – GLOBÁLNÍ SPRÁVA SEZÓN
-    // =========================================================
+    // ADMIN – globální správa sezón
 
     /**
-     * Vytvoří novou sezónu.
+     * Vytváří novou sezónu.
      *
-     * @param seasonDTO data nové sezóny
-     * @return vytvořená sezóna
+     * @param seasonDTO DTO s daty nové sezóny
+     * @return vytvořená sezóna jako {@link SeasonDTO}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -63,8 +60,8 @@ public class SeasonController {
      * Aktualizuje existující sezónu.
      *
      * @param id        ID sezóny
-     * @param seasonDTO aktualizovaná data sezóny
-     * @return aktualizovaná sezóna
+     * @param seasonDTO DTO s aktualizovanými daty sezóny
+     * @return aktualizovaná sezóna jako {@link SeasonDTO}
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -77,10 +74,12 @@ public class SeasonController {
     }
 
     /**
-     * Vrátí seznam všech sezón v systému.
+     * Vrací seznam všech sezón v systému.
      *
-     * Tady můžeš nechat jen ADMIN, nebo klidně všem přihlášeným.
-     * Aktuálně omezeno na ADMIN kvůli původnímu chování.
+     * Endpoint je v tuto chvíli omezen na roli ADMIN. Podle potřeby
+     * může být v budoucnu zpřístupněn širšímu okruhu uživatelů.
+     *
+     * @return seznam sezón jako {@link SeasonDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -90,7 +89,12 @@ public class SeasonController {
     }
 
     /**
-     * Vrátí aktuálně aktivní globální sezónu.
+     * Vrací aktuálně globálně aktivní sezónu.
+     *
+     * Aktivní sezóna představuje výchozí období pro systémové operace,
+     * které nejsou vázány na konkrétní volbu uživatele.
+     *
+     * @return aktivní sezóna jako {@link SeasonDTO}
      */
     @GetMapping("/active")
     @PreAuthorize("hasRole('ADMIN')")
@@ -100,10 +104,13 @@ public class SeasonController {
     }
 
     /**
-     * Nastaví zadanou sezónu jako globálně aktivní.
+     * Nastavuje zadanou sezónu jako globálně aktivní.
+     *
+     * Po nastavení se informace o aktivní sezóně používá v dalších
+     * částech systému jako výchozí sezóna.
      *
      * @param id ID sezóny, která má být nastavena jako aktivní
-     * @return nově aktivní sezóna
+     * @return nově aktivní sezóna jako {@link SeasonDTO}
      */
     @PutMapping("/{id}/active")
     @PreAuthorize("hasRole('ADMIN')")
@@ -113,14 +120,15 @@ public class SeasonController {
         return ResponseEntity.ok(active);
     }
 
-    // =========================================================
-    //  USER – PRÁCE S „MOJÍ“ SEZÓNOU (/me)
-    // =========================================================
+    // Uživatelská práce s „mojí“ sezónou
 
     /**
-     * Vrátí všechny sezóny pro účely výběru na frontendu.
+     * Vrací seznam všech sezón pro účely výběru na frontendu.
      *
-     * Toto je user-friendly varianta (původní /api/seasons/me GET).
+     * Jedná se o uživatelskou variantu endpointu, která se používá
+     * například pro zobrazení seznamu sezón v nabídce.
+     *
+     * @return seznam sezón jako {@link SeasonDTO}
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -129,8 +137,12 @@ public class SeasonController {
     }
 
     /**
-     * Vrátí sezónu, která je aktuálně vybraná pro přihlášeného uživatele.
-     * Pokud není vybraná, vrátí null (nebo default dle CurrentSeasonService).
+     * Vrací sezónu, která je aktuálně vybraná pro přihlášeného uživatele.
+     *
+     * Pokud uživatel nemá explicitně vybranou sezónu, může být vrácena
+     * výchozí hodnota podle implementace {@link CurrentSeasonService}.
+     *
+     * @return aktuální sezóna pro uživatele nebo null
      */
     @GetMapping("/me/current")
     @PreAuthorize("isAuthenticated()")
@@ -140,14 +152,16 @@ public class SeasonController {
     }
 
     /**
-     * Nastaví aktuální sezónu pro přihlášeného uživatele.
+     * Nastavuje aktuální sezónu pro přihlášeného uživatele.
      *
-     * @param seasonId ID sezóny, která má být nastavena jako current pro uživatele
+     * Před nastavením se ověřuje, že sezóna existuje. Id sezóny
+     * se následně ukládá do kontextu aktuální sezóny uživatele.
+     *
+     * @param seasonId ID sezóny, která má být nastavena jako aktuální
      */
     @PostMapping("/me/current/{seasonId}")
     @PreAuthorize("isAuthenticated()")
     public void setCurrentSeasonForUser(@PathVariable Long seasonId) {
-        // jednoduchá validace – ověříme, že sezóna existuje
         seasonService.getSeasonById(seasonId);
         currentSeasonService.setCurrentSeasonId(seasonId);
     }

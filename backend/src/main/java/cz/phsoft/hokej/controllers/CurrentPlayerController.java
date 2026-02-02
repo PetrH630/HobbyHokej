@@ -12,20 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller pro práci s „aktuálním hráčem“ přihlášeného uživatele.
- * <p>
+ * REST controller, který se používá pro práci s aktuálním hráčem
+ * přihlášeného uživatele.
+ *
  * Aktuální hráč představuje kontext, ve kterém uživatel pracuje
- * (např. registrace na zápasy, zobrazení statistik apod.).
- * <p>
- * Controller umožňuje:
- * <ul>
- *     <li>ruční nastavení aktuálního hráče,</li>
- *     <li>automatický výběr aktuálního hráče po přihlášení,</li>
- *     <li>získání aktuálního hráče,</li>
- *     <li>získání seznamu hráčů přihlášeného uživatele.</li>
- * </ul>
- * <p>
- * Veškerá business logika je delegována do {@link PlayerService}
+ * například při registraci na zápasy nebo při zobrazení statistik.
+ * Controller umožňuje nastavení aktuálního hráče, automatický výběr
+ * hráče po přihlášení a získání aktuálně zvoleného hráče.
+ *
+ * Veškerá business logika se předává do {@link PlayerService}
  * a {@link CurrentPlayerService}.
  */
 @RestController
@@ -42,14 +37,14 @@ public class CurrentPlayerController {
     }
 
     /**
-     * Nastaví aktuálního hráče pro přihlášeného uživatele.
-     * <p>
-     * Používá se zejména v případech, kdy má uživatel
-     * přiřazeno více hráčů a chce mezi nimi ručně přepínat.
+     * Nastavuje aktuálního hráče pro přihlášeného uživatele.
+     *
+     * Metoda se používá zejména v případech, kdy má uživatel přiřazeno
+     * více hráčů a potřebuje mezi nimi ručně přepínat.
      *
      * @param playerId ID hráče, který má být nastaven jako aktuální
      * @param auth     autentizační kontext přihlášeného uživatele
-     * @return informace o úspěšném nastavení aktuálního hráče
+     * @return DTO {@link SuccessResponseDTO} s informací o provedené změně
      */
     @PostMapping("/{playerId}")
     @PreAuthorize("isAuthenticated()")
@@ -64,11 +59,15 @@ public class CurrentPlayerController {
     }
 
     /**
-     * Automaticky zvolí aktuálního hráče pro přihlášeného uživatele
-     * podle jeho nastavení v AppUserSettings (playerSelectionMode).
-     * <p>
-     * - FIRST_PLAYER  → vybere prvního hráče podle ID
-     * - ALWAYS_CHOOSE → hráče nevybere, FE má nabídnout manuální výběr
+     * Provádí automatický výběr aktuálního hráče pro přihlášeného
+     * uživatele podle nastavení v AppUserSettings.
+     *
+     * Například může být vybrán první hráč podle ID nebo může být
+     * ponechán stav bez vybraného hráče, aby si uživatel vybral hráče
+     * ručně na frontendu.
+     *
+     * @param auth autentizační kontext přihlášeného uživatele
+     * @return DTO {@link SuccessResponseDTO} s výsledkem automatického výběru
      */
     @PostMapping("/auto-select")
     @PreAuthorize("isAuthenticated()")
@@ -80,12 +79,11 @@ public class CurrentPlayerController {
     }
 
     /**
-     * Vrátí aktuálně zvoleného hráče přihlášeného uživatele.
-     * <p>
-     * Pokud uživatel nemá aktuálního hráče nastaveného,
-     * je vrácena hodnota {@code null}.
+     * Vrací aktuálně zvoleného hráče přihlášeného uživatele.
      *
-     * @return aktuální hráč nebo {@code null}, pokud není nastaven
+     * Pokud není aktuální hráč nastaven, vrací se hodnota null.
+     *
+     * @return DTO {@link PlayerDTO} s detaily hráče nebo null
      */
     @GetMapping
     @PreAuthorize("isAuthenticated()")

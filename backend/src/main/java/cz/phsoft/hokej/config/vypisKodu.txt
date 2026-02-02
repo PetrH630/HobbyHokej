@@ -33,4 +33,4 @@ Get-ChildItem -Recurse -File -Include *.java |
 ---------------------------
 .\export-by-folder.ps1
 
-a potom jsou všechny balíčky v FilesForCheck
+a potom jsou všechny balíčky v FilesForC

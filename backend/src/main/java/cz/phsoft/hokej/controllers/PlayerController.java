@@ -14,15 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller pro správu hráčů.
+ * REST controller, který se používá pro správu hráčů.
  *
- * Zajišťuje:
- * <ul>
- *     <li>administraci hráčů (CRUD, schválení / zamítnutí, změna uživatele) pro role ADMIN/MANAGER,</li>
- *     <li>správu hráčů z pohledu přihlášeného uživatele (moji hráči /me).</li>
- * </ul>
+ * Zajišťuje administrativní správu hráčů pro role ADMIN a MANAGER,
+ * včetně vytváření, aktualizace, mazání a schvalování hráčů, a také
+ * správu hráčů z pohledu přihlášeného uživatele pod endpointy /me.
  *
- * Veškerá business logika je delegována do {@link PlayerService}.
+ * Veškerá business logika se předává do {@link PlayerService}.
  */
 @RestController
 @RequestMapping("/api/players")
@@ -37,12 +35,14 @@ public class PlayerController {
         this.currentPlayerService = currentPlayerService;
     }
 
-    // =========================================================
-    //  ADMIN / MANAGER – GLOBÁLNÍ SPRÁVA HRÁČŮ
-    // =========================================================
+    // ADMIN / MANAGER – globální správa hráčů
 
     /**
-     * Vrátí seznam všech hráčů v systému.
+     * Vrací seznam všech hráčů v systému.
+     *
+     * Endpoint je dostupný pro role ADMIN a MANAGER.
+     *
+     * @return seznam {@link PlayerDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -51,9 +51,10 @@ public class PlayerController {
     }
 
     /**
-     * Vrátí detail hráče podle jeho ID.
+     * Vrací detail hráče podle jeho ID.
      *
      * @param id ID hráče
+     * @return DTO {@link PlayerDTO} s detailem hráče
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -62,9 +63,12 @@ public class PlayerController {
     }
 
     /**
-     * Vytvoří nového hráče (administrátor/manažer).
+     * Vytváří nového hráče administrátorem nebo manažerem.
      *
-     * Používá se při ručním zakládání hráče do systému.
+     * Operace se používá při ručním zakládání hráče v systému.
+     *
+     * @param playerDTO DTO s daty nového hráče
+     * @return vytvořený hráč jako {@link PlayerDTO}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -76,7 +80,8 @@ public class PlayerController {
      * Aktualizuje údaje hráče administrátorem.
      *
      * @param id  ID hráče
-     * @param dto aktualizovaná data hráče
+     * @param dto DTO s aktualizovanými daty hráče
+     * @return aktualizovaný hráč jako {@link PlayerDTO}
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -86,9 +91,12 @@ public class PlayerController {
     }
 
     /**
-     * Odstraní hráče ze systému.
+     * Odstraňuje hráče ze systému.
      *
-     * Operace je vyhrazena pouze pro administrátora.
+     * Operace je vyhrazena pouze pro roli ADMIN.
+     *
+     * @param id ID hráče
+     * @return DTO {@link SuccessResponseDTO} s výsledkem operace
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -98,7 +106,10 @@ public class PlayerController {
     }
 
     /**
-     * Schválí hráče (změní jeho stav na APPROVED).
+     * Schvaluje hráče a nastavuje jeho stav na APPROVED.
+     *
+     * @param id ID hráče
+     * @return DTO {@link SuccessResponseDTO} s výsledkem operace
      */
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -108,7 +119,10 @@ public class PlayerController {
     }
 
     /**
-     * Zamítne hráče (změní jeho stav na REJECTED).
+     * Zamítá hráče a nastavuje jeho stav na REJECTED.
+     *
+     * @param id ID hráče
+     * @return DTO {@link SuccessResponseDTO} s výsledkem operace
      */
     @PutMapping("/{id}/reject")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -118,12 +132,14 @@ public class PlayerController {
     }
 
     /**
-     * Změní přiřazení hráče k aplikačnímu uživateli.
+     * Mění přiřazení hráče k aplikačnímu uživateli.
      *
-     * Operace je vyhrazena pouze pro roli ADMIN.
+     * Operace je určena pro roli ADMIN nebo MANAGER a používá se,
+     * pokud je potřeba hráče převést k jinému uživateli.
      *
-     * @param playerId ID hráče, kterému má být změněn přiřazený uživatel
+     * @param playerId ID hráče
      * @param request  request obsahující ID nového uživatele
+     * @return textová zpráva o úspěšné změně přiřazení
      */
     @PostMapping("/{playerId}/change-user")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -137,12 +153,17 @@ public class PlayerController {
         );
     }
 
-    // =========================================================
-    //  USER – HRÁČI PŘIHLÁŠENÉHO UŽIVATELE (/me)
-    // =========================================================
+    // Uživatelská správa hráčů přihlášeného uživatele
 
     /**
-     * Vytvoří nového hráče pro přihlášeného uživatele.
+     * Vytváří nového hráče pro přihlášeného uživatele.
+     *
+     * Nový hráč se automaticky přiřazuje k uživatelskému účtu,
+     * který vychází z e-mailu v objektu {@link Authentication}.
+     *
+     * @param playerDTO      DTO s daty nového hráče
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @return vytvořený hráč jako {@link PlayerDTO}
      */
     @PostMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -155,7 +176,10 @@ public class PlayerController {
     }
 
     /**
-     * Vrátí seznam všech hráčů patřících přihlášenému uživateli.
+     * Vrací seznam všech hráčů patřících přihlášenému uživateli.
+     *
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @return seznam {@link PlayerDTO} pro daného uživatele
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -167,7 +191,11 @@ public class PlayerController {
     /**
      * Aktualizuje údaje aktuálně zvoleného hráče.
      *
-     * Vyžaduje, aby měl uživatel nastaveného „aktuálního hráče“.
+     * Před provedením aktualizace se vyžaduje, aby byl nastaven
+     * aktuální hráč v {@link CurrentPlayerService}.
+     *
+     * @param dto DTO s aktualizovanými daty hráče
+     * @return aktualizovaný hráč jako {@link PlayerDTO}
      */
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")

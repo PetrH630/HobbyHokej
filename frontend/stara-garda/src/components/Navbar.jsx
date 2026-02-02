@@ -9,6 +9,7 @@ import { useAuth } from "../hooks/useAuth";
 import { PlayerIcon } from "../icons";
 import { UserIcon } from "../icons";
 import { useCurrentPlayer } from "../hooks/useCurrentPlayer";
+import RoleGuard from "./RoleGuard";          // 👈 NOVÉ
 
 import "./Navbar.css";
 
@@ -34,7 +35,7 @@ const Navbar = () => {
             <div className="container">
                 <span className="navbar-brand">
                     <NavLink to="/" className="navbar-brand">Hokej App </NavLink>
-                    </span>
+                </span>
 
                 <button
                     className="nav-toggle"
@@ -47,51 +48,101 @@ const Navbar = () => {
                 <div className={`nav-list ${showMenu ? "show" : "hide"}`}>
                     <ul>
                         <li>
-                            <NavLink to="/players" className={({ isActive }) =>
-                                isActive ? "activeLink" : "nonactiveLink"
-                            } onClick={closeMenu}>
+                            <NavLink
+                                to="/players"
+                                className={({ isActive }) =>
+                                    isActive ? "activeLink" : "nonactiveLink"
+                                }
+                                onClick={closeMenu}
+                            >
                                 Hráči
                             </NavLink>
                         </li>
 
                         <li>
-                            <NavLink to="/Matches" className={({ isActive }) =>
-                                isActive ? "activeLink" : "nonactiveLink"
-                            } onClick={closeMenu}>
+                            <NavLink
+                                to="/Matches"
+                                className={({ isActive }) =>
+                                    isActive ? "activeLink" : "nonactiveLink"
+                                }
+                                onClick={closeMenu}
+                            >
                                 Zápasy
                             </NavLink>
                         </li>
 
                         <li>
-                            <NavLink to="/Registrace" className={({ isActive }) =>
-                                isActive ? "activeLink" : "nonactiveLink"
-                            } onClick={closeMenu}>
+                            <NavLink
+                                to="/Registrace"
+                                className={({ isActive }) =>
+                                    isActive ? "activeLink" : "nonactiveLink"
+                                }
+                                onClick={closeMenu}
+                            >
                                 Registrace
                             </NavLink>
                         </li>
 
                         <li>
-                            <NavLink to="/contact" className={({ isActive }) =>
-                                isActive ? "activeLink" : "nonactiveLink"
-                            } onClick={closeMenu}>
+                            <NavLink
+                                to="/contact"
+                                className={({ isActive }) =>
+                                    isActive ? "activeLink" : "nonactiveLink"
+                                }
+                                onClick={closeMenu}
+                            >
                                 Nastavení
                             </NavLink>
-
                         </li>
+
+                        {/* 👇 NOVÁ POLOŽKA – jen pro ADMIN / MANAGER */}
+                        <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+                            <li>
+                                <NavLink
+                                    to="/admin/players"
+                                    className={({ isActive }) =>
+                                        isActive ? "activeLink" : "nonactiveLink"
+                                    }
+                                    onClick={closeMenu}
+                                >
+                                    Players
+                                </NavLink>
+                            </li>
+                        </RoleGuard>
+                        <RoleGuard roles={["ROLE_ADMIN"]}>
+                            <li>
+                                <NavLink
+                                    to="/admin/users"
+                                    className={({ isActive }) =>
+                                        isActive ? "activeLink" : "nonactiveLink"
+                                    }
+                                    onClick={closeMenu}
+                                >
+                                    Users                </NavLink>
+                            </li>
+                        </RoleGuard>
+                        
                     </ul>
                 </div>
+
                 <div className="d-flex gap-3">
                     {user && (
                         <>
                             <span>
                                 <UserIcon />{" "}
                                 {user.name} {user.surname}
-                                <div><PlayerIcon />{" "}  {currentPlayer
-                                    ? `${currentPlayer.name} ${currentPlayer.surname}`
-                                    : "Není vybrán hráč"}</div>
+                                <div>
+                                    <PlayerIcon />{" "}
+                                    {currentPlayer
+                                        ? `${currentPlayer.name} ${currentPlayer.surname}`
+                                        : "Není vybrán hráč"}
+                                </div>
                             </span>
 
-                            <button className="btn btn-outline-danger" onClick={handleLogout}>
+                            <button
+                                className="btn btn-outline-danger"
+                                onClick={handleLogout}
+                            >
                                 Odhlásit
                             </button>
                         </>

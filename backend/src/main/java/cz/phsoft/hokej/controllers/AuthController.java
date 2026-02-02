@@ -16,16 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
- * REST controller pro autentizaci a registraci uživatelů.
- * <p>
- * Zajišťuje:
- * <ul>
- *     <li>registraci nových uživatelů,</li>
- *     <li>aktivaci uživatelského účtu pomocí ověřovacího tokenu,</li>
- *     <li>získání informací o aktuálně přihlášeném uživateli.</li>
- * </ul>
+ * REST controller, který se používá pro autentizaci a registraci uživatelů.
  *
- * Veškerá business logika je delegována do {@link AppUserService}.
+ * Zajišťuje registraci nových uživatelů, aktivaci účtů pomocí ověřovacího
+ * tokenu, práci s přihlášeným uživatelem a proces zapomenutého hesla
+ * včetně vystavení tokenu a nastavení nového hesla.
+ *
+ * Veškerá business logika se předává do {@link AppUserService}.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -34,11 +31,10 @@ public class AuthController {
     private final AppUserService appUserService;
 
     /**
-     * Base URL frontendové SPA aplikace (React / Vite).
-     * Používá se pro přesměrování při resetu hesla.
+     * Základní URL frontendové SPA aplikace (React/Vite).
      *
-     * Např.:
-     *   app.frontend-base-url=http://localhost:5173
+     * Tato hodnota se používá pro přesměrování uživatele při procesu
+     * resetu hesla, aby mohl být otevřen správný route na frontend aplikaci.
      */
     @Value("${app.frontend-base-url:http://localhost:5173}")
     private String frontendBaseUrl;
@@ -48,13 +44,13 @@ public class AuthController {
     }
 
     /**
-     * Zaregistruje nového uživatele.
-     * <p>
-     * Po úspěšné registraci je uživateli odeslán aktivační e-mail
-     * s ověřovacím odkazem.
+     * Registruje nového uživatele.
      *
-     * @param dto registrační údaje uživatele
-     * @return informace o úspěšném přijetí registrace
+     * Po úspěšné registraci se vytváří aktivační token a odesílá se
+     * aktivační e-mail s odkazem na aktivaci účtu.
+     *
+     * @param dto registrační údaje nového uživatele
+     * @return HTTP odpověď s informací o úspěšné registraci
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDTO dto) {
@@ -68,10 +64,10 @@ public class AuthController {
     }
 
     /**
-     * Vrátí informace o aktuálně přihlášeném uživateli.
+     * Vrací informace o aktuálně přihlášeném uživateli.
      *
-     * @param authentication objekt s informacemi o přihlášeném uživateli
-     * @return detail přihlášeného uživatele
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @return DTO s detaily přihlášeného uživatele
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -82,18 +78,19 @@ public class AuthController {
 
     /**
      * Aktivuje uživatelský účet na základě ověřovacího tokenu.
-     * <p>
-     * Token je zaslán uživateli e-mailem po registraci a má omezenou platnost.
+     *
+     * Token se získává z aktivačního odkazu zaslaného po registraci
+     * a má omezenou platnost. V případě neplatného nebo expirovaného
+     * tokenu se vrací chyba 400.
      *
      * @param token aktivační token
-     * @return výsledek aktivace účtu
+     * @return textová informace o výsledku aktivace účtu
      */
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         boolean activated = appUserService.activateUser(token);
 
         if (!activated) {
-            // sjednocená odpověď pro neplatný nebo expirovaný token
             return ResponseEntity
                     .badRequest()
                     .body("Neplatný nebo expirovaný aktivační odkaz.");
@@ -103,44 +100,67 @@ public class AuthController {
     }
 
     /**
-     * Přesměruje uživatele z odkazu v e-mailu na frontendovou stránku
+     * Přesměrovává uživatele z odkazu v e-mailu na frontendovou stránku
      * pro nastavení nového hesla.
-     * <p>
-     * Uživatel dostane e-mail s odkazem ve tvaru:
-     *   http://localhost:8080/api/auth/reset-password?token=XYZ
-     * Backend provede redirect (302) na:
-     *   {frontendBaseUrl}/reset-password?token=XYZ
-     * např.
-     *   http://localhost:5173/reset-password?token=XYZ
      *
-     * Samotné ověření tokenu a změnu hesla pak řeší frontend
-     * přes REST endpointy:
-     *  - GET  /api/auth/forgotten-password/info
-     *  - POST /api/auth/forgotten-password/reset
+     * Backend provádí redirect na odpovídající route frontendové SPA
+     * a předává reset token jako query parametr. Samotná změna hesla
+     * se následně provádí pomocí REST endpointů pro zapomenuté heslo.
+     *
+     * @param token reset token pro zapomenuté heslo
+     * @return HTTP 302 s hlavičkou Location na frontendovou URL
      */
     @GetMapping("/reset-password")
     public ResponseEntity<Void> redirectResetPassword(@RequestParam String token) {
         String targetUrl = frontendBaseUrl + "/reset-password?token=" + token;
 
         return ResponseEntity
-                .status(HttpStatus.FOUND) // 302
+                .status(HttpStatus.FOUND)
                 .header("Location", targetUrl)
                 .build();
     }
 
     // TODO MOŽNÁ DO APPUSERSETTINGS CONTROLLER
+
+    /**
+     * Vytváří požadavek na reset zapomenutého hesla.
+     *
+     * Na základě zadané e-mailové adresy se vytvoří reset token
+     * a odešle se e-mail s odkazem pro nastavení nového hesla.
+     *
+     * @param dto DTO s e-mailovou adresou uživatele
+     * @return HTTP odpověď 200 v případě úspěchu
+     */
     @PostMapping("/forgotten-password")
     public ResponseEntity<Void> requestForgottenPassword(@RequestBody @Valid EmailDTO dto) {
         appUserService.requestForgottenPasswordReset(dto.getEmail());
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Vrací informaci o e-mailu, ke kterému přísluší daný reset token.
+     *
+     * Endpoint se používá například pro zobrazení e-mailové adresy
+     * na frontendové stránce pro reset hesla.
+     *
+     * @param token reset token
+     * @return mapování obsahující e-mail navázaný na token
+     */
     @GetMapping("/forgotten-password/info")
     public ResponseEntity<Map<String, String>> getForgottenPasswordInfo(@RequestParam String token) {
         String email = appUserService.getForgottenPasswordResetEmail(token);
         return ResponseEntity.ok(Map.of("email", email));
     }
 
+    /**
+     * Provádí nastavení nového hesla na základě reset tokenu.
+     *
+     * Informace o tokenu, novém hesle a jeho potvrzení se předává
+     * prostřednictvím {@link ForgottenPasswordResetDTO}.
+     *
+     * @param dto DTO obsahující token a nové heslo
+     * @return HTTP odpověď 200 v případě úspěchu
+     */
     @PostMapping("/forgotten-password/reset")
     public ResponseEntity<Void> forgottenPasswordReset(@RequestBody @Valid ForgottenPasswordResetDTO dto) {
         appUserService.forgottenPasswordReset(dto);

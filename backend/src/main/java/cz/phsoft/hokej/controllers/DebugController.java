@@ -5,28 +5,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Debug controller pro účely vývoje a ladění bezpečnostního kontextu.
- * <p>
- * Slouží k ověření:
- * <ul>
- *     <li>zda je uživatel autentizován,</li>
- *     <li>jaké údaje jsou dostupné v {@link Authentication},</li>
- *     <li>jaké role a authority má aktuální uživatel.</li>
- * </ul>
+ * REST controller, který se používá pro ladění bezpečnostního kontextu.
  *
- * Tento controller by měl být používán pouze ve vývojovém prostředí
- * a neměl by být dostupný v produkci.
+ * Umožňuje ověřit, zda je uživatel autentizován a jaké informace
+ * jsou dostupné v objektu {@link Authentication}. Controller je určen
+ * pouze pro vývojové prostředí a neměl by být vystaven v produkci.
  */
 @RestController
 public class DebugController {
 
     /**
-     * Vrátí aktuální {@link Authentication} objekt.
-     * <p>
-     * Endpoint slouží výhradně pro ladění a diagnostiku.
+     * Vrací aktuální objekt {@link Authentication}.
+     *
+     * Metoda se používá výhradně pro ladění a diagnostiku
+     * bezpečnostního kontextu.
      *
      * @param auth autentizační kontext aktuálního uživatele
-     * @return objekt {@link Authentication}
+     * @return objekt {@link Authentication} s informacemi o uživateli
      */
     @GetMapping("/api/debug/me")
     public Object me(Authentication auth) {

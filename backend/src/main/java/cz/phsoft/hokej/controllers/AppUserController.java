@@ -12,15 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller pro správu uživatelských účtů.
- * <p>
- * Zajišťuje:
- * <ul>
- *     <li>práci s přihlášeným uživatelem (profil, změna hesla),</li>
- *     <li>administrativní správu uživatelů (pouze ADMIN).</li>
- * </ul>
- * <p>
- * Veškerá business logika je delegována do {@link AppUserService}.
+ * REST controller, který se používá pro správu uživatelských účtů.
+ *
+ * Zajišťuje práci s přihlášeným uživatelem, včetně zobrazení profilu a změny
+ * hesla, a také administrativní správu uživatelů, která je vyhrazena roli ADMIN.
+ *
+ * Veškerá business logika se předává do {@link AppUserService}.
  */
 @RestController
 @RequestMapping("/api/users")
@@ -33,13 +30,13 @@ public class AppUserController {
     }
 
     /**
-     * Vrátí detail aktuálně přihlášeného uživatele.
-     * <p>
-     * Identifikace uživatele probíhá pomocí e-mailu (username)
-     * získaného z {@link Authentication}.
+     * Vrací detail aktuálně přihlášeného uživatele.
      *
-     * @param authentication objekt s informacemi o přihlášeném uživateli
-     * @return detail přihlášeného uživatele
+     * Identifikace uživatele se provádí podle e-mailu (username),
+     * který je získán z objektu {@link Authentication}.
+     *
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @return DTO s detaily přihlášeného uživatele
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -50,9 +47,9 @@ public class AppUserController {
     /**
      * Aktualizuje údaje aktuálně přihlášeného uživatele.
      *
-     * @param authentication objekt s informacemi o přihlášeném uživateli
-     * @param dto            aktualizovaná data uživatele
-     * @return informace o úspěšné aktualizaci
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @param dto            DTO s aktualizovanými údaji uživatele
+     * @return HTTP odpověď s informací o úspěšné aktualizaci
      */
     @PutMapping("/me/update")
     @PreAuthorize("isAuthenticated()")
@@ -66,11 +63,14 @@ public class AppUserController {
     }
 
     /**
-     * Změní heslo aktuálně přihlášeného uživatele.
+     * Mění heslo aktuálně přihlášeného uživatele.
      *
-     * @param authentication objekt s informacemi o přihlášeném uživateli
+     * Staré heslo, nové heslo a potvrzení nového hesla se předává
+     * prostřednictvím DTO {@link ChangePasswordDTO}.
+     *
+     * @param authentication autentizační kontext přihlášeného uživatele
      * @param dto            DTO obsahující staré a nové heslo
-     * @return informace o úspěšném provedení změny
+     * @return HTTP odpověď s informací o úspěšné změně hesla
      */
     @PostMapping("/me/change-password")
     @PreAuthorize("isAuthenticated()")
@@ -88,13 +88,14 @@ public class AppUserController {
         return ResponseEntity.ok("Heslo úspěšně změněno");
     }
 
-    //ADMIN
+    // ADMIN
+
     /**
-     * Vrátí seznam všech uživatelů v systému.
-     * <p>
-     * Endpoint je dostupný pouze pro administrátora.
+     * Vrací seznam všech uživatelů v systému.
      *
-     * @return seznam uživatelů
+     * Endpoint je dostupný pouze pro roli ADMIN.
+     *
+     * @return seznam uživatelů jako {@link AppUserDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -102,20 +103,27 @@ public class AppUserController {
         return appUserService.getAllUsers();
     }
 
-    // TODO - NOVÝ ENDPOINT
+    /**
+     * Vrací detail uživatele podle jeho ID.
+     *
+     * Endpoint je dostupný pouze pro roli ADMIN.
+     *
+     * @param id ID uživatele
+     * @return DTO s detaily vybraného uživatele
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public AppUserDTO getUserById(@PathVariable Long id ) {
+    public AppUserDTO getUserById(@PathVariable Long id) {
         return appUserService.getUserById(id);
     }
 
     /**
      * Resetuje heslo uživatele na výchozí hodnotu.
-     * <p>
-     * Operace je vyhrazena pouze pro administrátora.
      *
-     * @param id ID uživatele
-     * @return informace o úspěšném resetu hesla
+     * Operace je vyhrazena pouze pro roli ADMIN.
+     *
+     * @param id ID uživatele, kterému se má heslo resetovat
+     * @return HTTP odpověď s informací o úspěšném resetu hesla
      */
     @PostMapping("/{id}/reset-password")
     @PreAuthorize("hasRole('ADMIN')")
@@ -126,8 +134,11 @@ public class AppUserController {
 
     /**
      * Aktivuje účet uživatele.
-     * <p>
-     * Endpoint je dostupný pouze pro administrátora.
+     *
+     * Operace je vyhrazena pouze pro roli ADMIN.
+     *
+     * @param id ID uživatele, který má být aktivován
+     * @return HTTP odpověď s informací o úspěšné aktivaci
      */
     @PatchMapping("/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
@@ -137,9 +148,12 @@ public class AppUserController {
     }
 
     /**
-     * Dektivuje účet uživatele.
-     * <p>
-     * Endpoint je dostupný pouze pro administrátora.
+     * Deaktivuje účet uživatele.
+     *
+     * Operace je vyhrazena pouze pro roli ADMIN.
+     *
+     * @param id ID uživatele, který má být deaktivován
+     * @return HTTP odpověď s informací o úspěšné deaktivaci
      */
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasRole('ADMIN')")

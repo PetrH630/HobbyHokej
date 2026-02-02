@@ -19,7 +19,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableJpaRepositories // JPA v naĹˇem Spring Boot projektu
+@EnableJpaRepositories // JPA v našem Spring Boot projektu
 @EnableScheduling
 @EnableAsync
 public class StaraGardaApplication {

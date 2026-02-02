@@ -8,13 +8,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * REST controller pro nastavení uživatele (AppUser).
+ * REST controller, který se používá pro správu nastavení uživatele
+ * na úrovni aplikačního účtu (AppUser).
  *
- * Kontext: účet / uživatel, nikoliv currentPlayer.
+ * Pracuje s nastavením navázaným na účet uživatele, nikoli na aktuálního
+ * hráče. Slouží například pro nastavení preferencí uživatele a režimu
+ * výběru hráče po přihlášení.
  *
- * API:
- *  GET  /api/user/settings   – načtení nastavení přihlášeného uživatele
- *  PATCH /api/user/settings  – aktualizace nastavení přihlášeného uživatele
+ * Veškerá business logika se předává do {@link AppUserSettingsService}.
  */
 @RestController
 @RequestMapping("/api/user")
@@ -27,25 +28,31 @@ public class AppUserSettingsController {
     }
 
     /**
-     * Vrátí nastavení aktuálně přihlášeného uživatele.
+     * Vrací nastavení aktuálně přihlášeného uživatele.
      *
-     * Identifikace uživatele probíhá přes Authentication.getName()
-     * (typicky email).
+     * Uživatel se identifikuje pomocí e-mailu získaného z objektu
+     * {@link Authentication}.
+     *
+     * @param auth autentizační kontext přihlášeného uživatele
+     * @return DTO s nastavením uživatele
      */
     @GetMapping("/settings")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AppUserSettingsDTO> getCurrentUserSettings(Authentication auth) {
         String userEmail = auth.getName();
-
         AppUserSettingsDTO dto = appUserSettingsService.getSettingsForUser(userEmail);
-
         return ResponseEntity.ok(dto);
     }
 
     /**
      * Aktualizuje nastavení aktuálně přihlášeného uživatele.
      *
-     * Předpoklad: FE posílá kompletní stav nastavení (full update).
+     * Očekává se, že frontend předá kompletní stav nastavení, který se
+     * aplikuje na účet uživatele.
+     *
+     * @param auth       autentizační kontext přihlášeného uživatele
+     * @param requestDto DTO s novým nastavením uživatele
+     * @return DTO s aktualizovaným nastavením uživatele
      */
     @PatchMapping("/settings")
     @PreAuthorize("isAuthenticated()")
@@ -54,9 +61,7 @@ public class AppUserSettingsController {
             @RequestBody AppUserSettingsDTO requestDto
     ) {
         String userEmail = auth.getName();
-
         AppUserSettingsDTO updated = appUserSettingsService.updateSettingsForUser(userEmail, requestDto);
-
         return ResponseEntity.ok(updated);
     }
 }

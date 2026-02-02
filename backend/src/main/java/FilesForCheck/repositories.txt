@@ -3,12 +3,15 @@ Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\
 
 Seznam souborů:
 AppUserRepository.java
+AppUserSettingsRepository.java
 EmailVerificationTokenRepository.java
+ForgottenPasswordResetTokenRepository.java
 MatchRegistrationHistoryRepository.java
 MatchRegistrationRepository.java
 MatchRepository.java
 PlayerInactivityPeriodRepository.java
 PlayerRepository.java
+PlayerSettingsRepository.java
 SeasonRepository.java
 
 
@@ -25,23 +28,49 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 /**
- * RepozitĂˇĹ™ pro prĂˇci s entitou {@link AppUserEntity}.
+ * Repozitář pro práci s entitou {@link AppUserEntity}.
  *
- * SlouĹľĂ­ k perzistenci a naÄŤĂ­tĂˇnĂ­ uĹľivatelskĂ˝ch ĂşÄŤtĹŻ
- * z databĂˇze pomocĂ­ Spring Data JPA.
+ * Slouží k perzistenci a načítání uživatelských účtů
+ * z databáze pomocí Spring Data JPA.
  */
 public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
 
     /**
-     * VyhledĂˇ uĹľivatele podle emailovĂ© adresy.
+     * Vyhledá uživatele podle emailové adresy.
      *
-     * Email slouĹľĂ­ jako unikĂˇtnĂ­ identifikĂˇtor uĹľivatele
-     * v rĂˇmci autentizace.
+     * Email slouží jako unikátní identifikátor uživatele
+     * v rámci autentizace.
      *
-     * @param email email uĹľivatele
-     * @return uĹľivatel zabalenĂ˝ v {@link Optional}, pokud existuje
+     * @param email email uživatele
+     * @return uživatel zabalený v {@link Optional}, pokud existuje
      */
     Optional<AppUserEntity> findByEmail(String email);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\AppUserSettingsRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s nastavením uživatele (AppUserSettingsEntity).
+ */
+public interface AppUserSettingsRepository extends JpaRepository<AppUserSettingsEntity, Long> {
+
+    Optional<AppUserSettingsEntity> findByUser(AppUserEntity user);
+
+    Optional<AppUserSettingsEntity> findByUserEmail(String email);
+
+    Boolean existsByUser(AppUserEntity user);
 }
 
 
@@ -52,29 +81,55 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
 
 package cz.phsoft.hokej.data.repositories;
 
+import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
 /**
- * RepozitĂˇĹ™ pro prĂˇci s entitou {@link EmailVerificationTokenEntity}.
+ * Repozitář pro práci s entitou {@link EmailVerificationTokenEntity}.
  *
- * SlouĹľĂ­ k uklĂˇdĂˇnĂ­ a vyhledĂˇvĂˇnĂ­ ovÄ›Ĺ™ovacĂ­ch tokenĹŻ
- * pouĹľĂ­vanĂ˝ch pĹ™i aktivaci uĹľivatelskĂ˝ch ĂşÄŤtĹŻ.
+ * Slouží k ukládání a vyhledávání ověřovacích tokenů
+ * používaných při aktivaci uživatelských účtů.
  */
 public interface EmailVerificationTokenRepository
         extends JpaRepository<EmailVerificationTokenEntity, Long> {
 
     /**
-     * VyhledĂˇ ovÄ›Ĺ™ovacĂ­ token podle jeho hodnoty.
+     * Vyhledá ověřovací token podle jeho hodnoty.
      *
-     * PouĹľĂ­vĂˇ se pĹ™i ovÄ›Ĺ™ovĂˇnĂ­ aktivaÄŤnĂ­ho odkazu uĹľivatele.
+     * Používá se při ověřování aktivačního odkazu uživatele.
      *
-     * @param token hodnota ovÄ›Ĺ™ovacĂ­ho tokenu
-     * @return token zabalenĂ˝ v {@link Optional}, pokud existuje
+     * @param token hodnota ověřovacího tokenu
+     * @return token zabalený v {@link Optional}, pokud existuje
      */
     Optional<EmailVerificationTokenEntity> findByToken(String token);
+
+    void deleteByUser(AppUserEntity user);
+
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\ForgottenPasswordResetTokenRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.ForgottenPasswordResetTokenEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface ForgottenPasswordResetTokenRepository
+        extends JpaRepository<ForgottenPasswordResetTokenEntity, Long> {
+
+    Optional<ForgottenPasswordResetTokenEntity> findByToken(String token);
+
+    void deleteByUser(AppUserEntity user);
 }
 
 
@@ -91,48 +146,51 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 /**
- * RepozitĂˇĹ™ pro prĂˇci s entitou {@link MatchRegistrationHistoryEntity}.
+ * Repozitář pro práci s entitou {@link MatchRegistrationHistoryEntity}.
  *
- * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ historickĂ˝ch (auditnĂ­ch) zĂˇznamĹŻ zmÄ›n
- * registracĂ­ hrĂˇÄŤĹŻ k zĂˇpasĹŻm.
+ * Slouží k načítání historických (auditních) záznamů změn
+ * registrací hráčů k zápasům.
  */
 public interface MatchRegistrationHistoryRepository
         extends JpaRepository<MatchRegistrationHistoryEntity, Long> {
 
     /**
-     * VrĂˇtĂ­ historii zmÄ›n konkrĂ©tnĂ­ registrace.
+     * Vrátí historii změn konkrétní registrace.
      *
-     * ZĂˇznamy jsou seĹ™azeny sestupnÄ› podle ÄŤasu zmÄ›ny
-     * (nejnovÄ›jĹˇĂ­ zmÄ›na jako prvnĂ­).
+     * Záznamy jsou seřazeny sestupně podle času změny
+     * (nejnovější změna jako první).
      *
-     * @param matchRegistrationId ID pĹŻvodnĂ­ registrace
-     * @return seznam historickĂ˝ch zĂˇznamĹŻ
+     * @param matchRegistrationId ID původní registrace
+     * @return seznam historických záznamů
      */
     List<MatchRegistrationHistoryEntity>
     findByMatchRegistrationIdOrderByChangedAtDesc(Long matchRegistrationId);
 
     /**
-     * VrĂˇtĂ­ historii vĹˇech zmÄ›n registracĂ­ pro danĂ˝ zĂˇpas.
+     * Vrátí historii všech změn registrací pro daný zápas.
      *
-     * PouĹľĂ­vĂˇ se napĹ™. pro administrativnĂ­ pĹ™ehledy
-     * nebo auditnĂ­ kontrolu zĂˇpasu.
+     * Používá se např. pro administrativní přehledy
+     * nebo auditní kontrolu zápasu.
      *
-     * @param matchId ID zĂˇpasu
-     * @return seznam historickĂ˝ch zĂˇznamĹŻ
+     * @param matchId ID zápasu
+     * @return seznam historických záznamů
      */
     List<MatchRegistrationHistoryEntity>
     findByMatchIdOrderByChangedAtDesc(Long matchId);
 
     /**
-     * VrĂˇtĂ­ historii zmÄ›n registracĂ­ konkrĂ©tnĂ­ho hrĂˇÄŤe.
+     * Vrátí historii změn registrací konkrétního hráče.
      *
-     * ZĂˇznamy jsou seĹ™azeny sestupnÄ› podle ÄŤasu zmÄ›ny.
+     * Záznamy jsou seřazeny sestupně podle času změny.
      *
-     * @param playerId ID hrĂˇÄŤe
-     * @return seznam historickĂ˝ch zĂˇznamĹŻ
+     * @param playerId ID hráče
+     * @return seznam historických záznamů
      */
     List<MatchRegistrationHistoryEntity>
     findByPlayerIdOrderByChangedAtDesc(Long playerId);
+
+    List<MatchRegistrationHistoryEntity>
+    findByMatchIdAndPlayerIdOrderByChangedAtDesc(Long matchId, Long playerId);
 }
 
 
@@ -152,73 +210,73 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * RepozitĂˇĹ™ pro prĂˇci s entitou {@link MatchRegistrationEntity}.
+ * Repozitář pro práci s entitou {@link MatchRegistrationEntity}.
  *
- * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ a sprĂˇvÄ› registracĂ­ hrĂˇÄŤĹŻ k zĂˇpasĹŻm,
- * vÄŤetnÄ› kontroly existence registrace, poÄŤtĹŻ hrĂˇÄŤĹŻ
- * a vyhledĂˇvĂˇnĂ­ dle zĂˇpasu nebo hrĂˇÄŤe.
+ * Slouží k načítání a správě registrací hráčů k zápasům,
+ * včetně kontroly existence registrace, počtů hráčů
+ * a vyhledávání dle zápasu nebo hráče.
  */
 @Repository
 public interface MatchRegistrationRepository
         extends JpaRepository<MatchRegistrationEntity, Long> {
 
     /**
-     * OvÄ›Ĺ™Ă­, zda existuje registrace hrĂˇÄŤe k danĂ©mu zĂˇpasu.
+     * Ověří, zda existuje registrace hráče k danému zápasu.
      *
-     * PouĹľĂ­vĂˇ se zejmĂ©na k rychlĂ© kontrole existence
-     * registrace bez nutnosti naÄŤĂ­tat celou entitu.
+     * Používá se zejména k rychlé kontrole existence
+     * registrace bez nutnosti načítat celou entitu.
      *
-     * @param playerId ID hrĂˇÄŤe
-     * @param matchId  ID zĂˇpasu
+     * @param playerId ID hráče
+     * @param matchId  ID zápasu
      * @return {@code true}, pokud registrace existuje
      */
     Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
 
     /**
-     * VrĂˇtĂ­ vĹˇechny registrace k danĂ©mu zĂˇpasu.
+     * Vrátí všechny registrace k danému zápasu.
      *
-     * @param matchId ID zĂˇpasu
-     * @return seznam registracĂ­
+     * @param matchId ID zápasu
+     * @return seznam registrací
      */
     List<MatchRegistrationEntity> findByMatchId(Long matchId);
 
     /**
-     * VrĂˇtĂ­ vĹˇechny registrace danĂ©ho hrĂˇÄŤe.
+     * Vrátí všechny registrace daného hráče.
      *
-     * @param playerId ID hrĂˇÄŤe
-     * @return seznam registracĂ­
+     * @param playerId ID hráče
+     * @return seznam registrací
      */
     List<MatchRegistrationEntity> findByPlayerId(Long playerId);
 
     /**
-     * Najde konkrĂ©tnĂ­ registraci hrĂˇÄŤe k zĂˇpasu.
+     * Najde konkrétní registraci hráče k zápasu.
      *
-     * @param playerId ID hrĂˇÄŤe
-     * @param matchId  ID zĂˇpasu
-     * @return registrace zabalenĂˇ v {@link Optional}, pokud existuje
+     * @param playerId ID hráče
+     * @param matchId  ID zápasu
+     * @return registrace zabalená v {@link Optional}, pokud existuje
      */
     Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
 
     /**
-     * SpoÄŤĂ­tĂˇ poÄŤet registracĂ­ danĂ©ho zĂˇpasu podle stavu.
+     * Spočítá počet registrací daného zápasu podle stavu.
      *
-     * Typicky se pouĹľĂ­vĂˇ pro zjiĹˇtÄ›nĂ­ aktuĂˇlnĂ­
-     * obsazenosti zĂˇpasu.
+     * Typicky se používá pro zjištění aktuální
+     * obsazenosti zápasu.
      *
-     * @param matchId ID zĂˇpasu
+     * @param matchId ID zápasu
      * @param status  stav registrace
-     * @return poÄŤet registracĂ­
+     * @return počet registrací
      */
     long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
 
     /**
-     * VrĂˇtĂ­ registrace pro vĂ­ce zĂˇpasĹŻ najednou.
+     * Vrátí registrace pro více zápasů najednou.
      *
-     * PouĹľĂ­vĂˇ se napĹ™. pĹ™i hromadnĂ©m naÄŤĂ­tĂˇnĂ­
-     * registracĂ­ pro pĹ™ehledy a statistiky.
+     * Používá se např. při hromadném načítání
+     * registrací pro přehledy a statistiky.
      *
-     * @param matchIds seznam ID zĂˇpasĹŻ
-     * @return seznam registracĂ­
+     * @param matchIds seznam ID zápasů
+     * @return seznam registrací
      */
     List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
 }
@@ -238,75 +296,75 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * RepozitĂˇĹ™ pro prĂˇci s entitou {@link MatchEntity}.
+ * Repozitář pro práci s entitou {@link MatchEntity}.
  *
- * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ zĂˇpasĹŻ podle ÄŤasu konĂˇnĂ­ a sezĂłny,
- * zejmĂ©na pro pĹ™ehledy nadchĂˇzejĂ­cĂ­ch a odehranĂ˝ch zĂˇpasĹŻ.
+ * Slouží k načítání zápasů podle času konání a sezóny,
+ * zejména pro přehledy nadcházejících a odehraných zápasů.
  */
 public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
 
     // ==================================================
-    // ZĂPASY PODLE DATA (NEZĂVISLE NA SEZĂ“NÄš)
+    // ZÁPASY PODLE DATA (NEZÁVISLE NA SEZÓNĚ)
     // ==================================================
 
     /**
-     * VrĂˇtĂ­ vĹˇechny zĂˇpasy konajĂ­cĂ­ se po zadanĂ©m ÄŤase.
+     * Vrátí všechny zápasy konající se po zadaném čase.
      *
-     * ZĂˇpasy jsou seĹ™azeny vzestupnÄ› podle data konĂˇnĂ­
-     * (nejbliĹľĹˇĂ­ zĂˇpas jako prvnĂ­).
+     * Zápasy jsou seřazeny vzestupně podle data konání
+     * (nejbližší zápas jako první).
      *
-     * @param dateTime referenÄŤnĂ­ datum a ÄŤas
-     * @return seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ
+     * @param dateTime referenční datum a čas
+     * @return seznam nadcházejících zápasů
      */
     List<MatchEntity> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
 
     /**
-     * VrĂˇtĂ­ vĹˇechny zĂˇpasy konajĂ­cĂ­ se pĹ™ed zadanĂ˝m ÄŤasem.
+     * Vrátí všechny zápasy konající se před zadaným časem.
      *
-     * ZĂˇpasy jsou seĹ™azeny sestupnÄ› podle data konĂˇnĂ­
-     * (nejnovÄ›jĹˇĂ­ odehranĂ˝ zĂˇpas jako prvnĂ­).
+     * Zápasy jsou seřazeny sestupně podle data konání
+     * (nejnovější odehraný zápas jako první).
      *
-     * @param dateTime referenÄŤnĂ­ datum a ÄŤas
-     * @return seznam odehranĂ˝ch zĂˇpasĹŻ
+     * @param dateTime referenční datum a čas
+     * @return seznam odehraných zápasů
      */
     List<MatchEntity> findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime dateTime);
 
     // ==================================================
-    // ZĂPASY V KONKRĂ‰TNĂŤ SEZĂ“NÄš
+    // ZÁPASY V KONKRÉTNÍ SEZÓNĚ
     // ==================================================
 
     /**
-     * VrĂˇtĂ­ vĹˇechny zĂˇpasy v danĂ© sezĂłnÄ› seĹ™azenĂ©
-     * vzestupnÄ› podle data konĂˇnĂ­.
+     * Vrátí všechny zápasy v dané sezóně seřazené
+     * vzestupně podle data konání.
      *
-     * @param seasonId ID sezĂłny
-     * @return seznam zĂˇpasĹŻ v sezĂłnÄ›
+     * @param seasonId ID sezóny
+     * @return seznam zápasů v sezóně
      */
     List<MatchEntity> findAllBySeasonIdOrderByDateTimeAsc(Long seasonId);
 
     /**
-     * VrĂˇtĂ­ vĹˇechny zĂˇpasy v danĂ© sezĂłnÄ› seĹ™azenĂ©
-     * sestupnÄ› podle data konĂˇnĂ­.
+     * Vrátí všechny zápasy v dané sezóně seřazené
+     * sestupně podle data konání.
      *
-     * @param seasonId ID sezĂłny
-     * @return seznam zĂˇpasĹŻ v sezĂłnÄ›
+     * @param seasonId ID sezóny
+     * @return seznam zápasů v sezóně
      */
     List<MatchEntity> findAllBySeasonIdOrderByDateTimeDesc(Long seasonId);
 
     // ==================================================
-    // ZĂPASY V SEZĂ“NÄš S ÄŚASOVĂťM OMEZENĂŤM
+    // ZÁPASY V SEZÓNĚ S ČASOVÝM OMEZENÍM
     // ==================================================
 
     /**
-     * VrĂˇtĂ­ zĂˇpasy v danĂ© sezĂłnÄ›, kterĂ© se konajĂ­
-     * po zadanĂ©m ÄŤase.
+     * Vrátí zápasy v dané sezóně, které se konají
+     * po zadaném čase.
      *
-     * PouĹľĂ­vĂˇ se zejmĂ©na pro naÄŤĂ­tĂˇnĂ­ nadchĂˇzejĂ­cĂ­ch
-     * zĂˇpasĹŻ v aktivnĂ­ sezĂłnÄ›.
+     * Používá se zejména pro načítání nadcházejících
+     * zápasů v aktivní sezóně.
      *
-     * @param seasonId ID sezĂłny
-     * @param from     referenÄŤnĂ­ datum a ÄŤas
-     * @return seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ v sezĂłnÄ›
+     * @param seasonId ID sezóny
+     * @param from     referenční datum a čas
+     * @return seznam nadcházejících zápasů v sezóně
      */
     List<MatchEntity> findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(
             Long seasonId,
@@ -314,15 +372,15 @@ public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
     );
 
     /**
-     * VrĂˇtĂ­ zĂˇpasy v danĂ© sezĂłnÄ›, kterĂ© se konaly
-     * pĹ™ed zadanĂ˝m ÄŤasem.
+     * Vrátí zápasy v dané sezóně, které se konaly
+     * před zadaným časem.
      *
-     * PouĹľĂ­vĂˇ se zejmĂ©na pro pĹ™ehled odehranĂ˝ch
-     * zĂˇpasĹŻ v sezĂłnÄ›.
+     * Používá se zejména pro přehled odehraných
+     * zápasů v sezóně.
      *
-     * @param seasonId ID sezĂłny
-     * @param to       referenÄŤnĂ­ datum a ÄŤas
-     * @return seznam odehranĂ˝ch zĂˇpasĹŻ v sezĂłnÄ›
+     * @param seasonId ID sezóny
+     * @param to       referenční datum a čas
+     * @return seznam odehraných zápasů v sezóně
      */
     List<MatchEntity> findBySeasonIdAndDateTimeBeforeOrderByDateTimeDesc(
             Long seasonId,
@@ -347,25 +405,25 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * RepozitĂˇĹ™ pro prĂˇci s entitou {@link PlayerInactivityPeriodEntity}.
+ * Repozitář pro práci s entitou {@link PlayerInactivityPeriodEntity}.
  *
- * SlouĹľĂ­ k evidenci a vyhledĂˇvĂˇnĂ­ obdobĂ­ neaktivity hrĂˇÄŤĹŻ,
- * zejmĂ©na pro ovÄ›Ĺ™enĂ­ dostupnosti hrĂˇÄŤe v konkrĂ©tnĂ­m ÄŤase.
+ * Slouží k evidenci a vyhledávání období neaktivity hráčů,
+ * zejména pro ověření dostupnosti hráče v konkrétním čase.
  */
 @Repository
 public interface PlayerInactivityPeriodRepository
         extends JpaRepository<PlayerInactivityPeriodEntity, Long> {
 
     /**
-     * OvÄ›Ĺ™Ă­, zda je hrĂˇÄŤ v danĂ©m ÄŤasovĂ©m okamĹľiku neaktivnĂ­.
+     * Ověří, zda je hráč v daném časovém okamžiku neaktivní.
      *
-     * PouĹľĂ­vĂˇ se napĹ™. pĹ™i registraci hrĂˇÄŤe na zĂˇpas
-     * nebo pĹ™i kontrole jeho dostupnosti.
+     * Používá se např. při registraci hráče na zápas
+     * nebo při kontrole jeho dostupnosti.
      *
-     * @param player hrĂˇÄŤ, jehoĹľ neaktivita se ovÄ›Ĺ™uje
-     * @param from   referenÄŤnĂ­ ÄŤas (obvykle ÄŤas zĂˇpasu)
-     * @param to     referenÄŤnĂ­ ÄŤas (obvykle shodnĂ˝ s {@code from})
-     * @return {@code true}, pokud hrĂˇÄŤ spadĂˇ do obdobĂ­ neaktivity
+     * @param player hráč, jehož neaktivita se ověřuje
+     * @param from   referenční čas (obvykle čas zápasu)
+     * @param to     referenční čas (obvykle shodný s {@code from})
+     * @return {@code true}, pokud hráč spadá do období neaktivity
      */
     boolean existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
             PlayerEntity player,
@@ -374,16 +432,16 @@ public interface PlayerInactivityPeriodRepository
     );
 
     /**
-     * VrĂˇtĂ­ vĹˇechna obdobĂ­ neaktivity hrĂˇÄŤe, kterĂˇ
-     * se pĹ™ekrĂ˝vajĂ­ se zadanĂ˝m ÄŤasovĂ˝m intervalem.
+     * Vrátí všechna období neaktivity hráče, která
+     * se překrývají se zadaným časovým intervalem.
      *
-     * PouĹľĂ­vĂˇ se zejmĂ©na pĹ™i validaci vytvĂˇĹ™enĂ­
-     * nebo Ăşpravy obdobĂ­ neaktivity.
+     * Používá se zejména při validaci vytváření
+     * nebo úpravy období neaktivity.
      *
-     * @param player hrĂˇÄŤ
-     * @param from   zaÄŤĂˇtek kontrolovanĂ©ho intervalu
-     * @param to     konec kontrolovanĂ©ho intervalu
-     * @return seznam pĹ™ekrĂ˝vajĂ­cĂ­ch se obdobĂ­ neaktivity
+     * @param player hráč
+     * @param from   začátek kontrolovaného intervalu
+     * @param to     konec kontrolovaného intervalu
+     * @return seznam překrývajících se období neaktivity
      */
     List<PlayerInactivityPeriodEntity>
     findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
@@ -393,11 +451,11 @@ public interface PlayerInactivityPeriodRepository
     );
 
     /**
-     * VrĂˇtĂ­ vĹˇechna obdobĂ­ neaktivity danĂ©ho hrĂˇÄŤe
-     * seĹ™azenĂˇ vzestupnÄ› podle zaÄŤĂˇtku neaktivity.
+     * Vrátí všechna období neaktivity daného hráče
+     * seřazená vzestupně podle začátku neaktivity.
      *
-     * @param player hrĂˇÄŤ
-     * @return seznam obdobĂ­ neaktivity hrĂˇÄŤe
+     * @param player hráč
+     * @return seznam období neaktivity hráče
      */
     List<PlayerInactivityPeriodEntity>
     findByPlayerOrderByInactiveFromAsc(PlayerEntity player);
@@ -418,88 +476,114 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * RepozitĂˇĹ™ pro prĂˇci s entitou {@link PlayerEntity}.
+ * Repozitář pro práci s entitou {@link PlayerEntity}.
  *
- * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ a sprĂˇvÄ› hrĂˇÄŤĹŻ, zejmĂ©na ve vztahu
- * k uĹľivatelskĂ˝m ĂşÄŤtĹŻm a identifikaci hrĂˇÄŤĹŻ podle jmĂ©na
- * nebo emailu vlastnĂ­ka.
+ * Slouží k načítání a správě hráčů, zejména ve vztahu
+ * k uživatelským účtům a identifikaci hráčů podle jména
+ * nebo emailu vlastníka.
  */
 public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
 
     /**
-     * Najde hrĂˇÄŤe podle jeho ID.
+     * Najde hráče podle jeho ID.
      *
-     * PĹ™ekrĂ˝vĂˇ zĂˇkladnĂ­ metodu {@link JpaRepository},
-     * aby bylo moĹľnĂ© vracet {@link Optional}.
+     * Překrývá základní metodu {@link JpaRepository},
+     * aby bylo možné vracet {@link Optional}.
      *
-     * @param id ID hrĂˇÄŤe
-     * @return hrĂˇÄŤ zabalenĂ˝ v {@link Optional}, pokud existuje
+     * @param id ID hráče
+     * @return hráč zabalený v {@link Optional}, pokud existuje
      */
     Optional<PlayerEntity> findById(Long id);
 
     /**
-     * VrĂˇtĂ­ vĹˇechny hrĂˇÄŤe, jejichĹľ ID nenĂ­ obsaĹľeno
-     * v zadanĂ©m seznamu.
+     * Vrátí všechny hráče, jejichž ID není obsaženo
+     * v zadaném seznamu.
      *
-     * PouĹľĂ­vĂˇ se napĹ™. pĹ™i filtrovĂˇnĂ­ dostupnĂ˝ch hrĂˇÄŤĹŻ.
+     * Používá se např. při filtrování dostupných hráčů.
      *
-     * @param ids seznam ID hrĂˇÄŤĹŻ, kterĂ© majĂ­ bĂ˝t vylouÄŤeny
-     * @return seznam hrĂˇÄŤĹŻ
+     * @param ids seznam ID hráčů, které mají být vyloučeny
+     * @return seznam hráčů
      */
     List<PlayerEntity> findByIdNotIn(List<Long> ids);
 
     /**
-     * OvÄ›Ĺ™Ă­, zda jiĹľ existuje hrĂˇÄŤ se stejnĂ˝m jmĂ©nem a pĹ™Ă­jmenĂ­m.
+     * Ověří, zda již existuje hráč se stejným jménem a příjmením.
      *
-     * PouĹľĂ­vĂˇ se jako ochrana proti duplicitnĂ­mu
-     * vytvĂˇĹ™enĂ­ hrĂˇÄŤĹŻ.
+     * Používá se jako ochrana proti duplicitnímu
+     * vytváření hráčů.
      *
-     * @param name    jmĂ©no hrĂˇÄŤe
-     * @param surname pĹ™Ă­jmenĂ­ hrĂˇÄŤe
-     * @return {@code true}, pokud hrĂˇÄŤ existuje
+     * @param name    jméno hráče
+     * @param surname příjmení hráče
+     * @return {@code true}, pokud hráč existuje
      */
     boolean existsByNameAndSurname(String name, String surname);
 
     /**
-     * Najde hrĂˇÄŤe podle jmĂ©na a pĹ™Ă­jmenĂ­.
+     * Najde hráče podle jména a příjmení.
      *
-     * @param name    jmĂ©no hrĂˇÄŤe
-     * @param surname pĹ™Ă­jmenĂ­ hrĂˇÄŤe
-     * @return hrĂˇÄŤ zabalenĂ˝ v {@link Optional}, pokud existuje
+     * @param name    jméno hráče
+     * @param surname příjmení hráče
+     * @return hráč zabalený v {@link Optional}, pokud existuje
      */
     Optional<PlayerEntity> findByNameAndSurname(String name, String surname);
 
     /**
-     * Najde jednoho hrĂˇÄŤe podle emailu uĹľivatele,
-     * ke kterĂ©mu je hrĂˇÄŤ pĹ™iĹ™azen.
+     * Najde jednoho hráče podle emailu uživatele,
+     * ke kterému je hráč přiřazen.
      *
-     * PouĹľĂ­vĂˇ se zejmĂ©na v pĹ™Ă­padech, kdy mĂˇ uĹľivatel
-     * pouze jednoho hrĂˇÄŤe.
+     * Používá se zejména v případech, kdy má uživatel
+     * pouze jednoho hráče.
      *
-     * @param email email uĹľivatele
-     * @return hrĂˇÄŤ zabalenĂ˝ v {@link Optional}, pokud existuje
+     * @param email email uživatele
+     * @return hráč zabalený v {@link Optional}, pokud existuje
      */
     Optional<PlayerEntity> findByUserEmail(String email);
 
     /**
-     * VrĂˇtĂ­ vĹˇechny hrĂˇÄŤe patĹ™Ă­cĂ­ danĂ©mu uĹľivateli.
+     * Vrátí všechny hráče patřící danému uživateli.
      *
-     * @param email email uĹľivatele
-     * @return seznam hrĂˇÄŤĹŻ uĹľivatele
+     * @param email email uživatele
+     * @return seznam hráčů uživatele
      */
     List<PlayerEntity> findAllByUserEmail(String email);
 
     /**
-     * VrĂˇtĂ­ vĹˇechny hrĂˇÄŤe uĹľivatele seĹ™azenĂ©
-     * podle ID vzestupnÄ›.
+     * Vrátí všechny hráče uživatele seřazené
+     * podle ID vzestupně.
      *
-     * PouĹľĂ­vĂˇ se pro konzistentnĂ­ vĂ˝pis hrĂˇÄŤĹŻ
-     * v uĹľivatelskĂ©m rozhranĂ­.
+     * Používá se pro konzistentní výpis hráčů
+     * v uživatelském rozhraní.
      *
-     * @param email email uĹľivatele
-     * @return seznam hrĂˇÄŤĹŻ uĹľivatele
+     * @param email email uživatele
+     * @return seznam hráčů uživatele
      */
     List<PlayerEntity> findByUser_EmailOrderByIdAsc(String email);
+}
+
+
+
+-----
+# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\data\repositories\PlayerSettingsRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s nastavením hráče (PlayerSettingsEntity).
+ */
+public interface PlayerSettingsRepository extends JpaRepository<PlayerSettingsEntity, Long> {
+
+    Optional<PlayerSettingsEntity> findByPlayer(PlayerEntity player);
+
+    Optional<PlayerSettingsEntity> findByPlayerId(Long playerId);
+
+    boolean existsByPlayer(PlayerEntity player);
 }
 
 
@@ -518,42 +602,42 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * RepozitĂˇĹ™ pro prĂˇci s entitou {@link SeasonEntity}.
+ * Repozitář pro práci s entitou {@link SeasonEntity}.
  *
- * SlouĹľĂ­ ke sprĂˇvÄ› sezĂłn, zejmĂ©na k urÄŤenĂ­ aktivnĂ­ sezĂłny,
- * kontrole ÄŤasovĂ˝ch pĹ™ekryvĹŻ a naÄŤĂ­tĂˇnĂ­ sezĂłn
- * v chronologickĂ©m poĹ™adĂ­.
+ * Slouží ke správě sezón, zejména k určení aktivní sezóny,
+ * kontrole časových překryvů a načítání sezón
+ * v chronologickém pořadí.
  */
 public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
 
     /**
-     * VrĂˇtĂ­ aktuĂˇlnÄ› aktivnĂ­ sezĂłnu.
+     * Vrátí aktuálně aktivní sezónu.
      *
-     * V systĂ©mu mĹŻĹľe bĂ˝t v danĂ©m okamĹľiku
-     * aktivnĂ­ maximĂˇlnÄ› jedna sezĂłna.
+     * V systému může být v daném okamžiku
+     * aktivní maximálně jedna sezóna.
      *
-     * @return aktivnĂ­ sezĂłna zabalenĂˇ v {@link Optional}, pokud existuje
+     * @return aktivní sezóna zabalená v {@link Optional}, pokud existuje
      */
     Optional<SeasonEntity> findByActiveTrue();
 
     /**
-     * VrĂˇtĂ­ vĹˇechny sezĂłny seĹ™azenĂ©
-     * podle data zaÄŤĂˇtku vzestupnÄ›.
+     * Vrátí všechny sezóny seřazené
+     * podle data začátku vzestupně.
      *
-     * @return seznam sezĂłn
+     * @return seznam sezón
      */
     List<SeasonEntity> findAllByOrderByStartDateAsc();
 
     /**
-     * OvÄ›Ĺ™Ă­, zda existuje sezĂłna, kterĂˇ se ÄŤasovÄ›
-     * pĹ™ekrĂ˝vĂˇ se zadanĂ˝m intervalem.
+     * Ověří, zda existuje sezóna, která se časově
+     * překrývá se zadaným intervalem.
      *
-     * PouĹľĂ­vĂˇ se pĹ™i vytvĂˇĹ™enĂ­ novĂ© sezĂłny
-     * jako ochrana proti pĹ™ekrĂ˝vajĂ­cĂ­m se obdobĂ­m.
+     * Používá se při vytváření nové sezóny
+     * jako ochrana proti překrývajícím se obdobím.
      *
-     * @param endDate   konec kontrolovanĂ©ho intervalu
-     * @param startDate zaÄŤĂˇtek kontrolovanĂ©ho intervalu
-     * @return {@code true}, pokud existuje ÄŤasovĂ˝ pĹ™ekryv
+     * @param endDate   konec kontrolovaného intervalu
+     * @param startDate začátek kontrolovaného intervalu
+     * @return {@code true}, pokud existuje časový překryv
      */
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqual(
             LocalDate endDate,
@@ -561,16 +645,16 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
     );
 
     /**
-     * OvÄ›Ĺ™Ă­, zda existuje jinĂˇ sezĂłna (mimo zadanĂ© ID),
-     * kterĂˇ se ÄŤasovÄ› pĹ™ekrĂ˝vĂˇ se zadanĂ˝m intervalem.
+     * Ověří, zda existuje jiná sezóna (mimo zadané ID),
+     * která se časově překrývá se zadaným intervalem.
      *
-     * PouĹľĂ­vĂˇ se pĹ™i aktualizaci existujĂ­cĂ­ sezĂłny,
-     * aby nedoĹˇlo ke kolizi s jinou sezĂłnou.
+     * Používá se při aktualizaci existující sezóny,
+     * aby nedošlo ke kolizi s jinou sezónou.
      *
-     * @param endDate   konec kontrolovanĂ©ho intervalu
-     * @param startDate zaÄŤĂˇtek kontrolovanĂ©ho intervalu
-     * @param id        ID sezĂłny, kterĂˇ mĂˇ bĂ˝t z kontroly vynechĂˇna
-     * @return {@code true}, pokud existuje ÄŤasovĂ˝ pĹ™ekryv
+     * @param endDate   konec kontrolovaného intervalu
+     * @param startDate začátek kontrolovaného intervalu
+     * @param id        ID sezóny, která má být z kontroly vynechána
+     * @return {@code true}, pokud existuje časový překryv
      */
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(
             LocalDate endDate,
@@ -579,12 +663,12 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
     );
 
     /**
-     * SpoÄŤĂ­tĂˇ poÄŤet aktivnĂ­ch sezĂłn.
+     * Spočítá počet aktivních sezón.
      *
-     * SlouĹľĂ­ jako ochrana proti stavu,
-     * kdy by bylo aktivnĂ­ch vĂ­ce sezĂłn souÄŤasnÄ›.
+     * Slouží jako ochrana proti stavu,
+     * kdy by bylo aktivních více sezón současně.
      *
-     * @return poÄŤet aktivnĂ­ch sezĂłn
+     * @return počet aktivních sezón
      */
     long countByActiveTrue();
 }

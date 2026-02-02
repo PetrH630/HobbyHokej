@@ -16,48 +16,48 @@ package cz.phsoft.hokej.models.dto.requests;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Request DTO pro zmÄ›nu pĹ™iĹ™azenĂ©ho uĹľivatele k hrĂˇÄŤi.
+ * Request DTO pro změnu přiřazeného uživatele k hráči.
  * <p>
- * SlouĹľĂ­ jako vstupnĂ­ objekt pro administrĂˇtorskĂ© endpointy,
- * kterĂ© umoĹľĹujĂ­ zmÄ›nit vazbu mezi hrĂˇÄŤem a aplikaÄŤnĂ­m uĹľivatelem.
+ * Slouží jako vstupní objekt pro administrátorské endpointy,
+ * které umožňují změnit vazbu mezi hráčem a aplikačním uživatelem.
  * </p>
  *
- * TypickĂ© pouĹľitĂ­:
+ * Typické použití:
  * <ul>
- *     <li>oprava chybnÄ› pĹ™iĹ™azenĂ©ho uĹľivatelskĂ©ho ĂşÄŤtu k hrĂˇÄŤi,</li>
- *     <li>pĹ™evod hrĂˇÄŤe pod jinĂ˝ ĂşÄŤet,</li>
- *     <li>technickĂ© nebo datovĂ© korekce provĂˇdÄ›nĂ© administrĂˇtorem.</li>
+ *     <li>oprava chybně přiřazeného uživatelského účtu k hráči,</li>
+ *     <li>převod hráče pod jiný účet,</li>
+ *     <li>technické nebo datové korekce prováděné administrátorem.</li>
  * </ul>
  *
  * Validace:
  * <ul>
- *     <li>{@link NotNull} â€“ ID novĂ©ho uĹľivatele musĂ­ bĂ˝t vĹľdy uvedeno.</li>
+ *     <li>{@link NotNull} – ID nového uživatele musí být vždy uvedeno.</li>
  * </ul>
  *
- * TĹ™Ă­da neobsahuje ĹľĂˇdnou business logiku â€“ slouĹľĂ­ vĂ˝hradnÄ›
- * jako pĹ™enosovĂ˝ objekt mezi klientem a API vrstvou.
+ * Třída neobsahuje žádnou business logiku – slouží výhradně
+ * jako přenosový objekt mezi klientem a API vrstvou.
  */
 public class ChangePlayerUserRequest {
 
     /**
-     * ID novĂ©ho uĹľivatele, ke kterĂ©mu mĂˇ bĂ˝t hrĂˇÄŤ pĹ™iĹ™azen.
+     * ID nového uživatele, ke kterému má být hráč přiřazen.
      */
     @NotNull
     private Long newUserId;
 
     /**
-     * VrĂˇtĂ­ ID novĂ©ho uĹľivatele.
+     * Vrátí ID nového uživatele.
      *
-     * @return ID uĹľivatele
+     * @return ID uživatele
      */
     public Long getNewUserId() {
         return newUserId;
     }
 
     /**
-     * NastavĂ­ ID novĂ©ho uĹľivatele.
+     * Nastaví ID nového uživatele.
      *
-     * @param newUserId ID uĹľivatele, ke kterĂ©mu mĂˇ bĂ˝t hrĂˇÄŤ pĹ™iĹ™azen
+     * @param newUserId ID uživatele, ke kterému má být hráč přiřazen
      */
     public void setNewUserId(Long newUserId) {
         this.newUserId = newUserId;
@@ -78,76 +78,83 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 /**
- * Request DTO pro zmÄ›nu registrace hrĂˇÄŤe na zĂˇpas.
+ * Request DTO pro změnu registrace hráče na zápas.
  *
- * ĂšÄŚEL:
+ * ÚČEL:
  * -----
- * SlouĹľĂ­ jako vstupnĂ­ objekt pro operace:
+ * Slouží jako vstupní objekt pro operace:
  * <ul>
- *     <li>pĹ™ihlĂˇĹˇenĂ­ hrĂˇÄŤe na zĂˇpas,</li>
- *     <li>odhlĂˇĹˇenĂ­ hrĂˇÄŤe ze zĂˇpasu,</li>
- *     <li>omluvenĂ­ hrĂˇÄŤe (EXCUSED),</li>
- *     <li>administrĂˇtorskĂ© zĂˇsahy do registrace.</li>
+ *     <li>přihlášení hráče na zápas,</li>
+ *     <li>odhlášení hráče ze zápasu,</li>
+ *     <li>omluvení hráče (EXCUSED),</li>
+ *     <li>administrátorské zásahy do registrace.</li>
  * </ul>
  *
- * Tento request je zpracovĂˇvĂˇn metodou
+ * Tento request je zpracováván metodou
  * {@code MatchRegistrationService#upsertRegistration(...)}.
  *
- * POZNĂMKA:
+ * POZNÁMKA:
  * ---------
- * Ne vĹˇechna pole jsou povinnĂˇ â€“ jejich vĂ˝znam a validace
- * zĂˇvisĂ­ na konkrĂ©tnĂ­ operaci a business logice sluĹľby.
+ * Ne všechna pole jsou povinná – jejich význam a validace
+ * závisí na konkrétní operaci a business logice služby.
  */
 public class MatchRegistrationRequest {
 
     /**
-     * ID zĂˇpasu, ke kterĂ©mu se registrace vztahuje.
+     * ID zápasu, ke kterému se registrace vztahuje.
      */
     @NotNull
     @Positive
     private Long matchId;
 
     /**
-     * ID hrĂˇÄŤe.
+     * ID hráče.
      *
      * Typicky:
      * <ul>
-     *     <li>u endpointĹŻ typu {@code /me} mĹŻĹľe bĂ˝t {@code null}
-     *         a hrĂˇÄŤ je urÄŤen kontextem,</li>
-     *     <li>u administrĂˇtorskĂ˝ch operacĂ­ je vyplnÄ›no explicitnÄ›.</li>
+     *     <li>u endpointů typu {@code /me} může být {@code null}
+     *         a hráč je určen kontextem,</li>
+     *     <li>u administrátorských operací je vyplněno explicitně.</li>
      * </ul>
      */
     private Long playerId;
 
     /**
-     * TĂ˝m, do kterĂ©ho je hrĂˇÄŤ pĹ™iĹ™azen (napĹ™. DARK / LIGHT).
+     * Tým, do kterého je hráč přiřazen (např. DARK / LIGHT).
      */
     private Team team;
 
     /**
-     * DĹŻvod omluvy â€“ pouĹľĂ­vĂˇ se pouze pĹ™i statusu
+     * Důvod omluvy – používá se pouze při statusu
      * {@code EXCUSED}
      * {@code UNREGISTER}
      */
     private ExcuseReason excuseReason;
 
     /**
-     * VolitelnĂˇ poznĂˇmka k omluvÄ› od hrĂˇÄŤe.
+     * Volitelná poznámka k omluvě od hráče.
      */
     private String excuseNote;
 
     /**
-     * AdministrĂˇtorskĂˇ poznĂˇmka k registraci
-     * (napĹ™. no-show, internĂ­ komentĂˇĹ™).
+     * Administrátorská poznámka k registraci
+     * (např. no-show, interní komentář).
      */
     private String adminNote;
 
     /**
-     * PĹ™Ă­znak odhlĂˇĹˇenĂ­ ze zĂˇpasu.
+     * Příznak odhlášení ze zápasu.
      *
      * Pokud je {@code true}, request reprezentuje akci UNREGISTER.
      */
     private boolean unregister;
+
+    /**
+     * Příznak náhradníka do zápasu (možná příjde - už nějak reagoval).
+     *
+     * Pokud je {@code true}, request reprezentuje akci SUBSTITUTE.
+     */
+    private boolean substitute;
 
     // --- gettery ---
 
@@ -158,6 +165,8 @@ public class MatchRegistrationRequest {
     public String getExcuseNote() { return excuseNote; }
     public String getAdminNote() { return adminNote; }
     public boolean isUnregister() { return unregister; }
+    public boolean isSubstitute() { return substitute; }
+    public void setSubstitute(boolean substitute) { this.substitute = substitute; }
 }
 
 

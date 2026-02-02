@@ -7,15 +7,16 @@ const CurrentPlayerContext = createContext(null);
 export const CurrentPlayerProvider = ({ children }) => {
     const [currentPlayer, setCurrentPlayer] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null); // volitelné, ale hodí se
+    const [error, setError] = useState(null);
 
     const refreshCurrentPlayer = async () => {
         setLoading(true);
         setError(null);
 
         try {
-            const data = await getCurrentPlayer();   //  přímo data
-            setCurrentPlayer(data);                  // PlayerDTO nebo null
+            const data = await getCurrentPlayer();   // PlayerDTO nebo null
+            setCurrentPlayer(data);
+            return data;
         } catch (err) {
             console.error("Nepodařilo se načíst aktuálního hráče", err);
             setCurrentPlayer(null);
@@ -26,6 +27,7 @@ export const CurrentPlayerProvider = ({ children }) => {
                 "Nepodařilo se načíst aktuálního hráče";
 
             setError(message);
+            return null;
         } finally {
             setLoading(false);
         }
@@ -40,10 +42,10 @@ export const CurrentPlayerProvider = ({ children }) => {
         <CurrentPlayerContext.Provider
             value={{
                 currentPlayer,
-                setCurrentPlayer,      // setter z useState – můžeš ho dál používat ručně
+                setCurrentPlayer,
                 refreshCurrentPlayer,
                 loading,
-                error,                 // teď máš k dispozici i error
+                error,
             }}
         >
             {children}
@@ -53,8 +55,17 @@ export const CurrentPlayerProvider = ({ children }) => {
 
 export const useCurrentPlayer = () => {
     const ctx = useContext(CurrentPlayerContext);
+
+    // 👇 DŮLEŽITÁ ZMĚNA – místo throw vrátíme „safe fallback“
     if (!ctx) {
-        throw new Error("useCurrentPlayer musí být použit uvnitř CurrentPlayerProvider");
+        return {
+            currentPlayer: null,
+            setCurrentPlayer: () => { },
+            refreshCurrentPlayer: async () => null,
+            loading: false,
+            error: null,
+        };
     }
+
     return ctx;
 };
