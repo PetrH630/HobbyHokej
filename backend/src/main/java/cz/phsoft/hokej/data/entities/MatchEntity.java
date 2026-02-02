@@ -7,10 +7,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující zápas.
+ * Entita reprezentující hokejový zápas.
  *
- * Obsahuje základní informace o zápasu, jeho kapacitě,
- * stavu a vazbě na sezónu.
+ * Uchovává základní informace o zápasu, jeho kapacitě,
+ * ceně, aktuálním stavu a vazbě na sezónu.
+ * Informace o účasti hráčů jsou uloženy v samostatné entitě
+ * MatchRegistrationEntity.
  */
 @Entity
 @Table(name = "matches")
@@ -50,13 +52,13 @@ public class MatchEntity {
     private Integer price;
 
     /**
-     * Aktuální stav zápasu (např. aktivní, zrušený).
+     * Aktuální stav zápasu.
      */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
     /**
-     * Důvod zrušení zápasu (pouze pokud je zápas zrušen).
+     * Důvod zrušení zápasu, pokud je zápas zrušen.
      */
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
@@ -71,32 +73,39 @@ public class MatchEntity {
     public MatchEntity() {
     }
 
-    // gettery / settery
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public LocalDateTime getDateTime() { return dateTime; }
+
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
     public String getLocation() { return location; }
+
     public void setLocation(String location) { this.location = location; }
 
     public String getDescription() { return description; }
+
     public void setDescription(String description) { this.description = description; }
 
     public Integer getMaxPlayers() { return maxPlayers; }
+
     public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 
     public Integer getPrice() { return price; }
+
     public void setPrice(Integer price) { this.price = price; }
 
     public MatchStatus getMatchStatus() { return matchStatus; }
+
     public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
 
     public MatchCancelReason getCancelReason() { return cancelReason; }
+
     public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
 
     public SeasonEntity getSeason() { return season; }
+
     public void setSeason(SeasonEntity season) { this.season = season; }
 }

@@ -7,11 +7,12 @@ import jakarta.persistence.*;
 import java.time.LocalTime;
 
 /**
- * Entita uchovávající nastavení uživatelského účtu (AppUserEntity).
+ * Entita uchovávající nastavení uživatelského účtu.
  *
- * Odděluje:
- * - identitu uživatele (AppUserEntity: login, heslo, role...)
- * - jeho preference a chování v systému (AppUserSettingsEntity).
+ * Odděluje identitu uživatele (AppUserEntity) od jeho preferencí
+ * a chování v systému (AppUserSettingsEntity). Slouží zejména
+ * pro nastavení výběru hráče, globální úrovně notifikací a
+ * preferencí souvisejících s uživatelským rozhraním.
  */
 @Entity
 @Table(name = "app_user_settings")
@@ -22,7 +23,8 @@ public class AppUserSettingsEntity {
     private Long id;
 
     /**
-     * Jeden záznam AppUserSettingsEntity pro jednoho uživatele.
+     * Uživatel, ke kterému tato nastavení patří.
+     * Pro jednoho uživatele existuje právě jeden záznam nastavení.
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -38,75 +40,68 @@ public class AppUserSettingsEntity {
 
     /**
      * Globální úroveň notifikací pro uživatele.
-     * Určuje, kolik notifikací bude dostávat on sám,
-     * nezávisle na hráčích.
+     * Určuje, kolik notifikací bude uživatel dostávat
+     * bez ohledu na nastavení konkrétních hráčů.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "global_notification_level", nullable = false, length = 50)
     private GlobalNotificationLevel globalNotificationLevel = GlobalNotificationLevel.ALL;
 
     /**
-     * Má uživatel dostávat kopie všech notifikací,
-     * které chodí jeho hráčům?
+     * Určuje, zda má uživatel dostávat kopie všech notifikací,
+     * které chodí jeho hráčům.
      *
      * Příklad:
-     * - TRUE: rodič chce mít přehled o všem, co se děje u dětí
-     * - FALSE: spoléhá se jen na notifikace hráčů.
+     * true: rodič chce mít přehled o všem, co se děje u dětí.
+     * false: spoléhá se pouze na notifikace hráčů.
      */
     @Column(name = "copy_all_player_notifications_to_user_email", nullable = false)
     private boolean copyAllPlayerNotificationsToUserEmail = true;
 
     /**
-     * Má uživatel dostávat notifikace i za hráče,
-     * kteří mají vlastní email (contactEmail v PlayerSettings)?
+     * Určuje, zda má uživatel dostávat notifikace i za hráče,
+     * kteří mají vlastní email (contactEmail v PlayerSettings).
      *
      * Příklad:
-     * - FALSE: když má dítě vlastní email, chodí notifikace jen jemu
-     * - TRUE: rodič chce kopii, i když má hráč svůj email.
+     * false: pokud má hráč vlastní email, chodí notifikace pouze jemu.
+     * true: uživatel dostává kopie notifikací i v tomto případě.
      */
     @Column(name = "receive_notifications_for_players_with_own_email", nullable = false)
     private boolean receiveNotificationsForPlayersWithOwnEmail = false;
 
     /**
-     * Má uživatel preferovat denní souhrn (digest)
-     * místo jednotlivých notifikací během dne?
+     * Určuje, zda má být používán denní souhrn (digest) místo
+     * jednotlivých notifikací během dne.
      */
     @Column(name = "email_digest_enabled", nullable = false)
     private boolean emailDigestEnabled = false;
 
     /**
      * Čas, kdy má chodit souhrnný email, pokud je digest zapnutý.
-     * Např. 20:00.
      */
     @Column(name = "email_digest_time")
     private LocalTime emailDigestTime;
 
     /**
      * Preferovaný jazyk uživatelského rozhraní.
-     * Např. "cs", "en".
+     * Například "cs" nebo "en".
      */
     @Column(name = "ui_language", length = 10)
     private String uiLanguage = "cs";
 
     /**
-     * Časová zóna uživatele, např. "Europe/Prague".
+     * Časová zóna uživatele.
+     * Například "Europe/Prague".
      */
     @Column(name = "timezone", length = 50)
     private String timezone = "Europe/Prague";
 
     /**
      * Výchozí obrazovka po přihlášení.
-     * Může být např. "DASHBOARD", "MATCHES", "PLAYERS".
-     *
-     * Z praktických důvodů ji necháme jako String,
-     * enum můžeme doplnit později, pokud bude potřeba.
+     * Z praktických důvodů je uložena jako řetězec.
      */
     @Column(name = "default_landing_page", length = 50)
     private String defaultLandingPage = "DASHBOARD";
-
-    // =========================================
-    // Gettery a settery
-    // =========================================
 
     public Long getId() {
         return id;

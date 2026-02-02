@@ -5,9 +5,9 @@ import jakarta.persistence.*;
 /**
  * Entita uchovávající nastavení konkrétního hráče.
  *
- * Odděluje:
- * - identitu hráče (PlayerEntity: jméno, tým, status...)
- * - jeho notifikační preference a kontaktní údaje (PlayerSettingsEntity).
+ * Odděluje identitu hráče (PlayerEntity) od jeho kontaktních údajů
+ * a detailních notifikačních preferencí. Nastavení se využívá
+ * při rozhodování o tom, zda a jak budou hráči doručovány notifikace.
  */
 @Entity
 @Table(name = "player_settings")
@@ -18,118 +18,83 @@ public class PlayerSettingsEntity {
     private Long id;
 
     /**
-     * Jeden záznam PlayerSettingsEntity pro jednoho hráče.
+     * Hráč, ke kterému toto nastavení patří.
+     * Pro jednoho hráče existuje právě jeden záznam nastavení.
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false, unique = true)
     private PlayerEntity player;
 
-    // =========================================
-    // KONTAKT
-    // =========================================
-
     /**
      * Volitelný email hráče.
-     *
-     * Pokud je null/prázdný, používá se email uživatele (AppUser.email).
-     * Toto pole tedy představuje "override", nikoliv povinný údaj.
+     * Pokud není vyplněn, může se použít email uživatele (AppUserEntity).
      */
     @Column(name = "contact_email", length = 255)
     private String contactEmail;
 
     /**
-     * Volitelné telefonní číslo hráče pro SMS.
-     *
-     * Pokud je null/prázdné, můžeš se rozhodnout:
-     * - buď SMS neposílat,
-     * - nebo použít telefon z jiného zdroje (pokud ho máš).
+     * Volitelné telefonní číslo hráče pro SMS notifikace.
      */
     @Column(name = "contact_phone", length = 50)
     private String contactPhone;
 
-    // =========================================
-    // KANÁLY (EMAIL / SMS)
-    // =========================================
-
     /**
-     * Má hráč dostávat emailové notifikace?
-     *
-     * Pozn.: i když je TRUE, je potřeba mít k dispozici
-     * efektivní email (contactEmail nebo email účtu).
+     * Příznak, zda má hráč dostávat emailové notifikace.
      */
     @Column(name = "email_enabled", nullable = false)
     private boolean emailEnabled = true;
 
     /**
-     * Má hráč dostávat SMS notifikace?
-     *
-     * Opět je nutné mít vyplněný kontakt (contactPhone),
-     * jinak se SMS nebude posílat.
+     * Příznak, zda má hráč dostávat SMS notifikace.
      */
     @Column(name = "sms_enabled", nullable = false)
     private boolean smsEnabled = false;
 
-    // =========================================
-    // TYPY NOTIFIKACÍ (detailní flagy)
-    // =========================================
-
     /**
-     * Chce být hráč informován o své registraci / odhlášení na zápas?
+     * Příznak, zda chce hráč notifikace o registraci a odhlášení.
      */
     @Column(name = "notify_on_registration", nullable = false)
     private boolean notifyOnRegistration = true;
 
     /**
-     * Chce být hráč informován o změně svého statusu na omluveného (EXCUSED)?
+     * Příznak, zda chce hráč notifikace o omluvách.
      */
     @Column(name = "notify_on_excuse", nullable = false)
     private boolean notifyOnExcuse = true;
 
     /**
-     * Chce být hráč informován o změnách zápasu
-     * (čas, místo, popis...)?
+     * Příznak, zda chce hráč notifikace o změnách zápasu.
      */
     @Column(name = "notify_on_match_change", nullable = false)
     private boolean notifyOnMatchChange = true;
 
     /**
-     * Chce být hráč informován o zrušení zápasu?
+     * Příznak, zda chce hráč notifikace o zrušení zápasu.
      */
     @Column(name = "notify_on_match_cancel", nullable = false)
     private boolean notifyOnMatchCancel = true;
 
     /**
-     * Chce hráč notifikace o platbách / dluzích / vyúčtování?
-     * (zatím do budoucna, můžeš začít i s FALSE a používat později).
+     * Příznak, zda chce hráč notifikace o platbách nebo vyúčtování.
      */
     @Column(name = "notify_on_payment", nullable = false)
     private boolean notifyOnPayment = false;
 
-    // =========================================
-    // PŘIPOMÍNKY PŘED ZÁPASEM
-    // =========================================
-
     /**
-     * Má hráč dostávat připomínky před zápasem?
+     * Příznak, zda má hráč dostávat připomínky před zápasem.
      */
     @Column(name = "notify_reminders", nullable = false)
     private boolean notifyReminders = true;
 
     /**
-     * Kolik hodin před začátkem zápasu poslat připomínku.
-     * Např. 24 = den předem.
-     *
-     * Pokud je null, můžeš v logice použít default (např. 24 h).
+     * Počet hodin před začátkem zápasu, kdy má být odeslána připomínka.
+     * Například hodnota 24 znamená připomínku den předem.
      */
     @Column(name = "reminder_hours_before")
     private Integer reminderHoursBefore = 24;
 
-    // =========================================
-    // "KATEGORIE" – odvozené pohledy pro NotificationType
-    // =========================================
-
     /**
-     * Kategorie REGISTRATION – registrování / odhlašování na zápas.
+     * Určuje, zda jsou povoleny notifikace týkající se registrací.
      */
     @Transient
     public boolean isRegistrationNotificationsEnabled() {
@@ -137,7 +102,7 @@ public class PlayerSettingsEntity {
     }
 
     /**
-     * Kategorie EXCUSE – omluvy a neomluvení.
+     * Určuje, zda jsou povoleny notifikace týkající se omluv.
      */
     @Transient
     public boolean isExcuseNotificationsEnabled() {
@@ -145,8 +110,8 @@ public class PlayerSettingsEntity {
     }
 
     /**
-     * Kategorie MATCH_INFO – info o zápase:
-     * změna času/místa, zrušení, připomínky.
+     * Určuje, zda jsou povoleny notifikace týkající se informací o zápase,
+     * například změn a připomínek.
      */
     @Transient
     public boolean isMatchInfoNotificationsEnabled() {
@@ -156,17 +121,13 @@ public class PlayerSettingsEntity {
     }
 
     /**
-     * Kategorie SYSTEM – systémové věci (např. platby, do budoucna další).
-     * Zatím svážeme s notifyOnPayment.
+     * Určuje, zda jsou povoleny systémové notifikace,
+     * například o platbách.
      */
     @Transient
     public boolean isSystemNotificationsEnabled() {
         return notifyOnPayment;
     }
-
-    // =========================================
-    // GETTERY / SETTERY
-    // =========================================
 
     public Long getId() {
         return id;

@@ -8,9 +8,9 @@ import jakarta.persistence.*;
 /**
  * Entita reprezentující hráče v systému.
  *
- * Hráč představuje sportovní identitu uživatele a je
- * používán při registracích na zápasy, notifikacích
- * a statistikách.
+ * Hráč představuje sportovní identitu v aplikaci a je používán
+ * při registracích na zápasy, notifikacích a statistikách.
+ * Hráč může, ale nemusí mít přiřazeného aplikačního uživatele.
  */
 @Entity
 @Table(name = "player_entity")
@@ -32,14 +32,14 @@ public class PlayerEntity {
     private String nickname;
 
     /**
-     * Typ hráče (např. BASIC, STANDARD, VIP).
+     * Typ hráče, například BASIC, STANDARD nebo VIP.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerType type;
 
     /**
-     * Celé jméno hráče (odvozené z name + surname).
+     * Celé jméno hráče odvozené z křestního jména a příjmení.
      */
     private String fullName;
 
@@ -55,30 +55,25 @@ public class PlayerEntity {
     private Team team;
 
     /**
-     * Aktuální stav hráče v systému (např. PENDING, APPROVED).
+     * Aktuální stav hráče v systému.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerStatus playerStatus = PlayerStatus.PENDING;
 
     /**
-     * Uživatel, ke kterému hráč patří.
+     * Uživatelský účet, ke kterému hráč patří.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private AppUserEntity user;
 
     /**
-     * Nastavení hráče – kontakty a notifikační preference.
-     *
+     * Nastavení hráče, zejména kontaktní údaje a notifikační preference.
      * Jeden hráč má právě jedno PlayerSettingsEntity.
      */
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private PlayerSettingsEntity settings;
-
-    // ==================================================
-    // KONSTRUKTORY
-    // ==================================================
 
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
@@ -102,57 +97,58 @@ public class PlayerEntity {
         updateFullName();
     }
 
-    // ==================================================
-    // GETTERY / SETTERY
-    // ==================================================
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
+
     public void setName(String name) {
         this.name = name;
         updateFullName();
     }
 
     public String getSurname() { return surname; }
+
     public void setSurname(String surname) {
         this.surname = surname;
         updateFullName();
     }
 
     public String getNickname() { return nickname; }
+
     public void setNickname(String nickname) { this.nickname = nickname; }
 
     public String getFullName() { return fullName; }
 
     public PlayerType getType() { return type; }
+
     public void setType(PlayerType type) { this.type = type; }
 
     public String getPhoneNumber() { return phoneNumber; }
+
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
     public Team getTeam() { return team; }
+
     public void setTeam(Team team) { this.team = team; }
 
     public PlayerStatus getPlayerStatus() { return playerStatus; }
+
     public void setPlayerStatus(PlayerStatus playerStatus) { this.playerStatus = playerStatus; }
 
     public AppUserEntity getUser() { return user; }
-    public void setUser(AppUserEntity user) { this.user = user; }
 
+    public void setUser(AppUserEntity user) { this.user = user; }
 
     public PlayerSettingsEntity getSettings() { return settings; }
 
-    public void setSettings(PlayerSettingsEntity settings) { this.settings = settings;
+    public void setSettings(PlayerSettingsEntity settings) {
+        this.settings = settings;
         if (settings != null) {
             settings.setPlayer(this);
         }
     }
-
-    // ==================================================
-    // HELPER
-    // ==================================================
 
     /**
      * Aktualizuje celé jméno hráče podle jména a příjmení.
@@ -160,6 +156,4 @@ public class PlayerEntity {
     private void updateFullName() {
         this.fullName = name + " " + surname;
     }
-
-
 }

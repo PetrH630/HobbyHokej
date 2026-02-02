@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující období neaktivity hráče.
  *
- * Slouží k evidenci časových úseků, ve kterých hráč
- * není k dispozici (např. zranění, dovolená).
+ * Slouží k evidenci časových úseků, ve kterých se hráč
+ * neúčastní zápasů, například z důvodu zranění nebo dovolené.
  */
 @Entity
 @Table(name = "player_inactivity_period")
@@ -37,17 +37,19 @@ public class PlayerInactivityPeriodEntity {
     @Column(name = "inactive_to", nullable = false)
     private LocalDateTime inactiveTo;
 
-    // gettery / settery
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public PlayerEntity getPlayer() { return player; }
+
     public void setPlayer(PlayerEntity player) { this.player = player; }
 
     public LocalDateTime getInactiveFrom() { return inactiveFrom; }
+
     public void setInactiveFrom(LocalDateTime inactiveFrom) { this.inactiveFrom = inactiveFrom; }
 
     public LocalDateTime getInactiveTo() { return inactiveTo; }
+
     public void setInactiveTo(LocalDateTime inactiveTo) { this.inactiveTo = inactiveTo; }
 }

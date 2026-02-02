@@ -8,8 +8,9 @@ import java.util.Set;
 /**
  * Entita reprezentující uživatelský účet aplikace.
  *
- * Slouží pro autentizaci a autorizaci uživatelů.
+ * Slouží pro autentizaci a autorizaci uživatelů v systému.
  * Jeden uživatel může mít přiřazeno více hráčů.
+ * Detailní nastavení uživatele je odděleno do entity AppUserSettingsEntity.
  */
 @Entity
 @Table(name = "app_users")
@@ -45,7 +46,8 @@ public class AppUserEntity {
     private Role role;
 
     /**
-     * Příznak aktivace účtu (např. po emailové aktivaci).
+     * Příznak aktivace účtu.
+     * Nastaví se například po úspěšné emailové aktivaci.
      */
     @Column(nullable = false)
     private boolean enabled = false;
@@ -60,47 +62,45 @@ public class AppUserEntity {
     )
     private Set<PlayerEntity> players;
 
-    // nastavení uživatele (AppUserSettingsEntity)
     /**
-     * Nastavení uživatele (způsob výběru hráče, notifikace atd.).
+     * Nastavení uživatele (způsob výběru hráče, notifikace a další preference).
      *
      * Jeden uživatel má právě jedno AppUserSettingsEntity.
      */
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private AppUserSettingsEntity settings;
 
+    public Long getId() { return id; }
 
-    public Long getId() {return id;}
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {this.id = id;}
+    public String getName() { return name; }
 
-    public String getName() {return name;}
-
-    public void setName(String name) {this.name = name;}
+    public void setName(String name) { this.name = name; }
 
     public String getSurname() { return surname; }
 
     public void setSurname(String surname) { this.surname = surname; }
 
-    public String getEmail() {return email;}
+    public String getEmail() { return email; }
 
-    public void setEmail(String email) {this.email = email;}
+    public void setEmail(String email) { this.email = email; }
 
-    public String getPassword() {return password;}
+    public String getPassword() { return password; }
 
-    public void setPassword(String password) {this.password = password;}
+    public void setPassword(String password) { this.password = password; }
 
-    public Role getRole() {return role;}
+    public Role getRole() { return role; }
 
-    public void setRole(Role role) {this.role = role;}
+    public void setRole(Role role) { this.role = role; }
 
-    public boolean isEnabled() {    return enabled;    }
+    public boolean isEnabled() { return enabled; }
 
-    public void setEnabled(boolean enabled) {  this.enabled = enabled;    }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public Set<PlayerEntity> getPlayers() {return players;}
+    public Set<PlayerEntity> getPlayers() { return players; }
 
-    public void setPlayers(Set<PlayerEntity> players) {this.players = players;}
+    public void setPlayers(Set<PlayerEntity> players) { this.players = players; }
 
     public AppUserSettingsEntity getSettings() { return settings; }
 
@@ -110,5 +110,4 @@ public class AppUserEntity {
             settings.setUser(this);
         }
     }
-
 }

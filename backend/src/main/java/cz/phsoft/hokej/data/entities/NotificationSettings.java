@@ -1,12 +1,14 @@
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.Embeddable;
+
 // TODO - ASI SMAZAT PO OTESTOVÁNÍ Z SETTINGS
+
 /**
- * Vnořitelný objekt reprezentující nastavení notifikací uživatele / hráče.
+ * Vnořitelný objekt reprezentující základní nastavení notifikačních kanálů.
  *
- * Slouží k určení, jakými kanály si uživatel přeje
- * přijímat systémové notifikace.
+ * Slouží k určení, zda jsou povoleny emailové a SMS notifikace.
+ * Lze jej vkládat jako embeddable do různých entit podle potřeby.
  */
 @Embeddable
 public class NotificationSettings {
@@ -21,11 +23,11 @@ public class NotificationSettings {
      */
     private boolean smsEnabled;
 
-    // gettery / settery
-
     public boolean isEmailEnabled() { return emailEnabled; }
+
     public void setEmailEnabled(boolean emailEnabled) { this.emailEnabled = emailEnabled; }
 
     public boolean isSmsEnabled() { return smsEnabled; }
+
     public void setSmsEnabled(boolean smsEnabled) { this.smsEnabled = smsEnabled; }
 }

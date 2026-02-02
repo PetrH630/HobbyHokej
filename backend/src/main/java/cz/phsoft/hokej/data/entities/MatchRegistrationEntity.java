@@ -10,8 +10,10 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující registraci hráče k zápasu.
  *
- * Uchovává informace o účasti hráče, jeho stavu,
- * případné omluvě a administrativních poznámkách.
+ * Uchovává informace o účasti hráče, jeho aktuálním stavu,
+ * případné omluvě a administrativních poznámkách. Samostatná
+ * entita umožňuje sledovat změny registrace a pracovat
+ * s historií účasti.
  */
 @Entity
 @Table(name = "match_registrations")
@@ -43,7 +45,7 @@ public class MatchRegistrationEntity {
     private PlayerMatchStatus status;
 
     /**
-     * Důvod omluvy hráče (pouze pokud je hráč omluven).
+     * Důvod omluvy hráče, pokud je hráč omluven.
      */
     @Enumerated(EnumType.STRING)
     private ExcuseReason excuseReason;
@@ -54,8 +56,7 @@ public class MatchRegistrationEntity {
     private String excuseNote;
 
     /**
-     * Administrativní poznámka k registraci
-     * (např. neomluvená absence).
+     * Administrativní poznámka k registraci.
      */
     private String adminNote;
 
@@ -68,19 +69,14 @@ public class MatchRegistrationEntity {
 
     /**
      * Časové razítko registrace.
-     *
-     * Používá se pro určení pořadí registrací
-     * (např. při uvolnění místa po odhlášení).
+     * Používá se například pro určení pořadí přihlášení.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
      * Původ vytvoření registrace.
-     *
-     * Typicky:
-     * - "user"   – registrace vytvořená hráčem,
-     * - "system" – automatická registrace dle kapacity.
+     * Typické hodnoty jsou například "user" nebo "system".
      */
     @Column(nullable = false, updatable = true)
     private String createdBy;
@@ -88,35 +84,43 @@ public class MatchRegistrationEntity {
     public MatchRegistrationEntity() {
     }
 
-    // gettery / settery
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public MatchEntity getMatch() { return match; }
+
     public void setMatch(MatchEntity match) { this.match = match; }
 
     public PlayerEntity getPlayer() { return player; }
+
     public void setPlayer(PlayerEntity player) { this.player = player; }
 
     public PlayerMatchStatus getStatus() { return status; }
+
     public void setStatus(PlayerMatchStatus status) { this.status = status; }
 
     public ExcuseReason getExcuseReason() { return excuseReason; }
+
     public void setExcuseReason(ExcuseReason excuseReason) { this.excuseReason = excuseReason; }
 
     public String getExcuseNote() { return excuseNote; }
+
     public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
 
     public String getAdminNote() { return adminNote; }
+
     public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
 
     public Team getTeam() { return team; }
+
     public void setTeam(Team team) { this.team = team; }
 
     public LocalDateTime getTimestamp() { return timestamp; }
+
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 
     public String getCreatedBy() { return createdBy; }
+
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 }

@@ -10,8 +10,9 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující historický záznam změn registrace hráče k zápasu.
  *
- * Slouží k auditování změn registrací (vytvoření, úprava, zrušení)
- * a uchovává kompletní stav registrace v okamžiku změny.
+ * Slouží k auditování změn registrací, včetně vytvoření, úprav a zrušení.
+ * Uchovává stav registrace v okamžiku změny a základní údaje o původu
+ * provedené operace.
  */
 @Entity
 @Table(name = "match_registration_history")
@@ -23,7 +24,7 @@ public class MatchRegistrationHistoryEntity {
 
     /**
      * Typ provedené operace nad registrací.
-     * (INSERT / UPDATE / DELETE)
+     * Typicky hodnoty INSERT, UPDATE nebo DELETE.
      */
     @Column(name = "action", nullable = false)
     private String action;
@@ -41,7 +42,8 @@ public class MatchRegistrationHistoryEntity {
     private LocalDateTime changedAt;
 
     /**
-     * Původ vytvoření / změny registrace (např. "user", "system").
+     * Původ vytvoření nebo změny registrace.
+     * Typicky hodnoty jako "user" nebo "system".
      */
     @Column(name = "created_by", nullable = false)
     private String createdBy;
@@ -53,7 +55,7 @@ public class MatchRegistrationHistoryEntity {
     private String excuseNote;
 
     /**
-     * Důvod omluvy hráče (pokud byl stav EXCUSED).
+     * Důvod omluvy hráče, pokud byl stav omluvený.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "excuse_reason")
@@ -66,7 +68,7 @@ public class MatchRegistrationHistoryEntity {
     private Long matchId;
 
     /**
-     * ID původní registrace z hlavní tabulky.
+     * ID původní registrace z hlavní tabulky registrací.
      */
     @Column(name = "match_registration_id", nullable = false)
     private Long matchRegistrationId;
@@ -99,8 +101,6 @@ public class MatchRegistrationHistoryEntity {
 
     public MatchRegistrationHistoryEntity() {
     }
-
-    // ===== gettery / settery =====
 
     public Long getId() { return id; }
 
