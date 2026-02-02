@@ -12,22 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementace {@link EmailService} pro odesílání emailů přes WEDOS (SMTP).
- * <p>
- * Odpovědnosti:
- * <ul>
- *     <li>odesílání jednoduchých textových emailů,</li>
- *     <li>odesílání HTML emailů (např. aktivační emaily),</li>
- *     <li>zapouzdření práce s {@link JavaMailSender},</li>
- *     <li>centrální místo pro emailovou komunikaci aplikace.</li>
- * </ul>
+ * Implementace EmailService pro odesílání emailů přes SMTP (WEDOS).
  *
- * Vlastnosti:
- * <ul>
- *     <li>odesílání probíhá asynchronně ({@link Async}),</li>
- *     <li>emaily lze globálně vypnout pomocí konfigurace ({@code email.enabled}),</li>
- *     <li>chyby při odesílání NIKDY neshodí aplikaci – pouze se zalogují.</li>
- * </ul>
+ * Třída zapouzdřuje práci s JavaMailSenderem a představuje
+ * centrální místo pro veškerou emailovou komunikaci aplikace.
+ *
+ * Odesílání emailů probíhá asynchronně a je možné jej globálně
+ * vypnout pomocí konfigurační vlastnosti.
  */
 @Service
 public class EmailWedosService implements EmailService {
@@ -35,23 +26,11 @@ public class EmailWedosService implements EmailService {
     private static final Logger log =
             LoggerFactory.getLogger(EmailWedosService.class);
 
-    /**
-     * Spring JavaMailSender.
-     * Konfigurace (SMTP server, port, auth, atd.)
-     * se načítá z application.properties / application.yml.
-     */
     private final JavaMailSender mailSender;
 
-    /**
-     * Výchozí email odesílatele (FROM).
-     * Typicky např. info@phsoft.cz.
-     */
     @Value("${spring.mail.from}")
     private String fromEmail;
 
-    /**
-     * Globální přepínač pro zapnutí / vypnutí emailů.
-     */
     @Value("${email.enabled:true}")
     private boolean emailEnabled;
 
@@ -59,21 +38,18 @@ public class EmailWedosService implements EmailService {
         this.mailSender = mailSender;
     }
 
-    // ====================================================
-    // 1) JEDNODUCHÝ TEXTOVÝ EMAIL
-    // ====================================================
-
     /**
-     * {@inheritDoc}
+     * Odešle jednoduchý textový email.
+     *
+     * Pokud jsou emaily globálně vypnuté, zpráva se pouze zaloguje.
+     * Chyby při odesílání nejsou propagovány do vyšších vrstev.
      */
     @Override
     @Async
     public void sendSimpleEmail(String to, String subject, String text) {
 
-        // globální vypnutí emailů (např. v dev/test prostředí)
         if (!emailEnabled) {
-            log.info("MAIL JE VYPNUTÝ – email nebyl odeslán na: {}", to);
-            System.out.println("MAIL JE VYPNUTÝ – email nebyl odeslán na: " + to);
+            log.info("Email je vypnutý – zpráva nebyla odeslána na {}", to);
             return;
         }
 
@@ -85,133 +61,93 @@ public class EmailWedosService implements EmailService {
             message.setFrom(fromEmail);
 
             mailSender.send(message);
-
             log.debug("Textový email byl odeslán na {}", to);
-            System.out.println("Email byl odeslán na " + to);
 
         } catch (Exception e) {
-            // chyby při odesílání emailů NESMÍ shodit aplikaci
             log.error("Chyba při odesílání emailu na {}: {}", to, e.getMessage(), e);
-            System.out.println("Chyba při odesílání emailu na: " + to);
         }
     }
 
-    // ====================================================
-    // 2) HTML EMAIL
-    // ====================================================
-
     /**
-     * {@inheritDoc}
+     * Odešle HTML email.
+     *
+     * Používá se například pro aktivační a notifikační emaily.
      */
     @Override
     @Async
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
 
-        // globální vypnutí emailů
         if (!emailEnabled) {
-            log.info("MAIL JE VYPNUTÝ – HTML email nebyl odeslán na: {}", to);
-            System.out.println("MAIL JE VYPNUTÝ – email nebyl odeslán na: " + to);
+            log.info("Email je vypnutý – HTML zpráva nebyla odeslána na {}", to);
             return;
         }
 
         try {
-            System.out.println("email existuje - jdu zkusit poslat zprávu");
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper =
                     new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(htmlContent, true); // true = HTML obsah
+            helper.setText(htmlContent, true);
             helper.setFrom(fromEmail);
-            System.out.println("teď budu posílat");
-            mailSender.send(mimeMessage);
-            System.out.println("Email byl odeslán na " + to);
 
-            log.debug(
-                    "HTML email odeslán na {} se subjectem '{}'",
-                    to,
-                    subject
-            );
+            mailSender.send(mimeMessage);
+
+            log.debug("HTML email byl odeslán na {}", to);
 
         } catch (MessagingException e) {
-            // opět pouze logujeme, aplikace běží dál
-            log.error(
-                    "Chyba při odesílání HTML emailu na {}: {}",
-                    to,
-                    e.getMessage(),
-                    e
-            );
-            System.out.println("Chyba při odesílání HTML emailu na: " + to);
+            log.error("Chyba při odesílání HTML emailu na {}: {}", to, e.getMessage(), e);
         }
     }
 
-    // ====================================================
-    // 3) KONKRÉTNÍ EMAILY – AKTIVACE ÚČTU
-    // ====================================================
+    // Konkrétní emaily – aktivace účtu
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void sendActivationEmail(String to, String salutation, String activationLink) {
-        String subject = "Potvrzení registrace - App - Hokej Stará Garda";
+        String subject = "Potvrzení registrace – Hokej Stará Garda";
         String text =
-                "Dobrý den, " + salutation + " \n\n" +
-                        "Klikněte na tento odkaz pro aktivaci účtu:\n" +
+                "Dobrý den, " + salutation + "\n\n" +
+                        "Pro aktivaci účtu klikněte na následující odkaz:\n" +
                         activationLink + "\n\n" +
-                        "Platnost odkazu: 24 hodin.\n\n" +
-                        "Děkujeme!";
+                        "Platnost odkazu je 24 hodin.";
 
         sendSimpleEmail(to, subject, text);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @Async
     public void sendActivationEmailHTML(String to, String salutation, String activationLink) {
-        String subject = "Potvrzení registrace - App - Hokej Stará Garda";
+        String subject = "Potvrzení registrace – Hokej Stará Garda";
         String html =
-                "<p>Dobrý den, <br>" + salutation + ",</p>" +
-                "<p>Děkujeme za registraci účtu.</p><br><br>" +
-                        "<p>Klikněte na odkaz pro aktivaci účtu:</p>" +
-                        "<p>Platnost odkazu: 24 hodin</p>" +
+                "<p>Dobrý den,</p>" +
+                        "<p>" + salutation + "</p>" +
+                        "<p>Pro aktivaci účtu klikněte na následující odkaz:</p>" +
                         "<a href=\"" + activationLink + "\">Aktivovat účet</a>";
 
         sendHtmlEmail(to, subject, html);
     }
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     @Async
     public void sendSuccesActivationEmail(String to, String salutation) {
-        String subject = "Aktivace účtu - App - Hokej Stará Garda";
+        String subject = "Účet byl aktivován – Hokej Stará Garda";
         String text =
-                "Dobrý den, " + salutation + " " +
-                       "váš účet byl úspěšně aktivován" +
-                        "Děkujeme!";
+                "Dobrý den, " + salutation + "\n\n" +
+                        "Váš účet byl úspěšně aktivován.";
 
         sendSimpleEmail(to, subject, text);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @Async
     public void sendSuccesActivationEmailHTML(String to, String salutation) {
-        System.out.println("jdu posílat email na " + to);
-        String subject = "Aktivace účtu - App - Hokej Stará Garda";
+        String subject = "Účet byl aktivován – Hokej Stará Garda";
         String html =
-                "<p>Dobrý den</p><br><br>" +
-                        "<p>" + salutation + "<br></p>" +
-                        "<p>Váš účet byl úspěšně aktivován</p><br><br>" +
-                        "<p> Děkujeme </p>";
+                "<p>Dobrý den,</p>" +
+                        "<p>" + salutation + "</p>" +
+                        "<p>Váš účet byl úspěšně aktivován.</p>";
 
-        System.out.println("Zpráva vytvořena : " + html);
         sendHtmlEmail(to, subject, html);
     }
 }

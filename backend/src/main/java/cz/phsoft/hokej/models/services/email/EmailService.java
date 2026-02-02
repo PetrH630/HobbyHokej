@@ -1,71 +1,46 @@
 package cz.phsoft.hokej.models.services.email;
 
 /**
- * Rozhraní pro odesílání emailových notifikací.
+ * Rozhraní definující kontrakt pro odesílání emailových zpráv.
  *
- * Účel:
- * <ul>
- *     <li>poskytnout jednotný vstupní bod pro odesílání emailů,</li>
- *     <li>oddělit business logiku od konkrétní implementace (WEDOS, jiný provider),</li>
- *     <li>umožnit snadnou výměnu implementace bez změny business kódu.</li>
- * </ul>
+ * Slouží jako abstrahovaná vrstva nad konkrétní implementací
+ * emailového providera. Umožňuje oddělit business logiku
+ * notifikací od technického způsobu odesílání emailů.
  *
- * Implementační poznámky:
- * <ul>
- *     <li>odesílání emailu je „best-effort“ operace,</li>
- *     <li>výjimky by se neměly propagovat do business vrstvy,</li>
- *     <li>implementace může odesílat asynchronně.</li>
- * </ul>
+ * Implementace rozhraní:
+ * - nesmí propagovat chyby do business vrstvy,
+ * - může odesílat emaily asynchronně,
+ * - má fungovat v režimu best-effort.
  */
 public interface EmailService {
 
     /**
      * Odešle jednoduchý textový email.
-     *
-     * @param to      cílová emailová adresa
-     * @param subject předmět emailu
-     * @param text    textový obsah emailu
      */
     void sendSimpleEmail(String to, String subject, String text);
 
     /**
-     * Odešle HTML email.
-     *
-     * @param to          cílová emailová adresa
-     * @param subject     předmět emailu
-     * @param htmlContent HTML obsah zprávy
+     * Odešle email s HTML obsahem.
      */
     void sendHtmlEmail(String to, String subject, String htmlContent);
 
     /**
-     * Odešle jednoduchý textový aktivační email.
-     *
-     * @param to             cílový email
-     * @param activationLink aktivační odkaz
+     * Odešle textový aktivační email.
      */
     void sendActivationEmail(String to, String salutation, String activationLink);
 
     /**
      * Odešle HTML aktivační email.
-     *
-     * @param to             cílový email
-     * @param activationLink aktivační odkaz
      */
     void sendActivationEmailHTML(String to, String salutation, String activationLink);
 
     /**
-     * Odešle jednoduchý textový aktivační email.
-     *
-     * @param to             cílový email
-     *
+     * Odešle textový email o úspěšné aktivaci účtu.
      */
     void sendSuccesActivationEmail(String to, String salutation);
 
     /**
-     * Odešle HTML aktivační email.
-     *
-     * @param to             cílový email
-     *
+     * Odešle HTML email o úspěšné aktivaci účtu.
      */
     void sendSuccesActivationEmailHTML(String to, String salutation);
 }
