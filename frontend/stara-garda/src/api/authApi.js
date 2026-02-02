@@ -35,3 +35,26 @@ export const checkAuthentication = async () => {
  */
 export const registerUser = (data) =>
     api.post("/auth/register", data);
+
+/**
+ * Zapomenuté heslo – požadavek na reset (pošle e-mail s odkazem)
+ */
+export const requestForgottenPassword = (email) =>
+    api.post("/auth/forgotten-password", { email });
+
+/**
+ * Zapomenuté heslo – zjistí info podle tokenu (e-mail)
+ */
+export const getForgottenPasswordInfo = (token) =>
+    api.get("/auth/forgotten-password/info", {
+        params: { token },
+    });
+
+/**
+ * Zapomenuté heslo – finální reset hesla
+ *
+ * POZOR: názvy polí v objektu data si případně slaď s tím,
+ * jak máš definovaný ForgottenPasswordResetDTO na backendu.
+ */
+export const resetForgottenPassword = (data) =>
+    api.post("/auth/forgotten-password/reset", data);

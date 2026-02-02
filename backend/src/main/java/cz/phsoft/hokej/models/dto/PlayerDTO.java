@@ -6,6 +6,8 @@ import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.Locale;
+
 /**
  * DTO reprezentující hráče v systému.
  *
@@ -96,8 +98,8 @@ public class PlayerDTO {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; updateFullName(); }
 
-    public String getSurname() { return surname; }
-    public void setSurname(String surname) { this.surname = surname; updateFullName(); }
+    public String getSurname() { return surname.toUpperCase(); }
+    public void setSurname(String surname) { this.surname = surname.toUpperCase(); updateFullName(); }
 
     public String getNickname() { return nickname; }
     public void setNickname(String nickname) { this.nickname = nickname; }

@@ -40,6 +40,29 @@ export const checkAuthentication = async () => {
 export const registerUser = (data) =>
     api.post("/auth/register", data);
 
+/**
+ * Zapomenuté heslo – požadavek na reset (pošle e-mail s odkazem)
+ */
+export const requestForgottenPassword = (email) =>
+    api.post("/auth/forgotten-password", { email });
+
+/**
+ * Zapomenuté heslo – zjistí info podle tokenu (e-mail)
+ */
+export const getForgottenPasswordInfo = (token) =>
+    api.get("/auth/forgotten-password/info", {
+        params: { token },
+    });
+
+/**
+ * Zapomenuté heslo – finální reset hesla
+ *
+ * POZOR: názvy polí v objektu data si případně slaď s tím,
+ * jak máš definovaný ForgottenPasswordResetDTO na backendu.
+ */
+export const resetForgottenPassword = (data) =>
+    api.post("/auth/forgotten-password/reset", data);
+
 ===== FILE: \axios.js =====
 
 import axios from "axios";
@@ -80,9 +103,15 @@ export const getMatchDetail = async (id) => {
     return res.data; // očekáváme DTO s detailem + statusem hráče
 };
 
+
+
+
+
+
+
 ===== FILE: \matchRegistrationApi.js =====
 
-// src/api/registrationApi.js
+// src/api/matchRegistrationApi.js
 import api from "./axios";
 
 /**
@@ -99,6 +128,7 @@ export const upsertMyRegistration = async ({
     excuseReason = null,
     excuseNote = null,
     unregister = false,
+    substitute = false,
 }) => {
     const res = await api.post(
         "/registrations/me/upsert",
@@ -109,6 +139,7 @@ export const upsertMyRegistration = async ({
             excuseReason,
             excuseNote,
             unregister,
+            substitute,
         },
         { withCredentials: true }
     );
@@ -121,14 +152,22 @@ export const upsertMyRegistration = async ({
 
 import api from "./axios";
 
-export const getMyPlayers = () => 
-    api.get("/players/me");
+export const getMyPlayers = async () => {
+    const res = await api.get("/players/me");
+    return res.data;
+};
 
-export const setCurrentPlayer = (playerId) =>
-    api.post(`/current-player/${playerId}`);
+export const setCurrentPlayer = async (playerId) => {
+    const res = await api.post(`/current-player/${playerId}`);
+    return res.data; // nebo void, podle backendu
+};
 
-export const getCurrentPlayer = () =>
-    api.get(`/current-player`);
+export const getCurrentPlayer = async () => {
+    const res = await api.get("/current-player");
+    return res.data;
+};
 
-export const createPlayer = (data) => 
-    api.post("/players/me", data);
+export const createPlayer = async (data) => {
+    const res = await api.post("/players/me", data);
+    return res.data;
+};

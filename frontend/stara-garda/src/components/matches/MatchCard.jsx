@@ -17,6 +17,7 @@ const statusClassMap = {
     UNREGISTERED: "match-unregistered",
     EXCUSED: "match-excused",
     RESERVED: "match-reserved",
+    SUBSTITUTE: "match-substitute",
     NO_RESPONSE: "match-no-response",
     NO_EXCUSED: "match-no-excused",
 };
@@ -36,6 +37,7 @@ const statusTextPastMap = {
     NO_RESPONSE: "NEREAGOVAL",
     NO_EXCUSED: "NEPŘIŠEL",
     UNREGISTERED: "ODHLÁŠEN",
+    SUBSTITUTE: "ZADAL MOŽNÁ",
     EXCUSED: "NEMOHL",
     RESERVED: "ČEKAL",
 };
@@ -45,6 +47,7 @@ const statusIconMap = {
     UNREGISTERED: UnregisteredIcon,
     EXCUSED: ExcusedIcon,
     RESERVED: ReservedIcon,
+    SUBSTITUTE: NoResponseIcon,
     NO_RESPONSE: NoResponseIcon,
     NO_EXCUSED: NoExcusedIcon,
 };
@@ -98,6 +101,11 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
     // pro BEM modifier – REGISTERED -> "registered", NO_RESPONSE -> "no_response"
     const statusModifier = playerMatchStatus.toLowerCase();
 
+    const cardLayoutClass = condensed
+        ? "match-card--condensed"
+        : "match-card--default";
+
+
     const handleClick = () => {
         if (isClickable && onClick) {
             onClick();
@@ -106,7 +114,7 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
 
     return (
         <div
-            className={`match-card ${statusClass} ${isClickable ? "clickable" : ""
+            className={`match-card ${statusClass} ${cardLayoutClass} ${isClickable ? "clickable" : ""
                 } ${isDisabledByTooltip ? "match-card--disabled" : ""}`}
             role={isClickable ? "button" : undefined}
             tabIndex={isClickable ? 0 : -1}
@@ -117,38 +125,41 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
                     : undefined
             }
         >
-            <div className="card-body">
+            <div className="card-body match-card__body">
                 {formatted && (
                     <>
-                        <h4 className="card-title text-muted text-center mb-3 match-day">
+                        <h4 className="card-title text-muted text-center match-day">
                             {formatted.day} {" - "} {match.matchNumber}
                         </h4>
 
-                        <h5 className="text-center mb-2 match-date">
+                        <h3 className="text-center match-date">
                             {formatted.dateTime}
-                        </h5>
+                        </h3>
                     </>
                 )}
 
-                <p className="card-text text-center mb-3">
-                    <strong>{match.location}</strong>
+                <p className="card-text text-center">
+                    {match.location}
                 </p>
 
                 {!condensed && match.description && (
-                    <p className="card-text mb-1">
+                    <p className="card-text">
                         Popis: <strong>{match.description}</strong>
                     </p>
                 )}
 
-                <p className="card-text text-center mb-3">
-                    <UserIcon className="player-icon" />
-                    <strong>
-                        {match.inGamePlayers} / {match.maxPlayers}
-                    </strong>
-                </p>
+                {
+                    <p className="card-text text-center  players-count">
+                        <UserIcon className="player-icon" />
+                        <strong>
+                            {match.inGamePlayers} / {match.maxPlayers}
+
+                        </strong>
+                    </p>
+                }
 
                 {!condensed && (
-                    <p className="card-text text-center mb-1 mt-2">
+                    <p className="card-text text-center">
                         <MoneyIcon className="money-icon" />
                         <strong>
                             {match.pricePerRegisteredPlayer.toFixed(0)} Kč /{" "}
@@ -158,7 +169,7 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
                 )}
 
                 {/* 🔹 Stav hráče v zápase – ikona + text */}
-                <div className="text-center mt-3">
+                <div className="text-center status-cell">
                     <span
                         className={`player-match-status player-match-status--${statusModifier}`}
                     >

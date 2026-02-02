@@ -61,15 +61,283 @@ const CreatePlayer = () => {
 
 export default CreatePlayer;
 
+===== FILE: \ForgottenPasswordRequestPage.jsx =====
+
+// src/pages/ForgottenPasswordRequestPage.jsx
+
+import { useState } from "react";
+import { requestForgottenPassword } from "../api/authApi";
+
+const ForgottenPasswordRequestPage = () => {
+    const [email, setEmail] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        setSuccessMessage("");
+        setErrorMessage("");
+
+        try {
+            await requestForgottenPassword(email);
+            setSuccessMessage(
+                "Pokud existuje účet s tímto e-mailem, byl odeslán odkaz pro reset hesla."
+            );
+        } catch (err) {
+            console.error(err);
+            setErrorMessage("Nastala chyba při odesílání požadavku. Zkuste to prosím znovu.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="container mt-4">
+            <h1>Zapomenuté heslo</h1>
+            <p className="text-muted">
+                Zadejte e-mail, který používáte k přihlášení. Pošleme vám odkaz pro nastavení nového hesla.
+            </p>
+
+            {successMessage && (
+                <div className="alert alert-success" role="alert">
+                    {successMessage}
+                </div>
+            )}
+
+            {errorMessage && (
+                <div className="alert alert-danger" role="alert">
+                    {errorMessage}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="mt-3" style={{ maxWidth: "400px" }}>
+                <div className="mb-3">
+                    <label htmlFor="email" className="form-label">
+                        E-mail
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        className="form-control"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={submitting}
+                >
+                    {submitting ? "Odesílám..." : "Odeslat odkaz pro reset hesla"}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+export default ForgottenPasswordRequestPage;
+
+===== FILE: \ForgottenPasswordResetPage.jsx =====
+
+// src/pages/ForgottenPasswordResetPage.jsx
+
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+    getForgottenPasswordInfo,
+    resetForgottenPassword,
+} from "../api/authApi";
+
+const ForgottenPasswordResetPage = () => {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+
+    const token = searchParams.get("token");
+
+    const [email, setEmail] = useState("");
+    const [loadingInfo, setLoadingInfo] = useState(true);
+    const [infoError, setInfoError] = useState("");
+
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+    const [submitSuccess, setSubmitSuccess] = useState("");
+
+    // 1) Načtení info podle tokenu (email)
+    useEffect(() => {
+        const loadInfo = async () => {
+            if (!token) {
+                setInfoError("Chybí token pro reset hesla.");
+                setLoadingInfo(false);
+                return;
+            }
+
+            try {
+                const res = await getForgottenPasswordInfo(token);
+                setEmail(res.data.email);
+            } catch (err) {
+                console.error(err);
+                setInfoError("Neplatný nebo expirovaný odkaz pro reset hesla.");
+            } finally {
+                setLoadingInfo(false);
+            }
+        };
+
+        loadInfo();
+    }, [token]);
+
+    // 2) Odeslání nového hesla
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitError("");
+        setSubmitSuccess("");
+
+        if (newPassword !== confirmPassword) {
+            setSubmitError("Hesla se neshodují.");
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await resetForgottenPassword({
+                token,
+                newPassword,
+                newPasswordConfirm: confirmPassword, // DŮLEŽITÉ: musí sedět na DTO na backendu
+            });
+
+            setSubmitSuccess(
+                "Heslo bylo úspěšně změněno. Můžete se přihlásit novým heslem."
+            );
+
+            // volitelné přesměrování na login po pár sekundách:
+            setTimeout(() => {
+                navigate("/login");
+            }, 3000);
+        } catch (err) {
+            console.error(err);
+
+            // zkusíme vytáhnout zprávu z backendu, pokud nějaká přišla
+            const backendMessage =
+                err?.response?.data?.message ||
+                err?.response?.data?.error ||
+                null;
+
+            setSubmitError(
+                backendMessage ||
+                "Nastala chyba při změně hesla. Zkuste to prosím znovu."
+            );
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    if (loadingInfo) {
+        return (
+            <div className="container mt-4">
+                <p>Načítám informace...</p>
+            </div>
+        );
+    }
+
+    if (infoError) {
+        return (
+            <div className="container mt-4">
+                <div className="alert alert-danger" role="alert">
+                    {infoError}
+                </div>
+                <button
+                    type="button"
+                    className="btn btn-outline-primary mt-3"
+                    onClick={() => navigate("/forgotten-password")}
+                >
+                    Zkusit poslat nový odkaz
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container mt-4">
+            <h1>Nastavení nového hesla</h1>
+
+            <p className="text-muted">
+                Reset hesla pro účet: <strong>{email}</strong>
+            </p>
+
+            {submitError && (
+                <div className="alert alert-danger" role="alert">
+                    {submitError}
+                </div>
+            )}
+
+            {submitSuccess && (
+                <div className="alert alert-success" role="alert">
+                    {submitSuccess}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} style={{ maxWidth: "400px" }}>
+                <div className="mb-3">
+                    <label htmlFor="newPassword" className="form-label">
+                        Nové heslo
+                    </label>
+                    <input
+                        type="password"
+                        id="newPassword"
+                        className="form-control"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        minLength={8}
+                    />
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="confirmPassword" className="form-label">
+                        Potvrzení hesla
+                    </label>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        className="form-control"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        minLength={8}
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={submitting}
+                >
+                    {submitting ? "Měním heslo..." : "Změnit heslo"}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+export default ForgottenPasswordResetPage;
+
+===== FILE: \Home.css =====
+
+
 ===== FILE: \Home.jsx =====
 
 import MatchCard from "../components/matches/MatchCard";
 import Players from "../components/players/Players";
-import { useMatches } from "../hooks/useMatches";
+import { useMyUpcomingMatches } from "../hooks/useMyUpcomingMatches";
 import { useAuth } from "../hooks/useAuth";
 
 const Home = () => {
-    const { matches, loading } = useMatches();
+    const { matches, loading } = useUpcomingMatches();
     const { user } = useAuth();
 
     if (loading) return <p>Načítám data…</p>;
@@ -92,7 +360,7 @@ export default Home;
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { loginUser } from "../api/authApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -175,6 +443,10 @@ const LoginPage = () => {
                             >
                                 Registrovat se
                             </button>
+                            <div className="mt-4 text-center ">
+                                <p>Zapomněli jste heslo?{" "}</p>
+                                <Link to="/forgotten-password">Obnovit heslo</Link>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -192,7 +464,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 import { useMatchDetail } from "../hooks/useMatchDetail";
-import { upsertMyRegistration } from "../api/MatchRegistrationApi";
+import { upsertMyRegistration } from "../api/matchRegistrationApi";
 import MatchDetail from "../components/matches/MatchDetail";
 import { useNotification } from "../context/NotificationContext";
 import { useCurrentPlayer } from "../hooks/useCurrentPlayer";
@@ -215,7 +487,7 @@ const MatchDetailPage = () => {
     // jestli jde o uplynulý zápas (přijde z router state)
     const isPast = location.state?.isPast === true;
 
-    // 🔹 sjednocení s backendem – pojmenování přesně jako DTO
+    // sjednocení s backendem – pojmenování přesně jako DTO
     const playerMatchStatus = match?.playerMatchStatus ?? "NO_RESPONSE";
     const matchStatus = match?.matchStatus ?? null;      // např. SCHEDULED / CANCELED / PLAYED
 
@@ -249,6 +521,38 @@ const MatchDetailPage = () => {
             setActionError(
                 err?.response?.data?.message ||
                 "Nepodařilo se přihlásit na zápas."
+            );
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // handler pro "Možná" / SUBSTITUTE
+    const handleSubstitute = async () => {
+        if (!match) return;
+        try {
+            setSaving(true);
+            setActionError(null);
+
+            await upsertMyRegistration({
+                matchId: match.id,
+                team: null,
+                excuseReason: null,
+                excuseNote: null,
+                unregister: false,   // není odhlášení
+                substitute: true,    // KLÍČOVÉ – backend z toho udělá SUBSTITUTE
+            });
+
+            showNotification(
+                `${playerName} se přihlásil jako náhradník - možná příjde).`,
+                "info"
+            );
+            navigate("/matches");
+        } catch (err) {
+            console.error(err);
+            setActionError(
+                err?.response?.data?.message ||
+                "Nepodařilo se nastavit stav 'Možná'."
             );
         } finally {
             setSaving(false);
@@ -357,14 +661,15 @@ const MatchDetailPage = () => {
         <>
             <MatchDetail
                 match={match}
-                playerMatchStatus={playerMatchStatus}  // 🔹 jednoznačný název
-                matchStatus={matchStatus}             // 🔹 stav zápasu
+                playerMatchStatus={playerMatchStatus}  // jednoznačný název
+                matchStatus={matchStatus}             // stav zápasu Cancel/
                 loading={loading}
                 error={error}
                 actionError={actionError}
                 onRegister={handleRegister}
                 onUnregister={handleUnregister}
                 onExcuse={openExcuseModal}
+                onSubstitute={handleSubstitute}
                 saving={saving}
                 isPast={isPast}
             />

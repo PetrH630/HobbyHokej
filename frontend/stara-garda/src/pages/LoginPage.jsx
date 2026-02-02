@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from "react";
+// src/pages/LoginPage.jsx
+import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { loginUser } from "../api/authApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import usePostLoginRedirect from "../hooks/usePostLoginRedirect";
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const { updateUser } = useAuth();
+    const postLoginRedirect = usePostLoginRedirect(); // 👈 použijeme hook
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
@@ -18,8 +22,10 @@ const LoginPage = () => {
 
         try {
             await loginUser(email, password);
-            await updateUser();               // načte usera do kontextu
-            navigate("/Players");             // přesměruj na stránku hráči
+            await updateUser();               // načte usera do AuthContextu
+
+            // 🔽 tady místo navigate("/Players")
+            await postLoginRedirect();
         } catch (err) {
             setError(err?.response?.data?.message || "Neplatné přihlášení");
         } finally {
@@ -36,7 +42,7 @@ const LoginPage = () => {
                         style={{ maxWidth: "420px" }}
                     >
                         <h3 className="text-center mb-2">HokejApp</h3>
-                        <h5 className="text-center mb-4 text-muted">Přihlášení</h5>   
+                        <h5 className="text-center mb-4 text-muted">Přihlášení</h5>
 
                         {error && (
                             <div className="alert alert-danger">
@@ -48,7 +54,7 @@ const LoginPage = () => {
                             <div className="mb-3">
                                 <label className="form-label">E-mail</label>
                                 <input
-                                    type="text"
+                                    type="email"
                                     className="form-control"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -56,7 +62,7 @@ const LoginPage = () => {
                                 />
                             </div>
 
-                            <div className="mb-4">
+                            <div className="mb-3">
                                 <label className="form-label">Heslo</label>
                                 <input
                                     type="password"
@@ -69,22 +75,25 @@ const LoginPage = () => {
 
                             <button
                                 type="submit"
-                                className="btn btn-primary w-100 mb-2"
+                                className="btn btn-primary w-100"
                                 disabled={loading}
                             >
                                 {loading ? "Přihlašuji…" : "Přihlásit se"}
                             </button>
-                            
-                            
-                            {/*NOVÉ TLAČÍTKO PRO REGISTRACI */}
-                            <button
-                                type="button"
-                                className="btn btn-outline-secondary w-100 mt-3"
-                                onClick={() => navigate("/register")}
-                            >
-                                Registrovat se
-                            </button>
                         </form>
+
+                        <div className="mt-3 text-center">
+                            <Link to="/forgotten-password">
+                                Zapomenuté heslo?
+                            </Link>
+                        </div>
+
+                        <div className="mt-2 text-center">
+                            Nemáte účet?{" "}
+                            <Link to="/register">
+                                Zaregistrujte se
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

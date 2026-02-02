@@ -3,13 +3,14 @@
    ========================= */
 .past-match-list {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 16px;
+    flex-direction: column;
+    /* ⬅ místo gridu jeden sloupec */
+    gap: 12px;
 }
 
+/* každý zápas přes celou šířku */
 .past-match-item {
+    width: 100%;
     display: flex;
-    max-width: 360px;
 }
 

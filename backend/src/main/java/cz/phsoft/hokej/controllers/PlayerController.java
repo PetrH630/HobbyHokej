@@ -101,7 +101,7 @@ public class PlayerController {
      * Schválí hráče (změní jeho stav na APPROVED).
      */
     @PutMapping("/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<SuccessResponseDTO> approvePlayer(@PathVariable Long id) {
         SuccessResponseDTO response = playerService.approvePlayer(id);
         return ResponseEntity.ok(response);
@@ -111,7 +111,7 @@ public class PlayerController {
      * Zamítne hráče (změní jeho stav na REJECTED).
      */
     @PutMapping("/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<SuccessResponseDTO> rejectPlayer(@PathVariable Long id) {
         SuccessResponseDTO response = playerService.rejectPlayer(id);
         return ResponseEntity.ok(response);
@@ -126,7 +126,7 @@ public class PlayerController {
      * @param request  request obsahující ID nového uživatele
      */
     @PostMapping("/{playerId}/change-user")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<String> changePlayerUser(
             @PathVariable Long playerId,
             @RequestBody ChangePlayerUserRequest request

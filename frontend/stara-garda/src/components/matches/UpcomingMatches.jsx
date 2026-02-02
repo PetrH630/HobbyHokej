@@ -1,4 +1,4 @@
-// src/components/UpcomingMatches.jsx (původně Match.jsx)
+// src/components/matches/UpcomingMatches.jsx
 import { useMyUpcomingMatches } from "../../hooks/useMyUpcomingMatches";
 import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
 import MatchCard from "./MatchCard";
@@ -77,7 +77,7 @@ const UpcomingMatches = () => {
               match={m}
               onClick={() =>
                 navigate(`/matches/${m.id}`, {
-                  state: { isPast: false }, // playerMatchStatus bereš z detailu
+                  state: { isPast: false },
                 })
               }
             />
