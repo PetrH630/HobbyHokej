@@ -17,11 +17,20 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Component
+/**
+ * Komponenta pro inicializaci testovacích dat v databázi.
+ *
+ * Po startu aplikace vytváří výchozího administrátora, ukázkové hráče
+ * s uživateli, nastavení uživatelů a hráčů, sezóny, zápasy, ukázkové
+ * registrace a databázové triggery pro historii registrací.
+ *
+ * Třída je určena hlavně pro vývojové a testovací prostředí. V produkci
+ * se má používat pouze po zvážení důsledků, aby nedošlo k nechtěnému
+ * přepsání dat.
+ */
 public class DataInitializer {
-
 
     private final PlayerRepository playerRepository;
     private final MatchRepository matchRepository;
@@ -34,7 +43,6 @@ public class DataInitializer {
     private final PlayerSettingsService playerSettingService;
     private final JdbcTemplate jdbcTemplate;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
 
     public DataInitializer(PlayerRepository playerRepository,
                            MatchRepository matchRepository,
@@ -58,6 +66,12 @@ public class DataInitializer {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Spouští se po inicializaci Spring kontejneru.
+     *
+     * V definovaném pořadí volá metody inicializující jednotlivé oblasti
+     * dat tak, aby byly zachovány závislosti mezi entitami.
+     */
     @PostConstruct
     public void init() {
         initAdmin();
@@ -72,9 +86,11 @@ public class DataInitializer {
         System.out.println("Data initialization completed.");
     }
 
-    // =====================
-    // ADMIN
-    // =====================
+    // Inicializace administrátorského účtu
+
+    /**
+     * Vytváří výchozího administrátora, pokud ještě neexistuje.
+     */
     private void initAdmin() {
         appUserRepository.findByEmail("admin@example.com").ifPresentOrElse(
                 existing -> System.out.println("Admin user already exists – skipping."),
@@ -92,9 +108,13 @@ public class DataInitializer {
         );
     }
 
-    // =====================
-    // PLAYERS + USERS
-    // =====================
+    // Inicializace hráčů a jejich uživatelských účtů
+
+    /**
+     * Vytváří testovací hráče a k nim přiřazené uživatele.
+     *
+     * Pokud již v databázi existují hráči, inicializace se přeskočí.
+     */
     private void initPlayersAndUsers() {
         if (playerRepository.count() > 0) {
             System.out.println("Players already exist – skipping player initialization.");
@@ -126,7 +146,7 @@ public class DataInitializer {
             user.setEmail(email);
             user.setPassword(encoder.encode(password));
 
-            // TODO ODMAZAT EMAIL
+            // TODO odmazat email
             switch (playerCounter) {
                 case 1 -> {
                     user.setRole(Role.ROLE_MANAGER);
@@ -139,51 +159,50 @@ public class DataInitializer {
             }
             user.setEnabled(true);
 
-            // vztah user <-> player podle tvého modelu
+            // Vztah user <-> player podle doménového modelu
             player.setUser(user);
 
-            appUserRepository.save(user); // nebo playerRepository.save(player) – podle cascade
+            appUserRepository.save(user); // nebo playerRepository.save(player) – podle nastavené kaskády
             playerCounter++;
         }
 
-        // pokud cascade není, můžeš explicitně uložit i hráče:
+        // Pokud kaskáda neřeší uložení hráčů, uloží se explicitně
         playerRepository.saveAll(players);
 
         System.out.println("Players and users initialized.");
     }
 
-    // =====================
-    // User and Player Settings
-    // =====================
-    private void initUserSettings(){
+    // Inicializace uživatelských nastavení
+
+    /**
+     * Vytváří výchozí nastavení pro všechny uživatele, kteří je ještě nemají.
+     */
+    private void initUserSettings() {
 
         System.out.println("Initializing userSettings...");
-        // vezmeme všechny uživatele
         List<AppUserEntity> users = appUserRepository.findAll();
 
         for (AppUserEntity user : users) {
 
-            // jestli už má nastavení, přeskočíme
             boolean hasSettings = appUserSettingsRepository.existsByUser(user);
-            // případně, pokud máš metodu existsByUserId:
-            // boolean hasSettings = appUserSettingsRepository.existsByUserId(user.getId());
+            // Případně lze použít existsByUserId
 
             if (hasSettings) {
                 continue;
             }
 
-            // vytvořit defaultní settings přes tvou metodu
             AppUserSettingsEntity settings =
                     appUserSettingService.createDefaultSettingsForUser(user);
 
-            // navázat uživatele, pokud to nedělá přímo metoda createDefault...
-
-            // uložit
             appUserSettingsRepository.save(settings);
         }
 
         System.out.println("User settings initialized.");
     }
+
+    /**
+     * Vytváří výchozí nastavení pro všechny hráče, kteří je ještě nemají.
+     */
     private void initPlayerSettings() {
         System.out.println("Initializing player settings...");
 
@@ -192,7 +211,7 @@ public class DataInitializer {
         for (PlayerEntity player : players) {
 
             boolean hasSettings = playerSettingsRepository.existsByPlayer(player);
-            // nebo existsByPlayerId(player.getId());
+            // Případně existsByPlayerId(player.getId())
 
             if (hasSettings) {
                 continue;
@@ -207,10 +226,11 @@ public class DataInitializer {
         System.out.println("Player settings initialized.");
     }
 
-    // =====================
-    // SEASONS
-    // =====================
+    // Inicializace sezón
 
+    /**
+     * Vytváří výchozí sezóny, pokud žádné neexistují.
+     */
     private void initSeasons() {
         if (seasonRepository.count() > 0) {
             System.out.println("Seasons already exist – skipping match initialization.");
@@ -218,21 +238,18 @@ public class DataInitializer {
         }
         System.out.println("Initializing seasons...");
 
-        // Sezóna 2024/2025: 1.11.2024 – 31.3.2025
         SeasonEntity season2024_2025 = new SeasonEntity();
         season2024_2025.setName("2024/2025");
         season2024_2025.setStartDate(LocalDate.of(2024, 11, 20));
         season2024_2025.setEndDate(LocalDate.of(2025, 3, 31));
         season2024_2025.setActive(false);
 
-        // Sezóna 2025/2026: 1.11.2025 – 31.3.2026 (aktuální – nastavíme jako active)
         SeasonEntity season2025_2026 = new SeasonEntity();
         season2025_2026.setName("2025/2026");
         season2025_2026.setStartDate(LocalDate.of(2025, 11, 21));
         season2025_2026.setEndDate(LocalDate.of(2026, 3, 31));
         season2025_2026.setActive(true);
 
-        // Sezóna 2026/2027: 1.11.2026 – 31.3.2027
         SeasonEntity season2026_2027 = new SeasonEntity();
         season2026_2027.setName("2026/2027");
         season2026_2027.setStartDate(LocalDate.of(2026, 11, 1));
@@ -248,34 +265,35 @@ public class DataInitializer {
         System.out.println("Seasons initialized.");
     }
 
-    // =====================
-    // MATCHES
-    // =====================
+    // Inicializace zápasů
+
+    /**
+     * Vytváří zápasy pro jednotlivé sezóny.
+     *
+     * Zápasy se generují po pátcích v rámci období každé sezóny.
+     */
     private void initMatches() {
-        // Pokud už nějaké zápasy existují, nic nevytváříme
         if (matchRepository.count() > 0) {
             System.out.println("Matches already exist – skipping match initialization.");
             return;
         }
 
-        // Sezóny MUSÍ existovat, jinak nemáme co přiřadit
         List<SeasonEntity> seasons = seasonRepository.findAll();
         if (seasons.isEmpty()) {
             throw new IllegalStateException("BE - Nelze inicializovat zápasy, neexistuje žádná sezóna.");
         }
 
-
         System.out.println("Initializing matches...");
         for (int j = 0; j < 2; j++) {
             SeasonEntity actualSeason = seasons.get(j);
-            System.out.println("Nastavuji aktální sezonu" + j);
+            System.out.println("Nastavuji aktuální sezónu " + j);
             LocalDate startSeasonDate = actualSeason.getStartDate();
             LocalDate endSeasonDate = actualSeason.getEndDate();
             LocalDateTime startDate = startSeasonDate
                     .with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
                     .atTime(18, 45);
             int fridaysCount = countFridays(startSeasonDate, endSeasonDate);
-            System.out.println("jdu vytvářet zápasy");
+            System.out.println("Jdu vytvářet zápasy");
             for (int i = 0; i < fridaysCount; i++) {
                 MatchEntity match = new MatchEntity();
                 LocalDateTime dateTime = startDate.plusWeeks(i);
@@ -287,17 +305,22 @@ public class DataInitializer {
                 match.setMatchStatus(null);
                 match.setCancelReason(null);
                 match.setSeason(actualSeason);
-                // uložíme zápas
                 matchRepository.save(match);
 
             }
-            System.out.println("Zápasy v sezoně byly vytvořeny");
+            System.out.println("Zápasy v sezóně byly vytvořeny");
         }
 
         System.out.println("Zápasy vytvořeny");
     }
-// POMOCNÁ PRO SPOČÍTÁNÍ PÁTKU
 
+    /**
+     * Pomocná metoda pro spočítání počtu pátků v daném období.
+     *
+     * @param from počáteční datum
+     * @param to   koncové datum
+     * @return počet pátků mezi daty včetně
+     */
     private int countFridays(LocalDate from, LocalDate to) {
         if (to.isBefore(from)) {
             return 0;
@@ -317,9 +340,14 @@ public class DataInitializer {
         return count;
     }
 
-    // =====================
-    // REGISTRATIONS
-    // =====================
+    // Inicializace registrací
+
+    /**
+     * Vytváří ukázkové registrace hráčů na zápasy.
+     *
+     * Registrace se generují pouze pro omezený počet zápasů v blízké budoucnosti,
+     * aby bylo možné testovat různé stavy registrací.
+     */
     private void initRegistrations() {
         if (matchRegistrationRepository.count() > 0) {
             System.out.println("Match registrations already exist – skipping registration initialization.");
@@ -344,12 +372,10 @@ public class DataInitializer {
 
         for (MatchEntity match : matches) {
 
-            // Náhodný výběr 8 unikátních hráčů
             List<PlayerEntity> shuffledPlayers = new ArrayList<>(players);
             Collections.shuffle(shuffledPlayers);
             List<PlayerEntity> selectedPlayers = shuffledPlayers.subList(0, 8);
 
-            // Náhodné indexy pro statusy
             List<Integer> indexes = new ArrayList<>();
             for (int i = 0; i < selectedPlayers.size(); i++) {
                 indexes.add(i);
@@ -381,9 +407,7 @@ public class DataInitializer {
                     reg.setExcuseNote(null);
                 }
 
-                // půl na půl - logika týmů
-                // reg.setTeam(i < 4 ? Team.DARK : Team.LIGHT);
-
+                // Tým hráče se přebírá z entity hráče
                 reg.setTeam(player.getTeam());
                 reg.setTimestamp(LocalDateTime.now());
                 reg.setCreatedBy("initializer");
@@ -395,9 +419,14 @@ public class DataInitializer {
         System.out.println("Sample registrations initialized.");
     }
 
-    // =====================
-    // TRIGGERS
-    // =====================
+    // Inicializace databázových triggerů
+
+    /**
+     * Vytváří databázové triggery pro tabulku registrací.
+     *
+     * Triggery zajišťují automatický zápis do tabulky historie registrací
+     * při vzniknutí, změně nebo smazání registrace.
+     */
     private void initTriggers() {
         createTrigger("trg_match_reg_insert", """
                 CREATE TRIGGER trg_match_reg_insert
@@ -448,6 +477,15 @@ public class DataInitializer {
                 """);
     }
 
+    /**
+     * Pomocná metoda pro vytvoření triggeru, pokud ještě neexistuje.
+     *
+     * Chyby při vytváření triggeru se vypisují do konzole, ale neblokují
+     * start aplikace.
+     *
+     * @param name název triggeru
+     * @param sql  SQL definice triggeru
+     */
     private void createTrigger(String name, String sql) {
         try {
             jdbcTemplate.execute(sql);

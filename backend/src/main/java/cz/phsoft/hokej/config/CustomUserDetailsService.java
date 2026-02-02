@@ -10,42 +10,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * {@link UserDetailsService} implementace napojující Spring Security
- * na vlastní databázový model uživatele ({@link AppUserEntity}).
+ * Implementace {@link UserDetailsService} pro napojení Spring Security
+ * na databázový model uživatele.
  *
- * ÚČEL:
- * <ul>
- *     <li>při přihlášení načíst uživatele z DB podle emailu,</li>
- *     <li>ověřit existenci účtu a jeho aktivaci,</li>
- *     <li>namapovat {@link AppUserEntity} na {@link UserDetails} objekt,
- *         který Spring Security používá při autentizaci.</li>
- * </ul>
- *
- * JAK JE TO POUŽITÉ VE SPRING SECURITY:
- * <ul>
- *     <li>při loginu Spring Security zavolá {@link #loadUserByUsername(String)},</li>
- *     <li>vrácený {@link UserDetails} obsahuje:</li>
- *     <ul>
- *         <li>username (email),</li>
- *         <li>heslo (hashované),</li>
- *         <li>role / autority.</li>
- *     </ul>
- * </ul>
- *
- * BEZPEČNOST:
- * <ul>
- *     <li>heslo se porovnává automaticky přes {@code PasswordEncoder},</li>
- *     <li>pokud účet není aktivován ({@code enabled == false}),
- *         vyhodí se {@link AccountNotActivatedException},</li>
- *     <li>typ vyhozené výjimky přímo ovlivňuje výsledek přihlášení
- *         (např. jiná hláška pro „neaktivovaný účet“ vs. „uživatel nenalezen“).</li>
- * </ul>
+ * Třída načítá uživatele z databáze podle e-mailu, ověřuje, zda je účet
+ * aktivní, a převádí entitu {@link AppUserEntity} na objekt
+ * {@link UserDetails}, který Spring Security používá při autentizaci.
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
     /**
-     * Repozitář uživatelů – používá se pouze pro načtení dat pro autentizaci.
+     * Repozitář pro načítání uživatelů při přihlášení.
      */
     private final AppUserRepository appUserRepository;
 
@@ -53,62 +29,43 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.appUserRepository = appUserRepository;
     }
 
-    // =====================================================
-    // NAČTENÍ UŽIVATELE PRO SPRING SECURITY
-    // =====================================================
+    // Načtení uživatele pro Spring Security
 
     /**
-     * Načte uživatele podle emailu (username) pro potřeby autentizace.
-     * <p>
-     * Tato metoda je volána Spring Security při přihlášení.
+     * Načte uživatele podle e-mailu pro potřeby autentizace.
      *
-     * @param email email zadaný uživatelem při loginu (username)
-     * @return {@link UserDetails} objekt použitý pro autentizaci
+     * Metoda se volá Spring Security při přihlášení. V případě, že uživatel
+     * neexistuje, je vyhozena {@link UsernameNotFoundException}. Pokud účet
+     * existuje, ale není aktivní, je vyhozena {@link AccountNotActivatedException}.
      *
-     * @throws UsernameNotFoundException    pokud uživatel s daným emailem neexistuje
+     * @param email e-mail zadaný uživatelem při přihlášení
+     * @return objekt {@link UserDetails} použitý pro autentizaci
+     * @throws UsernameNotFoundException    pokud uživatel s daným e-mailem neexistuje
      * @throws AccountNotActivatedException pokud účet existuje, ale není aktivní
      */
     @Override
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        // -------------------------------------------------
-        // NAČTENÍ UŽIVATELE Z DB
-        // -------------------------------------------------
+        // Načtení uživatele z databáze
         AppUserEntity user = appUserRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("BE - Uživatel nenalezen")
                 );
 
-        // -------------------------------------------------
-        // KONTROLA AKTIVACE ÚČTU
-        // -------------------------------------------------
+        // Kontrola aktivace účtu
         if (!user.isEnabled()) {
-            // vlastní výjimka – typicky se zachytává ve filtru pro login
-            // a přeloží se na vhodnou odpověď pro FE
+            // Výjimka se typicky zachytává ve filtru pro login a převádí na odpověď pro frontend
             throw new AccountNotActivatedException();
         }
 
-        // -------------------------------------------------
-        // MAPOVÁNÍ NA UserDetails
-        // -------------------------------------------------
+        // Mapování na UserDetails
         return User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                /*
-                 * role se uloží bez prefixu (ADMIN / MANAGER / PLAYER),
-                 * Spring si automaticky přidá prefix "ROLE_".
-                 * Příklad:
-                 *   user.getRole() = "ROLE_ADMIN"
-                 *   → .roles("ADMIN")
-                 *   → výsledná autorita: "ROLE_ADMIN"
-                 */
+                // Role se ukládá bez prefixu ROLE_, Spring si prefix přidá automaticky
                 .roles(user.getRole().name().replace("ROLE_", ""))
-                /*
-                 * disabled = true → účet se nemůže přihlásit.
-                 * V praxi je to zde trochu redundantní (už jsme ověřili enabled),
-                 * ale držíme flag konzistentní se stavem v DB.
-                 */
+                // Disabled flag se drží konzistentní se stavem entity
                 .disabled(!user.isEnabled())
                 .build();
     }

@@ -16,44 +16,24 @@ import java.util.Map;
 
 /**
  * Globální handler výjimek pro REST API.
- * <p>
- * Účel:
- * <ul>
- *     <li>centralizovaně zachytávat výjimky z controllerů a service vrstvy,</li>
- *     <li>převést je na jednotnou JSON odpověď typu {@link ApiError},</li>
- *     <li>zajistit konzistentní HTTP status kód pro jednotlivé typy chyb.</li>
- * </ul>
  *
- * Tato třída:
- * <ul>
- *     <li>neřeší logování (to lze doplnit do jednotlivých handlerů),</li>
- *     <li>neřeší business logiku – pouze mapuje výjimky na HTTP odpovědi.</li>
- * </ul>
+ * Slouží k centralizovanému zachytávání výjimek z controllerů a service
+ * vrstvy, jejich převodu na jednotný JSON formát {@link ApiError} a
+ * k nastavení odpovídajících HTTP status kódů.
+ *
+ * Třída neřeší business logiku ani detailní logování. Tyto aspekty lze
+ * doplnit do jednotlivých handler metod podle potřeby.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // ==========================================
-    // 1) BUSINESS / DOMÉNOVÉ VÝJIMKY
-    // ==========================================
+    // 1) Doménové výjimky
 
     /**
-     * Zachytí všechny výjimky dědící z {@link BusinessException}.
-     * <p>
-     * Typicky:
-     * <ul>
-     *     <li>PlayerNotFoundException,</li>
-     *     <li>InvalidPlayerStatusException,</li>
-     *     <li>SeasonNotFoundException,</li>
-     *     <li>MatchNotFoundException, …</li>
-     * </ul>
+     * Zachytává výjimky typu {@link BusinessException}.
      *
-     * Každá {@link BusinessException} sama nese:
-     * <ul>
-     *     <li>HTTP status ({@link BusinessException#getStatus()}),</li>
-     *     <li>uživatelskou chybovou zprávu (message),</li>
-     *     <li>typ chyby (implicitně přes status a název výjimky).</li>
-     * </ul>
+     * Výjimka předává HTTP status, uživatelskou zprávu a další informace,
+     * které se používají při sestavení odpovědi {@link ApiError}.
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(
@@ -73,20 +53,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // ==========================================
-    // 2) PŘÍSTUP ODEPŘEN (Spring Security)
-    // ==========================================
+    // 2) Přístup odepřen (Spring Security)
 
     /**
-     * Zachytí {@link AccessDeniedException} vyhozenou Spring Security.
-     * <p>
-     * Typicky jde o situace:
-     * <ul>
-     *     <li>uživatel nemá roli ADMIN / MANAGER pro daný endpoint,</li>
-     *     <li>pokus o přístup k chráněnému zdroji bez oprávnění.</li>
-     * </ul>
+     * Zachytává {@link AccessDeniedException} vyhozenou Spring Security.
      *
-     * HTTP status: 403 Forbidden
+     * Typicky jde o situace, kdy uživatel nemá potřebnou roli pro volání
+     * daného endpointu. Vrací se HTTP status 403 Forbidden.
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex,
@@ -105,20 +78,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // ==========================================
-    // 3) ILLEGAL ARGUMENT – CHYBNÉ VSTUPY
-    // ==========================================
+    // 3) Chybné vstupy (IllegalArgumentException)
 
     /**
-     * Zachytí {@link IllegalArgumentException}.
-     * <p>
-     * Použití:
-     * <ul>
-     *     <li>obecné validační chyby vstupů,</li>
-     *     <li>nesmyslné parametry předané do service vrstvy.</li>
-     * </ul>
+     * Zachytává {@link IllegalArgumentException}.
      *
-     * HTTP status: 400 Bad Request
+     * Používá se pro obecné validační chyby vstupů nebo nesprávné
+     * parametry předané do service vrstvy. Vrací se HTTP status 400.
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex,
@@ -137,20 +103,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // ==========================================
-    // 4) ILLEGAL STATE – NEPLATNÝ STAV APLIKACE
-    // ==========================================
+    // 4) Neplatný stav aplikace (IllegalStateException)
 
     /**
-     * Zachytí {@link IllegalStateException}.
-     * <p>
-     * Typicky:
-     * <ul>
-     *     <li>operace není povolena v aktuálním stavu (např. deaktivace poslední aktivní sezóny),</li>
-     *     <li>porušení vnitřního invariantu aplikace.</li>
-     * </ul>
+     * Zachytává {@link IllegalStateException}.
      *
-     * HTTP status: 409 Conflict
+     * Používá se pro situace, kdy je aplikace v neplatném stavu a
+     * daná operace nemůže být provedena. Typicky se vrací HTTP status 409.
      */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiError> handleIllegalState(IllegalStateException ex,
@@ -169,26 +128,14 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // ==========================================
-    // 5) DATA INTEGRITA (DB KONFLIKTY, RACE CONDITION)
-    // ==========================================
+    // 5) Porušení integrity dat
 
     /**
-     * Zachytí {@link DataIntegrityViolationException} z perzistentní vrstvy.
-     * <p>
-     * Typicky:
-     * <ul>
-     *     <li>porušení unikátních omezení v DB (unique constraint),</li>
-     *     <li>race condition při paralelním ukládání stejných dat.</li>
-     * </ul>
+     * Zachytává {@link DataIntegrityViolationException} z databázové vrstvy.
      *
-     * Z bezpečnostních důvodů:
-     * <ul>
-     *     <li>nevrací detailní DB zprávu,</li>
-     *     <li>používá generickou, ale užitečnou textovou hlášku.</li>
-     * </ul>
-     *
-     * HTTP status: 409 Conflict
+     * Typicky jde o porušení unikátních omezení nebo jiné konflikty při
+     * ukládání dat. Z bezpečnostních důvodů se nevrací detailní databázová
+     * zpráva, ale obecnější chybové hlášení.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(
@@ -208,23 +155,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-
-
-    // ==========================================
-    // 6) FALLBACK – NEČEKANÉ CHYBY
-    // ==========================================
+    // 6) Neočekávané chyby (fallback)
 
     /**
-     * Fallback handler pro všechny ostatní neošetřené výjimky.
-     * <p>
-     * Použití:
-     * <ul>
-     *     <li>zachytí runtime chyby, které nebyly explicitně ošetřeny,</li>
-     *     <li>brání pádu aplikace bez odpovědi,</li>
-     *     <li>vrací jednotný formát {@link ApiError} pro FE.</li>
-     * </ul>
+     * Fallback handler pro všechny neošetřené výjimky.
      *
-     * HTTP status: 500 Internal Server Error
+     * Slouží jako poslední ochrana proti pádu aplikace bez odpovědi
+     * a vrací jednotný formát chyby s HTTP statusem 500.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAll(Exception ex,
@@ -242,24 +179,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(error);
     }
-    // ==========================================
-    // 7) VALIDACE VSTUPŮ (@Valid, Bean Validation)
-    // ==========================================
+
+    // 7) Validační chyby (@Valid, Bean Validation)
 
     /**
-     * Zachytí validační chyby z anotace {@code @Valid}.
-     * <p>
-     * Typické scénáře:
-     * <ul>
-     *     <li>nevyplněné povinné pole,</li>
-     *     <li>neplatný formát (např. e-mail),</li>
-     *     <li>porušení délkových nebo rozsahových omezení.</li>
-     * </ul>
+     * Zachytává validační chyby vyvolané anotací {@code @Valid}.
      *
-     * Do pole {@code details} se vrací mapa {@code field → message},
-     * kde klíčem je název pole v DTO a hodnotou text validační chyby.
-     *
-     * HTTP status: 400 Bad Request
+     * Do pole {@code details} se ukládá mapa ve tvaru název pole → text
+     * validační chyby. Vrací se HTTP status 400 Bad Request.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationException(
@@ -268,14 +195,12 @@ public class GlobalExceptionHandler {
     ) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        // Mapa field → message (použijeme LinkedHashMap pro zachování pořadí chyb)
         Map<String, String> fieldErrors = new java.util.LinkedHashMap<>();
 
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             String fieldName = fieldError.getField();
             String errorMessage = fieldError.getDefaultMessage();
 
-            // Pokud je pro jedno pole více chyb, můžeme je spojit do jedné zprávy
             fieldErrors.merge(
                     fieldName,
                     errorMessage,

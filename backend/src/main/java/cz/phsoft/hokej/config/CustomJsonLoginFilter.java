@@ -19,74 +19,46 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Vlastní autentizační filtr pro REST přihlášení (JSON / FORM).
+ * Vlastní autentizační filtr pro REST přihlášení.
  *
- * ÚČEL:
- * <ul>
- *     <li>umožňuje přihlášení pomocí JSON (application/json),</li>
- *     <li>zachovává podporu klasického form loginu (x-www-form-urlencoded),</li>
- *     <li>nahrazuje standardní redirect chování Spring Security JSON odpověďmi,</li>
- *     <li>vytváří HTTP session a ukládá SecurityContext (stateful autentizace).</li>
- * </ul>
+ * Filtr rozšiřuje výchozí {@link UsernamePasswordAuthenticationFilter} tak,
+ * aby podporoval přihlášení jak pomocí formuláře, tak pomocí JSON payloadu.
+ * Standardní redirect chování Spring Security je nahrazeno JSON odpověďmi
+ * a po úspěšném přihlášení se vytváří HTTP session se SecurityContextem.
  *
- * PROČ JE POTŘEBA:
- * <ul>
- *     <li>{@link UsernamePasswordAuthenticationFilter} standardně očekává
- *         pouze form data,</li>
- *     <li>SPA frontend (React / Vite) posílá JSON,</li>
- *     <li>REST API nemá používat redirecty, ale strukturované JSON odpovědi.</li>
- * </ul>
- *
- * BEZPEČNOST:
- * <ul>
- *     <li>autentizace probíhá výhradně přes {@link AuthenticationManager},</li>
- *     <li>heslo se nikdy neloguje ani nevrací klientovi,</li>
- *     <li>po úspěchu je vytvořen {@link org.springframework.security.core.context.SecurityContext}
- *         uložený v HTTP session.</li>
- * </ul>
- *
- * POZNÁMKA:
- * <ul>
- *     <li>tento filtr je určen pro stateful (session-based) autentizaci,</li>
- *     <li>pro JWT / stateless přístup by byl nahrazen jiným řešením.</li>
- * </ul>
+ * Filtr je určen pro stavový (session-based) způsob autentizace. Pro
+ * stateless přístup s JWT by se použil jiný mechanismus.
  */
 public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     /**
-     * Jackson ObjectMapper pro čtení JSON z request body.
+     * Objekt pro čtení JSON z request body.
      */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Konstruktor filtru.
+     * Vytvoří filtr pro zadanou login URL.
      *
-     * @param loginUrl    URL endpointu pro login (např. /api/auth/login)
-     * @param authManager Spring Security {@link AuthenticationManager}
+     * @param loginUrl    URL endpointu pro login, například {@code /api/auth/login}
+     * @param authManager instance {@link AuthenticationManager} používaná pro autentizaci
      */
     public CustomJsonLoginFilter(String loginUrl, AuthenticationManager authManager) {
         setFilterProcessesUrl(loginUrl);
         setAuthenticationManager(authManager);
     }
 
-    // =====================================================
-    // POKUS O AUTENTIZACI (LOGIN)
-    // =====================================================
+    // Pokus o autentizaci (login)
 
     /**
-     * Pokusí se autentizovat uživatele na základě requestu.
+     * Pokusí se autentizovat uživatele na základě HTTP requestu.
      *
      * Podporované formáty:
-     * <ul>
-     *     <li>application/x-www-form-urlencoded</li>
-     *     <li>application/json</li>
-     * </ul>
+     * - {@code application/x-www-form-urlencoded} (klasický form login),
+     * - {@code application/json} (SPA frontend).
      *
      * Očekávaná pole:
-     * <ul>
-     *     <li>email (username)</li>
-     *     <li>password</li>
-     * </ul>
+     * - {@code email} (případně {@code username} u form loginu),
+     * - {@code password}.
      *
      * @throws AuthenticationException při chybě přihlášení
      */
@@ -99,9 +71,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
             String email = null;
             String password = null;
 
-            // -------------------------------------------------
-            // FORM LOGIN (x-www-form-urlencoded)
-            // -------------------------------------------------
+            // Form login (x-www-form-urlencoded)
             if (request.getContentType() != null &&
                     request.getContentType().contains("application/x-www-form-urlencoded")) {
 
@@ -109,9 +79,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                 password = request.getParameter("password");
             }
 
-            // -------------------------------------------------
-            // JSON LOGIN (application/json)
-            // -------------------------------------------------
+            // JSON login (application/json)
             if ((email == null || password == null) &&
                     request.getContentType() != null &&
                     request.getContentType().contains("application/json")) {
@@ -123,46 +91,36 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                 password = json.get("password");
             }
 
-            // -------------------------------------------------
-            // VALIDACE VSTUPŮ
-            // -------------------------------------------------
+            // Základní validace vstupů
             if (email == null || password == null ||
                     email.isBlank() || password.isBlank()) {
 
                 throw new BadCredentialsException("BE - Chybí přihlašovací údaje");
             }
 
-            // -------------------------------------------------
-            // VYTVOŘENÍ AUTHENTICATION TOKENU
-            // -------------------------------------------------
+            // Vytvoření Authentication tokenu
             UsernamePasswordAuthenticationToken authRequest =
                     new UsernamePasswordAuthenticationToken(email, password);
 
             setDetails(request, authRequest);
 
-            // delegace autentizace na AuthenticationManager
+            // Delegace autentizace na AuthenticationManager
             return this.getAuthenticationManager().authenticate(authRequest);
 
         } catch (IOException e) {
-            // chyba při čtení JSON body (malformed JSON apod.)
+            // Chyba při čtení JSON body
             throw new RuntimeException(e);
         }
     }
 
-    // =====================================================
-    // ÚSPĚŠNÝ LOGIN
-    // =====================================================
+    // Úspěšný login
 
     /**
-     * Zavolá se po úspěšné autentizaci.
+     * Zpracuje úspěšnou autentizaci.
      *
-     * Co se zde děje:
-     * <ul>
-     *     <li>uloží se {@link Authentication} do {@link SecurityContextHolder},</li>
-     *     <li>vytvoří se HTTP session (pokud neexistuje),</li>
-     *     <li>do session se uloží SPRING_SECURITY_CONTEXT,</li>
-     *     <li>vrátí se JSON odpověď místo redirectu.</li>
-     * </ul>
+     * Do {@link SecurityContextHolder} se uloží autentizace, vytvoří se
+     * HTTP session a do ní se uloží {@link org.springframework.security.core.context.SecurityContext}.
+     * Následně se klientovi vrací JSON odpověď místo redirectu.
      */
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
@@ -171,10 +129,10 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                                             Authentication authResult)
             throws IOException, ServletException {
 
-        // nastavení SecurityContext
+        // Nastavení SecurityContext
         SecurityContextHolder.getContext().setAuthentication(authResult);
 
-        // vytvoření session a uložení kontextu
+        // Vytvoření session a uložení kontextu
         request.getSession(true).setAttribute(
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 SecurityContextHolder.getContext()
@@ -191,21 +149,14 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         objectMapper.writeValue(response.getWriter(), result);
     }
 
-    // =====================================================
-    // NEÚSPĚŠNÝ LOGIN
-    // =====================================================
+    // Neúspěšný login
 
     /**
-     * Zavolá se při neúspěšném přihlášení.
+     * Zpracuje neúspěšnou autentizaci.
      *
-     * Vrací JSON odpověď s HTTP 401.
-     *
-     * Rozlišuje:
-     * <ul>
-     *     <li>neaktivovaný účet,</li>
-     *     <li>neplatné přihlašovací údaje,</li>
-     *     <li>ostatní chyby autentizace.</li>
-     * </ul>
+     * Vrací se HTTP status 401 a JSON odpověď s informací o chybě.
+     * Rozlišuje se neaktivovaný účet, neplatné přihlašovací údaje
+     * a ostatní chyby při přihlášení.
      */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request,

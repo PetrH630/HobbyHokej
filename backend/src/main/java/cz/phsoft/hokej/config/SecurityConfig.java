@@ -22,36 +22,24 @@ import java.util.List;
 /**
  * Hlavní konfigurace Spring Security pro backend aplikace.
  *
- * ZODPOVĚDNOST:
- * <ul>
- *     <li>nastavení autentizace (CustomUserDetailsService + BCrypt),</li>
- *     <li>nastavení autorizace endpointů (role / přihlášení),</li>
- *     <li>konfigurace login mechanismu (CustomJsonLoginFilter),</li>
- *     <li>session management (stateful přístup),</li>
- *     <li>CORS konfigurace pro SPA frontend (React / Vite).</li>
- * </ul>
- *
- * REŽIMY PROVOZU:
- * <ul>
- *     <li><b>test-mode = true</b> → vše povoleno, HTTP Basic (Postman, vývoj),</li>
- *     <li><b>test-mode = false</b> → produkční režim, REST login + role.</li>
- * </ul>
+ * Třída zajišťuje nastavení autentizace, autorizace endpointů,
+ * login mechanizmu, správy session a CORS. Konfigurace podporuje
+ * testovací režim pro vývoj a produkční režim s REST loginem
+ * a rolově řízeným přístupem.
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // povolí @PreAuthorize, @Secured, @RolesAllowed
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
 
     /**
-     * Přepínač testovacího režimu:
+     * Příznak testovacího režimu.
      *
-     * app.test-mode=true
-     *
-     * Použití:
-     * - lokální vývoj
-     * - Postman bez řešení session / loginu
+     * Pokud je {@code app.test-mode=true}, aplikace povoluje všechny
+     * endpointy a používá HTTP Basic autentizaci. Režim je určen pro
+     * lokální vývoj a testování v Postmanu bez potřeby řešit session.
      */
     @Value("${app.test-mode:false}")
     private boolean isTestMode;
@@ -60,34 +48,26 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    // =====================================================
-    // 1) PASSWORD ENCODER
-    // =====================================================
+    // Password encoder
 
     /**
-     * BCrypt encoder pro ukládání a ověřování hesel.
+     * Encoder pro hashování a ověřování hesel pomocí BCrypt.
      *
-     * Používá se:
-     * - při registraci
-     * - při změně hesla
-     * - při autentizaci (login)
+     * Používá se při registraci, změně hesla i při samotné autentizaci.
      */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // =====================================================
-    // 2) AUTHENTICATION PROVIDER
-    // =====================================================
+    // Authentication provider
 
     /**
-     * DaoAuthenticationProvider:
+     * {@link DaoAuthenticationProvider} pro načítání uživatelů z databáze.
      *
-     * - načítá uživatele z databáze pomocí CustomUserDetailsService
-     * - ověřuje heslo pomocí BCryptPasswordEncoder
-     *
-     * Používá se při loginu přes AuthenticationManager.
+     * Poskytuje napojení na {@link CustomUserDetailsService} a
+     * {@link BCryptPasswordEncoder}. Používá se při loginu přes
+     * {@link AuthenticationManager}.
      */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -97,15 +77,12 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // =====================================================
-    // 3) AUTHENTICATION MANAGER
-    // =====================================================
+    // Authentication manager
 
     /**
-     * AuthenticationManager:
+     * Vytváří {@link AuthenticationManager} používaný při autentizaci.
      *
-     * - centrální bod autentizace ve Spring Security
-     * - používá se v CustomJsonLoginFilter
+     * Manager je předáván do {@link CustomJsonLoginFilter}.
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig)
@@ -113,57 +90,46 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    // =====================================================
-    // 4) SECURITY FILTER CHAIN
-    // =====================================================
+    // Security filter chain
 
     /**
      * Hlavní bezpečnostní konfigurace HTTP vrstvy.
      *
      * Řeší:
-     * <ul>
-     *     <li>CSRF / CORS</li>
-     *     <li>autorizaci endpointů</li>
-     *     <li>login (CustomJsonLoginFilter)</li>
-     *     <li>logout</li>
-     *     <li>session management</li>
-     * </ul>
+     * - vypnutí CSRF pro REST API,
+     * - povolení CORS pro SPA frontend,
+     * - autorizaci endpointů,
+     * - login (CustomJsonLoginFilter),
+     * - logout a správu session.
+     *
+     * V testovacím režimu povoluje všechny endpointy s HTTP Basic
+     * autentizací. V produkčním režimu aplikuje detailní pravidla
+     * pro jednotlivé endpointy a používá JSON login.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    AuthenticationManager authManager) throws Exception {
 
-        // REST API → CSRF vypnuto (řešeno přes session + CORS)
         http.csrf(csrf -> csrf.disable())
-                .cors(cors -> { /* používá corsConfigurationSource() */ });
+                .cors(cors -> {
+                    // Použije corsConfigurationSource()
+                });
 
         if (isTestMode) {
-            // =================================================
-            // TEST MODE
-            // =================================================
-            //
-            // - všechny endpointy povoleny
-            // - HTTP Basic autentizace
-            // - žádný JSON login filtr
-            //
+            // Testovací režim: vše povoleno, HTTP Basic
+
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .httpBasic();
 
         } else {
-            // =================================================
-            // PRODUKČNÍ REŽIM
-            // =================================================
+            // Produkční režim
 
             http
-                    // napojení na CustomUserDetailsService + BCrypt
                     .authenticationProvider(authenticationProvider())
 
-                    // -------------------------------
-                    // AUTORIZACE ENDPOINTŮ
-                    // -------------------------------
                     .authorizeHttpRequests(auth -> auth
 
-                            // ===== VEŘEJNÉ ENDPOINTY =====
+                            // Veřejné endpointy
                             .requestMatchers(
                                     "/api/auth/register",
                                     "/api/auth/verify",
@@ -177,46 +143,37 @@ public class SecurityConfig {
                                     "/favicon.ico"
                             ).permitAll()
 
-                            // ===== DEBUG / TEST =====
+                            // Debug a test
                             .requestMatchers(
                                     "/api/debug/me",
                                     "/api/test/**"
                             ).hasRole("ADMIN")
 
-                            // testovací emaily
+                            // Testovací e-maily
                             .requestMatchers("/api/email/test/**").hasRole("ADMIN")
 
-                            // ===== ADMIN / MANAGER =====
+                            // Admin / manager endpointy
                             .requestMatchers("/api/admin/seasons/**").hasRole("ADMIN")
                             .requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER")
 
-                            // ===== ZBYTEK API =====
+                            // Zbytek API pouze pro přihlášené
                             .requestMatchers("/api/**").authenticated()
 
                             .anyRequest().authenticated()
                     )
 
-                    // -------------------------------
-                    // SESSION MANAGEMENT
-                    // -------------------------------
                     .sessionManagement(sm ->
                             sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     )
 
-                    // -------------------------------
-                    // CUSTOM JSON LOGIN
-                    // -------------------------------
                     .addFilterAt(
                             new CustomJsonLoginFilter("/api/auth/login", authManager),
                             UsernamePasswordAuthenticationFilter.class
                     )
 
-                    // -------------------------------
-                    // LOGOUT
-                    // -------------------------------
                     .logout(logout -> logout
                             .logoutUrl("/api/auth/logout")
                             .deleteCookies("JSESSIONID")
@@ -235,16 +192,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // =====================================================
-    // 5) CORS KONFIGURACE
-    // =====================================================
+    // CORS konfigurace
 
     /**
      * CORS konfigurace pro SPA frontend (React / Vite).
      *
-     * - povoluje http://localhost:5173
-     * - umožňuje cookies (JSESSIONID)
-     * - povoluje běžné HTTP metody
+     * Povoluje původ {@code http://localhost:5173}, základní HTTP metody
+     * a hlavičky. Umožňuje přenos cookies (JSESSIONID) pro session-based
+     * autentizaci.
+     *
+     * V produkci se má konfigurace doplnit o produkční domény.
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

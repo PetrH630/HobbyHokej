@@ -1,0 +1,415 @@
+1️⃣ Cíl a princip
+
+Mít speciální administrační stránku pro práci s hráči:
+
+přehled všech hráčů v systému (ne jen „moji hráči“),
+
+schvalování (APPROVE / REJECT),
+
+CRUD operace (vytvořit, upravit, smazat),
+
+změna přiřazeného uživatele.
+
+Stránka bude dostupná pro:
+
+ADMIN – plná práva.
+
+MANAGER – omezenější práva (podle toho, co dovolí backend).
+
+Zůstane zachováno:
+
+/players (MyPlayers) – stránka pro běžného uživatele a výběr currentPlayer,
+
+/matches, registrace atd. beze změny.
+
+2️⃣ Mapování backend endpointů → akce na FE
+
+Z PlayerControlleru:
+
+ADMIN / MANAGER společné:
+
+GET /api/players
+
+FE: načte globální seznam hráčů pro admin stránku.
+
+GET /api/players/{id}
+
+FE: zobrazí detail hráče (např. v modálu / detailní stránce).
+
+POST /api/players
+
+FE: formulář „Vytvořit hráče (globálně)“ – typicky pro ADMIN/MANAGER, když zakládají hráče do systému (ne jen „pro sebe“).
+
+Jen ADMIN:
+
+PUT /api/players/{id}
+
+FE: tlačítko „Upravit“, které otevře formulář s daty a uloží změny.
+
+DELETE /api/players/{id}
+
+FE: tlačítko „Smazat“ (s confirm dialogem).
+
+PUT /api/players/{id}/approve
+
+FE: tlačítko „Schválit“.
+
+PUT /api/players/{id}/reject
+
+FE: tlačítko „Zamítnout“.
+
+POST /api/players/{playerId}/change-user
+
+FE: akce „Změnit uživatele“ – otevře modál, kde zadáš/ vybereš nového uživatele.
+
+USER /me část necháváme tak, jak je:
+
+POST /api/players/me – vytvoření hráče pro přihlášeného usera (už existuje v tvém playerApi.js). 
+
+api
+
+GET /api/players/me – seznam „mých“ hráčů (už používáš v usePlayers). 
+
+hooks
+
+PUT /api/players/me – update aktuálního hráče (přes CurrentPlayerService na backendu – to řešíš v jiné části).
+
+3️⃣ API vrstva na FE – jaké funkce přidat
+
+Do src/api/playerApi.js bych doplnil vedle stávajících „/me“ funkcí i admin/global funkce:
+
+Čtení:
+
+getAllPlayersAdmin() → volá GET /players
+
+getPlayerByIdAdmin(id) → GET /players/{id}
+
+Vytváření:
+
+createPlayerForMe(data) → stávající /players/me (přejmenování pouze v kódu, aby bylo jasné).
+
+createPlayerAdmin(data) → nové POST /players (role ADMIN/MANAGER).
+
+Update:
+
+updatePlayerAdmin(id, data) → PUT /players/{id}
+
+Mazání:
+
+deletePlayerAdmin(id) → DELETE /players/{id}
+
+Schvalování:
+
+approvePlayerAdmin(id) → PUT /players/{id}/approve
+
+rejectPlayerAdmin(id) → PUT /players/{id}/reject
+
+Změna uživatele:
+
+changePlayerUserAdmin(playerId, newUserId) → POST /players/{playerId}/change-user
+
+Architektonicky: „/me“ funkce ponecháš pro běžného usera, admin/global funkce mají v názvu „Admin“, aby bylo vždy jasné, že jsou pro admin stránku.
+
+4️⃣ Hooky / logická vrstva pro admin stránku
+
+Do src/hooks:
+
+useAllPlayersAdmin
+
+Odpovědnost:
+
+načíst všechny hráče (getAllPlayersAdmin),
+
+držet players, loading, error,
+
+umět reload() po akcích (approve/reject/update/delete).
+
+Alternativně: přidat i podporu filtrů (status, tým, textové hledání) – řešit už jen v hooku a do UI posílat vyfiltrovaný seznam.
+
+usePlayerDetailAdmin(playerId)
+
+pro detail/modál – GET /players/{id},
+
+nemusí být nutné hned na začátku, můžeš detail dělat jednoduše tak, že jen najdeš hráče v seznamu + případně si dotáhneš detail on-demand.
+
+(Volitelné) usePlayerAdminActions
+
+společná logika pro:
+
+approve(id)
+
+reject(id)
+
+delete(id)
+
+update(id, data)
+
+changeUser(playerId, newUserId)
+
+postará se o:
+
+volání API,
+
+zachycení chyb,
+
+volání reload() z useAllPlayersAdmin,
+
+zobrazení notifikace (přes tvůj NotificationContext, pokud chceš).
+
+5️⃣ Nová stránka pro ADMIN/MANAGER
+5.1 Název a umístění
+
+Soubor: src/pages/AdminPlayersPage.jsx (nebo PlayersAdminPage.jsx).
+
+Route: například /admin/players.
+
+5.2 Odpovědnost stránky
+
+Zajistit kompletní view pro globální správu hráčů:
+
+nahoře toolbar (filtry, tlačítko „Vytvořit hráče“),
+
+pod tím tabulka/karty všech hráčů,
+
+v každém řádku akční tlačítka podle role a statusu,
+
+modály pro:
+
+potvrzení smazání,
+
+editaci hráče,
+
+změnu uživatele.
+
+Uvnitř stránky se použije:
+
+useAllPlayersAdmin() – data,
+
+usePlayerAdminActions() – mutate akce.
+
+6️⃣ Role a tlačítka – kdo co vidí a kdy
+6.1 Rozdělení podle role (dnes podle backendu)
+
+ADMIN
+
+vidí:
+
+seznam všech hráčů,
+
+tlačítko „Vytvořit hráče“ (globálně),
+
+u každého hráče:
+
+Schválit (APPROVE) – pokud status dovoluje,
+
+Zamítnout (REJECT) – pokud status dovoluje,
+
+Upravit (update),
+
+Smazat,
+
+Změnit uživatele.
+
+MANAGER
+
+podle aktuálního PlayerControlleru:
+
+může GET /players, GET /players/{id}, POST /players (create),
+
+ale nemůže PUT /{id}, DELETE /{id}, approve/reject, change-user (ty jsou jen hasRole('ADMIN')).
+
+FE teda:
+
+zobrazí:
+
+seznam všech hráčů,
+
+tlačítko „Vytvořit hráče“ (globální create).
+
+nezobrazí:
+
+Approve/Reject,
+
+Upravit,
+
+Smazat,
+
+Změnit uživatele.
+
+Pokud do budoucna chceš, aby MANAGER mohl schvalovat:
+
+na backendu změnit @PreAuthorize u approve/reject (případně dalších) na hasRole('ADMIN') or hasRole('MANAGER'),
+
+na FE jen rozšíříš podmínky pro zobrazení tlačítek.
+
+6.2 Rozdělení podle statusu hráče
+
+Bez ohledu na roli (pro ty, kdo akci mohou):
+
+Pro ADMINA:
+
+Status	Tlačítko APPROVE	Tlačítko REJECT	Poznámka
+PENDING	zobrazit	zobrazit	klasické schvalování
+APPROVED	skryt / disabled	zobrazit	dává smysl jen „Zamítnout“
+REJECTED	zobrazit	skryt / disabled	dává smysl jen „Schválit zpětně“
+
+Pro MANAGERA dnes – žádná z těchto akcí, dokud nerozšíříš backend.
+
+7️⃣ Komponenty UI pro admin stránku
+
+Rozdělení do menších kousků, aby byl frontend přehledný:
+
+AdminPlayersToolbar
+
+Filtry:
+
+drop-down na status (Všichni / PENDING / APPROVED / REJECTED),
+
+textové hledání podle jména/emailu.
+
+Tlačítko:
+
+„Vytvořit hráče“ (viditelné pro ADMIN i MANAGER, protože POST /players mají oba).
+
+AdminPlayersTable
+
+Vykreslí tabulku / seznam.
+
+Sloupce třeba:
+
+Jméno / přezdívka,
+
+Status (hezký badge – klidně znovupoužít styl z PlayerMatchStatus, jen jiný enum),
+
+Tým,
+
+Přiřazený uživatel (email),
+
+Datum vytvoření,
+
+Akce.
+
+V props:
+
+players (již případně vyfiltrovaný seznam),
+
+onApprove(id), onReject(id), onEdit(player), onDelete(id), onChangeUser(player).
+
+AdminPlayerRow (volitelné)
+
+Řádek tabulky, který:
+
+drží logiku „která tlačítka zobrazit“ podle:
+
+user.role (přijde z kontextu nebo z prop),
+
+player.playerStatus.
+
+Modály:
+
+AdminPlayerEditModal – formulář pro update (ADMIN).
+
+ChangePlayerUserModal – zadání ID/emailu uživatele, kterému hráče přiřadit (ADMIN).
+
+ConfirmDeleteModal – potvrzení smazání (ADMIN).
+
+8️⃣ Router a navbar – jak tam dostat odkaz
+8.1 Routing
+
+V hlavním routeru:
+
+Přidat route:
+
+/admin/players → AdminPlayersPage.
+
+Omotat role guardem:
+
+něco jako:
+
+v routeru použít komponentu RoleGuard (už ji máš) 
+
+components
+
+pro role: ["ROLE_ADMIN", "ROLE_MANAGER"] (podle toho, co ti backend vrací).
+
+8.2 Navbar
+
+V Navbar.jsx:
+
+Do <ul> v menu přidat další položku:
+
+„Správa hráčů“ nebo „Admin hráči“ → /admin/players.
+
+Odkaz obalit RoleGuard nebo podmínkou, aby:
+
+se zobrazoval jen přihlášeným a
+
+jen ADMIN/MANAGER.
+
+Tím:
+
+běžný user uvidí dál jen:
+
+Hráči (svoji /players stránku),
+
+Zápasy,
+
+Registrace,
+
+Nastavení.
+
+ADMIN/MANAGER navíc:
+
+„Správa hráčů“.
+
+9️⃣ Jak to zapadne do stávajícího flow s „mými hráči“
+
+Stávající Players komponenta (MyPlayers) se nemění:
+
+používá usePlayers → GET /players/me,
+
+setCurrentPlayer → POST /current-player/{id},
+
+createPlayer → /players/me.
+
+Nová admin stránka:
+
+vůbec nepracuje s currentPlayer,
+
+neovlivňuje „výběr hráče“ uživatele,
+
+je čistě globální administrace.
+
+🔟 Doporučený postup implementace (aby ti to „nespadlo“)
+
+API vrstva:
+
+Přidej nové funkce do playerApi.js pro admin/global operations.
+
+Hook useAllPlayersAdmin:
+
+udělej jednoduchou verzi – jen načtení všech hráčů + reload.
+
+Stránka AdminPlayersPage:
+
+základ:
+
+useAllPlayersAdmin,
+
+výpis prosté tabulky bez modálů, jen se jménem a statusem.
+
+RoleGuard v routeru + navbar odkaz:
+
+přidej route + odkaz v menu,
+
+zkontroluj, že běžný user se tam nedostane.
+
+Postupně přidávej akce:
+
+Approve/Reject tlačítka pro ADMIN,
+
+Delete,
+
+Edit modal,
+
+ChangeUser modal.

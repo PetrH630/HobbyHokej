@@ -14,36 +14,12 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 /**
- * AuditAspect
+ * Aspekt pro auditní logování service vrstvy.
  *
- * CROSS-CUTTING CONCERN:
- * ----------------------
- * Tento aspekt slouží k centrálnímu auditnímu logování volání
- * service vrstev aplikace.
- *
- * CO LOGUJE:
- * ----------
- * - začátek volání metody (název + argumenty)
- * - konec úspěšného volání metody
- * - návratovou hodnotu
- * - časové razítko
- *
- * ROZSAH:
- * -------
- * - všechny metody ve všech třídách v balíčku
- *   cz.phsoft.hokej.models.services..*
- *
- * PROČ AOP:
- * ----------
- * - auditní logika není roztroušena po službách
- * - žádné duplikace kódu
- * - snadné zapnutí / vypnutí / úpravy
- *
- * BEZPEČNOST:
- * -----------
- * - aspekt NEMĚNÍ chování aplikace
- * - pouze čte data a loguje
- * - v případě chyby v logování aplikace pokračuje dál
+ * Používá se k centrálnímu zaznamenávání volání metod ve službách
+ * včetně argumentů, návratových hodnot a časových razítek. Chování
+ * aplikace se tímto aspektem nemění, pouze se doplňují auditní logy
+ * do samostatného loggeru.
  */
 @Component
 @Aspect
@@ -52,39 +28,32 @@ public class AuditAspect {
     /**
      * Speciální logger určený pouze pro auditní záznamy.
      *
-     * Doporučení:
-     * - v logback.xml / log4j2.xml mít samostatný appender (soubor)
-     * - oddělit auditní logy od aplikačních logů
+     * Doporučuje se mít pro tento logger samostatný appender
+     * a oddělený soubor logu, aby byly auditní záznamy odděleny
+     * od běžných aplikačních logů.
      */
     private static final Logger logger = LoggerFactory.getLogger("AUDIT_LOGGER");
 
-    // =====================================================
-    // POINTCUT
-    // =====================================================
+    // Pointcut pro metody service vrstvy
 
     /**
-     * Pointcut definující všechny metody ve service vrstvě.
+     * Pointcut definující všechny metody ve service vrstvě aplikace.
      *
-     * Zahrnuje:
-     * - všechny třídy
-     * - všechny metody
-     * - včetně podbalíčků
+     * Zahrnuje všechny třídy a metody v balíčku
+     * {@code cz.phsoft.hokej.models.services..} včetně podbalíčků.
      */
     @Pointcut("within(cz.phsoft.hokej.models.services..*)")
     public void serviceMethods() {
-        // pouze marker metoda pro pointcut
+        // Marker metoda pro pointcut
     }
 
-    // =====================================================
-    // BEFORE ADVICE
-    // =====================================================
+    // Logování před voláním metody
 
     /**
-     * Spustí se PŘED zavoláním jakékoli service metody.
+     * Provádí auditní záznam před zavoláním jakékoli service metody.
      *
-     * Slouží pro:
-     * - záznam začátku operace
-     * - debug / audit časování
+     * Zapisuje název metody, argumenty a aktuální čas. Slouží k evidenci
+     * začátku provádění operace a k pozdější analýze průběhu volání.
      *
      * @param joinPoint kontext volané metody
      */
@@ -102,17 +71,14 @@ public class AuditAspect {
         );
     }
 
-    // =====================================================
-    // AFTER RETURNING ADVICE
-    // =====================================================
+    // Logování po úspěšném dokončení metody
 
     /**
-     * Spustí se PO ÚSPĚŠNÉM dokončení metody
-     * (NEspustí se při vyhození výjimky).
+     * Provádí auditní záznam po úspěšném dokončení metody.
      *
-     * Slouží pro:
-     * - audit úspěšných operací
-     * - logování návratových hodnot
+     * Metoda se nespouští při vyhození výjimky. Zapisuje název metody,
+     * případné identifikátory hráče a návratovou hodnotu včetně času
+     * ukončení operace.
      *
      * @param joinPoint kontext volané metody
      * @param result    návratová hodnota metody
@@ -129,24 +95,14 @@ public class AuditAspect {
         Long userId = null;
         Long playerId = null;
 
-        /*
-         * Pokus o extrakci zajímavých business identifikátorů
-         * z parametrů metody.
-         *
-         * Cílem je mít auditní stopu:
-         * - KTERÝ HRÁČ
-         * - JAKÁ OPERACE
-         */
+        // Pokus o extrakci business identifikátorů z parametrů metody
         for (Object arg : args) {
             if (arg instanceof PlayerEntity player) {
                 playerId = player.getId();
             } else if (arg instanceof MatchRegistrationEntity registration) {
                 playerId = registration.getPlayer().getId();
             } else if (arg instanceof Long id) {
-                // zde můžeš případně rozlišovat:
-                // - první Long = matchId
-                // - druhý Long = playerId
-                // dle konvence signatur metod
+                // Případné rozlišení konkrétního ID lze doplnit podle konvence signatur metod
             }
         }
 
