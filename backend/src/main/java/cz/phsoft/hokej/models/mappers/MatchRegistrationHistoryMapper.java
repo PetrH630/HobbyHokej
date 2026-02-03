@@ -6,6 +6,12 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
+/**
+ * Mapper pro převod historických záznamů registrací
+ * na jejich DTO reprezentace.
+ *
+ * Slouží výhradně pro čtecí účely a auditní přehledy.
+ */
 @Mapper(componentModel = "spring")
 public interface MatchRegistrationHistoryMapper {
 

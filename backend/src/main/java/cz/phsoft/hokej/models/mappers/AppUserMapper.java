@@ -12,44 +12,28 @@ import org.mapstruct.MappingTarget;
 import java.util.List;
 
 /**
- * MapStruct mapper pro převod mezi AppUser / Player entitami a jejich DTO objekty.
+ * Mapper zajišťující převod mezi uživatelskými entitami
+ * a jejich DTO reprezentacemi.
  *
- * <p>
- * Zajišťuje:
- * </p>
- * <ul>
- *     <li>mapování uživatelských entit na DTO pro API vrstvy,</li>
- *     <li>mapování registračních DTO na nové uživatelské entity,</li>
- *     <li>bezpečnou aktualizaci uživatelů z AppUserDTO.</li>
- * </ul>
+ * Slouží k oddělení perzistenční vrstvy od API vrstvy.
+ * Controllery pracují výhradně s DTO objekty, zatímco
+ * databázová vrstva používá entity.
  *
- * <h3>Architektonická role</h3>
- * <ul>
- *     <li>oddělení mapování (transformace dat) od business logiky,</li>
- *     <li>centralizované mapování uživatelských a hráčských objektů,</li>
- *     <li>jasná kontrola nad tím, která pole se přenáší a která jsou řízena pouze službami.</li>
- * </ul>
- *
- * <h3>Implementační poznámky</h3>
- * <ul>
- *     <li>cílem je pracovat s DTO v controller vrstvách a entitami v persistence vrstvě,</li>
- *     <li>bezpečnostně citlivá pole (heslo, role, stav účtu) jsou z mapování záměrně vyloučena,</li>
- *     <li>MapStruct generuje implementaci tohoto rozhraní jako Spring bean.</li>
- * </ul>
+ * Mapper také zajišťuje bezpečné mapování, kdy citlivá
+ * nebo systémově řízená pole nejsou přenášena z DTO
+ * přímo do entit.
  */
 @Mapper(componentModel = "spring")
 public interface AppUserMapper {
 
     /**
-     * Převede entitu uživatele na DTO reprezentaci.
+     * Převede uživatelskou entitu na DTO.
      *
-     * <p>
-     * Metoda slouží k přípravě dat pro API odpovědi. Součástí DTO je
-     * i kolekce hráčů přiřazených k danému uživateli.
-     * </p>
+     * Součástí DTO je i seznam hráčů přiřazených
+     * k danému uživateli.
      *
-     * @param entity uživatelská entita načtená z databáze
-     * @return DTO reprezentace uživatele včetně seznamu hráčů
+     * @param entity entita uživatele
+     * @return DTO reprezentace uživatele
      */
     @Mapping(target = "players", source = "players")
     AppUserDTO toDTO(AppUserEntity entity);
@@ -57,50 +41,31 @@ public interface AppUserMapper {
     /**
      * Převede seznam uživatelských entit na seznam DTO.
      *
-     * <p>
-     * Typicky použito v administrátorských přehledech uživatelů.
-     * Mapování jednotlivých prvků využívá metodu {@link #toDTO(AppUserEntity)}.
-     * </p>
-     *
      * @param entities seznam uživatelských entit
-     * @return seznam uživatelských DTO
+     * @return seznam DTO
      */
     List<AppUserDTO> toDtoList(List<AppUserEntity> entities);
 
     /**
-     * Převede entitu hráče na {@link PlayerDTO}.
+     * Převede entitu hráče na DTO.
      *
-     * <p>
-     * ignoruje pole {@code fullName}, které se typicky sestavuje jinde
-     * (například v doménové logice nebo přímo v DTO).
-     * </p>
+     * Pole fullName se záměrně nemapuje, protože
+     * je skládáno jinde (např. v DTO logice).
      *
-     * @param entity hráčská entita
-     * @return DTO reprezentace hráče
+     * @param entity entita hráče
+     * @return DTO hráče
      */
     @Mapping(target = "fullName", ignore = true)
     PlayerDTO toPlayerDTO(PlayerEntity entity);
 
     /**
-     * Převede registrační DTO na novou entitu uživatele.
+     * Převede registrační DTO na novou uživatelskou entitu.
      *
-     * <p>
-     * Používá se při vytváření nového uživatelského účtu. Systémově
-     * řízená pole nejsou mapována a jejich hodnota je nastavována až
-     * v servisní vrstvě (např. role, heslo, stav účtu).
-     * </p>
+     * Systémová pole nejsou mapována a jejich hodnoty
+     * jsou nastavovány v servisní vrstvě.
      *
-     * Ignorovaná pole:
-     * <ul>
-     *     <li>{@code id} – generuje databáze,</li>
-     *     <li>{@code password} – nastavuje se v service po zahashování,</li>
-     *     <li>{@code role} – nastavuje business logika (např. výchozí role),</li>
-     *     <li>{@code enabled} – stav aktivace účtu, řeší se v service,</li>
-     *     <li>{@code players} – vazba na hráče se řeší samostatně.</li>
-     * </ul>
-     *
-     * @param dto registrační DTO s údaji nového uživatele
-     * @return nová entita uživatele připravená k uložení
+     * @param dto registrační DTO
+     * @return nová entita uživatele
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
@@ -110,29 +75,14 @@ public interface AppUserMapper {
     AppUserEntity fromRegisterDto(RegisterUserDTO dto);
 
     /**
-     * Aktualizuje existující entitu uživatele na základě hodnot z DTO.
+     * Aktualizuje existující entitu uživatele
+     * hodnotami z DTO.
      *
-     * <p>
-     * Slouží pro úpravu profilu uživatele. Metoda nevrací novou instanci,
-     * ale mění stav předané entity označené jako {@link MappingTarget}.
-     * </p>
+     * Identita, role, heslo a vazby na hráče
+     * nejsou z DTO přebírány.
      *
-     * <p>
-     * Kritická pole nejsou z DTO přebírána a zůstávají plně v režii
-     * servisní vrstvy (např. změna role, hesla nebo stavu účtu).
-     * </p>
-     *
-     * Ignorovaná pole:
-     * <ul>
-     *     <li>{@code id} – primární klíč se nemění,</li>
-     *     <li>{@code password} – mění se pouze přes dedikovanou logiku změny hesla,</li>
-     *     <li>{@code role} – spravuje administrace / business logika,</li>
-     *     <li>{@code enabled} – stav účtu (aktivace/blokace),</li>
-     *     <li>{@code players} – vazby na hráče jsou spravovány samostatně.</li>
-     * </ul>
-     *
-     * @param dto    zdrojové DTO s novými hodnotami
-     * @param entity cílová entita, která má být aktualizována
+     * @param dto    zdrojové DTO
+     * @param entity cílová entita
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
