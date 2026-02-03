@@ -54,7 +54,7 @@
         <password>${spring.mail.password}</password>
         <from>${spring.mail.from}</from>
         <to>${spring.mail.to}</to>
-        <subject>[ERROR] Aplikace StaraGarda - Log</subject>
+        <subject>[ERROR] Aplikace HobbyHokej - Log</subject>
         <starttls>true</starttls>
         <layout class="ch.qos.logback.classic.PatternLayout">
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n%xThrowable</pattern>

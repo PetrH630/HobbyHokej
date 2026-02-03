@@ -80,10 +80,13 @@ public class ApiError {
     private Map<String, String> details;
 
     /**
-     * Základní konstruktor pro chybovou odpověď bez detailní mapy.
+     * Vytváří chybovou odpověď bez detailů.
      *
-     * Čas vzniku chyby (timestamp) se nastavuje automaticky
-     * na aktuální čas.
+     * @param status  HTTP status kód odpovědi
+     * @param error   krátký název chyby (například "Bad Request")
+     * @param message popisná zpráva chyby určená pro klienta
+     * @param path    cesta požadavku, ve které k chybě došlo
+     * @param clientIp IP adresa klienta, který požadavek odeslal
      */
     public ApiError(int status,
                     String error,
@@ -99,7 +102,15 @@ public class ApiError {
     }
 
     /**
-     * Rozšířený konstruktor umožňující doplnit i mapu details.
+     * Vytváří chybovou odpověď včetně detailů.
+     *
+     * @param status   HTTP status kód odpovědi
+     * @param error    krátký název chyby (například "Bad Request")
+     * @param message  popisná zpráva chyby určená pro klienta
+     * @param path     cesta požadavku, ve které k chybě došlo
+     * @param clientIp IP adresa klienta, který požadavek odeslal
+     * @param details  mapa detailních informací o chybě
+     *                 (například validační chyby podle názvu pole)
      */
     public ApiError(int status,
                     String error,
@@ -112,35 +123,73 @@ public class ApiError {
     }
 
     // gettery a setter
-
+    /**
+     * Vrací čas vzniku chybové odpovědi.
+     *
+     * Čas se typicky uvádí ve formátu ISO-8601.
+     *
+     * @return čas, kdy byla chybová odpověď vytvořena
+     */
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
-
+    /**
+     * Vrací HTTP status kód odpovědi.
+     *
+     * @return HTTP status kód
+     */
     public int getStatus() {
         return status;
     }
-
+    /**
+     * Vrací krátký název chyby.
+     *
+     * @return krátký název chyby (například "Bad Request")
+     */
     public String getError() {
         return error;
     }
-
+    /**
+     * Vrací popisnou zprávu chyby.
+     *
+     * @return text chybové zprávy určený pro klienta
+     */
     public String getMessage() {
         return message;
     }
-
+    /**
+     * Vrací cestu požadavku, ve které k chybě došlo.
+     *
+     * @return URL cesta HTTP požadavku
+     */
     public String getPath() {
         return path;
     }
-
+    /**
+     * Vrací IP adresu klienta, který požadavek odeslal.
+     *
+     * @return IP adresa klienta
+     */
     public String getClientIp() {
         return clientIp;
     }
-
+    /**
+     * Vrací detailní informace o chybě.
+     *
+     * Mapuje název pole nebo klíče na popis konkrétního problému
+     * (například validační chyby).
+     *
+     * @return mapa detailních informací o chybě, může být {@code null}
+     *         nebo prázdná
+     */
     public Map<String, String> getDetails() {
         return details;
     }
-
+    /**
+     * Nastavuje detailní informace o chybě.
+     *
+     * @param details mapa detailních informací o chybě
+     */
     public void setDetails(Map<String, String> details) {
         this.details = details;
     }

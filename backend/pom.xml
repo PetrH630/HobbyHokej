@@ -14,8 +14,9 @@
     </parent>
 
     <groupId>cz.phsoft.hokej</groupId>
-    <artifactId>StaraGarda</artifactId>
+    <artifactId>HobbyHokej</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>HobbyHokej</name>
 
     <properties>
         <java.version>19</java.version>

@@ -13,6 +13,12 @@ import org.springframework.http.HttpStatus;
  */
 public class AccountNotActivatedException extends BusinessException {
 
+    /**
+     * Vytváří výjimku s předdefinovanou chybovou zprávou.
+     *
+     * Zpráva popisuje, že uživatelský účet není aktivován
+     * a je určena pro zobrazení v chybové odpovědi API.
+     */
     public AccountNotActivatedException() {
         super("BE - Nejprve musíte aktivovat účet pomocí odkazu v e-mailu, nebo kontaktujte administrátora.", HttpStatus.FORBIDDEN);
     }

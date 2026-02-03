@@ -13,6 +13,9 @@ import java.util.Set;
  * Slouží k přenosu uživatelských dat mezi backendem a klientem.
  * Používá se například při správě uživatelů, zobrazení profilu
  * nebo při přihlášení a načítání základních informací o účtu.
+ *
+ * DTO neobsahuje heslo. Pro změnu hesla se používá samostatné DTO.
+ *
  */
 public class AppUserDTO {
 

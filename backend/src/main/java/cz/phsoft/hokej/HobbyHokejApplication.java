@@ -1,15 +1,3 @@
-﻿Balíček (složka): hokej
-Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej
-
-Seznam souborů:
-StaraGardaApplication.java
-
-
-
------
-# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\StaraGardaApplication.java
------
-
 package cz.phsoft.hokej;
 
 import org.springframework.boot.SpringApplication;
@@ -19,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Hlavní spouštěcí třída aplikace Hokej – Hobby Hokej.
+ * Hlavní spouštěcí třída aplikace Hokej – HobbyHokej.
  *
  * Odpovědnost třídy:
  * - startuje Spring Boot aplikaci,
@@ -33,7 +21,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaRepositories // aktivuje podporu JPA repozitářů v aplikaci
 @EnableScheduling      // umožňuje spouštění plánovaných úloh (cron, fixedRate apod.)
 @EnableAsync           // umožňuje asynchronní metody označené anotací @Async
-public class StaraGardaApplication {
+public class HobbyHokejApplication {
 
     /**
      * Hlavní vstupní metoda aplikace.
@@ -44,8 +32,6 @@ public class StaraGardaApplication {
      * @param args argumenty příkazové řádky předané aplikaci
      */
     public static void main(String[] args) {
-        SpringApplication.run(StaraGardaApplication.class, args);
+        SpringApplication.run(HobbyHokejApplication.class, args);
     }
 }
-
-

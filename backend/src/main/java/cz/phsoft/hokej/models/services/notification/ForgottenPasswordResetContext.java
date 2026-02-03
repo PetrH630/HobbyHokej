@@ -11,6 +11,8 @@ import cz.phsoft.hokej.data.entities.AppUserEntity;
  *
  * Slouží k přenesení potřebných údajů do builderu notifikací
  * (email, SMS) bez nutnosti pracovat přímo s entitami na vyšší úrovni.
+ * @param user Uživatel, kterému je reset hesla určen.
+ * @param resetLink Jednorázový odkaz pro změnu hesla.
  */
 public record ForgottenPasswordResetContext(
         AppUserEntity user,

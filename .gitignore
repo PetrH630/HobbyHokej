@@ -3,6 +3,21 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### === Java / Spring Boot ===
+backend/target/
+backend/*.jar
+backend/*.war
+backend/.mvn/wrapper/maven-wrapper.jar
+
+### === Node / React / Vite ===
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.cache/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
@@ -40,6 +55,26 @@ build/
 ### Environment / secrets ###
 .env
 .env.*
-old-application.properties
-src/main/resources/old-application.properties
+
+# My files
 export-by-folder.ps1
+application.properties-dev
+application
+FilesForCheck
+Zaloha
+.log
+
+# =====================================
+# Spring Boot – lokální konfigurace
+# =====================================
+src/main/resources/application-dev.properties
+src/main/resources/application-my-prod.properties
+src/main/resources/old-application.properties
+
+### === Coverage & test artifacts ===
+coverage/
+*.lcov
+
+### === Temporary files ===
+*.tmp
+*.swp

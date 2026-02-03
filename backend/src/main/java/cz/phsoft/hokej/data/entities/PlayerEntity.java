@@ -111,7 +111,7 @@ public class PlayerEntity {
     public String getSurname() { return surname; }
 
     public void setSurname(String surname) {
-        this.surname = surname;
+        this.surname = surname.toUpperCase();
         updateFullName();
     }
 

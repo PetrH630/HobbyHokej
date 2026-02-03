@@ -11,6 +11,8 @@ import cz.phsoft.hokej.data.entities.AppUserEntity;
  *
  * Slouží k oddělení doménových entit od dat potřebných
  * pro sestavení aktivačních notifikací.
+ * @param user Uživatel, kterému je aktivační odkaz určen.
+ * @param activationLink Jednorázový odkaz pro aktivaci účtu.
  */
 public record UserActivationContext(
         AppUserEntity user,

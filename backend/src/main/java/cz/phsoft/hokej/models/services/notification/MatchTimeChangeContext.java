@@ -7,9 +7,18 @@ import java.time.LocalDateTime;
 /**
  * Kontext pro notifikace související se změnou termínu zápasu.
  *
- * Obsahuje odkaz na zápas a původní datum a čas. Umožňuje v notifikacích
- * srozumitelně informovat hráče o nové době konání a porovnat ji
- * s původním termínem.
+ * Odpovědnost:
+ * Tento kontext se používá při vytváření notifikací, které informují hráče
+ * o změně času konání konkrétního zápasu. Uchovává odkaz na daný zápas
+ * a původní čas zahájení, aby mohla být v notifikačních textech
+ * srozumitelně popsána změna termínu.
+ *
+ * Vazby:
+ * Kontext se používá v notifikačním subsystému při generování textů
+ * emailových nebo SMS zpráv.
+ *
+ * @param match Zápas, jehož termín se mění.
+ * @param oldDateTime Původní datum a čas konání zápasu před změnou.
  */
 public record MatchTimeChangeContext(
         MatchEntity match,

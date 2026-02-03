@@ -68,7 +68,7 @@ public class DataInitializer {
 
     /**
      * Spouští se po inicializaci Spring kontejneru.
-     *
+     * <p>
      * V definovaném pořadí volá metody inicializující jednotlivé oblasti
      * dat tak, aby byly zachovány závislosti mezi entitami.
      */
@@ -112,7 +112,7 @@ public class DataInitializer {
 
     /**
      * Vytváří testovací hráče a k nim přiřazené uživatele.
-     *
+     * <p>
      * Pokud již v databázi existují hráči, inicializace se přeskočí.
      */
     private void initPlayersAndUsers() {
@@ -121,54 +121,79 @@ public class DataInitializer {
             return;
         }
 
-        List<PlayerEntity> players = new ArrayList<>(List.of(
-                new PlayerEntity("Hráč_1", "Jedna", "", PlayerType.VIP, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_2", "Dva", "", PlayerType.VIP, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_3", "Tři", "", PlayerType.VIP, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_4", "Čtyři", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_5", "Pět", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_6", "Šest", "", PlayerType.STANDARD, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_7", "Sedm", "", PlayerType.STANDARD, "+420776609956", Team.LIGHT, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_8", "Osum", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_9", "Devět", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.APPROVED),
-                new PlayerEntity("Hráč_10", "Deset", "", PlayerType.BASIC, "+420776609956", Team.DARK, PlayerStatus.PENDING)
-        ));
+        String[] names = {
+                "Jan",
+                "Petr",
+                "Jiří",
+                "Josef",
+                "Pavel",
+                "Martin",
+                "Tomáš",
+                "Jaroslav",
+                "Miroslav",
+                "Zdeněk"
+        };
+        String[] surnames = {
+                "Novák",
+                "Svoboda",
+                "Novotný",
+                "Dvořák",
+                "Černý",
+                "Procházka",
+                "Kučera",
+                "Veselý",
+                "Horák",
+                "Němec"
+        };
 
-        int playerCounter = 1;
 
-        for (PlayerEntity player : players) {
-            String email = "player" + playerCounter + "@example.com";
-            String password = "Player123";
-
+        for (int i = 0; i < 10; i++) {
+            PlayerEntity player = new PlayerEntity();
             AppUserEntity user = new AppUserEntity();
-            user.setName("Hráč" + playerCounter);
-            user.setSurname("Číslo_" + playerCounter);
+            player.setName(names[i]);
+            user.setName(names[i]);
+            player.setSurname(surnames[i].toUpperCase());
+            user.setSurname(surnames[i].toUpperCase());
+
+            String email = "player" + (i+1) + "@example.com";
+            String password = "Heslo123";
             user.setEmail(email);
             user.setPassword(encoder.encode(password));
 
-            // TODO odmazat email
-            switch (playerCounter) {
-                case 1 -> {
-                    user.setRole(Role.ROLE_MANAGER);
-                    user.setEmail("petrhlista@seznam.cz");
-                    user.setName("Petr");
-                    user.setSurname("Hlista");
+            switch (i) {
+                case 0, 1, 2 -> {
+                    player.setType(PlayerType.VIP);
                 }
-                case 2 -> user.setRole(Role.ROLE_PLAYER);
+                case 3, 4, 5, 6 -> {
+                    player.setType(PlayerType.STANDARD);
+                }
+                default -> player.setType(PlayerType.BASIC);
+            }
+
+            player.setPhoneNumber("");
+            if (i < 5) {
+                player.setTeam(Team.DARK);
+            }else {
+                player.setTeam(Team.LIGHT);
+            }
+            if (i < 8){
+                player.setPlayerStatus(PlayerStatus.APPROVED);
+            }else {
+                player.setPlayerStatus(PlayerStatus.PENDING);
+            }
+            switch (i) {
+                case 0 -> {
+                    user.setRole(Role.ROLE_MANAGER);
+                }
                 default -> user.setRole(Role.ROLE_PLAYER);
             }
             user.setEnabled(true);
-
-            // Vztah user <-> player podle doménového modelu
             player.setUser(user);
+            appUserRepository.save(user);
+            playerRepository.save(player);
 
-            appUserRepository.save(user); // nebo playerRepository.save(player) – podle nastavené kaskády
-            playerCounter++;
+
         }
-
-        // Pokud kaskáda neřeší uložení hráčů, uloží se explicitně
-        playerRepository.saveAll(players);
-
         System.out.println("Players and users initialized.");
     }
 
@@ -269,7 +294,7 @@ public class DataInitializer {
 
     /**
      * Vytváří zápasy pro jednotlivé sezóny.
-     *
+     * <p>
      * Zápasy se generují po pátcích v rámci období každé sezóny.
      */
     private void initMatches() {
@@ -344,7 +369,7 @@ public class DataInitializer {
 
     /**
      * Vytváří ukázkové registrace hráčů na zápasy.
-     *
+     * <p>
      * Registrace se generují pouze pro omezený počet zápasů v blízké budoucnosti,
      * aby bylo možné testovat různé stavy registrací.
      */
@@ -423,7 +448,7 @@ public class DataInitializer {
 
     /**
      * Vytváří databázové triggery pro tabulku registrací.
-     *
+     * <p>
      * Triggery zajišťují automatický zápis do tabulky historie registrací
      * při vzniknutí, změně nebo smazání registrace.
      */
@@ -479,7 +504,7 @@ public class DataInitializer {
 
     /**
      * Pomocná metoda pro vytvoření triggeru, pokud ještě neexistuje.
-     *
+     * <p>
      * Chyby při vytváření triggeru se vypisují do konzole, ale neblokují
      * start aplikace.
      *

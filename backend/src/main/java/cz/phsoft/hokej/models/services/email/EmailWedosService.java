@@ -105,7 +105,7 @@ public class EmailWedosService implements EmailService {
 
     @Override
     public void sendActivationEmail(String to, String greetings, String activationLink) {
-        String subject = "Potvrzení registrace – Hokej Stará Garda";
+        String subject = "Potvrzení registrace – Hokej Hobby Hokej";
         String text =
                 "Dobrý den, " + greetings + "\n\n" +
                         "Pro aktivaci účtu klikněte na následující odkaz:\n" +
@@ -118,7 +118,7 @@ public class EmailWedosService implements EmailService {
     @Override
     @Async
     public void sendActivationEmailHTML(String to, String greetings, String activationLink) {
-        String subject = "Potvrzení registrace – Hokej Stará Garda";
+        String subject = "Potvrzení registrace – Hokej Hobby Hokej";
         String html =
                 "<p>Dobrý den,</p>" +
                         "<p>" + greetings + "</p>" +
@@ -131,7 +131,7 @@ public class EmailWedosService implements EmailService {
     @Override
     @Async
     public void sendSuccesActivationEmail(String to, String greetings) {
-        String subject = "Účet byl aktivován – Hokej Stará Garda";
+        String subject = "Účet byl aktivován – Hokej Hobby Hokej";
         String text =
                 "Dobrý den, " + greetings + "\n\n" +
                         "Váš účet byl úspěšně aktivován.";
@@ -142,7 +142,7 @@ public class EmailWedosService implements EmailService {
     @Override
     @Async
     public void sendSuccesActivationEmailHTML(String to, String greetings) {
-        String subject = "Účet byl aktivován – Hokej Stará Garda";
+        String subject = "Účet byl aktivován – Hokej Hobby Hokej";
         String html =
                 "<p>Dobrý den,</p>" +
                         "<p>" + greetings + "</p>" +
