@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Repozitář pro práci s entitou {@link PlayerInactivityPeriodEntity}.
+ * Repozitář pro práci s entitou PlayerInactivityPeriodEntity.
  *
  * Slouží k evidenci a vyhledávání období neaktivity hráčů,
  * zejména pro ověření dostupnosti hráče v konkrétním čase.
@@ -19,15 +19,15 @@ public interface PlayerInactivityPeriodRepository
         extends JpaRepository<PlayerInactivityPeriodEntity, Long> {
 
     /**
-     * Ověří, zda je hráč v daném časovém okamžiku neaktivní.
+     * Ověří, zda je hráč v daném časovém intervalu neaktivní.
      *
-     * Používá se např. při registraci hráče na zápas
+     * Používá se například při registraci hráče na zápas
      * nebo při kontrole jeho dostupnosti.
      *
      * @param player hráč, jehož neaktivita se ověřuje
-     * @param from   referenční čas (obvykle čas zápasu)
-     * @param to     referenční čas (obvykle shodný s {@code from})
-     * @return {@code true}, pokud hráč spadá do období neaktivity
+     * @param from   začátek kontrolovaného intervalu
+     * @param to     konec kontrolovaného intervalu
+     * @return true, pokud hráč spadá do období neaktivity
      */
     boolean existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
             PlayerEntity player,

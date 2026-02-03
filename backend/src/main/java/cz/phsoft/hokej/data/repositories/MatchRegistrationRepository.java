@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s entitou {@link MatchRegistrationEntity}.
+ * Repozitář pro práci s entitou MatchRegistrationEntity.
  *
  * Slouží k načítání a správě registrací hráčů k zápasům,
  * včetně kontroly existence registrace, počtů hráčů
- * a vyhledávání dle zápasu nebo hráče.
+ * a vyhledávání podle zápasu nebo hráče.
  */
 @Repository
 public interface MatchRegistrationRepository
@@ -27,7 +27,7 @@ public interface MatchRegistrationRepository
      *
      * @param playerId ID hráče
      * @param matchId  ID zápasu
-     * @return {@code true}, pokud registrace existuje
+     * @return true, pokud registrace existuje
      */
     Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
 
@@ -52,7 +52,7 @@ public interface MatchRegistrationRepository
      *
      * @param playerId ID hráče
      * @param matchId  ID zápasu
-     * @return registrace zabalená v {@link Optional}, pokud existuje
+     * @return registrace zabalená v Optional, pokud existuje
      */
     Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
 
@@ -64,14 +64,14 @@ public interface MatchRegistrationRepository
      *
      * @param matchId ID zápasu
      * @param status  stav registrace
-     * @return počet registrací
+     * @return počet registrací v daném stavu
      */
     long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
 
     /**
      * Vrátí registrace pro více zápasů najednou.
      *
-     * Používá se např. při hromadném načítání
+     * Používá se například při hromadném načítání
      * registrací pro přehledy a statistiky.
      *
      * @param matchIds seznam ID zápasů

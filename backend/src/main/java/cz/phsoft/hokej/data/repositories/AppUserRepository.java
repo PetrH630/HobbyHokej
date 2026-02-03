@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s entitou {@link AppUserEntity}.
+ * Repozitář pro práci s entitou AppUserEntity.
  *
  * Slouží k perzistenci a načítání uživatelských účtů
  * z databáze pomocí Spring Data JPA.
@@ -14,13 +14,13 @@ import java.util.Optional;
 public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
 
     /**
-     * Vyhledá uživatele podle emailové adresy.
+     * Vyhledá uživatele podle e-mailové adresy.
      *
-     * Email slouží jako unikátní identifikátor uživatele
-     * v rámci autentizace.
+     * E-mail slouží jako unikátní identifikátor uživatele
+     * při přihlášení do aplikace.
      *
-     * @param email email uživatele
-     * @return uživatel zabalený v {@link Optional}, pokud existuje
+     * @param email e-mail uživatele
+     * @return uživatel zabalený v Optional, pokud existuje
      */
     Optional<AppUserEntity> findByEmail(String email);
 }

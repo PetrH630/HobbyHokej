@@ -7,22 +7,22 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s entitou {@link PlayerEntity}.
+ * Repozitář pro práci s entitou PlayerEntity.
  *
  * Slouží k načítání a správě hráčů, zejména ve vztahu
  * k uživatelským účtům a identifikaci hráčů podle jména
- * nebo emailu vlastníka.
+ * nebo e-mailu vlastníka.
  */
 public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
 
     /**
      * Najde hráče podle jeho ID.
      *
-     * Překrývá základní metodu {@link JpaRepository},
-     * aby bylo možné vracet {@link Optional}.
+     * Překrývá základní metodu z JpaRepository tak,
+     * aby bylo možné vracet Optional.
      *
      * @param id ID hráče
-     * @return hráč zabalený v {@link Optional}, pokud existuje
+     * @return hráč zabalený v Optional, pokud existuje
      */
     Optional<PlayerEntity> findById(Long id);
 
@@ -30,7 +30,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      * Vrátí všechny hráče, jejichž ID není obsaženo
      * v zadaném seznamu.
      *
-     * Používá se např. při filtrování dostupných hráčů.
+     * Používá se například při filtrování dostupných hráčů.
      *
      * @param ids seznam ID hráčů, které mají být vyloučeny
      * @return seznam hráčů
@@ -45,7 +45,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      *
      * @param name    jméno hráče
      * @param surname příjmení hráče
-     * @return {@code true}, pokud hráč existuje
+     * @return true, pokud hráč existuje
      */
     boolean existsByNameAndSurname(String name, String surname);
 
@@ -54,26 +54,26 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      *
      * @param name    jméno hráče
      * @param surname příjmení hráče
-     * @return hráč zabalený v {@link Optional}, pokud existuje
+     * @return hráč zabalený v Optional, pokud existuje
      */
     Optional<PlayerEntity> findByNameAndSurname(String name, String surname);
 
     /**
-     * Najde jednoho hráče podle emailu uživatele,
+     * Najde jednoho hráče podle e-mailu uživatele,
      * ke kterému je hráč přiřazen.
      *
      * Používá se zejména v případech, kdy má uživatel
      * pouze jednoho hráče.
      *
-     * @param email email uživatele
-     * @return hráč zabalený v {@link Optional}, pokud existuje
+     * @param email e-mail uživatele
+     * @return hráč zabalený v Optional, pokud existuje
      */
     Optional<PlayerEntity> findByUserEmail(String email);
 
     /**
      * Vrátí všechny hráče patřící danému uživateli.
      *
-     * @param email email uživatele
+     * @param email e-mail uživatele
      * @return seznam hráčů uživatele
      */
     List<PlayerEntity> findAllByUserEmail(String email);
@@ -85,7 +85,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      * Používá se pro konzistentní výpis hráčů
      * v uživatelském rozhraní.
      *
-     * @param email email uživatele
+     * @param email e-mail uživatele
      * @return seznam hráčů uživatele
      */
     List<PlayerEntity> findByUser_EmailOrderByIdAsc(String email);

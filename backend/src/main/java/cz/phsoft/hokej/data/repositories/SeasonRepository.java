@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s entitou {@link SeasonEntity}.
+ * Repozitář pro práci s entitou SeasonEntity.
  *
  * Slouží ke správě sezón, zejména k určení aktivní sezóny,
  * kontrole časových překryvů a načítání sezón
@@ -22,7 +22,7 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
      * V systému může být v daném okamžiku
      * aktivní maximálně jedna sezóna.
      *
-     * @return aktivní sezóna zabalená v {@link Optional}, pokud existuje
+     * @return aktivní sezóna zabalená v Optional, pokud existuje
      */
     Optional<SeasonEntity> findByActiveTrue();
 
@@ -43,7 +43,7 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
      *
      * @param endDate   konec kontrolovaného intervalu
      * @param startDate začátek kontrolovaného intervalu
-     * @return {@code true}, pokud existuje časový překryv
+     * @return true, pokud existuje časový překryv
      */
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqual(
             LocalDate endDate,
@@ -60,7 +60,7 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
      * @param endDate   konec kontrolovaného intervalu
      * @param startDate začátek kontrolovaného intervalu
      * @param id        ID sezóny, která má být z kontroly vynechána
-     * @return {@code true}, pokud existuje časový překryv
+     * @return true, pokud existuje časový překryv
      */
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(
             LocalDate endDate,
