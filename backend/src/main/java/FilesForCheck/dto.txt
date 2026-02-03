@@ -37,10 +37,11 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 
 /**
- * DTO reprezentující uživatelský účet aplikace.
+ * DTO, které reprezentuje uživatelský účet aplikace.
  *
- * Slouží k přenosu uživatelských dat mezi backendem
- * a klientem (např. při správě uživatelů nebo přihlášení).
+ * Slouží k přenosu uživatelských dat mezi backendem a klientem.
+ * Používá se například při správě uživatelů, zobrazení profilu
+ * nebo při přihlášení a načítání základních informací o účtu.
  */
 public class AppUserDTO {
 
@@ -55,7 +56,7 @@ public class AppUserDTO {
     private String surname;
 
     /**
-     * Email uživatele sloužící jako přihlašovací identifikátor.
+     * Email uživatele, který se používá jako přihlašovací identifikátor.
      */
     @NotBlank(message = "Email je povinný.")
     @Email(message = "Email není ve správném formátu.")
@@ -63,19 +64,24 @@ public class AppUserDTO {
 
     /**
      * Role uživatele v systému.
+     *
+     * Ovlivňuje oprávnění k jednotlivým endpointům a funkcím.
      */
     private Role role;
 
     /**
-     * Příznak aktivace uživatelského účtu.
+     * Příznak, zda je uživatelský účet aktivní.
+     *
+     * Neaktivní účet se nemůže přihlásit do aplikace.
      */
     private boolean enabled;
 
     /**
      * Hráči přiřazení k uživateli.
      *
-     * Jedná se o jednostranný vztah používaný
-     * pouze pro prezentační účely.
+     * Jedná se o datový pohled využívaný pro prezentační účely
+     * na straně klienta. DTO nenese zodpovědnost za správu tohoto
+     * vztahu v databázi.
      */
     private Set<PlayerDTO> players;
 
@@ -112,78 +118,82 @@ public class AppUserDTO {
 package cz.phsoft.hokej.models.dto;
 
 /**
- * DTO pro nastavení uživatele (AppUserSettingsEntity).
+ * DTO pro nastavení uživatele na úrovni aplikačního účtu.
  *
- * Slouží pro přenos dat mezi backendem a frontendem.
+ * Reprezentuje datový model entity AppUserSettingsEntity na úrovni API.
+ * Slouží pro přenos preferencí uživatele mezi backendem a frontendem,
+ * zejména v oblasti výběru hráče, globálních notifikací a uživatelského
+ * rozhraní.
  */
 public class AppUserSettingsDTO {
 
-    // ---- výběr hráče ----
+    // výběr hráče
 
     /**
-     * Způsob automatického výběru hráče.
+     * Způsob automatického výběru hráče po přihlášení.
      *
-     * Hodnoty odpovídají enumu PlayerSelectionMode:
-     * - FIRST_PLAYER
-     * - ALWAYS_CHOOSE
+     * Hodnoty odpovídají enumu PlayerSelectionMode,
+     * například FIRST_PLAYER nebo ALWAYS_CHOOSE.
      */
     private String playerSelectionMode;
 
-    // ---- globální notifikace ----
+    // globální notifikace
 
     /**
      * Globální úroveň notifikací pro uživatele.
      *
-     * Hodnoty odpovídají enumu GlobalNotificationLevel:
-     * - ALL
-     * - IMPORTANT_ONLY
-     * - NONE
+     * Hodnoty odpovídají enumu GlobalNotificationLevel,
+     * například ALL, IMPORTANT_ONLY nebo NONE.
      */
     private String globalNotificationLevel;
 
     /**
-     * Má uživatel dostávat kopie všech notifikací
-     * svých hráčů na svůj email?
+     * Určuje, zda má uživatel dostávat kopie všech notifikací
+     * svých hráčů na svůj email.
      */
     private boolean copyAllPlayerNotificationsToUserEmail;
 
     /**
-     * Má uživatel dostávat notifikace i za hráče,
-     * kteří mají vlastní email?
+     * Určuje, zda má uživatel dostávat notifikace i za hráče,
+     * kteří mají vlastní email.
      */
     private boolean receiveNotificationsForPlayersWithOwnEmail;
 
     /**
-     * Má uživatel preferovat denní souhrn (digest)
-     * místo jednotlivých notifikací?
+     * Určuje, zda je aktivní denní souhrn e-mailů místo
+     * jednotlivých notifikací.
      */
     private boolean emailDigestEnabled;
 
     /**
-     * Čas, kdy má chodit souhrnný email (pokud je digest aktivní).
-     * Reprezentovaný jako String, např. "20:00".
+     * Čas pro odeslání souhrnného e-mailu, pokud je denní digest aktivní.
+     *
+     * Hodnota se zadává jako řetězec, například "20:00".
      */
     private String emailDigestTime;
 
-    // ---- UX / UI ----
+    // UX / UI
 
     /**
-     * Preferovaný jazyk UI (např. "cs", "en").
+     * Preferovaný jazyk uživatelského rozhraní,
+     * například "cs" nebo "en".
      */
     private String uiLanguage;
 
     /**
-     * Časová zóna (např. "Europe/Prague").
+     * Časová zóna uživatele, například "Europe/Prague".
      */
     private String timezone;
 
     /**
      * Výchozí obrazovka po přihlášení.
-     * Např. "DASHBOARD", "MATCHES", "PLAYERS".
+     *
+     * Typicky odpovídá názvu sekce na frontendu,
+     * například "DASHBOARD", "MATCHES" nebo "PLAYERS".
      */
     private String defaultLandingPage;
 
-    // ===== Gettery / settery =====
+    // gettery / settery
 
     public String getPlayerSelectionMode() {
         return playerSelectionMode;
@@ -270,7 +280,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * DTO pro zadání emailu (např. zapomenuté heslo).
+ * DTO pro zadání e-mailové adresy.
+ *
+ * Používá se u jednoduchých formulářů, kde uživatel zadává pouze email,
+ * například při požadavku na reset zapomenutého hesla.
  */
 public class EmailDTO {
 
@@ -299,7 +312,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * DTO pro nastavení nového hesla na základě forgotten-password tokenu.
+ * DTO pro nastavení nového hesla na základě resetovacího tokenu.
+ *
+ * Používá se v procesu zapomenutého hesla. Obsahuje token, nové heslo
+ * a jeho potvrzení. Kontrola shody hesel se provádí v servisní vrstvě.
  */
 public class ForgottenPasswordResetDTO {
 
@@ -313,7 +329,8 @@ public class ForgottenPasswordResetDTO {
     @NotBlank(message = "Potvrzení nového hesla je povinné.")
     private String newPasswordConfirm;
 
-    // gettery/settery
+    // gettery / settery
+
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 
@@ -338,18 +355,12 @@ import jakarta.validation.constraints.Size;
 /**
  * DTO pro změnu hesla přihlášeného uživatele.
  *
- * Používá se při:
- * <ul>
- *     <li>změně hesla z uživatelského profilu,</li>
- *     <li>ověření původního hesla před nastavením nového.</li>
- * </ul>
+ * Používá se při změně hesla z uživatelského profilu, kde je potřeba
+ * ověřit původní heslo a nastavit nové. DTO obsahuje staré heslo,
+ * nové heslo a jeho potvrzení. Kontrola shody nového hesla a potvrzení
+ * se provádí v servisní vrstvě.
  *
- * Validace:
- * <ul>
- *     <li>všechna pole jsou povinná,</li>
- *     <li>nové heslo musí splňovat minimální délku,</li>
- *     <li>shoda nového hesla a potvrzení se kontroluje v servisní vrstvě.</li>
- * </ul>
+ * Všechna pole jsou povinná a nové heslo musí splňovat minimální délku.
  */
 public class ChangePasswordDTO {
 
@@ -394,32 +405,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Detailní DTO reprezentující zápas včetně
- * kontextu přihlášeného hráče a agregovaných statistik.
+ * Detailní DTO reprezentující jeden zápas včetně kontextu hráče
+ * a agregovaných statistik.
  *
- * Používá se zejména:
- * <ul>
- *     <li>na stránce detailu zápasu,</li>
- *     <li>pro zobrazení seznamů hráčů dle stavu registrace,</li>
- *     <li>pro zobrazení kapacity, ceny a stavu účasti.</li>
- * </ul>
- *
- * DTO obsahuje jak:
- * <ul>
- *     <li>základní informace o zápasu,</li>
- *     <li>agregované hodnoty (počty hráčů, ceny),</li>
- *     <li>stav přihlášeného hráče k danému zápasu.</li>
- * </ul>
+ * Používá se zejména na stránce detailu zápasu, pro zobrazení
+ * seznamů hráčů podle stavu registrace, pro zobrazení kapacity,
+ * ceny a aktuální účasti. Kromě základních informací o zápasu
+ * obsahuje i stav přihlášeného hráče a rozdělené seznamy hráčů
+ * podle jednotlivých kategorií účasti.
  */
 public class MatchDetailDTO implements NumberedMatchDTO {
 
     /**
-     * Pořadové číslo zápasu v sezóně (1..N),
-     * počítané podle data v rámci dané sezóny.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
+     * Hodnota se nastavuje pouze na serveru a na klienta se vrací jako
+     * read-only údaj.
      */
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)   // klient to neposílá
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer matchNumber;
 
     private Long id;
@@ -433,6 +435,10 @@ public class MatchDetailDTO implements NumberedMatchDTO {
 
     /**
      * Kapacitní a agregační údaje zápasu.
+     *
+     * Obsahují například maximální počet hráčů, počet přihlášených hráčů
+     * celkově a v jednotlivých týmech, počet náhradníků a počet hráčů
+     * v různých stavech účasti.
      */
     private int maxPlayers;
     private int inGamePlayers;
@@ -447,7 +453,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
 
     /**
      * Cena přepočtená na jednoho přihlášeného hráče.
-     * Hodnota je počítána serverem.
+     * Hodnota se počítá na serveru podle aktuálního stavu registrací.
      */
     private double pricePerRegisteredPlayer;
 
@@ -457,25 +463,30 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private PlayerMatchStatus playerMatchStatus;
 
     /**
-     * Informace o omluvě přihlášeného hráče (pokud existuje).
+     * Informace o omluvě přihlášeného hráče, pokud je k dispozici.
      */
     private ExcuseReason excuseReason;
     private String excuseNote;
 
     /**
-     * Stav zápasu a případný důvod zrušení.
+     * Stav zápasu a případný důvod jeho zrušení.
      */
     private MatchStatus matchStatus;
     private MatchCancelReason cancelReason;
 
     /**
-     * ID sezóny – pouze pro čtení.
+     * ID sezóny, do které zápas patří.
+     * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
     /**
      * Seznamy hráčů rozdělené podle stavu registrace.
+     *
+     * Seznamy se používají pro přehledné zobrazení v uživatelském rozhraní,
+     * například pro zvýraznění přihlášených hráčů, náhradníků nebo
+     * neomluvených hráčů.
      */
     private List<PlayerDTO> registeredPlayers;
     private List<PlayerDTO> reservedPlayers;
@@ -485,9 +496,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private List<PlayerDTO> noExcusedPlayers;
     private List<PlayerDTO> noResponsePlayers;
 
-    // ================
     // gettery / settery
-    // ================
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -594,9 +603,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
         this.noResponsePlayers = noResponsePlayers;
     }
 
-    // ================
     // NumberedMatchDTO
-    // ================
 
     @Override
     public void setMatchNumber(Integer matchNumber) {
@@ -630,23 +637,22 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 /**
- * DTO reprezentující zápas.
- * <p>
- * Slouží k přenosu dat o zápasech mezi backendem
- * a klientem (vytváření, editace, přehledy).
- * <p>
- * Neobsahuje žádnou business logiku ani vazby na entity.
+ * DTO, které reprezentuje základní informace o zápasu.
+ *
+ * Slouží k přenosu dat o zápasech mezi backendem a klientem,
+ * například při vytváření a editaci zápasů nebo v administrativních
+ * přehledech. DTO neobsahuje business logiku ani vazby na entity
+ * a slouží pouze jako transportní objekt.
  */
 public class MatchDTO implements NumberedMatchDTO {
 
     /**
-     * Pořadové číslo zápasu v sezóně (1..N),
-     * počítané podle data zápasu v rámci dané sezóny.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
+     * Hodnota se nastavuje pouze na serveru a na klienta se vrací jako
+     * read-only údaj.
      */
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)    // – klient to nesmí posílat
-    private Integer matchNumber;                           
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Integer matchNumber;
 
     private Long id;
 
@@ -671,28 +677,25 @@ public class MatchDTO implements NumberedMatchDTO {
     private Integer price;
 
     /**
-     * Aktuální stav zápasu (např. aktivní, zrušený).
+     * Aktuální stav zápasu, například plánovaný, zrušený nebo odehraný.
      */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
     /**
-     * Důvod zrušení zápasu, pokud byl zrušen.
+     * Důvod zrušení zápasu, pokud byl zápas zrušen.
      */
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
 
     /**
      * ID sezóny, do které zápas patří.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
-    // ================
     // gettery / settery
-    // ================
 
     public Long getId() { return id; }
 
@@ -730,9 +733,7 @@ public class MatchDTO implements NumberedMatchDTO {
 
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
 
-    // ================
     // NumberedMatchDTO
-    // ================
 
     @Override
     public void setMatchNumber(Integer matchNumber) {
@@ -766,24 +767,16 @@ import java.time.LocalDateTime;
 /**
  * Přehledové DTO reprezentující zápas v seznamu.
  *
- * Používá se zejména:
- * <ul>
- *     <li>v přehledech nadcházejících a minulých zápasů,</li>
- *     <li>v seznamu zápasů hráče,</li>
- *     <li>na dashboardu nebo úvodních obrazovkách.</li>
- * </ul>
- *
- * Obsahuje zjednodušený pohled na zápas
- * doplněný o kontext přihlášeného hráče
- * a základní agregační informace.
+ * Používá se v přehledech nadcházejících a minulých zápasů, v případech,
+ * kdy stačí zjednodušený pohled na zápas doplněný o agregované informace
+ * a stav aktuálního hráče. Typicky se používá na úvodních obrazovkách,
+ * dashboardu nebo v kartách zápasů.
  */
 public class MatchOverviewDTO implements NumberedMatchDTO {
 
     /**
-     * Pořadové číslo zápasu v sezóně (1..N),
-     * počítané podle data zápasu v rámci dané sezóny.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
+     * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer matchNumber;
@@ -799,13 +792,16 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
 
     /**
      * Základní agregační údaje zápasu.
+     *
+     * Obsahují maximální počet hráčů a aktuální počet přihlášených
+     * hráčů v zápase.
      */
     private int maxPlayers;
     private int inGamePlayers;
 
     /**
      * Cena přepočtená na jednoho přihlášeného hráče.
-     * Hodnota je počítána serverem.
+     * Hodnota se počítá na serveru.
      */
     private double pricePerRegisteredPlayer;
 
@@ -825,15 +821,12 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
 
     /**
      * ID sezóny, do které zápas patří.
-     * <p>
-     * Pouze pro čtení – nastavuje server.
+     * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
-    // ================
     // gettery / settery
-    // ================
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -875,9 +868,7 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     public Long getSeasonId() { return seasonId; }
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
 
-    // ================
     // NumberedMatchDTO
-    // ================
 
     @Override
     public void setMatchNumber(Integer matchNumber) {
@@ -905,25 +896,19 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 /**
- * DTO reprezentující registraci hráče k zápasu.
+ * DTO, které reprezentuje registraci hráče k zápasu.
  *
- * Slouží k přenosu informací o stavu účasti hráče
- * na konkrétním zápasu mezi backendem a klientem.
- *
- * Používá se zejména:
- * <ul>
- *     <li>při registraci / odhlášení / omluvě hráče,</li>
- *     <li>v přehledech registrací zápasu,</li>
- *     <li>v administraci účasti hráčů.</li>
- * </ul>
+ * Slouží k přenosu informací o stavu účasti hráče na konkrétním zápase
+ * mezi backendem a klientem. Používá se při registraci, odhlášení,
+ * omluvě hráče, v přehledech registrací a v administraci účasti.
  */
 public class MatchRegistrationDTO {
 
     /**
      * ID registrace.
      *
-     * Vyplněno při načítání dat (GET),
-     * při vytváření nové registrace může být {@code null}.
+     * Při vytváření nové registrace může být hodnota null.
+     * Hodnota se generuje na serveru.
      */
     private Long id;
 
@@ -941,30 +926,37 @@ public class MatchRegistrationDTO {
     private PlayerMatchStatus status;
 
     /**
-     * Důvod omluvy – vyplněn pouze pokud je
-     * {@link #status} nastaven na {@code EXCUSED}.
+     * Důvod omluvy, pokud je registrace ve stavu omluvené účasti.
      */
     private ExcuseReason excuseReason;
 
+    /**
+     * Textová poznámka k omluvě zadaná hráčem.
+     */
     private String excuseNote;
+
+    /**
+     * Interní poznámka administrátora k dané registraci.
+     */
     private String adminNote;
+
+    /**
+     * Tým, do kterého je hráč přiřazen v daném zápase.
+     */
     private Team team;
 
     /**
      * Informace o původu registrace.
      *
-     * Typické hodnoty:
-     * <ul>
-     *     <li>{@code "user"} – akce provedená hráčem,</li>
-     *     <li>{@code "system"} – automatická změna systémem.</li>
-     * </ul>
+     * Typicky se používají hodnoty jako "user" pro akce hráče
+     * a "system" pro automatické změny provedené systémem.
      */
     @NotNull
     private String createdBy;
 
     /**
-     * Detail hráče – používá se pro prezentační účely
-     * v přehledech registrací.
+     * Detail hráče. Používá se pro prezentační účely v přehledech
+     * registrací, aby nebylo nutné dělat další dotazy na hráče.
      */
     private PlayerDTO playerDTO;
 
@@ -1034,6 +1026,15 @@ import cz.phsoft.hokej.data.enums.Team;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO reprezentující historický záznam o registraci hráče k zápasu.
+ *
+ * Slouží pro auditní a přehledové účely. Obsahuje informace o tom,
+ * jak se registrace v čase měnila, včetně původního časového razítka,
+ * akce, autora změny a stavů registrace.
+ *
+ * Datový model odpovídá záznamu v tabulce historie registrací.
+ */
 public class MatchRegistrationHistoryDTO {
 
     private Long id;
@@ -1113,8 +1114,30 @@ public class MatchRegistrationHistoryDTO {
 
 package cz.phsoft.hokej.models.dto;
 
+/**
+ * Společné rozhraní pro DTO objekt reprezentující zápas
+ * s přiřazeným pořadovým číslem v rámci sezóny.
+ *
+ * Rozhraní se používá u více typů DTO (například MatchDTO,
+ * MatchDetailDTO, MatchOverviewDTO), aby bylo možné jednotně
+ * nastavovat a číst pořadové číslo zápasu vypočítané na serveru.
+ */
 public interface NumberedMatchDTO {
+
+    /**
+     * Nastavuje pořadové číslo zápasu v sezóně.
+     *
+     * Metoda se typicky volá v servisní nebo mapovací vrstvě.
+     *
+     * @param matchNumber pořadové číslo v rozsahu 1..N
+     */
     void setMatchNumber(Integer matchNumber);
+
+    /**
+     * Vrací pořadové číslo zápasu v sezóně.
+     *
+     * @return pořadové číslo nebo null, pokud není nastaveno
+     */
     Integer getMatchNumber();
 }
 
@@ -1135,21 +1158,20 @@ import jakarta.validation.constraints.Size;
 import java.util.Locale;
 
 /**
- * DTO reprezentující hráče v systému.
+ * DTO, které reprezentuje hráče v systému.
  *
- * Slouží k přenosu dat o hráči mezi backendem a klientem
- * (registrace hráče, správa profilu, přehledy a registrace na zápasy).
- *
- * DTO neobsahuje žádnou perzistentní logiku
- * a je nezávislé na databázové vrstvě.
+ * Slouží k přenosu dat o hráči mezi backendem a klientem při registraci,
+ * správě profilu, přehledech a registracích na zápasy. DTO je nezávislé
+ * na databázové vrstvě a neobsahuje perzistentní logiku. Obsahuje však
+ * jednoduchou odvozenou hodnotu celého jména.
  */
 public class PlayerDTO {
 
     /**
      * ID hráče.
      *
-     * Při vytváření nového hráče může být {@code null},
-     * hodnota je generována serverem.
+     * Při vytváření nového hráče může být hodnota null.
+     * Hodnota se generuje na serveru.
      */
     private Long id;
 
@@ -1166,29 +1188,28 @@ public class PlayerDTO {
     /**
      * Celé jméno hráče.
      *
-     * Odvozená hodnota složená ze jména a příjmení.
+     * Hodnota se odvozuje z křestního jména a příjmení.
+     * Aktualizuje se při změně jména nebo příjmení.
      */
     private String fullName;
 
     private String phoneNumber;
 
     /**
-     * Typ hráče (např. BASIC, STANDARD, VIP).
+     * Typ hráče, například BASIC, STANDARD nebo VIP.
      *
-     * Pokud není explicitně nastaven,
-     * použije se výchozí hodnota {@link PlayerType#BASIC}.
+     * Pokud není explicitně nastaven, používá se výchozí hodnota BASIC.
      */
     private PlayerType type;
 
     private Team team;
 
     /**
-     * Stav hráče v systému (např. PENDING, APPROVED).
+     * Stav hráče v systému, například PENDING nebo APPROVED.
      *
-     * Pokud není nastaven, použije se výchozí stav {@link PlayerStatus#PENDING}.
+     * Pokud není explicitně nastaven, používá se výchozí stav PENDING.
      */
     private PlayerStatus playerStatus;
-
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
@@ -1202,7 +1223,7 @@ public class PlayerDTO {
                      String phoneNumber,
                      Team team,
                      PlayerStatus playerStatus
-                  ) {
+    ) {
 
         this.id = id;
         this.name = name;
@@ -1248,15 +1269,10 @@ public class PlayerDTO {
         this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
     }
 
-
-
-    // ==================================================
-    // INTERNÍ LOGIKA
-    // ==================================================
+    // interní logika
 
     /**
-     * Aktualizuje odvozené pole {@link #fullName}
-     * při změně jména nebo příjmení.
+     * Aktualizuje odvozené pole fullName při změně jména nebo příjmení.
      */
     private void updateFullName() {
         this.fullName = name + " " + surname;
@@ -1278,9 +1294,8 @@ import java.time.LocalDateTime;
 /**
  * DTO reprezentující období neaktivity hráče.
  *
- * Používá se k přenosu informací o časovém intervalu,
- * ve kterém hráč není k dispozici pro zápasy
- * (např. zranění, dlouhodobá absence).
+ * Slouží k přenosu informací o časovém intervalu, ve kterém se hráč
+ * neúčastní zápasů, například z důvodu zranění nebo dlouhodobé absence.
  */
 public class PlayerInactivityPeriodDTO {
 
@@ -1317,23 +1332,25 @@ public class PlayerInactivityPeriodDTO {
 package cz.phsoft.hokej.models.dto;
 
 /**
- * DTO pro nastavení hráče (PlayerSettingsEntity).
+ * DTO pro nastavení hráče na úrovni PlayerSettingsEntity.
  *
- * Slouží pro přenos dat mezi backendem a frontendem.
+ * Slouží k přenosu preferencí hráče mezi backendem a frontendem,
+ * zejména v oblasti kontaktních údajů a notifikačních kanálů.
+ * DTO se používá jak pro zobrazení nastavení, tak pro jejich aktualizaci.
  */
 public class PlayerSettingsDTO {
 
-    // KONTAKT
+    // kontaktní údaje
 
     private String contactEmail;
     private String contactPhone;
 
-    // KANÁLY
+    // kanály
 
     private boolean emailEnabled;
     private boolean smsEnabled;
 
-    // TYPY NOTIFIKACÍ
+    // typy notifikací
 
     private boolean notifyOnRegistration;
     private boolean notifyOnExcuse;
@@ -1341,12 +1358,12 @@ public class PlayerSettingsDTO {
     private boolean notifyOnMatchCancel;
     private boolean notifyOnPayment;
 
-    // PŘIPOMÍNKY
+    // připomínky
 
     private boolean notifyReminders;
     private Integer reminderHoursBefore;
 
-    // ===== GETTERY / SETTERY =====
+    // gettery / settery
 
     public String getContactEmail() {
         return contactEmail;
@@ -1451,9 +1468,9 @@ import cz.phsoft.hokej.data.enums.Team;
 /**
  * Zjednodušené DTO reprezentující hráče.
  *
- * Slouží pro přehledové a seznamové pohledy,
- * kde není potřeba kompletní detail hráče
- * ani jeho stavové či notifikační informace.
+ * Slouží pro přehledové a seznamové pohledy, kde není potřeba kompletní
+ * detail hráče ani jeho stavové a notifikační informace. Typicky se používá
+ * v seznamech hráčů nebo pro rychlé výběry.
  */
 public class PlayerSummaryDTO {
 
@@ -1504,12 +1521,10 @@ import jakarta.validation.constraints.Size;
 /**
  * DTO pro registraci nového uživatele.
  *
- * Slouží k přenosu registračních údajů z klienta
- * do backendu při vytváření nového uživatelského účtu.
- *
- * DTO obsahuje pouze validační pravidla základního formátu dat.
- * Kontrola shody hesel a další business validace
- * jsou řešeny v servisní vrstvě.
+ * Slouží k přenosu registračních údajů z klienta do backendu
+ * při vytváření nového uživatelského účtu. DTO obsahuje základní
+ * validační pravidla pro formát dat. Kontrola shody hesel a další
+ * business validace se provádí v servisní vrstvě.
  */
 public class RegisterUserDTO {
 
@@ -1567,18 +1582,17 @@ import java.time.LocalDate;
 /**
  * DTO reprezentující sezónu v aplikaci.
  *
- * Slouží k přenosu informací o sezónách mezi backendem
- * a klientem (správa sezón, výběr aktivní sezóny).
- *
- * Sezóna vymezuje časové období, ve kterém
- * se konají zápasy a ke kterému se vztahují statistiky.
+ * Slouží k přenosu informací o sezónách mezi backendem a klientem,
+ * například při správě sezón nebo výběru aktivní sezóny. Sezóna vymezuje
+ * časové období, ve kterém se konají zápasy a ke kterému se vztahují
+ * statistiky a přehledy.
  */
 public class SeasonDTO {
 
     private Long id;
 
     /**
-     * Název sezóny (např. "2024/2025").
+     * Název sezóny, například "2024/2025".
      */
     @NotBlank(message = "např. 2025/2026")
     private String name;
@@ -1592,10 +1606,9 @@ public class SeasonDTO {
     private LocalDate endDate;
 
     /**
-     * Určuje, zda je sezóna aktuálně aktivní.
+     * Příznak, zda je sezóna aktuálně aktivní.
      *
-     * V systému může být v daném okamžiku
-     * aktivní maximálně jedna sezóna.
+     * V systému může být v daném okamžiku aktivní nejvýše jedna sezóna.
      */
     private boolean active;
 
@@ -1645,9 +1658,10 @@ package cz.phsoft.hokej.models.dto;
 /**
  * DTO reprezentující standardizovanou úspěšnou odpověď API.
  *
- * Používá se jako návratová hodnota u operací,
- * které provedly změnu stavu systému
- * (např. vytvoření, aktualizace, smazání, schválení).
+ * Používá se jako návratová hodnota u operací, které provedly změnu
+ * stavu systému, například při vytvoření, aktualizaci, smazání
+ * nebo schválení entity. Umožňuje vrátit textovou zprávu, ID
+ * dotčené entity a čas vzniku odpovědi.
  */
 public class SuccessResponseDTO {
 
@@ -1659,13 +1673,15 @@ public class SuccessResponseDTO {
     /**
      * ID entity, které se operace týkala.
      *
-     * Může být {@code null}, pokud operace
-     * nemá přímou vazbu na konkrétní entitu.
+     * Může být null, pokud operace nemá přímou vazbu na konkrétní entitu.
      */
     private final Long id;
 
     /**
-     * Čas vytvoření odpovědi (typicky ve formátu ISO-8601).
+     * Čas vytvoření odpovědi.
+     *
+     * Čas se typicky předává ve formátu ISO-8601 a slouží
+     * k ladění nebo zobrazování v logu na frontendu.
      */
     private final String timestamp;
 

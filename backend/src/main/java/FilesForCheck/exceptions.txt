@@ -44,11 +44,9 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že uživatelský účet není aktivován.
  *
- * <p>
- * Vyhazuje se v případě, kdy se uživatel pokouší přihlásit nebo
- * používat funkce vyžadující aktivovaný účet, aniž by dokončil
- * aktivaci přes odkaz v e-mailu.
- * </p>
+ * Vyhazuje se v případě, kdy se uživatel pokouší přihlásit
+ * nebo používat funkce vyžadující aktivovaný účet, aniž by
+ * dokončil aktivaci přes odkaz v e-mailu.
  *
  * Typicky mapováno na HTTP 403 (Forbidden).
  */
@@ -68,100 +66,94 @@ public class AccountNotActivatedException extends BusinessException {
 package cz.phsoft.hokej.exceptions;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
  * DTO reprezentující jednotný formát chybové odpovědi backendu.
- * <p>
- * Používá se v {@link cz.phsoft.hokej.config.GlobalExceptionHandler} pro
- * serializaci výjimek do JSON odpovědi, kterou zpracovává frontend.
  *
- * Struktura:
- * <ul>
- *     <li>{@code timestamp} – čas vzniku chyby na serveru,</li>
- *     <li>{@code status} – HTTP status kód (např. 400, 403, 409, 500),</li>
- *     <li>{@code error} – stručný textový popis statusu (např. "Bad Request"),</li>
- *     <li>{@code message} – detailnější zpráva (typicky z výjimky),</li>
- *     <li>{@code path} – URL, kde k chybě došlo,</li>
- *     <li>{@code clientIp} – IP adresa klienta, který požadavek poslal,</li>
- *     <li>{@code details} – volitelné doplňující informace (např. validační chyby).</li>
- * </ul>
+ * Používá se v globálním handleru výjimek
+ * (cz.phsoft.hokej.config.GlobalExceptionHandler) pro serializaci
+ * výjimek do JSON odpovědi, kterou zpracovává frontend.
  *
- * Příklad JSON odpovědi:
- * <pre>
- * {
- *   "timestamp": "2026-01-24 22:21:09",
- *   "status": 400,
- *   "error": "Bad Request",
- *   "message": "BE - Datum 'od' musí být před 'do'.",
- *   "path": "/api/inactivity/admin",
- *   "clientIp": "0:0:0:0:0:0:0:1",
- *   "details": {
- *     "field": "inactiveFrom",
- *     "reason": "must be before inactiveTo"
- *   }
- * }
- * </pre>
+ * Struktura odpovědi:
+ * - timestamp: čas vzniku chyby na serveru,
+ * - status: HTTP status kód (například 400, 403, 409, 500),
+ * - error: stručný textový popis statusu (například "Bad Request"),
+ * - message: detailnější zpráva (typicky z výjimky),
+ * - path: URL, kde k chybě došlo,
+ * - clientIp: IP adresa klienta, který požadavek poslal,
+ * - details: volitelné doplňující informace (například validační chyby).
+ *
+ * Tato struktura umožňuje frontend části jednotně zpracovávat chyby
+ * a zobrazovat uživatelsky přívětivé zprávy.
  */
 public class ApiError {
 
     /**
      * Datum a čas vzniku chyby na serveru.
-     * <p>
-     * Formát {@code yyyy-MM-dd HH:mm:ss} usnadňuje čitelnost v logu i ve FE.
+     *
+     * Formát "yyyy-MM-dd HH:mm:ss" usnadňuje čitelnost v logu
+     * i ve frontendové části.
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 
     /**
-     * HTTP status kód (např. 400, 403, 404, 409, 500).
+     * HTTP status kód (například 400, 403, 404, 409, 500).
      */
     private int status;
 
     /**
-     * Stručný textový popis statusu (např. "Bad Request", "Forbidden", "Conflict").
+     * Stručný textový popis statusu (například "Bad Request", "Forbidden", "Conflict").
      */
     private String error;
 
     /**
-     * Detailnější chybová zpráva – typicky pochází z {@link Exception#getMessage()}.
-     * <p>
+     * Detailnější chybová zpráva.
+     *
+     * Typicky pochází z metody Exception.getMessage().
      * V doménových výjimkách je záměrně formulována tak,
-     * aby byla použitelná přímo pro uživatele (přes FE).
+     * aby byla použitelná přímo pro uživatele.
      */
     private String message;
 
     /**
-     * URL (path) požadavku, ve kterém chyba vznikla (např. {@code /api/matches/1}).
+     * URL (path) požadavku, ve kterém chyba vznikla
+     * (například "/api/matches/1").
      */
     private String path;
 
     /**
      * IP adresa klienta, který požadavek odeslal.
-     * <p>
-     * Hodí se pro audit / diagnostiku (např. při řešení problémů uživatelů).
+     *
+     * Hodí se pro audit a diagnostiku, například při řešení
+     * problémů konkrétních uživatelů.
      */
     private String clientIp;
 
     /**
      * Volitelná mapa s doplňujícími detaily o chybě.
-     * <p>
+     *
      * Typické použití:
-     * <ul>
-     *     <li>validační chyby formuláře (field → message),</li>
-     *     <li>více chyb v jednom requestu (key → popis problému).</li>
-     * </ul>
-     * Může být {@code null}.
+     * - validační chyby formuláře (klíč pole → chybová zpráva),
+     * - více chyb v jednom requestu (klíč → popis problému).
+     *
+     * Může být null.
      */
     private Map<String, String> details;
 
     /**
      * Základní konstruktor pro chybovou odpověď bez detailní mapy.
-     * <p>
-     * {@code timestamp} se nastavuje automaticky na aktuální čas.
+     *
+     * Čas vzniku chyby (timestamp) se nastavuje automaticky
+     * na aktuální čas.
      */
-    public ApiError(int status, String error, String message, String path,
+    public ApiError(int status,
+                    String error,
+                    String message,
+                    String path,
                     String clientIp) {
         this.timestamp = LocalDateTime.now();
         this.status = status;
@@ -172,7 +164,7 @@ public class ApiError {
     }
 
     /**
-     * Rozšířený konstruktor umožňující doplnit i {@code details} mapu.
+     * Rozšířený konstruktor umožňující doplnit i mapu details.
      */
     public ApiError(int status,
                     String error,
@@ -184,17 +176,35 @@ public class ApiError {
         this.details = details;
     }
 
-    // ======================
-    // GETTERY
-    // ======================
+    // gettery a setter
 
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public int getStatus() { return status; }
-    public String getError() { return error; }
-    public String getMessage() { return message; }
-    public String getPath() { return path; }
-    public String getClientIp() { return clientIp; }
-    public Map<String, String> getDetails() { return details; }
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getClientIp() {
+        return clientIp;
+    }
+
+    public Map<String, String> getDetails() {
+        return details;
+    }
 
     public void setDetails(Map<String, String> details) {
         this.details = details;
@@ -214,12 +224,10 @@ import org.springframework.http.HttpStatus;
 /**
  * Základní doménová výjimka pro business chyby v aplikaci.
  *
- * <p>
- * Slouží jako společný předek pro aplikační výjimky, které nesou
- * informaci o odpovídajícím HTTP status kódu. Tento status
- * je následně použit v globálním handleru výjimek pro tvorbu
- * jednotné chybové odpovědi.
- * </p>
+ * Slouží jako společný předek pro aplikační výjimky,
+ * které nesou informaci o odpovídajícím HTTP status kódu.
+ * Tento status je následně použit v globálním handleru
+ * výjimek pro tvorbu jednotné chybové odpovědi.
  */
 public class BusinessException extends RuntimeException {
 
@@ -240,7 +248,7 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
-     * Vrátí HTTP status kód spojený s touto výjimkou.
+     * Vrací HTTP status kód spojený s touto výjimkou.
      *
      * @return HTTP status kód
      */
@@ -262,11 +270,9 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že není zvolen aktuální hráč.
  *
- * <p>
  * Vyhazuje se v situaci, kdy klient volá endpoint, který vyžaduje
  * nastaveného "current player", ale žádný hráč není pro daného
  * uživatele vybrán.
- * </p>
  *
  * Typicky mapováno na HTTP 400 (Bad Request).
  */
@@ -290,20 +296,15 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že hráč se stejným jménem a příjmením již existuje.
  *
- * <p>
  * Používá se při vytváření nebo registraci hráče, pokud by došlo
- * k duplicitě podle kombinace jméno + příjmení.
- * </p>
+ * k duplicitě podle kombinace jméno a příjmení.
  *
  * Typicky mapováno na HTTP 409 (Conflict).
  */
 public class DuplicateNameSurnameException extends BusinessException {
 
     public DuplicateNameSurnameException(String name, String surname) {
-        super(
-                "BE - Hráč se jménem " + name + " " + surname + " již existuje.",
-                HttpStatus.CONFLICT
-        );
+        super("BE - Hráč se jménem " + name + " " + surname + " již existuje.", HttpStatus.CONFLICT);
     }
 }
 
@@ -320,21 +321,22 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že hráč má již aktivní registraci na daný zápas.
  *
- * <p>
  * Vyhazuje se při pokusu o vytvoření nové registrace na zápas,
  * pokud už existuje platná registrace pro stejného hráče a zápas.
- * </p>
  *
  * Typicky mapováno na HTTP 409 (Conflict).
  */
 public class DuplicateRegistrationException extends BusinessException {
 
     public DuplicateRegistrationException(Long matchId, Long playerId) {
-        super(
-                "BE - Hráč " + playerId + " již má aktivní registraci na zápas " + matchId + ".",
-                HttpStatus.CONFLICT
-        );
+        super("BE - Hráč " + playerId + " již má aktivní registraci na zápas " + matchId + ".", HttpStatus.CONFLICT);
     }
+
+    /**
+     * Alternativní konstruktor s vlastním textem zprávy.
+     *
+     * Poznámka: HTTP status je zde nastaven na 404 (Not Found).
+     */
     public DuplicateRegistrationException(Long matchId, Long playerId, String message) {
         super(message, HttpStatus.NOT_FOUND);
     }
@@ -353,10 +355,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že uživatel nemá oprávnění pracovat s daným hráčem.
  *
- * <p>
  * Vyhazuje se, pokud se přihlášený uživatel snaží číst nebo měnit
  * data hráče, který mu nepatří (není k němu přiřazen).
- * </p>
  *
  * Typicky mapováno na HTTP 403 (Forbidden).
  */
@@ -380,10 +380,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že požadované období neaktivity nebylo nalezeno.
  *
- * <p>
  * Vyhazuje se při práci s ID období neaktivity, které neexistuje
  * v databázi.
- * </p>
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */
@@ -407,10 +405,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující překryv období neaktivity pro daného hráče.
  *
- * <p>
  * Vyhazuje se v případě, kdy nové období neaktivity koliduje
  * s již existujícím obdobím téhož hráče.
- * </p>
  *
  * Typicky mapováno na HTTP 409 (Conflict).
  */
@@ -420,6 +416,9 @@ public class InactivityPeriodOverlapException extends BusinessException {
         super("BE - Nové období se překrývá s existujícím obdobím neaktivity hráče.", HttpStatus.CONFLICT);
     }
 
+    /**
+     * Alternativní konstruktor s vlastní chybovou zprávou.
+     */
     public InactivityPeriodOverlapException(String message) {
         super(message, HttpStatus.CONFLICT);
     }
@@ -437,20 +436,11 @@ import org.springframework.http.HttpStatus;
 
 /**
  * Výjimka signalizující neplatný pokus o změnu přiřazení hráče k uživateli.
- * <p>
+ *
  * Vyhazuje se v případě, kdy se aplikace pokusí přiřadit hráče
  * ke stejnému uživateli, ke kterému již patří.
- * </p>
  *
- * Tato výjimka:
- * <ul>
- *     <li>rozšiřuje {@link BusinessException},</li>
- *     <li>mapuje se na HTTP status {@link HttpStatus#CONFLICT} (409),</li>
- *     <li>označuje logický konflikt ve stavu dat.</li>
- * </ul>
- *
- * Používá se v service vrstvě jako ochrana proti zbytečné
- * nebo neplatné změně vazby hráč → uživatel.
+ * Typicky mapováno na HTTP 409 (Conflict).
  */
 public class InvalidChangePlayerUserException extends BusinessException {
 
@@ -475,10 +465,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující neplatné datumové rozmezí období neaktivity.
  *
- * <p>
- * Typicky se používá, pokud datum "od" je po datu "do" nebo jinak
- * nesplňuje logická validační pravidla.
- * </p>
+ * Typicky se používá, pokud datum "od" je po datu "do"
+ * nebo jinak nesplňuje logická validační pravidla.
  *
  * Typicky mapováno na HTTP 400 (Bad Request).
  */
@@ -499,11 +487,22 @@ package cz.phsoft.hokej.exceptions;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Výjimka signalizující neplatné datum nebo čas zápasu.
+ *
+ * Používá se například v situacích, kdy je zápas plánován
+ * v minulosti nebo kdy datum a čas nesplňují validační pravidla
+ * aplikace.
+ *
+ * Typicky mapováno na HTTP 400 (Bad Request).
+ */
 public class InvalidMatchDateTimeException extends BusinessException {
+
     public InvalidMatchDateTimeException(String message) {
         super(message, HttpStatus.BAD_REQUEST);
     }
 }
+
 
 
 -----
@@ -517,10 +516,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující neplatnou změnu stavu zápasu.
  *
- * <p>
  * Vyhazuje se při pokusu o přechod zápasu do stavu, který není
  * povolen vzhledem k aktuálnímu stavu nebo business pravidlům.
- * </p>
  *
  * Typicky mapováno na HTTP 409 (Conflict).
  */
@@ -544,10 +541,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující nesprávné původní heslo při změně hesla.
  *
- * <p>
  * Vyhazuje se v případě, kdy uživatel zadá špatné aktuální heslo
  * při pokusu o změnu hesla.
- * </p>
  *
  * Typicky mapováno na HTTP 400 (Bad Request).
  */
@@ -571,10 +566,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující neplatný nebo nepovolený stav hráče.
  *
- * <p>
  * Používá se při změně nebo vyhodnocování stavu hráče, pokud
  * požadovaná operace není v daném stavu povolena.
- * </p>
  *
  * Typicky mapováno na HTTP 400 (Bad Request).
  */
@@ -593,15 +586,25 @@ public class InvalidPlayerStatusException extends BusinessException {
 
 package cz.phsoft.hokej.exceptions;
 
-import cz.phsoft.hokej.data.entities.ForgottenPasswordResetTokenEntity;
 import org.springframework.http.HttpStatus;
 
+/**
+ * Výjimka signalizující neplatný nebo expirovaný resetovací token.
+ *
+ * Používá se při procesu resetu hesla, pokud je odkaz neplatný,
+ * již použitý nebo expirovaný.
+ */
 public class InvalidResetTokenException extends BusinessException {
 
     public InvalidResetTokenException() {
         super("BE - Resetovací odkaz je neplatný nebo expirovaný.", HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Alternativní konstruktor s vlastním textem zprávy.
+     *
+     * V tomto případě je použit HTTP status 410 (Gone).
+     */
     public InvalidResetTokenException(String message) {
         super(message, HttpStatus.GONE);
     }
@@ -620,10 +623,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující neplatné datumové rozmezí sezóny.
  *
- * <p>
  * Typicky se používá v případě, kdy datum začátku sezóny
  * není před datem konce nebo porušuje jiná logická pravidla.
- * </p>
  *
  * Typicky mapováno na HTTP 400 (Bad Request).
  */
@@ -647,11 +648,9 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující nepovolený stavový přechod sezóny.
  *
- * <p>
  * Používá se v situacích, kdy operace nad sezónou není povolena
- * vzhledem k jejímu aktuálnímu stavu (např. deaktivace poslední
- * aktivní sezóny nebo neplatná změna aktivace).
- * </p>
+ * vzhledem k jejímu aktuálnímu stavu, například při deaktivaci
+ * poslední aktivní sezóny nebo při neplatné změně aktivace.
  *
  * Typicky mapováno na HTTP 409 (Conflict).
  */
@@ -675,22 +674,13 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující neplatnou nebo nepovolenou změnu
  * aktivačního stavu uživatelského účtu.
- * <p>
+ *
  * Typicky se vyhazuje v situacích, kdy:
- * <ul>
- *     <li>je uživatel již aktivní a pokusíme se ho znovu aktivovat,</li>
- *     <li>je uživatel neaktivní a operace neodpovídá jeho aktuálnímu stavu,</li>
- *     <li>dojde k porušení pravidel životního cyklu uživatele.</li>
- * </ul>
+ * - je uživatel již aktivní a pokusí se o další aktivaci,
+ * - je uživatel neaktivní a operace neodpovídá jeho stavu,
+ * - dojde k porušení pravidel životního cyklu uživatele.
  *
- * Tato výjimka:
- * <ul>
- *     <li>rozšiřuje {@link BusinessException},</li>
- *     <li>mapuje se na HTTP status {@link HttpStatus#CONFLICT} (409),</li>
- *     <li>signalizuje logický konflikt stavu zdroje.</li>
- * </ul>
- *
- * Používá se v service vrstvě, nikoli přímo v controllerech.
+ * Typicky mapováno na HTTP 409 (Conflict).
  */
 public class InvalidUserActivationException extends BusinessException {
 
@@ -717,9 +707,7 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že požadovaný zápas nebyl nalezen.
  *
- * <p>
  * Vyhazuje se při práci s ID zápasu, které neexistuje v databázi.
- * </p>
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */
@@ -743,21 +731,15 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že registrace hráče na daný zápas nebyla nalezena.
  *
- * <p>
  * Vyhazuje se při práci s registrací, která neexistuje pro kombinaci
- * hráč + zápas.
- * </p>
+ * hráč a zápas.
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */
 public class MatchRegistrationNotFoundException extends BusinessException {
 
     public MatchRegistrationNotFoundException(Long playerId, Long matchId) {
-        super(
-                "BE - Registrace hráče s ID " + playerId +
-                        " na zápas s ID " + matchId + " nenalezena.",
-                HttpStatus.NOT_FOUND
-        );
+        super("BE - Registrace hráče s ID " + playerId + " na zápas s ID " + matchId + " nenalezena.", HttpStatus.NOT_FOUND);
     }
 }
 
@@ -774,10 +756,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že zadaná hesla se neshodují.
  *
- * <p>
  * Používá se při registraci nebo změně hesla, pokud nové heslo
  * a jeho potvrzení nejsou stejné.
- * </p>
  *
  * Typicky mapováno na HTTP 400 (Bad Request).
  */
@@ -787,6 +767,9 @@ public class PasswordsDoNotMatchException extends BusinessException {
         super("BE - Hesla se neshodují.", HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Alternativní konstruktor pro vlastní chybovou zprávu.
+     */
     public PasswordsDoNotMatchException(String message) {
         super(message, HttpStatus.BAD_REQUEST);
     }
@@ -805,9 +788,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že požadovaný hráč nebyl nalezen.
  *
- * <p>
- * Může být vyhozena jak při hledání podle ID, tak při hledání podle e-mailu.
- * </p>
+ * Může být vyhozena jak při hledání podle ID, tak při hledání
+ * podle e-mailu.
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */
@@ -821,11 +803,12 @@ public class PlayerNotFoundException extends BusinessException {
         super("BE - Hráč s e-mailem " + email + " nenalezen.", HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Alternativní konstruktor s vlastní chybovou zprávou.
+     */
     public PlayerNotFoundException(String message, String Email) {
         super(message, HttpStatus.NOT_FOUND);
     }
-
-
 }
 
 
@@ -841,20 +824,15 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že hráč nemá registraci na daný zápas.
  *
- * <p>
  * Vyhazuje se při pokusu o práci s registrací, která pro kombinaci
- * hráč + zápas neexistuje (např. při odhlášení neexistující registrace).
- * </p>
+ * hráč a zápas neexistuje, například při odhlášení neexistující registrace.
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */
 public class RegistrationNotFoundException extends BusinessException {
 
     public RegistrationNotFoundException(Long matchId, Long playerId) {
-        super(
-                "BE - Hráč " + playerId + " nemá registraci na zápas " + matchId + ".",
-                HttpStatus.NOT_FOUND
-        );
+        super("BE - Hráč " + playerId + " nemá registraci na zápas " + matchId + ".", HttpStatus.NOT_FOUND);
     }
 }
 
@@ -871,10 +849,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že požadovaná sezóna nebyla nalezena.
  *
- * <p>
  * Používá se jak při hledání sezóny podle ID, tak v situaci,
  * kdy není nastavena žádná aktivní sezóna.
- * </p>
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */
@@ -890,9 +866,10 @@ public class SeasonNotFoundException extends BusinessException {
     }
 
     /**
-     * Obecnější varianta s custom zprávou.
+     * Obecnější varianta s vlastní chybovou zprávou.
      *
-     * Typicky použitá pro situaci typu „není nastavena žádná aktivní sezóna“.
+     * Typické použití je situace, kdy není nastavena žádná
+     * aktivní sezóna.
      *
      * @param message chybová zpráva
      */
@@ -914,10 +891,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující překryv období mezi sezónami.
  *
- * <p>
  * Vyhazuje se při vytváření nebo úpravě sezóny, pokud její období
  * zasahuje do období jiné existující sezóny.
- * </p>
  *
  * Typicky mapováno na HTTP 409 (Conflict).
  */
@@ -941,10 +916,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že uživatel již existuje.
  *
- * <p>
  * Typicky se používá při registraci, pokud je e-mail nebo jiný
  * identifikátor uživatele již obsazen.
- * </p>
  *
  * Typicky mapováno na HTTP 409 (Conflict).
  */
@@ -968,9 +941,7 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že požadovaný uživatel nebyl nalezen.
  *
- * <p>
  * Může být vyhozena při hledání podle e-mailu nebo podle ID uživatele.
- * </p>
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */

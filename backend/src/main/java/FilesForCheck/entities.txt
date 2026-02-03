@@ -31,8 +31,9 @@ import java.util.Set;
 /**
  * Entita reprezentující uživatelský účet aplikace.
  *
- * Slouží pro autentizaci a autorizaci uživatelů.
+ * Slouží pro autentizaci a autorizaci uživatelů v systému.
  * Jeden uživatel může mít přiřazeno více hráčů.
+ * Detailní nastavení uživatele je odděleno do entity AppUserSettingsEntity.
  */
 @Entity
 @Table(name = "app_users")
@@ -68,7 +69,8 @@ public class AppUserEntity {
     private Role role;
 
     /**
-     * Příznak aktivace účtu (např. po emailové aktivaci).
+     * Příznak aktivace účtu.
+     * Nastaví se například po úspěšné emailové aktivaci.
      */
     @Column(nullable = false)
     private boolean enabled = false;
@@ -83,47 +85,45 @@ public class AppUserEntity {
     )
     private Set<PlayerEntity> players;
 
-    // nastavení uživatele (AppUserSettingsEntity)
     /**
-     * Nastavení uživatele (způsob výběru hráče, notifikace atd.).
+     * Nastavení uživatele (způsob výběru hráče, notifikace a další preference).
      *
      * Jeden uživatel má právě jedno AppUserSettingsEntity.
      */
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private AppUserSettingsEntity settings;
 
+    public Long getId() { return id; }
 
-    public Long getId() {return id;}
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {this.id = id;}
+    public String getName() { return name; }
 
-    public String getName() {return name;}
-
-    public void setName(String name) {this.name = name;}
+    public void setName(String name) { this.name = name; }
 
     public String getSurname() { return surname; }
 
     public void setSurname(String surname) { this.surname = surname; }
 
-    public String getEmail() {return email;}
+    public String getEmail() { return email; }
 
-    public void setEmail(String email) {this.email = email;}
+    public void setEmail(String email) { this.email = email; }
 
-    public String getPassword() {return password;}
+    public String getPassword() { return password; }
 
-    public void setPassword(String password) {this.password = password;}
+    public void setPassword(String password) { this.password = password; }
 
-    public Role getRole() {return role;}
+    public Role getRole() { return role; }
 
-    public void setRole(Role role) {this.role = role;}
+    public void setRole(Role role) { this.role = role; }
 
-    public boolean isEnabled() {    return enabled;    }
+    public boolean isEnabled() { return enabled; }
 
-    public void setEnabled(boolean enabled) {  this.enabled = enabled;    }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public Set<PlayerEntity> getPlayers() {return players;}
+    public Set<PlayerEntity> getPlayers() { return players; }
 
-    public void setPlayers(Set<PlayerEntity> players) {this.players = players;}
+    public void setPlayers(Set<PlayerEntity> players) { this.players = players; }
 
     public AppUserSettingsEntity getSettings() { return settings; }
 
@@ -133,7 +133,6 @@ public class AppUserEntity {
             settings.setUser(this);
         }
     }
-
 }
 
 
@@ -151,11 +150,12 @@ import jakarta.persistence.*;
 import java.time.LocalTime;
 
 /**
- * Entita uchovávající nastavení uživatelského účtu (AppUserEntity).
+ * Entita uchovávající nastavení uživatelského účtu.
  *
- * Odděluje:
- * - identitu uživatele (AppUserEntity: login, heslo, role...)
- * - jeho preference a chování v systému (AppUserSettingsEntity).
+ * Odděluje identitu uživatele (AppUserEntity) od jeho preferencí
+ * a chování v systému (AppUserSettingsEntity). Slouží zejména
+ * pro nastavení výběru hráče, globální úrovně notifikací a
+ * preferencí souvisejících s uživatelským rozhraním.
  */
 @Entity
 @Table(name = "app_user_settings")
@@ -166,7 +166,8 @@ public class AppUserSettingsEntity {
     private Long id;
 
     /**
-     * Jeden záznam AppUserSettingsEntity pro jednoho uživatele.
+     * Uživatel, ke kterému tato nastavení patří.
+     * Pro jednoho uživatele existuje právě jeden záznam nastavení.
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -182,75 +183,68 @@ public class AppUserSettingsEntity {
 
     /**
      * Globální úroveň notifikací pro uživatele.
-     * Určuje, kolik notifikací bude dostávat on sám,
-     * nezávisle na hráčích.
+     * Určuje, kolik notifikací bude uživatel dostávat
+     * bez ohledu na nastavení konkrétních hráčů.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "global_notification_level", nullable = false, length = 50)
     private GlobalNotificationLevel globalNotificationLevel = GlobalNotificationLevel.ALL;
 
     /**
-     * Má uživatel dostávat kopie všech notifikací,
-     * které chodí jeho hráčům?
+     * Určuje, zda má uživatel dostávat kopie všech notifikací,
+     * které chodí jeho hráčům.
      *
      * Příklad:
-     * - TRUE: rodič chce mít přehled o všem, co se děje u dětí
-     * - FALSE: spoléhá se jen na notifikace hráčů.
+     * true: rodič chce mít přehled o všem, co se děje u dětí.
+     * false: spoléhá se pouze na notifikace hráčů.
      */
     @Column(name = "copy_all_player_notifications_to_user_email", nullable = false)
     private boolean copyAllPlayerNotificationsToUserEmail = true;
 
     /**
-     * Má uživatel dostávat notifikace i za hráče,
-     * kteří mají vlastní email (contactEmail v PlayerSettings)?
+     * Určuje, zda má uživatel dostávat notifikace i za hráče,
+     * kteří mají vlastní email (contactEmail v PlayerSettings).
      *
      * Příklad:
-     * - FALSE: když má dítě vlastní email, chodí notifikace jen jemu
-     * - TRUE: rodič chce kopii, i když má hráč svůj email.
+     * false: pokud má hráč vlastní email, chodí notifikace pouze jemu.
+     * true: uživatel dostává kopie notifikací i v tomto případě.
      */
     @Column(name = "receive_notifications_for_players_with_own_email", nullable = false)
     private boolean receiveNotificationsForPlayersWithOwnEmail = false;
 
     /**
-     * Má uživatel preferovat denní souhrn (digest)
-     * místo jednotlivých notifikací během dne?
+     * Určuje, zda má být používán denní souhrn (digest) místo
+     * jednotlivých notifikací během dne.
      */
     @Column(name = "email_digest_enabled", nullable = false)
     private boolean emailDigestEnabled = false;
 
     /**
      * Čas, kdy má chodit souhrnný email, pokud je digest zapnutý.
-     * Např. 20:00.
      */
     @Column(name = "email_digest_time")
     private LocalTime emailDigestTime;
 
     /**
      * Preferovaný jazyk uživatelského rozhraní.
-     * Např. "cs", "en".
+     * Například "cs" nebo "en".
      */
     @Column(name = "ui_language", length = 10)
     private String uiLanguage = "cs";
 
     /**
-     * Časová zóna uživatele, např. "Europe/Prague".
+     * Časová zóna uživatele.
+     * Například "Europe/Prague".
      */
     @Column(name = "timezone", length = 50)
     private String timezone = "Europe/Prague";
 
     /**
      * Výchozí obrazovka po přihlášení.
-     * Může být např. "DASHBOARD", "MATCHES", "PLAYERS".
-     *
-     * Z praktických důvodů ji necháme jako String,
-     * enum můžeme doplnit později, pokud bude potřeba.
+     * Z praktických důvodů je uložena jako řetězec.
      */
     @Column(name = "default_landing_page", length = 50)
     private String defaultLandingPage = "DASHBOARD";
-
-    // =========================================
-    // Gettery a settery
-    // =========================================
 
     public Long getId() {
         return id;
@@ -382,21 +376,21 @@ public class EmailVerificationTokenEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private AppUserEntity user;
 
-    // gettery / settery
-
-    // gettery / settery
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public String getToken() { return token; }
+
     public void setToken(String token) { this.token = token; }
 
     public LocalDateTime getExpiresAt() { return expiresAt; }
+
     public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
 
     public AppUserEntity getUser() { return user; }
-    public void setUser(AppUserEntity user) { this.user = user; }
 
+    public void setUser(AppUserEntity user) { this.user = user; }
 }
 
 
@@ -410,6 +404,13 @@ package cz.phsoft.hokej.data.entities;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Entita reprezentující token pro reset zapomenutého hesla.
+ *
+ * Slouží k bezpečnému nastavení nového hesla uživatele.
+ * Token je časově omezený a navázaný na konkrétního uživatele.
+ * Volitelné pole usedAt umožňuje evidovat okamžik použití tokenu.
+ */
 @Entity
 public class ForgottenPasswordResetTokenEntity {
 
@@ -417,33 +418,48 @@ public class ForgottenPasswordResetTokenEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Unikátní resetovací token.
+     */
     @Column(nullable = false, unique = true, length = 128)
     private String token;
 
+    /**
+     * Uživatel, ke kterému token patří.
+     */
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private AppUserEntity user;
 
+    /**
+     * Datum a čas expirace tokenu.
+     */
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
-    // volitelné – pokud chceš logovat použití
+    /**
+     * Datum a čas, kdy byl token použit.
+     * Hodnota je volitelná a slouží pro auditní účely.
+     */
     private LocalDateTime usedAt;
 
-    // gettery/settery
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public String getToken() { return token; }
+
     public void setToken(String token) { this.token = token; }
 
     public AppUserEntity getUser() { return user; }
+
     public void setUser(AppUserEntity user) { this.user = user; }
 
     public LocalDateTime getExpiresAt() { return expiresAt; }
+
     public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
 
     public LocalDateTime getUsedAt() { return usedAt; }
+
     public void setUsedAt(LocalDateTime usedAt) { this.usedAt = usedAt; }
 }
 
@@ -462,10 +478,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující zápas.
+ * Entita reprezentující hokejový zápas.
  *
- * Obsahuje základní informace o zápasu, jeho kapacitě,
- * stavu a vazbě na sezónu.
+ * Uchovává základní informace o zápasu, jeho kapacitě,
+ * ceně, aktuálním stavu a vazbě na sezónu.
+ * Informace o účasti hráčů jsou uloženy v samostatné entitě
+ * MatchRegistrationEntity.
  */
 @Entity
 @Table(name = "matches")
@@ -505,13 +523,13 @@ public class MatchEntity {
     private Integer price;
 
     /**
-     * Aktuální stav zápasu (např. aktivní, zrušený).
+     * Aktuální stav zápasu.
      */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
     /**
-     * Důvod zrušení zápasu (pouze pokud je zápas zrušen).
+     * Důvod zrušení zápasu, pokud je zápas zrušen.
      */
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
@@ -526,33 +544,40 @@ public class MatchEntity {
     public MatchEntity() {
     }
 
-    // gettery / settery
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public LocalDateTime getDateTime() { return dateTime; }
+
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
     public String getLocation() { return location; }
+
     public void setLocation(String location) { this.location = location; }
 
     public String getDescription() { return description; }
+
     public void setDescription(String description) { this.description = description; }
 
     public Integer getMaxPlayers() { return maxPlayers; }
+
     public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 
     public Integer getPrice() { return price; }
+
     public void setPrice(Integer price) { this.price = price; }
 
     public MatchStatus getMatchStatus() { return matchStatus; }
+
     public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
 
     public MatchCancelReason getCancelReason() { return cancelReason; }
+
     public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
 
     public SeasonEntity getSeason() { return season; }
+
     public void setSeason(SeasonEntity season) { this.season = season; }
 }
 
@@ -574,8 +599,10 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující registraci hráče k zápasu.
  *
- * Uchovává informace o účasti hráče, jeho stavu,
- * případné omluvě a administrativních poznámkách.
+ * Uchovává informace o účasti hráče, jeho aktuálním stavu,
+ * případné omluvě a administrativních poznámkách. Samostatná
+ * entita umožňuje sledovat změny registrace a pracovat
+ * s historií účasti.
  */
 @Entity
 @Table(name = "match_registrations")
@@ -607,7 +634,7 @@ public class MatchRegistrationEntity {
     private PlayerMatchStatus status;
 
     /**
-     * Důvod omluvy hráče (pouze pokud je hráč omluven).
+     * Důvod omluvy hráče, pokud je hráč omluven.
      */
     @Enumerated(EnumType.STRING)
     private ExcuseReason excuseReason;
@@ -618,8 +645,7 @@ public class MatchRegistrationEntity {
     private String excuseNote;
 
     /**
-     * Administrativní poznámka k registraci
-     * (např. neomluvená absence).
+     * Administrativní poznámka k registraci.
      */
     private String adminNote;
 
@@ -632,19 +658,14 @@ public class MatchRegistrationEntity {
 
     /**
      * Časové razítko registrace.
-     *
-     * Používá se pro určení pořadí registrací
-     * (např. při uvolnění místa po odhlášení).
+     * Používá se například pro určení pořadí přihlášení.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
      * Původ vytvoření registrace.
-     *
-     * Typicky:
-     * - "user"   – registrace vytvořená hráčem,
-     * - "system" – automatická registrace dle kapacity.
+     * Typické hodnoty jsou například "user" nebo "system".
      */
     @Column(nullable = false, updatable = true)
     private String createdBy;
@@ -652,36 +673,44 @@ public class MatchRegistrationEntity {
     public MatchRegistrationEntity() {
     }
 
-    // gettery / settery
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public MatchEntity getMatch() { return match; }
+
     public void setMatch(MatchEntity match) { this.match = match; }
 
     public PlayerEntity getPlayer() { return player; }
+
     public void setPlayer(PlayerEntity player) { this.player = player; }
 
     public PlayerMatchStatus getStatus() { return status; }
+
     public void setStatus(PlayerMatchStatus status) { this.status = status; }
 
     public ExcuseReason getExcuseReason() { return excuseReason; }
+
     public void setExcuseReason(ExcuseReason excuseReason) { this.excuseReason = excuseReason; }
 
     public String getExcuseNote() { return excuseNote; }
+
     public void setExcuseNote(String excuseNote) { this.excuseNote = excuseNote; }
 
     public String getAdminNote() { return adminNote; }
+
     public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
 
     public Team getTeam() { return team; }
+
     public void setTeam(Team team) { this.team = team; }
 
     public LocalDateTime getTimestamp() { return timestamp; }
+
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 
     public String getCreatedBy() { return createdBy; }
+
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 }
 
@@ -703,8 +732,9 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující historický záznam změn registrace hráče k zápasu.
  *
- * Slouží k auditování změn registrací (vytvoření, úprava, zrušení)
- * a uchovává kompletní stav registrace v okamžiku změny.
+ * Slouží k auditování změn registrací, včetně vytvoření, úprav a zrušení.
+ * Uchovává stav registrace v okamžiku změny a základní údaje o původu
+ * provedené operace.
  */
 @Entity
 @Table(name = "match_registration_history")
@@ -716,7 +746,7 @@ public class MatchRegistrationHistoryEntity {
 
     /**
      * Typ provedené operace nad registrací.
-     * (INSERT / UPDATE / DELETE)
+     * Typicky hodnoty INSERT, UPDATE nebo DELETE.
      */
     @Column(name = "action", nullable = false)
     private String action;
@@ -734,7 +764,8 @@ public class MatchRegistrationHistoryEntity {
     private LocalDateTime changedAt;
 
     /**
-     * Původ vytvoření / změny registrace (např. "user", "system").
+     * Původ vytvoření nebo změny registrace.
+     * Typicky hodnoty jako "user" nebo "system".
      */
     @Column(name = "created_by", nullable = false)
     private String createdBy;
@@ -746,7 +777,7 @@ public class MatchRegistrationHistoryEntity {
     private String excuseNote;
 
     /**
-     * Důvod omluvy hráče (pokud byl stav EXCUSED).
+     * Důvod omluvy hráče, pokud byl stav omluvený.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "excuse_reason")
@@ -759,7 +790,7 @@ public class MatchRegistrationHistoryEntity {
     private Long matchId;
 
     /**
-     * ID původní registrace z hlavní tabulky.
+     * ID původní registrace z hlavní tabulky registrací.
      */
     @Column(name = "match_registration_id", nullable = false)
     private Long matchRegistrationId;
@@ -792,8 +823,6 @@ public class MatchRegistrationHistoryEntity {
 
     public MatchRegistrationHistoryEntity() {
     }
-
-    // ===== gettery / settery =====
 
     public Long getId() { return id; }
 
@@ -857,12 +886,14 @@ public class MatchRegistrationHistoryEntity {
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.Embeddable;
+
 // TODO - ASI SMAZAT PO OTESTOVÁNÍ Z SETTINGS
+
 /**
- * Vnořitelný objekt reprezentující nastavení notifikací uživatele / hráče.
+ * Vnořitelný objekt reprezentující základní nastavení notifikačních kanálů.
  *
- * Slouží k určení, jakými kanály si uživatel přeje
- * přijímat systémové notifikace.
+ * Slouží k určení, zda jsou povoleny emailové a SMS notifikace.
+ * Lze jej vkládat jako embeddable do různých entit podle potřeby.
  */
 @Embeddable
 public class NotificationSettings {
@@ -877,12 +908,12 @@ public class NotificationSettings {
      */
     private boolean smsEnabled;
 
-    // gettery / settery
-
     public boolean isEmailEnabled() { return emailEnabled; }
+
     public void setEmailEnabled(boolean emailEnabled) { this.emailEnabled = emailEnabled; }
 
     public boolean isSmsEnabled() { return smsEnabled; }
+
     public void setSmsEnabled(boolean smsEnabled) { this.smsEnabled = smsEnabled; }
 }
 
@@ -902,9 +933,9 @@ import jakarta.persistence.*;
 /**
  * Entita reprezentující hráče v systému.
  *
- * Hráč představuje sportovní identitu uživatele a je
- * používán při registracích na zápasy, notifikacích
- * a statistikách.
+ * Hráč představuje sportovní identitu v aplikaci a je používán
+ * při registracích na zápasy, notifikacích a statistikách.
+ * Hráč může, ale nemusí mít přiřazeného aplikačního uživatele.
  */
 @Entity
 @Table(name = "player_entity")
@@ -926,14 +957,14 @@ public class PlayerEntity {
     private String nickname;
 
     /**
-     * Typ hráče (např. BASIC, STANDARD, VIP).
+     * Typ hráče, například BASIC, STANDARD nebo VIP.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerType type;
 
     /**
-     * Celé jméno hráče (odvozené z name + surname).
+     * Celé jméno hráče odvozené z křestního jména a příjmení.
      */
     private String fullName;
 
@@ -949,30 +980,25 @@ public class PlayerEntity {
     private Team team;
 
     /**
-     * Aktuální stav hráče v systému (např. PENDING, APPROVED).
+     * Aktuální stav hráče v systému.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerStatus playerStatus = PlayerStatus.PENDING;
 
     /**
-     * Uživatel, ke kterému hráč patří.
+     * Uživatelský účet, ke kterému hráč patří.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private AppUserEntity user;
 
     /**
-     * Nastavení hráče – kontakty a notifikační preference.
-     *
+     * Nastavení hráče, zejména kontaktní údaje a notifikační preference.
      * Jeden hráč má právě jedno PlayerSettingsEntity.
      */
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private PlayerSettingsEntity settings;
-
-    // ==================================================
-    // KONSTRUKTORY
-    // ==================================================
 
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
@@ -996,57 +1022,58 @@ public class PlayerEntity {
         updateFullName();
     }
 
-    // ==================================================
-    // GETTERY / SETTERY
-    // ==================================================
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
+
     public void setName(String name) {
         this.name = name;
         updateFullName();
     }
 
     public String getSurname() { return surname; }
+
     public void setSurname(String surname) {
         this.surname = surname;
         updateFullName();
     }
 
     public String getNickname() { return nickname; }
+
     public void setNickname(String nickname) { this.nickname = nickname; }
 
     public String getFullName() { return fullName; }
 
     public PlayerType getType() { return type; }
+
     public void setType(PlayerType type) { this.type = type; }
 
     public String getPhoneNumber() { return phoneNumber; }
+
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
     public Team getTeam() { return team; }
+
     public void setTeam(Team team) { this.team = team; }
 
     public PlayerStatus getPlayerStatus() { return playerStatus; }
+
     public void setPlayerStatus(PlayerStatus playerStatus) { this.playerStatus = playerStatus; }
 
     public AppUserEntity getUser() { return user; }
-    public void setUser(AppUserEntity user) { this.user = user; }
 
+    public void setUser(AppUserEntity user) { this.user = user; }
 
     public PlayerSettingsEntity getSettings() { return settings; }
 
-    public void setSettings(PlayerSettingsEntity settings) { this.settings = settings;
+    public void setSettings(PlayerSettingsEntity settings) {
+        this.settings = settings;
         if (settings != null) {
             settings.setPlayer(this);
         }
     }
-
-    // ==================================================
-    // HELPER
-    // ==================================================
 
     /**
      * Aktualizuje celé jméno hráče podle jména a příjmení.
@@ -1054,8 +1081,6 @@ public class PlayerEntity {
     private void updateFullName() {
         this.fullName = name + " " + surname;
     }
-
-
 }
 
 
@@ -1073,8 +1098,8 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující období neaktivity hráče.
  *
- * Slouží k evidenci časových úseků, ve kterých hráč
- * není k dispozici (např. zranění, dovolená).
+ * Slouží k evidenci časových úseků, ve kterých se hráč
+ * neúčastní zápasů, například z důvodu zranění nebo dovolené.
  */
 @Entity
 @Table(name = "player_inactivity_period")
@@ -1103,18 +1128,20 @@ public class PlayerInactivityPeriodEntity {
     @Column(name = "inactive_to", nullable = false)
     private LocalDateTime inactiveTo;
 
-    // gettery / settery
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public PlayerEntity getPlayer() { return player; }
+
     public void setPlayer(PlayerEntity player) { this.player = player; }
 
     public LocalDateTime getInactiveFrom() { return inactiveFrom; }
+
     public void setInactiveFrom(LocalDateTime inactiveFrom) { this.inactiveFrom = inactiveFrom; }
 
     public LocalDateTime getInactiveTo() { return inactiveTo; }
+
     public void setInactiveTo(LocalDateTime inactiveTo) { this.inactiveTo = inactiveTo; }
 }
 
@@ -1131,9 +1158,9 @@ import jakarta.persistence.*;
 /**
  * Entita uchovávající nastavení konkrétního hráče.
  *
- * Odděluje:
- * - identitu hráče (PlayerEntity: jméno, tým, status...)
- * - jeho notifikační preference a kontaktní údaje (PlayerSettingsEntity).
+ * Odděluje identitu hráče (PlayerEntity) od jeho kontaktních údajů
+ * a detailních notifikačních preferencí. Nastavení se využívá
+ * při rozhodování o tom, zda a jak budou hráči doručovány notifikace.
  */
 @Entity
 @Table(name = "player_settings")
@@ -1144,118 +1171,83 @@ public class PlayerSettingsEntity {
     private Long id;
 
     /**
-     * Jeden záznam PlayerSettingsEntity pro jednoho hráče.
+     * Hráč, ke kterému toto nastavení patří.
+     * Pro jednoho hráče existuje právě jeden záznam nastavení.
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false, unique = true)
     private PlayerEntity player;
 
-    // =========================================
-    // KONTAKT
-    // =========================================
-
     /**
      * Volitelný email hráče.
-     *
-     * Pokud je null/prázdný, používá se email uživatele (AppUser.email).
-     * Toto pole tedy představuje "override", nikoliv povinný údaj.
+     * Pokud není vyplněn, může se použít email uživatele (AppUserEntity).
      */
     @Column(name = "contact_email", length = 255)
     private String contactEmail;
 
     /**
-     * Volitelné telefonní číslo hráče pro SMS.
-     *
-     * Pokud je null/prázdné, můžeš se rozhodnout:
-     * - buď SMS neposílat,
-     * - nebo použít telefon z jiného zdroje (pokud ho máš).
+     * Volitelné telefonní číslo hráče pro SMS notifikace.
      */
     @Column(name = "contact_phone", length = 50)
     private String contactPhone;
 
-    // =========================================
-    // KANÁLY (EMAIL / SMS)
-    // =========================================
-
     /**
-     * Má hráč dostávat emailové notifikace?
-     *
-     * Pozn.: i když je TRUE, je potřeba mít k dispozici
-     * efektivní email (contactEmail nebo email účtu).
+     * Příznak, zda má hráč dostávat emailové notifikace.
      */
     @Column(name = "email_enabled", nullable = false)
     private boolean emailEnabled = true;
 
     /**
-     * Má hráč dostávat SMS notifikace?
-     *
-     * Opět je nutné mít vyplněný kontakt (contactPhone),
-     * jinak se SMS nebude posílat.
+     * Příznak, zda má hráč dostávat SMS notifikace.
      */
     @Column(name = "sms_enabled", nullable = false)
     private boolean smsEnabled = false;
 
-    // =========================================
-    // TYPY NOTIFIKACÍ (detailní flagy)
-    // =========================================
-
     /**
-     * Chce být hráč informován o své registraci / odhlášení na zápas?
+     * Příznak, zda chce hráč notifikace o registraci a odhlášení.
      */
     @Column(name = "notify_on_registration", nullable = false)
     private boolean notifyOnRegistration = true;
 
     /**
-     * Chce být hráč informován o změně svého statusu na omluveného (EXCUSED)?
+     * Příznak, zda chce hráč notifikace o omluvách.
      */
     @Column(name = "notify_on_excuse", nullable = false)
     private boolean notifyOnExcuse = true;
 
     /**
-     * Chce být hráč informován o změnách zápasu
-     * (čas, místo, popis...)?
+     * Příznak, zda chce hráč notifikace o změnách zápasu.
      */
     @Column(name = "notify_on_match_change", nullable = false)
     private boolean notifyOnMatchChange = true;
 
     /**
-     * Chce být hráč informován o zrušení zápasu?
+     * Příznak, zda chce hráč notifikace o zrušení zápasu.
      */
     @Column(name = "notify_on_match_cancel", nullable = false)
     private boolean notifyOnMatchCancel = true;
 
     /**
-     * Chce hráč notifikace o platbách / dluzích / vyúčtování?
-     * (zatím do budoucna, můžeš začít i s FALSE a používat později).
+     * Příznak, zda chce hráč notifikace o platbách nebo vyúčtování.
      */
     @Column(name = "notify_on_payment", nullable = false)
     private boolean notifyOnPayment = false;
 
-    // =========================================
-    // PŘIPOMÍNKY PŘED ZÁPASEM
-    // =========================================
-
     /**
-     * Má hráč dostávat připomínky před zápasem?
+     * Příznak, zda má hráč dostávat připomínky před zápasem.
      */
     @Column(name = "notify_reminders", nullable = false)
     private boolean notifyReminders = true;
 
     /**
-     * Kolik hodin před začátkem zápasu poslat připomínku.
-     * Např. 24 = den předem.
-     *
-     * Pokud je null, můžeš v logice použít default (např. 24 h).
+     * Počet hodin před začátkem zápasu, kdy má být odeslána připomínka.
+     * Například hodnota 24 znamená připomínku den předem.
      */
     @Column(name = "reminder_hours_before")
     private Integer reminderHoursBefore = 24;
 
-    // =========================================
-    // "KATEGORIE" – odvozené pohledy pro NotificationType
-    // =========================================
-
     /**
-     * Kategorie REGISTRATION – registrování / odhlašování na zápas.
+     * Určuje, zda jsou povoleny notifikace týkající se registrací.
      */
     @Transient
     public boolean isRegistrationNotificationsEnabled() {
@@ -1263,7 +1255,7 @@ public class PlayerSettingsEntity {
     }
 
     /**
-     * Kategorie EXCUSE – omluvy a neomluvení.
+     * Určuje, zda jsou povoleny notifikace týkající se omluv.
      */
     @Transient
     public boolean isExcuseNotificationsEnabled() {
@@ -1271,8 +1263,8 @@ public class PlayerSettingsEntity {
     }
 
     /**
-     * Kategorie MATCH_INFO – info o zápase:
-     * změna času/místa, zrušení, připomínky.
+     * Určuje, zda jsou povoleny notifikace týkající se informací o zápase,
+     * například změn a připomínek.
      */
     @Transient
     public boolean isMatchInfoNotificationsEnabled() {
@@ -1282,17 +1274,13 @@ public class PlayerSettingsEntity {
     }
 
     /**
-     * Kategorie SYSTEM – systémové věci (např. platby, do budoucna další).
-     * Zatím svážeme s notifyOnPayment.
+     * Určuje, zda jsou povoleny systémové notifikace,
+     * například o platbách.
      */
     @Transient
     public boolean isSystemNotificationsEnabled() {
         return notifyOnPayment;
     }
-
-    // =========================================
-    // GETTERY / SETTERY
-    // =========================================
 
     public Long getId() {
         return id;
@@ -1410,8 +1398,9 @@ import java.time.LocalDate;
 /**
  * Entita reprezentující sezónu.
  *
- * Sezóna vymezuje časové období, do kterého
- * spadají zápasy a související data.
+ * Sezóna vymezuje časové období, do kterého spadají zápasy
+ * a související statistiky. V systému může být v jednom okamžiku
+ * označena právě jedna sezóna jako aktivní.
  */
 @Entity
 @Table(name = "season")
@@ -1422,7 +1411,7 @@ public class SeasonEntity {
     private Long id;
 
     /**
-     * Název sezóny (např. "2024/2025").
+     * Název sezóny, například "2024/2025".
      */
     @Column(nullable = false)
     private String name;
@@ -1440,25 +1429,28 @@ public class SeasonEntity {
     private LocalDate endDate;
 
     /**
-     * Příznak aktivní sezóny.
+     * Příznak, zda je sezóna aktuálně aktivní.
      */
     private boolean active;
 
-    // gettery / settery
-
     public Long getId() { return id; }
+
     public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
+
     public void setName(String name) { this.name = name; }
 
     public LocalDate getStartDate() { return startDate; }
+
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
     public LocalDate getEndDate() { return endDate; }
+
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
     public boolean isActive() { return active; }
+
     public void setActive(boolean active) { this.active = active; }
 }
 

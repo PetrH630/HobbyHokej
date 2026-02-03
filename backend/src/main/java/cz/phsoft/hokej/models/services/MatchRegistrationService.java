@@ -8,54 +8,29 @@ import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
 import java.util.List;
 
 /**
- * Rozhraní pro správu registrací hráčů na zápasy.
- * <p>
+ * Rozhraní se používá pro správu registrací hráčů na zápasy.
+ *
  * Definuje kontrakt pro práci s účastí hráčů na zápasech
- * z pohledu business logiky aplikace.
- * </p>
+ * z pohledu business logiky aplikace. Poskytuje operace pro
+ * vytvoření nebo změnu registrace, získávání přehledů a
+ * administrativní zásahy do stavů registrací.
  *
- * Význam v aplikaci:
- * <ul>
- *     <li>umožňuje hráčům reagovat na zápasy (přihlášení, odhlášení, omluva),</li>
- *     <li>poskytuje přehled registrací pro zápasy i jednotlivé hráče,</li>
- *     <li>zajišťuje konzistenci stavů registrací.</li>
- * </ul>
- *
- * Architektonické zásady:
- * <ul>
- *     <li>pracuje výhradně s DTO objekty, nikoliv s entitami,</li>
- *     <li>odděluje business logiku registrací od persistence vrstvy,</li>
- *     <li>implementace je zodpovědná za validace a přechody stavů.</li>
- * </ul>
- *
- * Použití:
- * <ul>
- *     <li>využívá se v controllerech a dalších business službách,</li>
- *     <li>je klíčovou součástí workflow práce se zápasy.</li>
- * </ul>
+ * Rozhraní pracuje s DTO objekty a odděluje business logiku
+ * od persistence vrstvy. Implementace je odpovědná za validace
+ * a přechody stavů registrací.
  */
 public interface MatchRegistrationService {
 
     /**
      * Vytvoří nebo aktualizuje registraci hráče na zápas.
-     * <p>
+     *
      * Metoda slouží jako jednotný vstupní bod pro reakci hráče
-     * na zápas (tzv. upsert – insert nebo update).
-     * </p>
+     * na zápas. Registrace se podle potřeby vytvoří nebo upraví.
+     * Implementace zajišťuje validaci vstupních dat, kontrolu
+     * povolených přechodů stavů a uložení výsledné registrace.
      *
-     * Typické scénáře:
-     * <ul>
-     *     <li>přihlášení hráče k zápasu,</li>
-     *     <li>odhlášení hráče ze zápasu,</li>
-     *     <li>omluva hráče.</li>
-     * </ul>
-     *
-     * Implementace zajišťuje:
-     * <ul>
-     *     <li>validaci vstupních dat,</li>
-     *     <li>kontrolu povolených přechodů stavů,</li>
-     *     <li>vytvoření nebo úpravu registrace.</li>
-     * </ul>
+     * Typickým scénářem je přihlášení hráče k zápasu, odhlášení
+     * nebo omluva z účasti.
      *
      * @param playerId ID hráče, který reaguje na zápas
      * @param request  požadavek obsahující data o registraci
@@ -76,9 +51,9 @@ public interface MatchRegistrationService {
 
     /**
      * Vrátí seznam registrací pro více zápasů.
-     * <p>
-     * Typicky se používá pro hromadné přehledy nebo statistiky.
-     * </p>
+     *
+     * Metoda se typicky používá pro hromadné přehledy
+     * nebo statistiky přes více zápasů.
      *
      * @param matchIds seznam ID zápasů
      * @return seznam registrací pro zadané zápasy
@@ -86,10 +61,10 @@ public interface MatchRegistrationService {
     List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds);
 
     /**
-     * Vrátí všechny registrace v systému.
-     * <p>
-     * Typicky určeno pro administrátorské přehledy.
-     * </p>
+     * Vrátí všechny registrace v systému omezené
+     * na relevantní sezónu podle implementace.
+     *
+     * Metoda se používá zejména pro administrátorské přehledy.
      *
      * @return seznam všech registrací
      */
@@ -105,25 +80,21 @@ public interface MatchRegistrationService {
 
     /**
      * Vrátí seznam hráčů, kteří dosud nereagovali na daný zápas.
-     * <p>
-     * Používá se zejména:
-     * </p>
-     * <ul>
-     *     <li>pro připomínkové notifikace,</li>
-     *     <li>pro přehledy nevyřešené účasti.</li>
-     * </ul>
+     *
+     * Metoda se používá například pro připomínkové notifikace
+     * nebo pro přehledy nevyřešené účasti.
      *
      * @param matchId ID zápasu
-     * @return seznam hráčů bez reakce
+     * @return seznam hráčů bez reakce na zápas
      */
     List<PlayerDTO> getNoResponsePlayers(Long matchId);
 
     /**
      * Přepočítá stavy registrací pro daný zápas.
-     * <p>
-     * Metoda slouží k zajištění konzistence stavů
-     * (např. po administrátorském zásahu).
-     * </p>
+     *
+     * Metoda slouží k zajištění konzistence stavů registrovaných
+     * a rezervních hráčů podle kapacity zápasu, typicky po změnách
+     * provedených administrátorem.
      *
      * @param matchId ID zápasu
      */
@@ -131,10 +102,10 @@ public interface MatchRegistrationService {
 
     /**
      * Změní stav registrace hráče na zápas.
-     * <p>
-     * Typicky se používá v administrátorském kontextu,
-     * kde je nutné ručně upravit stav registrace.
-     * </p>
+     *
+     * Metoda se používá převážně v administrátorském kontextu,
+     * kde je nutné ručně upravit stav registrace. Nastavení
+     * stavu NO_EXCUSED má vlastní logiku a řeší se samostatně.
      *
      * @param matchId  ID zápasu
      * @param playerId ID hráče
@@ -148,11 +119,11 @@ public interface MatchRegistrationService {
     );
 
     /**
-     * Označí hráče jako „neomluveného“ pro konkrétní zápas.
-     * <p>
-     * Používá se zejména v administrátorském kontextu
-     * po vyhodnocení účasti na zápase.
-     * </p>
+     * Označí hráče jako neomluveného pro konkrétní zápas.
+     *
+     * Metoda se používá v administrátorském kontextu po vyhodnocení
+     * účasti na zápase. Původní omluva se odstraní a registrace
+     * se nastaví do stavu NO_EXCUSED včetně poznámky administrátora.
      *
      * @param matchId   ID zápasu
      * @param playerId  ID hráče

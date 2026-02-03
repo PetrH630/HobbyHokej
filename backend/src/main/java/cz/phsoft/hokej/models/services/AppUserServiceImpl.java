@@ -28,29 +28,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-
 /**
  * Service pro správu aplikačních uživatelských účtů.
- * <p>
- * Odpovědnosti:
- * <ul>
- *     <li>registrace nových uživatelů,</li>
- *     <li>aktivace účtů pomocí emailového ověřovacího tokenu,</li>
- *     <li>změna a reset hesla,</li>
- *     <li>správa základních údajů uživatelského účtu.</li>
- * </ul>
- * <p>
- * Bezpečnost:
- * <ul>
- *     <li>hesla jsou vždy ukládána hashovaná pomocí BCrypt,</li>
- *     <li>nově registrovaný účet je neaktivní, dokud není ověřen email.</li>
- * </ul>
- * <p>
- * Tato service neřeší:
- * <ul>
- *     <li>autentizaci (řeší Spring Security),</li>
- *     <li>správu hráčů (řeší {@link PlayerService}).</li>
- * </ul>
+ *
+ * Zajišťuje se registrace, aktivace a deaktivace účtů,
+ * změna a reset hesla a aktualizace základních údajů uživatele.
+ * Třída se stará o bezpečné uložení hesel, práci s ověřovacími
+ * a resetovacími tokeny a napojení na notifikační systém.
+ *
+ * Autentizace a autorizace se předpokládá v Spring Security,
+ * nikoliv v této třídě.
  */
 @Service
 public class AppUserServiceImpl implements AppUserService {
@@ -58,12 +45,13 @@ public class AppUserServiceImpl implements AppUserService {
     private static final Logger log = LoggerFactory.getLogger(AppUserServiceImpl.class);
 
     /**
-     * Výchozí heslo při resetu účtu administrátorem
+     * Výchozí heslo při resetu účtu administrátorem.
      */
     private static final String DEFAULT_RESET_PASSWORD = "Player123";
 
     /**
-     * Base URL aplikace – používá se pro generování aktivačních odkazů
+     * Základní URL aplikace používaná pro generování odkazů
+     * v aktivačních a resetovacích emailech.
      */
     @Value("${app.base-url}")
     private String baseUrl;
@@ -105,15 +93,10 @@ public class AppUserServiceImpl implements AppUserService {
 
     /**
      * Zaregistruje nového uživatele.
-     * <p>
-     * Průběh registrace:
-     * <ol>
-     *     <li>ověření shody hesel,</li>
-     *     <li>kontrola duplicity emailu,</li>
-     *     <li>vytvoření neaktivního uživatele,</li>
-     *     <li>vytvoření ověřovacího tokenu,</li>
-     *     <li>odeslání aktivačního emailu.</li>
-     * </ol>
+     *
+     * Provádí se kontrola shody hesel a jedinečnosti emailu.
+     * Uživatel se vytvoří jako neaktivní, vygeneruje se ověřovací token
+     * a odešle se notifikační zpráva s aktivačním odkazem.
      *
      * @param dto registrační údaje uživatele
      */
@@ -130,17 +113,9 @@ public class AppUserServiceImpl implements AppUserService {
         EmailVerificationTokenEntity verificationToken =
                 createVerificationToken(savedUser);
 
-        // ⬅ TADY ZÍSKÁŠ activationLink
         String activationLink = buildActivationLink(verificationToken);
         log.info("Aktivační odkaz pro {}: {}", user.getEmail(), activationLink);
-        // 1) Pošleme aktivační email přes EmailService (stávající logika)
-//        emailService.sendActivationEmail(
-//                savedUser.getEmail(),
-//                savedUser.getName(),         // nebo full name, jak to máš
-//                activationLink
-//        );
 
-        // 2) Pošleme notifikaci přes NotificationService (user + manažeři)
         notificationService.notifyUser(
                 savedUser,
                 NotificationType.USER_CREATED,
@@ -151,9 +126,12 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Aktivuje uživatelský účet na základě ověřovacího tokenu.
      *
-     * @param token aktivační token z emailu
-     * @return {@code true} pokud byl účet úspěšně aktivován,
-     * {@code false} pokud je token neplatný nebo expirovaný
+     * Token se ověří, zkontroluje se jeho platnost a případně
+     * se účet označí jako povolený. Pokud uživatel nemá nastavení,
+     * vytvoří se pro něj výchozí konfigurace.
+     *
+     * @param token aktivační token
+     * @return true při úspěšné aktivaci, jinak false
      */
     @Override
     @Transactional
@@ -174,15 +152,14 @@ public class AppUserServiceImpl implements AppUserService {
             user.setEnabled(true);
             newlyActivated = true;
 
-            // pokud user ještě nemá settings → vytvoř default
             if (user.getSettings() == null) {
                 appUserSettingsService.createDefaultSettingsForUser(user);
             }
             userRepository.save(user);
         }
-        // token vždy smažeme, pokud byl platný
+
         tokenRepository.delete(verificationToken);
-        // pokud se opravdu podaří nově aktivoval, pošleme notifikaci USER_ACTIVATED
+
         if (newlyActivated) {
             notifyUser(user, NotificationType.USER_ACTIVATED);
         }
@@ -190,7 +167,14 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Aktivuje uživatelský účet na základě aktivace Administrátorem.
+     * Aktivuje uživatelský účet v administraci.
+     *
+     * Kontroluje se, zda není účet již aktivní. Pokud nemá uživatel
+     * nastavení, vytvoří se pro něj výchozí AppUserSettingsEntity.
+     * Všechny aktivační tokeny se odstraní a odešle se notifikace
+     * o úspěšné aktivaci.
+     *
+     * @param id ID uživatele
      */
     @Override
     public void activateUserByAdmin(Long id) {
@@ -202,12 +186,10 @@ public class AppUserServiceImpl implements AppUserService {
         }
         boolean newlyActivated = false;
 
-        // aktivace účtu
         if (!user.isEnabled()) {
             user.setEnabled(true);
             newlyActivated = true;
 
-            // pokud user ještě nemá settings → vytvoř default
             if (user.getSettings() == null) {
                 appUserSettingsService.createDefaultSettingsForUser(user);
             }
@@ -215,12 +197,8 @@ public class AppUserServiceImpl implements AppUserService {
             userRepository.save(user);
         }
 
-        // smazání všech tokenu uživatele
         tokenRepository.deleteByUser(user);
-        // případně: tokenRepository.deleteByUserId(user.getId());
 
-        // pokud se opravdu nově aktivoval, pošleme notifikaci USER_ACTIVATED
-        // pokud se opravdu nově aktivoval, pošleme notifikaci USER_ACTIVATED
         if (newlyActivated) {
             notifyUser(user, NotificationType.USER_ACTIVATED);
         }
@@ -228,7 +206,10 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Aktualizuje základní údaje přihlášeného uživatele.
+     * Aktualizuje základní údaje uživatele podle emailu.
+     *
+     * Při změně emailu se ověřuje, že nový email není obsazen
+     * jiným účtem. Po úspěšné aktualizaci se odešle notifikace.
      *
      * @param email email aktuálního uživatele
      * @param dto   aktualizovaná data účtu
@@ -252,10 +233,10 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vrátí detail aktuálně přihlášeného uživatele.
+     * Vrací detail aktuálně přihlášeného uživatele.
      *
      * @param email email uživatele
-     * @return DTO uživatele
+     * @return DTO reprezentace uživatele
      */
     @Override
     public AppUserDTO getCurrentUser(String email) {
@@ -264,9 +245,10 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vrátí seznam všech uživatelů v systému.
-     * <p>
-     * Určeno pouze pro administrátora.
+     * Vrací všechny uživatele systému.
+     *
+     * Výsledek se mapuje na DTO a používá se v administraci
+     * pro přehled a správu uživatelských účtů.
      *
      * @return seznam uživatelů
      */
@@ -278,7 +260,11 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Změní heslo přihlášeného uživatele.
+     * Změní heslo aktuálního uživatele.
+     *
+     * Ověří se shoda nového hesla a potvrzení, poté se zkontroluje
+     * původní heslo pomocí BCrypt. Po úspěšné změně se odešle
+     * notifikace o změně hesla.
      *
      * @param email              email uživatele
      * @param oldPassword        původní heslo
@@ -312,8 +298,9 @@ public class AppUserServiceImpl implements AppUserService {
 
     /**
      * Resetuje heslo uživatele na výchozí hodnotu.
-     * <p>
-     * Operace dostupná pouze administrátorovi.
+     *
+     * Používá se v administraci při ručním resetu hesla. Po změně
+     * se odešle notifikace o resetu hesla.
      *
      * @param userId ID uživatele
      */
@@ -328,7 +315,12 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Deaktivuj uživatelský účet na základě deaktivace Administrátorem.
+     * Deaktivuje uživatelský účet v administraci.
+     *
+     * Pokud je účet již deaktivovaný, vyhodí se výjimka.
+     * Po deaktivaci se odešle notifikace.
+     *
+     * @param id ID uživatele
      */
     @Override
     public void deactivateUserByAdmin(Long id) {
@@ -345,11 +337,28 @@ public class AppUserServiceImpl implements AppUserService {
 
     }
 
+    /**
+     * Vrací uživatele podle ID ve formě DTO.
+     *
+     * Používá se v administraci při zobrazení detailu účtu.
+     *
+     * @param id ID uživatele
+     * @return DTO reprezentace uživatele
+     */
     public AppUserDTO getUserById(Long id) {
         AppUserEntity user = findUserByIdOrThrow(id);
         return appUserMapper.toDTO(user);
     }
 
+    /**
+     * Vytvoří požadavek na reset zapomenutého hesla.
+     *
+     * Případné staré tokeny se odstraní a vygeneruje se nový
+     * resetovací token. Navenek se neprozrazuje, zda email
+     * v systému existuje, kvůli bezpečnosti.
+     *
+     * @param email email uživatele
+     */
     @Override
     @Transactional
     public void requestForgottenPasswordReset(String email) {
@@ -357,31 +366,18 @@ public class AppUserServiceImpl implements AppUserService {
         AppUserEntity user = userRepository.findByEmail(email)
                 .orElse(null);
 
-        // Bezpečnost: i když user neexistuje, neřekneme to klientovi.
         if (user == null) {
             log.info("Požadavek na forgotten password reset pro neexistující email: {}", email);
             return;
         }
 
-        // Smažeme staré reset tokeny
         forgottenPasswordResetTokenRepository.deleteByUser(user);
 
-        // Vytvoříme nový reset token
         ForgottenPasswordResetTokenEntity forgottenPasswordToken = createResetPasswordToken(user);
 
-//        ForgottenPasswordResetTokenEntity token = new ForgottenPasswordResetTokenEntity();
-//        token.setToken(UUID.randomUUID().toString());
-//        token.setUser(user);
-//        token.setExpiresAt(LocalDateTime.now().plusHours(1));
-//
-//        ForgottenPasswordResetTokenEntity savedToken =
-//                forgottenPasswordResetTokenRepository.save(token);
-
-        // ⬅ TADY ZÍSKÁŠ activationLink
         String resetPasswordlink = buildResetPasswordlink(forgottenPasswordToken);
 
         log.info("Odkaz pro reset hesla {}: {}", user.getEmail(), resetPasswordlink);
-
 
         notifyUser(
                 user,
@@ -390,13 +386,22 @@ public class AppUserServiceImpl implements AppUserService {
         );
     }
 
+    /**
+     * Vrací email uživatele svázaný s daným resetovacím tokenem.
+     *
+     * Ověřuje se platnost a neexpirovanost tokenu. Metoda se používá
+     * při načítání formuláře pro zadání nového hesla.
+     *
+     * @param token resetovací token
+     * @return email uživatele
+     */
     @Override
     @Transactional
     public String getForgottenPasswordResetEmail(String token) {
 
         ForgottenPasswordResetTokenEntity resetToken =
                 forgottenPasswordResetTokenRepository.findByToken(token)
-                        .orElseThrow(() -> new InvalidResetTokenException());
+                        .orElseThrow(InvalidResetTokenException::new);
 
         if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new InvalidResetTokenException("BE - Reset token expiroval.");
@@ -405,6 +410,16 @@ public class AppUserServiceImpl implements AppUserService {
         return resetToken.getUser().getEmail();
     }
 
+    /**
+     * Nastaví nové heslo na základě resetovacího tokenu.
+     *
+     * Provádí se kontrola shody nového hesla a jeho potvrzení,
+     * ověření platnosti tokenu a následné uložení nového hesla
+     * v zahashované podobě. Token se poté odstraní
+     * a odešle se notifikace o dokončení resetu hesla.
+     *
+     * @param dto data pro reset zapomenutého hesla
+     */
     @Override
     @Transactional
     public void forgottenPasswordReset(ForgottenPasswordResetDTO dto) {
@@ -417,7 +432,7 @@ public class AppUserServiceImpl implements AppUserService {
 
         ForgottenPasswordResetTokenEntity resetToken =
                 forgottenPasswordResetTokenRepository.findByToken(dto.getToken())
-                        .orElseThrow(() -> new InvalidResetTokenException());
+                        .orElseThrow(InvalidResetTokenException::new);
 
         if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new InvalidResetTokenException("BE - Reset token expiroval.");
@@ -428,12 +443,8 @@ public class AppUserServiceImpl implements AppUserService {
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
 
-        // token zneplatníme – smažeme
         forgottenPasswordResetTokenRepository.delete(resetToken);
 
-        // Notifikace – heslo změněno (můžeš použít buď USER_CHANGE_PASSWORD, nebo speciální FORGOTTEN_PASSWORD_RESET_COMPLETED)
-        //notifyUser(user, NotificationType.USER_CHANGE_PASSWORD);
-        // nebo:
         notifyUser(user, NotificationType.FORGOTTEN_PASSWORD_RESET_COMPLETED);
     }
 
@@ -451,9 +462,11 @@ public class AppUserServiceImpl implements AppUserService {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-
     /**
-     * Ověří shodu hesla a potvrzení hesla.
+     * Ověří shodu hesla a jeho potvrzení.
+     *
+     * Pokud se hodnoty neshodují, vyhodí se výjimka
+     * PasswordsDoNotMatchException s případnou vlastním textem.
      */
     private void ensurePasswordsMatch(String password,
                                       String confirm,
@@ -471,8 +484,7 @@ public class AppUserServiceImpl implements AppUserService {
      * Ověří, že email není používán jiným uživatelem.
      *
      * @param email         nový email
-     * @param currentUserId ID uživatele, který je ignorován (při update),
-     *                      při registraci {@code null}
+     * @param currentUserId ID aktuálního uživatele nebo null při registraci
      */
     private void ensureEmailNotUsed(String email, Long currentUserId) {
         userRepository.findByEmail(email).ifPresent(existing -> {
@@ -486,6 +498,11 @@ public class AppUserServiceImpl implements AppUserService {
 
     /**
      * Vytvoří nového uživatele z registračního DTO.
+     *
+     * Uživatel se nastaví jako neaktivní s rolí hráče.
+     *
+     * @param dto registrační data
+     * @return nová entita uživatele
      */
     private AppUserEntity createUserFromRegisterDto(RegisterUserDTO dto) {
         AppUserEntity user = appUserMapper.fromRegisterDto(dto);
@@ -496,7 +513,13 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vytvoří a uloží emailový ověřovací token.
+     * Vytvoří a uloží aktivační token pro uživatele.
+     *
+     * Token je platný omezenou dobu a používá se
+     * při aktivaci účtu přes email.
+     *
+     * @param user uživatel, pro kterého se token vytváří
+     * @return uložený aktivační token
      */
     private EmailVerificationTokenEntity createVerificationToken(AppUserEntity user) {
         EmailVerificationTokenEntity token = new EmailVerificationTokenEntity();
@@ -507,7 +530,12 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vytvoří a uloží emailový reset password token.
+     * Vytvoří a uloží resetovací token pro zapomenuté heslo.
+     *
+     * Token se používá v procesu resetu hesla a má omezenou platnost.
+     *
+     * @param user uživatel, pro kterého se token vytváří
+     * @return uložený resetovací token
      */
     private ForgottenPasswordResetTokenEntity createResetPasswordToken(AppUserEntity user) {
         ForgottenPasswordResetTokenEntity token = new ForgottenPasswordResetTokenEntity();
@@ -517,14 +545,17 @@ public class AppUserServiceImpl implements AppUserService {
         return forgottenPasswordResetTokenRepository.save(token);
     }
 
-
-    // metody pro notifikaci
+    /**
+     * Odesílá notifikaci uživateli bez kontextu.
+     */
     private void notifyUser(AppUserEntity user, NotificationType type) {
         notificationService.notifyUser(user, type, null);
     }
 
+    /**
+     * Odesílá notifikaci uživateli s volitelným kontextem.
+     */
     private void notifyUser(AppUserEntity user, NotificationType type, Object context) {
         notificationService.notifyUser(user, type, context);
     }
 }
-

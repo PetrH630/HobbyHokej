@@ -11,44 +11,28 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
 /**
- * Service pro správu „aktuálně zvoleného hráče“ přihlášeného uživatele.
- * <p>
- * význam:
- * <ul>
- *     <li>jeden uživatel může mít více hráčů,</li>
- *     <li>pro většinu operací (registrace na zápasy, přehledy, statistiky)
- *     musí být jednoznačně určen aktuální hráč.</li>
- * </ul>
+ * Implementace rozhraní CurrentPlayerService.
  *
- * Technické řešení:
- * <ul>
- *     <li>aktuální hráč je uložen v HTTP session,</li>
- *     <li>do session se ukládá pouze ID hráče, nikoliv celá entita.</li>
- * </ul>
+ * Třída spravuje identifikátor aktuálně zvoleného hráče v HTTP session
+ * přihlášeného uživatele. V session se ukládá pouze ID hráče, nikoli
+ * celá entita. Pomocí PlayerRepository se ověřuje, zda hráč existuje
+ * a zda je ve stavu vhodném pro použití v aplikaci.
  *
- * Tato service:
- * <ul>
- *     <li>ukládá a čte ID aktuálního hráče ze session,</li>
- *     <li>ověřuje existenci hráče,</li>
- *     <li>hlídá, že hráč je ve správném stavu (APPROVED).</li>
- * </ul>
- *
- * Tato service neřeší:
- * <ul>
- *     <li>oprávnění uživatele k hráči (řeší {@link PlayerService}),</li>
- *     <li>business logiku zápasů.</li>
- * </ul>
+ * Třída neřeší oprávnění uživatele k danému hráči ani business logiku
+ * zápasů a registrací. Tyto oblasti jsou pokryty jinými service třídami.
  */
 @Service
 public class CurrentPlayerServiceImpl implements CurrentPlayerService {
 
     /**
      * HTTP session vázaná na přihlášeného uživatele.
+     * Slouží k uchování identifikátoru aktuálního hráče.
      */
     private final HttpSession session;
 
     /**
-     * Repozitář hráčů – slouží k ověření existence a stavu hráče.
+     * Repository pro práci s entitami hráčů.
+     * Používá se k ověření existence hráče a jeho aktuálního stavu.
      */
     private final PlayerRepository playerRepository;
 
@@ -59,9 +43,9 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
     }
 
     /**
-     * Vrátí ID aktuálně zvoleného hráče ze session.
+     * Vrátí identifikátor aktuálně zvoleného hráče ze session.
      *
-     * @return ID hráče nebo {@code null}, pokud ještě nebyl vybrán
+     * @return ID hráče nebo null, pokud aktuální hráč ještě nebyl zvolen
      */
     @Override
     public Long getCurrentPlayerId() {
@@ -69,15 +53,15 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
     }
 
     /**
-     * Nastaví aktuálního hráče do session.
-     * <p>
-     * Validace:
-     * <ul>
-     *     <li>hráč musí existovat,</li>
-     *     <li>hráč musí být ve stavu {@link PlayerStatus#APPROVED}.</li>
-     * </ul>
+     * Nastaví aktuálního hráče do HTTP session.
+     *
+     * Před uložením do session se ověří, že hráč existuje
+     * a že je ve stavu PlayerStatus.APPROVED. Pokud některá
+     * z podmínek není splněna, je vyhozena výjimka.
      *
      * @param playerId ID hráče, který má být nastaven jako aktuální
+     * @throws PlayerNotFoundException pokud hráč s daným ID neexistuje
+     * @throws InvalidPlayerStatusException pokud hráč není ve schváleném stavu
      */
     @Override
     public void setCurrentPlayerId(Long playerId) {
@@ -88,13 +72,11 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
     }
 
     /**
-     * Ověří, že je aktuální hráč nastaven.
-     * <p>
-     * Používá se zejména:
-     * <ul>
-     *     <li>před registrací na zápas,</li>
-     *     <li>u endpointů pracujících s kontextem „/me“.</li>
-     * </ul>
+     * Ověří, že je aktuální hráč nastaven v session.
+     *
+     * Metoda se používá před operacemi, které vyžadují kontext
+     * aktuálního hráče, například před registrací na zápas
+     * nebo při volání endpointů pracujících s „/me“.
      *
      * @throws CurrentPlayerNotSelectedException pokud aktuální hráč není nastaven
      */
@@ -107,13 +89,10 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
     }
 
     /**
-     * Odstraní aktuálního hráče ze session.
-     * <p>
-     * Typicky se používá při:
-     * <ul>
-     *     <li>odhlášení uživatele,</li>
-     *     <li>resetu uživatelského kontextu.</li>
-     * </ul>
+     * Odstraní informaci o aktuálním hráči z HTTP session.
+     *
+     * Metoda se používá při odhlášení uživatele nebo při resetu
+     * uživatelského kontextu, kdy již nemá být vazba na konkrétního hráče.
      */
     @Override
     public void clear() {
@@ -121,11 +100,15 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
     }
 
     // ==================================================
-    // HELPER METODY
+    // Helper metody
     // ==================================================
 
     /**
      * Najde hráče podle ID nebo vyhodí výjimku.
+     *
+     * @param playerId ID hledaného hráče
+     * @return entita PlayerEntity odpovídající zadanému ID
+     * @throws PlayerNotFoundException pokud hráč s daným ID neexistuje
      */
     private PlayerEntity findPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)
@@ -133,16 +116,14 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
     }
 
     /**
-     * Ověří, zda hráč může být zvolen jako „aktuální“.
-     * <p>
-     * Aktuálně je povolen pouze stav {@link PlayerStatus#APPROVED}.
+     * Ověří, zda může být hráč zvolen jako aktuální.
      *
-     * Možná budoucí rozšíření:
-     * <ul>
-     *     <li>hráč nesmí být smazaný,</li>
-     *     <li>hráč musí mít vyplněné kontaktní údaje,</li>
-     *     <li>hráč nesmí být dlouhodobě neaktivní.</li>
-     * </ul>
+     * V současné době je povolen pouze stav PlayerStatus.APPROVED.
+     * Ostatní stavy jsou považovány za neplatné pro použití
+     * v kontextu přihlášeného uživatele.
+     *
+     * @param player entita hráče, která má být ověřena
+     * @throws InvalidPlayerStatusException pokud hráč není ve schváleném stavu
      */
     private void validatePlayerSelectable(PlayerEntity player) {
         if (player.getPlayerStatus() != PlayerStatus.APPROVED) {

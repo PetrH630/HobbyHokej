@@ -1,57 +1,98 @@
 package cz.phsoft.hokej.models.services;
 
 /**
- * Výsledek vyhodnocení notifikačních preferencí.
+ * Datový objekt reprezentující výsledek vyhodnocení
+ * notifikačních preferencí pro konkrétní událost.
  *
- * Třída říká:
- * - zda poslat email uživateli (AppUser),
- * - zda poslat email hráči (pokud má vlastní email),
- * - zda poslat SMS hráči,
- * - jaké konkrétní kontakty použít.
+ * Slouží jako přenosový objekt mezi logikou vyhodnocení
+ * notifikací a konkrétními kanály odesílání (email, SMS).
+ *
+ * Objekt jednoznačně určuje:
+ * - zda má být odeslán email uživateli (AppUser),
+ * - zda má být odeslán email hráči na jeho vlastní kontakt,
+ * - zda má být odeslána SMS hráči,
+ * - jaké konkrétní kontaktní údaje se mají použít.
+ *
+ * Třída neřeší:
+ * - samotné odesílání notifikací,
+ * - sestavení obsahu zpráv,
+ * - validaci kontaktních údajů.
+ *
+ * Používá se typicky v NotificationService
+ * jako výsledek rozhodovací logiky.
  */
 public class NotificationDecision {
 
-    // ===== EMAIL =====
+    // ==================================================
+    // EMAIL – UŽIVATEL (AppUser)
+    // ==================================================
 
-
-     /**
-     * Poslat email uživateli (AppUser)?
+    /**
+     * Určuje, zda má být odeslán email uživateli (AppUser).
+     *
+     * Hodnota {@code true} znamená, že notifikace má být
+     * odeslána na email navázaný na uživatelský účet.
      */
     private boolean sendEmailToUser;
 
     /**
-     * Email uživatele (AppUser.email).
+     * Emailová adresa uživatele (AppUser.email),
+     * na kterou má být případná notifikace odeslána.
      */
     private String userEmail;
 
     /**
-     * fullname uživatele (AppUser.email).
+     * Celé jméno uživatele.
+     *
+     * Používá se zejména pro personalizaci textu
+     * emailové zprávy.
      */
     private String fullname;
+
+    // ==================================================
+    // EMAIL – HRÁČ
+    // ==================================================
+
     /**
-     * Poslat email hráči na jeho kontakt (PlayerSettings.contactEmail)?
+     * Určuje, zda má být odeslán email přímo hráči.
+     *
+     * Email se odesílá na kontakt definovaný v nastavení hráče,
+     * typicky {@code PlayerSettings.contactEmail}.
      */
     private boolean sendEmailToPlayer;
 
     /**
-     * Email hráče (PlayerSettings.contactEmail nebo fallback).
+     * Emailová adresa hráče.
+     *
+     * Hodnota obvykle pochází z {@code PlayerSettings.contactEmail},
+     * případně může být použita náhradní (fallback) hodnota
+     * podle logiky vyhodnocení.
      */
     private String playerEmail;
 
-    // ===== SMS =====
+    // ==================================================
+    // SMS – HRÁČ
+    // ==================================================
 
     /**
-     * Poslat SMS hráči?
+     * Určuje, zda má být odeslána SMS hráči.
+     *
+     * Hodnota {@code true} znamená, že hráč má povolené
+     * SMS notifikace a je k dispozici platné telefonní číslo.
      */
     private boolean sendSmsToPlayer;
 
     /**
-     * Telefon hráče (PlayerSettings.contactPhone nebo fallback).
+     * Telefonní číslo hráče.
+     *
+     * Hodnota obvykle pochází z {@code PlayerSettings.contactPhone},
+     * případně se použije fallback hodnota uložená přímo u hráče.
      */
     private String playerPhone;
 
-    // ===== GETTERY / SETTERY =====
-
+    // ==================================================
+    // GETTERY / SETTERY
+    // ==================================================
 
     public boolean isSendEmailToUser() {
         return sendEmailToUser;
@@ -100,6 +141,4 @@ public class NotificationDecision {
     public void setPlayerPhone(String playerPhone) {
         this.playerPhone = playerPhone;
     }
-
-
 }

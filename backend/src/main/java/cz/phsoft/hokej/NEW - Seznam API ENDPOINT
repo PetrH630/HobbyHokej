@@ -1,9 +1,3 @@
-TODO NOVÉ ENDPOINTY
-@PostMapping("/forgotten-password")
-@GetMapping("/forgotten-password/info")
-@PostMapping("/forgotten-password/reset")
-
-
 ------------------------------------------------------
 LOGIN/LOGOUT
 ------------------------------------------------------
@@ -21,6 +15,12 @@ User / Public
 POST /api/auth/register                 – registrace nového uživatele
 GET /api/auth/me (isAuthenticated)      – detail aktuálně přihlášeného uživatele
 GET /api/auth/verify?token=...          – aktivace účtu pomocí verifikačního tokenu z e-mailu
+
+endpointy pro reste hesla přes token - zapomenuté heslo
+GET /api/auth/reset-password")
+POST /api/auth/forgotten-password")
+GET /api/auth/forgotten-password/info")
+POST /api/auth/forgotten-password/reset")
 
 ------------------------------------------------------
 UŽIVATEL

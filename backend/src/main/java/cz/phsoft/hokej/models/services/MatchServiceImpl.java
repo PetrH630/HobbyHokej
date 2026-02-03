@@ -1,6 +1,5 @@
 package cz.phsoft.hokej.models.services;
 
-
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
@@ -14,7 +13,6 @@ import cz.phsoft.hokej.models.mappers.MatchMapper;
 import cz.phsoft.hokej.models.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.services.notification.NotificationService;
 import cz.phsoft.hokej.models.services.notification.MatchTimeChangeContext;
-
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,31 +20,22 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-
 import java.time.LocalDateTime;
 import java.util.*;
-
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Service vrstva pro práci se zápasy.
- * <p>
- * Odpovědnosti:
- * <ul>
- *     <li>CRUD nad zápasy v rámci aktivní sezóny,</li>
- *     <li>filtrování zápasů podle data a typu hráče (VIP/STANDARD/BASIC),</li>
- *     <li>výpočet detailních statistik k zápasu (MatchDetailDTO),</li>
- *     <li>přístupová logika k detailu zápasu (hráč vs admin/manager),</li>
- *     <li>přehledy zápasů pro konkrétního hráče (overview),</li>
- *     <li>rušení a obnovení zápasů (CANCELLED / uncancel).</li>
- * </ul>
- * <p>
- * Tato service:
- * <ul>
- *     <li>neřeší registrace (detailní stav hráče) – to řeší {@link MatchRegistrationService},</li>
- *     <li>neřeší výběr aktuálního hráče – to řeší {@link CurrentPlayerService} a controller.</li>
- * </ul>
+ * Service vrstva se používá pro práci se zápasy.
+ *
+ * Zajišťuje CRUD operace nad zápasy v rámci sezón, filtrování
+ * nadcházejících a proběhlých zápasů, výpočet statistik a přehledů
+ * pro hráče i administrátory a rušení či obnovu zápasů.
+ *
+ * Třída neřeší podrobnou logiku registrací hráčů, která je
+ * umístěna v {@link MatchRegistrationService}, ani výběr
+ * aktuálního hráče, který je spravován v {@link CurrentPlayerService}
+ * a ve vrstvách controllerů.
  */
 @Service
 public class MatchServiceImpl implements MatchService {
@@ -67,7 +56,6 @@ public class MatchServiceImpl implements MatchService {
     private final SeasonService seasonService;
     private final CurrentSeasonService currentSeasonService;
     private final NotificationService notificationService;
-
 
     public MatchServiceImpl(MatchRepository matchRepository,
                             MatchRegistrationRepository matchRegistrationRepository,
@@ -98,8 +86,10 @@ public class MatchServiceImpl implements MatchService {
     // ======================
 
     /**
-     * Vrátí všechny zápasy v rámci aktivní sezóny
-     * seřazené podle data vzestupně.
+     * Vrátí všechny zápasy v rámci aktuálně používané sezóny.
+     *
+     * Zápasy jsou seřazeny podle data a času vzestupně.
+     * Součástí výstupu je i číslo zápasu v sezóně.
      */
     @Override
     public List<MatchDTO> getAllMatches() {
@@ -112,8 +102,11 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Vrátí všechny nadcházející zápasy v aktivní sezóně
-     * (datum > aktuální čas), seřazené podle data vzestupně.
+     * Vrátí všechny nadcházející zápasy v aktuální sezóně.
+     *
+     * Zápasy mají datum a čas v budoucnosti a jsou řazeny
+     * podle data vzestupně. Výstup zahrnuje i číslo zápasu
+     * v rámci sezóny.
      */
     @Override
     public List<MatchDTO> getUpcomingMatches() {
@@ -125,9 +118,11 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Vrátí všechny již proběhlé zápasy v aktivní sezóně
-     * (datum < aktuální čas), seřazené podle data sestupně
-     * (nejnovější první).
+     * Vrátí všechny proběhlé zápasy v aktuální sezóně.
+     *
+     * Zápasy mají datum a čas v minulosti a jsou řazeny
+     * podle data sestupně (nejnovější jako první).
+     * Výstup zahrnuje i číslo zápasu v rámci sezóny.
      */
     @Override
     public List<MatchDTO> getPastMatches() {
@@ -139,8 +134,9 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Vrátí nejbližší nadcházející zápas v aktivní sezóně
-     * nebo {@code null}, pokud žádný neexistuje.
+     * Vrátí nejbližší nadcházející zápas v aktuální sezóně.
+     *
+     * Pokud žádný nadcházející zápas neexistuje, vrací se {@code null}.
      */
     @Override
     public MatchDTO getNextMatch() {
@@ -152,9 +148,12 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Vrátí konkrétní zápas podle ID.
+     * Vrátí základní informace o zápasu podle ID.
      *
-     * @throws MatchNotFoundException pokud zápas neexistuje
+     * Pokud zápas neexistuje, vyvolá se {@link MatchNotFoundException}.
+     *
+     * @param id ID zápasu
+     * @return zápas ve formě {@link MatchDTO}
      */
     @Override
     public MatchDTO getMatchById(Long id) {
@@ -163,12 +162,10 @@ public class MatchServiceImpl implements MatchService {
 
     /**
      * Vytvoří nový zápas.
-     * <ul>
-     *     <li>namapuje DTO na entitu,</li>
-     *     <li>ověří, že datum zápasu spadá do aktivní sezóny,</li>
-     *     <li>přiřadí aktivní sezónu,</li>
-     *     <li>uloží zápas a vrátí DTO.</li>
-     * </ul>
+     *
+     * DTO se namapuje na entitu, ověří se, že datum zápasu
+     * spadá do intervalu aktivní sezóny, a k zápasu se přiřadí
+     * aktivní sezóna. Zápas se uloží a vrátí se ve formě DTO.
      */
     @Override
     public MatchDTO createMatch(MatchDTO dto) {
@@ -182,25 +179,25 @@ public class MatchServiceImpl implements MatchService {
 
     /**
      * Aktualizuje existující zápas.
-     * <ul>
-     *     <li>ověří, že zápas patří do aktivní sezóny,</li>
-     *     <li>přenese změny z DTO do entity,</li>
-     *     <li>znovu zvaliduje datum v rámci aktivní sezóny,</li>
-     *     <li>uloží změny,</li>
-     *     <li>pokud se změnil maxPlayers, přepočítá REGISTERED/RESERVED.</li>
-     * </ul>
      *
-     * @throws InvalidMatchStatusException pokud zápas nepatří do aktivní sezóny
+     * Zápas se načte z databáze, zkontroluje se oprávnění
+     * podle role uživatele a ověří se, zda může být v aktivní sezóně upravován.
+     * Poté se přenesou změny z DTO do entity a zápas se uloží.
+     * Pokud se změní kapacita, přepočítají se stavy registrací.
+     * Pokud se změní datum nebo čas, spustí se notifikace
+     * o změně termínu zápasu.
+     *
+     * @throws InvalidMatchStatusException pokud uživatel bez role administrátora
+     *                                     nebo manažera upravuje zápas mimo aktivní sezónu
+     * @throws InvalidMatchDateTimeException pokud by po úpravě zápas spadl do minulosti
      */
     @Override
     public MatchDTO updateMatch(Long id, MatchDTO dto) {
         MatchEntity entity = findMatchOrThrow(id);
 
-        // zjistíme roli uživatele
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdminOrManager = hasAdminOrManagerRole(auth);
 
-        // Kontrola sezóny jen pro "běžné" uživatele (kdyby se tahle metoda někdy použila i pro ně)
         if (!isAdminOrManager) {
             Long activeSeasonId = seasonService.getActiveSeason().getId();
             if (!entity.getSeason().getId().equals(activeSeasonId)) {
@@ -215,25 +212,23 @@ public class MatchServiceImpl implements MatchService {
 
         matchMapper.updateEntity(dto, entity);
 
-        // validace data v aktivní sezóně jen pro ne-adminy
         if (!isAdminOrManager) {
             validateMatchDateInActiveSeason(entity.getDateTime());
         }
 
         MatchEntity saved = matchRepository.save(entity);
-        //pokud se změnil maxPlayers, přepočet REGISTERED/RESERVED
+
         if (saved.getMaxPlayers() != oldMaxPlayers) {
             registrationService.recalcStatusesForMatch(saved.getId());
         }
-        // pokud se změnilo datum nebo čas - MATCH_TIME_CHANGED
+
         if (saved.getDateTime().isBefore(LocalDateTime.now())) {
             throw new InvalidMatchDateTimeException("Zápas by již byl minulostí");
         }
-        MatchStatus matchStatus = saved.getMatchStatus();
+
         boolean dateTimeChanged = !saved.getDateTime().isEqual(oldDateTime);
 
         if (dateTimeChanged) {
-            // vytvoří context se starým datem/časem
             MatchTimeChangeContext ctx = new MatchTimeChangeContext(saved, oldDateTime);
             notifyPlayersAboutMatchChanges(ctx, MatchStatus.UPDATED);
         }
@@ -243,10 +238,13 @@ public class MatchServiceImpl implements MatchService {
 
     /**
      * Smaže zápas podle ID.
-     * <p>
-     * Pokud zápas neexistuje, vyhodí {@link MatchNotFoundException}.
      *
-     * @return {@link SuccessResponseDTO} s potvrzením smazání
+     * Pokud zápas neexistuje, vyvolá se {@link MatchNotFoundException}.
+     * Při úspěchu vrací standardizovanou odpověď s potvrzením
+     * a časovou známkou operace.
+     *
+     * @param id ID zápasu
+     * @return odpověď s informací o úspěchu smazání
      */
     @Override
     public SuccessResponseDTO deleteMatch(Long id) {
@@ -262,11 +260,11 @@ public class MatchServiceImpl implements MatchService {
 
     /**
      * Zruší zápas s uvedeným důvodem.
-     * <ul>
-     *     <li>nastaví MatchStatus.CANCELLED,</li>
-     *     <li>uloží důvod zrušení,</li>
-     *     <li>pokud je již zrušen, vyhodí InvalidMatchStatusException.</li>
-     * </ul>
+     *
+     * Zápasu se nastaví stav {@link MatchStatus#CANCELLED}
+     * a uloží se důvod zrušení. Pokud je zápas již zrušen,
+     * vyvolá se {@link InvalidMatchStatusException}. Po zrušení
+     * se odešlou notifikace přihlášeným hráčům.
      */
     @Override
     @Transactional
@@ -277,7 +275,6 @@ public class MatchServiceImpl implements MatchService {
         if (match.getMatchStatus() == MatchStatus.CANCELLED) {
             throw new InvalidMatchStatusException(matchId, message);
         }
-
 
         match.setMatchStatus(MatchStatus.CANCELLED);
         match.setCancelReason(reason);
@@ -294,11 +291,11 @@ public class MatchServiceImpl implements MatchService {
 
     /**
      * Obnoví dříve zrušený zápas.
-     * <ul>
-     *     <li>MatchStatus nastaví na null,</li>
-     *     <li>cancelReason nastaví na null,</li>
-     *     <li>pokud zápas nebyl zrušen, vyhodí InvalidMatchStatusException.</li>
-     * </ul>
+     *
+     * Zápasu se odstraní stav {@link MatchStatus#CANCELLED}
+     * a důvod zrušení. Pokud zápas zrušen nebyl, vyvolá se
+     * {@link InvalidMatchStatusException}. Implementace může
+     * navazovat odeslání notifikací o obnovení zápasu.
      */
     @Override
     @Transactional
@@ -321,34 +318,16 @@ public class MatchServiceImpl implements MatchService {
     }
 
     // ======================
-    // POMOCNÉ METODY – ENTITY
-    // ======================
-
-
-    // ======================
     // DETAIL ZÁPASU
     // ======================
 
     /**
-     * Vrátí detail zápasu (MatchDetailDTO) včetně:
-     * <ul>
-     *     <li>seskupení hráčů podle statusu (REGISTERED/RESERVED/EXCUSED/...),</li>
-     *     <li>počtů hráčů v zápase, mimo zápas, náhradníků, NO_EXCUSED, NO_RESPONSE,</li>
-     *     <li>ceny na registrovaného hráče,</li>
-     *     <li>stavu zápasu (MatchStatus + důvod zrušení),</li>
-     *     <li>stavu aktuálního hráče (PlayerMatchStatus) a jeho omluvy.</li>
-     * </ul>
-     * <p>
-     * Obsahuje i přístupovou logiku:
-     * <ul>
-     *     <li>ADMIN/MANAGER vidí vždy,</li>
-     *     <li>běžný uživatel:
-     *          <ul>
-     *              <li>nadcházející zápas → musí mít aktivního hráče k datu zápasu,</li>
-     *              <li>proběhlý zápas → některý jeho hráč musel být REGISTERED.</li>
-     *          </ul>
-     *     </li>
-     * </ul>
+     * Vrátí detail zápasu ve formě {@link MatchDetailDTO}.
+     *
+     * Detail obsahuje souhrnné statistiky, seskupení hráčů podle stavu,
+     * informace o kapacitě, cenu na registrovaného hráče a stav
+     * aktuálně zvoleného hráče v zápase. Metoda současně uplatňuje
+     * přístupová pravidla podle role uživatele a jeho navázaných hráčů.
      */
     @Override
     public MatchDetailDTO getMatchDetail(Long id) {
@@ -357,13 +336,10 @@ public class MatchServiceImpl implements MatchService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdminOrManager = hasAdminOrManagerRole(auth);
 
-        // 1) přístupová logika
         checkAccessForPlayer(match, auth);
 
-        // 2) sběr statistik a stavů hráčů
         MatchDetailDTO dto = collectPlayerStatus(match, isAdminOrManager);
 
-        // 3) stav aktuálního hráče (pokud je zvolen)
         Long currentPlayerId = null;
         try {
             currentPlayerId = currentPlayerService.getCurrentPlayerId();
@@ -374,7 +350,6 @@ public class MatchServiceImpl implements MatchService {
         PlayerMatchStatus playerMatchStatus = resolveStatusForPlayer(dto, currentPlayerId);
         dto.setPlayerMatchStatus(playerMatchStatus);
 
-        // 4) omluva aktuálního hráče (pokud existuje registrace)
         if (currentPlayerId != null) {
             matchRegistrationRepository.findByPlayerIdAndMatchId(currentPlayerId, match.getId())
                     .ifPresent(reg -> {
@@ -386,11 +361,9 @@ public class MatchServiceImpl implements MatchService {
             dto.setExcuseNote(null);
         }
 
-        // 5) stav zápasu
         dto.setMatchStatus(match.getMatchStatus());
         dto.setCancelReason(match.getCancelReason());
 
-        // 6) číslo zápasu v sezóně podle globálního pořadí v sezóně   
         if (match.getSeason() != null && match.getSeason().getId() != null) {
             Long seasonId = match.getSeason().getId();
             Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);
@@ -401,26 +374,15 @@ public class MatchServiceImpl implements MatchService {
         return dto;
     }
 
-    // --------------------------------------------------
-    // Přístupová logika – kdo smí vidět detail zápasu
-    // --------------------------------------------------
-
     /**
      * Ověří, zda má aktuální uživatel přístup k detailu zápasu.
-     * <ul>
-     *     <li>nepřihlášený → AccessDenied,</li>
-     *     <li>ADMIN/MANAGER → vždy povoleno,</li>
-     *     <li>běžný uživatel:
-     *         <ul>
-     *             <li>získá své hráče (ownedPlayers) podle emailu,</li>
-     *             <li>bez hráčů → AccessDenied,</li>
-     *             <li>nadcházející zápas → musí mít aktivního hráče k datu zápasu,</li>
-     *             <li>uplynulý zápas → jeho hráč musel být REGISTERED.</li>
-     *         </ul>
-     *     </li>
-     * </ul>
      *
-     * @throws org.springframework.security.access.AccessDeniedException pokud uživatel nesplňuje podmínky
+     * Uživatel musí být přihlášen. Uživatel s rolí administrátora
+     * nebo manažera má přístup vždy. Běžný uživatel musí mít
+     * navázaného hráče a splnit podmínky podle toho, zda jde
+     * o nadcházející nebo proběhlý zápas.
+     *
+     * Pokud podmínky nejsou splněny, vyvolá se přístupová výjimka.
      */
     private void checkAccessForPlayer(MatchEntity match, Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
@@ -467,7 +429,6 @@ public class MatchServiceImpl implements MatchService {
                 registrationService.getRegistrationsForMatch(match.getId());
 
         if (!isPastOrNow) {
-            // nadcházející zápas – hráč musí být aktivní pro datum zápasu
             boolean hasActivePlayerForMatch = ownedPlayers.stream()
                     .anyMatch(p -> isPlayerActiveForMatch(p, match.getDateTime()));
 
@@ -479,7 +440,6 @@ public class MatchServiceImpl implements MatchService {
             return;
         }
 
-        // uplynulý zápas – hráč musí být mezi REGISTERED
         boolean wasRegistered = registrations.stream()
                 .anyMatch(r ->
                         r.getStatus() == PlayerMatchStatus.REGISTERED
@@ -493,24 +453,18 @@ public class MatchServiceImpl implements MatchService {
         }
     }
 
-    // --------------------------------------------------
-    // Sběr statistik hráčů pro MatchDetailDTO
-    // --------------------------------------------------
-
     /**
-     * Sestaví {@link MatchDetailDTO} pro daný zápas:
-     * <ul>
-     *     <li>seskupí hráče podle statusu (REGISTERED/RESERVED/EXCUSED/...)</li>
-     *     <li>spočítá počty hráčů v jednotlivých kategoriích,</li>
-     *     <li>vypočítá cenu na registrovaného hráče,</li>
-     *     <li>naplní seznamy hráčů k jednotlivým statusům,</li>
-     *     <li>pole noResponsePlayers vyplní jen pro admin/manager.</li>
-     * </ul>
+     * Sestaví {@link MatchDetailDTO} pro daný zápas.
+     *
+     * Zápis obsahuje seskupení hráčů podle statusů, počty hráčů
+     * v jednotlivých kategoriích, počet volných míst, cenu
+     * na registrovaného hráče a seznam hráčů bez reakce.
+     * Seznam hráčů bez reakce je dostupný pouze pro administrátory
+     * a manažery.
      */
     private MatchDetailDTO collectPlayerStatus(MatchEntity match, boolean isAdminOrManager) {
         List<MatchRegistrationDTO> registrations =
                 registrationService.getRegistrationsForMatch(match.getId());
-
 
         var statusToPlayersMap = registrations.stream()
                 .map(r -> playerRepository.findById(r.getPlayerId())
@@ -529,13 +483,6 @@ public class MatchServiceImpl implements MatchService {
 
         int inGamePlayers =
                 statusToPlayersMap.getOrDefault(PlayerMatchStatus.REGISTERED, List.of()).size();
-
-
-        registrations.forEach(r -> {
-            System.out.println("Reg: status=" + r.getStatus()
-                    + ", team=" + r.getTeam());
-        });
-
 
         int inGamePlayersDark =
                 (int) registrations.stream()
@@ -601,9 +548,10 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Z MatchDetailDTO odvodí status konkrétního hráče
-     * na základě jeho členství v seznamu hráčů dle statusu.
-     * Pokud není v žádném seznamu, vrací NO_RESPONSE.
+     * Odvodí status konkrétního hráče z detailu zápasu.
+     *
+     * Hráč se hledá v seznamech podle statusu. Pokud není
+     * nalezen v žádné kategorii, vrací se stav NO_RESPONSE.
      */
     private PlayerMatchStatus resolveStatusForPlayer(MatchDetailDTO dto, Long playerId) {
         if (dto == null || playerId == null) {
@@ -634,13 +582,12 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Pomocná metoda – zjistí, zda je hráč s daným ID v seznamu PlayerDTO.
+     * Ověří, zda je hráč s daným ID přítomen v seznamu hráčů.
      */
     private boolean isIn(List<PlayerDTO> players, Long playerId) {
         return players != null
                 && players.stream().anyMatch(p -> p.getId().equals(playerId));
     }
-
 
     // ======================
     // DALŠÍ PUBLIC METODY
@@ -648,14 +595,10 @@ public class MatchServiceImpl implements MatchService {
 
     /**
      * Vrátí všechny zápasy, ve kterých může daný hráč potenciálně hrát.
-     * <ul>
-     *     <li>vezme všechny zápasy (všechny sezóny),</li>
-     *     <li>filtruje je podle aktivity hráče v daném datu
-     *         (PlayerInactivityPeriodService.isActive).</li>
-     * </ul>
-     * <p>
-     * POZOR: tady se zápasy tahají přes všechny sezóny, takže globální
-     * "číslo v sezóně" nedává smysl – DTO se nečíslují.
+     *
+     * Zápasy se vybírají napříč všemi sezónami a následně se filtrují
+     * podle toho, zda je hráč v daném období aktivní podle
+     * {@link PlayerInactivityPeriodService}.
      */
     @Override
     public List<MatchDTO> getAvailableMatchesForPlayer(Long playerId) {
@@ -668,9 +611,9 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Najde ID hráče podle emailu uživatele (User.email).
+     * Najde ID hráče podle e-mailu uživatele.
      *
-     * @throws PlayerNotFoundException pokud uživatel nemá hráče
+     * Pokud uživatel nemá žádného hráče, vyvolá se {@link PlayerNotFoundException}.
      */
     @Override
     public Long getPlayerIdByEmail(String email) {
@@ -681,13 +624,10 @@ public class MatchServiceImpl implements MatchService {
 
     /**
      * Vrátí přehled nadcházejících zápasů pro konkrétního hráče.
-     * <ul>
-     *     <li>zjistí PlayerType hráče,</li>
-     *     <li>vezme všechny nadcházející zápasy v aktivní sezóně,</li>
-     *     <li>omezí jejich počet podle PlayerType (VIP/STANDARD/BASIC),</li>
-     *     <li>filtruje jen zápasy, kde je hráč aktivní,</li>
-     *     <li>namapuje na MatchOverviewDTO včetně PlayerMatchStatus.</li>
-     * </ul>
+     *
+     * Zohledňuje typ hráče (VIP, STANDARD, BASIC) a omezuje počet
+     * zobrazených zápasů. Současně filtruje jen zápasy, pro které
+     * je hráč v daném datu aktivní, a nastavuje stav hráče v zápase.
      */
     @Override
     public List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId) {
@@ -712,8 +652,10 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Vrátí seznam nadcházejících zápasů pro konkrétního hráče
-     * v plném MatchDTO formátu, s omezením podle PlayerType.
+     * Vrátí seznam nadcházejících zápasů pro konkrétního hráče.
+     *
+     * Výsledek je v plném formátu {@link MatchDTO} a je omezen
+     * podle typu hráče a jeho aktivity v termínu zápasu.
      */
     @Override
     public List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId) {
@@ -734,15 +676,13 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Vrátí overview všech proběhlých zápasů aktivní sezóny,
+     * Vrátí přehled všech proběhlých zápasů aktuální sezóny,
      * kterých se hráč mohl účastnit.
-     * <ul>
-     *     <li>bere jen proběhlé zápasy v aktivní sezóně,</li>
-     *     <li>filtruje podle aktivity hráče v datu zápasu,</li>
-     *     <li>najednou načte všechny registrace k těmto zápasům,</li>
-     *     <li>z nich sestaví mapu matchId → playerId → status,</li>
-     *     <li>pro každý zápas sestaví MatchOverviewDTO a nastaví PlayerMatchStatus.</li>
-     * </ul>
+     *
+     * Zápasy se filtrují podle aktivity hráče v datu zápasu,
+     * hromadně se načtou registrace k těmto zápasům a pro každý
+     * zápas se odvodí stav hráče. Výstup obsahuje i číslo zápasu
+     * v sezóně.
      */
     @Override
     public List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId) {
@@ -774,7 +714,6 @@ public class MatchServiceImpl implements MatchService {
                         )
                 ));
 
-        // původní logika + globální číslo zápasu v sezóně
         List<MatchOverviewDTO> overviews = availableMatches.stream()
                 .map(match -> {
                     MatchOverviewDTO overview = toOverviewDTO(match);
@@ -794,23 +733,35 @@ public class MatchServiceImpl implements MatchService {
         return overviews;
     }
 
-
-
+    /**
+     * Najde hráče podle ID nebo vyhodí {@link PlayerNotFoundException}.
+     */
     private PlayerEntity findPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
     }
 
+    /**
+     * Najde zápas podle ID nebo vyhodí {@link MatchNotFoundException}.
+     */
     private MatchEntity findMatchOrThrow(Long matchId) {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
     }
 
+    /**
+     * Najde registraci hráče k zápasu nebo vyhodí {@link MatchRegistrationNotFoundException}.
+     */
     private MatchRegistrationEntity findMatchRegistrationOrThrow(Long playerId, Long matchId) {
         return matchRegistrationRepository.findByPlayerIdAndMatchId(playerId, matchId)
                 .orElseThrow(() -> new MatchRegistrationNotFoundException(playerId, matchId));
     }
 
+    /**
+     * Vrátí aktuální čas.
+     *
+     * Metoda je oddělena kvůli jednoduššímu testování.
+     */
     private LocalDateTime now() {
         return LocalDateTime.now();
     }
@@ -820,12 +771,11 @@ public class MatchServiceImpl implements MatchService {
     // ======================
 
     /**
-     * Sestaví základní {@link MatchOverviewDTO} pro daný zápas
-     * (bez ohledu na konkrétního hráče).
-     * <ul>
-     *     <li>vypočítá počet REGISTERED hráčů,</li>
-     *     <li>vypočítá cenu na registrovaného hráče.</li>
-     * </ul>
+     * Sestaví základní {@link MatchOverviewDTO} pro daný zápas.
+     *
+     * DTO obsahuje základní informace o zápasu a počet hráčů
+     * se stavem REGISTERED včetně vypočtené ceny na registrovaného
+     * hráče.
      */
     private MatchOverviewDTO toOverviewDTO(MatchEntity match) {
         MatchOverviewDTO dto = new MatchOverviewDTO();
@@ -851,7 +801,9 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Rozšířená verze overview o stav konkrétního hráče v zápase.
+     * Sestaví {@link MatchOverviewDTO} pro daný zápas v kontextu konkrétního hráče.
+     *
+     * K základním údajům o zápasu doplní i stav hráče v daném zápase.
      */
     private MatchOverviewDTO toOverviewDTO(MatchEntity match, Long playerId) {
         MatchOverviewDTO dto = toOverviewDTO(match);
@@ -873,7 +825,7 @@ public class MatchServiceImpl implements MatchService {
     // ======================
 
     /**
-     * Zjistí, zda má uživatel roli ADMIN nebo MANAGER.
+     * Zjistí, zda má uživatel roli administrátora nebo manažera.
      */
     private boolean hasAdminOrManagerRole(Authentication auth) {
         if (auth == null) {
@@ -887,8 +839,10 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Všechny nadcházející zápasy v aktivní sezóně (datum > teď),
-     * seřazené podle data vzestupně.
+     * Vrátí všechny nadcházející zápasy v aktuální sezóně.
+     *
+     * Zápasy mají datum a čas větší než aktuální okamžik
+     * a jsou seřazeny podle data vzestupně.
      */
     private List<MatchEntity> findUpcomingMatchesForCurrentSeason() {
         return matchRepository.findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(
@@ -898,8 +852,10 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Všechny proběhlé zápasy v aktivní sezóně (datum < teď),
-     * seřazené podle data sestupně.
+     * Vrátí všechny proběhlé zápasy v aktuální sezóně.
+     *
+     * Zápasy mají datum a čas menší než aktuální okamžik
+     * a jsou seřazeny podle data sestupně.
      */
     private List<MatchEntity> findPastMatchesForCurrentSeason() {
         return matchRepository.findBySeasonIdAndDateTimeBeforeOrderByDateTimeDesc(
@@ -909,12 +865,10 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Omezení seznamu nadcházejících zápasů podle typu hráče.
-     * <ul>
-     *     <li>VIP → max 3 zápasy,</li>
-     *     <li>STANDARD → max 2 zápasy,</li>
-     *     <li>BASIC → pouze nejbližší zápas.</li>
-     * </ul>
+     * Omezuje nadcházející zápasy podle typu hráče.
+     *
+     * Pro typ VIP vrací tři nejbližší zápasy, pro STANDARD dva
+     * a pro BASIC pouze jeden nejbližší zápas.
      */
     private List<MatchEntity> limitMatchesByPlayerType(List<MatchEntity> upcomingAll, PlayerType type) {
         if (upcomingAll == null || upcomingAll.isEmpty()) {
@@ -929,19 +883,21 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Ověří, zda je hráč aktivní pro dané datum zápasu,
-     * pomocí {@link PlayerInactivityPeriodService}.
+     * Ověří, zda je hráč aktivní pro dané datum zápasu.
+     *
+     * Informace o aktivitě hráče se zjišťuje pomocí
+     * {@link PlayerInactivityPeriodService}.
      */
     private boolean isPlayerActiveForMatch(PlayerEntity player, LocalDateTime dateTime) {
         return playerInactivityPeriodService.isActive(player, dateTime);
     }
 
     /**
-     * Normalizuje status hráče.
-     * <ul>
-     *     <li>null → NO_RESPONSE,</li>
-     *     <li>jinak vrací status, pokud je z podporovaného seznamu.</li>
-     * </ul>
+     * Normalizuje stav registrace hráče.
+     *
+     * Pokud je stav {@code null}, vrací se NO_RESPONSE.
+     * V případě ostatních podporovaných stavů se vrací
+     * původní hodnota, jinak se použije NO_RESPONSE.
      */
     private PlayerMatchStatus normalizePlayerStatus(PlayerMatchStatus status) {
         if (status == null) {
@@ -960,8 +916,10 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Ověří, že datum zápasu spadá do intervalu aktivní sezóny,
-     * jinak vyhodí {@link InvalidSeasonPeriodDateException}.
+     * Ověří, že datum zápasu spadá do období aktivní sezóny.
+     *
+     * Pokud datum leží mimo interval aktivní sezóny, vyvolá se
+     * {@link InvalidSeasonPeriodDateException}.
      */
     private void validateMatchDateInActiveSeason(LocalDateTime dateTime) {
         var activeSeason = seasonService.getActiveSeason();
@@ -978,20 +936,25 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Sezona pro uživatele
+     * Vrátí ID sezóny, která se má použít pro práci se zápasy.
+     *
+     * Nejprve se použije sezóna uložená v {@link CurrentSeasonService}.
+     * Pokud není k dispozici, použije se globálně aktivní sezóna
+     * z {@link SeasonService}.
      */
     private Long getCurrentSeasonIdOrActive() {
         Long id = currentSeasonService.getCurrentSeasonIdOrDefault();
         if (id != null) {
             return id;
         }
-        // fallback – kdyby náhodou nebyla v session ani globálně aktivní
         return seasonService.getActiveSeason().getId();
     }
 
     /**
-     * Generická metoda pro číslování zápasů:
-     * číslo se bere z mapy matchId -> pořadí v sezóně.
+     * Přidá zápasům číslo v sezóně podle mapy matchId → pořadí.
+     *
+     * Metoda se používá jako společný pomocník pro mapování
+     * entit na DTO, která implementují {@link NumberedMatchDTO}.
      */
     private <D extends NumberedMatchDTO> List<D> assignMatchNumbers(
             List<MatchEntity> matches,
@@ -1009,9 +972,9 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * Pro danou sezónu vrátí mapu:
-     * matchId -> pořadové číslo zápasu v sezóně (1..N)
-     * Pořadí je podle dateTime ASC.
+     * Pro danou sezónu sestaví mapu matchId → pořadové číslo zápasu v sezóně.
+     *
+     * Pořadí zápasů vychází z datumu a času zápasu řazeného vzestupně.
      */
     private Map<Long, Integer> buildMatchNumberMapForSeason(Long seasonId) {
         List<MatchEntity> allMatchesInSeason =
@@ -1025,9 +988,14 @@ public class MatchServiceImpl implements MatchService {
         return map;
     }
 
-
+    /**
+     * Odešle notifikace hráčům o změnách souvisejících se zápasem.
+     *
+     * Context představuje buď samotný zápas, nebo objekt
+     * {@link MatchTimeChangeContext} v případě změny termínu.
+     * Na základě typu změny zápasu se určí konkrétní typ notifikace.
+     */
     private void notifyPlayersAboutMatchChanges(Object context, MatchStatus matchStatus) {
-        // z contextu vytáhneme MatchEntity
         MatchEntity match;
         if (context instanceof MatchTimeChangeContext mtc) {
             match = mtc.match();
@@ -1046,11 +1014,10 @@ public class MatchServiceImpl implements MatchService {
                     PlayerEntity player = reg.getPlayer();
 
                     if (matchStatus == MatchStatus.UPDATED) {
-                        // tady chceme vidět i staré datum -> musíme poslat celý context
                         notificationService.notifyPlayer(
                                 player,
                                 NotificationType.MATCH_TIME_CHANGED,
-                                context // MatchTimeChangeContext
+                                context
                         );
                     }
 
@@ -1058,7 +1025,7 @@ public class MatchServiceImpl implements MatchService {
                         notificationService.notifyPlayer(
                                 player,
                                 NotificationType.MATCH_CANCELED,
-                                match // stačí MatchEntity
+                                match
                         );
                     }
 
@@ -1071,6 +1038,5 @@ public class MatchServiceImpl implements MatchService {
                     }
                 });
     }
-
 
 }

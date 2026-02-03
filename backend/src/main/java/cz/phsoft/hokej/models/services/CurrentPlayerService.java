@@ -1,49 +1,32 @@
 package cz.phsoft.hokej.models.services;
 
 /**
- * Rozhraní pro správu „aktuálně zvoleného hráče“ přihlášeného uživatele.
- * <p>
- * Uživatel může mít v systému více hráčů, ale většina operací
- * (registrace na zápasy, přehledy, statistiky) pracuje vždy
- * s jedním jednoznačně zvoleným hráčem.
- * </p>
+ * Rozhraní se používá pro správu aktuálně zvoleného hráče přihlášeného uživatele.
  *
- * Účel:
- * <ul>
- *     <li>poskytnout jednotný kontrakt pro práci s aktuálním hráčem,</li>
- *     <li>oddělit práci se session / kontextem od business logiky,</li>
- *     <li>zajistit konzistentní chování napříč aplikací.</li>
- * </ul>
+ * Uživatel může mít v systému více hráčů, ale většina aplikačních operací
+ * (registrace na zápasy, přehledy, statistiky) pracuje vždy s jedním
+ * jednoznačně určeným hráčem. Rozhraní definuje jednotný kontrakt
+ * pro práci s tímto kontextem napříč aplikací.
  *
- * Použití:
- * <ul>
- *     <li>využívá se zejména v controllerech a business službách,</li>
- *     <li>typicky v kontextu endpointů pracujících s „/me“.</li>
- * </ul>
- *
- * Implementační poznámky:
- * <ul>
- *     <li>implementace typicky ukládá identifikátor hráče do uživatelského kontextu
- *     (např. HTTP session),</li>
- *     <li>ověření existence a stavu hráče je zodpovědností implementace.</li>
- * </ul>
+ * Rozhraní odděluje práci s uživatelským kontextem od business logiky.
+ * Konkrétní implementace obvykle ukládá identifikátor hráče do uživatelské
+ * session. Ověření existence a stavu hráče je odpovědností implementace.
  */
 public interface CurrentPlayerService {
 
     /**
-     * Vrátí ID aktuálně zvoleného hráče.
+     * Vrátí identifikátor aktuálně zvoleného hráče.
      *
-     * @return ID hráče nebo {@code null}, pokud aktuální hráč není nastaven
+     * @return ID hráče nebo null, pokud aktuální hráč není nastaven
      */
     Long getCurrentPlayerId();
 
     /**
-     * Nastaví aktuálního hráče.
-     * <p>
-     * Metoda slouží ke změně uživatelského kontextu na konkrétního hráče.
-     * Implementace je zodpovědná za validaci, že hráč může být zvolen
-     * (např. že existuje a je ve správném stavu).
-     * </p>
+     * Nastaví aktuálního hráče v uživatelském kontextu.
+     *
+     * Metoda slouží ke změně kontextu přihlášeného uživatele
+     * na konkrétního hráče. Implementace je odpovědná za to,
+     * aby byl zvolen pouze platný hráč v odpovídajícím stavu.
      *
      * @param playerId ID hráče, který má být nastaven jako aktuální
      */
@@ -51,10 +34,9 @@ public interface CurrentPlayerService {
 
     /**
      * Ověří, že je aktuální hráč nastaven.
-     * <p>
-     * Používá se zejména před operacemi, které vyžadují kontext
-     * aktuálního hráče.
-     * </p>
+     *
+     * Metoda se používá před operacemi, které vyžadují kontext
+     * aktuálně zvoleného hráče. Pokud hráč není zvolen, je vyhozena výjimka.
      *
      * @throws RuntimeException pokud aktuální hráč není nastaven
      */
@@ -62,10 +44,9 @@ public interface CurrentPlayerService {
 
     /**
      * Odstraní informaci o aktuálním hráči z uživatelského kontextu.
-     * <p>
-     * Typicky se používá při odhlášení uživatele
-     * nebo při resetu uživatelského kontextu.
-     * </p>
+     *
+     * Metoda se používá zejména při odhlášení uživatele nebo při
+     * explicitním resetu uživatelského kontextu.
      */
     void clear();
 }

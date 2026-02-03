@@ -22,11 +22,14 @@ package cz.phsoft.hokej.models.services.notification;
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 
 /**
- * Kontext pro notifikace kolem zapomenutého hesla.
+ * Kontext pro notifikace související se zapomenutým heslem.
  *
  * Obsahuje:
  * - uživatele, kterého se reset týká,
  * - odkaz pro nastavení nového hesla.
+ *
+ * Slouží k přenesení potřebných údajů do builderu notifikací
+ * (email, SMS) bez nutnosti pracovat přímo s entitami na vyšší úrovni.
  */
 public record ForgottenPasswordResetContext(
         AppUserEntity user,
@@ -41,15 +44,23 @@ public record ForgottenPasswordResetContext(
 -----
 
 package cz.phsoft.hokej.models.services.notification;
+
 import cz.phsoft.hokej.data.entities.MatchEntity;
 
 import java.time.LocalDateTime;
 
-
+/**
+ * Kontext pro notifikace související se změnou termínu zápasu.
+ *
+ * Obsahuje odkaz na zápas a původní datum a čas. Umožňuje v notifikacích
+ * srozumitelně informovat hráče o nové době konání a porovnat ji
+ * s původním termínem.
+ */
 public record MatchTimeChangeContext(
         MatchEntity match,
         LocalDateTime oldDateTime
-) {}
+) {
+}
 
 
 
@@ -67,8 +78,16 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 /**
  * Typový kontejner pro notifikační data.
  *
- * Slouží k předání všech relevantních dat
- * do builderů notifikací (email / SMS).
+ * Slouží k předání všech relevantních dat do builderů notifikací
+ * (email a SMS). Umožňuje sjednotit vstupní parametry tak,
+ * aby jednotlivé buildery nemusely pracovat s množstvím
+ * volných parametrů.
+ *
+ * Typicky obsahuje:
+ * - hráče, kterého se notifikace týká,
+ * - uživatele, ke kterému hráč patří,
+ * - zápas, k němuž se událost vztahuje,
+ * - konkrétní registraci, pokud je relevantní.
  */
 public class NotificationContext {
 
@@ -100,9 +119,14 @@ public class NotificationContext {
         return registration;
     }
 
-    // -------------------------
-    // BUILDER
-    // -------------------------
+    // Builder třídy
+
+    /**
+     * Builder pro vytvoření instance NotificationContext.
+     *
+     * Umožňuje postupné skládání kontextu podle potřeby
+     * konkrétní notifikace.
+     */
     public static class Builder {
         private PlayerEntity player;
         private AppUserEntity user;
@@ -148,20 +172,26 @@ import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.models.services.NotificationDecision;
 
 /**
- * Service, která vyhodnocuje notifikační preference
- * na základě:
- * - AppUserSettings (nastavení účtu),
- * - PlayerSettings (nastavení hráče),
- * - typu notifikace (NotificationType).
+ * Služba pro vyhodnocení notifikačních preferencí.
  *
- * Nemá na starosti POSÍLÁNÍ emailů/SMS,
- * pouze říká KOMU a JAK má být notifikace doručena.
+ * Na základě:
+ * - nastavení uživatele (AppUserSettings),
+ * - nastavení hráče (PlayerSettings),
+ * - typu notifikace (NotificationType)
+ *
+ * rozhoduje, komu a jak má být notifikace doručena.
+ * Nemá na starosti samotné odesílání e-mailů nebo SMS,
+ * pouze dodává rozhodnutí pro další notifikační logiku.
  */
 public interface NotificationPreferencesService {
 
     /**
      * Na základě hráče a typu notifikace rozhodne,
      * kam má být zpráva poslána.
+     *
+     * Výstupem je objekt NotificationDecision, který určuje,
+     * zda se má poslat e-mail hráči, e-mail uživateli,
+     * SMS hráči a jaké kontakty se mají použít.
      *
      * @param player hráč, kterého se notifikace týká
      * @param type   typ notifikace
@@ -193,14 +223,19 @@ import org.springframework.util.StringUtils;
 /**
  * Implementace NotificationPreferencesService.
  *
- * Vyhodnocuje:
- * - PlayerSettingsEntity (emailEnabled, smsEnabled, notifyOn..., kategorie)
- * - AppUserSettingsEntity (globalNotificationLevel, kopie emailů, chování pro hráče s vlastním emailem...)
+ * Služba vyhodnocuje:
+ * - nastavení hráče (PlayerSettingsEntity),
+ * - nastavení uživatele (AppUserSettingsEntity),
+ * - globální úroveň notifikací uživatele (GlobalNotificationLevel),
+ * - kategorii a důležitost notifikace (NotificationCategory, NotificationType).
+ *
+ * Výsledkem je NotificationDecision, které definuje,
+ * komu a jakými kanály bude notifikace doručena.
  */
 @Service
 public class NotificationPreferencesServiceImpl implements NotificationPreferencesService {
 
-
+    @Override
     public NotificationDecision evaluate(PlayerEntity player,
                                          NotificationType type) {
 
@@ -214,23 +249,23 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
         AppUserEntity user = player.getUser();
         AppUserSettingsEntity userSettings = (user != null ? user.getSettings() : null);
 
-        // ===== ZDROJE KONTAKTŮ =====
+        // Zdrojové kontakty
 
-        // email hráče – preferuj PlayerSettings.contactEmail,
-        // případně fallback na email uživatele, pokud chceme
+        // Email hráče – preferuje se PlayerSettings.contactEmail,
+        // případně se použije email uživatele, pokud je to vhodné.
         String playerEmail = null;
         if (playerSettings != null && StringUtils.hasText(playerSettings.getContactEmail())) {
             playerEmail = playerSettings.getContactEmail();
         } else if (user != null && StringUtils.hasText(user.getEmail())) {
-            // fallback: pokud nemá vlastní email, můžeme použít email uživatele
+            // Fallback: pokud hráč nemá vlastní e-mail, lze použít e-mail uživatele.
             playerEmail = user.getEmail();
         }
 
-        // email uživatele (účtu)
+        // Email uživatele (účtu).
         String userEmail = (user != null ? user.getEmail() : null);
 
-        // telefon hráče – preferuj PlayerSettings.contactPhone,
-        // fallback na případný player.getPhoneNumber()
+        // Telefon hráče – preferuje se PlayerSettings.contactPhone,
+        // fallback je případný phoneNumber na PlayerEntity.
         String playerPhone = null;
         if (playerSettings != null && StringUtils.hasText(playerSettings.getContactPhone())) {
             playerPhone = playerSettings.getContactPhone();
@@ -238,16 +273,14 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
             playerPhone = player.getPhoneNumber();
         }
 
-
-
-        // ===== GLOBALNÍ NASTAVENÍ USERA =====
+        // Globální nastavení uživatele
 
         GlobalNotificationLevel globalLevel =
                 (userSettings != null && userSettings.getGlobalNotificationLevel() != null)
                         ? userSettings.getGlobalNotificationLevel()
                         : GlobalNotificationLevel.ALL;
 
-        // zda globální level vůbec povoluje tento konkrétní NotificationType
+        // Zda globální úroveň vůbec povoluje tento konkrétní NotificationType.
         boolean userGlobalAllowsThisType = isGloballyEnabledForType(type, globalLevel);
 
         boolean copyAllToUserEmail =
@@ -256,42 +289,35 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
         boolean includePlayersWithOwnEmail =
                 userSettings != null && userSettings.isReceiveNotificationsForPlayersWithOwnEmail();
 
-        // ===== PLAYER SETTINGS – KANÁLY + KATEGORIE =====
+        // Nastavení hráče – povolené kanály a kategorie
 
         boolean emailChannelEnabled = (playerSettings == null) || playerSettings.isEmailEnabled();
         boolean smsChannelEnabled = (playerSettings != null) && playerSettings.isSmsEnabled();
 
-        // kategorie povolená pro hráče?
+        // Zda je kategorie notifikace povolena pro hráče.
         boolean categoryEnabledForPlayer = isCategoryEnabledForPlayer(type, playerSettings);
 
-        // ===== ROZHODOVÁNÍ DLE TYPE / CATEGORY =====
+        // Rozhodování podle kategorie notifikace
 
         NotificationCategory category = type.getCategory();
 
         switch (category) {
 
-            // ----------------------------------
-            // SYSTÉMOVÉ TYPY – jdou primárně na účet (user.email)
-            // (PLAYER_CREATED, PLAYER_UPDATED, PLAYER_APPROVED, PLAYER_REJECTED, USER_UPDATED, ...)
-            // ----------------------------------
+            // Systémové typy – primárně směřují na účet (user.email).
             case SYSTEM -> {
                 if (user != null
                         && StringUtils.hasText(userEmail)
                         && userGlobalAllowsThisType) {
+
                     decision.setSendEmailToUser(true);
                     decision.setUserEmail(userEmail);
                 }
-                // momentálně neposíláme nic hráči; pokud bys chtěl, můžeš doplnit:
-                // if (emailChannelEnabled && categoryEnabledForPlayer && StringUtils.hasText(playerEmail)) ...
             }
 
-            // ----------------------------------
-            // REGISTRACE / OMLUVY / ZÁPASOVÉ INFO
-            // (PLAYER_REGISTERED, PLAYER_UNREGISTERED, PLAYER_RESERVED, PLAYER_EXCUSED, ...)
-            // ----------------------------------
+            // Registrace, omluvy, zápasové informace.
             case REGISTRATION, MATCH_INFO -> {
 
-                // EMAIL – hráč
+                // E-mail hráči.
                 if (emailChannelEnabled
                         && categoryEnabledForPlayer
                         && StringUtils.hasText(playerEmail)) {
@@ -300,7 +326,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
                     decision.setPlayerEmail(playerEmail);
                 }
 
-                // SMS – hráč
+                // SMS hráči.
                 if (smsChannelEnabled
                         && categoryEnabledForPlayer
                         && StringUtils.hasText(playerPhone)) {
@@ -309,7 +335,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
                     decision.setPlayerPhone(playerPhone);
                 }
 
-                // EMAIL – uživatel (kopie)
+                // E-mail uživateli jako kopie.
                 if (user != null
                         && StringUtils.hasText(userEmail)
                         && userGlobalAllowsThisType
@@ -318,19 +344,17 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
 
                     // Uživatel dostane kopii, pokud:
                     // - chce kopie (copyAllToUserEmail),
-                    // - global level mu tento typ neblokuje,
-                    // - a buď hráč nemá vlastní email (contactEmail),
-                    //   nebo user výslovně chce kopie i pro hráče s vlastním emailem.
+                    // - globální úroveň mu tento typ neblokuje,
+                    // - a buď hráč nemá vlastní e-mail,
+                    //   nebo uživatel výslovně chce kopie i pro hráče s vlastním e-mailem.
                     decision.setSendEmailToUser(true);
                     decision.setUserEmail(userEmail);
                 }
             }
 
-            // ----------------------------------
-            // OSTATNÍ – raději explicitně nic
-            // ----------------------------------
+            // Ostatní kategorie se explicitně nezpracovávají.
             default -> {
-                // nezpracovaná kategorie – raději neposílat nic
+                // Nezpracovaná kategorie – raději neposílat nic.
             }
         }
 
@@ -340,9 +364,9 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     /**
      * Určuje, zda globální nastavení uživatele povoluje daný NotificationType.
      *
-     * NONE           -> nikdy nic
-     * ALL            -> vždy
-     * IMPORTANT_ONLY -> jen pokud je typ označen jako "important"
+     * NONE           -> nepovoluje žádné notifikace
+     * ALL            -> povoluje všechny notifikace
+     * IMPORTANT_ONLY -> povoluje pouze typy označené jako důležité
      */
     private boolean isGloballyEnabledForType(NotificationType type,
                                              GlobalNotificationLevel level) {
@@ -355,16 +379,15 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     /**
-     * Kategorie notifikací povolená pro daného hráče?
+     * Zjistí, zda je kategorie notifikace povolena pro daného hráče.
      *
-     * Pokud playerSettings == null -> bereme default: vše povoleno.
-     * (chování stejné jako dřív, kdy jsi u null settings bral vše jako TRUE).
+     * Pokud playerSettings == null, bere se výchozí chování:
+     * všechny kategorie jsou povoleny.
      */
     private boolean isCategoryEnabledForPlayer(NotificationType type,
                                                PlayerSettingsEntity playerSettings) {
 
         if (playerSettings == null) {
-            // defaultní chování – hráč nemá nastavení, vše povoleno
             return true;
         }
 
@@ -376,8 +399,9 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     /**
-     * Má hráč vlastní email v PlayerSettings (contactEmail)?
-     * Používá se při rozhodování, zda posílat kopii na user.email.
+     * Zjistí, zda má hráč vlastní e-mail v PlayerSettings (contactEmail).
+     *
+     * Používá se při rozhodování, zda posílat kopii na e-mail uživatele.
      */
     private boolean hasOwnPlayerEmail(PlayerSettingsEntity playerSettings) {
         return playerSettings != null && StringUtils.hasText(playerSettings.getContactEmail());
@@ -397,69 +421,55 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
 
 /**
- * Rozhraní pro odesílání notifikací hráčům.
- * <p>
+ * Rozhraní pro odesílání notifikací hráčům a uživatelům.
+ *
  * Definuje jednotný vstupní bod pro notifikační logiku v aplikaci.
- * Na základě typu notifikace a kontextu rozhoduje implementace,
- * jakým kanálem (SMS, email, …) a s jakým obsahem bude hráč informován.
- * </p>
+ * Implementace na základě typu notifikace a kontextu rozhoduje,
+ * jakým kanálem a s jakým obsahem bude příjemce informován.
  *
  * Účel:
- * <ul>
- *     <li>centralizovat notifikační logiku do jednoho místa,</li>
- *     <li>oddělit business události od konkrétní formy notifikace,</li>
- *     <li>umožnit snadné rozšíření o další typy notifikací a kanály.</li>
- * </ul>
+ * - centralizovat notifikační logiku do jednoho místa,
+ * - oddělit business události od konkrétní formy notifikace,
+ * - umožnit snadné rozšíření o další typy notifikací a kanály.
  *
- * Použití:
- * <ul>
- *     <li>využívá se v business službách (registrace na zápasy, správa hráčů),</li>
- *     <li>volá se vždy v reakci na konkrétní business událost.</li>
- * </ul>
- *
- * Implementační poznámky:
- * <ul>
- *     <li>implementace typicky respektuje nastavení notifikací hráče
- *     (např. povolení SMS / emailu),</li>
- *     <li>odesílání notifikací by mělo být odolné vůči selhání
- *     jednotlivých kanálů,</li>
- *     <li>selhání notifikace nesmí ovlivnit hlavní business proces.</li>
- * </ul>
+ * Metody tohoto rozhraní se typicky volají z business služeb
+ * v reakci na konkrétní události (registrace na zápas, změna hesla,
+ * aktivace účtu a podobně).
  */
 public interface NotificationService {
 
     /**
      * Odešle notifikaci konkrétnímu hráči.
-     * <p>
-     * Metoda slouží jako hlavní vstupní bod pro notifikace hráče
-     * v reakci na business události v systému.
-     * </p>
      *
-     * Parametr {@code context}:
-     * <ul>
-     *     <li>nese dodatečné informace potřebné pro sestavení obsahu notifikace,</li>
-     *     <li>typicky se jedná o doménovou entitu vztahující se k události,</li>
-     *     <li>může být {@code null} pro jednoduché notifikace.</li>
-     * </ul>
+     * Parametr context nese dodatečné informace potřebné
+     * pro sestavení obsahu notifikace. Typicky se jedná
+     * o doménovou entitu nebo kontextový objekt související
+     * s danou událostí. Může být null u jednodušších notifikací.
      *
-     * Typické příklady kontextu:
-     * <ul>
-     *     <li>{@code MatchRegistrationEntity} – registrace / odhlášení / omluva,</li>
-     *     <li>{@code null} – vytvoření hráče, schválení hráče, změna stavu.</li>
-     * </ul>
+     * Příklady:
+     * - MatchRegistrationEntity pro registraci, odhlášení a omluvu,
+     * - null pro vytvoření hráče nebo změnu stavu.
      *
      * @param player  hráč, kterému je notifikace určena
-     * @param type    typ notifikace (např. PLAYER_CREATED, PLAYER_REGISTERED, …)
+     * @param type    typ notifikace
      * @param context kontextová data související s notifikací
      */
     void notifyPlayer(PlayerEntity player, NotificationType type, Object context);
 
+    /**
+     * Odešle notifikaci konkrétnímu uživateli.
+     *
+     * Používá se zejména pro systémové notifikace na úrovni účtu,
+     * například aktivace účtu, reset hesla nebo změna hesla.
+     *
+     * @param user    uživatel, kterému je notifikace určena
+     * @param type    typ notifikace
+     * @param context kontextová data související s notifikací
+     */
     void notifyUser(AppUserEntity user,
                     NotificationType type,
                     Object context);
 }
-
-
 
 
 
@@ -488,6 +498,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Implementace NotificationService.
+ *
+ * Zajišťuje:
+ * - použití NotificationPreferencesService pro rozhodnutí, komu notifikaci poslat,
+ * - sestavení obsahu zpráv pomocí EmailMessageBuilder a SmsMessageBuilder,
+ * - odesílání e-mailů pomocí EmailService,
+ * - odesílání SMS pomocí SmsService,
+ * - rozesílání kopií vybraných notifikací manažerům.
+ *
+ * Třída neřeší:
+ * - perzistenci notifikací,
+ * - detailní business pravidla, kdy se má notifikace vyvolat.
+ */
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
@@ -501,8 +525,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationPreferencesService notificationPreferencesService;
 
     /**
-     * Typy notifikací, pro které se NEMÁ posílat kopie manažerům.
-     * (Platí jak pro notifyPlayer, tak pro notifyUser.)
+     * Typy notifikací, pro které se nemá posílat kopie manažerům.
+     * Platí jak pro notifyPlayer, tak pro notifyUser.
      */
     private static final Set<NotificationType> MANAGER_COPY_BLACKLIST = EnumSet.of(
             NotificationType.MATCH_CANCELED,
@@ -539,22 +563,22 @@ public class NotificationServiceImpl implements NotificationService {
 
         NotificationDecision decision = notificationPreferencesService.evaluate(player, type);
 
-        // EMAIL – uživatel (AppUser)
+        // E-mail pro uživatele (AppUser).
         if (decision.isSendEmailToUser() && decision.getUserEmail() != null) {
             sendEmailToUser(decision.getUserEmail(), player, type, context);
         }
 
-        // EMAIL – hráč (kontakt na PlayerEntity)
+        // E-mail pro hráče.
         if (decision.isSendEmailToPlayer() && decision.getPlayerEmail() != null) {
             sendEmailToPlayer(decision.getPlayerEmail(), player, type, context);
         }
 
-        // SMS – hráč
+        // SMS pro hráče.
         if (decision.isSendSmsToPlayer() && decision.getPlayerPhone() != null) {
             sendSmsToPhone(decision.getPlayerPhone(), player, type, context);
         }
 
-        // EMAIL – manažeři (kopie zpráv pro hráče), jen pokud typ není v blacklistu
+        // E-mail pro manažery (kopie zpráv pro hráče), pokud typ není v blacklistu.
         if (shouldSendManagerCopy(type)) {
 
             List<AppUserEntity> managers = appUserRepository.findAll().stream()
@@ -568,7 +592,7 @@ public class NotificationServiceImpl implements NotificationService {
                     continue;
                 }
 
-                // nepřeposílat, pokud je manager zároveň owner hráče
+                // Neposílat, pokud je manažer zároveň vlastníkem hráče.
                 if (owner != null && owner.getId() != null
                         && Objects.equals(manager.getId(), owner.getId())) {
                     log.debug("Manager {} je zároveň vlastníkem hráče {} – kopie se neposílá (notifyPlayer).",
@@ -578,10 +602,10 @@ public class NotificationServiceImpl implements NotificationService {
 
                 String managerEmail = manager.getEmail();
 
-                // nepřeposílat, pokud už manager dostane mail jako USER nebo PLAYER (shodný email)
+                // Neposílat, pokud manažer už dostane e-mail jako USER nebo PLAYER (stejný e-mail).
                 if (Objects.equals(managerEmail, decision.getUserEmail())
                         || Objects.equals(managerEmail, decision.getPlayerEmail())) {
-                    log.debug("Manager {} má stejný email jako příjemce (USER/PLAYER) – kopie se neposílá (notifyPlayer).",
+                    log.debug("Manager {} má stejný e-mail jako příjemce (USER/PLAYER) – kopie se neposílá (notifyPlayer).",
                             manager.getId());
                     continue;
                 }
@@ -602,13 +626,15 @@ public class NotificationServiceImpl implements NotificationService {
             log.warn("notifyUser() called with null user for type {}", type);
             return;
         }
+
         Object effectiveContext = (context != null) ? context : user;
 
-        // ========== EMAIL PRO UŽIVATELE ==========
+        // E-mail pro uživatele.
         String userEmail = user.getEmail();
 
         if (userEmail != null && !userEmail.isBlank()) {
-            // player = null, user pošleme v contextu
+
+            // Player je null, user se případně předá v kontextu.
             EmailMessageBuilder.EmailContent content =
                     emailMessageBuilder.buildForUser(type, null, userEmail, effectiveContext);
 
@@ -619,13 +645,13 @@ public class NotificationServiceImpl implements NotificationService {
                     emailService.sendSimpleEmail(userEmail, content.subject(), content.body());
                 }
             } else {
-                log.debug("Typ {} nemá definovanou email šablonu pro uživatele (USER), nic se neposílá", type);
+                log.debug("Typ {} nemá definovanou e-mailovou šablonu pro uživatele (USER), nic se neposílá", type);
             }
         } else {
-            log.debug("notifyUser: uživatel {} nemá email, nic se neposílá", user.getId());
+            log.debug("notifyUser: uživatel {} nemá e-mail, nic se neposílá", user.getId());
         }
 
-        // ========== EMAIL PRO MANAŽERY ==========
+        // E-mail pro manažery.
         if (shouldSendManagerCopy(type)) {
 
             List<AppUserEntity> managers = appUserRepository.findAll().stream()
@@ -637,7 +663,7 @@ public class NotificationServiceImpl implements NotificationService {
                     continue;
                 }
 
-                // nepřeposílat, pokud je manager zároveň tento user
+                // Neposílat, pokud je manažer zároveň tento uživatel.
                 if (user.getId() != null && Objects.equals(manager.getId(), user.getId())) {
                     log.debug("Manager {} je zároveň adresátem (USER) – kopie se neposílá (notifyUser).",
                             manager.getId());
@@ -646,18 +672,18 @@ public class NotificationServiceImpl implements NotificationService {
 
                 String managerEmail = manager.getEmail();
 
-                // nepřeposílat, pokud je jeho email stejný jako email uživatele
+                // Neposílat, pokud má manažer stejný e-mail jako uživatel.
                 if (Objects.equals(managerEmail, userEmail)) {
-                    log.debug("Manager {} má stejný email jako uživatel – kopie se neposílá (notifyUser).",
+                    log.debug("Manager {} má stejný e-mail jako uživatel – kopie se neposílá (notifyUser).",
                             manager.getId());
                     continue;
                 }
 
                 EmailMessageBuilder.EmailContent managerContent =
-                        emailMessageBuilder.buildForManager(type, null, manager, effectiveContext); // context = user
+                        emailMessageBuilder.buildForManager(type, null, manager, effectiveContext);
 
                 if (managerContent == null) {
-                    log.debug("Typ {} nemá definovanou email šablonu pro manažera (USER), nic se neposílá", type);
+                    log.debug("Typ {} nemá definovanou e-mailovou šablonu pro manažera (USER), nic se neposílá", type);
                     continue;
                 }
 
@@ -672,9 +698,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    // ----------------------------------------------------
-    // EMAIL helper metody
-    // ----------------------------------------------------
+    // Pomocné metody pro e-mail
 
     private void sendEmailToManager(AppUserEntity manager,
                                     PlayerEntity player,
@@ -682,7 +706,7 @@ public class NotificationServiceImpl implements NotificationService {
                                     Object context) {
 
         if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
-            log.debug("sendEmailToManager: prázdný manager nebo email, nic se neposílá");
+            log.debug("sendEmailToManager: prázdný manager nebo e-mail, nic se neposílá");
             return;
         }
 
@@ -692,7 +716,7 @@ public class NotificationServiceImpl implements NotificationService {
                 emailMessageBuilder.buildForManager(type, player, manager, context);
 
         if (content == null) {
-            log.debug("Typ {} nemá definovanou email šablonu pro manažera, nic se neposílá", type);
+            log.debug("Typ {} nemá definovanou e-mailovou šablonu pro manažera, nic se neposílá", type);
             return;
         }
 
@@ -709,7 +733,7 @@ public class NotificationServiceImpl implements NotificationService {
                                  Object context) {
 
         if (email == null || email.isBlank()) {
-            log.debug("sendEmailToUser: prázdný email, nic se neposílá");
+            log.debug("sendEmailToUser: prázdný e-mail, nic se neposílá");
             return;
         }
 
@@ -717,7 +741,7 @@ public class NotificationServiceImpl implements NotificationService {
                 emailMessageBuilder.buildForUser(type, player, email, context);
 
         if (content == null) {
-            log.debug("Typ {} nemá definovanou email šablonu pro uživatele, nic se neposílá", type);
+            log.debug("Typ {} nemá definovanou e-mailovou šablonu pro uživatele, nic se neposílá", type);
             return;
         }
 
@@ -734,7 +758,7 @@ public class NotificationServiceImpl implements NotificationService {
                                    Object context) {
 
         if (email == null || email.isBlank()) {
-            log.debug("sendEmailToPlayer: prázdný email, nic se neposílá");
+            log.debug("sendEmailToPlayer: prázdný e-mail, nic se neposílá");
             return;
         }
 
@@ -742,7 +766,7 @@ public class NotificationServiceImpl implements NotificationService {
                 emailMessageBuilder.buildForPlayer(type, player, email, context);
 
         if (content == null) {
-            log.debug("Typ {} nemá definovanou email šablonu pro hráče, nic se neposílá", type);
+            log.debug("Typ {} nemá definovanou e-mailovou šablonu pro hráče, nic se neposílá", type);
             return;
         }
 
@@ -753,9 +777,8 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    // ----------------------------------------------------
-    // SMS – beze změny
-    // ----------------------------------------------------
+    // SMS pomocná metoda
+
     private void sendSmsToPhone(String phone,
                                 PlayerEntity player,
                                 NotificationType type,
@@ -776,9 +799,11 @@ public class NotificationServiceImpl implements NotificationService {
         smsService.sendSms(phone, msg);
     }
 
-    // ----------------------------------------------------
-    // helper pro posílání kopií manažerům
-    // ----------------------------------------------------
+    /**
+     * Určuje, zda se pro daný typ notifikace mají posílat kopie manažerům.
+     *
+     * Pokud je typ uveden v MANAGER_COPY_BLACKLIST, kopie se neposílají.
+     */
     private boolean shouldSendManagerCopy(NotificationType type) {
         return !MANAGER_COPY_BLACKLIST.contains(type);
     }
@@ -794,9 +819,20 @@ package cz.phsoft.hokej.models.services.notification;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 
+/**
+ * Kontext pro notifikace související s aktivací uživatelského účtu.
+ *
+ * Obsahuje:
+ * - uživatele, který má být aktivován,
+ * - aktivační odkaz použitý v e-mailu.
+ *
+ * Slouží k oddělení doménových entit od dat potřebných
+ * pro sestavení aktivačních notifikací.
+ */
 public record UserActivationContext(
         AppUserEntity user,
         String activationLink
-) {}
+) {
+}
 
 

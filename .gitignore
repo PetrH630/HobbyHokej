@@ -42,3 +42,4 @@ build/
 .env.*
 old-application.properties
 src/main/resources/old-application.properties
+export-by-folder.ps1

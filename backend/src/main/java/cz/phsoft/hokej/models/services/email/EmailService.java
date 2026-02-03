@@ -27,20 +27,20 @@ public interface EmailService {
     /**
      * Odešle textový aktivační email.
      */
-    void sendActivationEmail(String to, String salutation, String activationLink);
+    void sendActivationEmail(String to, String greetings, String activationLink);
 
     /**
      * Odešle HTML aktivační email.
      */
-    void sendActivationEmailHTML(String to, String salutation, String activationLink);
+    void sendActivationEmailHTML(String to, String greetings, String activationLink);
 
     /**
      * Odešle textový email o úspěšné aktivaci účtu.
      */
-    void sendSuccesActivationEmail(String to, String salutation);
+    void sendSuccesActivationEmail(String to, String greetings);
 
     /**
      * Odešle HTML email o úspěšné aktivaci účtu.
      */
-    void sendSuccesActivationEmailHTML(String to, String salutation);
+    void sendSuccesActivationEmailHTML(String to, String greetings);
 }

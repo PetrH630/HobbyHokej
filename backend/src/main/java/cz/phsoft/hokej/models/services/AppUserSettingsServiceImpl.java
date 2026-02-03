@@ -15,7 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 /**
- * Implementace service pro práci s nastavením uživatele.
+ * Implementace service pro práci s uživatelským nastavením.
+ *
+ * Odpovědností je vyhledávání uživatele podle e-mailu,
+ * získávání nebo vytváření odpovídajícího AppUserSettingsEntity
+ * a mapování na AppUserSettingsDTO. V rámci této třídy se udržuje
+ * vazba mezi nastavením a uživatelským účtem.
+ *
+ * Třída představuje transakční hranici pro operace s uživatelským
+ * nastavením. Validace vstupů z HTTP vrstvy a autorizace se řeší
+ * v controllerech a bezpečnostní vrstvě.
  */
 @Service
 @Transactional
@@ -25,6 +34,17 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
     private final AppUserSettingsRepository appUserSettingsRepository;
     private final AppUserSettingsMapper mapper;
 
+    /**
+     * Vytvoří instanci service s repository a mapperem.
+     *
+     * Repository se používají pro práci s entitami AppUserEntity
+     * a AppUserSettingsEntity. Mapper zajišťuje převod mezi entitou
+     * a AppUserSettingsDTO pro komunikaci s frontendem.
+     *
+     * @param appUserRepository repository pro uživatelské účty
+     * @param appUserSettingsRepository repository pro uživatelská nastavení
+     * @param mapper mapper pro převod mezi entitou a DTO
+     */
     public AppUserSettingsServiceImpl(AppUserRepository appUserRepository,
                                       AppUserSettingsRepository appUserSettingsRepository,
                                       AppUserSettingsMapper mapper) {
@@ -33,15 +53,24 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
         this.mapper = mapper;
     }
 
+    /**
+     * Načte nastavení pro uživatele identifikovaného e-mailem.
+     *
+     * Pokud nastavení neexistuje, vytvoří se nová entita s výchozími
+     * hodnotami pomocí metody createDefaultSettingsForUser a uloží se.
+     * Volající část aplikace tak vždy obdrží validní nastavení.
+     *
+     * @param userEmail e-mail uživatele, pro kterého se nastavení načítá
+     * @return AppUserSettingsDTO s aktuálním nastavením uživatele
+     * @throws UserNotFoundException pokud uživatel s daným e-mailem neexistuje
+     */
     @Override
     public AppUserSettingsDTO getSettingsForUser(String userEmail) {
         AppUserEntity user = findUserByEmailOrThrow(userEmail);
 
-        // zkusíme najít existující settings
         Optional<AppUserSettingsEntity> existingOpt = appUserSettingsRepository.findByUser(user);
 
         AppUserSettingsEntity settings = existingOpt.orElseGet(() -> {
-            // vytvoření default nastavení pro uživatele, pokud ještě neexistuje
             AppUserSettingsEntity created = createDefaultSettingsForUser(user);
             return appUserSettingsRepository.save(created);
         });
@@ -49,6 +78,19 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
         return mapper.toDTO(settings);
     }
 
+    /**
+     * Aktualizuje nastavení pro uživatele identifikovaného e-mailem.
+     *
+     * Pokud uživatel žádné nastavení nemá, vytvoří se nová entita
+     * s výchozími hodnotami a následně se do ní aplikují hodnoty
+     * z předaného DTO. Je zajištěno, že nastavení je navázáno
+     * na správného uživatele.
+     *
+     * @param userEmail e-mail uživatele, pro kterého se nastavení aktualizuje
+     * @param dto nové hodnoty nastavení z frontendu
+     * @return AppUserSettingsDTO reprezentující uložené nastavení
+     * @throws UserNotFoundException pokud uživatel s daným e-mailem neexistuje
+     */
     @Override
     public AppUserSettingsDTO updateSettingsForUser(String userEmail, AppUserSettingsDTO dto) {
         AppUserEntity user = findUserByEmailOrThrow(userEmail);
@@ -56,10 +98,8 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
         AppUserSettingsEntity settings = appUserSettingsRepository.findByUser(user)
                 .orElseGet(() -> createDefaultSettingsForUser(user));
 
-        // aplikovat hodnoty z DTO
         mapper.updateEntityFromDTO(dto, settings);
 
-        // zajistit napojení na usera (pro případ nového objektu)
         settings.setUser(user);
 
         AppUserSettingsEntity saved = appUserSettingsRepository.save(settings);
@@ -68,20 +108,38 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
     }
 
     // =========================================
-    // HELPER METODY
+    // Helper metody
     // =========================================
 
+    /**
+     * Najde uživatele podle e-mailu nebo vyhodí výjimku.
+     *
+     * Metoda centralizuje logiku pro vyhledávání uživatele v databázi.
+     *
+     * @param email e-mail hledaného uživatele
+     * @return entita AppUserEntity, pokud byla nalezena
+     * @throws UserNotFoundException pokud uživatel s daným e-mailem neexistuje
+     */
     private AppUserEntity findUserByEmailOrThrow(String email) {
         return appUserRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
     }
 
+    /**
+     * Vytvoří výchozí nastavení pro daného uživatele.
+     *
+     * Výchozí hodnoty jsou nastaveny explicitně, aby byly
+     * snadno dohledatelné na jednom místě. Metoda se používá
+     * při prvním načtení nastavení nebo při zakládání nového účtu.
+     *
+     * @param user entita uživatele, ke které se nastavení naváže
+     * @return entita AppUserSettingsEntity s výchozími hodnotami
+     */
     @Override
     public AppUserSettingsEntity createDefaultSettingsForUser(AppUserEntity user) {
         AppUserSettingsEntity settings = new AppUserSettingsEntity();
         settings.setUser(user);
 
-        // výchozí hodnoty – stejné jako v entitě, ale explicitně
         settings.setPlayerSelectionMode(PlayerSelectionMode.FIRST_PLAYER);
         settings.setGlobalNotificationLevel(GlobalNotificationLevel.ALL);
         settings.setCopyAllPlayerNotificationsToUserEmail(false);
@@ -95,6 +153,5 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
         appUserSettingsRepository.save(settings);
 
         return settings;
-
     }
 }

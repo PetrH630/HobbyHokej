@@ -22,9 +22,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Aplikační konfigurace pro sdílené Spring beany.
+ *
+ * V této třídě se definují technické komponenty, které jsou využívány
+ * napříč aplikací. V současné době se zde vytváří instance {@link RestTemplate}
+ * pro volání externích HTTP služeb.
+ */
 @Configuration
 public class AppConfig {
 
+    /**
+     * Vytváří instanci {@link RestTemplate}.
+     *
+     * Tato instance se používá pro synchronní volání externích HTTP API
+     * z jiných částí aplikace (například z service vrstvy).
+     *
+     * @return nová instance RestTemplate spravovaná Spring kontejnereem
+     */
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
@@ -53,36 +68,12 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 /**
- * AuditAspect
+ * Aspekt pro auditní logování service vrstvy.
  *
- * CROSS-CUTTING CONCERN:
- * ----------------------
- * Tento aspekt slouží k centrálnímu auditnímu logování volání
- * service vrstev aplikace.
- *
- * CO LOGUJE:
- * ----------
- * - začátek volání metody (název + argumenty)
- * - konec úspěšného volání metody
- * - návratovou hodnotu
- * - časové razítko
- *
- * ROZSAH:
- * -------
- * - všechny metody ve všech třídách v balíčku
- *   cz.phsoft.hokej.models.services..*
- *
- * PROČ AOP:
- * ----------
- * - auditní logika není roztroušena po službách
- * - žádné duplikace kódu
- * - snadné zapnutí / vypnutí / úpravy
- *
- * BEZPEČNOST:
- * -----------
- * - aspekt NEMĚNÍ chování aplikace
- * - pouze čte data a loguje
- * - v případě chyby v logování aplikace pokračuje dál
+ * Používá se k centrálnímu zaznamenávání volání metod ve službách
+ * včetně argumentů, návratových hodnot a časových razítek. Chování
+ * aplikace se tímto aspektem nemění, pouze se doplňují auditní logy
+ * do samostatného loggeru.
  */
 @Component
 @Aspect
@@ -91,39 +82,32 @@ public class AuditAspect {
     /**
      * Speciální logger určený pouze pro auditní záznamy.
      *
-     * Doporučení:
-     * - v logback.xml / log4j2.xml mít samostatný appender (soubor)
-     * - oddělit auditní logy od aplikačních logů
+     * Doporučuje se mít pro tento logger samostatný appender
+     * a oddělený soubor logu, aby byly auditní záznamy odděleny
+     * od běžných aplikačních logů.
      */
     private static final Logger logger = LoggerFactory.getLogger("AUDIT_LOGGER");
 
-    // =====================================================
-    // POINTCUT
-    // =====================================================
+    // Pointcut pro metody service vrstvy
 
     /**
-     * Pointcut definující všechny metody ve service vrstvě.
+     * Pointcut definující všechny metody ve service vrstvě aplikace.
      *
-     * Zahrnuje:
-     * - všechny třídy
-     * - všechny metody
-     * - včetně podbalíčků
+     * Zahrnuje všechny třídy a metody v balíčku
+     * {@code cz.phsoft.hokej.models.services..} včetně podbalíčků.
      */
     @Pointcut("within(cz.phsoft.hokej.models.services..*)")
     public void serviceMethods() {
-        // pouze marker metoda pro pointcut
+        // Marker metoda pro pointcut
     }
 
-    // =====================================================
-    // BEFORE ADVICE
-    // =====================================================
+    // Logování před voláním metody
 
     /**
-     * Spustí se PŘED zavoláním jakékoli service metody.
+     * Provádí auditní záznam před zavoláním jakékoli service metody.
      *
-     * Slouží pro:
-     * - záznam začátku operace
-     * - debug / audit časování
+     * Zapisuje název metody, argumenty a aktuální čas. Slouží k evidenci
+     * začátku provádění operace a k pozdější analýze průběhu volání.
      *
      * @param joinPoint kontext volané metody
      */
@@ -141,17 +125,14 @@ public class AuditAspect {
         );
     }
 
-    // =====================================================
-    // AFTER RETURNING ADVICE
-    // =====================================================
+    // Logování po úspěšném dokončení metody
 
     /**
-     * Spustí se PO ÚSPĚŠNÉM dokončení metody
-     * (NEspustí se při vyhození výjimky).
+     * Provádí auditní záznam po úspěšném dokončení metody.
      *
-     * Slouží pro:
-     * - audit úspěšných operací
-     * - logování návratových hodnot
+     * Metoda se nespouští při vyhození výjimky. Zapisuje název metody,
+     * případné identifikátory hráče a návratovou hodnotu včetně času
+     * ukončení operace.
      *
      * @param joinPoint kontext volané metody
      * @param result    návratová hodnota metody
@@ -168,24 +149,14 @@ public class AuditAspect {
         Long userId = null;
         Long playerId = null;
 
-        /*
-         * Pokus o extrakci zajímavých business identifikátorů
-         * z parametrů metody.
-         *
-         * Cílem je mít auditní stopu:
-         * - KTERÝ HRÁČ
-         * - JAKÁ OPERACE
-         */
+        // Pokus o extrakci business identifikátorů z parametrů metody
         for (Object arg : args) {
             if (arg instanceof PlayerEntity player) {
                 playerId = player.getId();
             } else if (arg instanceof MatchRegistrationEntity registration) {
                 playerId = registration.getPlayer().getId();
             } else if (arg instanceof Long id) {
-                // zde můžeš případně rozlišovat:
-                // - první Long = matchId
-                // - druhý Long = playerId
-                // dle konvence signatur metod
+                // Případné rozlišení konkrétního ID lze doplnit podle konvence signatur metod
             }
         }
 
@@ -227,74 +198,46 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Vlastní autentizační filtr pro REST přihlášení (JSON / FORM).
+ * Vlastní autentizační filtr pro REST přihlášení.
  *
- * ÚČEL:
- * <ul>
- *     <li>umožňuje přihlášení pomocí JSON (application/json),</li>
- *     <li>zachovává podporu klasického form loginu (x-www-form-urlencoded),</li>
- *     <li>nahrazuje standardní redirect chování Spring Security JSON odpověďmi,</li>
- *     <li>vytváří HTTP session a ukládá SecurityContext (stateful autentizace).</li>
- * </ul>
+ * Filtr rozšiřuje výchozí {@link UsernamePasswordAuthenticationFilter} tak,
+ * aby podporoval přihlášení jak pomocí formuláře, tak pomocí JSON payloadu.
+ * Standardní redirect chování Spring Security je nahrazeno JSON odpověďmi
+ * a po úspěšném přihlášení se vytváří HTTP session se SecurityContextem.
  *
- * PROČ JE POTŘEBA:
- * <ul>
- *     <li>{@link UsernamePasswordAuthenticationFilter} standardně očekává
- *         pouze form data,</li>
- *     <li>SPA frontend (React / Vite) posílá JSON,</li>
- *     <li>REST API nemá používat redirecty, ale strukturované JSON odpovědi.</li>
- * </ul>
- *
- * BEZPEČNOST:
- * <ul>
- *     <li>autentizace probíhá výhradně přes {@link AuthenticationManager},</li>
- *     <li>heslo se nikdy neloguje ani nevrací klientovi,</li>
- *     <li>po úspěchu je vytvořen {@link org.springframework.security.core.context.SecurityContext}
- *         uložený v HTTP session.</li>
- * </ul>
- *
- * POZNÁMKA:
- * <ul>
- *     <li>tento filtr je určen pro stateful (session-based) autentizaci,</li>
- *     <li>pro JWT / stateless přístup by byl nahrazen jiným řešením.</li>
- * </ul>
+ * Filtr je určen pro stavový (session-based) způsob autentizace. Pro
+ * stateless přístup s JWT by se použil jiný mechanismus.
  */
 public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     /**
-     * Jackson ObjectMapper pro čtení JSON z request body.
+     * Objekt pro čtení JSON z request body.
      */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Konstruktor filtru.
+     * Vytvoří filtr pro zadanou login URL.
      *
-     * @param loginUrl    URL endpointu pro login (např. /api/auth/login)
-     * @param authManager Spring Security {@link AuthenticationManager}
+     * @param loginUrl    URL endpointu pro login, například {@code /api/auth/login}
+     * @param authManager instance {@link AuthenticationManager} používaná pro autentizaci
      */
     public CustomJsonLoginFilter(String loginUrl, AuthenticationManager authManager) {
         setFilterProcessesUrl(loginUrl);
         setAuthenticationManager(authManager);
     }
 
-    // =====================================================
-    // POKUS O AUTENTIZACI (LOGIN)
-    // =====================================================
+    // Pokus o autentizaci (login)
 
     /**
-     * Pokusí se autentizovat uživatele na základě requestu.
+     * Pokusí se autentizovat uživatele na základě HTTP requestu.
      *
      * Podporované formáty:
-     * <ul>
-     *     <li>application/x-www-form-urlencoded</li>
-     *     <li>application/json</li>
-     * </ul>
+     * - {@code application/x-www-form-urlencoded} (klasický form login),
+     * - {@code application/json} (SPA frontend).
      *
      * Očekávaná pole:
-     * <ul>
-     *     <li>email (username)</li>
-     *     <li>password</li>
-     * </ul>
+     * - {@code email} (případně {@code username} u form loginu),
+     * - {@code password}.
      *
      * @throws AuthenticationException při chybě přihlášení
      */
@@ -307,9 +250,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
             String email = null;
             String password = null;
 
-            // -------------------------------------------------
-            // FORM LOGIN (x-www-form-urlencoded)
-            // -------------------------------------------------
+            // Form login (x-www-form-urlencoded)
             if (request.getContentType() != null &&
                     request.getContentType().contains("application/x-www-form-urlencoded")) {
 
@@ -317,9 +258,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                 password = request.getParameter("password");
             }
 
-            // -------------------------------------------------
-            // JSON LOGIN (application/json)
-            // -------------------------------------------------
+            // JSON login (application/json)
             if ((email == null || password == null) &&
                     request.getContentType() != null &&
                     request.getContentType().contains("application/json")) {
@@ -331,46 +270,36 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                 password = json.get("password");
             }
 
-            // -------------------------------------------------
-            // VALIDACE VSTUPŮ
-            // -------------------------------------------------
+            // Základní validace vstupů
             if (email == null || password == null ||
                     email.isBlank() || password.isBlank()) {
 
                 throw new BadCredentialsException("BE - Chybí přihlašovací údaje");
             }
 
-            // -------------------------------------------------
-            // VYTVOŘENÍ AUTHENTICATION TOKENU
-            // -------------------------------------------------
+            // Vytvoření Authentication tokenu
             UsernamePasswordAuthenticationToken authRequest =
                     new UsernamePasswordAuthenticationToken(email, password);
 
             setDetails(request, authRequest);
 
-            // delegace autentizace na AuthenticationManager
+            // Delegace autentizace na AuthenticationManager
             return this.getAuthenticationManager().authenticate(authRequest);
 
         } catch (IOException e) {
-            // chyba při čtení JSON body (malformed JSON apod.)
+            // Chyba při čtení JSON body
             throw new RuntimeException(e);
         }
     }
 
-    // =====================================================
-    // ÚSPĚŠNÝ LOGIN
-    // =====================================================
+    // Úspěšný login
 
     /**
-     * Zavolá se po úspěšné autentizaci.
+     * Zpracuje úspěšnou autentizaci.
      *
-     * Co se zde děje:
-     * <ul>
-     *     <li>uloží se {@link Authentication} do {@link SecurityContextHolder},</li>
-     *     <li>vytvoří se HTTP session (pokud neexistuje),</li>
-     *     <li>do session se uloží SPRING_SECURITY_CONTEXT,</li>
-     *     <li>vrátí se JSON odpověď místo redirectu.</li>
-     * </ul>
+     * Do {@link SecurityContextHolder} se uloží autentizace, vytvoří se
+     * HTTP session a do ní se uloží {@link org.springframework.security.core.context.SecurityContext}.
+     * Následně se klientovi vrací JSON odpověď místo redirectu.
      */
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
@@ -379,10 +308,10 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                                             Authentication authResult)
             throws IOException, ServletException {
 
-        // nastavení SecurityContext
+        // Nastavení SecurityContext
         SecurityContextHolder.getContext().setAuthentication(authResult);
 
-        // vytvoření session a uložení kontextu
+        // Vytvoření session a uložení kontextu
         request.getSession(true).setAttribute(
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 SecurityContextHolder.getContext()
@@ -399,21 +328,14 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         objectMapper.writeValue(response.getWriter(), result);
     }
 
-    // =====================================================
-    // NEÚSPĚŠNÝ LOGIN
-    // =====================================================
+    // Neúspěšný login
 
     /**
-     * Zavolá se při neúspěšném přihlášení.
+     * Zpracuje neúspěšnou autentizaci.
      *
-     * Vrací JSON odpověď s HTTP 401.
-     *
-     * Rozlišuje:
-     * <ul>
-     *     <li>neaktivovaný účet,</li>
-     *     <li>neplatné přihlašovací údaje,</li>
-     *     <li>ostatní chyby autentizace.</li>
-     * </ul>
+     * Vrací se HTTP status 401 a JSON odpověď s informací o chybě.
+     * Rozlišuje se neaktivovaný účet, neplatné přihlašovací údaje
+     * a ostatní chyby při přihlášení.
      */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request,
@@ -458,42 +380,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * {@link UserDetailsService} implementace napojující Spring Security
- * na vlastní databázový model uživatele ({@link AppUserEntity}).
+ * Implementace {@link UserDetailsService} pro napojení Spring Security
+ * na databázový model uživatele.
  *
- * ÚČEL:
- * <ul>
- *     <li>při přihlášení načíst uživatele z DB podle emailu,</li>
- *     <li>ověřit existenci účtu a jeho aktivaci,</li>
- *     <li>namapovat {@link AppUserEntity} na {@link UserDetails} objekt,
- *         který Spring Security používá při autentizaci.</li>
- * </ul>
- *
- * JAK JE TO POUŽITÉ VE SPRING SECURITY:
- * <ul>
- *     <li>při loginu Spring Security zavolá {@link #loadUserByUsername(String)},</li>
- *     <li>vrácený {@link UserDetails} obsahuje:</li>
- *     <ul>
- *         <li>username (email),</li>
- *         <li>heslo (hashované),</li>
- *         <li>role / autority.</li>
- *     </ul>
- * </ul>
- *
- * BEZPEČNOST:
- * <ul>
- *     <li>heslo se porovnává automaticky přes {@code PasswordEncoder},</li>
- *     <li>pokud účet není aktivován ({@code enabled == false}),
- *         vyhodí se {@link AccountNotActivatedException},</li>
- *     <li>typ vyhozené výjimky přímo ovlivňuje výsledek přihlášení
- *         (např. jiná hláška pro „neaktivovaný účet“ vs. „uživatel nenalezen“).</li>
- * </ul>
+ * Třída načítá uživatele z databáze podle e-mailu, ověřuje, zda je účet
+ * aktivní, a převádí entitu {@link AppUserEntity} na objekt
+ * {@link UserDetails}, který Spring Security používá při autentizaci.
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
     /**
-     * Repozitář uživatelů – používá se pouze pro načtení dat pro autentizaci.
+     * Repozitář pro načítání uživatelů při přihlášení.
      */
     private final AppUserRepository appUserRepository;
 
@@ -501,62 +399,43 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.appUserRepository = appUserRepository;
     }
 
-    // =====================================================
-    // NAČTENÍ UŽIVATELE PRO SPRING SECURITY
-    // =====================================================
+    // Načtení uživatele pro Spring Security
 
     /**
-     * Načte uživatele podle emailu (username) pro potřeby autentizace.
-     * <p>
-     * Tato metoda je volána Spring Security při přihlášení.
+     * Načte uživatele podle e-mailu pro potřeby autentizace.
      *
-     * @param email email zadaný uživatelem při loginu (username)
-     * @return {@link UserDetails} objekt použitý pro autentizaci
+     * Metoda se volá Spring Security při přihlášení. V případě, že uživatel
+     * neexistuje, je vyhozena {@link UsernameNotFoundException}. Pokud účet
+     * existuje, ale není aktivní, je vyhozena {@link AccountNotActivatedException}.
      *
-     * @throws UsernameNotFoundException    pokud uživatel s daným emailem neexistuje
+     * @param email e-mail zadaný uživatelem při přihlášení
+     * @return objekt {@link UserDetails} použitý pro autentizaci
+     * @throws UsernameNotFoundException    pokud uživatel s daným e-mailem neexistuje
      * @throws AccountNotActivatedException pokud účet existuje, ale není aktivní
      */
     @Override
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        // -------------------------------------------------
-        // NAČTENÍ UŽIVATELE Z DB
-        // -------------------------------------------------
+        // Načtení uživatele z databáze
         AppUserEntity user = appUserRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("BE - Uživatel nenalezen")
                 );
 
-        // -------------------------------------------------
-        // KONTROLA AKTIVACE ÚČTU
-        // -------------------------------------------------
+        // Kontrola aktivace účtu
         if (!user.isEnabled()) {
-            // vlastní výjimka – typicky se zachytává ve filtru pro login
-            // a přeloží se na vhodnou odpověď pro FE
+            // Výjimka se typicky zachytává ve filtru pro login a převádí na odpověď pro frontend
             throw new AccountNotActivatedException();
         }
 
-        // -------------------------------------------------
-        // MAPOVÁNÍ NA UserDetails
-        // -------------------------------------------------
+        // Mapování na UserDetails
         return User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                /*
-                 * role se uloží bez prefixu (ADMIN / MANAGER / PLAYER),
-                 * Spring si automaticky přidá prefix "ROLE_".
-                 * Příklad:
-                 *   user.getRole() = "ROLE_ADMIN"
-                 *   → .roles("ADMIN")
-                 *   → výsledná autorita: "ROLE_ADMIN"
-                 */
+                // Role se ukládá bez prefixu ROLE_, Spring si prefix přidá automaticky
                 .roles(user.getRole().name().replace("ROLE_", ""))
-                /*
-                 * disabled = true → účet se nemůže přihlásit.
-                 * V praxi je to zde trochu redundantní (už jsme ověřili enabled),
-                 * ale držíme flag konzistentní se stavem v DB.
-                 */
+                // Disabled flag se drží konzistentní se stavem entity
                 .disabled(!user.isEnabled())
                 .build();
     }
@@ -587,11 +466,20 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Component
+/**
+ * Komponenta pro inicializaci testovacích dat v databázi.
+ *
+ * Po startu aplikace vytváří výchozího administrátora, ukázkové hráče
+ * s uživateli, nastavení uživatelů a hráčů, sezóny, zápasy, ukázkové
+ * registrace a databázové triggery pro historii registrací.
+ *
+ * Třída je určena hlavně pro vývojové a testovací prostředí. V produkci
+ * se má používat pouze po zvážení důsledků, aby nedošlo k nechtěnému
+ * přepsání dat.
+ */
 public class DataInitializer {
-
 
     private final PlayerRepository playerRepository;
     private final MatchRepository matchRepository;
@@ -604,7 +492,6 @@ public class DataInitializer {
     private final PlayerSettingsService playerSettingService;
     private final JdbcTemplate jdbcTemplate;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
 
     public DataInitializer(PlayerRepository playerRepository,
                            MatchRepository matchRepository,
@@ -628,6 +515,12 @@ public class DataInitializer {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Spouští se po inicializaci Spring kontejneru.
+     *
+     * V definovaném pořadí volá metody inicializující jednotlivé oblasti
+     * dat tak, aby byly zachovány závislosti mezi entitami.
+     */
     @PostConstruct
     public void init() {
         initAdmin();
@@ -642,9 +535,11 @@ public class DataInitializer {
         System.out.println("Data initialization completed.");
     }
 
-    // =====================
-    // ADMIN
-    // =====================
+    // Inicializace administrátorského účtu
+
+    /**
+     * Vytváří výchozího administrátora, pokud ještě neexistuje.
+     */
     private void initAdmin() {
         appUserRepository.findByEmail("admin@example.com").ifPresentOrElse(
                 existing -> System.out.println("Admin user already exists – skipping."),
@@ -662,9 +557,13 @@ public class DataInitializer {
         );
     }
 
-    // =====================
-    // PLAYERS + USERS
-    // =====================
+    // Inicializace hráčů a jejich uživatelských účtů
+
+    /**
+     * Vytváří testovací hráče a k nim přiřazené uživatele.
+     *
+     * Pokud již v databázi existují hráči, inicializace se přeskočí.
+     */
     private void initPlayersAndUsers() {
         if (playerRepository.count() > 0) {
             System.out.println("Players already exist – skipping player initialization.");
@@ -696,7 +595,7 @@ public class DataInitializer {
             user.setEmail(email);
             user.setPassword(encoder.encode(password));
 
-            // TODO ODMAZAT EMAIL
+            // TODO odmazat email
             switch (playerCounter) {
                 case 1 -> {
                     user.setRole(Role.ROLE_MANAGER);
@@ -709,51 +608,50 @@ public class DataInitializer {
             }
             user.setEnabled(true);
 
-            // vztah user <-> player podle tvého modelu
+            // Vztah user <-> player podle doménového modelu
             player.setUser(user);
 
-            appUserRepository.save(user); // nebo playerRepository.save(player) – podle cascade
+            appUserRepository.save(user); // nebo playerRepository.save(player) – podle nastavené kaskády
             playerCounter++;
         }
 
-        // pokud cascade není, můžeš explicitně uložit i hráče:
+        // Pokud kaskáda neřeší uložení hráčů, uloží se explicitně
         playerRepository.saveAll(players);
 
         System.out.println("Players and users initialized.");
     }
 
-    // =====================
-    // User and Player Settings
-    // =====================
-    private void initUserSettings(){
+    // Inicializace uživatelských nastavení
+
+    /**
+     * Vytváří výchozí nastavení pro všechny uživatele, kteří je ještě nemají.
+     */
+    private void initUserSettings() {
 
         System.out.println("Initializing userSettings...");
-        // vezmeme všechny uživatele
         List<AppUserEntity> users = appUserRepository.findAll();
 
         for (AppUserEntity user : users) {
 
-            // jestli už má nastavení, přeskočíme
             boolean hasSettings = appUserSettingsRepository.existsByUser(user);
-            // případně, pokud máš metodu existsByUserId:
-            // boolean hasSettings = appUserSettingsRepository.existsByUserId(user.getId());
+            // Případně lze použít existsByUserId
 
             if (hasSettings) {
                 continue;
             }
 
-            // vytvořit defaultní settings přes tvou metodu
             AppUserSettingsEntity settings =
                     appUserSettingService.createDefaultSettingsForUser(user);
 
-            // navázat uživatele, pokud to nedělá přímo metoda createDefault...
-
-            // uložit
             appUserSettingsRepository.save(settings);
         }
 
         System.out.println("User settings initialized.");
     }
+
+    /**
+     * Vytváří výchozí nastavení pro všechny hráče, kteří je ještě nemají.
+     */
     private void initPlayerSettings() {
         System.out.println("Initializing player settings...");
 
@@ -762,7 +660,7 @@ public class DataInitializer {
         for (PlayerEntity player : players) {
 
             boolean hasSettings = playerSettingsRepository.existsByPlayer(player);
-            // nebo existsByPlayerId(player.getId());
+            // Případně existsByPlayerId(player.getId())
 
             if (hasSettings) {
                 continue;
@@ -777,10 +675,11 @@ public class DataInitializer {
         System.out.println("Player settings initialized.");
     }
 
-    // =====================
-    // SEASONS
-    // =====================
+    // Inicializace sezón
 
+    /**
+     * Vytváří výchozí sezóny, pokud žádné neexistují.
+     */
     private void initSeasons() {
         if (seasonRepository.count() > 0) {
             System.out.println("Seasons already exist – skipping match initialization.");
@@ -788,21 +687,18 @@ public class DataInitializer {
         }
         System.out.println("Initializing seasons...");
 
-        // Sezóna 2024/2025: 1.11.2024 – 31.3.2025
         SeasonEntity season2024_2025 = new SeasonEntity();
         season2024_2025.setName("2024/2025");
         season2024_2025.setStartDate(LocalDate.of(2024, 11, 20));
         season2024_2025.setEndDate(LocalDate.of(2025, 3, 31));
         season2024_2025.setActive(false);
 
-        // Sezóna 2025/2026: 1.11.2025 – 31.3.2026 (aktuální – nastavíme jako active)
         SeasonEntity season2025_2026 = new SeasonEntity();
         season2025_2026.setName("2025/2026");
         season2025_2026.setStartDate(LocalDate.of(2025, 11, 21));
         season2025_2026.setEndDate(LocalDate.of(2026, 3, 31));
         season2025_2026.setActive(true);
 
-        // Sezóna 2026/2027: 1.11.2026 – 31.3.2027
         SeasonEntity season2026_2027 = new SeasonEntity();
         season2026_2027.setName("2026/2027");
         season2026_2027.setStartDate(LocalDate.of(2026, 11, 1));
@@ -818,34 +714,35 @@ public class DataInitializer {
         System.out.println("Seasons initialized.");
     }
 
-    // =====================
-    // MATCHES
-    // =====================
+    // Inicializace zápasů
+
+    /**
+     * Vytváří zápasy pro jednotlivé sezóny.
+     *
+     * Zápasy se generují po pátcích v rámci období každé sezóny.
+     */
     private void initMatches() {
-        // Pokud už nějaké zápasy existují, nic nevytváříme
         if (matchRepository.count() > 0) {
             System.out.println("Matches already exist – skipping match initialization.");
             return;
         }
 
-        // Sezóny MUSÍ existovat, jinak nemáme co přiřadit
         List<SeasonEntity> seasons = seasonRepository.findAll();
         if (seasons.isEmpty()) {
             throw new IllegalStateException("BE - Nelze inicializovat zápasy, neexistuje žádná sezóna.");
         }
 
-
         System.out.println("Initializing matches...");
         for (int j = 0; j < 2; j++) {
             SeasonEntity actualSeason = seasons.get(j);
-            System.out.println("Nastavuji aktální sezonu" + j);
+            System.out.println("Nastavuji aktuální sezónu " + j);
             LocalDate startSeasonDate = actualSeason.getStartDate();
             LocalDate endSeasonDate = actualSeason.getEndDate();
             LocalDateTime startDate = startSeasonDate
                     .with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
                     .atTime(18, 45);
             int fridaysCount = countFridays(startSeasonDate, endSeasonDate);
-            System.out.println("jdu vytvářet zápasy");
+            System.out.println("Jdu vytvářet zápasy");
             for (int i = 0; i < fridaysCount; i++) {
                 MatchEntity match = new MatchEntity();
                 LocalDateTime dateTime = startDate.plusWeeks(i);
@@ -857,17 +754,22 @@ public class DataInitializer {
                 match.setMatchStatus(null);
                 match.setCancelReason(null);
                 match.setSeason(actualSeason);
-                // uložíme zápas
                 matchRepository.save(match);
 
             }
-            System.out.println("Zápasy v sezoně byly vytvořeny");
+            System.out.println("Zápasy v sezóně byly vytvořeny");
         }
 
         System.out.println("Zápasy vytvořeny");
     }
-// POMOCNÁ PRO SPOČÍTÁNÍ PÁTKU
 
+    /**
+     * Pomocná metoda pro spočítání počtu pátků v daném období.
+     *
+     * @param from počáteční datum
+     * @param to   koncové datum
+     * @return počet pátků mezi daty včetně
+     */
     private int countFridays(LocalDate from, LocalDate to) {
         if (to.isBefore(from)) {
             return 0;
@@ -887,9 +789,14 @@ public class DataInitializer {
         return count;
     }
 
-    // =====================
-    // REGISTRATIONS
-    // =====================
+    // Inicializace registrací
+
+    /**
+     * Vytváří ukázkové registrace hráčů na zápasy.
+     *
+     * Registrace se generují pouze pro omezený počet zápasů v blízké budoucnosti,
+     * aby bylo možné testovat různé stavy registrací.
+     */
     private void initRegistrations() {
         if (matchRegistrationRepository.count() > 0) {
             System.out.println("Match registrations already exist – skipping registration initialization.");
@@ -914,12 +821,10 @@ public class DataInitializer {
 
         for (MatchEntity match : matches) {
 
-            // Náhodný výběr 8 unikátních hráčů
             List<PlayerEntity> shuffledPlayers = new ArrayList<>(players);
             Collections.shuffle(shuffledPlayers);
             List<PlayerEntity> selectedPlayers = shuffledPlayers.subList(0, 8);
 
-            // Náhodné indexy pro statusy
             List<Integer> indexes = new ArrayList<>();
             for (int i = 0; i < selectedPlayers.size(); i++) {
                 indexes.add(i);
@@ -951,9 +856,7 @@ public class DataInitializer {
                     reg.setExcuseNote(null);
                 }
 
-                // půl na půl - logika týmů
-                // reg.setTeam(i < 4 ? Team.DARK : Team.LIGHT);
-
+                // Tým hráče se přebírá z entity hráče
                 reg.setTeam(player.getTeam());
                 reg.setTimestamp(LocalDateTime.now());
                 reg.setCreatedBy("initializer");
@@ -965,9 +868,14 @@ public class DataInitializer {
         System.out.println("Sample registrations initialized.");
     }
 
-    // =====================
-    // TRIGGERS
-    // =====================
+    // Inicializace databázových triggerů
+
+    /**
+     * Vytváří databázové triggery pro tabulku registrací.
+     *
+     * Triggery zajišťují automatický zápis do tabulky historie registrací
+     * při vzniknutí, změně nebo smazání registrace.
+     */
     private void initTriggers() {
         createTrigger("trg_match_reg_insert", """
                 CREATE TRIGGER trg_match_reg_insert
@@ -1018,6 +926,15 @@ public class DataInitializer {
                 """);
     }
 
+    /**
+     * Pomocná metoda pro vytvoření triggeru, pokud ještě neexistuje.
+     *
+     * Chyby při vytváření triggeru se vypisují do konzole, ale neblokují
+     * start aplikace.
+     *
+     * @param name název triggeru
+     * @param sql  SQL definice triggeru
+     */
     private void createTrigger(String name, String sql) {
         try {
             jdbcTemplate.execute(sql);
@@ -1052,44 +969,24 @@ import java.util.Map;
 
 /**
  * Globální handler výjimek pro REST API.
- * <p>
- * Účel:
- * <ul>
- *     <li>centralizovaně zachytávat výjimky z controllerů a service vrstvy,</li>
- *     <li>převést je na jednotnou JSON odpověď typu {@link ApiError},</li>
- *     <li>zajistit konzistentní HTTP status kód pro jednotlivé typy chyb.</li>
- * </ul>
  *
- * Tato třída:
- * <ul>
- *     <li>neřeší logování (to lze doplnit do jednotlivých handlerů),</li>
- *     <li>neřeší business logiku – pouze mapuje výjimky na HTTP odpovědi.</li>
- * </ul>
+ * Slouží k centralizovanému zachytávání výjimek z controllerů a service
+ * vrstvy, jejich převodu na jednotný JSON formát {@link ApiError} a
+ * k nastavení odpovídajících HTTP status kódů.
+ *
+ * Třída neřeší business logiku ani detailní logování. Tyto aspekty lze
+ * doplnit do jednotlivých handler metod podle potřeby.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // ==========================================
-    // 1) BUSINESS / DOMÉNOVÉ VÝJIMKY
-    // ==========================================
+    // 1) Doménové výjimky
 
     /**
-     * Zachytí všechny výjimky dědící z {@link BusinessException}.
-     * <p>
-     * Typicky:
-     * <ul>
-     *     <li>PlayerNotFoundException,</li>
-     *     <li>InvalidPlayerStatusException,</li>
-     *     <li>SeasonNotFoundException,</li>
-     *     <li>MatchNotFoundException, …</li>
-     * </ul>
+     * Zachytává výjimky typu {@link BusinessException}.
      *
-     * Každá {@link BusinessException} sama nese:
-     * <ul>
-     *     <li>HTTP status ({@link BusinessException#getStatus()}),</li>
-     *     <li>uživatelskou chybovou zprávu (message),</li>
-     *     <li>typ chyby (implicitně přes status a název výjimky).</li>
-     * </ul>
+     * Výjimka předává HTTP status, uživatelskou zprávu a další informace,
+     * které se používají při sestavení odpovědi {@link ApiError}.
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(
@@ -1109,20 +1006,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // ==========================================
-    // 2) PŘÍSTUP ODEPŘEN (Spring Security)
-    // ==========================================
+    // 2) Přístup odepřen (Spring Security)
 
     /**
-     * Zachytí {@link AccessDeniedException} vyhozenou Spring Security.
-     * <p>
-     * Typicky jde o situace:
-     * <ul>
-     *     <li>uživatel nemá roli ADMIN / MANAGER pro daný endpoint,</li>
-     *     <li>pokus o přístup k chráněnému zdroji bez oprávnění.</li>
-     * </ul>
+     * Zachytává {@link AccessDeniedException} vyhozenou Spring Security.
      *
-     * HTTP status: 403 Forbidden
+     * Typicky jde o situace, kdy uživatel nemá potřebnou roli pro volání
+     * daného endpointu. Vrací se HTTP status 403 Forbidden.
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex,
@@ -1141,20 +1031,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // ==========================================
-    // 3) ILLEGAL ARGUMENT – CHYBNÉ VSTUPY
-    // ==========================================
+    // 3) Chybné vstupy (IllegalArgumentException)
 
     /**
-     * Zachytí {@link IllegalArgumentException}.
-     * <p>
-     * Použití:
-     * <ul>
-     *     <li>obecné validační chyby vstupů,</li>
-     *     <li>nesmyslné parametry předané do service vrstvy.</li>
-     * </ul>
+     * Zachytává {@link IllegalArgumentException}.
      *
-     * HTTP status: 400 Bad Request
+     * Používá se pro obecné validační chyby vstupů nebo nesprávné
+     * parametry předané do service vrstvy. Vrací se HTTP status 400.
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex,
@@ -1173,20 +1056,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // ==========================================
-    // 4) ILLEGAL STATE – NEPLATNÝ STAV APLIKACE
-    // ==========================================
+    // 4) Neplatný stav aplikace (IllegalStateException)
 
     /**
-     * Zachytí {@link IllegalStateException}.
-     * <p>
-     * Typicky:
-     * <ul>
-     *     <li>operace není povolena v aktuálním stavu (např. deaktivace poslední aktivní sezóny),</li>
-     *     <li>porušení vnitřního invariantu aplikace.</li>
-     * </ul>
+     * Zachytává {@link IllegalStateException}.
      *
-     * HTTP status: 409 Conflict
+     * Používá se pro situace, kdy je aplikace v neplatném stavu a
+     * daná operace nemůže být provedena. Typicky se vrací HTTP status 409.
      */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiError> handleIllegalState(IllegalStateException ex,
@@ -1205,26 +1081,14 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // ==========================================
-    // 5) DATA INTEGRITA (DB KONFLIKTY, RACE CONDITION)
-    // ==========================================
+    // 5) Porušení integrity dat
 
     /**
-     * Zachytí {@link DataIntegrityViolationException} z perzistentní vrstvy.
-     * <p>
-     * Typicky:
-     * <ul>
-     *     <li>porušení unikátních omezení v DB (unique constraint),</li>
-     *     <li>race condition při paralelním ukládání stejných dat.</li>
-     * </ul>
+     * Zachytává {@link DataIntegrityViolationException} z databázové vrstvy.
      *
-     * Z bezpečnostních důvodů:
-     * <ul>
-     *     <li>nevrací detailní DB zprávu,</li>
-     *     <li>používá generickou, ale užitečnou textovou hlášku.</li>
-     * </ul>
-     *
-     * HTTP status: 409 Conflict
+     * Typicky jde o porušení unikátních omezení nebo jiné konflikty při
+     * ukládání dat. Z bezpečnostních důvodů se nevrací detailní databázová
+     * zpráva, ale obecnější chybové hlášení.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(
@@ -1244,23 +1108,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-
-
-    // ==========================================
-    // 6) FALLBACK – NEČEKANÉ CHYBY
-    // ==========================================
+    // 6) Neočekávané chyby (fallback)
 
     /**
-     * Fallback handler pro všechny ostatní neošetřené výjimky.
-     * <p>
-     * Použití:
-     * <ul>
-     *     <li>zachytí runtime chyby, které nebyly explicitně ošetřeny,</li>
-     *     <li>brání pádu aplikace bez odpovědi,</li>
-     *     <li>vrací jednotný formát {@link ApiError} pro FE.</li>
-     * </ul>
+     * Fallback handler pro všechny neošetřené výjimky.
      *
-     * HTTP status: 500 Internal Server Error
+     * Slouží jako poslední ochrana proti pádu aplikace bez odpovědi
+     * a vrací jednotný formát chyby s HTTP statusem 500.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAll(Exception ex,
@@ -1278,24 +1132,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(error);
     }
-    // ==========================================
-    // 7) VALIDACE VSTUPŮ (@Valid, Bean Validation)
-    // ==========================================
+
+    // 7) Validační chyby (@Valid, Bean Validation)
 
     /**
-     * Zachytí validační chyby z anotace {@code @Valid}.
-     * <p>
-     * Typické scénáře:
-     * <ul>
-     *     <li>nevyplněné povinné pole,</li>
-     *     <li>neplatný formát (např. e-mail),</li>
-     *     <li>porušení délkových nebo rozsahových omezení.</li>
-     * </ul>
+     * Zachytává validační chyby vyvolané anotací {@code @Valid}.
      *
-     * Do pole {@code details} se vrací mapa {@code field → message},
-     * kde klíčem je název pole v DTO a hodnotou text validační chyby.
-     *
-     * HTTP status: 400 Bad Request
+     * Do pole {@code details} se ukládá mapa ve tvaru název pole → text
+     * validační chyby. Vrací se HTTP status 400 Bad Request.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationException(
@@ -1304,14 +1148,12 @@ public class GlobalExceptionHandler {
     ) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        // Mapa field → message (použijeme LinkedHashMap pro zachování pořadí chyb)
         Map<String, String> fieldErrors = new java.util.LinkedHashMap<>();
 
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             String fieldName = fieldError.getField();
             String errorMessage = fieldError.getDefaultMessage();
 
-            // Pokud je pro jedno pole více chyb, můžeme je spojit do jedné zprávy
             fieldErrors.merge(
                     fieldName,
                     errorMessage,
@@ -1364,36 +1206,24 @@ import java.util.List;
 /**
  * Hlavní konfigurace Spring Security pro backend aplikace.
  *
- * ZODPOVĚDNOST:
- * <ul>
- *     <li>nastavení autentizace (CustomUserDetailsService + BCrypt),</li>
- *     <li>nastavení autorizace endpointů (role / přihlášení),</li>
- *     <li>konfigurace login mechanismu (CustomJsonLoginFilter),</li>
- *     <li>session management (stateful přístup),</li>
- *     <li>CORS konfigurace pro SPA frontend (React / Vite).</li>
- * </ul>
- *
- * REŽIMY PROVOZU:
- * <ul>
- *     <li><b>test-mode = true</b> → vše povoleno, HTTP Basic (Postman, vývoj),</li>
- *     <li><b>test-mode = false</b> → produkční režim, REST login + role.</li>
- * </ul>
+ * Třída zajišťuje nastavení autentizace, autorizace endpointů,
+ * login mechanizmu, správy session a CORS. Konfigurace podporuje
+ * testovací režim pro vývoj a produkční režim s REST loginem
+ * a rolově řízeným přístupem.
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // povolí @PreAuthorize, @Secured, @RolesAllowed
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
 
     /**
-     * Přepínač testovacího režimu:
+     * Příznak testovacího režimu.
      *
-     * app.test-mode=true
-     *
-     * Použití:
-     * - lokální vývoj
-     * - Postman bez řešení session / loginu
+     * Pokud je {@code app.test-mode=true}, aplikace povoluje všechny
+     * endpointy a používá HTTP Basic autentizaci. Režim je určen pro
+     * lokální vývoj a testování v Postmanu bez potřeby řešit session.
      */
     @Value("${app.test-mode:false}")
     private boolean isTestMode;
@@ -1402,34 +1232,26 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    // =====================================================
-    // 1) PASSWORD ENCODER
-    // =====================================================
+    // Password encoder
 
     /**
-     * BCrypt encoder pro ukládání a ověřování hesel.
+     * Encoder pro hashování a ověřování hesel pomocí BCrypt.
      *
-     * Používá se:
-     * - při registraci
-     * - při změně hesla
-     * - při autentizaci (login)
+     * Používá se při registraci, změně hesla i při samotné autentizaci.
      */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // =====================================================
-    // 2) AUTHENTICATION PROVIDER
-    // =====================================================
+    // Authentication provider
 
     /**
-     * DaoAuthenticationProvider:
+     * {@link DaoAuthenticationProvider} pro načítání uživatelů z databáze.
      *
-     * - načítá uživatele z databáze pomocí CustomUserDetailsService
-     * - ověřuje heslo pomocí BCryptPasswordEncoder
-     *
-     * Používá se při loginu přes AuthenticationManager.
+     * Poskytuje napojení na {@link CustomUserDetailsService} a
+     * {@link BCryptPasswordEncoder}. Používá se při loginu přes
+     * {@link AuthenticationManager}.
      */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -1439,15 +1261,12 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // =====================================================
-    // 3) AUTHENTICATION MANAGER
-    // =====================================================
+    // Authentication manager
 
     /**
-     * AuthenticationManager:
+     * Vytváří {@link AuthenticationManager} používaný při autentizaci.
      *
-     * - centrální bod autentizace ve Spring Security
-     * - používá se v CustomJsonLoginFilter
+     * Manager je předáván do {@link CustomJsonLoginFilter}.
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig)
@@ -1455,57 +1274,46 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    // =====================================================
-    // 4) SECURITY FILTER CHAIN
-    // =====================================================
+    // Security filter chain
 
     /**
      * Hlavní bezpečnostní konfigurace HTTP vrstvy.
      *
      * Řeší:
-     * <ul>
-     *     <li>CSRF / CORS</li>
-     *     <li>autorizaci endpointů</li>
-     *     <li>login (CustomJsonLoginFilter)</li>
-     *     <li>logout</li>
-     *     <li>session management</li>
-     * </ul>
+     * - vypnutí CSRF pro REST API,
+     * - povolení CORS pro SPA frontend,
+     * - autorizaci endpointů,
+     * - login (CustomJsonLoginFilter),
+     * - logout a správu session.
+     *
+     * V testovacím režimu povoluje všechny endpointy s HTTP Basic
+     * autentizací. V produkčním režimu aplikuje detailní pravidla
+     * pro jednotlivé endpointy a používá JSON login.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    AuthenticationManager authManager) throws Exception {
 
-        // REST API → CSRF vypnuto (řešeno přes session + CORS)
         http.csrf(csrf -> csrf.disable())
-                .cors(cors -> { /* používá corsConfigurationSource() */ });
+                .cors(cors -> {
+                    // Použije corsConfigurationSource()
+                });
 
         if (isTestMode) {
-            // =================================================
-            // TEST MODE
-            // =================================================
-            //
-            // - všechny endpointy povoleny
-            // - HTTP Basic autentizace
-            // - žádný JSON login filtr
-            //
+            // Testovací režim: vše povoleno, HTTP Basic
+
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .httpBasic();
 
         } else {
-            // =================================================
-            // PRODUKČNÍ REŽIM
-            // =================================================
+            // Produkční režim
 
             http
-                    // napojení na CustomUserDetailsService + BCrypt
                     .authenticationProvider(authenticationProvider())
 
-                    // -------------------------------
-                    // AUTORIZACE ENDPOINTŮ
-                    // -------------------------------
                     .authorizeHttpRequests(auth -> auth
 
-                            // ===== VEŘEJNÉ ENDPOINTY =====
+                            // Veřejné endpointy
                             .requestMatchers(
                                     "/api/auth/register",
                                     "/api/auth/verify",
@@ -1519,46 +1327,37 @@ public class SecurityConfig {
                                     "/favicon.ico"
                             ).permitAll()
 
-                            // ===== DEBUG / TEST =====
+                            // Debug a test
                             .requestMatchers(
                                     "/api/debug/me",
                                     "/api/test/**"
                             ).hasRole("ADMIN")
 
-                            // testovací emaily
+                            // Testovací e-maily
                             .requestMatchers("/api/email/test/**").hasRole("ADMIN")
 
-                            // ===== ADMIN / MANAGER =====
+                            // Admin / manager endpointy
                             .requestMatchers("/api/admin/seasons/**").hasRole("ADMIN")
                             .requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER")
                             .requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER")
 
-                            // ===== ZBYTEK API =====
+                            // Zbytek API pouze pro přihlášené
                             .requestMatchers("/api/**").authenticated()
 
                             .anyRequest().authenticated()
                     )
 
-                    // -------------------------------
-                    // SESSION MANAGEMENT
-                    // -------------------------------
                     .sessionManagement(sm ->
                             sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     )
 
-                    // -------------------------------
-                    // CUSTOM JSON LOGIN
-                    // -------------------------------
                     .addFilterAt(
                             new CustomJsonLoginFilter("/api/auth/login", authManager),
                             UsernamePasswordAuthenticationFilter.class
                     )
 
-                    // -------------------------------
-                    // LOGOUT
-                    // -------------------------------
                     .logout(logout -> logout
                             .logoutUrl("/api/auth/logout")
                             .deleteCookies("JSESSIONID")
@@ -1577,16 +1376,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // =====================================================
-    // 5) CORS KONFIGURACE
-    // =====================================================
+    // CORS konfigurace
 
     /**
      * CORS konfigurace pro SPA frontend (React / Vite).
      *
-     * - povoluje http://localhost:5173
-     * - umožňuje cookies (JSESSIONID)
-     * - povoluje běžné HTTP metody
+     * Povoluje původ {@code http://localhost:5173}, základní HTTP metody
+     * a hlavičky. Umožňuje přenos cookies (JSESSIONID) pro session-based
+     * autentizaci.
+     *
+     * V produkci se má konfigurace doplnit o produkční domény.
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

@@ -28,7 +28,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s entitou {@link AppUserEntity}.
+ * Repozitář pro práci s entitou AppUserEntity.
  *
  * Slouží k perzistenci a načítání uživatelských účtů
  * z databáze pomocí Spring Data JPA.
@@ -36,13 +36,13 @@ import java.util.Optional;
 public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
 
     /**
-     * Vyhledá uživatele podle emailové adresy.
+     * Vyhledá uživatele podle e-mailové adresy.
      *
-     * Email slouží jako unikátní identifikátor uživatele
-     * v rámci autentizace.
+     * E-mail slouží jako unikátní identifikátor uživatele
+     * při přihlášení do aplikace.
      *
-     * @param email email uživatele
-     * @return uživatel zabalený v {@link Optional}, pokud existuje
+     * @param email e-mail uživatele
+     * @return uživatel zabalený v Optional, pokud existuje
      */
     Optional<AppUserEntity> findByEmail(String email);
 }
@@ -62,14 +62,35 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s nastavením uživatele (AppUserSettingsEntity).
+ * Repozitář pro práci s entitou AppUserSettingsEntity.
+ *
+ * Slouží k načítání a ukládání nastavení uživatelských účtů,
+ * oddělených od samotných uživatelů.
  */
 public interface AppUserSettingsRepository extends JpaRepository<AppUserSettingsEntity, Long> {
 
+    /**
+     * Vyhledá nastavení podle uživatele.
+     *
+     * @param user uživatelský účet
+     * @return nastavení zabalené v Optional, pokud existuje
+     */
     Optional<AppUserSettingsEntity> findByUser(AppUserEntity user);
 
+    /**
+     * Vyhledá nastavení podle e-mailu uživatele.
+     *
+     * @param email e-mail uživatele
+     * @return nastavení zabalené v Optional, pokud existuje
+     */
     Optional<AppUserSettingsEntity> findByUserEmail(String email);
 
+    /**
+     * Ověří, zda existuje záznam nastavení pro daného uživatele.
+     *
+     * @param user uživatelský účet
+     * @return true, pokud nastavení existuje
+     */
     Boolean existsByUser(AppUserEntity user);
 }
 
@@ -88,7 +109,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s entitou {@link EmailVerificationTokenEntity}.
+ * Repozitář pro práci s entitou EmailVerificationTokenEntity.
  *
  * Slouží k ukládání a vyhledávání ověřovacích tokenů
  * používaných při aktivaci uživatelských účtů.
@@ -102,12 +123,19 @@ public interface EmailVerificationTokenRepository
      * Používá se při ověřování aktivačního odkazu uživatele.
      *
      * @param token hodnota ověřovacího tokenu
-     * @return token zabalený v {@link Optional}, pokud existuje
+     * @return token zabalený v Optional, pokud existuje
      */
     Optional<EmailVerificationTokenEntity> findByToken(String token);
 
+    /**
+     * Smaže všechny ověřovací tokeny daného uživatele.
+     *
+     * Typicky se používá po úspěšné aktivaci účtu
+     * nebo při opakovaném posílání aktivačního e-mailu.
+     *
+     * @param user uživatel, jehož tokeny mají být smazány
+     */
     void deleteByUser(AppUserEntity user);
-
 }
 
 
@@ -124,11 +152,31 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
+/**
+ * Repozitář pro práci s entitou ForgottenPasswordResetTokenEntity.
+ *
+ * Slouží k ukládání a vyhledávání resetovacích tokenů
+ * používaných při obnově zapomenutého hesla.
+ */
 public interface ForgottenPasswordResetTokenRepository
         extends JpaRepository<ForgottenPasswordResetTokenEntity, Long> {
 
+    /**
+     * Vyhledá resetovací token podle jeho hodnoty.
+     *
+     * @param token hodnota resetovacího tokenu
+     * @return token zabalený v Optional, pokud existuje
+     */
     Optional<ForgottenPasswordResetTokenEntity> findByToken(String token);
 
+    /**
+     * Smaže všechny resetovací tokeny daného uživatele.
+     *
+     * Typicky se používá po úspěšném nastavení nového hesla
+     * nebo při vynulování procesu resetu.
+     *
+     * @param user uživatel, jehož tokeny mají být smazány
+     */
     void deleteByUser(AppUserEntity user);
 }
 
@@ -146,9 +194,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 /**
- * Repozitář pro práci s entitou {@link MatchRegistrationHistoryEntity}.
+ * Repozitář pro práci s entitou MatchRegistrationHistoryEntity.
  *
- * Slouží k načítání historických (auditních) záznamů změn
+ * Slouží k načítání historických záznamů změn
  * registrací hráčů k zápasům.
  */
 public interface MatchRegistrationHistoryRepository
@@ -157,8 +205,8 @@ public interface MatchRegistrationHistoryRepository
     /**
      * Vrátí historii změn konkrétní registrace.
      *
-     * Záznamy jsou seřazeny sestupně podle času změny
-     * (nejnovější změna jako první).
+     * Záznamy jsou seřazeny sestupně podle času změny,
+     * takže nejnovější změna je na prvním místě.
      *
      * @param matchRegistrationId ID původní registrace
      * @return seznam historických záznamů
@@ -169,7 +217,7 @@ public interface MatchRegistrationHistoryRepository
     /**
      * Vrátí historii všech změn registrací pro daný zápas.
      *
-     * Používá se např. pro administrativní přehledy
+     * Používá se například pro administrativní přehledy
      * nebo auditní kontrolu zápasu.
      *
      * @param matchId ID zápasu
@@ -189,6 +237,14 @@ public interface MatchRegistrationHistoryRepository
     List<MatchRegistrationHistoryEntity>
     findByPlayerIdOrderByChangedAtDesc(Long playerId);
 
+    /**
+     * Vrátí historii všech změn registrací konkrétního hráče
+     * v konkrétním zápase.
+     *
+     * @param matchId  ID zápasu
+     * @param playerId ID hráče
+     * @return seznam historických záznamů
+     */
     List<MatchRegistrationHistoryEntity>
     findByMatchIdAndPlayerIdOrderByChangedAtDesc(Long matchId, Long playerId);
 }
@@ -210,11 +266,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s entitou {@link MatchRegistrationEntity}.
+ * Repozitář pro práci s entitou MatchRegistrationEntity.
  *
  * Slouží k načítání a správě registrací hráčů k zápasům,
  * včetně kontroly existence registrace, počtů hráčů
- * a vyhledávání dle zápasu nebo hráče.
+ * a vyhledávání podle zápasu nebo hráče.
  */
 @Repository
 public interface MatchRegistrationRepository
@@ -228,7 +284,7 @@ public interface MatchRegistrationRepository
      *
      * @param playerId ID hráče
      * @param matchId  ID zápasu
-     * @return {@code true}, pokud registrace existuje
+     * @return true, pokud registrace existuje
      */
     Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
 
@@ -253,7 +309,7 @@ public interface MatchRegistrationRepository
      *
      * @param playerId ID hráče
      * @param matchId  ID zápasu
-     * @return registrace zabalená v {@link Optional}, pokud existuje
+     * @return registrace zabalená v Optional, pokud existuje
      */
     Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
 
@@ -265,14 +321,14 @@ public interface MatchRegistrationRepository
      *
      * @param matchId ID zápasu
      * @param status  stav registrace
-     * @return počet registrací
+     * @return počet registrací v daném stavu
      */
     long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
 
     /**
      * Vrátí registrace pro více zápasů najednou.
      *
-     * Používá se např. při hromadném načítání
+     * Používá se například při hromadném načítání
      * registrací pro přehledy a statistiky.
      *
      * @param matchIds seznam ID zápasů
@@ -296,22 +352,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Repozitář pro práci s entitou {@link MatchEntity}.
+ * Repozitář pro práci s entitou MatchEntity.
  *
  * Slouží k načítání zápasů podle času konání a sezóny,
  * zejména pro přehledy nadcházejících a odehraných zápasů.
  */
 public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
 
-    // ==================================================
-    // ZÁPASY PODLE DATA (NEZÁVISLE NA SEZÓNĚ)
-    // ==================================================
+    // Zápasy podle data (nezávisle na sezóně)
 
     /**
      * Vrátí všechny zápasy konající se po zadaném čase.
      *
-     * Zápasy jsou seřazeny vzestupně podle data konání
-     * (nejbližší zápas jako první).
+     * Zápasy jsou seřazeny vzestupně podle data a času konání,
+     * nejbližší zápas je na prvním místě.
      *
      * @param dateTime referenční datum a čas
      * @return seznam nadcházejících zápasů
@@ -321,21 +375,19 @@ public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
     /**
      * Vrátí všechny zápasy konající se před zadaným časem.
      *
-     * Zápasy jsou seřazeny sestupně podle data konání
-     * (nejnovější odehraný zápas jako první).
+     * Zápasy jsou seřazeny sestupně podle data a času konání,
+     * nejnovější odehraný zápas je na prvním místě.
      *
      * @param dateTime referenční datum a čas
      * @return seznam odehraných zápasů
      */
     List<MatchEntity> findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime dateTime);
 
-    // ==================================================
-    // ZÁPASY V KONKRÉTNÍ SEZÓNĚ
-    // ==================================================
+    // Zápasy v konkrétní sezóně
 
     /**
      * Vrátí všechny zápasy v dané sezóně seřazené
-     * vzestupně podle data konání.
+     * vzestupně podle data a času konání.
      *
      * @param seasonId ID sezóny
      * @return seznam zápasů v sezóně
@@ -344,16 +396,14 @@ public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
 
     /**
      * Vrátí všechny zápasy v dané sezóně seřazené
-     * sestupně podle data konání.
+     * sestupně podle data a času konání.
      *
      * @param seasonId ID sezóny
      * @return seznam zápasů v sezóně
      */
     List<MatchEntity> findAllBySeasonIdOrderByDateTimeDesc(Long seasonId);
 
-    // ==================================================
-    // ZÁPASY V SEZÓNĚ S ČASOVÝM OMEZENÍM
-    // ==================================================
+    // Zápasy v sezóně s časovým omezením
 
     /**
      * Vrátí zápasy v dané sezóně, které se konají
@@ -405,7 +455,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Repozitář pro práci s entitou {@link PlayerInactivityPeriodEntity}.
+ * Repozitář pro práci s entitou PlayerInactivityPeriodEntity.
  *
  * Slouží k evidenci a vyhledávání období neaktivity hráčů,
  * zejména pro ověření dostupnosti hráče v konkrétním čase.
@@ -415,15 +465,15 @@ public interface PlayerInactivityPeriodRepository
         extends JpaRepository<PlayerInactivityPeriodEntity, Long> {
 
     /**
-     * Ověří, zda je hráč v daném časovém okamžiku neaktivní.
+     * Ověří, zda je hráč v daném časovém intervalu neaktivní.
      *
-     * Používá se např. při registraci hráče na zápas
+     * Používá se například při registraci hráče na zápas
      * nebo při kontrole jeho dostupnosti.
      *
      * @param player hráč, jehož neaktivita se ověřuje
-     * @param from   referenční čas (obvykle čas zápasu)
-     * @param to     referenční čas (obvykle shodný s {@code from})
-     * @return {@code true}, pokud hráč spadá do období neaktivity
+     * @param from   začátek kontrolovaného intervalu
+     * @param to     konec kontrolovaného intervalu
+     * @return true, pokud hráč spadá do období neaktivity
      */
     boolean existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
             PlayerEntity player,
@@ -476,22 +526,22 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s entitou {@link PlayerEntity}.
+ * Repozitář pro práci s entitou PlayerEntity.
  *
  * Slouží k načítání a správě hráčů, zejména ve vztahu
  * k uživatelským účtům a identifikaci hráčů podle jména
- * nebo emailu vlastníka.
+ * nebo e-mailu vlastníka.
  */
 public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
 
     /**
      * Najde hráče podle jeho ID.
      *
-     * Překrývá základní metodu {@link JpaRepository},
-     * aby bylo možné vracet {@link Optional}.
+     * Překrývá základní metodu z JpaRepository tak,
+     * aby bylo možné vracet Optional.
      *
      * @param id ID hráče
-     * @return hráč zabalený v {@link Optional}, pokud existuje
+     * @return hráč zabalený v Optional, pokud existuje
      */
     Optional<PlayerEntity> findById(Long id);
 
@@ -499,7 +549,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      * Vrátí všechny hráče, jejichž ID není obsaženo
      * v zadaném seznamu.
      *
-     * Používá se např. při filtrování dostupných hráčů.
+     * Používá se například při filtrování dostupných hráčů.
      *
      * @param ids seznam ID hráčů, které mají být vyloučeny
      * @return seznam hráčů
@@ -514,7 +564,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      *
      * @param name    jméno hráče
      * @param surname příjmení hráče
-     * @return {@code true}, pokud hráč existuje
+     * @return true, pokud hráč existuje
      */
     boolean existsByNameAndSurname(String name, String surname);
 
@@ -523,26 +573,26 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      *
      * @param name    jméno hráče
      * @param surname příjmení hráče
-     * @return hráč zabalený v {@link Optional}, pokud existuje
+     * @return hráč zabalený v Optional, pokud existuje
      */
     Optional<PlayerEntity> findByNameAndSurname(String name, String surname);
 
     /**
-     * Najde jednoho hráče podle emailu uživatele,
+     * Najde jednoho hráče podle e-mailu uživatele,
      * ke kterému je hráč přiřazen.
      *
      * Používá se zejména v případech, kdy má uživatel
      * pouze jednoho hráče.
      *
-     * @param email email uživatele
-     * @return hráč zabalený v {@link Optional}, pokud existuje
+     * @param email e-mail uživatele
+     * @return hráč zabalený v Optional, pokud existuje
      */
     Optional<PlayerEntity> findByUserEmail(String email);
 
     /**
      * Vrátí všechny hráče patřící danému uživateli.
      *
-     * @param email email uživatele
+     * @param email e-mail uživatele
      * @return seznam hráčů uživatele
      */
     List<PlayerEntity> findAllByUserEmail(String email);
@@ -554,7 +604,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      * Používá se pro konzistentní výpis hráčů
      * v uživatelském rozhraní.
      *
-     * @param email email uživatele
+     * @param email e-mail uživatele
      * @return seznam hráčů uživatele
      */
     List<PlayerEntity> findByUser_EmailOrderByIdAsc(String email);
@@ -575,14 +625,35 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s nastavením hráče (PlayerSettingsEntity).
+ * Repozitář pro práci s entitou PlayerSettingsEntity.
+ *
+ * Slouží k načítání a správě nastavení hráčů
+ * (kontakty, notifikační preference).
  */
 public interface PlayerSettingsRepository extends JpaRepository<PlayerSettingsEntity, Long> {
 
+    /**
+     * Vyhledá nastavení podle hráče.
+     *
+     * @param player hráč
+     * @return nastavení zabalené v Optional, pokud existuje
+     */
     Optional<PlayerSettingsEntity> findByPlayer(PlayerEntity player);
 
+    /**
+     * Vyhledá nastavení podle ID hráče.
+     *
+     * @param playerId ID hráče
+     * @return nastavení zabalené v Optional, pokud existuje
+     */
     Optional<PlayerSettingsEntity> findByPlayerId(Long playerId);
 
+    /**
+     * Ověří, zda existuje záznam nastavení pro daného hráče.
+     *
+     * @param player hráč
+     * @return true, pokud nastavení existuje
+     */
     boolean existsByPlayer(PlayerEntity player);
 }
 
@@ -602,7 +673,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s entitou {@link SeasonEntity}.
+ * Repozitář pro práci s entitou SeasonEntity.
  *
  * Slouží ke správě sezón, zejména k určení aktivní sezóny,
  * kontrole časových překryvů a načítání sezón
@@ -616,7 +687,7 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
      * V systému může být v daném okamžiku
      * aktivní maximálně jedna sezóna.
      *
-     * @return aktivní sezóna zabalená v {@link Optional}, pokud existuje
+     * @return aktivní sezóna zabalená v Optional, pokud existuje
      */
     Optional<SeasonEntity> findByActiveTrue();
 
@@ -637,7 +708,7 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
      *
      * @param endDate   konec kontrolovaného intervalu
      * @param startDate začátek kontrolovaného intervalu
-     * @return {@code true}, pokud existuje časový překryv
+     * @return true, pokud existuje časový překryv
      */
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqual(
             LocalDate endDate,
@@ -654,7 +725,7 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
      * @param endDate   konec kontrolovaného intervalu
      * @param startDate začátek kontrolovaného intervalu
      * @param id        ID sezóny, která má být z kontroly vynechána
-     * @return {@code true}, pokud existuje časový překryv
+     * @return true, pokud existuje časový překryv
      */
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(
             LocalDate endDate,

@@ -17,47 +17,46 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Builder pro generování textů SMS zpráv.
- * <p>
- * Slouží jako centrální místo pro skládání lidsky čitelných SMS
- * používaných v aplikaci. Řeší pouze textovou podobu zprávy, nikoliv
- * odesílání nebo business logiku.
- * </p>
  *
- * Odpovědnost:
- * <ul>
- *     <li>sestavení lidsky čitelného obsahu SMS,</li>
- *     <li>centrální místo pro formátování zpráv (princip DRY),</li>
- *     <li>oddělení textové logiky od business logiky a schedulingu.</li>
- * </ul>
+ * Odpovědnosti:
+ * - sestavení lidsky čitelného obsahu SMS pro různé typy notifikací,
+ * - centralizace formátování SMS zpráv (princip DRY),
+ * - oddělení textové logiky od business logiky a schedulingu.
  *
- * Třída vytváří SMS texty pro:
- * <ul>
- *     <li>registraci / odhlášení / omluvu hráče,</li>
- *     <li>připomenutí hráčům, kteří nereagovali,</li>
- *     <li>finální připomínku v den zápasu,</li>
- *     <li>obecné info o zápasu (zrušení, změna času).</li>
- * </ul>
+ * Tato třída se používá zejména v NotificationServiceImpl a SmsService
+ * jako zdroj výsledného textu SMS zpráv.
  *
  * Třída neřeší:
- * <ul>
- *     <li>odesílání SMS (to zajišťuje {@link SmsService}),</li>
- *     <li>změny v databázi,</li>
- *     <li>oprávnění ani validace (předpokládá validní vstup).</li>
- * </ul>
+ * - odesílání SMS (to zajišťuje SmsService),
+ * - změny v databázi,
+ * - oprávnění ani validace vstupů (předpokládá se, že vstupy jsou zvalidované dříve).
  */
 @Component
 public class SmsMessageBuilder {
 
     /**
-     * Repozitář registrací – používá se pro read-only výpočty
-     * (např. aktuální počet hráčů se statusem REGISTERED).
+     * Repozitář registrací používaný pro read-only výpočty
+     * (například aktuální počet hráčů se statusem REGISTERED).
      */
     private final MatchRegistrationRepository matchRegistrationRepository;
+
+    /**
+     * Repozitář zápasů používaný pro doplňující informace o zápase.
+     *
+     * Aktuálně se využívá minimálně, je zde ponechán pro možné rozšíření.
+     */
     private final MatchRepository matchRepository;
+
+    /**
+     * Repozitář hráčů používaný pro případné rozšíření zpráv
+     * o detailnější informace o hráčích.
+     */
     private final PlayerRepository playerRepository;
 
     /**
      * Jednotný formát data používaný v SMS zprávách.
+     *
+     * Slouží k tomu, aby měly všechny SMS zprávy konzistentní formát data.
      */
     private final DateTimeFormatter dateFormatter =
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -71,16 +70,24 @@ public class SmsMessageBuilder {
     }
 
     // ====================================================
-    // HLAVNÍ METODA PRO NotificationServiceImpl
+    // HLAVNÍ VSTUPNÍ METODA PRO NotificationServiceImpl
     // ====================================================
 
     /**
      * Sestaví SMS text pro hráče podle typu notifikace a kontextu.
      *
-     * @param type    typ notifikace
-     * @param player  hráč (aktuálně se používá hlavně pro jméno – pro rozšíření do budoucna)
-     * @param context kontext – typicky {@link MatchRegistrationEntity} nebo {@link MatchEntity}
-     * @return hotový text SMS nebo {@code null}, pokud pro daný typ nic neposíláme
+     * Metoda slouží jako hlavní vstupní bod pro NotificationServiceImpl,
+     * kde se podle NotificationType a typu contextu rozhoduje,
+     * který specializovaný builder se použije.
+     *
+     * Podporované scénáře:
+     * - změny registrace hráče na zápas,
+     * - obecné informace o zápase (zrušení, změna času, připomenutí).
+     *
+     * @param type    typ notifikace, pro kterou se SMS generuje
+     * @param player  hráč, pro kterého se SMS generuje
+     * @param context kontext notifikace, obvykle MatchRegistrationEntity nebo MatchEntity
+     * @return hotový text SMS nebo {@code null}, pokud se pro daný typ notifikace SMS neposílá
      */
     public String buildForNotification(NotificationType type,
                                        PlayerEntity player,
@@ -115,11 +122,21 @@ public class SmsMessageBuilder {
                 yield buildMessageMatchInfo(type, match);
             }
 
-            // ostatní typy přes SMS neposíláme
+            // ostatní typy se přes SMS neposílají
             default -> null;
         };
     }
 
+    /**
+     * Bezpečné přetypování contextu na očekávaný typ.
+     *
+     * Pokud context není zadaného typu, vrací se null.
+     *
+     * @param context      vstupní objekt kontextu
+     * @param expectedType očekávaný typ kontextu
+     * @param <T>          generický typ výsledku
+     * @return přetypovaný objekt nebo null, pokud typ neodpovídá
+     */
     @SuppressWarnings("unchecked")
     private <T> T castContext(Object context, Class<T> expectedType) {
         if (context == null) {
@@ -138,17 +155,23 @@ public class SmsMessageBuilder {
     /**
      * Vytvoří SMS zprávu po změně registrace hráče na zápas.
      *
-     * Používá se pro stavy:
-     * <ul>
-     *     <li>{@link PlayerMatchStatus#REGISTERED},</li>
-     *     <li>{@link PlayerMatchStatus#UNREGISTERED},</li>
-     *     <li>{@link PlayerMatchStatus#EXCUSED},</li>
-     *     <li>{@link PlayerMatchStatus#SUBSTITUTE},</li>
-     *     <li>{@link PlayerMatchStatus#RESERVED}.</li>
-     * </ul>
+     * Zpráva popisuje:
+     * - datum zápasu,
+     * - aktuální obsazenost zápasu,
+     * - jméno hráče,
+     * - slovní popis změny stavu (přihlášení, odhlášení, omluva, náhradník).
+     *
+     * Použité stavy:
+     * - REGISTERED,
+     * - UNREGISTERED,
+     * - EXCUSED,
+     * - SUBSTITUTE,
+     * - RESERVED.
+     *
+     * Text se liší podle toho, zda změnu provedl uživatel nebo systém.
      *
      * @param registration registrace hráče k zápasu
-     * @return text SMS zprávy
+     * @return text SMS zprávy popisující změnu registrace
      */
     public String buildMessageRegistration(MatchRegistrationEntity registration) {
 
@@ -208,11 +231,20 @@ public class SmsMessageBuilder {
     // ====================================================
 
     /**
-     * Vytvoří SMS zprávu pro hráče, kteří dosud nereagovali
-     * na zápas (nemají žádnou registraci).
+     * Vytvoří SMS zprávu pro hráče, kteří dosud nereagovali na zápas.
      *
-     * Používá se typicky několik dní před zápasem v rámci
-     * scheduleru, který připomíná blížící se zápasy.
+     * Zpráva se používá typicky několik dní před zápasem
+     * v rámci plánovače, který připomíná blížící se zápasy
+     * a upozorňuje na volná místa.
+     *
+     * Obsah zprávy:
+     * - datum zápasu,
+     * - aktuální počet volných míst,
+     * - upozornění, že hráč ještě nereagoval.
+     *
+     * @param player hráč, pro kterého se zpráva vytváří
+     * @param match  zápas, ke kterému se připomínka vztahuje
+     * @return text SMS zprávy pro nereagujícího hráče
      */
     public String buildMessageNoResponse(PlayerDTO player, MatchEntity match) {
 
@@ -237,11 +269,24 @@ public class SmsMessageBuilder {
     // ====================================================
 
     /**
-     * Vytvoří SMS zprávu s informací o změně stavu zápasu
-     * (zrušen / obnoven apod.).
+     * Vytvoří SMS zprávu s informací o změně stavu zápasu.
      *
-     * @param type  typ notifikace (např. MATCH_CANCELED, MATCH_TIME_CHANGED)
-     * @param match zápas
+     * Typické scénáře:
+     * - zápas byl zrušen,
+     * - zápas byl obnoven nebo změněn.
+     *
+     * Zpráva obsahuje:
+     * - datum zápasu,
+     * - slovní popis stavu zápasu,
+     * - slovní popis důvodu zrušení (pokud je k dispozici).
+     *
+     * Parametr type se používá na úrovni volající služby pro rozhodnutí,
+     * kdy se zpráva generuje. V této metodě se stav určuje primárně
+     * z vlastností MatchEntity.
+     *
+     * @param type  typ notifikace, pro kterou se zpráva vytváří
+     * @param match zápas, jehož stav se oznamuje
+     * @return text SMS zprávy popisující stav zápasu
      */
     public String buildMessageMatchInfo(NotificationType type, MatchEntity match) {
         MatchStatus matchStatus = match.getMatchStatus();
@@ -282,15 +327,13 @@ public class SmsMessageBuilder {
      * Vytvoří finální SMS zprávu v den zápasu
      * pro již přihlášené hráče.
      *
-     * Obsah:
-     * <ul>
-     *     <li>datum zápasu,</li>
-     *     <li>aktuální počet přihlášených hráčů / maximální kapacita,</li>
-     *     <li>cena na jednoho hráče (celková cena / počet přihlášených).</li>
-     * </ul>
+     * Zpráva shrnuje:
+     * - datum zápasu,
+     * - aktuální počet přihlášených hráčů a maximální kapacitu,
+     * - orientační cenu na jednoho hráče (celková cena dělená počtem přihlášených).
      *
-     * @param registration registrace hráče k zápasu
-     * @return text finální SMS zprávy
+     * @param registration registrace hráče k zápasu, pro kterou se připomínka vytváří
+     * @return text finální SMS zprávy v den zápasu
      */
     public String buildMessageFinal(MatchRegistrationEntity registration) {
 

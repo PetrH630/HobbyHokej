@@ -8,41 +8,33 @@ import java.util.List;
 
 /**
  * Rozhraní pro správu období neaktivity hráčů.
- * <p>
- * Definuje kontrakt pro práci s časovými úseky, ve kterých
- * je hráč považován za neaktivního (např. zranění, dovolená,
- * dlouhodobá absence).
- * </p>
  *
- * Účel:
- * <ul>
- *     <li>evidence období, kdy se hráč nemůže účastnit zápasů,</li>
- *     <li>poskytnutí přehledů neaktivity pro hráče i administraci,</li>
- *     <li>umožnění kontroly, zda je hráč v daný okamžik aktivní.</li>
- * </ul>
+ * Tato service definuje kontrakt pro práci s časovými úseky,
+ * ve kterých je hráč považován za neaktivního
+ * (zranění, dovolená, dlouhodobá absence a podobné situace).
  *
- * Použití:
- * <ul>
- *     <li>využívá se při registraci hráčů na zápasy,</li>
- *     <li>slouží pro validaci účasti hráče v konkrétním čase,</li>
- *     <li>je součástí business pravidel plánování zápasů.</li>
- * </ul>
+ * Odpovědnosti:
+ * - eviduje období, kdy se hráč nemůže účastnit zápasů,
+ * - poskytuje přehledy období neaktivity pro konkrétního hráče i pro administraci,
+ * - umožňuje ověření, zda je hráč v daném okamžiku aktivní.
  *
- * Architektonické zásady:
- * <ul>
- *     <li>pracuje výhradně s DTO objekty, nikoliv přímo s entitami,</li>
- *     <li>odděluje business logiku neaktivity od persistence vrstvy.</li>
- * </ul>
+ * Tato service:
+ * - pracuje s DTO {@link PlayerInactivityPeriodDTO}, nikoliv přímo s entitami,
+ * - odděluje business logiku neaktivity od persistence vrstvy.
+ *
+ * Tato service neřeší:
+ * - autorizaci a role uživatelů,
+ * - notifikace,
+ * - UI logiku.
  */
 public interface PlayerInactivityPeriodService {
 
     /**
      * Vrátí seznam všech období neaktivity v systému.
-     * <p>
-     * Typicky dostupné pouze pro administrátorské přehledy.
-     * </p>
      *
-     * @return seznam všech období neaktivity
+     * Typicky se používá v administrátorských přehledech.
+     *
+     * @return seznam všech období neaktivity ve formě DTO
      */
     List<PlayerInactivityPeriodDTO> getAll();
 
@@ -64,22 +56,26 @@ public interface PlayerInactivityPeriodService {
 
     /**
      * Vytvoří nové období neaktivity hráče.
-     * <p>
-     * Implementace je zodpovědná za validaci časového rozsahu
-     * (např. začátek &lt; konec, nepřekrývání s jinými obdobími).
-     * </p>
+     *
+     * Implementace je zodpovědná za:
+     * - validaci časového rozsahu (začátek před koncem),
+     * - kontrolu překryvů s existujícími obdobími neaktivity.
      *
      * @param dto data nového období neaktivity
-     * @return vytvořené období neaktivity
+     * @return vytvořené období neaktivity ve formě DTO
      */
     PlayerInactivityPeriodDTO create(PlayerInactivityPeriodDTO dto);
 
     /**
      * Aktualizuje existující období neaktivity.
      *
+     * Implementace je zodpovědná za:
+     * - validaci časového rozsahu,
+     * - kontrolu překryvů s ostatními obdobími neaktivity daného hráče.
+     *
      * @param id  ID období neaktivity, které má být upraveno
      * @param dto nové hodnoty období neaktivity
-     * @return aktualizované období neaktivity
+     * @return aktualizované období neaktivity ve formě DTO
      */
     PlayerInactivityPeriodDTO update(Long id, PlayerInactivityPeriodDTO dto);
 
@@ -92,21 +88,18 @@ public interface PlayerInactivityPeriodService {
 
     /**
      * Ověří, zda je hráč v daném okamžiku aktivní.
-     * <p>
+     *
      * Metoda vrací informaci, zda se zadaný čas
      * nenachází v žádném z evidovaných období neaktivity hráče.
-     * </p>
      *
      * Typické použití:
-     * <ul>
-     *     <li>při registraci hráče na zápas,</li>
-     *     <li>při validaci účasti hráče v konkrétním čase.</li>
-     * </ul>
+     * - při registraci hráče na zápas,
+     * - při validaci účasti hráče v konkrétním čase,
+     * - při filtrování dostupných zápasů pro hráče.
      *
      * @param player   hráč, jehož aktivita se ověřuje
      * @param dateTime časový okamžik, pro který se aktivita kontroluje
-     * @return {@code true}, pokud je hráč v daném čase aktivní,
-     *         jinak {@code false}
+     * @return true, pokud je hráč v daném čase aktivní, jinak false
      */
     boolean isActive(PlayerEntity player, LocalDateTime dateTime);
 }

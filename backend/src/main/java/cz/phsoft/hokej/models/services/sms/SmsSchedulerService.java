@@ -14,79 +14,51 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Scheduler služba pro automatické odesílání SMS notifikací hráčům.
- * <p>
- * Automaticky odesílá SMS hráčům podle času a stavu zápasů:
- * </p>
- * <ul>
- *     <li>v den zápasu („finální“ SMS s informacemi o zápasu),</li>
- *     <li>několik dní před zápasem hráčům, kteří dosud nereagovali.</li>
- * </ul>
+ * Scheduler služba, která zajišťuje plánované odesílání SMS notifikací hráčům.
  *
- * Význam v aplikaci:
- * <ul>
- *     <li>zajišťuje pravidelnou a konzistentní komunikaci s hráči,</li>
- *     <li>snižuje riziko zapomenutí zápasu,</li>
- *     <li>pomáhá organizátorům získat včasné reakce hráčů.</li>
- * </ul>
+ * Odpovědnost třídy je:
+ * - vyhledávání zápasů podle data konání,
+ * - určení cílových hráčů pro daný typ SMS,
+ * - předání textu zpráv službě SmsService k odeslání.
  *
- * Technické řešení:
- * <ul>
- *     <li>využívá Spring scheduler ({@link Scheduled}),</li>
- *     <li>používá {@link SmsService} – nezávislá na konkrétním SMS providerovi,</li>
- *     <li>texty SMS jsou generovány centrálně pomocí {@link SmsMessageBuilder}.</li>
- * </ul>
- *
- * Chování a odolnost:
- * <ul>
- *     <li>služba pracuje pouze se čtením dat (read-only),</li>
- *     <li>selhání odeslání SMS jednomu hráči nesmí ovlivnit ostatní,</li>
- *     <li>výjimky jsou zachyceny a nezastavují běh scheduleru.</li>
- * </ul>
+ * Třída se používá ve vrstvě služeb a navazuje na MatchRepository,
+ * MatchRegistrationRepository, MatchRegistrationService a SmsMessageBuilder.
  */
 @Service
 public class SmsSchedulerService {
 
     /**
-     * Repozitář zápasů.
-     * <p>
-     * Slouží k vyhledávání zápasů podle data konání.
-     * </p>
+     * Repozitář zápasů, který se používá pro vyhledávání zápasů podle data konání.
      */
     private final MatchRepository matchRepository;
 
     /**
-     * Repozitář registrací hráčů na zápasy.
-     * <p>
-     * Umožňuje získat seznam hráčů registrovaných ke konkrétnímu zápasu.
-     * </p>
+     * Repozitář registrací hráčů na zápasy, který se používá pro získání registrací
+     * ke konkrétnímu zápasu.
      */
     private final MatchRegistrationRepository registrationRepository;
 
     /**
-     * Service pro odesílání SMS zpráv.
-     * <p>
-     * Jedná se o jediný vstupní bod pro odesílání SMS v aplikaci.
-     * </p>
+     * Služba pro odesílání SMS zpráv, která představuje technický vstupní bod
+     * pro komunikaci s externím SMS providerem.
      */
     private final SmsService smsService;
 
     /**
-     * Builder pro jednotnou tvorbu textů SMS zpráv.
-     * <p>
-     * Zajišťuje konzistentní formát a obsah SMS napříč aplikací.
-     * </p>
+     * Builder pro tvorbu textů SMS zpráv, který zajišťuje jednotný formát
+     * a obsah SMS napříč aplikací.
      */
     private final SmsMessageBuilder smsMessageBuilder;
 
     /**
-     * Service s business logikou registrací hráčů na zápasy.
-     * <p>
-     * Používá se zejména pro zjištění hráčů bez reakce.
-     * </p>
+     * Služba s business logikou registrací hráčů na zápasy, která se používá
+     * zejména pro zjištění hráčů bez reakce na pozvánku.
      */
     private final MatchRegistrationService matchRegistrationService;
 
+    /**
+     * Vytváří instanci scheduler služby a injektuje závislosti ze Spring kontextu.
+     */
     public SmsSchedulerService(
             MatchRepository matchRepository,
             MatchRegistrationRepository registrationRepository,
@@ -102,39 +74,31 @@ public class SmsSchedulerService {
     }
 
     /**
-     * Odešle „finální“ SMS všem hráčům registrovaným na zápasy,
+     * Metoda odesílá finální SMS všem hráčům registrovaným na zápasy,
      * které se konají v aktuální den.
-     * <p>
-     * Tato SMS slouží jako poslední připomenutí a shrnutí informací
-     * o zápasu pro hráče, kteří jsou již registrováni.
-     * </p>
      *
-     * Obsah SMS typicky zahrnuje:
-     * <ul>
-     *     <li>datum a čas zápasu,</li>
-     *     <li>místo konání,</li>
-     *     <li>informaci o účasti konkrétního hráče.</li>
-     * </ul>
+     * Metoda se plánuje pomocí Spring scheduleru a spouští se každý den ve 12:30
+     * v časové zóně Europe/Prague. V rámci zpracování se vyhledají všechny dnešní zápasy,
+     * načtou se registrace hráčů k těmto zápasům a pro každou registraci se vygeneruje
+     * text finální SMS a předá se službě SmsService k odeslání.
      *
-     * Spouštění:
-     * <ul>
-     *     <li>každý den ve 12:30.</li>
-     * </ul>
+     * Metoda pracuje pouze s existujícími daty a nemění stav databáze, transakce
+     * se používá pro zajištění konzistence při čtení.
      */
-    @Scheduled(cron = "0 30 12 * * *")
+    @Scheduled(cron = "0 30 12 * * *", zone = "Europe/Prague")
     @Transactional
     public void sendFinalSmsForTodayMatches() {
 
         LocalDate today = LocalDate.now();
 
-        // všechny zápasy, které se konají dnes
+        // Zápasy, které se konají v aktuální den.
         List<MatchEntity> todaysMatches = matchRepository.findAll().stream()
                 .filter(m -> m.getDateTime().toLocalDate().isEqual(today))
                 .toList();
 
         for (MatchEntity match : todaysMatches) {
 
-            // všechny registrace k danému zápasu
+            // Registrace hráčů k danému zápasu.
             List<MatchRegistrationEntity> registrations =
                     registrationRepository.findByMatchId(match.getId());
 
@@ -154,7 +118,7 @@ public class SmsSchedulerService {
                     );
 
                 } catch (Exception e) {
-                    // chyba jednoho hráče nesmí zastavit celý scheduler
+                    // Chyba při odesílání jednomu hráči nesmí zastavit běh celé naplánované úlohy.
                     System.err.println(
                             "Chyba SMS pro hráče " +
                                     reg.getPlayer().getFullName() +
@@ -166,38 +130,32 @@ public class SmsSchedulerService {
     }
 
     /**
-     * Odešle připomínkovou SMS hráčům, kteří:
-     * <ul>
-     *     <li>mají zápas za 3 dny,</li>
-     *     <li>dosud na zápas nijak nereagovali (NO_RESPONSE).</li>
-     * </ul>
+     * Metoda odesílá připomínkovou SMS hráčům, kteří mají zápas naplánovaný
+     * za tři dny a dosud na zápas nijak nereagovali (stav NO_RESPONSE).
      *
-     * Smysl této SMS:
-     * <ul>
-     *     <li>upozornit hráče na blížící se zápas,</li>
-     *     <li>motivovat je k reakci (účast / omluva),</li>
-     *     <li>umožnit včasné plánování sestavy.</li>
-     * </ul>
+     * Metoda se plánuje pomocí Spring scheduleru a spouští se každý den ve 12:30
+     * v časové zóně Europe/Prague. V rámci zpracování se vyhledají zápasy,
+     * které se konají přesně za tři dny od aktuálního data. Pro každý takový zápas
+     * se využije logika služby MatchRegistrationService k získání hráčů bez reakce
+     * a těmto hráčům se odešle připomínková SMS prostřednictvím SmsService.
      *
-     * Spouštění:
-     * <ul>
-     *     <li>každý den ve 14:40.</li>
-     * </ul>
+     * Metoda slouží k podpoře včasného plánování sestavy a k omezení situací,
+     * kdy hráči zapomenou na blížící se zápas.
      */
-    @Scheduled(cron = "0 40 14 * * *")
+    @Scheduled(cron = "0 30 12 * * *", zone = "Europe/Prague")
     @Transactional
     public void sendNoResponseSmsForMatchesIn3Days() {
 
         LocalDate targetDate = LocalDate.now().plusDays(3);
 
-        // zápasy, které se konají za 3 dny
+        // Zápasy, které se konají za tři dny.
         List<MatchEntity> matchesInThreeDays = matchRepository.findAll().stream()
                 .filter(m -> m.getDateTime().toLocalDate().isEqual(targetDate))
                 .toList();
 
         for (MatchEntity match : matchesInThreeDays) {
 
-            // využijeme existující logiku z MatchRegistrationService
+            // Hráči bez reakce se získávají pomocí MatchRegistrationService.
             List<PlayerDTO> noResponsePlayers =
                     matchRegistrationService.getNoResponsePlayers(match.getId());
 
@@ -218,6 +176,7 @@ public class SmsSchedulerService {
                     );
 
                 } catch (Exception e) {
+                    // Chyba při odesílání jednomu hráči nesmí zastavit běh celé naplánované úlohy.
                     System.err.println(
                             "Chyba NO_RESPONSE SMS pro hráče " +
                                     player.getFullName() +

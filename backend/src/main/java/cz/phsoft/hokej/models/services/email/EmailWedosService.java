@@ -104,10 +104,10 @@ public class EmailWedosService implements EmailService {
     // Konkrétní emaily – aktivace účtu
 
     @Override
-    public void sendActivationEmail(String to, String salutation, String activationLink) {
+    public void sendActivationEmail(String to, String greetings, String activationLink) {
         String subject = "Potvrzení registrace – Hokej Stará Garda";
         String text =
-                "Dobrý den, " + salutation + "\n\n" +
+                "Dobrý den, " + greetings + "\n\n" +
                         "Pro aktivaci účtu klikněte na následující odkaz:\n" +
                         activationLink + "\n\n" +
                         "Platnost odkazu je 24 hodin.";
@@ -117,11 +117,11 @@ public class EmailWedosService implements EmailService {
 
     @Override
     @Async
-    public void sendActivationEmailHTML(String to, String salutation, String activationLink) {
+    public void sendActivationEmailHTML(String to, String greetings, String activationLink) {
         String subject = "Potvrzení registrace – Hokej Stará Garda";
         String html =
                 "<p>Dobrý den,</p>" +
-                        "<p>" + salutation + "</p>" +
+                        "<p>" + greetings + "</p>" +
                         "<p>Pro aktivaci účtu klikněte na následující odkaz:</p>" +
                         "<a href=\"" + activationLink + "\">Aktivovat účet</a>";
 
@@ -130,10 +130,10 @@ public class EmailWedosService implements EmailService {
 
     @Override
     @Async
-    public void sendSuccesActivationEmail(String to, String salutation) {
+    public void sendSuccesActivationEmail(String to, String greetings) {
         String subject = "Účet byl aktivován – Hokej Stará Garda";
         String text =
-                "Dobrý den, " + salutation + "\n\n" +
+                "Dobrý den, " + greetings + "\n\n" +
                         "Váš účet byl úspěšně aktivován.";
 
         sendSimpleEmail(to, subject, text);
@@ -141,11 +141,11 @@ public class EmailWedosService implements EmailService {
 
     @Override
     @Async
-    public void sendSuccesActivationEmailHTML(String to, String salutation) {
+    public void sendSuccesActivationEmailHTML(String to, String greetings) {
         String subject = "Účet byl aktivován – Hokej Stará Garda";
         String html =
                 "<p>Dobrý den,</p>" +
-                        "<p>" + salutation + "</p>" +
+                        "<p>" + greetings + "</p>" +
                         "<p>Váš účet byl úspěšně aktivován.</p>";
 
         sendHtmlEmail(to, subject, html);

@@ -1,50 +1,38 @@
 package cz.phsoft.hokej.models.services.sms;
 
 /**
- * Rozhraní pro odesílání SMS zpráv v aplikaci.
- * <p>
- * Definuje kontrakt pro odesílání SMS bez závislosti
- * na konkrétním technickém řešení nebo poskytovateli služby.
- * </p>
+ * Rozhraní definující kontrakt pro odesílání SMS zpráv v aplikaci.
  *
- * Účel:
- * <ul>
- *     <li>poskytnout jednotný vstupní bod pro odesílání SMS,</li>
- *     <li>oddělit business logiku od technické implementace,</li>
- *     <li>umožnit snadnou výměnu nebo rozšíření SMS providerů.</li>
- * </ul>
+ * Rozhraní slouží jako jednotný vstupní bod pro odesílání SMS
+ * bez vazby na konkrétní technickou implementaci nebo poskytovatele služby.
+ * Business logika aplikace pracuje výhradně s tímto rozhraním
+ * a není závislá na detailech odesílání zpráv.
  *
- * Použití:
- * <ul>
- *     <li>využívá se v business službách (např. NotificationService, schedulery),</li>
- *     <li>implementace zajišťuje konkrétní způsob odeslání SMS.</li>
- * </ul>
+ * Odpovědnost rozhraní:
+ * - definování operace pro odeslání SMS zprávy,
+ * - oddělení business logiky od technické implementace,
+ * - umožnění snadné výměny nebo rozšíření SMS providerů.
  *
- * Implementační poznámky:
- * <ul>
- *     <li>implementace by měla být odolná vůči chybám externích služeb,</li>
- *     <li>výjimky by neměly být propagovány do business vrstvy,</li>
- *     <li>odesílání SMS je typicky „best-effort“ operace.</li>
- * </ul>
+ * Rozhraní je typicky používáno ve službách aplikační vrstvy,
+ * například v notifikačních službách nebo plánovaných schedulerech.
  */
 public interface SmsService {
 
     /**
-     * Odešle SMS zprávu na zadané telefonní číslo.
-     * <p>
+     * Odesílá SMS zprávu na zadané telefonní číslo.
+     *
      * Metoda představuje abstraktní operaci odeslání SMS
-     * a nezaručuje její skutečné doručení koncovému uživateli.
-     * </p>
+     * a nezaručuje její skutečné doručení koncovému příjemci.
+     * Způsob odeslání, práce s externí službou a případné chyby
+     * jsou plně v odpovědnosti konkrétní implementace rozhraní.
      *
      * Očekávané chování implementace:
-     * <ul>
-     *     <li>validní formát telefonního čísla je předpokladem,</li>
-     *     <li>selhání odeslání SMS nesmí shodit aplikaci,</li>
-     *     <li>chyby by měly být zalogovány.</li>
-     * </ul>
+     * - selhání odeslání SMS nesmí ovlivnit chod aplikace,
+     * - technické chyby by měly být zachyceny a zalogovány,
+     * - odesílání SMS je považováno za best-effort operaci.
      *
-     * @param phoneNumber cílové telefonní číslo příjemce
-     * @param message     text SMS zprávy
+     * @param phoneNumber telefonní číslo příjemce SMS zprávy
+     * @param message text SMS zprávy
      */
     void sendSms(String phoneNumber, String message);
 }

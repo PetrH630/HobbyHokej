@@ -4,7 +4,6 @@ Cesta: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\model
 Seznam souborů:
 SmsMessageBuilder.java
 SmsService.java
-SmsServiceImpl.java
 SmsSchedulerService.java
 SmsTextBeeService.java
 
@@ -33,47 +32,46 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Builder pro generování textů SMS zpráv.
- * <p>
- * Slouží jako centrální místo pro skládání lidsky čitelných SMS
- * používaných v aplikaci. Řeší pouze textovou podobu zprávy, nikoliv
- * odesílání nebo business logiku.
- * </p>
  *
- * Odpovědnost:
- * <ul>
- *     <li>sestavení lidsky čitelného obsahu SMS,</li>
- *     <li>centrální místo pro formátování zpráv (princip DRY),</li>
- *     <li>oddělení textové logiky od business logiky a schedulingu.</li>
- * </ul>
+ * Odpovědnosti:
+ * - sestavení lidsky čitelného obsahu SMS pro různé typy notifikací,
+ * - centralizace formátování SMS zpráv (princip DRY),
+ * - oddělení textové logiky od business logiky a schedulingu.
  *
- * Třída vytváří SMS texty pro:
- * <ul>
- *     <li>registraci / odhlášení / omluvu hráče,</li>
- *     <li>připomenutí hráčům, kteří nereagovali,</li>
- *     <li>finální připomínku v den zápasu,</li>
- *     <li>obecné info o zápasu (zrušení, změna času).</li>
- * </ul>
+ * Tato třída se používá zejména v NotificationServiceImpl a SmsService
+ * jako zdroj výsledného textu SMS zpráv.
  *
  * Třída neřeší:
- * <ul>
- *     <li>odesílání SMS (to zajišťuje {@link SmsService}),</li>
- *     <li>změny v databázi,</li>
- *     <li>oprávnění ani validace (předpokládá validní vstup).</li>
- * </ul>
+ * - odesílání SMS (to zajišťuje SmsService),
+ * - změny v databázi,
+ * - oprávnění ani validace vstupů (předpokládá se, že vstupy jsou zvalidované dříve).
  */
 @Component
 public class SmsMessageBuilder {
 
     /**
-     * Repozitář registrací – používá se pro read-only výpočty
-     * (např. aktuální počet hráčů se statusem REGISTERED).
+     * Repozitář registrací používaný pro read-only výpočty
+     * (například aktuální počet hráčů se statusem REGISTERED).
      */
     private final MatchRegistrationRepository matchRegistrationRepository;
+
+    /**
+     * Repozitář zápasů používaný pro doplňující informace o zápase.
+     *
+     * Aktuálně se využívá minimálně, je zde ponechán pro možné rozšíření.
+     */
     private final MatchRepository matchRepository;
+
+    /**
+     * Repozitář hráčů používaný pro případné rozšíření zpráv
+     * o detailnější informace o hráčích.
+     */
     private final PlayerRepository playerRepository;
 
     /**
      * Jednotný formát data používaný v SMS zprávách.
+     *
+     * Slouží k tomu, aby měly všechny SMS zprávy konzistentní formát data.
      */
     private final DateTimeFormatter dateFormatter =
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -87,16 +85,24 @@ public class SmsMessageBuilder {
     }
 
     // ====================================================
-    // HLAVNÍ METODA PRO NotificationServiceImpl
+    // HLAVNÍ VSTUPNÍ METODA PRO NotificationServiceImpl
     // ====================================================
 
     /**
      * Sestaví SMS text pro hráče podle typu notifikace a kontextu.
      *
-     * @param type    typ notifikace
-     * @param player  hráč (aktuálně se používá hlavně pro jméno – pro rozšíření do budoucna)
-     * @param context kontext – typicky {@link MatchRegistrationEntity} nebo {@link MatchEntity}
-     * @return hotový text SMS nebo {@code null}, pokud pro daný typ nic neposíláme
+     * Metoda slouží jako hlavní vstupní bod pro NotificationServiceImpl,
+     * kde se podle NotificationType a typu contextu rozhoduje,
+     * který specializovaný builder se použije.
+     *
+     * Podporované scénáře:
+     * - změny registrace hráče na zápas,
+     * - obecné informace o zápase (zrušení, změna času, připomenutí).
+     *
+     * @param type    typ notifikace, pro kterou se SMS generuje
+     * @param player  hráč, pro kterého se SMS generuje
+     * @param context kontext notifikace, obvykle MatchRegistrationEntity nebo MatchEntity
+     * @return hotový text SMS nebo {@code null}, pokud se pro daný typ notifikace SMS neposílá
      */
     public String buildForNotification(NotificationType type,
                                        PlayerEntity player,
@@ -131,11 +137,21 @@ public class SmsMessageBuilder {
                 yield buildMessageMatchInfo(type, match);
             }
 
-            // ostatní typy přes SMS neposíláme
+            // ostatní typy se přes SMS neposílají
             default -> null;
         };
     }
 
+    /**
+     * Bezpečné přetypování contextu na očekávaný typ.
+     *
+     * Pokud context není zadaného typu, vrací se null.
+     *
+     * @param context      vstupní objekt kontextu
+     * @param expectedType očekávaný typ kontextu
+     * @param <T>          generický typ výsledku
+     * @return přetypovaný objekt nebo null, pokud typ neodpovídá
+     */
     @SuppressWarnings("unchecked")
     private <T> T castContext(Object context, Class<T> expectedType) {
         if (context == null) {
@@ -154,17 +170,23 @@ public class SmsMessageBuilder {
     /**
      * Vytvoří SMS zprávu po změně registrace hráče na zápas.
      *
-     * Používá se pro stavy:
-     * <ul>
-     *     <li>{@link PlayerMatchStatus#REGISTERED},</li>
-     *     <li>{@link PlayerMatchStatus#UNREGISTERED},</li>
-     *     <li>{@link PlayerMatchStatus#EXCUSED},</li>
-     *     <li>{@link PlayerMatchStatus#SUBSTITUTE},</li>
-     *     <li>{@link PlayerMatchStatus#RESERVED}.</li>
-     * </ul>
+     * Zpráva popisuje:
+     * - datum zápasu,
+     * - aktuální obsazenost zápasu,
+     * - jméno hráče,
+     * - slovní popis změny stavu (přihlášení, odhlášení, omluva, náhradník).
+     *
+     * Použité stavy:
+     * - REGISTERED,
+     * - UNREGISTERED,
+     * - EXCUSED,
+     * - SUBSTITUTE,
+     * - RESERVED.
+     *
+     * Text se liší podle toho, zda změnu provedl uživatel nebo systém.
      *
      * @param registration registrace hráče k zápasu
-     * @return text SMS zprávy
+     * @return text SMS zprávy popisující změnu registrace
      */
     public String buildMessageRegistration(MatchRegistrationEntity registration) {
 
@@ -224,11 +246,20 @@ public class SmsMessageBuilder {
     // ====================================================
 
     /**
-     * Vytvoří SMS zprávu pro hráče, kteří dosud nereagovali
-     * na zápas (nemají žádnou registraci).
+     * Vytvoří SMS zprávu pro hráče, kteří dosud nereagovali na zápas.
      *
-     * Používá se typicky několik dní před zápasem v rámci
-     * scheduleru, který připomíná blížící se zápasy.
+     * Zpráva se používá typicky několik dní před zápasem
+     * v rámci plánovače, který připomíná blížící se zápasy
+     * a upozorňuje na volná místa.
+     *
+     * Obsah zprávy:
+     * - datum zápasu,
+     * - aktuální počet volných míst,
+     * - upozornění, že hráč ještě nereagoval.
+     *
+     * @param player hráč, pro kterého se zpráva vytváří
+     * @param match  zápas, ke kterému se připomínka vztahuje
+     * @return text SMS zprávy pro nereagujícího hráče
      */
     public String buildMessageNoResponse(PlayerDTO player, MatchEntity match) {
 
@@ -253,11 +284,24 @@ public class SmsMessageBuilder {
     // ====================================================
 
     /**
-     * Vytvoří SMS zprávu s informací o změně stavu zápasu
-     * (zrušen / obnoven apod.).
+     * Vytvoří SMS zprávu s informací o změně stavu zápasu.
      *
-     * @param type  typ notifikace (např. MATCH_CANCELED, MATCH_TIME_CHANGED)
-     * @param match zápas
+     * Typické scénáře:
+     * - zápas byl zrušen,
+     * - zápas byl obnoven nebo změněn.
+     *
+     * Zpráva obsahuje:
+     * - datum zápasu,
+     * - slovní popis stavu zápasu,
+     * - slovní popis důvodu zrušení (pokud je k dispozici).
+     *
+     * Parametr type se používá na úrovni volající služby pro rozhodnutí,
+     * kdy se zpráva generuje. V této metodě se stav určuje primárně
+     * z vlastností MatchEntity.
+     *
+     * @param type  typ notifikace, pro kterou se zpráva vytváří
+     * @param match zápas, jehož stav se oznamuje
+     * @return text SMS zprávy popisující stav zápasu
      */
     public String buildMessageMatchInfo(NotificationType type, MatchEntity match) {
         MatchStatus matchStatus = match.getMatchStatus();
@@ -298,15 +342,13 @@ public class SmsMessageBuilder {
      * Vytvoří finální SMS zprávu v den zápasu
      * pro již přihlášené hráče.
      *
-     * Obsah:
-     * <ul>
-     *     <li>datum zápasu,</li>
-     *     <li>aktuální počet přihlášených hráčů / maximální kapacita,</li>
-     *     <li>cena na jednoho hráče (celková cena / počet přihlášených).</li>
-     * </ul>
+     * Zpráva shrnuje:
+     * - datum zápasu,
+     * - aktuální počet přihlášených hráčů a maximální kapacitu,
+     * - orientační cenu na jednoho hráče (celková cena dělená počtem přihlášených).
      *
-     * @param registration registrace hráče k zápasu
-     * @return text finální SMS zprávy
+     * @param registration registrace hráče k zápasu, pro kterou se připomínka vytváří
+     * @return text finální SMS zprávy v den zápasu
      */
     public String buildMessageFinal(MatchRegistrationEntity registration) {
 
@@ -344,111 +386,42 @@ public class SmsMessageBuilder {
 package cz.phsoft.hokej.models.services.sms;
 
 /**
- * Rozhraní pro odesílání SMS zpráv v aplikaci.
- * <p>
- * Definuje kontrakt pro odesílání SMS bez závislosti
- * na konkrétním technickém řešení nebo poskytovateli služby.
- * </p>
+ * Rozhraní definující kontrakt pro odesílání SMS zpráv v aplikaci.
  *
- * Účel:
- * <ul>
- *     <li>poskytnout jednotný vstupní bod pro odesílání SMS,</li>
- *     <li>oddělit business logiku od technické implementace,</li>
- *     <li>umožnit snadnou výměnu nebo rozšíření SMS providerů.</li>
- * </ul>
+ * Rozhraní slouží jako jednotný vstupní bod pro odesílání SMS
+ * bez vazby na konkrétní technickou implementaci nebo poskytovatele služby.
+ * Business logika aplikace pracuje výhradně s tímto rozhraním
+ * a není závislá na detailech odesílání zpráv.
  *
- * Použití:
- * <ul>
- *     <li>využívá se v business službách (např. NotificationService, schedulery),</li>
- *     <li>implementace zajišťuje konkrétní způsob odeslání SMS.</li>
- * </ul>
+ * Odpovědnost rozhraní:
+ * - definování operace pro odeslání SMS zprávy,
+ * - oddělení business logiky od technické implementace,
+ * - umožnění snadné výměny nebo rozšíření SMS providerů.
  *
- * Implementační poznámky:
- * <ul>
- *     <li>implementace by měla být odolná vůči chybám externích služeb,</li>
- *     <li>výjimky by neměly být propagovány do business vrstvy,</li>
- *     <li>odesílání SMS je typicky „best-effort“ operace.</li>
- * </ul>
+ * Rozhraní je typicky používáno ve službách aplikační vrstvy,
+ * například v notifikačních službách nebo plánovaných schedulerech.
  */
 public interface SmsService {
 
     /**
-     * Odešle SMS zprávu na zadané telefonní číslo.
-     * <p>
+     * Odesílá SMS zprávu na zadané telefonní číslo.
+     *
      * Metoda představuje abstraktní operaci odeslání SMS
-     * a nezaručuje její skutečné doručení koncovému uživateli.
-     * </p>
+     * a nezaručuje její skutečné doručení koncovému příjemci.
+     * Způsob odeslání, práce s externí službou a případné chyby
+     * jsou plně v odpovědnosti konkrétní implementace rozhraní.
      *
      * Očekávané chování implementace:
-     * <ul>
-     *     <li>validní formát telefonního čísla je předpokladem,</li>
-     *     <li>selhání odeslání SMS nesmí shodit aplikaci,</li>
-     *     <li>chyby by měly být zalogovány.</li>
-     * </ul>
+     * - selhání odeslání SMS nesmí ovlivnit chod aplikace,
+     * - technické chyby by měly být zachyceny a zalogovány,
+     * - odesílání SMS je považováno za best-effort operaci.
      *
-     * @param phoneNumber cílové telefonní číslo příjemce
-     * @param message     text SMS zprávy
+     * @param phoneNumber telefonní číslo příjemce SMS zprávy
+     * @param message text SMS zprávy
      */
     void sendSms(String phoneNumber, String message);
 }
 
-
-
------
-# Soubor: C:\Projekty Práce\StaraGarda\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsServiceImpl.java
------
-
-/* package cz.phsoft.hokej.models.services.sms;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Map;
-
-@Service
-public class SmsServiceImpl {
-
-   // private final RestTemplate restTemplate = new RestTemplate();
-
-    @Value("${textbee.api-url}")
-    private String apiUrl;
-
-    @Value("${textbee.api-key}")
-    private String apiKey;
-
-    // testovací číslo
-    //private final String testNumber = "+420776609956";
-
-    /**
-     * Odešle SMS na testovací číslo.
-     * @param message text zprávy
-     */
-
-/*
-    public void sendSms(String phoneNumber, String message) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("x-api-key", apiKey);
-
-        Map<String, Object> body = Map.of(
-                "recipients", List.of(phoneNumber),
-                "message", message
-        );
-
-        HttpEntity<Map<String,Object>> request = new HttpEntity<>(body, headers);
-
-        try {
-            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
-            System.out.println("SMS poslána na testovací číslo  xxx   : " + response.getBody());
-        } catch (Exception e) {
-            System.err.println("Chyba při odesílání SMS: " + e.getMessage());
-        }
-    }
-
-*/
 
 
 -----
@@ -471,79 +444,51 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Scheduler služba pro automatické odesílání SMS notifikací hráčům.
- * <p>
- * Automaticky odesílá SMS hráčům podle času a stavu zápasů:
- * </p>
- * <ul>
- *     <li>v den zápasu („finální“ SMS s informacemi o zápasu),</li>
- *     <li>několik dní před zápasem hráčům, kteří dosud nereagovali.</li>
- * </ul>
+ * Scheduler služba, která zajišťuje plánované odesílání SMS notifikací hráčům.
  *
- * Význam v aplikaci:
- * <ul>
- *     <li>zajišťuje pravidelnou a konzistentní komunikaci s hráči,</li>
- *     <li>snižuje riziko zapomenutí zápasu,</li>
- *     <li>pomáhá organizátorům získat včasné reakce hráčů.</li>
- * </ul>
+ * Odpovědnost třídy je:
+ * - vyhledávání zápasů podle data konání,
+ * - určení cílových hráčů pro daný typ SMS,
+ * - předání textu zpráv službě SmsService k odeslání.
  *
- * Technické řešení:
- * <ul>
- *     <li>využívá Spring scheduler ({@link Scheduled}),</li>
- *     <li>používá {@link SmsService} – nezávislá na konkrétním SMS providerovi,</li>
- *     <li>texty SMS jsou generovány centrálně pomocí {@link SmsMessageBuilder}.</li>
- * </ul>
- *
- * Chování a odolnost:
- * <ul>
- *     <li>služba pracuje pouze se čtením dat (read-only),</li>
- *     <li>selhání odeslání SMS jednomu hráči nesmí ovlivnit ostatní,</li>
- *     <li>výjimky jsou zachyceny a nezastavují běh scheduleru.</li>
- * </ul>
+ * Třída se používá ve vrstvě služeb a navazuje na MatchRepository,
+ * MatchRegistrationRepository, MatchRegistrationService a SmsMessageBuilder.
  */
 @Service
 public class SmsSchedulerService {
 
     /**
-     * Repozitář zápasů.
-     * <p>
-     * Slouží k vyhledávání zápasů podle data konání.
-     * </p>
+     * Repozitář zápasů, který se používá pro vyhledávání zápasů podle data konání.
      */
     private final MatchRepository matchRepository;
 
     /**
-     * Repozitář registrací hráčů na zápasy.
-     * <p>
-     * Umožňuje získat seznam hráčů registrovaných ke konkrétnímu zápasu.
-     * </p>
+     * Repozitář registrací hráčů na zápasy, který se používá pro získání registrací
+     * ke konkrétnímu zápasu.
      */
     private final MatchRegistrationRepository registrationRepository;
 
     /**
-     * Service pro odesílání SMS zpráv.
-     * <p>
-     * Jedná se o jediný vstupní bod pro odesílání SMS v aplikaci.
-     * </p>
+     * Služba pro odesílání SMS zpráv, která představuje technický vstupní bod
+     * pro komunikaci s externím SMS providerem.
      */
     private final SmsService smsService;
 
     /**
-     * Builder pro jednotnou tvorbu textů SMS zpráv.
-     * <p>
-     * Zajišťuje konzistentní formát a obsah SMS napříč aplikací.
-     * </p>
+     * Builder pro tvorbu textů SMS zpráv, který zajišťuje jednotný formát
+     * a obsah SMS napříč aplikací.
      */
     private final SmsMessageBuilder smsMessageBuilder;
 
     /**
-     * Service s business logikou registrací hráčů na zápasy.
-     * <p>
-     * Používá se zejména pro zjištění hráčů bez reakce.
-     * </p>
+     * Služba s business logikou registrací hráčů na zápasy, která se používá
+     * zejména pro zjištění hráčů bez reakce na pozvánku.
      */
     private final MatchRegistrationService matchRegistrationService;
 
+    /**
+     * Vytváří instanci scheduler služby a injektuje závislosti ze Spring kontextu.
+     */
     public SmsSchedulerService(
             MatchRepository matchRepository,
             MatchRegistrationRepository registrationRepository,
@@ -559,39 +504,31 @@ public class SmsSchedulerService {
     }
 
     /**
-     * Odešle „finální“ SMS všem hráčům registrovaným na zápasy,
+     * Metoda odesílá finální SMS všem hráčům registrovaným na zápasy,
      * které se konají v aktuální den.
-     * <p>
-     * Tato SMS slouží jako poslední připomenutí a shrnutí informací
-     * o zápasu pro hráče, kteří jsou již registrováni.
-     * </p>
      *
-     * Obsah SMS typicky zahrnuje:
-     * <ul>
-     *     <li>datum a čas zápasu,</li>
-     *     <li>místo konání,</li>
-     *     <li>informaci o účasti konkrétního hráče.</li>
-     * </ul>
+     * Metoda se plánuje pomocí Spring scheduleru a spouští se každý den ve 12:30
+     * v časové zóně Europe/Prague. V rámci zpracování se vyhledají všechny dnešní zápasy,
+     * načtou se registrace hráčů k těmto zápasům a pro každou registraci se vygeneruje
+     * text finální SMS a předá se službě SmsService k odeslání.
      *
-     * Spouštění:
-     * <ul>
-     *     <li>každý den ve 12:30.</li>
-     * </ul>
+     * Metoda pracuje pouze s existujícími daty a nemění stav databáze, transakce
+     * se používá pro zajištění konzistence při čtení.
      */
-    @Scheduled(cron = "0 30 12 * * *")
+    @Scheduled(cron = "0 30 12 * * *", zone = "Europe/Prague")
     @Transactional
     public void sendFinalSmsForTodayMatches() {
 
         LocalDate today = LocalDate.now();
 
-        // všechny zápasy, které se konají dnes
+        // Zápasy, které se konají v aktuální den.
         List<MatchEntity> todaysMatches = matchRepository.findAll().stream()
                 .filter(m -> m.getDateTime().toLocalDate().isEqual(today))
                 .toList();
 
         for (MatchEntity match : todaysMatches) {
 
-            // všechny registrace k danému zápasu
+            // Registrace hráčů k danému zápasu.
             List<MatchRegistrationEntity> registrations =
                     registrationRepository.findByMatchId(match.getId());
 
@@ -611,7 +548,7 @@ public class SmsSchedulerService {
                     );
 
                 } catch (Exception e) {
-                    // chyba jednoho hráče nesmí zastavit celý scheduler
+                    // Chyba při odesílání jednomu hráči nesmí zastavit běh celé naplánované úlohy.
                     System.err.println(
                             "Chyba SMS pro hráče " +
                                     reg.getPlayer().getFullName() +
@@ -623,38 +560,32 @@ public class SmsSchedulerService {
     }
 
     /**
-     * Odešle připomínkovou SMS hráčům, kteří:
-     * <ul>
-     *     <li>mají zápas za 3 dny,</li>
-     *     <li>dosud na zápas nijak nereagovali (NO_RESPONSE).</li>
-     * </ul>
+     * Metoda odesílá připomínkovou SMS hráčům, kteří mají zápas naplánovaný
+     * za tři dny a dosud na zápas nijak nereagovali (stav NO_RESPONSE).
      *
-     * Smysl této SMS:
-     * <ul>
-     *     <li>upozornit hráče na blížící se zápas,</li>
-     *     <li>motivovat je k reakci (účast / omluva),</li>
-     *     <li>umožnit včasné plánování sestavy.</li>
-     * </ul>
+     * Metoda se plánuje pomocí Spring scheduleru a spouští se každý den ve 12:30
+     * v časové zóně Europe/Prague. V rámci zpracování se vyhledají zápasy,
+     * které se konají přesně za tři dny od aktuálního data. Pro každý takový zápas
+     * se využije logika služby MatchRegistrationService k získání hráčů bez reakce
+     * a těmto hráčům se odešle připomínková SMS prostřednictvím SmsService.
      *
-     * Spouštění:
-     * <ul>
-     *     <li>každý den ve 14:40.</li>
-     * </ul>
+     * Metoda slouží k podpoře včasného plánování sestavy a k omezení situací,
+     * kdy hráči zapomenou na blížící se zápas.
      */
-    @Scheduled(cron = "0 40 14 * * *")
+    @Scheduled(cron = "0 30 12 * * *", zone = "Europe/Prague")
     @Transactional
     public void sendNoResponseSmsForMatchesIn3Days() {
 
         LocalDate targetDate = LocalDate.now().plusDays(3);
 
-        // zápasy, které se konají za 3 dny
+        // Zápasy, které se konají za tři dny.
         List<MatchEntity> matchesInThreeDays = matchRepository.findAll().stream()
                 .filter(m -> m.getDateTime().toLocalDate().isEqual(targetDate))
                 .toList();
 
         for (MatchEntity match : matchesInThreeDays) {
 
-            // využijeme existující logiku z MatchRegistrationService
+            // Hráči bez reakce se získávají pomocí MatchRegistrationService.
             List<PlayerDTO> noResponsePlayers =
                     matchRegistrationService.getNoResponsePlayers(match.getId());
 
@@ -675,6 +606,7 @@ public class SmsSchedulerService {
                     );
 
                 } catch (Exception e) {
+                    // Chyba při odesílání jednomu hráči nesmí zastavit běh celé naplánované úlohy.
                     System.err.println(
                             "Chyba NO_RESPONSE SMS pro hráče " +
                                     player.getFullName() +
@@ -708,27 +640,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementace {@link SmsService} využívající externí službu TextBee.
- * <p>
- * Tato service představuje jediný vstupní bod pro odesílání SMS zpráv
- * v aplikaci. Business vrstvy pracují výhradně s rozhraním
- * {@link SmsService} a nejsou závislé na konkrétním SMS providerovi.
- * </p>
+ * Implementace rozhraní SmsService využívající externí SMS službu TextBee.
  *
- * Odpovědnost:
- * <ul>
- *     <li>odesílání SMS zpráv přes TextBee API,</li>
- *     <li>respektování globálního přepínače {@code sms.enabled},</li>
- *     <li>jednotné logování úspěchů i chyb,</li>
- *     <li>zajištění, že selhání SMS neovlivní business logiku.</li>
- * </ul>
+ * Třída představuje technickou implementaci odesílání SMS zpráv.
+ * Business vrstvy aplikace pracují výhradně s rozhraním SmsService
+ * a nejsou závislé na konkrétním SMS providerovi ani na detailech
+ * HTTP komunikace.
  *
- * Technické poznámky:
- * <ul>
- *     <li>integrace probíhá pomocí REST API služby TextBee,</li>
- *     <li>chyby jsou zachyceny a nejsou propagovány výše,</li>
- *     <li>service je vhodná jak pro produkci, tak pro dev/test režim.</li>
- * </ul>
+ * Odpovědnost třídy:
+ * - odesílání SMS zpráv prostřednictvím TextBee API,
+ * - respektování globálního nastavení zapnutí nebo vypnutí SMS,
+ * - jednotné logování úspěšných i neúspěšných pokusů o odeslání,
+ * - zajištění, že technické selhání SMS neovlivní business logiku aplikace.
+ *
+ * Třída je navržena tak, aby byla snadno nahraditelná jinou implementací
+ * SmsService bez zásahu do vyšších vrstev aplikace.
  */
 @Service
 public class SmsTextBeeService implements SmsService {
@@ -737,71 +663,65 @@ public class SmsTextBeeService implements SmsService {
             LoggerFactory.getLogger(SmsTextBeeService.class);
 
     /**
-     * Globální zapnutí / vypnutí SMS.
-     * <p>
-     * Typické použití:
-     * </p>
-     * <ul>
-     *     <li>{@code true} – produkční prostředí (SMS se skutečně odesílají),</li>
-     *     <li>{@code false} – lokální vývoj / testy (SMS se pouze logují).</li>
-     * </ul>
+     * Globální přepínač pro zapnutí nebo vypnutí odesílání SMS.
+     *
+     * Hodnota se načítá z konfiguračních properties aplikace.
+     * V produkčním prostředí je obvykle nastavena na true,
+     * v lokálním vývoji nebo testech může být nastavena na false.
      */
     @Value("${sms.enabled:true}")
     private boolean smsEnabled;
 
     /**
      * URL endpointu TextBee API.
+     *
+     * Používá se jako cílová adresa pro HTTP POST požadavky
+     * při odesílání SMS zpráv.
      */
     @Value("${textbee.api-url}")
     private String apiUrl;
 
     /**
-     * API klíč pro autentizaci vůči TextBee.
-     * <p>
-     * Klíč se odesílá v HTTP hlavičce {@code x-api-key}.
-     * </p>
+     * API klíč pro autentizaci vůči službě TextBee.
+     *
+     * Klíč se odesílá v HTTP hlavičce každého požadavku
+     * a slouží k autorizaci aplikace vůči externí službě.
      */
     @Value("${textbee.api-key}")
     private String apiKey;
 
     /**
-     * HTTP klient pro komunikaci s TextBee API.
-     * <p>
-     * Pro jednoduchost je vytvořen přímo zde. V případě potřeby
-     * lze tuto implementaci snadno nahradit injektovaným {@code @Bean}
-     * nebo {@code WebClientem}.
-     * </p>
+     * HTTP klient používaný pro komunikaci s TextBee API.
+     *
+     * Pro jednoduchost je instancován přímo v této třídě.
+     * V případě potřeby lze tuto implementaci nahradit
+     * konfigurovaným Beanem nebo WebClientem.
      */
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**
-     * Odešle SMS zprávu na zadané telefonní číslo.
-     * <p>
-     * Chování metody:
-     * </p>
-     * <ul>
-     *     <li>pokud jsou SMS globálně vypnuté, zpráva se neodesílá, pouze se zaloguje,</li>
-     *     <li>jinak se odešle HTTP POST požadavek na TextBee API,</li>
-     *     <li>jakákoli chyba při odesílání je zachycena a zalogována.</li>
-     * </ul>
+     * Odesílá SMS zprávu na zadané telefonní číslo.
      *
-     * Důležité:
-     * <ul>
-     *     <li>výjimky nejsou propagovány do business vrstvy,</li>
-     *     <li>odesílání SMS je „best-effort“ operace,</li>
-     *     <li>selhání SMS nesmí shodit aplikaci.</li>
-     * </ul>
+     * Metoda nejprve ověřuje globální nastavení odesílání SMS.
+     * Pokud jsou SMS vypnuté, zpráva se neodesílá a událost se pouze zaloguje.
+     * Pokud jsou SMS povolené, vytvoří se HTTP POST požadavek
+     * a odešle se na TextBee API.
      *
-     * @param phoneNumber cílové telefonní číslo
-     * @param message     text SMS zprávy
+     * Veškeré výjimky vzniklé během odesílání jsou zachyceny
+     * a nejsou propagovány do vyšších vrstev aplikace.
+     * Odesílání SMS je považováno za best-effort operaci,
+     * jejíž selhání nesmí ohrozit stabilitu systému.
+     *
+     * @param phoneNumber cílové telefonní číslo příjemce
+     * @param message text SMS zprávy
      */
     @Override
     public void sendSms(String phoneNumber, String message) {
 
-        // Globální vypnutí SMS (typicky dev / test)
+        // Ověření globálního nastavení odesílání SMS.
         if (!smsEnabled) {
             log.info(
-                    "SMS jsou globálně vypnuté (sms.enabled=false). Zpráva NEODESLÁNA. Tel: {}, msg: {}",
+                    "SMS jsou globálně vypnuté. Zpráva nebyla odeslána. Tel: {}, msg: {}",
                     phoneNumber, message
             );
 
@@ -812,12 +732,12 @@ public class SmsTextBeeService implements SmsService {
             return;
         }
 
-        // HTTP hlavičky
+        // Příprava HTTP hlaviček požadavku.
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("x-api-key", apiKey);
 
-        // Tělo requestu
+        // Příprava těla požadavku dle specifikace TextBee API.
         Map<String, Object> body = Map.of(
                 "recipients", List.of(phoneNumber),
                 "message", message
@@ -827,23 +747,22 @@ public class SmsTextBeeService implements SmsService {
                 new HttpEntity<>(body, headers);
 
         try {
-            // Odeslání požadavku na TextBee API
+            // Odeslání HTTP POST požadavku na TextBee API.
             ResponseEntity<String> response =
                     restTemplate.postForEntity(apiUrl, request, String.class);
 
             log.info(
-                    "SMS odeslána (TextBee) na {}, response: {}",
+                    "SMS úspěšně odeslána přes TextBee na {}, response: {}",
                     phoneNumber, response.getBody()
             );
 
-            // Paralelní výstup do konzole (užitečné zejména v DEV)
             System.out.println(
                     "SMS odeslána (TextBee) na " + phoneNumber +
                             ", response: " + response.getBody()
             );
 
         } catch (Exception e) {
-            // Chyby při odesílání SMS nesmí ovlivnit chod aplikace
+            // Selhání odeslání SMS nesmí ovlivnit chod aplikace.
             log.error(
                     "Chyba při odesílání SMS přes TextBee na {}: {}",
                     phoneNumber, e.getMessage(), e

@@ -17,30 +17,19 @@ import jakarta.validation.constraints.NotNull;
 
 /**
  * Request DTO pro změnu přiřazeného uživatele k hráči.
- * <p>
+ *
  * Slouží jako vstupní objekt pro administrátorské endpointy,
  * které umožňují změnit vazbu mezi hráčem a aplikačním uživatelem.
- * </p>
- *
- * Typické použití:
- * <ul>
- *     <li>oprava chybně přiřazeného uživatelského účtu k hráči,</li>
- *     <li>převod hráče pod jiný účet,</li>
- *     <li>technické nebo datové korekce prováděné administrátorem.</li>
- * </ul>
- *
- * Validace:
- * <ul>
- *     <li>{@link NotNull} – ID nového uživatele musí být vždy uvedeno.</li>
- * </ul>
- *
- * Třída neobsahuje žádnou business logiku – slouží výhradně
- * jako přenosový objekt mezi klientem a API vrstvou.
+ * Třída neobsahuje žádnou business logiku, používá se pouze
+ * pro přenos dat z klienta do API vrstvy.
  */
 public class ChangePlayerUserRequest {
 
     /**
      * ID nového uživatele, ke kterému má být hráč přiřazen.
+     *
+     * Hodnota je povinná. Validace se provádí anotací {@link NotNull}
+     * a následně v servisní vrstvě při vyhledávání uživatele.
      */
     @NotNull
     private Long newUserId;
@@ -80,93 +69,128 @@ import jakarta.validation.constraints.Positive;
 /**
  * Request DTO pro změnu registrace hráče na zápas.
  *
- * ÚČEL:
- * -----
  * Slouží jako vstupní objekt pro operace:
- * <ul>
- *     <li>přihlášení hráče na zápas,</li>
- *     <li>odhlášení hráče ze zápasu,</li>
- *     <li>omluvení hráče (EXCUSED),</li>
- *     <li>administrátorské zásahy do registrace.</li>
- * </ul>
+ * - přihlášení hráče na zápas,
+ * - odhlášení hráče ze zápasu,
+ * - omluvení hráče,
+ * - administrátorské zásahy do registrace.
  *
+ * Typ a kombinace vyplněných polí určují,
+ * jaká operace se v servisní vrstvě provede.
  * Tento request je zpracováván metodou
- * {@code MatchRegistrationService#upsertRegistration(...)}.
+ * MatchRegistrationService.upsertRegistration.
  *
- * POZNÁMKA:
- * ---------
- * Ne všechna pole jsou povinná – jejich význam a validace
+ * Ne všechna pole jsou povinná. Jejich význam a validace
  * závisí na konkrétní operaci a business logice služby.
  */
 public class MatchRegistrationRequest {
 
     /**
      * ID zápasu, ke kterému se registrace vztahuje.
+     *
+     * Hodnota je povinná a musí být kladná.
+     * Slouží k jednoznačnému určení zápasu,
+     * u kterého se registrace mění.
      */
     @NotNull
     @Positive
     private Long matchId;
 
     /**
-     * ID hráče.
+     * ID hráče, kterého se operace týká.
      *
-     * Typicky:
-     * <ul>
-     *     <li>u endpointů typu {@code /me} může být {@code null}
-     *         a hráč je určen kontextem,</li>
-     *     <li>u administrátorských operací je vyplněno explicitně.</li>
-     * </ul>
+     * Typické použití:
+     * - u endpointů typu "/me" může být null a hráč
+     *   se určuje podle přihlášeného uživatele,
+     * - u administrátorských operací se hodnota vyplňuje explicitně.
      */
     private Long playerId;
 
     /**
-     * Tým, do kterého je hráč přiřazen (např. DARK / LIGHT).
+     * Tým, do kterého je hráč přiřazen (například DARK nebo LIGHT).
+     *
+     * Používá se při nastavování nebo změně rozdělení týmů.
      */
     private Team team;
 
     /**
-     * Důvod omluvy – používá se pouze při statusu
-     * {@code EXCUSED}
-     * {@code UNREGISTER}
+     * Důvod omluvy hráče.
+     *
+     * Používá se u operací, které představují omluvu
+     * nebo odhlášení se zdůvodněním.
      */
     private ExcuseReason excuseReason;
 
     /**
-     * Volitelná poznámka k omluvě od hráče.
+     * Volitelná textová poznámka k omluvě od hráče.
+     *
+     * Umožňuje doplnit detailnější vysvětlení
+     * nad rámec strukturovaného ExcuseReason.
      */
     private String excuseNote;
 
     /**
-     * Administrátorská poznámka k registraci
-     * (např. no-show, interní komentář).
+     * Administrátorská poznámka k registraci.
+     *
+     * Používá se například pro označení no-show,
+     * interních komentářů nebo dalších technických poznámek.
      */
     private String adminNote;
 
     /**
-     * Příznak odhlášení ze zápasu.
+     * Příznak, že má dojít k odhlášení hráče ze zápasu.
      *
-     * Pokud je {@code true}, request reprezentuje akci UNREGISTER.
+     * Pokud je true, request reprezentuje akci odhlášení
+     * (UNREGISTER) bez ohledu na ostatní volitelná pole.
      */
     private boolean unregister;
 
     /**
-     * Příznak náhradníka do zápasu (možná příjde - už nějak reagoval).
+     * Příznak, že jde o registraci náhradníka.
      *
-     * Pokud je {@code true}, request reprezentuje akci SUBSTITUTE.
+     * Pokud je true, request reprezentuje akci SUBSTITUTE,
+     * tedy stav, kdy hráč projevil zájem, ale jeho účast
+     * není jistá (čeká se na uvolnění místa nebo potvrzení).
      */
     private boolean substitute;
 
-    // --- gettery ---
+    // --- gettery / settery ---
 
-    public Long getPlayerId() { return playerId; }
-    public Long getMatchId() { return matchId; }
-    public Team getTeam() { return team; }
-    public ExcuseReason getExcuseReason() { return excuseReason; }
-    public String getExcuseNote() { return excuseNote; }
-    public String getAdminNote() { return adminNote; }
-    public boolean isUnregister() { return unregister; }
-    public boolean isSubstitute() { return substitute; }
-    public void setSubstitute(boolean substitute) { this.substitute = substitute; }
+    public Long getPlayerId() {
+        return playerId;
+    }
+
+    public Long getMatchId() {
+        return matchId;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public ExcuseReason getExcuseReason() {
+        return excuseReason;
+    }
+
+    public String getExcuseNote() {
+        return excuseNote;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public boolean isUnregister() {
+        return unregister;
+    }
+
+    public boolean isSubstitute() {
+        return substitute;
+    }
+
+    public void setSubstitute(boolean substitute) {
+        this.substitute = substitute;
+    }
 }
 
 

@@ -7,34 +7,23 @@ import cz.phsoft.hokej.models.dto.*;
 import java.util.List;
 
 /**
- * Rozhraní pro správu zápasů v aplikaci.
- * <p>
- * Definuje kontrakt pro práci se zápasy z pohledu business logiky –
- * vytváření, úpravu, mazání, získávání přehledů a práci s dostupností
- * pro konkrétního hráče.
- * </p>
+ * Rozhraní se používá pro správu zápasů v aplikaci.
  *
- * Účel:
- * <ul>
- *     <li>poskytnout jednotný vstupní bod pro práci se zápasy,</li>
- *     <li>oddělit business logiku zápasů od persistence vrstvy,</li>
- *     <li>nabídnout specializované přehledy pro hráče i administraci.</li>
- * </ul>
+ * Definuje kontrakt pro práci se zápasy z pohledu business logiky.
+ * Zajišťuje vytváření, úpravy, mazání zápasů, získávání přehledů
+ * a práci s dostupností zápasů pro konkrétního hráče.
  *
- * Použití:
- * <ul>
- *     <li>využívá se v controllerech a plánovačích (scheduler),</li>
- *     <li>pracuje výhradně s DTO objekty pro přenos dat.</li>
- * </ul>
+ * Rozhraní je navrženo tak, aby oddělovalo business logiku
+ * od persistence vrstvy a poskytovalo jednotný vstupní bod
+ * pro controllery a např. plánovače (scheduler).
  */
 public interface MatchService {
 
     /**
      * Vrátí seznam všech zápasů v systému.
-     * <p>
-     * Metoda typicky slouží pro administrátorské přehledy
-     * nebo globální seznam zápasů.
-     * </p>
+     *
+     * Metoda se typicky používá pro administrátorské přehledy
+     * nebo pro globální seznam zápasů v rámci vybrané sezóny.
      *
      * @return seznam všech zápasů ve formě {@link MatchDTO}
      */
@@ -42,10 +31,9 @@ public interface MatchService {
 
     /**
      * Vrátí seznam všech nadcházejících zápasů.
-     * <p>
-     * Nadcházející zápasy jsou ty, které mají datum v budoucnosti
-     * (podle interně zvolené definice – např. datum/čas &gt;= nyní).
-     * </p>
+     *
+     * Za nadcházející zápasy se považují ty, které mají
+     * datum a čas v budoucnosti podle interně zvolených pravidel.
      *
      * @return seznam nadcházejících zápasů
      */
@@ -54,24 +42,26 @@ public interface MatchService {
     /**
      * Vrátí seznam všech již odehraných zápasů.
      *
+     * Zápasy jsou obvykle řazené od nejnovějšího po nejstarší.
+     *
      * @return seznam minulých zápasů
      */
     List<MatchDTO> getPastMatches();
 
     /**
      * Vrátí nejbližší nadcházející zápas.
-     * <p>
-     * Typicky se používá pro rychlé zobrazení „dalšího zápasu“
-     * na dashboardu nebo v notifikacích.
-     * </p>
+     *
+     * Metoda se používá například pro zobrazení
+     * „dalšího zápasu“ na dashboardu nebo
+     * pro potřeby notifikací.
      *
      * @return nejbližší nadcházející zápas nebo {@code null},
-     *         pokud žádný neexistuje
+     * pokud žádný neexistuje
      */
     MatchDTO getNextMatch();
 
     /**
-     * Vrátí detail zápasu podle jeho ID.
+     * Vrátí základní informace o zápasu podle jeho ID.
      *
      * @param id ID zápasu
      * @return zápas ve formě {@link MatchDTO}
@@ -80,9 +70,10 @@ public interface MatchService {
 
     /**
      * Vytvoří nový zápas.
-     * <p>
-     * Metoda typicky dostupná pouze pro administrátory / manažery.
-     * </p>
+     *
+     * Metoda je typicky dostupná pouze pro administrátory
+     * nebo manažery. Implementace zajišťuje validaci
+     * data v rámci aktivní sezóny a přiřazení sezóny k zápasu.
      *
      * @param dto data nového zápasu
      * @return vytvořený zápas
@@ -92,6 +83,9 @@ public interface MatchService {
     /**
      * Aktualizuje existující zápas.
      *
+     * Implementace je odpovědná za načtení stávajícího zápasu,
+     * přenesení změn z DTO, validaci a uložení výsledného stavu.
+     *
      * @param id  ID zápasu, který má být upraven
      * @param dto nové hodnoty pro zápas
      * @return aktualizovaný zápas
@@ -100,10 +94,9 @@ public interface MatchService {
 
     /**
      * Smaže zápas podle ID.
-     * <p>
-     * Typicky vrací informaci o úspěchu operace
-     * ve formě {@link SuccessResponseDTO}.
-     * </p>
+     *
+     * Metoda typicky vrací standardizovanou odpověď
+     * s informací o úspěchu operace.
      *
      * @param id ID zápasu, který má být smazán
      * @return odpověď s výsledkem operace
@@ -112,10 +105,10 @@ public interface MatchService {
 
     /**
      * Vrátí detailní informace o zápasu.
-     * <p>
-     * Na rozdíl od {@link #getMatchById(Long)} může obsahovat
-     * rozšířené informace (např. registrace, statistiky, atd.).
-     * </p>
+     *
+     * Oproti metodě {@link #getMatchById(Long)} může detail
+     * obsahovat rozšířená data, například statistiky,
+     * seznamy hráčů v jednotlivých stavech nebo agregované údaje.
      *
      * @param id ID zápasu
      * @return detail zápasu
@@ -124,14 +117,10 @@ public interface MatchService {
 
     /**
      * Vrátí seznam zápasů, na které se daný hráč může registrovat.
-     * <p>
-     * Typicky filtruje:
-     * </p>
-     * <ul>
-     *     <li>pouze nadcházející zápasy,</li>
-     *     <li>zápasy, kde ještě není plná kapacita,</li>
-     *     <li>zápasy v rámci povolené sezóny / pravidel.</li>
-     * </ul>
+     *
+     * Implementace obvykle filtruje pouze nadcházející zápasy,
+     * kontroluje kapacitu a respektuje pravidla sezóny
+     * a případná další business omezení.
      *
      * @param playerId ID hráče
      * @return seznam dostupných zápasů pro hráče
@@ -140,13 +129,10 @@ public interface MatchService {
 
     /**
      * Vrátí nadcházející zápasy pro konkrétního hráče.
-     * <p>
-     * Může zahrnovat:
-     * </p>
-     * <ul>
-     *     <li>zápasy, na které je hráč přihlášen,</li>
-     *     <li>případně další omezené podle business pravidel.</li>
-     * </ul>
+     *
+     * Metoda může zohledňovat, zda je hráč registrovaný,
+     * případně další business pravidla. Výsledek je
+     * určen pro podrobnější zobrazení seznamu zápasů.
      *
      * @param playerId ID hráče
      * @return seznam nadcházejících zápasů pro daného hráče
@@ -154,24 +140,24 @@ public interface MatchService {
     List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId);
 
     /**
-     * Najde ID hráče podle emailu uživatele.
-     * <p>
-     * Pomocná metoda pro případy, kdy je k dispozici email
-     * přihlášeného uživatele a je potřeba zjistit navázaného hráče.
-     * </p>
+     * Najde ID hráče podle e-mailu uživatele.
      *
-     * @param email email uživatele
+     * Metoda se používá jako pomocný nástroj v situaci,
+     * kdy je k dispozici e-mail přihlášeného uživatele
+     * a je potřeba zjistit navázaného hráče.
+     *
+     * @param email e-mail uživatele
      * @return ID hráče nebo {@code null}, pokud neexistuje
      */
     Long getPlayerIdByEmail(String email);
 
     /**
      * Vrátí přehled nadcházejících zápasů pro hráče.
-     * <p>
-     * Na rozdíl od {@link #getUpcomingMatchesForPlayer(Long)} může
-     * poskytovat zjednodušený nebo agregovaný pohled (overview)
-     * vhodný pro seznamy a dashboardy.
-     * </p>
+     *
+     * Přehled slouží pro zobrazení na dashboardu
+     * nebo v jednoduchých seznamech, kde se zobrazují
+     * základní informace o zápasech včetně stavu
+     * daného hráče.
      *
      * @param playerId ID hráče
      * @return přehled nadcházejících zápasů pro daného hráče
@@ -180,10 +166,9 @@ public interface MatchService {
 
     /**
      * Vrátí přehled všech odehraných zápasů pro hráče.
-     * <p>
-     * Využívá se pro statistiky, historii účasti a přehled
-     * minulých zápasů daného hráče.
-     * </p>
+     *
+     * Metoda se používá pro statistiky, historii účasti
+     * a přehled minulých zápasů daného hráče v rámci sezóny.
      *
      * @param playerId ID hráče
      * @return přehled všech odehraných zápasů pro daného hráče
@@ -192,11 +177,10 @@ public interface MatchService {
 
     /**
      * Zruší zápas a nastaví důvod zrušení.
-     * <p>
-     * Zápas je označen jako zrušený s uvedeným důvodem.
-     * Implementace může navazovat další logiku
-     * (např. notifikace hráčů).
-     * </p>
+     *
+     * Zápas je označen jako zrušený včetně uvedeného důvodu.
+     * Implementace může navazovat další logiku, například
+     * odeslání notifikací hráčům.
      *
      * @param matchId ID zápasu
      * @param reason  důvod zrušení
@@ -206,10 +190,9 @@ public interface MatchService {
 
     /**
      * Obnoví dříve zrušený zápas.
-     * <p>
-     * Zápas se vrátí do stavu, kdy je opět platný a může se konat,
-     * pokud to dovolují ostatní podmínky (např. datum, kapacita).
-     * </p>
+     *
+     * Zápas se vrací do stavu, kdy je opět platný a může se konat,
+     * pokud jsou splněny ostatní podmínky (datum, kapacita a podobně).
      *
      * @param matchId ID zápasu
      * @return odpověď s výsledkem operace
