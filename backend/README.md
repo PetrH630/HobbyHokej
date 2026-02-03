@@ -42,10 +42,10 @@ Backend poskytuje REST API pro:
 
 ## Dokumentace
 
-- JavaDoc – součást zdrojového kódu
-- Architektura aplikace: `docs/ARCHITECTURE.md`
-- API dokumentace:
-    - [API](API.md)
+- JavaDoc: generován ze zdrojového kódu backendu
+- Architektura aplikace: [ARCHITECTURE](docs/ARCHITECTURE.md)
+- API dokumentace: [API](docs/API.md)
+
 
 ---
 

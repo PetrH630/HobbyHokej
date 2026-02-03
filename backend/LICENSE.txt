@@ -1,0 +1,47 @@
+MIT License
+
+Copyright (c) 2026 Petr Hlista
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+-----------------------------------------------------------------------
+ČESKÝ NEOFICIÁLNÍ PŘEKLAD (informativní, právně rozhodující je anglická verze)
+-----------------------------------------------------------------------
+
+Licence MIT
+
+Copyright (c) 2026 Petr Hlista
+
+Tímto se bezplatně uděluje povolení každé osobě, která získá kopii tohoto
+softwaru a související dokumentace (dále jen „Software“), nakládat se
+Softwarem bez omezení, včetně (nikoli však výlučně) práv Software používat,
+kopírovat, upravovat, slučovat, publikovat, šířit, poskytovat sublicence
+a/nebo prodávat kopie Softwaru, a umožnit osobám, kterým je Software
+poskytnut, aby tak činily, za následujících podmínek:
+
+Výše uvedené upozornění na autorská práva a toto licenční ujednání musí být
+zahrnuto ve všech kopiích nebo podstatných částech Softwaru.
+
+SOFTWARE JE POSKYTOVÁN „TAK JAK JE“, BEZ JAKÉKOLI ZÁRUKY, AŤ JIŽ VÝSLOVNÉ NEBO
+IMPLICITNÍ, VČETNĚ (NIKOLI VÝLUČNĚ) ZÁRUK PRODEJNOSTI, VHODNOSTI PRO KONKRÉTNÍ
+ÚČEL A NEPORUŠENÍ PRÁV. AUTOŘI ANI DRŽITELÉ AUTORSKÝCH PRÁV V ŽÁDNÉM PŘÍPADĚ
+NEODPOVÍDAJÍ ZA JAKÉKOLI NÁROKY, ŠKODY ČI JINOU ODPOVĚDNOST, AŤ JIŽ VZNIKLOU NA
+ZÁKLADĚ SMLOUVY, DELIKTU NEBO JINAK, V SOUVISLOSTI SE SOFTWAREM NEBO JEHO
+POUŽITÍM ČI JINÝM NAKLÁDÁNÍM SE SOFTWAREM.
