@@ -60,8 +60,6 @@ build/
 export-by-folder.ps1
 application.properties-dev
 application
-FilesForCheck
-Zaloha
 .log
 
 # =====================================
