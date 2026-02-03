@@ -12,40 +12,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Security / request filtr pro práci s „aktuálním hráčem“.
+ * HTTP filtr zajišťující dostupnost aktuálního hráče
+ * v průběhu zpracování requestu.
  *
- * ÚČEL:
- * ------
- * Zajistit, aby byl v průběhu zpracování jednoho HTTP requestu
- * v thread-local kontextu ({@link CurrentPlayerContext})
- * dostupný hráč, kterého si uživatel vybral jako „current player“.
+ * Filtr:
+ * - načítá ID aktuálního hráče z HTTP session,
+ * - ověřuje existenci hráče v databázi,
+ * - ukládá hráče do CurrentPlayerContext,
+ * - po dokončení requestu kontext vždy vyčistí.
  *
- * DŮVOD EXISTENCE:
- * ----------------
- * <ul>
- *     <li>uživatelský účet ({@code AppUser}) může mít více hráčů ({@code Player}),</li>
- *     <li>FE si zvolí, který hráč je právě aktivní,</li>
- *     <li>backend potřebuje mít v průběhu requestu pohodlně dostupného hráče
- *         bez nutnosti pracovat přímo s {@code HttpSession} v každé vrstvě.</li>
- * </ul>
- *
- * CHOVÁNÍ:
- * --------
- * <ol>
- *     <li>získá ID aktuálního hráče ze session přes {@link CurrentPlayerService},</li>
- *     <li>ověří existenci hráče v DB přes {@link PlayerRepository},</li>
- *     <li>uloží {@code PlayerEntity} do {@link CurrentPlayerContext} (ThreadLocal),</li>
- *     <li>předá řízení dál ve filter chainu,</li>
- *     <li>po dokončení requestu vždy kontext vyčistí.</li>
- * </ol>
- *
- * THREAD-SAFETY:
- * --------------
- * <ul>
- *     <li>využívá {@link ThreadLocal} – každý request má vlastní kontext,</li>
- *     <li>v {@code finally} bloku se vždy volá {@link CurrentPlayerContext#clear()},</li>
- *     <li>tím se předchází memory leakům a přenosu dat mezi requesty.</li>
- * </ul>
+ * Filtr umožňuje, aby servisní a controller vrstvy
+ * pracovaly s aktuálním hráčem bez nutnosti
+ * přímého přístupu k HttpSession.
  */
 @Component
 public class CurrentPlayerFilter extends OncePerRequestFilter {
@@ -60,17 +38,14 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Hlavní filtrační metoda – volá se jednou pro každý HTTP request.
+     * Filtrační metoda volaná jednou pro každý HTTP request.
      *
-     * Postup:
-     * <ol>
-     *     <li>načte {@code currentPlayerId} ze session
-     *         pomocí {@link CurrentPlayerService#getCurrentPlayerId()},</li>
-     *     <li>pokud ID existuje, ověří přítomnost hráče v databázi,</li>
-     *     <li>pokud je hráč nalezen, uloží ho do {@link CurrentPlayerContext},</li>
-     *     <li>pokračuje ve filter chainu,</li>
-     *     <li>vždy v {@code finally} bloku vyčistí thread-local kontext.</li>
-     * </ol>
+     * Postup zpracování:
+     * - načte ID aktuálního hráče ze session,
+     * - ověří existenci hráče v databázi,
+     * - uloží hráče do thread-local kontextu,
+     * - předá řízení dalším filtrům,
+     * - v závěru vždy vyčistí kontext.
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -78,20 +53,16 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // ID aktuálního hráče uložené v HTTP session
         Long playerId = currentPlayerService.getCurrentPlayerId();
 
         if (playerId != null) {
-            // bezpečnostní kontrola – hráč musí existovat v DB
             playerRepository.findById(playerId)
                     .ifPresent(CurrentPlayerContext::set);
         }
 
         try {
-            // pokračování ve zpracování requestu
             filterChain.doFilter(request, response);
         } finally {
-            // důležité: vždy vyčistit ThreadLocal kontext
             CurrentPlayerContext.clear();
         }
     }

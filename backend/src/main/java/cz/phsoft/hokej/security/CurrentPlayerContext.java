@@ -3,42 +3,23 @@ package cz.phsoft.hokej.security;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 
 /**
- * Thread-local kontext pro „aktuálního hráče“.
+ * Thread-local kontext pro uchování aktuálně zvoleného hráče.
  *
- * Slouží k uchování instance {@link PlayerEntity},
- * která je zvolená jako „current player“
- * v rámci jednoho konkrétního HTTP requestu.
+ * Slouží k uložení instance PlayerEntity, která je považována
+ * za aktuálního hráče v rámci jednoho HTTP requestu.
  *
- * -------------------------------------------------
- * ŽIVOTNÍ CYKLUS
- * -------------------------------------------------
- * <ul>
- *     <li>naplněn v {@code CurrentPlayerFilter} na začátku requestu,</li>
- *     <li>dostupný v celém call stacku
- *         (controller → service → helper),</li>
- *     <li>vyčištěn po dokončení requestu.</li>
- * </ul>
+ * Kontext je:
+ * - nastaven na začátku requestu ve filtru CurrentPlayerFilter,
+ * - dostupný v celém call stacku (controller, service, helper),
+ * - vyčištěn po dokončení zpracování requestu.
  *
- * -------------------------------------------------
- * PROČ THREADLOCAL
- * -------------------------------------------------
- * Spring obsluhuje HTTP requesty paralelně ve vláknech.
- * {@link ThreadLocal} zajišťuje, že:
- * <ul>
- *     <li>každý request má vlastní instanci {@code PlayerEntity},</li>
- *     <li>nedochází ke sdílení dat mezi uživateli,</li>
- *     <li>není nutné předávat hráče přes všechny metody.</li>
- * </ul>
+ * Použití ThreadLocal zajišťuje, že každý HTTP request
+ * má vlastní instanci kontextu a nedochází ke sdílení dat
+ * mezi paralelně zpracovávanými požadavky.
  *
- * -------------------------------------------------
- * DŮLEŽITÉ
- * -------------------------------------------------
- * {@link ThreadLocal} MUSÍ být vždy vyčištěn pomocí {@link #clear()},
- * jinak hrozí:
- * <ul>
- *     <li>memory leak v aplikačním serveru,</li>
- *     <li>únik dat mezi jednotlivými requesty.</li>
- * </ul>
+ * ThreadLocal musí být vždy vyčištěn metodou clear,
+ * jinak hrozí únik paměti a nechtěné přenášení dat
+ * mezi jednotlivými requesty.
  */
 public final class CurrentPlayerContext {
 
@@ -49,16 +30,14 @@ public final class CurrentPlayerContext {
     private static final ThreadLocal<PlayerEntity> currentPlayer = new ThreadLocal<>();
 
     private CurrentPlayerContext() {
-        // utility class – nelze instancovat
+        // Utility třída, instanci nelze vytvořit
     }
 
     /**
      * Nastaví aktuálního hráče do thread-local kontextu.
      *
-     * Volá se typicky:
-     * <ul>
-     *     <li>na začátku requestu ve {@code CurrentPlayerFilter}.</li>
-     * </ul>
+     * Metoda se volá typicky ve filtru CurrentPlayerFilter
+     * na začátku zpracování HTTP requestu.
      *
      * @param player hráč zvolený jako aktuální pro daný request
      */
@@ -69,9 +48,8 @@ public final class CurrentPlayerContext {
     /**
      * Vrátí aktuálního hráče pro právě zpracovávaný request.
      *
-     * @return {@link PlayerEntity} nebo {@code null},
-     *         pokud hráč nebyl zvolen nebo request
-     *         nevyžaduje kontext hráče
+     * @return instance PlayerEntity nebo null,
+     * pokud nebyl hráč pro request zvolen
      */
     public static PlayerEntity get() {
         return currentPlayer.get();
@@ -80,16 +58,11 @@ public final class CurrentPlayerContext {
     /**
      * Vyčistí thread-local kontext.
      *
-     * MUSÍ se volat:
-     * <ul>
-     *     <li>vždy po dokončení requestu (typicky ve {@code finally} bloku filtru).</li>
-     * </ul>
+     * Metoda musí být vždy volána po dokončení requestu,
+     * typicky ve finally bloku filtru.
      *
-     * Použití {@link ThreadLocal#remove()}:
-     * <ul>
-     *     <li>uvolní referenci na {@link PlayerEntity},</li>
-     *     <li>zabrání memory leakům při reuse vláken.</li>
-     * </ul>
+     * Použití ThreadLocal.remove uvolňuje referenci
+     * a zabraňuje memory leakům při opakovaném použití vláken.
      */
     public static void clear() {
         currentPlayer.remove();

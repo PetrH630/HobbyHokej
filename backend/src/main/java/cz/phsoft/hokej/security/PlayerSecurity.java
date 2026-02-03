@@ -11,26 +11,13 @@ import org.springframework.stereotype.Component;
 /**
  * Bezpečnostní helper pro kontrolu vlastnictví hráče.
  *
- * ÚČEL:
- * -----
- * Poskytuje metody pro jemnozrnnou autorizaci nad entitou {@link PlayerEntity},
- * typicky ve SpEL výrazech v anotacích jako {@code @PreAuthorize}.
+ * Poskytuje metody určené pro použití ve SpEL výrazech
+ * v anotacích typu PreAuthorize.
  *
- * Typické použití:
- * <pre>
- * {@code
- * @PreAuthorize("@playerSecurity.isOwner(authentication, #playerId)")
- * public ResponseEntity<?> getPlayerDetail(Long playerId) { ... }
- * }
- * </pre>
- *
- * Poznámka:
- * ---------
- * V aktuální verzi využívám hlavně endpointy typu {@code /me}
- * a {@link CurrentPlayerContext}, ale tato třída je připravena
- * pro případné rozšíření autorizace na úrovni konkrétních hráčů.
+ * Slouží k jemnozrnné autorizaci nad entitou PlayerEntity,
+ * zejména v případech, kdy se pracuje s konkrétním ID hráče.
  */
-@Component("playerSecurity") // název beany pro použití ve SpEL výrazech
+@Component("playerSecurity")
 public class PlayerSecurity {
 
     private static final Logger logger =
@@ -43,50 +30,28 @@ public class PlayerSecurity {
     }
 
     /**
-     * Ověří, zda je aktuálně přihlášený uživatel vlastníkem daného hráče.
+     * Ověří, zda je aktuálně přihlášený uživatel
+     * vlastníkem zadaného hráče.
      *
-     * LOGIKA:
-     * -------
-     * <ol>
-     *     <li>ověří existenci autentizace a její platnost,</li>
-     *     <li>ověří, že {@code principal} je typu {@link UserDetails},</li>
-     *     <li>načte hráče z DB podle {@code playerId},</li>
-     *     <li>porovná email přihlášeného uživatele (username)
-     *         s emailem uživatele přiřazeného k hráči.</li>
-     * </ol>
+     * Při jakékoli chybě nebo nesrovnalosti
+     * je přístup zamítnut a metoda vrací false.
      *
-     * BEZPEČNOSTNÍ PRAVIDLO:
-     * ----------------------
-     * Jakákoli chyba nebo nesrovnalost → přístup je zamítnut
-     * (metoda vždy vrací {@code false}, nikdy nevyhazuje výjimku).
-     *
-     * @param authentication aktuální {@link Authentication} objekt
-     * @param playerId       ID hráče, ke kterému se má ověřit vlastnictví
-     * @return {@code true}, pokud je uživatel vlastníkem hráče; jinak {@code false}
+     * @param authentication aktuální autentizace
+     * @param playerId ID hráče
+     * @return true, pokud je uživatel vlastníkem hráče
      */
     public boolean isOwner(Authentication authentication, Long playerId) {
 
         try {
-            // 1) základní kontrola autentizace
             if (authentication == null || !authentication.isAuthenticated()) {
-                logger.warn(
-                        "Neautorizovaný přístup: žádná autentizace pro playerId {}",
-                        playerId
-                );
                 return false;
             }
 
-            // 2) kontrola typu principal
             Object principal = authentication.getPrincipal();
             if (!(principal instanceof UserDetails userDetails)) {
-                logger.warn(
-                        "Neautorizovaný přístup: principal není UserDetails pro playerId {}",
-                        playerId
-                );
                 return false;
             }
 
-            // 3) kontrola vlastnictví hráče
             boolean isOwner = playerRepository.findById(playerId)
                     .map(player ->
                             player.getUser() != null
@@ -95,10 +60,9 @@ public class PlayerSecurity {
                     )
                     .orElse(false);
 
-            // 4) logování pokusu o neoprávněný přístup
             if (!isOwner) {
                 logger.warn(
-                        "Neautorizovaný přístup: uživatel {} není vlastníkem hráče {}",
+                        "Neoprávněný přístup: uživatel {} není vlastníkem hráče {}",
                         userDetails.getUsername(),
                         playerId
                 );
@@ -107,11 +71,9 @@ public class PlayerSecurity {
             return isOwner;
 
         } catch (Exception e) {
-            // NIKDY nepropouštět výjimku do SpEL výrazu – vždy vracíme boolean
             logger.error(
-                    "Chyba při kontrole vlastníka hráče {}: {}",
+                    "Chyba při ověřování vlastníka hráče {}",
                     playerId,
-                    e.getMessage(),
                     e
             );
             return false;
