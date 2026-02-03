@@ -6,100 +6,101 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 /**
- * Request DTO používané pro změnu registrace hráče na zápas.
+ * Request DTO pro změnu registrace hráče na zápas.
  *
- * Slouží jako vstupní objekt pro operace související se správou účasti
- * hráče na zápase, zejména pro přihlášení, odhlášení, omluvení hráče
- * nebo administrátorské zásahy do registrace.
+ * Slouží jako vstupní objekt pro operace:
+ * - přihlášení hráče na zápas,
+ * - odhlášení hráče ze zápasu,
+ * - omluvení hráče,
+ * - administrátorské zásahy do registrace.
  *
- * Tento request je zpracováván servisní metodou
- * MatchRegistrationService.upsertRegistration(...), která na základě
- * kombinace předaných polí a business pravidel rozhoduje o výsledném
- * stavu registrace.
+ * Typ a kombinace vyplněných polí určují,
+ * jaká operace se v servisní vrstvě provede.
+ * Tento request je zpracováván metodou
+ * MatchRegistrationService.upsertRegistration.
  *
- * Ne všechna pole jsou povinná. Jejich význam a validace závisí
- * na konkrétní operaci, kontextu volání (uživatelský vs. administrátorský
- * endpoint) a rozhodovací logice servisní vrstvy.
+ * Ne všechna pole jsou povinná. Jejich význam a validace
+ * závisí na konkrétní operaci a business logice služby.
  */
 public class MatchRegistrationRequest {
 
     /**
      * ID zápasu, ke kterému se registrace vztahuje.
      *
-     * Hodnota je povinná a jednoznačně identifikuje zápas,
-     * pro který se má registrace vytvořit nebo aktualizovat.
+     * Hodnota je povinná a musí být kladná.
+     * Slouží k jednoznačnému určení zápasu,
+     * u kterého se registrace mění.
      */
     @NotNull
     @Positive
     private Long matchId;
 
     /**
-     * ID hráče, kterého se registrace týká.
+     * ID hráče, kterého se operace týká.
      *
-     * U uživatelských endpointů typu /me může být hodnota null,
-     * protože hráč je určen kontextem aktuálního hráče.
-     * U administrátorských operací se očekává explicitně vyplněná hodnota.
+     * Typické použití:
+     * - u endpointů typu "/me" může být null a hráč
+     *   se určuje podle přihlášeného uživatele,
+     * - u administrátorských operací se hodnota vyplňuje explicitně.
      */
     private Long playerId;
 
     /**
-     * Tým, do kterého má být hráč v rámci zápasu přiřazen.
+     * Tým, do kterého je hráč přiřazen (například DARK nebo LIGHT).
      *
-     * Typicky se jedná o hodnoty DARK nebo LIGHT. Hodnota může být
-     * nastavena uživatelem nebo administrátorem podle typu operace.
+     * Používá se při nastavování nebo změně rozdělení týmů.
      */
     private Team team;
 
     /**
      * Důvod omluvy hráče.
      *
-     * Používá se pouze v případě, že výsledný stav registrace
-     * odpovídá omluvené účasti. Validace relevance hodnoty
-     * se provádí v servisní vrstvě.
+     * Používá se u operací, které představují omluvu
+     * nebo odhlášení se zdůvodněním.
      */
     private ExcuseReason excuseReason;
 
     /**
      * Volitelná textová poznámka k omluvě od hráče.
      *
-     * Hodnota se používá pouze při omluvení a slouží
-     * pro doplnění důvodu neúčasti.
+     * Umožňuje doplnit detailnější vysvětlení
+     * nad rámec strukturovaného ExcuseReason.
      */
     private String excuseNote;
 
     /**
-     * Interní administrátorská poznámka k registraci.
+     * Administrátorská poznámka k registraci.
      *
-     * Používá se například pro označení neomluvené absence
-     * nebo pro interní komentáře správců systému.
+     * Používá se například pro označení no-show,
+     * interních komentářů nebo dalších technických poznámek.
      */
     private String adminNote;
 
     /**
-     * Příznak odhlášení ze zápasu.
+     * Příznak, že má dojít k odhlášení hráče ze zápasu.
      *
-     * Pokud je hodnota nastavena na true, request reprezentuje
-     * akci odhlášení hráče ze zápasu bez omluvy.
+     * Pokud je true, request reprezentuje akci odhlášení
+     * (UNREGISTER) bez ohledu na ostatní volitelná pole.
      */
     private boolean unregister;
 
     /**
-     * Příznak náhradníka.
+     * Příznak, že jde o registraci náhradníka.
      *
-     * Pokud je hodnota nastavena na true, request reprezentuje
-     * stav, kdy hráč projevil zájem o účast, ale je veden
-     * jako náhradník.
+     * Pokud je true, request reprezentuje akci SUBSTITUTE,
+     * tedy stav, kdy hráč projevil zájem, ale jeho účast
+     * není jistá (čeká se na uvolnění místa nebo potvrzení).
      */
     private boolean substitute;
 
-    // gettery / settery
-
-    public Long getMatchId() {
-        return matchId;
-    }
+    // --- gettery / settery ---
 
     public Long getPlayerId() {
         return playerId;
+    }
+
+    public Long getMatchId() {
+        return matchId;
     }
 
     public Team getTeam() {

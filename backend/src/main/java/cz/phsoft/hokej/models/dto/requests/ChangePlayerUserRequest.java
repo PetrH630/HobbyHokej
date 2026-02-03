@@ -3,40 +3,35 @@ package cz.phsoft.hokej.models.dto.requests;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Request DTO používané pro změnu přiřazení hráče k aplikačnímu uživateli.
+ * Request DTO pro změnu přiřazeného uživatele k hráči.
  *
- * Slouží jako vstupní objekt pro administrátorské endpointy, které umožňují
- * změnit vazbu mezi entitou hráče a aplikačním uživatelským účtem.
- * Používá se například při opravě chybného přiřazení nebo při převodu
- * hráče pod jiný uživatelský účet.
- *
- * Třída je určena výhradně pro přenos dat z klienta do API vrstvy
- * a neobsahuje žádnou business logiku ani validační rozhodování
- * nad rámec základních validačních anotací.
+ * Slouží jako vstupní objekt pro administrátorské endpointy,
+ * které umožňují změnit vazbu mezi hráčem a aplikačním uživatelem.
+ * Třída neobsahuje žádnou business logiku, používá se pouze
+ * pro přenos dat z klienta do API vrstvy.
  */
 public class ChangePlayerUserRequest {
 
     /**
-     * ID uživatele, ke kterému má být hráč nově přiřazen.
+     * ID nového uživatele, ke kterému má být hráč přiřazen.
      *
-     * Hodnota je povinná a musí odpovídat existujícímu uživatelskému
-     * účtu v systému. Samotná kontrola existence uživatele se provádí
-     * v servisní vrstvě.
+     * Hodnota je povinná. Validace se provádí anotací {@link NotNull}
+     * a následně v servisní vrstvě při vyhledávání uživatele.
      */
     @NotNull
     private Long newUserId;
 
     /**
-     * Vrací ID nového uživatele.
+     * Vrátí ID nového uživatele.
      *
-     * @return ID uživatele, ke kterému má být hráč přiřazen
+     * @return ID uživatele
      */
     public Long getNewUserId() {
         return newUserId;
     }
 
     /**
-     * Nastavuje ID nového uživatele.
+     * Nastaví ID nového uživatele.
      *
      * @param newUserId ID uživatele, ke kterému má být hráč přiřazen
      */
