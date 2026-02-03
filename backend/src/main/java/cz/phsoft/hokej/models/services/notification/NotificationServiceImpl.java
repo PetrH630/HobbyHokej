@@ -19,6 +19,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Implementace NotificationService.
+ *
+ * Zajišťuje:
+ * - použití NotificationPreferencesService pro rozhodnutí, komu notifikaci poslat,
+ * - sestavení obsahu zpráv pomocí EmailMessageBuilder a SmsMessageBuilder,
+ * - odesílání e-mailů pomocí EmailService,
+ * - odesílání SMS pomocí SmsService,
+ * - rozesílání kopií vybraných notifikací manažerům.
+ *
+ * Třída neřeší:
+ * - perzistenci notifikací,
+ * - detailní business pravidla, kdy se má notifikace vyvolat.
+ */
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
@@ -32,8 +46,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationPreferencesService notificationPreferencesService;
 
     /**
-     * Typy notifikací, pro které se NEMÁ posílat kopie manažerům.
-     * (Platí jak pro notifyPlayer, tak pro notifyUser.)
+     * Typy notifikací, pro které se nemá posílat kopie manažerům.
+     * Platí jak pro notifyPlayer, tak pro notifyUser.
      */
     private static final Set<NotificationType> MANAGER_COPY_BLACKLIST = EnumSet.of(
             NotificationType.MATCH_CANCELED,
@@ -70,22 +84,22 @@ public class NotificationServiceImpl implements NotificationService {
 
         NotificationDecision decision = notificationPreferencesService.evaluate(player, type);
 
-        // EMAIL – uživatel (AppUser)
+        // E-mail pro uživatele (AppUser).
         if (decision.isSendEmailToUser() && decision.getUserEmail() != null) {
             sendEmailToUser(decision.getUserEmail(), player, type, context);
         }
 
-        // EMAIL – hráč (kontakt na PlayerEntity)
+        // E-mail pro hráče.
         if (decision.isSendEmailToPlayer() && decision.getPlayerEmail() != null) {
             sendEmailToPlayer(decision.getPlayerEmail(), player, type, context);
         }
 
-        // SMS – hráč
+        // SMS pro hráče.
         if (decision.isSendSmsToPlayer() && decision.getPlayerPhone() != null) {
             sendSmsToPhone(decision.getPlayerPhone(), player, type, context);
         }
 
-        // EMAIL – manažeři (kopie zpráv pro hráče), jen pokud typ není v blacklistu
+        // E-mail pro manažery (kopie zpráv pro hráče), pokud typ není v blacklistu.
         if (shouldSendManagerCopy(type)) {
 
             List<AppUserEntity> managers = appUserRepository.findAll().stream()
@@ -99,7 +113,7 @@ public class NotificationServiceImpl implements NotificationService {
                     continue;
                 }
 
-                // nepřeposílat, pokud je manager zároveň owner hráče
+                // Neposílat, pokud je manažer zároveň vlastníkem hráče.
                 if (owner != null && owner.getId() != null
                         && Objects.equals(manager.getId(), owner.getId())) {
                     log.debug("Manager {} je zároveň vlastníkem hráče {} – kopie se neposílá (notifyPlayer).",
@@ -109,10 +123,10 @@ public class NotificationServiceImpl implements NotificationService {
 
                 String managerEmail = manager.getEmail();
 
-                // nepřeposílat, pokud už manager dostane mail jako USER nebo PLAYER (shodný email)
+                // Neposílat, pokud manažer už dostane e-mail jako USER nebo PLAYER (stejný e-mail).
                 if (Objects.equals(managerEmail, decision.getUserEmail())
                         || Objects.equals(managerEmail, decision.getPlayerEmail())) {
-                    log.debug("Manager {} má stejný email jako příjemce (USER/PLAYER) – kopie se neposílá (notifyPlayer).",
+                    log.debug("Manager {} má stejný e-mail jako příjemce (USER/PLAYER) – kopie se neposílá (notifyPlayer).",
                             manager.getId());
                     continue;
                 }
@@ -133,13 +147,15 @@ public class NotificationServiceImpl implements NotificationService {
             log.warn("notifyUser() called with null user for type {}", type);
             return;
         }
+
         Object effectiveContext = (context != null) ? context : user;
 
-        // ========== EMAIL PRO UŽIVATELE ==========
+        // E-mail pro uživatele.
         String userEmail = user.getEmail();
 
         if (userEmail != null && !userEmail.isBlank()) {
-            // player = null, user pošleme v contextu
+
+            // Player je null, user se případně předá v kontextu.
             EmailMessageBuilder.EmailContent content =
                     emailMessageBuilder.buildForUser(type, null, userEmail, effectiveContext);
 
@@ -150,13 +166,13 @@ public class NotificationServiceImpl implements NotificationService {
                     emailService.sendSimpleEmail(userEmail, content.subject(), content.body());
                 }
             } else {
-                log.debug("Typ {} nemá definovanou email šablonu pro uživatele (USER), nic se neposílá", type);
+                log.debug("Typ {} nemá definovanou e-mailovou šablonu pro uživatele (USER), nic se neposílá", type);
             }
         } else {
-            log.debug("notifyUser: uživatel {} nemá email, nic se neposílá", user.getId());
+            log.debug("notifyUser: uživatel {} nemá e-mail, nic se neposílá", user.getId());
         }
 
-        // ========== EMAIL PRO MANAŽERY ==========
+        // E-mail pro manažery.
         if (shouldSendManagerCopy(type)) {
 
             List<AppUserEntity> managers = appUserRepository.findAll().stream()
@@ -168,7 +184,7 @@ public class NotificationServiceImpl implements NotificationService {
                     continue;
                 }
 
-                // nepřeposílat, pokud je manager zároveň tento user
+                // Neposílat, pokud je manažer zároveň tento uživatel.
                 if (user.getId() != null && Objects.equals(manager.getId(), user.getId())) {
                     log.debug("Manager {} je zároveň adresátem (USER) – kopie se neposílá (notifyUser).",
                             manager.getId());
@@ -177,18 +193,18 @@ public class NotificationServiceImpl implements NotificationService {
 
                 String managerEmail = manager.getEmail();
 
-                // nepřeposílat, pokud je jeho email stejný jako email uživatele
+                // Neposílat, pokud má manažer stejný e-mail jako uživatel.
                 if (Objects.equals(managerEmail, userEmail)) {
-                    log.debug("Manager {} má stejný email jako uživatel – kopie se neposílá (notifyUser).",
+                    log.debug("Manager {} má stejný e-mail jako uživatel – kopie se neposílá (notifyUser).",
                             manager.getId());
                     continue;
                 }
 
                 EmailMessageBuilder.EmailContent managerContent =
-                        emailMessageBuilder.buildForManager(type, null, manager, effectiveContext); // context = user
+                        emailMessageBuilder.buildForManager(type, null, manager, effectiveContext);
 
                 if (managerContent == null) {
-                    log.debug("Typ {} nemá definovanou email šablonu pro manažera (USER), nic se neposílá", type);
+                    log.debug("Typ {} nemá definovanou e-mailovou šablonu pro manažera (USER), nic se neposílá", type);
                     continue;
                 }
 
@@ -203,9 +219,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    // ----------------------------------------------------
-    // EMAIL helper metody
-    // ----------------------------------------------------
+    // Pomocné metody pro e-mail
 
     private void sendEmailToManager(AppUserEntity manager,
                                     PlayerEntity player,
@@ -213,7 +227,7 @@ public class NotificationServiceImpl implements NotificationService {
                                     Object context) {
 
         if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
-            log.debug("sendEmailToManager: prázdný manager nebo email, nic se neposílá");
+            log.debug("sendEmailToManager: prázdný manager nebo e-mail, nic se neposílá");
             return;
         }
 
@@ -223,7 +237,7 @@ public class NotificationServiceImpl implements NotificationService {
                 emailMessageBuilder.buildForManager(type, player, manager, context);
 
         if (content == null) {
-            log.debug("Typ {} nemá definovanou email šablonu pro manažera, nic se neposílá", type);
+            log.debug("Typ {} nemá definovanou e-mailovou šablonu pro manažera, nic se neposílá", type);
             return;
         }
 
@@ -240,7 +254,7 @@ public class NotificationServiceImpl implements NotificationService {
                                  Object context) {
 
         if (email == null || email.isBlank()) {
-            log.debug("sendEmailToUser: prázdný email, nic se neposílá");
+            log.debug("sendEmailToUser: prázdný e-mail, nic se neposílá");
             return;
         }
 
@@ -248,7 +262,7 @@ public class NotificationServiceImpl implements NotificationService {
                 emailMessageBuilder.buildForUser(type, player, email, context);
 
         if (content == null) {
-            log.debug("Typ {} nemá definovanou email šablonu pro uživatele, nic se neposílá", type);
+            log.debug("Typ {} nemá definovanou e-mailovou šablonu pro uživatele, nic se neposílá", type);
             return;
         }
 
@@ -265,7 +279,7 @@ public class NotificationServiceImpl implements NotificationService {
                                    Object context) {
 
         if (email == null || email.isBlank()) {
-            log.debug("sendEmailToPlayer: prázdný email, nic se neposílá");
+            log.debug("sendEmailToPlayer: prázdný e-mail, nic se neposílá");
             return;
         }
 
@@ -273,7 +287,7 @@ public class NotificationServiceImpl implements NotificationService {
                 emailMessageBuilder.buildForPlayer(type, player, email, context);
 
         if (content == null) {
-            log.debug("Typ {} nemá definovanou email šablonu pro hráče, nic se neposílá", type);
+            log.debug("Typ {} nemá definovanou e-mailovou šablonu pro hráče, nic se neposílá", type);
             return;
         }
 
@@ -284,9 +298,8 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    // ----------------------------------------------------
-    // SMS – beze změny
-    // ----------------------------------------------------
+    // SMS pomocná metoda
+
     private void sendSmsToPhone(String phone,
                                 PlayerEntity player,
                                 NotificationType type,
@@ -307,9 +320,11 @@ public class NotificationServiceImpl implements NotificationService {
         smsService.sendSms(phone, msg);
     }
 
-    // ----------------------------------------------------
-    // helper pro posílání kopií manažerům
-    // ----------------------------------------------------
+    /**
+     * Určuje, zda se pro daný typ notifikace mají posílat kopie manažerům.
+     *
+     * Pokud je typ uveden v MANAGER_COPY_BLACKLIST, kopie se neposílají.
+     */
     private boolean shouldSendManagerCopy(NotificationType type) {
         return !MANAGER_COPY_BLACKLIST.contains(type);
     }

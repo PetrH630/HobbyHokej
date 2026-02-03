@@ -8,8 +8,16 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 /**
  * Typový kontejner pro notifikační data.
  *
- * Slouží k předání všech relevantních dat
- * do builderů notifikací (email / SMS).
+ * Slouží k předání všech relevantních dat do builderů notifikací
+ * (email a SMS). Umožňuje sjednotit vstupní parametry tak,
+ * aby jednotlivé buildery nemusely pracovat s množstvím
+ * volných parametrů.
+ *
+ * Typicky obsahuje:
+ * - hráče, kterého se notifikace týká,
+ * - uživatele, ke kterému hráč patří,
+ * - zápas, k němuž se událost vztahuje,
+ * - konkrétní registraci, pokud je relevantní.
  */
 public class NotificationContext {
 
@@ -41,9 +49,14 @@ public class NotificationContext {
         return registration;
     }
 
-    // -------------------------
-    // BUILDER
-    // -------------------------
+    // Builder třídy
+
+    /**
+     * Builder pro vytvoření instance NotificationContext.
+     *
+     * Umožňuje postupné skládání kontextu podle potřeby
+     * konkrétní notifikace.
+     */
     public static class Builder {
         private PlayerEntity player;
         private AppUserEntity user;

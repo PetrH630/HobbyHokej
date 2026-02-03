@@ -14,14 +14,19 @@ import org.springframework.util.StringUtils;
 /**
  * Implementace NotificationPreferencesService.
  *
- * Vyhodnocuje:
- * - PlayerSettingsEntity (emailEnabled, smsEnabled, notifyOn..., kategorie)
- * - AppUserSettingsEntity (globalNotificationLevel, kopie emailů, chování pro hráče s vlastním emailem...)
+ * Služba vyhodnocuje:
+ * - nastavení hráče (PlayerSettingsEntity),
+ * - nastavení uživatele (AppUserSettingsEntity),
+ * - globální úroveň notifikací uživatele (GlobalNotificationLevel),
+ * - kategorii a důležitost notifikace (NotificationCategory, NotificationType).
+ *
+ * Výsledkem je NotificationDecision, které definuje,
+ * komu a jakými kanály bude notifikace doručena.
  */
 @Service
 public class NotificationPreferencesServiceImpl implements NotificationPreferencesService {
 
-
+    @Override
     public NotificationDecision evaluate(PlayerEntity player,
                                          NotificationType type) {
 
@@ -35,23 +40,23 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
         AppUserEntity user = player.getUser();
         AppUserSettingsEntity userSettings = (user != null ? user.getSettings() : null);
 
-        // ===== ZDROJE KONTAKTŮ =====
+        // Zdrojové kontakty
 
-        // email hráče – preferuj PlayerSettings.contactEmail,
-        // případně fallback na email uživatele, pokud chceme
+        // Email hráče – preferuje se PlayerSettings.contactEmail,
+        // případně se použije email uživatele, pokud je to vhodné.
         String playerEmail = null;
         if (playerSettings != null && StringUtils.hasText(playerSettings.getContactEmail())) {
             playerEmail = playerSettings.getContactEmail();
         } else if (user != null && StringUtils.hasText(user.getEmail())) {
-            // fallback: pokud nemá vlastní email, můžeme použít email uživatele
+            // Fallback: pokud hráč nemá vlastní e-mail, lze použít e-mail uživatele.
             playerEmail = user.getEmail();
         }
 
-        // email uživatele (účtu)
+        // Email uživatele (účtu).
         String userEmail = (user != null ? user.getEmail() : null);
 
-        // telefon hráče – preferuj PlayerSettings.contactPhone,
-        // fallback na případný player.getPhoneNumber()
+        // Telefon hráče – preferuje se PlayerSettings.contactPhone,
+        // fallback je případný phoneNumber na PlayerEntity.
         String playerPhone = null;
         if (playerSettings != null && StringUtils.hasText(playerSettings.getContactPhone())) {
             playerPhone = playerSettings.getContactPhone();
@@ -59,16 +64,14 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
             playerPhone = player.getPhoneNumber();
         }
 
-
-
-        // ===== GLOBALNÍ NASTAVENÍ USERA =====
+        // Globální nastavení uživatele
 
         GlobalNotificationLevel globalLevel =
                 (userSettings != null && userSettings.getGlobalNotificationLevel() != null)
                         ? userSettings.getGlobalNotificationLevel()
                         : GlobalNotificationLevel.ALL;
 
-        // zda globální level vůbec povoluje tento konkrétní NotificationType
+        // Zda globální úroveň vůbec povoluje tento konkrétní NotificationType.
         boolean userGlobalAllowsThisType = isGloballyEnabledForType(type, globalLevel);
 
         boolean copyAllToUserEmail =
@@ -77,42 +80,35 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
         boolean includePlayersWithOwnEmail =
                 userSettings != null && userSettings.isReceiveNotificationsForPlayersWithOwnEmail();
 
-        // ===== PLAYER SETTINGS – KANÁLY + KATEGORIE =====
+        // Nastavení hráče – povolené kanály a kategorie
 
         boolean emailChannelEnabled = (playerSettings == null) || playerSettings.isEmailEnabled();
         boolean smsChannelEnabled = (playerSettings != null) && playerSettings.isSmsEnabled();
 
-        // kategorie povolená pro hráče?
+        // Zda je kategorie notifikace povolena pro hráče.
         boolean categoryEnabledForPlayer = isCategoryEnabledForPlayer(type, playerSettings);
 
-        // ===== ROZHODOVÁNÍ DLE TYPE / CATEGORY =====
+        // Rozhodování podle kategorie notifikace
 
         NotificationCategory category = type.getCategory();
 
         switch (category) {
 
-            // ----------------------------------
-            // SYSTÉMOVÉ TYPY – jdou primárně na účet (user.email)
-            // (PLAYER_CREATED, PLAYER_UPDATED, PLAYER_APPROVED, PLAYER_REJECTED, USER_UPDATED, ...)
-            // ----------------------------------
+            // Systémové typy – primárně směřují na účet (user.email).
             case SYSTEM -> {
                 if (user != null
                         && StringUtils.hasText(userEmail)
                         && userGlobalAllowsThisType) {
+
                     decision.setSendEmailToUser(true);
                     decision.setUserEmail(userEmail);
                 }
-                // momentálně neposíláme nic hráči; pokud bys chtěl, můžeš doplnit:
-                // if (emailChannelEnabled && categoryEnabledForPlayer && StringUtils.hasText(playerEmail)) ...
             }
 
-            // ----------------------------------
-            // REGISTRACE / OMLUVY / ZÁPASOVÉ INFO
-            // (PLAYER_REGISTERED, PLAYER_UNREGISTERED, PLAYER_RESERVED, PLAYER_EXCUSED, ...)
-            // ----------------------------------
+            // Registrace, omluvy, zápasové informace.
             case REGISTRATION, MATCH_INFO -> {
 
-                // EMAIL – hráč
+                // E-mail hráči.
                 if (emailChannelEnabled
                         && categoryEnabledForPlayer
                         && StringUtils.hasText(playerEmail)) {
@@ -121,7 +117,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
                     decision.setPlayerEmail(playerEmail);
                 }
 
-                // SMS – hráč
+                // SMS hráči.
                 if (smsChannelEnabled
                         && categoryEnabledForPlayer
                         && StringUtils.hasText(playerPhone)) {
@@ -130,7 +126,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
                     decision.setPlayerPhone(playerPhone);
                 }
 
-                // EMAIL – uživatel (kopie)
+                // E-mail uživateli jako kopie.
                 if (user != null
                         && StringUtils.hasText(userEmail)
                         && userGlobalAllowsThisType
@@ -139,19 +135,17 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
 
                     // Uživatel dostane kopii, pokud:
                     // - chce kopie (copyAllToUserEmail),
-                    // - global level mu tento typ neblokuje,
-                    // - a buď hráč nemá vlastní email (contactEmail),
-                    //   nebo user výslovně chce kopie i pro hráče s vlastním emailem.
+                    // - globální úroveň mu tento typ neblokuje,
+                    // - a buď hráč nemá vlastní e-mail,
+                    //   nebo uživatel výslovně chce kopie i pro hráče s vlastním e-mailem.
                     decision.setSendEmailToUser(true);
                     decision.setUserEmail(userEmail);
                 }
             }
 
-            // ----------------------------------
-            // OSTATNÍ – raději explicitně nic
-            // ----------------------------------
+            // Ostatní kategorie se explicitně nezpracovávají.
             default -> {
-                // nezpracovaná kategorie – raději neposílat nic
+                // Nezpracovaná kategorie – raději neposílat nic.
             }
         }
 
@@ -161,9 +155,9 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     /**
      * Určuje, zda globální nastavení uživatele povoluje daný NotificationType.
      *
-     * NONE           -> nikdy nic
-     * ALL            -> vždy
-     * IMPORTANT_ONLY -> jen pokud je typ označen jako "important"
+     * NONE           -> nepovoluje žádné notifikace
+     * ALL            -> povoluje všechny notifikace
+     * IMPORTANT_ONLY -> povoluje pouze typy označené jako důležité
      */
     private boolean isGloballyEnabledForType(NotificationType type,
                                              GlobalNotificationLevel level) {
@@ -176,16 +170,15 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     /**
-     * Kategorie notifikací povolená pro daného hráče?
+     * Zjistí, zda je kategorie notifikace povolena pro daného hráče.
      *
-     * Pokud playerSettings == null -> bereme default: vše povoleno.
-     * (chování stejné jako dřív, kdy jsi u null settings bral vše jako TRUE).
+     * Pokud playerSettings == null, bere se výchozí chování:
+     * všechny kategorie jsou povoleny.
      */
     private boolean isCategoryEnabledForPlayer(NotificationType type,
                                                PlayerSettingsEntity playerSettings) {
 
         if (playerSettings == null) {
-            // defaultní chování – hráč nemá nastavení, vše povoleno
             return true;
         }
 
@@ -197,8 +190,9 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     /**
-     * Má hráč vlastní email v PlayerSettings (contactEmail)?
-     * Používá se při rozhodování, zda posílat kopii na user.email.
+     * Zjistí, zda má hráč vlastní e-mail v PlayerSettings (contactEmail).
+     *
+     * Používá se při rozhodování, zda posílat kopii na e-mail uživatele.
      */
     private boolean hasOwnPlayerEmail(PlayerSettingsEntity playerSettings) {
         return playerSettings != null && StringUtils.hasText(playerSettings.getContactEmail());

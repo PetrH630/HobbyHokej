@@ -5,66 +5,52 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
 
 /**
- * Rozhraní pro odesílání notifikací hráčům.
- * <p>
+ * Rozhraní pro odesílání notifikací hráčům a uživatelům.
+ *
  * Definuje jednotný vstupní bod pro notifikační logiku v aplikaci.
- * Na základě typu notifikace a kontextu rozhoduje implementace,
- * jakým kanálem (SMS, email, …) a s jakým obsahem bude hráč informován.
- * </p>
+ * Implementace na základě typu notifikace a kontextu rozhoduje,
+ * jakým kanálem a s jakým obsahem bude příjemce informován.
  *
  * Účel:
- * <ul>
- *     <li>centralizovat notifikační logiku do jednoho místa,</li>
- *     <li>oddělit business události od konkrétní formy notifikace,</li>
- *     <li>umožnit snadné rozšíření o další typy notifikací a kanály.</li>
- * </ul>
+ * - centralizovat notifikační logiku do jednoho místa,
+ * - oddělit business události od konkrétní formy notifikace,
+ * - umožnit snadné rozšíření o další typy notifikací a kanály.
  *
- * Použití:
- * <ul>
- *     <li>využívá se v business službách (registrace na zápasy, správa hráčů),</li>
- *     <li>volá se vždy v reakci na konkrétní business událost.</li>
- * </ul>
- *
- * Implementační poznámky:
- * <ul>
- *     <li>implementace typicky respektuje nastavení notifikací hráče
- *     (např. povolení SMS / emailu),</li>
- *     <li>odesílání notifikací by mělo být odolné vůči selhání
- *     jednotlivých kanálů,</li>
- *     <li>selhání notifikace nesmí ovlivnit hlavní business proces.</li>
- * </ul>
+ * Metody tohoto rozhraní se typicky volají z business služeb
+ * v reakci na konkrétní události (registrace na zápas, změna hesla,
+ * aktivace účtu a podobně).
  */
 public interface NotificationService {
 
     /**
      * Odešle notifikaci konkrétnímu hráči.
-     * <p>
-     * Metoda slouží jako hlavní vstupní bod pro notifikace hráče
-     * v reakci na business události v systému.
-     * </p>
      *
-     * Parametr {@code context}:
-     * <ul>
-     *     <li>nese dodatečné informace potřebné pro sestavení obsahu notifikace,</li>
-     *     <li>typicky se jedná o doménovou entitu vztahující se k události,</li>
-     *     <li>může být {@code null} pro jednoduché notifikace.</li>
-     * </ul>
+     * Parametr context nese dodatečné informace potřebné
+     * pro sestavení obsahu notifikace. Typicky se jedná
+     * o doménovou entitu nebo kontextový objekt související
+     * s danou událostí. Může být null u jednodušších notifikací.
      *
-     * Typické příklady kontextu:
-     * <ul>
-     *     <li>{@code MatchRegistrationEntity} – registrace / odhlášení / omluva,</li>
-     *     <li>{@code null} – vytvoření hráče, schválení hráče, změna stavu.</li>
-     * </ul>
+     * Příklady:
+     * - MatchRegistrationEntity pro registraci, odhlášení a omluvu,
+     * - null pro vytvoření hráče nebo změnu stavu.
      *
      * @param player  hráč, kterému je notifikace určena
-     * @param type    typ notifikace (např. PLAYER_CREATED, PLAYER_REGISTERED, …)
+     * @param type    typ notifikace
      * @param context kontextová data související s notifikací
      */
     void notifyPlayer(PlayerEntity player, NotificationType type, Object context);
 
+    /**
+     * Odešle notifikaci konkrétnímu uživateli.
+     *
+     * Používá se zejména pro systémové notifikace na úrovni účtu,
+     * například aktivace účtu, reset hesla nebo změna hesla.
+     *
+     * @param user    uživatel, kterému je notifikace určena
+     * @param type    typ notifikace
+     * @param context kontextová data související s notifikací
+     */
     void notifyUser(AppUserEntity user,
                     NotificationType type,
                     Object context);
 }
-
-
