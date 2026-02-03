@@ -5,10 +5,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že uživatel nemá oprávnění pracovat s daným hráčem.
  *
- * <p>
  * Vyhazuje se, pokud se přihlášený uživatel snaží číst nebo měnit
  * data hráče, který mu nepatří (není k němu přiřazen).
- * </p>
  *
  * Typicky mapováno na HTTP 403 (Forbidden).
  */

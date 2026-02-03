@@ -5,10 +5,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že požadovaná sezóna nebyla nalezena.
  *
- * <p>
  * Používá se jak při hledání sezóny podle ID, tak v situaci,
  * kdy není nastavena žádná aktivní sezóna.
- * </p>
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */
@@ -24,9 +22,10 @@ public class SeasonNotFoundException extends BusinessException {
     }
 
     /**
-     * Obecnější varianta s custom zprávou.
+     * Obecnější varianta s vlastní chybovou zprávou.
      *
-     * Typicky použitá pro situaci typu „není nastavena žádná aktivní sezóna“.
+     * Typické použití je situace, kdy není nastavena žádná
+     * aktivní sezóna.
      *
      * @param message chybová zpráva
      */

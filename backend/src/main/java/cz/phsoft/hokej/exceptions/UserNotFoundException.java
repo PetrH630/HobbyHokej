@@ -5,9 +5,7 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že požadovaný uživatel nebyl nalezen.
  *
- * <p>
  * Může být vyhozena při hledání podle e-mailu nebo podle ID uživatele.
- * </p>
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */

@@ -5,10 +5,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující nesprávné původní heslo při změně hesla.
  *
- * <p>
  * Vyhazuje se v případě, kdy uživatel zadá špatné aktuální heslo
  * při pokusu o změnu hesla.
- * </p>
  *
  * Typicky mapováno na HTTP 400 (Bad Request).
  */

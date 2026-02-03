@@ -5,9 +5,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že požadovaný hráč nebyl nalezen.
  *
- * <p>
- * Může být vyhozena jak při hledání podle ID, tak při hledání podle e-mailu.
- * </p>
+ * Může být vyhozena jak při hledání podle ID, tak při hledání
+ * podle e-mailu.
  *
  * Typicky mapováno na HTTP 404 (Not Found).
  */
@@ -21,9 +20,10 @@ public class PlayerNotFoundException extends BusinessException {
         super("BE - Hráč s e-mailem " + email + " nenalezen.", HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Alternativní konstruktor s vlastní chybovou zprávou.
+     */
     public PlayerNotFoundException(String message, String Email) {
         super(message, HttpStatus.NOT_FOUND);
     }
-
-
 }

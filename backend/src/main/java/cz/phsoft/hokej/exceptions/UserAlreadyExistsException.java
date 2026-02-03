@@ -5,10 +5,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že uživatel již existuje.
  *
- * <p>
  * Typicky se používá při registraci, pokud je e-mail nebo jiný
  * identifikátor uživatele již obsazen.
- * </p>
  *
  * Typicky mapováno na HTTP 409 (Conflict).
  */

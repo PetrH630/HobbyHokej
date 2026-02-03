@@ -5,10 +5,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující neplatnou změnu stavu zápasu.
  *
- * <p>
  * Vyhazuje se při pokusu o přechod zápasu do stavu, který není
  * povolen vzhledem k aktuálnímu stavu nebo business pravidlům.
- * </p>
  *
  * Typicky mapováno na HTTP 409 (Conflict).
  */

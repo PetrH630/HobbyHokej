@@ -5,12 +5,10 @@ import org.springframework.http.HttpStatus;
 /**
  * Základní doménová výjimka pro business chyby v aplikaci.
  *
- * <p>
- * Slouží jako společný předek pro aplikační výjimky, které nesou
- * informaci o odpovídajícím HTTP status kódu. Tento status
- * je následně použit v globálním handleru výjimek pro tvorbu
- * jednotné chybové odpovědi.
- * </p>
+ * Slouží jako společný předek pro aplikační výjimky,
+ * které nesou informaci o odpovídajícím HTTP status kódu.
+ * Tento status je následně použit v globálním handleru
+ * výjimek pro tvorbu jednotné chybové odpovědi.
  */
 public class BusinessException extends RuntimeException {
 
@@ -31,7 +29,7 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
-     * Vrátí HTTP status kód spojený s touto výjimkou.
+     * Vrací HTTP status kód spojený s touto výjimkou.
      *
      * @return HTTP status kód
      */

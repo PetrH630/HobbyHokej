@@ -5,10 +5,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující neplatné datumové rozmezí období neaktivity.
  *
- * <p>
- * Typicky se používá, pokud datum "od" je po datu "do" nebo jinak
- * nesplňuje logická validační pravidla.
- * </p>
+ * Typicky se používá, pokud datum "od" je po datu "do"
+ * nebo jinak nesplňuje logická validační pravidla.
  *
  * Typicky mapováno na HTTP 400 (Bad Request).
  */
