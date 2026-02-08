@@ -31,6 +31,19 @@ public class AppUserSettingsDTO {
     private String globalNotificationLevel;
 
     /**
+     * Úroveň notifikací, které má uživatel dostávat v roli manažera.
+     *
+     * Hodnoty odpovídají enumu GlobalNotificationLevel.
+     * Určuje, jaké kopie notifikací budou zasílány na e-mail
+     * uživatele jako manažera. Používá se pro filtrování kopií
+     * zpráv určených manažerům.
+     *
+     * Pokud je tato hodnota na backendu null, používá se hodnota
+     * globalNotificationLevel jako výchozí.
+     */
+    private String managerNotificationLevel;
+
+    /**
      * Určuje, zda má uživatel dostávat kopie všech notifikací
      * svých hráčů na svůj email.
      */
@@ -92,6 +105,14 @@ public class AppUserSettingsDTO {
 
     public void setGlobalNotificationLevel(String globalNotificationLevel) {
         this.globalNotificationLevel = globalNotificationLevel;
+    }
+
+    public String getManagerNotificationLevel() {
+        return managerNotificationLevel;
+    }
+
+    public void setManagerNotificationLevel(String managerNotificationLevel) {
+        this.managerNotificationLevel = managerNotificationLevel;
     }
 
     public boolean isCopyAllPlayerNotificationsToUserEmail() {

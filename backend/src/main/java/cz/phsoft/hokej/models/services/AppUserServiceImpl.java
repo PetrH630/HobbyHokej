@@ -21,6 +21,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,8 @@ import java.util.UUID;
 @Service
 public class AppUserServiceImpl implements AppUserService {
 
+    @Value("${app.demo-mode:false}")
+    private boolean isDemoMode;
     private static final Logger log = LoggerFactory.getLogger(AppUserServiceImpl.class);
 
     /**
@@ -179,6 +182,13 @@ public class AppUserServiceImpl implements AppUserService {
     @Override
     public void activateUserByAdmin(Long id) {
         AppUserEntity user = findUserByIdOrThrow(id);
+
+        if (user.getRole() == Role.ROLE_ADMIN) {
+            throw new InvalidAdminActivateDeactivateException(
+                    "BE - Administrátorský účet nelze deaktivovat"
+            );
+        }
+
         if (user.isEnabled()) {
             throw new InvalidUserActivationException(
                     "BE - Aktivace účtu již byla provedena"
@@ -222,6 +232,13 @@ public class AppUserServiceImpl implements AppUserService {
 
         if (!user.getEmail().equals(dto.getEmail())) {
             ensureEmailNotUsed(dto.getEmail(), user.getId());
+        }
+
+        // DEMO režim – operace se zakáže před uložením do DB
+        if (isDemoMode) {
+            throw new DemoModeOperationNotAllowedException(
+                    "Uživatel nebude změněn. Aplikace běží v DEMO režimu."
+            );
         }
 
         user.setName(dto.getName());
@@ -290,6 +307,12 @@ public class AppUserServiceImpl implements AppUserService {
             throw new InvalidOldPasswordException();
         }
 
+        // DEMO režim – operace se zakáže před uložením do DB
+        if (isDemoMode) {
+            throw new DemoModeOperationNotAllowedException(
+                    "Heslo nebude změněno. Aplikace běží v DEMO režimu."
+            );
+        }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
@@ -308,6 +331,13 @@ public class AppUserServiceImpl implements AppUserService {
     @Transactional
     public void resetPassword(Long userId) {
         AppUserEntity user = findUserByIdOrThrow(userId);
+        // DEMO režim – operace se zakáže před uložením do DB
+        if (isDemoMode) {
+            throw new DemoModeOperationNotAllowedException(
+                    "Heslo nebude resetováno. Aplikace běží v DEMO režimu."
+            );
+        }
+
         user.setPassword(passwordEncoder.encode(DEFAULT_RESET_PASSWORD));
         userRepository.save(user);
 
@@ -325,6 +355,13 @@ public class AppUserServiceImpl implements AppUserService {
     @Override
     public void deactivateUserByAdmin(Long id) {
         AppUserEntity user = findUserByIdOrThrow(id);
+
+        if (user.getRole() == Role.ROLE_ADMIN) {
+            throw new InvalidAdminActivateDeactivateException(
+                    "BE - Administrátorský účet nelze deaktivovat"
+            );
+        }
+
 
         if (!user.isEnabled()) {
             throw new InvalidUserActivationException(

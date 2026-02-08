@@ -98,7 +98,7 @@ public class AppUserController {
      * @return seznam uživatelů jako {@link AppUserDTO}
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<AppUserDTO> getAllUsers() {
         return appUserService.getAllUsers();
     }
@@ -112,7 +112,7 @@ public class AppUserController {
      * @return DTO s detaily vybraného uživatele
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public AppUserDTO getUserById(@PathVariable Long id) {
         return appUserService.getUserById(id);
     }
@@ -161,4 +161,5 @@ public class AppUserController {
         appUserService.deactivateUserByAdmin(id);
         return ResponseEntity.ok("Uživatel byl úspěšně deaktivován");
     }
+
 }

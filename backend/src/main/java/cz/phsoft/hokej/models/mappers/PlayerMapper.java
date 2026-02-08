@@ -21,6 +21,7 @@ public interface PlayerMapper {
 
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "playerStatus", defaultValue = "PENDING")
     PlayerEntity toEntity(PlayerDTO dto);
 
     @Mapping(target = "fullName", ignore = true)

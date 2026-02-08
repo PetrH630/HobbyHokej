@@ -84,7 +84,7 @@ public class PlayerController {
      * @return aktualizovaný hráč jako {@link PlayerDTO}
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public PlayerDTO updatePlayerAdmin(@PathVariable Long id,
                                        @Valid @RequestBody PlayerDTO dto) {
         return playerService.updatePlayer(id, dto);
@@ -99,7 +99,7 @@ public class PlayerController {
      * @return DTO {@link SuccessResponseDTO} s výsledkem operace
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<SuccessResponseDTO> deletePlayer(@PathVariable Long id) {
         SuccessResponseDTO response = playerService.deletePlayer(id);
         return ResponseEntity.ok(response);

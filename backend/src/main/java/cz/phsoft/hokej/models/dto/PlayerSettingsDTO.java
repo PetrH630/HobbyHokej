@@ -1,5 +1,7 @@
 package cz.phsoft.hokej.models.dto;
 
+import jakarta.validation.constraints.Pattern;
+
 /**
  * DTO pro nastavení hráče na úrovni PlayerSettingsEntity.
  *
@@ -12,6 +14,11 @@ public class PlayerSettingsDTO {
     // kontaktní údaje
 
     private String contactEmail;
+
+    @Pattern(
+            regexp = "^\\+[1-9]\\d{1,14}$",
+            message = "Telefon musí být v mezinárodním formátu, např. +420123456789"
+    )
     private String contactPhone;
 
     // kanály
@@ -47,8 +54,10 @@ public class PlayerSettingsDTO {
     }
 
     public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
-    }
+        this.contactPhone = (contactPhone == null || contactPhone.isBlank())
+            ? null
+            : contactPhone;
+}
 
     public boolean isEmailEnabled() {
         return emailEnabled;

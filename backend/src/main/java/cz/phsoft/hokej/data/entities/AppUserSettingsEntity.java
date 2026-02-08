@@ -48,6 +48,21 @@ public class AppUserSettingsEntity {
     private GlobalNotificationLevel globalNotificationLevel = GlobalNotificationLevel.ALL;
 
     /**
+     * Úroveň notifikací, které má uživatel dostávat v roli manažera.
+     *
+     * Hodnota se používá při rozhodování, zda mají být zasílány
+     * kopie notifikací na e-mail uživatele, pokud má zároveň
+     * roli manažera. Nastavení ovlivňuje pouze manažerské kopie,
+     * nikoliv notifikace určené přímo tomuto uživateli nebo hráčům.
+     *
+     * Pokud je hodnota null, používá se hodnota globalNotificationLevel
+     * jako výchozí chování.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "manager_notification_level", length = 50)
+    private GlobalNotificationLevel managerNotificationLevel;
+
+    /**
      * Určuje, zda má uživatel dostávat kopie všech notifikací,
      * které chodí jeho hráčům.
      *
@@ -129,6 +144,14 @@ public class AppUserSettingsEntity {
 
     public void setGlobalNotificationLevel(GlobalNotificationLevel globalNotificationLevel) {
         this.globalNotificationLevel = globalNotificationLevel;
+    }
+
+    public GlobalNotificationLevel getManagerNotificationLevel() {
+        return managerNotificationLevel;
+    }
+
+    public void setManagerNotificationLevel(GlobalNotificationLevel managerNotificationLevel) {
+        this.managerNotificationLevel = managerNotificationLevel;
     }
 
     public boolean isCopyAllPlayerNotificationsToUserEmail() {

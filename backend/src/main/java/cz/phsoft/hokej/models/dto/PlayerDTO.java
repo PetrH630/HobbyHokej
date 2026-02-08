@@ -4,6 +4,7 @@ import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.util.Locale;
@@ -44,7 +45,12 @@ public class PlayerDTO {
      */
     private String fullName;
 
+    @Pattern(
+            regexp = "^\\+[1-9]\\d{1,14}$",
+            message = "Telefon musí být v mezinárodním formátu, např. +420123456789"
+    )
     private String phoneNumber;
+
 
     /**
      * Typ hráče, například BASIC, STANDARD nebo VIP.
@@ -113,7 +119,11 @@ public class PlayerDTO {
     public void setTeam(Team team) { this.team = team; }
 
     public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = (phoneNumber == null || phoneNumber.isBlank())
+                ? null
+                : phoneNumber;
+    }
 
     public PlayerStatus getPlayerStatus() { return playerStatus; }
     public void setPlayerStatus(PlayerStatus playerStatus) {

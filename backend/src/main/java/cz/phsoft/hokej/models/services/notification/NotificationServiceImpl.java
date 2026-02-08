@@ -1,7 +1,9 @@
 package cz.phsoft.hokej.models.services.notification;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.enums.Role;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
@@ -131,6 +133,13 @@ public class NotificationServiceImpl implements NotificationService {
                     continue;
                 }
 
+                // Filtrování podle manažerského nastavení notifikací.
+                if (!isManagerCopyAllowedForManager(type, manager)) {
+                    log.debug("Manager {} má nastavenou úroveň manažerských notifikací, pro typ {} se kopie neposílá (notifyPlayer).",
+                            manager.getId(), type);
+                    continue;
+                }
+
                 sendEmailToManager(manager, player, type, context);
             }
         } else {
@@ -197,6 +206,13 @@ public class NotificationServiceImpl implements NotificationService {
                 if (Objects.equals(managerEmail, userEmail)) {
                     log.debug("Manager {} má stejný e-mail jako uživatel – kopie se neposílá (notifyUser).",
                             manager.getId());
+                    continue;
+                }
+
+                // Filtrování podle manažerského nastavení notifikací.
+                if (!isManagerCopyAllowedForManager(type, manager)) {
+                    log.debug("Manager {} má nastavenou úroveň manažerských notifikací, pro typ {} se kopie neposílá (notifyUser).",
+                            manager.getId(), type);
                     continue;
                 }
 
@@ -327,5 +343,50 @@ public class NotificationServiceImpl implements NotificationService {
      */
     private boolean shouldSendManagerCopy(NotificationType type) {
         return !MANAGER_COPY_BLACKLIST.contains(type);
+    }
+
+    /**
+     * Určuje, zda má konkrétní manažer dostat kopii daného typu notifikace.
+     *
+     * Vyhodnocuje nastavení managerNotificationLevel na AppUserSettingsEntity.
+     * Pokud není nastaveno, používá se globalNotificationLevel. Pokud není
+     * k dispozici ani globální úroveň, používá se výchozí ALL.
+     */
+    private boolean isManagerCopyAllowedForManager(NotificationType type,
+                                                   AppUserEntity manager) {
+        if (manager == null) {
+            return false;
+        }
+
+        AppUserSettingsEntity settings = manager.getSettings();
+        GlobalNotificationLevel level;
+
+        if (settings == null) {
+            level = GlobalNotificationLevel.ALL;
+        } else if (settings.getManagerNotificationLevel() != null) {
+            level = settings.getManagerNotificationLevel();
+        } else if (settings.getGlobalNotificationLevel() != null) {
+            level = settings.getGlobalNotificationLevel();
+        } else {
+            level = GlobalNotificationLevel.ALL;
+        }
+
+        return isEnabledForType(type, level);
+    }
+
+    /**
+     * Vyhodnotí, zda je daný typ notifikace povolen pro zvolenou úroveň.
+     *
+     * NONE           znamená, že se notifikace neposílají.
+     * ALL            znamená, že se posílají všechny typy.
+     * IMPORTANT_ONLY znamená, že se posílají pouze důležité typy.
+     */
+    private boolean isEnabledForType(NotificationType type,
+                                     GlobalNotificationLevel level) {
+        return switch (level) {
+            case NONE -> false;
+            case ALL -> true;
+            case IMPORTANT_ONLY -> type.isImportant();
+        };
     }
 }

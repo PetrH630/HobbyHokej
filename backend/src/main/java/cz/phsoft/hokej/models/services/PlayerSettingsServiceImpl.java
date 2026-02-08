@@ -160,13 +160,15 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
         settings.setContactPhone(null);
 
         // původní logika z PlayerEntity.emailEnabled / smsEnabled přesunuta do nastavení hráče
+        settings.setEmailEnabled(false);
+        settings.setSmsEnabled(false);
         settings.setNotifyOnRegistration(true);
         settings.setNotifyOnExcuse(true);
         settings.setNotifyOnMatchChange(true);
         settings.setNotifyOnMatchCancel(true);
         settings.setNotifyOnPayment(false);
 
-        settings.setNotifyReminders(true);
+        settings.setNotifyReminders(false);
         settings.setReminderHoursBefore(24);
 
         return settings;

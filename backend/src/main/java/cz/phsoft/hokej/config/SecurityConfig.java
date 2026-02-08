@@ -44,6 +44,18 @@ public class SecurityConfig {
     @Value("${app.test-mode:false}")
     private boolean isTestMode;
 
+    /**
+     * Příznak demo režimu.
+     *
+     * Pokud je {@code app.demo-mode=true}, aplikace běží se stejným
+     * security nastavením jako v produkci, ale některé operace
+     * (např. změna hesla, mazání dat) mohou být na úrovni service
+     * blokované.
+     */
+    @Value("${app.demo-mode:false}")
+    private boolean isDemoMode;
+
+
     public SecurityConfig(CustomUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
@@ -209,7 +221,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

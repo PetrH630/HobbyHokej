@@ -95,6 +95,8 @@ public class MatchDetailDTO implements NumberedMatchDTO {
      * neomluvených hráčů.
      */
     private List<PlayerDTO> registeredPlayers;
+    private List<PlayerDTO> registeredDarkPlayers;
+    private List<PlayerDTO> registeredLightPlayers;
     private List<PlayerDTO> reservedPlayers;
     private List<PlayerDTO> unregisteredPlayers;
     private List<PlayerDTO> excusedPlayers;
@@ -177,6 +179,22 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     public List<PlayerDTO> getRegisteredPlayers() { return registeredPlayers; }
     public void setRegisteredPlayers(List<PlayerDTO> registeredPlayers) {
         this.registeredPlayers = registeredPlayers;
+    }
+
+    public List<PlayerDTO> getRegisteredDarkPlayers() {
+        return registeredDarkPlayers;
+    }
+
+    public void setRegisteredDarkPlayers(List<PlayerDTO> registeredDarkPlayers) {
+        this.registeredDarkPlayers = registeredDarkPlayers;
+    }
+
+    public List<PlayerDTO> getRegisteredLightPlayers() {
+        return registeredLightPlayers;
+    }
+
+    public void setRegisteredLightPlayers(List<PlayerDTO> registeredLightPlayers) {
+        this.registeredLightPlayers = registeredLightPlayers;
     }
 
     public List<PlayerDTO> getReservedPlayers() { return reservedPlayers; }

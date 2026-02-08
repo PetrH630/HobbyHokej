@@ -142,6 +142,7 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
 
         settings.setPlayerSelectionMode(PlayerSelectionMode.FIRST_PLAYER);
         settings.setGlobalNotificationLevel(GlobalNotificationLevel.ALL);
+        settings.setManagerNotificationLevel(GlobalNotificationLevel.ALL);
         settings.setCopyAllPlayerNotificationsToUserEmail(false);
         settings.setReceiveNotificationsForPlayersWithOwnEmail(false);
         settings.setEmailDigestEnabled(false);
