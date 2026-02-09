@@ -81,8 +81,15 @@ public class PlayerEntity {
      * Časové razítko hráče.
      * Používá se pro určení data a času u vytvoření, a změn uživatele.
      */
-    @Column(nullable = false, updatable = true)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.timestamp == null) {
+            this.timestamp = LocalDateTime.now();
+        }
+    }
 
     public PlayerEntity() {
         this.type = PlayerType.BASIC;

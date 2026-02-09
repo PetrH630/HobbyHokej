@@ -1,8 +1,10 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.SeasonDTO;
+import cz.phsoft.hokej.models.dto.SeasonHistoryDTO;
 import cz.phsoft.hokej.models.mappers.SeasonMapper;
 import cz.phsoft.hokej.models.services.CurrentSeasonService;
+import cz.phsoft.hokej.models.services.SeasonHistoryService;
 import cz.phsoft.hokej.models.services.SeasonService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -30,13 +32,16 @@ public class SeasonController {
     private final SeasonService seasonService;
     private final SeasonMapper seasonMapper;
     private final CurrentSeasonService currentSeasonService;
+    private final SeasonHistoryService seasonHistoryService;
 
     public SeasonController(SeasonService seasonService,
                             SeasonMapper seasonMapper,
-                            CurrentSeasonService currentSeasonService) {
+                            CurrentSeasonService currentSeasonService,
+                            SeasonHistoryService seasonHistoryService) {
         this.seasonService = seasonService;
         this.seasonMapper = seasonMapper;
         this.currentSeasonService = currentSeasonService;
+        this.seasonHistoryService = seasonHistoryService;
     }
 
     // ADMIN – globální správa sezón
@@ -48,7 +53,7 @@ public class SeasonController {
      * @return vytvořená sezóna jako {@link SeasonDTO}
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<SeasonDTO> createSeason(
             @Valid @RequestBody SeasonDTO seasonDTO) {
 
@@ -64,13 +69,27 @@ public class SeasonController {
      * @return aktualizovaná sezóna jako {@link SeasonDTO}
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<SeasonDTO> updateSeason(
             @PathVariable Long id,
             @Valid @RequestBody SeasonDTO seasonDTO
     ) {
         SeasonDTO updated = seasonService.updateSeason(id, seasonDTO);
         return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * Vrací historii sezóny dle id.
+     *
+     * @param id ID sezóny
+     * @return historie sezony jako {@link List<SeasonHistoryDTO>}
+     */
+    @GetMapping("/{id}/history")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<SeasonHistoryDTO> getSeasonHistory(
+            @PathVariable Long id
+    ) {
+        return seasonHistoryService.getHistoryForSeason(id);
     }
 
     /**
@@ -82,7 +101,7 @@ public class SeasonController {
      * @return seznam sezón jako {@link SeasonDTO}
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<List<SeasonDTO>> getAllSeasonsAdmin() {
         List<SeasonDTO> seasons = seasonService.getAllSeasons();
         return ResponseEntity.ok(seasons);
@@ -97,7 +116,7 @@ public class SeasonController {
      * @return aktivní sezóna jako {@link SeasonDTO}
      */
     @GetMapping("/active")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<SeasonDTO> getActiveSeason() {
         SeasonDTO dto = seasonMapper.toDTO(seasonService.getActiveSeason());
         return ResponseEntity.ok(dto);
@@ -113,7 +132,7 @@ public class SeasonController {
      * @return nově aktivní sezóna jako {@link SeasonDTO}
      */
     @PutMapping("/{id}/active")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<SeasonDTO> setActiveSeason(@PathVariable Long id) {
         seasonService.setActiveSeason(id);
         SeasonDTO active = seasonMapper.toDTO(seasonService.getActiveSeason());

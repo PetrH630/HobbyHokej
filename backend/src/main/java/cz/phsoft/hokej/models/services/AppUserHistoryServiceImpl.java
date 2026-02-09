@@ -1,11 +1,14 @@
 package cz.phsoft.hokej.models.services;
 
+import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.repositories.AppUserHistoryRepository;
 import cz.phsoft.hokej.models.dto.AppUserHistoryDTO;
 import cz.phsoft.hokej.models.mappers.AppUserHistoryMapper;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class AppUserHistoryServiceImpl implements AppUserHistoryService{
 
     private final AppUserHistoryRepository repository;
@@ -19,9 +22,18 @@ public class AppUserHistoryServiceImpl implements AppUserHistoryService{
         this.mapper = mapper;
     }
 
-    public List<AppUserHistoryDTO> getHistoryForUser(Long userId) {
+    public List<AppUserHistoryDTO> getHistoryForUser(String email) {
         return mapper.toDTOList(
-                repository.findByUserIdOrderByChangedAtDesc(userId)
+                repository.findByEmailOrderByChangedAtDesc(email)
         );
     }
+
+    public List<AppUserHistoryDTO> getHistoryForUser(Long id) {
+        return mapper.toDTOList(
+                repository.findByUserIdOrderByChangedAtDesc(id)
+        );
+    }
+
+
+
 }

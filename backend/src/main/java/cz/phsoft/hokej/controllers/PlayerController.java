@@ -1,15 +1,18 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.models.dto.PlayerHistoryDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.requests.ChangePlayerUserRequest;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
+import cz.phsoft.hokej.models.services.PlayerHistoryService;
 import cz.phsoft.hokej.models.services.PlayerService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import cz.phsoft.hokej.models.services.PlayerHistoryService;
 
 import java.util.List;
 
@@ -28,11 +31,14 @@ public class PlayerController {
 
     private final PlayerService playerService;
     private final CurrentPlayerService currentPlayerService;
+    private final PlayerHistoryService playerHistoryService;
 
     public PlayerController(PlayerService playerService,
-                            CurrentPlayerService currentPlayerService) {
+                            CurrentPlayerService currentPlayerService,
+                            PlayerHistoryService playerHistoryService) {
         this.playerService = playerService;
         this.currentPlayerService = currentPlayerService;
+        this.playerHistoryService = playerHistoryService;
     }
 
     // ADMIN / MANAGER – globální správa hráčů
@@ -60,6 +66,18 @@ public class PlayerController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public PlayerDTO getPlayerById(@PathVariable Long id) {
         return playerService.getPlayerById(id);
+    }
+
+    /**
+     * Vrací historii hráče podle jeho ID.
+     *
+     * @param id ID hráče
+     * @return DTO {@link List<PlayerHistoryDTO>} s historii hráče
+     */
+    @GetMapping("/{id}/history")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<PlayerHistoryDTO> getPlayerHistoryById(@PathVariable Long id) {
+        return playerHistoryService.getHistoryForPlayer(id);
     }
 
     /**
@@ -204,4 +222,19 @@ public class PlayerController {
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
         return playerService.updatePlayer(currentPlayerId, dto);
     }
+
+    /**
+     * Vrací historii aktuálně přihlášeného hráče podle jeho ID.
+     *
+     * @param id ID hráče
+     * @return DTO {@link List<PlayerHistoryDTO>} s historii hráče
+     */
+    @GetMapping("/me/history")
+    @PreAuthorize("isAuthenticated()")
+    public List<PlayerHistoryDTO> getMyPlayerHistory(Long id) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return playerHistoryService.getHistoryForPlayer(currentPlayerId);
+    }
+
 }

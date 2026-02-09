@@ -18,9 +18,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * pro JVM a konfiguraci základních Spring funkcí na úrovni aplikace.
  */
 @SpringBootApplication
-@EnableJpaRepositories // aktivuje podporu JPA repozitářů v aplikaci
-@EnableScheduling      // umožňuje spouštění plánovaných úloh (cron, fixedRate apod.)
-@EnableAsync           // umožňuje asynchronní metody označené anotací @Async
+@EnableJpaRepositories
+@EnableScheduling
+@EnableAsync
 public class HobbyHokejApplication {
 
     /**

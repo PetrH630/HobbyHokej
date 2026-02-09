@@ -1,7 +1,9 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.AppUserDTO;
+import cz.phsoft.hokej.models.dto.AppUserHistoryDTO;
 import cz.phsoft.hokej.models.dto.ChangePasswordDTO;
+import cz.phsoft.hokej.models.services.AppUserHistoryService;
 import cz.phsoft.hokej.models.services.AppUserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +26,14 @@ import java.util.List;
 public class AppUserController {
 
     private final AppUserService appUserService;
+    private final AppUserHistoryService appUserHistoryService;
 
-    public AppUserController(AppUserService appUserService) {
+    public AppUserController(AppUserService appUserService,
+                             AppUserHistoryService appUserHistoryService) {
         this.appUserService = appUserService;
+        this.appUserHistoryService = appUserHistoryService;
     }
+
 
     /**
      * Vrací detail aktuálně přihlášeného uživatele.
@@ -160,6 +166,37 @@ public class AppUserController {
     public ResponseEntity<String> deactivateUserByAdmin(@PathVariable Long id) {
         appUserService.deactivateUserByAdmin(id);
         return ResponseEntity.ok("Uživatel byl úspěšně deaktivován");
+    }
+
+    /**
+     * Vrací historii uživatele dle id.
+     *
+     * @param id ID uživatele
+     * @return historie uživatele jako {@link List<AppUserHistoryDTO>}
+     *
+     */
+    @GetMapping("/{id}/history")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<AppUserHistoryDTO> getUserHistory(@PathVariable Long id
+            ) {
+        return appUserHistoryService.getHistoryForUser(id);
+    }
+
+    /**
+     * Vrací historii aktuálně přihlášeného uživatele.
+     *
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @return historie uživatele jako {@link List<AppUserHistoryDTO>}
+     */
+    @GetMapping("/me/history")
+    @PreAuthorize("isAuthenticated()")
+    public List<AppUserHistoryDTO> getMyUserHistory(
+            Authentication authentication
+            ) {
+
+        String email = authentication.getName();
+        return appUserHistoryService.getHistoryForUser(email);
+
     }
 
 }

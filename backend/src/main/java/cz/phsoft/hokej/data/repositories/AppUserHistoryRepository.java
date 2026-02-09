@@ -1,9 +1,11 @@
 package cz.phsoft.hokej.data.repositories;
 
+import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.AppUserHistoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repozitář pro čtení historických záznamů uživatelů.
@@ -18,4 +20,8 @@ public interface AppUserHistoryRepository extends JpaRepository<AppUserHistoryEn
      * seřazené od nejnovější změny po nejstarší.
      */
     List<AppUserHistoryEntity> findByUserIdOrderByChangedAtDesc(Long userId);
+
+    List<AppUserHistoryEntity> findByEmailOrderByChangedAtDesc(String email);
+
+
 }

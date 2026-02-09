@@ -1,11 +1,9 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
-import cz.phsoft.hokej.models.dto.MatchDTO;
-import cz.phsoft.hokej.models.dto.MatchDetailDTO;
-import cz.phsoft.hokej.models.dto.MatchOverviewDTO;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.models.dto.*;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
+import cz.phsoft.hokej.models.services.MatchHistoryService;
 import cz.phsoft.hokej.models.services.MatchService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -31,11 +29,14 @@ public class MatchController {
 
     private final MatchService matchService;
     private final CurrentPlayerService currentPlayerService;
+    private final MatchHistoryService matchHistoryService;
 
     public MatchController(MatchService matchService,
-                           CurrentPlayerService currentPlayerService) {
+                           CurrentPlayerService currentPlayerService,
+                           MatchHistoryService matchHistoryService) {
         this.matchService = matchService;
         this.currentPlayerService = currentPlayerService;
+        this.matchHistoryService = matchHistoryService;
     }
 
     // ADMIN / MANAGER – globální správa zápasů
@@ -104,6 +105,19 @@ public class MatchController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public MatchDTO getMatch(@PathVariable Long id) {
         return matchService.getMatchById(id);
+    }
+
+    /**
+     * Vrací historií zápasu podle jeho ID.
+     *
+     *
+     * @param id ID zápasu
+     * @return DTO {@link List<MatchHistoryDTO>} s historií zápasu
+     */
+    @GetMapping("/{id}/history")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchHistoryDTO> getMatchHistory(@PathVariable Long id) {
+        return matchHistoryService.getHistoryForMatch(id);
     }
 
     /**

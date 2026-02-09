@@ -5,6 +5,8 @@ import cz.phsoft.hokej.models.dto.AppUserHistoryDTO;
 import java.util.List;
 
 public interface AppUserHistoryService {
-    public List<AppUserHistoryDTO> getHistoryForUser(Long userId);
+    public List<AppUserHistoryDTO> getHistoryForUser(String email);
+
+    public List<AppUserHistoryDTO> getHistoryForUser(Long id);
 
 }

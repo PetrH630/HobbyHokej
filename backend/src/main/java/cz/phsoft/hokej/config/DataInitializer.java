@@ -268,18 +268,21 @@ public class DataInitializer {
         season2024_2025.setStartDate(LocalDate.of(2024, 11, 20));
         season2024_2025.setEndDate(LocalDate.of(2025, 3, 31));
         season2024_2025.setActive(false);
+        season2024_2025.setCreatedByUserId(2L);
 
         SeasonEntity season2025_2026 = new SeasonEntity();
         season2025_2026.setName("2025/2026");
         season2025_2026.setStartDate(LocalDate.of(2025, 11, 21));
         season2025_2026.setEndDate(LocalDate.of(2026, 3, 31));
         season2025_2026.setActive(true);
+        season2025_2026.setCreatedByUserId(2L);
 
         SeasonEntity season2026_2027 = new SeasonEntity();
         season2026_2027.setName("2026/2027");
         season2026_2027.setStartDate(LocalDate.of(2026, 11, 1));
         season2026_2027.setEndDate(LocalDate.of(2027, 3, 31));
         season2026_2027.setActive(false);
+        season2026_2027.setCreatedByUserId(2L);
 
         seasonRepository.saveAll(List.of(
                 season2024_2025,
@@ -330,6 +333,7 @@ public class DataInitializer {
                 match.setMatchStatus(null);
                 match.setCancelReason(null);
                 match.setSeason(actualSeason);
+                match.setCreatedByUserId(2L);
                 matchRepository.save(match);
 
             }
