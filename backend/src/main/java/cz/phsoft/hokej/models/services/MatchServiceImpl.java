@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+//TODO KOMENTÁŘE - PROSTÉ
 /**
  * Service vrstva se používá pro práci se zápasy.
  * <p>
