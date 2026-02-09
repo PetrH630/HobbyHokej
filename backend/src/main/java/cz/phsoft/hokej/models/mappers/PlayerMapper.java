@@ -22,14 +22,17 @@ public interface PlayerMapper {
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "playerStatus", defaultValue = "PENDING")
+    @Mapping(target = "timestamp", ignore = true)
     PlayerEntity toEntity(PlayerDTO dto);
 
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "timestamp", ignore = true)
     void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
 
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "timestamp", ignore = true)
     void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
 
     List<PlayerDTO> toDTOList(List<PlayerEntity> players);

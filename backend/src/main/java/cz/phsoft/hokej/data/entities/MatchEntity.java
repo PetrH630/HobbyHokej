@@ -70,6 +70,14 @@ public class MatchEntity {
     @JoinColumn(name = "season_id", nullable = false)
     private SeasonEntity season;
 
+    /**
+     * Časové razítko zápasu.
+     * Používá se pro ukládání data a času vytvoření a změn zápasu.
+     */
+    @Column(nullable = false, updatable = true)
+    private LocalDateTime timestamp = LocalDateTime.now();
+
+
     public MatchEntity() {
     }
 
@@ -108,4 +116,8 @@ public class MatchEntity {
     public SeasonEntity getSeason() { return season; }
 
     public void setSeason(SeasonEntity season) { this.season = season; }
+
+    public LocalDateTime getTimestamp() { return timestamp; }
+
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }

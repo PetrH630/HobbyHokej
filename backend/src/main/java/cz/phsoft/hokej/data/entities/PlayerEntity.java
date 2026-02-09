@@ -5,6 +5,8 @@ import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 /**
  * Entita reprezentující hráče v systému.
  *
@@ -74,6 +76,13 @@ public class PlayerEntity {
      */
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private PlayerSettingsEntity settings;
+
+    /**
+     * Časové razítko hráče.
+     * Používá se pro určení data a času u vytvoření, a změn uživatele.
+     */
+    @Column(nullable = false, updatable = true)
+    private LocalDateTime timestamp = LocalDateTime.now();
 
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
@@ -156,4 +165,8 @@ public class PlayerEntity {
     private void updateFullName() {
         this.fullName = name + " " + surname;
     }
+
+    public LocalDateTime getTimestamp() { return timestamp; }
+
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }

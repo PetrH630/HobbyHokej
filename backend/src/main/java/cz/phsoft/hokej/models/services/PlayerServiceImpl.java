@@ -161,6 +161,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (dto.getPlayerStatus() != null) {
             existing.setPlayerStatus(dto.getPlayerStatus());
         }
+        existing.setTimestamp(LocalDateTime.now());
 
         PlayerEntity saved = playerRepository.save(existing);
         notifyPlayer(saved, NotificationType.PLAYER_UPDATED, saved);
@@ -259,6 +260,7 @@ public class PlayerServiceImpl implements PlayerService {
             throw new InvalidChangePlayerUserException();
         }
         player.setUser(newUser);
+        player.setTimestamp(LocalDateTime.now());
         PlayerEntity saved = playerRepository.save(player);
 
         notifyPlayer(saved, NotificationType.PLAYER_CHANGE_USER, newUser);
@@ -567,7 +569,7 @@ public class PlayerServiceImpl implements PlayerService {
                     playerSettingsService.createDefaultSettingsForPlayer(player);
             player.setSettings(settings);
         }
-
+        player.setTimestamp(LocalDateTime.now());
         PlayerEntity saved = playerRepository.save(player);
 
         notificationType = resolveNotificationType(targetStatus);

@@ -155,7 +155,7 @@ public class DataInitializer {
             player.setSurname(surnames[i].toUpperCase());
             user.setSurname(surnames[i].toUpperCase());
 
-            String email = "player" + (i+1) + "@example.com";
+            String email = "player" + (i + 1) + "@example.com";
             String password = "Heslo123";
             user.setEmail(email);
             user.setPassword(encoder.encode(password));
@@ -173,12 +173,12 @@ public class DataInitializer {
             player.setPhoneNumber("");
             if (i < 5) {
                 player.setTeam(Team.DARK);
-            }else {
+            } else {
                 player.setTeam(Team.LIGHT);
             }
-            if (i < 8){
+            if (i < 8) {
                 player.setPlayerStatus(PlayerStatus.APPROVED);
-            }else {
+            } else {
                 player.setPlayerStatus(PlayerStatus.PENDING);
             }
             switch (i) {
@@ -323,7 +323,7 @@ public class DataInitializer {
                 MatchEntity match = new MatchEntity();
                 LocalDateTime dateTime = startDate.plusWeeks(i);
                 match.setDateTime(dateTime);
-                match.setLocation("WOODARÉNA");
+                match.setLocation("NĚJAKÁ HALA");
                 match.setDescription("");
                 match.setMaxPlayers(12);
                 match.setPrice(2200);
@@ -500,6 +500,56 @@ public class DataInitializer {
                      'DELETE', NOW());
                 END
                 """);
+        /**
+         * Vytváří databázové triggery pro tabulku hráčů.
+         * <p>
+         * Triggery zajišťují automatický zápis do tabulky historie hráče
+         * při vzniku, změně nebo smazání hráče.
+         */
+
+        createTrigger("trg_player_insert", """
+                CREATE TRIGGER trg_player_insert
+                AFTER INSERT ON player_entity
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO player_entity_history
+                        (player_id, name, surname, nickname, type, full_name, phone_number,
+                         team, player_status, user_id, original_timestamp, action, changed_at)
+                    VALUES
+                        (NEW.id, NEW.name, NEW.surname, NEW.nickname, NEW.type, NEW.full_name, NEW.phone_number,
+                         NEW.team, NEW.player_status, NEW.user_id, NEW.timestamp, 'INSERT', NOW());
+                END
+                """);
+
+        createTrigger("trg_player_update", """
+        CREATE TRIGGER trg_player_update
+        AFTER UPDATE ON player_entity
+        FOR EACH ROW
+        BEGIN
+            INSERT INTO player_entity_history
+                (player_id, name, surname, nickname, type, full_name, phone_number,
+                 team, player_status, user_id, original_timestamp, action, changed_at)
+            VALUES
+                (NEW.id, NEW.name, NEW.surname, NEW.nickname, NEW.type, NEW.full_name, NEW.phone_number,
+                 NEW.team, NEW.player_status, NEW.user_id, NEW.timestamp, 'UPDATE', NOW());
+        END
+        """);
+
+
+        createTrigger("trg_player_delete", """
+                CREATE TRIGGER trg_player_delete
+                AFTER DELETE ON player_entity
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO player_entity_history
+                        (player_id, name, surname, nickname, type, full_name, phone_number,
+                         team, player_status, user_id, original_timestamp, action, changed_at)
+                    VALUES
+                        (OLD.id, OLD.name, OLD.surname, OLD.nickname, OLD.type, OLD.full_name, OLD.phone_number,
+                         OLD.team, OLD.player_status, OLD.user_id, OLD.timestamp, 'DELETE', NOW());
+                END
+                """);
+
     }
 
     /**

@@ -3,10 +3,12 @@ package cz.phsoft.hokej.models.dto;
 import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerType;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 /**
@@ -67,6 +69,12 @@ public class PlayerDTO {
      * Pokud není explicitně nastaven, používá se výchozí stav PENDING.
      */
     private PlayerStatus playerStatus;
+
+    /**
+     * Časové razítko hráče.
+     * Používá se pro určení data a času u vytvoření, a změn uživatele.
+     */
+    private LocalDateTime timestamp;
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
@@ -137,5 +145,13 @@ public class PlayerDTO {
      */
     private void updateFullName() {
         this.fullName = name + " " + surname;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

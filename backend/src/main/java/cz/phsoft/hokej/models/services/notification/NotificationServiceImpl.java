@@ -47,6 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final EmailMessageBuilder emailMessageBuilder;
     private final NotificationPreferencesService notificationPreferencesService;
 
+
     /**
      * Typy notifikací, pro které se nemá posílat kopie manažerům.
      * Platí jak pro notifyPlayer, tak pro notifyUser.

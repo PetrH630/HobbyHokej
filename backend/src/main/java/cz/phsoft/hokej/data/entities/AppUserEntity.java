@@ -3,6 +3,7 @@ package cz.phsoft.hokej.data.entities;
 import cz.phsoft.hokej.data.enums.Role;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
@@ -70,6 +71,13 @@ public class AppUserEntity {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private AppUserSettingsEntity settings;
 
+    /**
+     * Časové razítko uživatele.
+     * Používá se pro uložení data a času vytvoření a změn u uživatele.
+     */
+    @Column(nullable = false, updatable = true)
+    private LocalDateTime timestamp = LocalDateTime.now();
+
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
@@ -109,5 +117,13 @@ public class AppUserEntity {
         if (settings != null) {
             settings.setUser(this);
         }
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }
