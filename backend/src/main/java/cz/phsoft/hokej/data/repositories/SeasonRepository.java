@@ -9,7 +9,7 @@ import java.util.Optional;
 
 /**
  * Repozitář pro práci s entitou SeasonEntity.
- *
+ * <p>
  * Slouží ke správě sezón, zejména k určení aktivní sezóny,
  * kontrole časových překryvů a načítání sezón
  * v chronologickém pořadí.
@@ -17,8 +17,19 @@ import java.util.Optional;
 public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
 
     /**
-     * Vrátí aktuálně aktivní sezónu.
+     * ověří, zda existuje sezona se zadaným názvem.
      *
+     * @param name název hledané sezony
+     * @return true, pokud existuje
+     */
+    boolean existsByName(String name);
+
+    boolean existsByNameAndIdNot(String name, Long id);
+
+
+    /**
+     * Vrátí aktuálně aktivní sezónu.
+     * <p>
      * V systému může být v daném okamžiku
      * aktivní maximálně jedna sezóna.
      *
@@ -37,7 +48,7 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
     /**
      * Ověří, zda existuje sezóna, která se časově
      * překrývá se zadaným intervalem.
-     *
+     * <p>
      * Používá se při vytváření nové sezóny
      * jako ochrana proti překrývajícím se obdobím.
      *
@@ -53,7 +64,7 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
     /**
      * Ověří, zda existuje jiná sezóna (mimo zadané ID),
      * která se časově překrývá se zadaným intervalem.
-     *
+     * <p>
      * Používá se při aktualizaci existující sezóny,
      * aby nedošlo ke kolizi s jinou sezónou.
      *
@@ -70,7 +81,7 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
 
     /**
      * Spočítá počet aktivních sezón.
-     *
+     * <p>
      * Slouží jako ochrana proti stavu,
      * kdy by bylo aktivních více sezón současně.
      *
