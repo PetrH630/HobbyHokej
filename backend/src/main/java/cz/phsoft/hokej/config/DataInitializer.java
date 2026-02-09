@@ -522,18 +522,18 @@ public class DataInitializer {
                 """);
 
         createTrigger("trg_player_update", """
-        CREATE TRIGGER trg_player_update
-        AFTER UPDATE ON player_entity
-        FOR EACH ROW
-        BEGIN
-            INSERT INTO player_entity_history
-                (player_id, name, surname, nickname, type, full_name, phone_number,
-                 team, player_status, user_id, original_timestamp, action, changed_at)
-            VALUES
-                (NEW.id, NEW.name, NEW.surname, NEW.nickname, NEW.type, NEW.full_name, NEW.phone_number,
-                 NEW.team, NEW.player_status, NEW.user_id, NEW.timestamp, 'UPDATE', NOW());
-        END
-        """);
+                CREATE TRIGGER trg_player_update
+                AFTER UPDATE ON player_entity
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO player_entity_history
+                        (player_id, name, surname, nickname, type, full_name, phone_number,
+                         team, player_status, user_id, original_timestamp, action, changed_at)
+                    VALUES
+                        (NEW.id, NEW.name, NEW.surname, NEW.nickname, NEW.type, NEW.full_name, NEW.phone_number,
+                         NEW.team, NEW.player_status, NEW.user_id, NEW.timestamp, 'UPDATE', NOW());
+                END
+                """);
 
 
         createTrigger("trg_player_delete", """
@@ -547,6 +547,192 @@ public class DataInitializer {
                     VALUES
                         (OLD.id, OLD.name, OLD.surname, OLD.nickname, OLD.type, OLD.full_name, OLD.phone_number,
                          OLD.team, OLD.player_status, OLD.user_id, OLD.timestamp, 'DELETE', NOW());
+                END
+                """);
+
+        createTrigger("trg_match_insert", """
+                CREATE TRIGGER trg_match_insert
+                AFTER INSERT ON matches
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO matches_history
+                        (match_id,
+                         original_timestamp,
+                         action,
+                         changed_at,
+                         date_time,
+                         location,
+                         description,
+                         max_players,
+                         price,
+                         match_status,
+                         cancel_reason,
+                         season_id,
+                         created_by_user_id,
+                         last_modified_by_user_id)
+                    VALUES
+                        (NEW.id,
+                         NEW.timestamp,
+                         'INSERT',
+                         NOW(),
+                         NEW.date_time,
+                         NEW.location,
+                         NEW.description,
+                         NEW.max_players,
+                         NEW.price,
+                         NEW.match_status,
+                         NEW.cancel_reason,
+                         NEW.season_id,
+                         NEW.created_by_user_id,
+                         NEW.last_modified_by_user_id);
+                END
+                """);
+
+        createTrigger("trg_match_update", """
+                CREATE TRIGGER trg_match_update
+                AFTER UPDATE ON matches
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO matches_history
+                        (match_id,
+                         original_timestamp,
+                         action,
+                         changed_at,
+                         date_time,
+                         location,
+                         description,
+                         max_players,
+                         price,
+                         match_status,
+                         cancel_reason,
+                         season_id,
+                         created_by_user_id,
+                         last_modified_by_user_id)
+                    VALUES
+                        (NEW.id,
+                         NEW.timestamp,
+                         'UPDATE',
+                         NOW(),
+                         NEW.date_time,
+                         NEW.location,
+                         NEW.description,
+                         NEW.max_players,
+                         NEW.price,
+                         NEW.match_status,
+                         NEW.cancel_reason,
+                         NEW.season_id,
+                         NEW.created_by_user_id,
+                         NEW.last_modified_by_user_id);
+                END
+                """);
+
+        createTrigger("trg_match_delete", """
+                CREATE TRIGGER trg_match_delete
+                AFTER DELETE ON matches
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO matches_history
+                        (match_id, original_timestamp, action, changed_at, date_time,
+                         location, description,max_players, price, match_status, cancel_reason,
+                         season_id, created_by_user_id, last_modified_by_user_id)
+                    VALUES
+                        (OLD.id,
+                         OLD.timestamp,
+                         'DELETE',
+                         NOW(),
+                         OLD.date_time,
+                         OLD.location,
+                         OLD.description,
+                         OLD.max_players,
+                         OLD.price,
+                         OLD.match_status,
+                         OLD.cancel_reason,
+                         OLD.season_id,
+                         OLD.created_by_user_id,
+                         OLD.last_modified_by_user_id);
+                END
+                """);
+
+        createTrigger("trg_app_user_insert", """
+                CREATE TRIGGER trg_app_user_insert
+                AFTER INSERT ON app_users
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO app_users_history
+                        (user_id, name, surname, email, role, enabled,
+                         original_timestamp, action, changed_at)
+                    VALUES
+                        (NEW.id, NEW.name, NEW.surname, NEW.email, NEW.role, NEW.enabled,
+                         NEW.timestamp, 'INSERT', NOW());
+                END
+                """);
+
+        createTrigger("trg_app_user_update", """
+                CREATE TRIGGER trg_app_user_update
+                AFTER UPDATE ON app_users
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO app_users_history
+                        (user_id, name, surname, email, role, enabled,
+                         original_timestamp, action, changed_at)
+                    VALUES
+                        (NEW.id, NEW.name, NEW.surname, NEW.email, NEW.role, NEW.enabled,
+                         NEW.timestamp, 'UPDATE', NOW());
+                END
+                """);
+
+        createTrigger("trg_app_user_delete", """
+                CREATE TRIGGER trg_app_user_delete
+                AFTER DELETE ON app_users
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO app_users_history
+                        (user_id, name, surname, email, role, enabled,
+                         original_timestamp, action, changed_at)
+                    VALUES
+                        (OLD.id, OLD.name, OLD.surname, OLD.email, OLD.role, OLD.enabled,
+                         OLD.timestamp, 'DELETE', NOW());
+                END
+                """);
+        createTrigger("trg_season_insert", """
+                CREATE TRIGGER trg_season_insert
+                AFTER INSERT ON season
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO season_history
+                        (season_id, original_timestamp, action, changed_at,
+                         name, start_date, end_date, active, created_by_user_id)
+                    VALUES
+                        (NEW.id, NEW.timestamp, 'INSERT', NOW(),
+                         NEW.name, NEW.start_date, NEW.end_date, NEW.active, NEW.created_by_user_id);
+                END
+                """);
+
+        createTrigger("trg_season_update", """
+                CREATE TRIGGER trg_season_update
+                AFTER UPDATE ON season
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO season_history
+                        (season_id, original_timestamp, action, changed_at,
+                         name, start_date, end_date, active, created_by_user_id)
+                    VALUES
+                        (NEW.id, NEW.timestamp, 'UPDATE', NOW(),
+                         NEW.name, NEW.start_date, NEW.end_date, NEW.active, NEW.created_by_user_id);
+                END
+                """);
+
+        createTrigger("trg_season_delete", """
+                CREATE TRIGGER trg_season_delete
+                AFTER DELETE ON season
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO season_history
+                        (season_id, original_timestamp, action, changed_at,
+                         name, start_date, end_date, active, created_by_user_id)
+                    VALUES
+                        (OLD.id, OLD.timestamp, 'DELETE', NOW(),
+                         OLD.name, OLD.start_date, OLD.end_date, OLD.active, OLD.created_by_user_id);
                 END
                 """);
 

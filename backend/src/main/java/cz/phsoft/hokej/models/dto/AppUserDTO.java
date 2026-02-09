@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
@@ -59,6 +60,16 @@ public class AppUserDTO {
      */
     private Set<PlayerDTO> players;
 
+    /**
+     * Časové razítko uživatele.
+     * Používá se pro zobrazení data a času vytvoření nebo
+     * poslední změny uživatelského účtu.
+     *
+     * Hodnota je spravována na backendu (entitou a triggery)
+     * a klient ji pouze zobrazuje.
+     */
+    private LocalDateTime timestamp;
+
     // gettery / settery
 
     public Long getId() { return id; }
@@ -81,4 +92,7 @@ public class AppUserDTO {
 
     public Set<PlayerDTO> getPlayers() { return players; }
     public void setPlayers(Set<PlayerDTO> players) { this.players = players; }
+
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }

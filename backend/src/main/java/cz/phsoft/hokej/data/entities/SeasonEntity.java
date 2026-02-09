@@ -42,6 +42,32 @@ public class SeasonEntity {
      */
     private boolean active;
 
+    /**
+     * Identifikátor uživatele, který sezónu vytvořil.
+     *
+     * Hodnota se nastaví při vytvoření sezóny a při dalších změnách
+     * se obvykle nemění. V historii sezóny se používá pro auditní účely.
+     */
+    @Column(name = "created_by_user_id")
+    private Long createdByUserId;
+
+    /**
+     * Časové razítko sezóny.
+     * Používá se pro zaznamenání vytvoření a poslední změny sezóny.
+     */
+    @Column(nullable = false, updatable = true)
+    private java.time.LocalDateTime timestamp = java.time.LocalDateTime.now();
+
+    @PrePersist
+    public void prePersist() {
+        this.timestamp = java.time.LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.timestamp = java.time.LocalDateTime.now();
+    }
+
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
@@ -61,4 +87,10 @@ public class SeasonEntity {
     public boolean isActive() { return active; }
 
     public void setActive(boolean active) { this.active = active; }
+
+    public Long getCreatedByUserId() { return createdByUserId; }
+    public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
+
+    public java.time.LocalDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(java.time.LocalDateTime timestamp) { this.timestamp = timestamp; }
 }

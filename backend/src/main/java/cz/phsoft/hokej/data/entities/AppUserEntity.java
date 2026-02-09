@@ -70,13 +70,27 @@ public class AppUserEntity {
      */
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private AppUserSettingsEntity settings;
-
     /**
      * Časové razítko uživatele.
      * Používá se pro uložení data a času vytvoření a změn u uživatele.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
+
+    @PrePersist
+    public void prePersist() {
+        this.timestamp = LocalDateTime.now();
+        if (surname != null) {
+            this.surname = this.surname.toUpperCase();
+        }
+    }
+    @PreUpdate
+    public void preUpdate() {
+        this.timestamp = LocalDateTime.now();
+        if (surname != null) {
+            this.surname = this.surname.toUpperCase();
+        }
+    }
 
     public Long getId() { return id; }
 

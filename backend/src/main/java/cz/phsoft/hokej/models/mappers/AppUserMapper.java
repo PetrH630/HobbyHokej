@@ -72,6 +72,7 @@ public interface AppUserMapper {
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "enabled", ignore = true)
     @Mapping(target = "players", ignore = true)
+    @Mapping(target = "timestamp", ignore = true)
     AppUserEntity fromRegisterDto(RegisterUserDTO dto);
 
     /**
@@ -89,5 +90,6 @@ public interface AppUserMapper {
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "enabled", ignore = true)
     @Mapping(target = "players", ignore = true)
+    @Mapping(target = "timestamp", ignore = true)
     void updateEntityFromDto(AppUserDTO dto, @MappingTarget AppUserEntity entity);
 }

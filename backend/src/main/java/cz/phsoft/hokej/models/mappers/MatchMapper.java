@@ -36,7 +36,11 @@ public interface MatchMapper {
      * @param dto DTO zápasu
      * @return entita zápasu
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "season", ignore = true)
+    @Mapping(target = "timestamp", ignore = true)
+    @Mapping(target = "createdByUserId", ignore = true)
+    @Mapping(target = "lastModifiedByUserId", ignore = true)
     MatchEntity toEntity(MatchDTO dto);
 
     /**
@@ -48,6 +52,10 @@ public interface MatchMapper {
      * @param dto    zdrojové DTO
      * @param entity cílová entita
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "season", ignore = true)
+    @Mapping(target = "timestamp", ignore = true)
+    @Mapping(target = "createdByUserId", ignore = true)
+    @Mapping(target = "lastModifiedByUserId", ignore = true)
     void updateEntity(MatchDTO dto, @MappingTarget MatchEntity entity);
 }

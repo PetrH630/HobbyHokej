@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.entities.SeasonEntity;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.SeasonRepository;
 import cz.phsoft.hokej.exceptions.InvalidSeasonPeriodDateException;
 import cz.phsoft.hokej.exceptions.InvalidSeasonStateException;
@@ -10,6 +11,10 @@ import cz.phsoft.hokej.models.dto.SeasonDTO;
 import cz.phsoft.hokej.models.mappers.SeasonMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,15 +44,16 @@ public class SeasonServiceImpl implements SeasonService {
 
     private final SeasonRepository seasonRepository;
     private final SeasonMapper mapper;
+    private final AppUserRepository appUserRepository;
 
-    public SeasonServiceImpl(SeasonRepository seasonRepository, SeasonMapper mapper) {
+    public SeasonServiceImpl(SeasonRepository seasonRepository,
+                             SeasonMapper mapper,
+                             AppUserRepository appUserRepository) {
         this.seasonRepository = seasonRepository;
         this.mapper = mapper;
+        this.appUserRepository = appUserRepository;
     }
-
-    // ======================
     // CREATE
-    // ======================
 
     /**
      * Vytvoří novou sezónu.
@@ -72,6 +78,10 @@ public class SeasonServiceImpl implements SeasonService {
         validateDates(seasonDTO, null);
 
         SeasonEntity entity = mapper.toEntity(seasonDTO);
+        // *** NOVÉ *** – nastavíme ID uživatele, který sezónu vytvořil
+        Long currentUserId = getCurrentUserIdOrNull();
+        entity.setCreatedByUserId(currentUserId);
+
         SeasonEntity saved = seasonRepository.save(entity);
 
         long activeCount = seasonRepository.countByActiveTrue();
@@ -87,9 +97,7 @@ public class SeasonServiceImpl implements SeasonService {
         return mapper.toDTO(saved);
     }
 
-    // ======================
     // UPDATE
-    // ======================
 
     /**
      * Aktualizuje existující sezónu.
@@ -144,10 +152,7 @@ public class SeasonServiceImpl implements SeasonService {
         return mapper.toDTO(saved);
     }
 
-    // ======================
     // AKTIVNÍ SEZÓNA
-    // ======================
-
     /**
      * Vrátí aktuálně aktivní sezónu.
      *
@@ -195,10 +200,7 @@ public class SeasonServiceImpl implements SeasonService {
         return mapper.toDTO(entity);
     }
 
-    // ======================
     // SEZNAM VŠECH SEZÓN
-    // ======================
-
     /**
      * Vrátí všechny sezóny seřazené podle začátku stoupajícím způsobem.
      *
@@ -215,10 +217,7 @@ public class SeasonServiceImpl implements SeasonService {
                 .map(mapper::toDTO)
                 .toList();
     }
-
-    // ======================
     // NASTAVENÍ AKTIVNÍ SEZÓNY
-    // ======================
 
     /**
      * Nastaví konkrétní sezónu jako aktivní.
@@ -240,9 +239,7 @@ public class SeasonServiceImpl implements SeasonService {
         setOnlyActiveSeason(toActivate.getId());
     }
 
-    // ======================
     // PRIVÁTNÍ VALIDACE DAT
-    // ======================
 
     /**
      * Validuje datumy sezóny a kontroluje překryvy s ostatními sezónami.
@@ -296,9 +293,7 @@ public class SeasonServiceImpl implements SeasonService {
         }
     }
 
-    // ======================
     // PRIVÁTNÍ POMOCNÁ METODA
-    // ======================
 
     /**
      * Nastaví zadanou sezónu jako jedinou aktivní.
@@ -321,4 +316,21 @@ public class SeasonServiceImpl implements SeasonService {
         }
         seasonRepository.saveAll(all);
     }
+
+    /**
+     * Získá ID aktuálně přihlášeného uživatele nebo null,
+     * pokud se nepodaří uživatele určit (například při testech).
+     */
+    private Long getCurrentUserIdOrNull() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return null;
+        }
+
+        String email = auth.getName(); // username = email
+        return appUserRepository.findByEmail(email)
+                .map(AppUserEntity::getId)
+                .orElse(null);
+    }
 }
+

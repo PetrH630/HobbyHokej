@@ -4,6 +4,7 @@ import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.*;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import cz.phsoft.hokej.data.entities.AppUserEntity;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -57,6 +59,9 @@ public class MatchServiceImpl implements MatchService {
     private final CurrentSeasonService currentSeasonService;
     private final NotificationService notificationService;
 
+
+    private final AppUserRepository appUserRepository;
+
     public MatchServiceImpl(MatchRepository matchRepository,
                             MatchRegistrationRepository matchRegistrationRepository,
                             MatchMapper matchMapper,
@@ -67,7 +72,8 @@ public class MatchServiceImpl implements MatchService {
                             CurrentPlayerService currentPlayerService,
                             SeasonService seasonService,
                             CurrentSeasonService currentSeasonService,
-                            NotificationService notificationService) {
+                            NotificationService notificationService,
+                            AppUserRepository appUserRepository) {
         this.matchRepository = matchRepository;
         this.matchRegistrationRepository = matchRegistrationRepository;
         this.matchMapper = matchMapper;
@@ -79,6 +85,7 @@ public class MatchServiceImpl implements MatchService {
         this.seasonService = seasonService;
         this.currentSeasonService = currentSeasonService;
         this.notificationService = notificationService;
+        this.appUserRepository = appUserRepository;
     }
 
     // ======================
@@ -174,6 +181,11 @@ public class MatchServiceImpl implements MatchService {
 
         entity.setSeason(seasonService.getActiveSeason());
 
+        // autor vytvoření + poslední úprava = aktuální uživatel
+        Long currentUserId = getCurrentUserIdOrNull();
+        entity.setCreatedByUserId(currentUserId);
+        entity.setLastModifiedByUserId(currentUserId);
+
         return matchMapper.toDTO(matchRepository.save(entity));
     }
 
@@ -211,6 +223,10 @@ public class MatchServiceImpl implements MatchService {
         LocalDateTime oldDateTime = entity.getDateTime();
 
         matchMapper.updateEntity(dto, entity);
+
+        // kdo provedl tuto změnu
+        Long currentUserId = getCurrentUserIdOrNull();
+        entity.setLastModifiedByUserId(currentUserId);
 
         if (!isAdminOrManager) {
             validateMatchDateInActiveSeason(entity.getDateTime());
@@ -279,6 +295,10 @@ public class MatchServiceImpl implements MatchService {
         match.setMatchStatus(MatchStatus.CANCELLED);
         match.setCancelReason(reason);
 
+        // kdo zápas zrušil
+        Long currentUserId = getCurrentUserIdOrNull();
+        match.setLastModifiedByUserId(currentUserId);
+
         MatchEntity saved = matchRepository.save(match);
         notifyPlayersAboutMatchChanges(saved, MatchStatus.CANCELLED);
 
@@ -309,6 +329,10 @@ public class MatchServiceImpl implements MatchService {
 
         match.setMatchStatus(null);
         match.setCancelReason(null);
+
+        // kdo zápas obnovil
+        Long currentUserId = getCurrentUserIdOrNull();
+        match.setLastModifiedByUserId(currentUserId);
 
         return new SuccessResponseDTO(
                 "BE - Zápas " + match.getId() + match.getDateTime() + " byl úspěšně obnoven",
@@ -1060,6 +1084,22 @@ public class MatchServiceImpl implements MatchService {
                         );
                     }
                 });
+    }
+
+    /**
+     * Získá ID aktuálně přihlášeného uživatele nebo null,
+     * pokud se nepodaří uživatele určit.
+     */
+    private Long getCurrentUserIdOrNull() { // *** NOVÉ ***
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return null;
+        }
+
+        String email = auth.getName(); // předpoklad: username = email
+        return appUserRepository.findByEmail(email)
+                .map(AppUserEntity::getId)
+                .orElse(null);
     }
 
 }

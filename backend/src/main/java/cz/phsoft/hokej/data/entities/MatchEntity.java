@@ -72,10 +72,22 @@ public class MatchEntity {
 
     /**
      * Časové razítko zápasu.
-     * Používá se pro ukládání data a času vytvoření a změn zápasu.
+     * Používá se pro ukládání data a času vytvoření a poslední změny zápasu.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
+
+    /**
+     * ID uživatele, který zápas vytvořil.
+     */
+    @Column(name = "created_by_user_id")
+    private Long createdByUserId;
+
+    /**
+     * ID uživatele, který zápas naposledy změnil.
+     */
+    @Column(name = "last_modified_by_user_id")
+    private Long lastModifiedByUserId;
 
 
     public MatchEntity() {
@@ -120,4 +132,11 @@ public class MatchEntity {
     public LocalDateTime getTimestamp() { return timestamp; }
 
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+
+    public Long getCreatedByUserId() { return createdByUserId; }
+    public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
+
+    public Long getLastModifiedByUserId() { return lastModifiedByUserId; }
+    public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
+
 }

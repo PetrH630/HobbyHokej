@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * DTO reprezentující sezónu v aplikaci.
@@ -39,6 +40,14 @@ public class SeasonDTO {
      */
     private boolean active;
 
+    /**
+     * Časové razítko sezóny.
+     * Slouží pro zobrazení data a času vytvoření / poslední změny sezóny.
+     * Hodnota je spravována na backendu.
+     */
+    private LocalDateTime timestamp;
+
+
     // konstruktory
 
     public SeasonDTO() {}
@@ -72,4 +81,7 @@ public class SeasonDTO {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }
