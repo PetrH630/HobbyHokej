@@ -68,7 +68,7 @@ public class MatchRegistrationHistoryController {
      * @return seznam záznamů historie seřazených od nejnovějšího
      */
     @GetMapping("/admin/matches/{matchId}/players/{playerId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<List<MatchRegistrationHistoryDTO>> getPlayerHistoryForMatch(
             @PathVariable Long matchId,
             @PathVariable Long playerId

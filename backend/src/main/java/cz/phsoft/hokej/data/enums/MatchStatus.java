@@ -16,7 +16,7 @@ public enum MatchStatus {
     /**
      * Zápas byl zrušen.
      */
-    CANCELLED,      // zrušený
+    CANCELED,      // zrušený
 
     /**
      * Došlo ke změně data nebo času zápasu.

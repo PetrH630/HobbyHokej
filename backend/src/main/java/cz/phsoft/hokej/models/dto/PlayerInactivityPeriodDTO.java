@@ -21,6 +21,9 @@ public class PlayerInactivityPeriodDTO {
     @NotNull(message = "Datum konce neaktivity je povinné.")
     private LocalDateTime inactiveTo;
 
+    @NotNull(message = "Duvod neaktivity je povinný.")
+    private String inactivityReason;
+
     // gettery / settery
 
     public Long getId() { return id; }
@@ -34,4 +37,12 @@ public class PlayerInactivityPeriodDTO {
 
     public LocalDateTime getInactiveTo() { return inactiveTo; }
     public void setInactiveTo(LocalDateTime inactiveTo) { this.inactiveTo = inactiveTo; }
+
+    public String getInactivityReason() {
+        return inactivityReason;
+    }
+
+    public void setInactivityReason(String inactivityReason) {
+        this.inactivityReason = inactivityReason;
+    }
 }

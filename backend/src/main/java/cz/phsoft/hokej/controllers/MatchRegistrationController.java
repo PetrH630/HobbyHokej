@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.controllers;
 
+import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.exceptions.CurrentPlayerNotSelectedException;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
@@ -126,9 +127,31 @@ public class MatchRegistrationController {
     public MatchRegistrationDTO markNoExcused(
             @PathVariable Long matchId,
             @PathVariable Long playerId,
-            @RequestParam(required = false) String adminNote
+            @RequestParam(name = "adminNote", required = false) String adminNote
     ) {
         return matchRegistrationService.markNoExcused(matchId, playerId, adminNote);
+    }
+
+    /**
+     * Označuje hráče v konkrétním zápase jako neomluveně nepřítomného.
+     *
+     * Pro záznam může být doplněna poznámka administrátora.
+     *
+     * @param matchId   ID zápasu
+     * @param playerId  ID hráče
+     * @param excuseReason důvod omluvy
+     * @param excuseNote poznámka k omluvě
+     * @return DTO {@link MatchRegistrationDTO} s aktualizovaným stavem
+     */
+    @PatchMapping("/match/{matchId}/players/{playerId}/cancel-no-excused")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO cancelNoExcused(
+            @PathVariable Long matchId,
+            @PathVariable Long playerId,
+            @RequestParam(required = true) ExcuseReason excuseReason,
+            @RequestParam(required = true) String excuseNote
+            ) {
+        return matchRegistrationService.cancelNoExcused(matchId, playerId, excuseReason, excuseNote);
     }
 
     // Uživatelská správa registrací pro aktuálního hráče

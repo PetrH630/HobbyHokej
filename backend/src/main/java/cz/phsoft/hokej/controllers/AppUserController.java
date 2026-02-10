@@ -16,8 +16,10 @@ import java.util.List;
 /**
  * REST controller, který se používá pro správu uživatelských účtů.
  *
- * Zajišťuje práci s přihlášeným uživatelem, včetně zobrazení profilu a změny
- * hesla, a také administrativní správu uživatelů, která je vyhrazena roli ADMIN.
+ * Zajišťuje práci s přihlášeným uživatelem, včetně zobrazení profilu, historie změn
+ * a změny hesla, a také administrativní správu uživatelů, která je vyhrazena roli
+ * ADMIN/MANAGER.
+ *
  *
  * Veškerá business logika se předává do {@link AppUserService}.
  */
@@ -33,7 +35,6 @@ public class AppUserController {
         this.appUserService = appUserService;
         this.appUserHistoryService = appUserHistoryService;
     }
-
 
     /**
      * Vrací detail aktuálně přihlášeného uživatele.
@@ -171,12 +172,13 @@ public class AppUserController {
     /**
      * Vrací historii uživatele dle id.
      *
+     * Operace je vyhrazena pouze pro roli ADMIN.
+     *
      * @param id ID uživatele
      * @return historie uživatele jako {@link List<AppUserHistoryDTO>}
-     *
      */
     @GetMapping("/{id}/history")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<AppUserHistoryDTO> getUserHistory(@PathVariable Long id
             ) {
         return appUserHistoryService.getHistoryForUser(id);

@@ -4,6 +4,7 @@ import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
@@ -32,11 +33,11 @@ import java.util.stream.Collectors;
 
 /**
  * Implementace service pro správu registrací hráčů na zápasy.
- *
+ * <p>
  * Třída zajišťuje vytvoření a změny registrací, přepočítávání stavů
  * podle kapacity zápasu a poskytování přehledů registrací.
  * Současně spouští notifikace hráčům podle typu změny registrace.
- *
+ * <p>
  * Třída řeší business logiku registrací a stavových přechodů,
  * ale neřeší UI, autentizaci ani výběr aktuálního hráče.
  * Tyto oblasti náleží jiným vrstvám aplikace.
@@ -87,7 +88,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Vytvoří nebo aktualizuje registraci hráče na zápas.
-     *
+     * <p>
      * Metoda načte zápas a hráče, ověří, že zápas patří do aktivní sezóny
      * a že aktuální uživatel může registraci upravovat. Poté podle obsahu
      * požadavku zvolí větev pro odhlášení, omluvu nebo registraci
@@ -155,7 +156,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Zpracuje větev pro registraci typu REGISTER, RESERVED nebo SUBSTITUTE.
-     *
+     * <p>
      * Metoda nepovolí opakovanou registraci již registrovaného hráče.
      * Při volbě SUBSTITUTE se hráč označí jako náhradník, který
      * neblokuje kapacitu a může později přejít na jiný stav.
@@ -202,7 +203,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Zpracuje odhlášení hráče ze zápasu (UNREGISTER).
-     *
+     * <p>
      * Odhlášení je povoleno pouze v případě, že registrace existuje
      * a má stav REGISTERED nebo RESERVED. Při úspěšném odhlášení
      * se nastaví informace o omluvě a stav UNREGISTERED.
@@ -229,10 +230,11 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Zpracuje omluvu hráče z účasti na zápase (EXCUSED).
-     *
+     * <p>
      * Omluva je povolena pouze v případě, že hráč dosud nereagoval
-     * nebo byl veden jako náhradník. Při úspěšné omluvě se nastaví
-     * důvod a poznámka a registrace se přepne do stavu EXCUSED.
+     * nebo byl veden jako náhradník, nebo byl veden jako neomluvený.
+     * Při úspěšné omluvě se nastaví důvod a poznámka a registrace
+     * se přepne do stavu EXCUSED.
      */
     private PlayerMatchStatus handleExcuse(
             MatchRegistrationRequest request,
@@ -243,7 +245,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         boolean isNoResponseOrSubstitute =
                 (registration == null
                         || registration.getStatus() == null
-                        || registration.getStatus() == PlayerMatchStatus.SUBSTITUTE);
+                        || registration.getStatus() == PlayerMatchStatus.SUBSTITUTE
+                        || registration.getStatus() == PlayerMatchStatus.NO_EXCUSED);
 
 
         if (!isNoResponseOrSubstitute) {
@@ -261,7 +264,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Nastaví registraci do stavu NO_EXCUSED na základě rozhodnutí administrátora.
-     *
+     * <p>
      * Zápas musí být již odehraný a předchozí stav registrace musí být REGISTERED.
      * Případná omluva se odstraní a uloží se poznámka administrátora. Po změně
      * se odešle notifikace podle nastaveného typu.
@@ -316,9 +319,61 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return matchRegistrationMapper.toDTO(updated);
     }
 
+    // TODO
+    /**
+     * Nastaví registraci do stavu EXCUSED na základě rozhodnutí administrátora/manažera
+     * poté co byl původně uložen se statutem NO_EXCUSED.
+     *
+     * Zápas musí být již odehraný a předchozí stav registrace musí být NO_EXCUSED.
+     * Případná poznámka administrátora se odstraní. Notifikace se neodesílá.
+     */
+    @Override
+    @Transactional
+    public MatchRegistrationDTO cancelNoExcused(Long matchId,
+                                              Long playerId,
+                                              ExcuseReason excuseReason,
+                                              String excuseNote) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        if (match.getDateTime().isAfter(now())) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Status EXCUSED po NO-EXCUSED lze nastavit pouze u již proběhlého zápasu."
+            );
+        }
+
+        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
+
+        if (registration.getStatus() != PlayerMatchStatus.NO_EXCUSED) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Status EXCUSED (zrušení neomluvení) lze nastavit pouze u hráče se statutem NO_EXCUSED."
+            );
+        }
+
+        registration.setExcuseReason(ExcuseReason.JINE);
+        registration.setAdminNote(null);
+        if (excuseNote == null || excuseNote.isBlank()) {
+            registration.setExcuseNote("Opravdu nemohl");
+        } else {
+            registration.setExcuseNote(excuseNote);
+        }
+
+        MatchRegistrationEntity updated =
+                updateRegistrationStatus(
+                        registration,
+                        PlayerMatchStatus.EXCUSED,
+                        "manager",
+                        true
+                );
+
+        return matchRegistrationMapper.toDTO(updated);
+    }
+    // KONEC TODO
+
     /**
      * Nastaví do registrace společné údaje z požadavku.
-     *
+     * <p>
      * Upravuje tým, administrátorskou poznámku a případné informace
      * o omluvě, pokud jsou v požadavku uvedeny.
      */
@@ -357,7 +412,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Vrátí všechny registrace pro daný zápas omezené na aktuální sezónu.
-     *
+     * <p>
      * Pokud zápas nepatří do aktuálně vybrané sezóny, vrátí se prázdný seznam.
      */
     @Override
@@ -375,7 +430,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Vrátí všechny registrace pro zadané zápasy omezené na aktuální sezónu.
-     *
+     * <p>
      * Pokud je seznam ID prázdný nebo null, vrátí se prázdný seznam.
      */
     @Override
@@ -420,7 +475,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Vrátí hráče, kteří na daný zápas nijak nereagovali.
-     *
+     * <p>
      * Registrace se berou bez ohledu na konkrétní stav.
      * Pokud zápas nepatří do aktuálně vybrané sezóny,
      * vrátí se prázdný seznam.
@@ -446,7 +501,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Přepočítá statusy REGISTERED a RESERVED pro daný zápas.
-     *
+     * <p>
      * Registrace se seřadí podle času vytvoření a prvním hráčům
      * do výše kapacity zápasu se nastaví stav REGISTERED.
      * Ostatním se nastaví stav RESERVED. Náhradníci se do
@@ -508,7 +563,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Obecná administrátorská operace pro změnu statusu registrace.
-     *
+     * <p>
      * Metoda neumožňuje nastavit status NO_EXCUSED, protože ten má
      * vlastní samostatnou logiku. Před změnou se ověří existence
      * zápasu, hráče i samotné registrace.
@@ -602,9 +657,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     // TODO - ŘEŠENO NOTIFIKACEMI - ASI SMAZAT
+
     /**
      * Bezpečně odešle SMS hráči z registrace.
-     *
+     * <p>
      * Pokud je registrace nebo hráč null, metoda nic neprovede.
      * Chyby při odesílání jsou pouze zalogovány.
      */
@@ -642,7 +698,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Společná metoda pro změnu statusu registrace.
-     *
+     * <p>
      * Nastaví nový status, případně aktualizuje čas změny
      * a informaci o tom, kdo změnu provedl, a registraci uloží.
      *
@@ -667,7 +723,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Převede status registrace na odpovídající typ notifikace.
-     *
+     * <p>
      * Pokud se pro daný status notifikace neposílá, vrací se null.
      */
     private NotificationType resolveNotificationType(PlayerMatchStatus newStatus) {
@@ -685,7 +741,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Pomocná metoda pro získání aktuálního času.
-     *
+     * <p>
      * Oddělení do samostatné metody usnadňuje testování.
      */
     private LocalDateTime now() {
@@ -694,7 +750,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Ověří, že zápas patří do aktivní sezóny.
-     *
+     * <p>
      * Metoda se používá před zápisem registrace, aby se zabránilo
      * změnám v neaktivních sezónách.
      */
@@ -708,7 +764,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Ověří, zda aktuálně přihlášený uživatel může měnit registraci na daný zápas.
-     *
+     * <p>
      * Uživatel s rolí ADMIN nebo MANAGER není časově omezen.
      * Uživatel s rolí PLAYER může registraci měnit pouze
      * v definovaném časovém okně kolem začátku zápasu.
@@ -727,7 +783,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Zjistí, zda je zápas ještě v časovém okně, ve kterém může hráč měnit registraci.
-     *
+     * <p>
      * Zápas je považován za editovatelný pro hráče do třiceti minut
      * po začátku zápasu. Po uplynutí této doby už změna registrace není povolena.
      *
@@ -741,7 +797,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Zjistí, zda má aktuálně přihlášený uživatel roli ROLE_PLAYER.
-     *
+     * <p>
      * Metoda se používá pro odlišení časového omezení
      * oproti administrátorům nebo manažerům.
      *
@@ -763,7 +819,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Zjistí, zda daný zápas patří do aktuálně vybrané sezóny.
-     *
+     * <p>
      * Porovnává se identifikátor sezóny zápasu s identifikátorem,
      * který vrací metoda getCurrentSeasonIdOrActive.
      */
@@ -787,7 +843,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     /**
      * Vrátí identifikátor sezóny, která se má použít pro filtrování registrací.
-     *
+     * <p>
      * Nejprve se použije sezóna uložená v CurrentSeasonService.
      * Pokud není k dispozici, použije se globálně aktivní sezóna
      * ze SeasonService.

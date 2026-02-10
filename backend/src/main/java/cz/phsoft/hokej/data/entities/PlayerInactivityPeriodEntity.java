@@ -37,6 +37,12 @@ public class PlayerInactivityPeriodEntity {
     @Column(name = "inactive_to", nullable = false)
     private LocalDateTime inactiveTo;
 
+    /**
+     * Důvod neaktivity.
+     */
+    @Column(name = "inactivity_reason", nullable = false)
+    private String inactivityReason;
+
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
@@ -52,4 +58,12 @@ public class PlayerInactivityPeriodEntity {
     public LocalDateTime getInactiveTo() { return inactiveTo; }
 
     public void setInactiveTo(LocalDateTime inactiveTo) { this.inactiveTo = inactiveTo; }
+
+    public String getInactivityReason() {
+        return inactivityReason;
+    }
+
+    public void setInactivityReason(String inactivityReason) {
+        this.inactivityReason = inactivityReason;
+    }
 }

@@ -194,7 +194,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
             );
         }
 
-        mapper.updateEntityFromDto(dto, entity);
+        entity.setInactiveFrom(dto.getInactiveFrom());
+        entity.setInactiveTo(dto.getInactiveTo());
+
         PlayerInactivityPeriodEntity saved = inactivityRepository.save(entity);
 
         return mapper.toDTO(saved);

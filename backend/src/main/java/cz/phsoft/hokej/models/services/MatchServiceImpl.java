@@ -17,11 +17,13 @@ import cz.phsoft.hokej.models.services.notification.MatchTimeChangeContext;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -43,6 +45,8 @@ import java.util.stream.Collectors;
 @Service
 public class MatchServiceImpl implements MatchService {
 
+    @Value("${app.demo-mode:false}")
+    private boolean isDemoMode;
     private static final Logger logger = LoggerFactory.getLogger(MatchServiceImpl.class);
 
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
@@ -59,9 +63,9 @@ public class MatchServiceImpl implements MatchService {
     private final SeasonService seasonService;
     private final CurrentSeasonService currentSeasonService;
     private final NotificationService notificationService;
-
-
     private final AppUserRepository appUserRepository;
+
+
 
     public MatchServiceImpl(MatchRepository matchRepository,
                             MatchRegistrationRepository matchRegistrationRepository,
@@ -211,6 +215,7 @@ public class MatchServiceImpl implements MatchService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdminOrManager = hasAdminOrManagerRole(auth);
 
+        // bezpečnostní pojistka – i kdyby se někdy změnilo zabezpečení endpointu
         if (!isAdminOrManager) {
             Long activeSeasonId = seasonService.getActiveSeason().getId();
             if (!entity.getSeason().getId().equals(activeSeasonId)) {
@@ -220,12 +225,14 @@ public class MatchServiceImpl implements MatchService {
             }
         }
 
-        int oldMaxPlayers = entity.getMaxPlayers();
+
+        Integer oldMaxPlayers = entity.getMaxPlayers();
         LocalDateTime oldDateTime = entity.getDateTime();
+        String oldLocation = entity.getLocation();
+        Integer oldPrice = entity.getPrice();
 
         matchMapper.updateEntity(dto, entity);
 
-        // kdo provedl tuto změnu
         Long currentUserId = getCurrentUserIdOrNull();
         entity.setLastModifiedByUserId(currentUserId);
 
@@ -233,17 +240,32 @@ public class MatchServiceImpl implements MatchService {
             validateMatchDateInActiveSeason(entity.getDateTime());
         }
 
-        MatchEntity saved = matchRepository.save(entity);
-
-        if (saved.getMaxPlayers() != oldMaxPlayers) {
-            registrationService.recalcStatusesForMatch(saved.getId());
-        }
-
-        if (saved.getDateTime().isBefore(LocalDateTime.now())) {
+        if (entity.getDateTime() != null
+                && entity.getDateTime().isBefore(LocalDateTime.now())) {
             throw new InvalidMatchDateTimeException("Zápas by již byl minulostí");
         }
 
-        boolean dateTimeChanged = !saved.getDateTime().isEqual(oldDateTime);
+        boolean maxPlayersChanged =
+                !java.util.Objects.equals(entity.getMaxPlayers(), oldMaxPlayers);
+
+        boolean dateTimeChanged =
+                !java.util.Objects.equals(entity.getDateTime(), oldDateTime);
+
+        boolean locationChanged =
+                !java.util.Objects.equals(entity.getLocation(), oldLocation);
+
+        boolean priceChanged =
+                !java.util.Objects.equals(entity.getPrice(), oldPrice);
+
+        if (maxPlayersChanged || dateTimeChanged || locationChanged || priceChanged) {
+            entity.setMatchStatus(MatchStatus.UPDATED);
+        }
+
+        MatchEntity saved = matchRepository.save(entity);
+
+        if (maxPlayersChanged) {
+            registrationService.recalcStatusesForMatch(saved.getId());
+        }
 
         if (dateTimeChanged) {
             MatchTimeChangeContext ctx = new MatchTimeChangeContext(saved, oldDateTime);
@@ -252,6 +274,7 @@ public class MatchServiceImpl implements MatchService {
 
         return matchMapper.toDTO(saved);
     }
+
 
     /**
      * Smaže zápas podle ID.
@@ -266,6 +289,14 @@ public class MatchServiceImpl implements MatchService {
     @Override
     public SuccessResponseDTO deleteMatch(Long id) {
         MatchEntity match = findMatchOrThrow(id);
+
+        // DEMO režim – operace se zakáže před uložením do DB
+        if (isDemoMode) {
+            throw new DemoModeOperationNotAllowedException(
+                    "Zápas nebude odstraněn. Aplikace běží v DEMO režimu."
+            );
+        }
+
         matchRepository.delete(match);
 
         return new SuccessResponseDTO(
@@ -278,7 +309,7 @@ public class MatchServiceImpl implements MatchService {
     /**
      * Zruší zápas s uvedeným důvodem.
      * <p>
-     * Zápasu se nastaví stav {@link MatchStatus#CANCELLED}
+     * Zápasu se nastaví stav {@link MatchStatus#CANCELED}
      * a uloží se důvod zrušení. Pokud je zápas již zrušen,
      * vyvolá se {@link InvalidMatchStatusException}. Po zrušení
      * se odešlou notifikace přihlášeným hráčům.
@@ -289,11 +320,11 @@ public class MatchServiceImpl implements MatchService {
         MatchEntity match = findMatchOrThrow(matchId);
         String message = " je již zrušen";
 
-        if (match.getMatchStatus() == MatchStatus.CANCELLED) {
+        if (match.getMatchStatus() == MatchStatus.CANCELED) {
             throw new InvalidMatchStatusException(matchId, message);
         }
 
-        match.setMatchStatus(MatchStatus.CANCELLED);
+        match.setMatchStatus(MatchStatus.CANCELED);
         match.setCancelReason(reason);
 
         // kdo zápas zrušil
@@ -301,7 +332,7 @@ public class MatchServiceImpl implements MatchService {
         match.setLastModifiedByUserId(currentUserId);
 
         MatchEntity saved = matchRepository.save(match);
-        notifyPlayersAboutMatchChanges(saved, MatchStatus.CANCELLED);
+        notifyPlayersAboutMatchChanges(saved, MatchStatus.CANCELED);
 
         return new SuccessResponseDTO(
                 "BE - Zápas " + match.getId() + match.getDateTime() + " byl úspěšně zrušen",
@@ -313,7 +344,7 @@ public class MatchServiceImpl implements MatchService {
     /**
      * Obnoví dříve zrušený zápas.
      * <p>
-     * Zápasu se odstraní stav {@link MatchStatus#CANCELLED}
+     * Zápasu se odstraní stav {@link MatchStatus#CANCELED}
      * a důvod zrušení. Pokud zápas zrušen nebyl, vyvolá se
      * {@link InvalidMatchStatusException}. Implementace může
      * navazovat odeslání notifikací o obnovení zápasu.
@@ -324,16 +355,19 @@ public class MatchServiceImpl implements MatchService {
         MatchEntity match = findMatchOrThrow(matchId);
         String message = " ještě nebyl zrušen";
 
-        if (match.getMatchStatus() != MatchStatus.CANCELLED) {
+        if (match.getMatchStatus() != MatchStatus.CANCELED) {
             throw new InvalidMatchStatusException(matchId, message);
         }
 
-        match.setMatchStatus(null);
+        match.setMatchStatus(MatchStatus.UNCANCELED);
         match.setCancelReason(null);
 
         // kdo zápas obnovil
         Long currentUserId = getCurrentUserIdOrNull();
         match.setLastModifiedByUserId(currentUserId);
+
+        MatchEntity saved = matchRepository.save(match);
+        notifyPlayersAboutMatchChanges(saved, MatchStatus.UNCANCELED);
 
         return new SuccessResponseDTO(
                 "BE - Zápas " + match.getId() + match.getDateTime() + " byl úspěšně obnoven",
@@ -732,18 +766,24 @@ public class MatchServiceImpl implements MatchService {
      * zápas se odvodí stav hráče. Výstup obsahuje i číslo zápasu
      * v sezóně.
      */
+    // TODO - OD DATA VYTVOŘENÍ HRÁČE
     @Override
     public List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
 
+        LocalDateTime playerCreatedDate = player.getTimestamp();
+
         List<MatchEntity> availableMatches =
                 findPastMatchesForCurrentSeason().stream()
+                        .filter(match-> match.getDateTime().isAfter(playerCreatedDate))
                         .filter(match -> isPlayerActiveForMatch(player, match.getDateTime()))
                         .toList();
+
 
         if (availableMatches.isEmpty()) {
             return List.of();
         }
+
 
         List<Long> matchIds = availableMatches.stream()
                 .map(MatchEntity::getId)
@@ -1069,7 +1109,7 @@ public class MatchServiceImpl implements MatchService {
                         );
                     }
 
-                    if (matchStatus == MatchStatus.CANCELLED) {
+                    if (matchStatus == MatchStatus.CANCELED) {
                         notificationService.notifyPlayer(
                                 player,
                                 NotificationType.MATCH_CANCELED,

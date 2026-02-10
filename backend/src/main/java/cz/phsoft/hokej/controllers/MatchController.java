@@ -271,6 +271,7 @@ public class MatchController {
      * @param authentication autentizační kontext přihlášeného uživatele
      * @return seznam {@link MatchOverviewDTO} pro odehrané zápasy hráče
      */
+    // TODO - JEN ZÁPASY OD VYTVOŘENÍ HRÁČE
     @GetMapping("/me/all-passed")
     @PreAuthorize("isAuthenticated()")
     public List<MatchOverviewDTO> getAllMatchesForPlayer(Authentication authentication) {

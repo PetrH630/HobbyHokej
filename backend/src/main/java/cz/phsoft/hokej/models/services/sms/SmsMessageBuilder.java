@@ -293,7 +293,7 @@ public class SmsMessageBuilder {
         MatchCancelReason cancelReason = match.getCancelReason();
 
         String statusText = switch (matchStatus) {
-            case CANCELLED -> "byl zrušen";
+            case CANCELED -> "byl zrušen";
             case UNCANCELED -> "byl obnoven";
             default -> "neznámý stav";
         };

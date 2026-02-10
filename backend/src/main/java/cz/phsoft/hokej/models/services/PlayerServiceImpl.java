@@ -13,6 +13,9 @@ import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.mappers.PlayerMapper;
 import cz.phsoft.hokej.models.services.notification.NotificationService;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 
@@ -41,6 +44,10 @@ import java.util.Optional;
  */
 @Service
 public class PlayerServiceImpl implements PlayerService {
+
+    @Value("${app.demo-mode:false}")
+    private boolean isDemoMode;
+    private static final Logger logger = LoggerFactory.getLogger(PlayerServiceImpl.class);
 
     private final PlayerRepository playerRepository;
     private final PlayerMapper playerMapper;
@@ -181,6 +188,13 @@ public class PlayerServiceImpl implements PlayerService {
     @Transactional
     public SuccessResponseDTO deletePlayer(Long id) {
         PlayerEntity player = findPlayerOrThrow(id);
+
+        if (isDemoMode) {
+            throw new DemoModeOperationNotAllowedException(
+                    "Hráč nebude smazán. Aplikace běží v DEMO režimu."
+            );
+        }
+
         playerRepository.delete(player);
 
         String message = "Hráč " + player.getFullName() + " byl úspěšně smazán";
@@ -189,10 +203,7 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, id);
     }
 
-    // ======================
-    // STATUS – APPROVE / REJECT
-    // ======================
-
+   // STATUS – APPROVE / REJECT
     /**
      * Schválí hráče a nastaví mu status {@link PlayerStatus#APPROVED}.
      *
@@ -215,7 +226,6 @@ public class PlayerServiceImpl implements PlayerService {
                 "Hráč %s byl úspěšně aktivován"
         );
     }
-
     /**
      * Zamítne hráče a nastaví mu status {@link PlayerStatus#REJECTED}.
      *
@@ -264,12 +274,8 @@ public class PlayerServiceImpl implements PlayerService {
         notifyPlayer(saved, NotificationType.PLAYER_CHANGE_USER, newUser);
         notifyUser(newUser, NotificationType.PLAYER_CHANGE_USER, player);
     }
-
-    // ======================
     // READ
-    // ======================
-
-    /**
+   /**
      * Vrátí všechny hráče v systému.
      *
      * @return seznam hráčů ve formě {@link PlayerDTO}
@@ -309,9 +315,7 @@ public class PlayerServiceImpl implements PlayerService {
                 .toList();
     }
 
-    // ======================
     // CURRENT PLAYER – SESSION
-    // ======================
 
     /**
      * Nastaví aktuálního hráče pro daného uživatele.
@@ -450,9 +454,7 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, 0L);
     }
 
-    // ======================
     // PRIVATE HELPERY – ENTITY / DUPLICITY
-    // ======================
 
     /**
      * Najde hráče podle ID nebo vyhodí {@link PlayerNotFoundException}.
@@ -578,11 +580,8 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, id);
     }
 
-    // ====================================================
     // PRIVÁTNÍ HELPERY – NOTIFIKACE
-    // ====================================================
 
-    // TODO - možná změnit Object context
     private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {
         notificationService.notifyPlayer(player, type, context);
     }

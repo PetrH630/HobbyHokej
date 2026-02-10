@@ -362,7 +362,6 @@ public class AppUserServiceImpl implements AppUserService {
             );
         }
 
-
         if (!user.isEnabled()) {
             throw new InvalidUserActivationException(
                     "BE - Deaktivace účtu již byla provedena"

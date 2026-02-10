@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.models.services;
 
+import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
@@ -135,4 +136,9 @@ public interface MatchRegistrationService {
             Long playerId,
             String adminNote
     );
+    // TODO
+    MatchRegistrationDTO cancelNoExcused(Long matchId,
+                                         Long playerId,
+                                         ExcuseReason excuseReason,
+                                         String excuseNote);
 }

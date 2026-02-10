@@ -1,10 +1,13 @@
 package cz.phsoft.hokej.controllers;
 
+import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
+import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.PlayerInactivityPeriodService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +26,12 @@ import java.util.List;
 public class PlayerInactivityPeriodController {
 
     private final PlayerInactivityPeriodService service;
+    private final CurrentPlayerService currentPlayerService;
 
-    public PlayerInactivityPeriodController(PlayerInactivityPeriodService service) {
+    public PlayerInactivityPeriodController(PlayerInactivityPeriodService service,
+                                            CurrentPlayerService currentPlayerService) {
         this.service = service;
+        this.currentPlayerService = currentPlayerService;
     }
 
     /**
@@ -73,7 +79,7 @@ public class PlayerInactivityPeriodController {
      * @return vytvořený záznam jako {@link PlayerInactivityPeriodDTO}
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<PlayerInactivityPeriodDTO> create(
             @Valid @RequestBody PlayerInactivityPeriodDTO dto) {
 
@@ -91,7 +97,7 @@ public class PlayerInactivityPeriodController {
      * @return aktualizovaný záznam jako {@link PlayerInactivityPeriodDTO}
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<PlayerInactivityPeriodDTO> update(
             @PathVariable Long id,
             @Valid @RequestBody PlayerInactivityPeriodDTO dto) {
@@ -114,4 +120,23 @@ public class PlayerInactivityPeriodController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    // TODO- V SERVICE ZKONTROLOVAT.
+    /**
+     * Vrací seznam neaktivit aktuálně zvoleného hráče.
+     *
+     * Před voláním služby se vyžaduje, aby byl nastaven aktuální hráč.
+     *
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @return seznam neaktivit pro aktuálního hráče
+     */
+    @GetMapping("/me/all")
+    @PreAuthorize("isAuthenticated()")
+    public List<PlayerInactivityPeriodDTO> getMyInactivity(Authentication authentication) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return service.getByPlayer(currentPlayerId);
+    }
 }
+
+
