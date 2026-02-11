@@ -8,59 +8,91 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující historický záznam o uživateli.
  *
- * Slouží pro auditní účely a sledování změn uživatelského účtu v čase,
- * zejména při vytvoření, změně role, změně aktivace, změně emailu apod.
+ * Slouží pro auditní účely a uchovávání změn uživatelského účtu v čase.
+ * Každý záznam představuje stav uživatele v okamžiku provedení operace
+ * nad hlavní entitou AppUserEntity.
+ *
+ * Záznamy jsou typicky vytvářeny databázovým triggerem při operacích
+ * INSERT, UPDATE nebo DELETE.
  */
 @Entity
 @Table(name = "app_users_history")
 public class AppUserHistoryEntity {
 
+    /**
+     * Primární klíč historického záznamu.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Typ provedené operace.
-     * Typicky hodnoty INSERT, UPDATE nebo DELETE.
+     *
+     * Typicky se jedná o hodnoty INSERT, UPDATE nebo DELETE.
      */
     @Column(name = "action", nullable = false)
     private String action;
 
     /**
      * Datum a čas provedení změny.
+     *
+     * Udává okamžik vytvoření historického záznamu.
      */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
     /**
      * ID uživatele z hlavní tabulky app_users.
+     *
+     * Slouží pro propojení historického záznamu s původní entitou uživatele.
      */
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
     /**
      * Původní časové razítko uživatele.
+     *
      * Jedná se o hodnotu timestamp z AppUserEntity v okamžiku změny.
+     * Umožňuje dohledat přesný stav uživatele při konkrétní operaci.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
+    /**
+     * Jméno uživatele v okamžiku změny.
+     */
     @Column(name = "name", nullable = false)
     private String name;
 
+    /**
+     * Příjmení uživatele v okamžiku změny.
+     */
     @Column(name = "surname", nullable = false)
     private String surname;
 
+    /**
+     * E-mail uživatele v okamžiku změny.
+     */
     @Column(name = "email", nullable = false)
     private String email;
 
+    /**
+     * Role uživatele v okamžiku změny.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
 
+    /**
+     * Stav aktivace účtu v okamžiku změny.
+     */
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
+    /**
+     * Bezparametrický konstruktor požadovaný JPA.
+     */
     public AppUserHistoryEntity() {
     }
 

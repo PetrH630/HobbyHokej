@@ -10,75 +10,115 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující historický záznam o hráči.
  *
- * Slouží pro auditní účely a sledování změn hráčů v čase,
- * zejména při vytvoření hráče, změně stavu a změně přiřazeného uživatele.
+ * Slouží pro auditní účely a uchovávání změn hráčů v čase.
+ * Každý záznam představuje stav hráče v okamžiku provedení operace
+ * nad hlavní entitou PlayerEntity.
+ *
+ * Záznamy jsou typicky vytvářeny databázovým triggerem při změně
+ * údajů hráče.
  */
 @Entity
 @Table(name = "player_entity_history")
 public class PlayerHistoryEntity {
 
+    /**
+     * Primární klíč historického záznamu.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Typ provedené operace.
-     * Typicky hodnoty CREATE, STATUS_CHANGE, USER_CHANGE, DELETE.
+     *
+     * Typicky se jedná o hodnoty CREATE, STATUS_CHANGE,
+     * USER_CHANGE nebo DELETE.
      */
     @Column(name = "action", nullable = false)
     private String action;
 
     /**
      * Datum a čas provedení změny.
+     *
+     * Udává okamžik vytvoření historického záznamu.
      */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
     /**
-     * ID hráče v hlavní tabulce player_entity.
+     * ID hráče z hlavní tabulky player_entity.
+     *
+     * Slouží pro propojení historického záznamu s původní entitou hráče.
      */
     @Column(name = "player_id", nullable = false)
     private Long playerId;
 
     /**
      * Původní časové razítko hráče.
+     *
      * Jedná se o hodnotu sloupce timestamp z tabulky player_entity
-     * v okamžiku, kdy byl záznam přesunut do historie.
+     * v okamžiku vytvoření historického záznamu.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
+    /**
+     * Křestní jméno hráče v okamžiku změny.
+     */
     @Column(name = "name", nullable = false)
     private String name;
 
+    /**
+     * Příjmení hráče v okamžiku změny.
+     */
     @Column(name = "surname", nullable = false)
     private String surname;
 
+    /**
+     * Přezdívka hráče v okamžiku změny.
+     */
     @Column(name = "nickname")
     private String nickname;
 
+    /**
+     * Typ hráče v okamžiku změny.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private PlayerType type;
 
+    /**
+     * Celé jméno hráče v okamžiku změny.
+     */
     @Column(name = "full_name")
     private String fullName;
 
+    /**
+     * Telefonní číslo hráče v okamžiku změny.
+     */
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    /**
+     * Tým hráče v okamžiku změny.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "team")
     private Team team;
 
+    /**
+     * Stav hráče v okamžiku změny.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "player_status", nullable = false)
     private PlayerStatus playerStatus;
 
+    /**
+     * ID uživatele, ke kterému byl hráč přiřazen
+     * v okamžiku vytvoření historického záznamu.
+     */
     @Column(name = "user_id")
     private Long userId;
-
-    // gettery / settery ...
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

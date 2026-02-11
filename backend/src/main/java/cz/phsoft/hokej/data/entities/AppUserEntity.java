@@ -10,37 +10,52 @@ import java.util.Set;
  * Entita reprezentující uživatelský účet aplikace.
  *
  * Slouží pro autentizaci a autorizaci uživatelů v systému.
- * Jeden uživatel může mít přiřazeno více hráčů.
- * Detailní nastavení uživatele je odděleno do entity AppUserSettingsEntity.
+ * Uchovává základní identifikační údaje, přihlašovací informace,
+ * roli uživatele a stav aktivace účtu.
+ *
+ * Jeden uživatel může mít přiřazeno více hráčů. Detailní uživatelské
+ * preference a nastavení jsou odděleny do entity AppUserSettingsEntity.
  */
 @Entity
 @Table(name = "app_users")
 public class AppUserEntity {
 
+    /**
+     * Primární klíč uživatele.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Křestní jméno uživatele.
+     */
     @Column(nullable = false)
     private String name;
 
+    /**
+     * Příjmení uživatele.
+     * Při uložení je převáděno na velká písmena.
+     */
     @Column(nullable = false)
     private String surname;
 
     /**
-     * Unikátní email uživatele sloužící pro přihlášení.
+     * Unikátní e-mail uživatele sloužící pro přihlášení do systému.
      */
     @Column(nullable = false, unique = true)
     private String email;
 
     /**
      * Hash hesla uživatele.
+     * Heslo se nikdy neukládá v otevřené podobě.
      */
     @Column(nullable = false)
     private String password;
 
     /**
      * Role uživatele v systému.
+     * Určuje oprávnění uživatele při přístupu k jednotlivým endpointům.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -48,13 +63,16 @@ public class AppUserEntity {
 
     /**
      * Příznak aktivace účtu.
-     * Nastaví se například po úspěšné emailové aktivaci.
+     * Nastavuje se například po úspěšné e-mailové aktivaci účtu.
      */
     @Column(nullable = false)
     private boolean enabled = false;
 
     /**
      * Hráči přiřazení k tomuto uživateli.
+     *
+     * Vztah je typu one-to-many, kdy jeden uživatel může mít více hráčů.
+     * Životní cyklus hráčů je navázán na uživatele.
      */
     @OneToMany(
             mappedBy = "user",
@@ -64,19 +82,33 @@ public class AppUserEntity {
     private Set<PlayerEntity> players;
 
     /**
-     * Nastavení uživatele (způsob výběru hráče, notifikace a další preference).
+     * Nastavení uživatele.
      *
-     * Jeden uživatel má právě jedno AppUserSettingsEntity.
+     * Obsahuje například způsob výběru aktuálního hráče,
+     * nastavení notifikací a další preference.
+     * Jeden uživatel má právě jedno nastavení.
      */
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "user",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true)
     private AppUserSettingsEntity settings;
+
     /**
      * Časové razítko uživatele.
-     * Používá se pro uložení data a času vytvoření a změn u uživatele.
+     *
+     * Uchovává datum a čas poslední změny entity.
+     * Hodnota se aktualizuje při vytvoření i při každé úpravě záznamu.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
+    /**
+     * Metoda volaná před prvním uložením entity.
+     *
+     * Nastavuje aktuální časové razítko a převádí příjmení
+     * na velká písmena.
+     */
     @PrePersist
     public void prePersist() {
         this.timestamp = LocalDateTime.now();
@@ -84,6 +116,13 @@ public class AppUserEntity {
             this.surname = this.surname.toUpperCase();
         }
     }
+
+    /**
+     * Metoda volaná před aktualizací entity.
+     *
+     * Aktualizuje časové razítko a převádí příjmení
+     * na velká písmena.
+     */
     @PreUpdate
     public void preUpdate() {
         this.timestamp = LocalDateTime.now();
@@ -126,6 +165,11 @@ public class AppUserEntity {
 
     public AppUserSettingsEntity getSettings() { return settings; }
 
+    /**
+     * Nastavuje uživatelské nastavení a zároveň zajišťuje obousměrnou vazbu.
+     *
+     * @param settings instance nastavení uživatele
+     */
     public void setSettings(AppUserSettingsEntity settings) {
         this.settings = settings;
         if (settings != null) {

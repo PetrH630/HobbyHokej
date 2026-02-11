@@ -1,6 +1,6 @@
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.NotificationSettings;
+
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import org.mapstruct.Mapper;
