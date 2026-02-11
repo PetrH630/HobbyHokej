@@ -56,7 +56,6 @@ public class MatchRegistrationHistoryController {
         return ResponseEntity.ok(history);
     }
 
-
     /**
      * Vrací historii všech změn registrace konkrétního hráče pro daný zápas.
      *

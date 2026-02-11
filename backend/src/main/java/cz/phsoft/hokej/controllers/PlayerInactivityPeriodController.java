@@ -1,6 +1,5 @@
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.MatchDTO;
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.PlayerInactivityPeriodService;
@@ -19,7 +18,8 @@ import java.util.List;
  * neúčastní zápasů, například z důvodu zranění nebo dovolené. Endpointy jsou
  * určeny pro role ADMIN a MANAGER a umožňují úplnou správu záznamů o neaktivitě.
  *
- * Veškerá business logika se předává do {@link PlayerInactivityPeriodService}.
+ * Veškerá business logika se deleguje do {@link PlayerInactivityPeriodService}.
+ * Informace o aktuálním hráči se získávají pomocí {@link CurrentPlayerService}.
  */
 @RestController
 @RequestMapping("/api/inactivity/admin")
@@ -37,6 +37,9 @@ public class PlayerInactivityPeriodController {
     /**
      * Vrací seznam všech záznamů o neaktivitě hráčů.
      *
+     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
+     * k přehledové správě všech evidovaných období neaktivity.
+     *
      * @return seznam období neaktivity jako {@link PlayerInactivityPeriodDTO}
      */
     @GetMapping("/all")
@@ -48,8 +51,11 @@ public class PlayerInactivityPeriodController {
     /**
      * Vrací detail záznamu o neaktivitě podle jeho ID.
      *
+     * Endpoint se používá pro zobrazení nebo kontrolu konkrétního
+     * záznamu před jeho úpravou či smazáním.
+     *
      * @param id ID záznamu o neaktivitě
-     * @return DTO {@link PlayerInactivityPeriodDTO} s detailem období neaktivity
+     * @return {@link PlayerInactivityPeriodDTO} s detailem období neaktivity
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -61,8 +67,11 @@ public class PlayerInactivityPeriodController {
     /**
      * Vrací všechna období neaktivity pro konkrétního hráče.
      *
+     * Endpoint je vhodný například pro kontrolu dlouhodobé absence
+     * hráče nebo pro plánování jeho účasti na zápasech.
+     *
      * @param playerId ID hráče
-     * @return seznam období neaktivity pro daného hráče
+     * @return seznam období neaktivity pro daného hráče jako {@link PlayerInactivityPeriodDTO}
      */
     @GetMapping("/player/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -73,7 +82,9 @@ public class PlayerInactivityPeriodController {
     /**
      * Vytváří nový záznam o neaktivitě hráče.
      *
-     * Operace je vyhrazena pouze pro roli ADMIN.
+     * Vstupní data jsou validována pomocí bean validation a vlastní
+     * uložení záznamu se deleguje do servisní vrstvy. Operace je
+     * dostupná pro role ADMIN a MANAGER.
      *
      * @param dto DTO s daty období neaktivity
      * @return vytvořený záznam jako {@link PlayerInactivityPeriodDTO}
@@ -90,7 +101,9 @@ public class PlayerInactivityPeriodController {
     /**
      * Aktualizuje existující záznam o neaktivitě hráče.
      *
-     * Operace je vyhrazena pouze pro roli ADMIN.
+     * Endpoint je dostupný pro role ADMIN a MANAGER. Aktualizace
+     * probíhá prostřednictvím servisní vrstvy a slouží k opravám
+     * nebo úpravám dříve zadaných údajů.
      *
      * @param id  ID záznamu o neaktivitě
      * @param dto DTO s aktualizovanými daty období neaktivity
@@ -109,7 +122,8 @@ public class PlayerInactivityPeriodController {
     /**
      * Odstraňuje záznam o neaktivitě hráče.
      *
-     * Operace je vyhrazena pouze pro roli ADMIN.
+     * Operace je vyhrazena pouze pro roli ADMIN a používá se
+     * například při chybném zadání období neaktivity.
      *
      * @param id ID záznamu o neaktivitě
      * @return HTTP odpověď 204 No Content v případě úspěchu
@@ -121,14 +135,15 @@ public class PlayerInactivityPeriodController {
         return ResponseEntity.noContent().build();
     }
 
-    // TODO- V SERVICE ZKONTROLOVAT.
     /**
-     * Vrací seznam neaktivit aktuálně zvoleného hráče.
+     * Vrací seznam období neaktivity aktuálně zvoleného hráče.
      *
-     * Před voláním služby se vyžaduje, aby byl nastaven aktuální hráč.
+     * Před voláním služby se vyžaduje, aby byl nastaven aktuální hráč
+     * v {@link CurrentPlayerService}. Endpoint je určen pro uživatelské
+     * zobrazení vlastních období neaktivity v rozhraní hráče.
      *
      * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam neaktivit pro aktuálního hráče
+     * @return seznam období neaktivity pro aktuálního hráče jako {@link PlayerInactivityPeriodDTO}
      */
     @GetMapping("/me/all")
     @PreAuthorize("isAuthenticated()")
@@ -138,5 +153,3 @@ public class PlayerInactivityPeriodController {
         return service.getByPlayer(currentPlayerId);
     }
 }
-
-

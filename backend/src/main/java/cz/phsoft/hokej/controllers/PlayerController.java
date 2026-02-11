@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import cz.phsoft.hokej.models.services.PlayerHistoryService;
 
 import java.util.List;
 
@@ -21,9 +20,11 @@ import java.util.List;
  *
  * Zajišťuje administrativní správu hráčů pro role ADMIN a MANAGER,
  * včetně vytváření, aktualizace, mazání a schvalování hráčů, a také
- * správu hráčů z pohledu přihlášeného uživatele pod endpointy /me.
+ * správu hráčů z pohledu přihlášeného uživatele pod endpointy s prefixem /me.
  *
- * Veškerá business logika se předává do {@link PlayerService}.
+ * Veškerá business logika se deleguje do {@link PlayerService}.
+ * Historie změn hráčů se získává pomocí {@link PlayerHistoryService}
+ * a práce s aktuálním hráčem se zajišťuje přes {@link CurrentPlayerService}.
  */
 @RestController
 @RequestMapping("/api/players")
@@ -46,9 +47,10 @@ public class PlayerController {
     /**
      * Vrací seznam všech hráčů v systému.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER.
+     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
+     * pro přehledovou správu hráčů v administraci.
      *
-     * @return seznam {@link PlayerDTO}
+     * @return seznam všech hráčů jako {@link PlayerDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -59,8 +61,11 @@ public class PlayerController {
     /**
      * Vrací detail hráče podle jeho ID.
      *
+     * Endpoint je určen pro administrativní pohled na hráče,
+     * například pro úpravu jeho údajů.
+     *
      * @param id ID hráče
-     * @return DTO {@link PlayerDTO} s detailem hráče
+     * @return {@link PlayerDTO} s detailem hráče
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -71,8 +76,11 @@ public class PlayerController {
     /**
      * Vrací historii hráče podle jeho ID.
      *
+     * Historie obsahuje záznamy o změnách provedených nad daným hráčem
+     * a slouží pro auditní a přehledové účely.
+     *
      * @param id ID hráče
-     * @return DTO {@link List<PlayerHistoryDTO>} s historii hráče
+     * @return seznam {@link PlayerHistoryDTO} představujících historii hráče
      */
     @GetMapping("/{id}/history")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -83,7 +91,8 @@ public class PlayerController {
     /**
      * Vytváří nového hráče administrátorem nebo manažerem.
      *
-     * Operace se používá při ručním zakládání hráče v systému.
+     * Operace se používá při ručním zakládání hráče v systému,
+     * typicky pro dodatečné doplnění hráčů mimo uživatelské rozhraní.
      *
      * @param playerDTO DTO s daty nového hráče
      * @return vytvořený hráč jako {@link PlayerDTO}
@@ -95,7 +104,10 @@ public class PlayerController {
     }
 
     /**
-     * Aktualizuje údaje hráče administrátorem.
+     * Aktualizuje údaje hráče v administrativním rozhraní.
+     *
+     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
+     * k úpravě existujících údajů hráče.
      *
      * @param id  ID hráče
      * @param dto DTO s aktualizovanými daty hráče
@@ -111,10 +123,12 @@ public class PlayerController {
     /**
      * Odstraňuje hráče ze systému.
      *
-     * Operace je vyhrazena pouze pro roli ADMIN.
+     * Operace je dostupná pro role ADMIN a MANAGER a používá se
+     * pouze ve výjimečných situacích, například při chybném založení
+     * hráče. Samotné odstranění se provádí v servisní vrstvě.
      *
      * @param id ID hráče
-     * @return DTO {@link SuccessResponseDTO} s výsledkem operace
+     * @return {@link SuccessResponseDTO} s výsledkem operace
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -126,8 +140,12 @@ public class PlayerController {
     /**
      * Schvaluje hráče a nastavuje jeho stav na APPROVED.
      *
+     * Endpoint se používá po kontrole údajů hráče administrátorem
+     * nebo manažerem. Schválení umožňuje hráči plnohodnotné využití
+     * systému.
+     *
      * @param id ID hráče
-     * @return DTO {@link SuccessResponseDTO} s výsledkem operace
+     * @return {@link SuccessResponseDTO} s výsledkem operace
      */
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -139,8 +157,11 @@ public class PlayerController {
     /**
      * Zamítá hráče a nastavuje jeho stav na REJECTED.
      *
+     * Endpoint se používá v situacích, kdy hráč nesplňuje podmínky
+     * pro schválení, například z hlediska validity údajů.
+     *
      * @param id ID hráče
-     * @return DTO {@link SuccessResponseDTO} s výsledkem operace
+     * @return {@link SuccessResponseDTO} s výsledkem operace
      */
     @PutMapping("/{id}/reject")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -153,10 +174,11 @@ public class PlayerController {
      * Mění přiřazení hráče k aplikačnímu uživateli.
      *
      * Operace je určena pro roli ADMIN nebo MANAGER a používá se,
-     * pokud je potřeba hráče převést k jinému uživateli.
+     * pokud je potřeba hráče převést k jinému uživateli, například
+     * při změně vlastníka účtu.
      *
      * @param playerId ID hráče
-     * @param request  request obsahující ID nového uživatele
+     * @param request  požadavek obsahující ID nového uživatele
      * @return textová zpráva o úspěšné změně přiřazení
      */
     @PostMapping("/{playerId}/change-user")
@@ -176,8 +198,8 @@ public class PlayerController {
     /**
      * Vytváří nového hráče pro přihlášeného uživatele.
      *
-     * Nový hráč se automaticky přiřazuje k uživatelskému účtu,
-     * který vychází z e-mailu v objektu {@link Authentication}.
+     * Nový hráč se automaticky přiřazuje k uživatelskému účtu
+     * odvozenému z e-mailové adresy v objektu {@link Authentication}.
      *
      * @param playerDTO      DTO s daty nového hráče
      * @param authentication autentizační kontext přihlášeného uživatele
@@ -196,8 +218,11 @@ public class PlayerController {
     /**
      * Vrací seznam všech hráčů patřících přihlášenému uživateli.
      *
+     * Hráči se identifikují na základě e-mailové adresy uživatele
+     * získané z autentizačního kontextu.
+     *
      * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam {@link PlayerDTO} pro daného uživatele
+     * @return seznam {@link PlayerDTO} patřících danému uživateli
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -210,7 +235,8 @@ public class PlayerController {
      * Aktualizuje údaje aktuálně zvoleného hráče.
      *
      * Před provedením aktualizace se vyžaduje, aby byl nastaven
-     * aktuální hráč v {@link CurrentPlayerService}.
+     * aktuální hráč v {@link CurrentPlayerService}. Aktualizace
+     * se následně deleguje do {@link PlayerService}.
      *
      * @param dto DTO s aktualizovanými daty hráče
      * @return aktualizovaný hráč jako {@link PlayerDTO}
@@ -224,14 +250,16 @@ public class PlayerController {
     }
 
     /**
-     * Vrací historii aktuálně přihlášeného hráče podle jeho ID.
+     * Vrací historii pro aktuálně zvoleného hráče přihlášeného uživatele.
      *
-     * @param id ID hráče
-     * @return DTO {@link List<PlayerHistoryDTO>} s historii hráče
+     * Identita hráče se získává z {@link CurrentPlayerService}. Endpoint
+     * je určen pro uživatelské zobrazení historie změn nad vlastním hráčem.
+     *
+     * @return seznam {@link PlayerHistoryDTO} představujících historii aktuálního hráče
      */
     @GetMapping("/me/history")
     @PreAuthorize("isAuthenticated()")
-    public List<PlayerHistoryDTO> getMyPlayerHistory(Long id) {
+    public List<PlayerHistoryDTO> getMyPlayerHistory() {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
         return playerHistoryService.getHistoryForPlayer(currentPlayerId);

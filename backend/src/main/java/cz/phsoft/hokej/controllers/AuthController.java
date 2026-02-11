@@ -120,8 +120,6 @@ public class AuthController {
                 .build();
     }
 
-    // TODO MOŽNÁ DO APPUSERSETTINGS CONTROLLER
-
     /**
      * Vytváří požadavek na reset zapomenutého hesla.
      *
