@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +18,9 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.sql.Timestamp;
+import java.time.ZoneOffset;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 /**
@@ -91,6 +95,9 @@ public class DataInitializer {
     /**
      * Vytváří výchozího administrátora, pokud ještě neexistuje.
      */
+    /**
+     * Vytváří výchozího administrátora, pokud ještě neexistuje.
+     */
     private void initAdmin() {
         appUserRepository.findByEmail("admin@example.com").ifPresentOrElse(
                 existing -> System.out.println("Admin user already exists – skipping."),
@@ -102,7 +109,19 @@ public class DataInitializer {
                     admin.setPassword(encoder.encode("Administrator123"));
                     admin.setRole(Role.ROLE_ADMIN);
                     admin.setEnabled(true);
+
+                    // standardní uložení – fungovalo doteď
                     appUserRepository.save(admin);
+
+                    // přepsání timestampu na 1.11.2024 08:00 přes JdbcTemplate
+                    LocalDateTime fixedTimestamp = LocalDateTime.of(2024, 11, 1, 8, 0);
+
+                    jdbcTemplate.update(
+                            "UPDATE app_users SET timestamp = ? WHERE id = ?",
+                            fixedTimestamp,           // nebo Timestamp.valueOf(fixedTimestamp)
+                            admin.getId()
+                    );
+
                     System.out.println("Default admin user created.");
                 }
         );
@@ -146,10 +165,10 @@ public class DataInitializer {
                 "Němec"
         };
 
-
         for (int i = 0; i < 10; i++) {
             PlayerEntity player = new PlayerEntity();
             AppUserEntity user = new AppUserEntity();
+
             player.setName(names[i]);
             user.setName(names[i]);
             player.setSurname(surnames[i].toUpperCase());
@@ -161,12 +180,8 @@ public class DataInitializer {
             user.setPassword(encoder.encode(password));
 
             switch (i) {
-                case 0, 1, 2 -> {
-                    player.setType(PlayerType.VIP);
-                }
-                case 3, 4, 5, 6 -> {
-                    player.setType(PlayerType.STANDARD);
-                }
+                case 0, 1, 2 -> player.setType(PlayerType.VIP);
+                case 3, 4, 5, 6 -> player.setType(PlayerType.STANDARD);
                 default -> player.setType(PlayerType.BASIC);
             }
 
@@ -181,21 +196,38 @@ public class DataInitializer {
             } else {
                 player.setPlayerStatus(PlayerStatus.PENDING);
             }
+
             switch (i) {
-                case 0 -> {
-                    user.setRole(Role.ROLE_MANAGER);
-                }
+                case 0 -> user.setRole(Role.ROLE_MANAGER);
                 default -> user.setRole(Role.ROLE_PLAYER);
             }
+
             user.setEnabled(true);
             player.setUser(user);
+
+            // náhodný timestamp pro dvojici (user + player)
+            LocalDateTime randomTs = randomTimestampForDemoData();
+
+            // hráči nastavíme timestamp rovnou (PrePersist ho nepřepíše,
+            // protože metoda v entitě PlayerEntity nastavuje jen když je null)
+            player.setTimestamp(randomTs);
+
+            // nejdřív uložíme uživatele a hráče
             appUserRepository.save(user);
             playerRepository.save(player);
 
-
+            // uživateli přepíšeme timestamp přímo v DB,
+            // protože AppUserEntity @PrePersist nastavuje vždy now()
+            jdbcTemplate.update(
+                    "UPDATE app_users SET timestamp = ? WHERE id = ?",
+                    randomTs,
+                    user.getId()
+            );
         }
+
         System.out.println("Players and users initialized.");
     }
+
 
     // Inicializace uživatelských nastavení
 
@@ -265,21 +297,21 @@ public class DataInitializer {
 
         SeasonEntity season2024_2025 = new SeasonEntity();
         season2024_2025.setName("2024/2025");
-        season2024_2025.setStartDate(LocalDate.of(2024, 11, 20));
+        season2024_2025.setStartDate(LocalDate.of(2024, 11, 01));
         season2024_2025.setEndDate(LocalDate.of(2025, 3, 31));
         season2024_2025.setActive(false);
         season2024_2025.setCreatedByUserId(2L);
 
         SeasonEntity season2025_2026 = new SeasonEntity();
         season2025_2026.setName("2025/2026");
-        season2025_2026.setStartDate(LocalDate.of(2025, 11, 21));
+        season2025_2026.setStartDate(LocalDate.of(2025, 11, 01));
         season2025_2026.setEndDate(LocalDate.of(2026, 3, 31));
         season2025_2026.setActive(true);
         season2025_2026.setCreatedByUserId(2L);
 
         SeasonEntity season2026_2027 = new SeasonEntity();
         season2026_2027.setName("2026/2027");
-        season2026_2027.setStartDate(LocalDate.of(2026, 11, 1));
+        season2026_2027.setStartDate(LocalDate.of(2026, 11, 01));
         season2026_2027.setEndDate(LocalDate.of(2027, 3, 31));
         season2026_2027.setActive(false);
         season2026_2027.setCreatedByUserId(2L);
@@ -759,4 +791,22 @@ public class DataInitializer {
             System.out.println("Trigger " + name + " already exists or error: " + e.getMessage());
         }
     }
+
+    /**
+     * Vygeneruje náhodný timestamp v rozsahu
+     * 1. 11. 2024 00:00:00 až 20. 12. 2025 23:59:59.
+     */
+    private LocalDateTime randomTimestampForDemoData() {
+        LocalDateTime from = LocalDateTime.of(2024, 11, 1, 0, 0);
+        LocalDateTime to = LocalDateTime.of(2025, 12, 20, 23, 59);
+
+        long fromEpoch = from.toEpochSecond(ZoneOffset.UTC);
+        long toEpoch = to.toEpochSecond(ZoneOffset.UTC);
+
+        long randomEpoch = ThreadLocalRandom.current()
+                .nextLong(fromEpoch, toEpoch + 1);
+
+        return LocalDateTime.ofEpochSecond(randomEpoch, 0, ZoneOffset.UTC);
+    }
+
 }

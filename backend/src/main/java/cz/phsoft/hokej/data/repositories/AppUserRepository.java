@@ -23,4 +23,6 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
      * @return uživatel zabalený v Optional, pokud existuje
      */
     Optional<AppUserEntity> findByEmail(String email);
+
+
 }

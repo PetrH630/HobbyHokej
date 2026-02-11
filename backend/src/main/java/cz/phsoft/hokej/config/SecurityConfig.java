@@ -152,7 +152,9 @@ public class SecurityConfig {
                                     "/api/auth/forgotten-password/reset",
                                     "/api/auth/reset-password",
                                     "/error",
-                                    "/favicon.ico"
+                                    "/favicon.ico",
+                                    "/public/***",
+                                    "/api/inactivity/admin/me/***"
                             ).permitAll()
 
                             // Debug a test

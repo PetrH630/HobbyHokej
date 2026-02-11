@@ -47,6 +47,9 @@ public class NotificationServiceImpl implements NotificationService {
     private final EmailMessageBuilder emailMessageBuilder;
     private final NotificationPreferencesService notificationPreferencesService;
 
+    // demo režim a úložiště notifikací pro demo
+    private final DemoModeService demoModeService;
+    private final DemoNotificationStore demoNotificationStore;
 
     /**
      * Typy notifikací, pro které se nemá posílat kopie manažerům.
@@ -65,7 +68,9 @@ public class NotificationServiceImpl implements NotificationService {
             SmsService smsService,
             SmsMessageBuilder smsMessageBuilder,
             EmailMessageBuilder emailMessageBuilder,
-            NotificationPreferencesService notificationPreferencesService
+            NotificationPreferencesService notificationPreferencesService,
+            DemoModeService demoModeService,
+            DemoNotificationStore demoNotificationStore
     ) {
         this.appUserRepository = appUserRepository;
         this.emailService = emailService;
@@ -73,6 +78,8 @@ public class NotificationServiceImpl implements NotificationService {
         this.smsMessageBuilder = smsMessageBuilder;
         this.emailMessageBuilder = emailMessageBuilder;
         this.notificationPreferencesService = notificationPreferencesService;
+        this.demoModeService = demoModeService;
+        this.demoNotificationStore = demoNotificationStore;
     }
 
     @Override
@@ -170,11 +177,27 @@ public class NotificationServiceImpl implements NotificationService {
                     emailMessageBuilder.buildForUser(type, null, userEmail, effectiveContext);
 
             if (content != null) {
-                if (content.html()) {
-                    emailService.sendHtmlEmail(userEmail, content.subject(), content.body());
+                // DEMO režim – místo odeslání uložíme do DemoNotificationStore
+                if (demoModeService.isDemoMode()) {
+                    // DEMO CHANGED: používáme novou signaturu addEmail(...)
+                    demoNotificationStore.addEmail(
+                            userEmail,
+                            content.subject(),
+                            content.body(),
+                            content.html(),
+                            type,
+                            "USER"
+                    );
+                    log.debug("DEMO MODE: notifyUser e-mail USER uložen do DemoNotificationStore, nic se neodesílá");
+                    // KONEC DEMO
                 } else {
-                    emailService.sendSimpleEmail(userEmail, content.subject(), content.body());
+                    if (content.html()) {
+                        emailService.sendHtmlEmail(userEmail, content.subject(), content.body());
+                    } else {
+                        emailService.sendSimpleEmail(userEmail, content.subject(), content.body());
+                    }
                 }
+
             } else {
                 log.debug("Typ {} nemá definovanou e-mailovou šablonu pro uživatele (USER), nic se neposílá", type);
             }
@@ -225,11 +248,26 @@ public class NotificationServiceImpl implements NotificationService {
                     continue;
                 }
 
-                if (managerContent.html()) {
-                    emailService.sendHtmlEmail(managerEmail, managerContent.subject(), managerContent.body());
+                // DEMO režim pro manager kopie v notifyUser
+                if (demoModeService.isDemoMode()) {
+                    // DEMO CHANGED: používáme novou signaturu addEmail(...)
+                    demoNotificationStore.addEmail(
+                            managerEmail,
+                            managerContent.subject(),
+                            managerContent.body(),
+                            managerContent.html(),
+                            type,
+                            "MANAGER"
+                    );
+                    log.debug("DEMO MODE: notifyUser e-mail MANAGER uložen do DemoNotificationStore, nic se neodesílá");
                 } else {
-                    emailService.sendSimpleEmail(managerEmail, managerContent.subject(), managerContent.body());
+                    if (managerContent.html()) {
+                        emailService.sendHtmlEmail(managerEmail, managerContent.subject(), managerContent.body());
+                    } else {
+                        emailService.sendSimpleEmail(managerEmail, managerContent.subject(), managerContent.body());
+                    }
                 }
+                // KONEC DEMO
             }
         } else {
             log.debug("Typ {} je v MANAGER_COPY_BLACKLIST – kopie manažerům se neposílá (notifyUser).", type);
@@ -258,6 +296,22 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
+        // DEMO režim – uložení do DemoNotificationStore
+        if (demoModeService.isDemoMode()) {
+            // DEMO CHANGED: používáme novou signaturu addEmail(...)
+            demoNotificationStore.addEmail(
+                    email,
+                    content.subject(),
+                    content.body(),
+                    content.html(),
+                    type,
+                    "MANAGER"
+            );
+            log.debug("DEMO MODE: sendEmailToManager – e-mail uložen do DemoNotificationStore, nic se neodesílá");
+            return;
+        }
+        // KONEC DEMO
+
         if (content.html()) {
             emailService.sendHtmlEmail(email, content.subject(), content.body());
         } else {
@@ -282,6 +336,22 @@ public class NotificationServiceImpl implements NotificationService {
             log.debug("Typ {} nemá definovanou e-mailovou šablonu pro uživatele, nic se neposílá", type);
             return;
         }
+
+        // DEMO režim – uložení do DemoNotificationStore
+        if (demoModeService.isDemoMode()) {
+            // DEMO CHANGED: používáme novou signaturu addEmail(...)
+            demoNotificationStore.addEmail(
+                    email,
+                    content.subject(),
+                    content.body(),
+                    content.html(),
+                    type,
+                    "USER"
+            );
+            log.debug("DEMO MODE: sendEmailToUser – e-mail uložen do DemoNotificationStore, nic se neodesílá");
+            return;
+        }
+        // KONEC DEMO
 
         if (content.html()) {
             emailService.sendHtmlEmail(email, content.subject(), content.body());
@@ -308,6 +378,22 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
+        // DEMO režim – uložení do DemoNotificationStore
+        if (demoModeService.isDemoMode()) {
+            // DEMO CHANGED: používáme novou signaturu addEmail(...)
+            demoNotificationStore.addEmail(
+                    email,
+                    content.subject(),
+                    content.body(),
+                    content.html(),
+                    type,
+                    "PLAYER"
+            );
+            log.debug("DEMO MODE: sendEmailToPlayer – e-mail uložen do DemoNotificationStore, nic se neodesílá");
+            return;
+        }
+        // KONEC DEMO
+
         if (content.html()) {
             emailService.sendHtmlEmail(email, content.subject(), content.body());
         } else {
@@ -323,7 +409,7 @@ public class NotificationServiceImpl implements NotificationService {
                                 Object context) {
 
         if (phone == null || phone.isBlank()) {
-            log.debug("sendSmsToPhone: prázdný telefon – SMS se nepošle (player {})", player.getId());
+            log.debug("sendSmsToPhone: prázdný telefon – SMS se nepošle (player {})", player != null ? player.getId() : null);
             return;
         }
 
@@ -333,6 +419,19 @@ public class NotificationServiceImpl implements NotificationService {
             log.debug("Typ {} nemá definovanou SMS šablonu nebo chybí context – SMS se neposílá", type);
             return;
         }
+
+        // DEMO režim – uložení do DemoNotificationStore
+        if (demoModeService.isDemoMode()) {
+            // DEMO CHANGED: používáme novou signaturu addSms(...)
+            demoNotificationStore.addSms(
+                    phone,
+                    msg,
+                    type
+            );
+            log.debug("DEMO MODE: sendSmsToPhone – SMS uložena do DemoNotificationStore, nic se neodesílá");
+            return;
+        }
+        // KONEC DEMO
 
         smsService.sendSms(phone, msg);
     }
