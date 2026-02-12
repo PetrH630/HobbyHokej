@@ -9,50 +9,70 @@ import java.util.Optional;
 
 /**
  * Repozitář pro práci s entitou SeasonEntity.
- * <p>
- * Slouží ke správě sezón, zejména k určení aktivní sezóny,
- * kontrole časových překryvů a načítání sezón
- * v chronologickém pořadí.
+ *
+ * Slouží k přístupu k datům sezón uloženým v databázi.
+ * Poskytuje základní CRUD operace zděděné z JpaRepository
+ * a specifické dotazy používané servisní vrstvou pro kontrolu
+ * jedinečnosti názvu, aktivní sezóny a časových překryvů.
+ *
+ * Repozitář neobsahuje business logiku. Ověřování aplikačních pravidel
+ * a rozhodování o dalším postupu je prováděno v servisní vrstvě.
  */
 public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
 
     /**
-     * ověří, zda existuje sezona se zadaným názvem.
+     * Ověří, zda existuje sezóna se zadaným názvem.
      *
-     * @param name název hledané sezony
-     * @return true, pokud existuje
+     * Používá se při vytváření nové sezóny pro kontrolu
+     * jedinečnosti názvu.
+     *
+     * @param name název sezóny
+     * @return true, pokud sezóna se zadaným názvem existuje
      */
     boolean existsByName(String name);
 
+    /**
+     * Ověří, zda existuje jiná sezóna se zadaným názvem
+     * mimo zadané ID.
+     *
+     * Používá se při aktualizaci sezóny pro kontrolu,
+     * aby nedošlo ke kolizi názvů.
+     *
+     * @param name název sezóny
+     * @param id identifikátor sezóny, která má být z kontroly vynechána
+     * @return true, pokud existuje jiná sezóna se stejným názvem
+     */
     boolean existsByNameAndIdNot(String name, Long id);
-
 
     /**
      * Vrátí aktuálně aktivní sezónu.
-     * <p>
-     * V systému může být v daném okamžiku
-     * aktivní maximálně jedna sezóna.
+     *
+     * V systému může být v jednom okamžiku aktivní
+     * maximálně jedna sezóna. Ověření tohoto pravidla
+     * je prováděno v servisní vrstvě.
      *
      * @return aktivní sezóna zabalená v Optional, pokud existuje
      */
     Optional<SeasonEntity> findByActiveTrue();
 
     /**
-     * Vrátí všechny sezóny seřazené
-     * podle data začátku vzestupně.
+     * Vrátí všechny sezóny seřazené podle data začátku vzestupně.
      *
-     * @return seznam sezón
+     * Používá se pro přehledové výpisy sezón
+     * v chronologickém pořadí.
+     *
+     * @return seznam sezón seřazený podle data začátku
      */
     List<SeasonEntity> findAllByOrderByStartDateAsc();
 
     /**
-     * Ověří, zda existuje sezóna, která se časově
-     * překrývá se zadaným intervalem.
-     * <p>
-     * Používá se při vytváření nové sezóny
-     * jako ochrana proti překrývajícím se obdobím.
+     * Ověří, zda existuje sezóna, která se časově překrývá
+     * se zadaným intervalem.
      *
-     * @param endDate   konec kontrolovaného intervalu
+     * Používá se při vytváření nové sezóny jako ochrana
+     * proti překrývajícím se časovým obdobím.
+     *
+     * @param endDate konec kontrolovaného intervalu
      * @param startDate začátek kontrolovaného intervalu
      * @return true, pokud existuje časový překryv
      */
@@ -62,15 +82,15 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
     );
 
     /**
-     * Ověří, zda existuje jiná sezóna (mimo zadané ID),
+     * Ověří, zda existuje jiná sezóna mimo zadané ID,
      * která se časově překrývá se zadaným intervalem.
-     * <p>
-     * Používá se při aktualizaci existující sezóny,
-     * aby nedošlo ke kolizi s jinou sezónou.
      *
-     * @param endDate   konec kontrolovaného intervalu
+     * Používá se při aktualizaci existující sezóny,
+     * aby nedošlo ke kolizi s jiným obdobím.
+     *
+     * @param endDate konec kontrolovaného intervalu
      * @param startDate začátek kontrolovaného intervalu
-     * @param id        ID sezóny, která má být z kontroly vynechána
+     * @param id identifikátor sezóny, která má být z kontroly vynechána
      * @return true, pokud existuje časový překryv
      */
     boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(
@@ -81,9 +101,10 @@ public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
 
     /**
      * Spočítá počet aktivních sezón.
-     * <p>
-     * Slouží jako ochrana proti stavu,
+     *
+     * Používá se jako ochrana proti stavu,
      * kdy by bylo aktivních více sezón současně.
+     * Kontrola konzistence je prováděna v servisní vrstvě.
      *
      * @return počet aktivních sezón
      */
