@@ -36,7 +36,7 @@ public class AuthController {
      * Tato hodnota se používá pro přesměrování uživatele při procesu
      * resetu hesla, aby mohl být otevřen správný route na frontend aplikaci.
      */
-    @Value("${app.frontend-base-url:http://localhost:5173}")
+    @Value("${app.frontend-base-url}")
     private String frontendBaseUrl;
 
     public AuthController(AppUserService appUserService) {

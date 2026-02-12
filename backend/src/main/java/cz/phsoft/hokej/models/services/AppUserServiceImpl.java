@@ -44,6 +44,8 @@ import java.util.UUID;
 @Service
 public class AppUserServiceImpl implements AppUserService {
 
+    @Value("${app.frontend-base-url}")
+    private String frontendBasUrl;
     @Value("${app.demo-mode:false}")
     private boolean isDemoMode;
 
@@ -522,7 +524,7 @@ public class AppUserServiceImpl implements AppUserService {
     // ==================================================
 
     private String buildActivationLink(EmailVerificationTokenEntity token) {
-        return baseUrl + "/api/auth/verify?token=" + token.getToken();
+        return frontendBasUrl + "/verify?token=" + token.getToken();
     }
 
     private String buildResetPasswordlink(ForgottenPasswordResetTokenEntity token) {

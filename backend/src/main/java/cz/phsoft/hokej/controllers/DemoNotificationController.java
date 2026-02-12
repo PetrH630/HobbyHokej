@@ -2,23 +2,21 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.DemoNotificationsDTO;
 import cz.phsoft.hokej.models.services.notification.DemoNotificationStore;
-
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * REST controller, který se používá pro práci s demo notifikacemi.
  *
- * Tento controller je určen výhradně pro demo režim aplikace.
- * Umožňuje frontendové části načítat seznam odeslaných notifikací,
- * které byly zachyceny v rámci demo prostředí místo skutečného
- * odeslání prostřednictvím e-mailu nebo SMS.
+ * Controller je registrován pouze v demo režimu. Pokud demo režim není aktivní,
+ * endpointy nejsou součástí aplikace a vrací se odpověď 404.
  *
- * Po načtení jsou notifikace z úložiště automaticky odstraněny.
  * Práce s dočasným úložištěm notifikací se deleguje na {@link DemoNotificationStore}.
  */
 @RestController
 @RequestMapping("/api/demo/notifications")
+@ConditionalOnProperty(name = "app.demo-mode", havingValue = "true")
 public class DemoNotificationController {
 
     private final DemoNotificationStore demoNotificationStore;
@@ -31,8 +29,7 @@ public class DemoNotificationController {
      * Vrací všechny zachycené demo notifikace a následně je vymaže z úložiště.
      *
      * Endpoint slouží zejména pro frontendovou část aplikace,
-     * která zobrazuje simulované odeslané e-maily a SMS zprávy
-     * v rámci demo režimu.
+     * která zobrazuje simulované odeslané e-maily a SMS zprávy v demo režimu.
      *
      * @return DTO obsahující seznam zachycených e-mailů a SMS zpráv
      */
@@ -43,7 +40,7 @@ public class DemoNotificationController {
     }
 
     /**
-     * Provádí vyčištění zachycených demo notifikací bez jejich vrácení.
+     * Provede vyčištění zachycených demo notifikací bez jejich vrácení.
      *
      * Endpoint umožňuje explicitní smazání obsahu úložiště
      * například při resetu demo prostředí.

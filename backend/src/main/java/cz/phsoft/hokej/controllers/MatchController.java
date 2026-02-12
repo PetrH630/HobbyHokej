@@ -96,7 +96,7 @@ public class MatchController {
      * @return vytvořený zápas jako {@link MatchDTO}
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public MatchDTO createMatch(@Valid @RequestBody MatchDTO matchDTO) {
         return matchService.createMatch(matchDTO);
     }

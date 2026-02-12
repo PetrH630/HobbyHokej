@@ -133,51 +133,57 @@ public class SecurityConfig {
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .httpBasic();
 
-        } else {
+        }
+        else {
             // Produkční režim
 
             http
                     .authenticationProvider(authenticationProvider())
 
-                    .authorizeHttpRequests(auth -> auth
+                    .authorizeHttpRequests(auth -> {
 
-                            // Veřejné endpointy
-                            .requestMatchers(
-                                    "/api/auth/register",
-                                    "/api/auth/verify",
-                                    "/api/auth/login",
-                                    "/api/auth/logout",
-                                    "/api/auth/forgotten-password",
-                                    "/api/auth/forgotten-password/info",
-                                    "/api/auth/forgotten-password/reset",
-                                    "/api/auth/reset-password",
-                                    "/error",
-                                    "/favicon.ico",
-                                    "/public/***",
-                                    "/api/inactivity/admin/me/***"
-                            ).permitAll()
+                        // Veřejné endpointy
+                        auth.requestMatchers(
+                                "/api/auth/register",
+                                "/api/auth/verify",
+                                "/api/auth/login",
+                                "/api/auth/logout",
+                                "/api/auth/forgotten-password",
+                                "/api/auth/forgotten-password/info",
+                                "/api/auth/forgotten-password/reset",
+                                "/api/auth/reset-password",
+                                "/error",
+                                "/favicon.ico",
+                                "/public/**",
+                                "/api/inactivity/admin/me/**"
+                        ).permitAll();
 
-                            // Debug a test
-                            .requestMatchers(
-                                    "/api/debug/me",
-                                    "/api/test/**"
-                            ).hasRole("ADMIN")
+                        // DEMO režim: umožní číst demo notifikace bez přihlášení
+                        if (isDemoMode) {
+                            auth.requestMatchers("/api/demo/notifications/**").permitAll();
 
-                            // Testovací e-maily
-                            .requestMatchers("/api/email/test/**").hasRole("ADMIN")
+                        }
 
-                            // Admin / manager endpointy
-                            .requestMatchers("/api/admin/seasons/**").hasRole("ADMIN")
-                            .requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER")
-                            .requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                        // Debug a test
+                        auth.requestMatchers(
+                                "/api/debug/me",
+                                "/api/test/**"
+                        ).hasRole("ADMIN");
 
-                            // Zbytek API pouze pro přihlášené
-                            .requestMatchers("/api/**").authenticated()
+                        // Testovací e-maily
+                        auth.requestMatchers("/api/email/test/**").hasRole("ADMIN");
 
-                            .anyRequest().authenticated()
-                    )
+                        // Admin / manager endpointy
+                        auth.requestMatchers("/api/admin/seasons/**").hasRole("ADMIN");
+                        auth.requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                        auth.requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                        auth.requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                        auth.requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER");
+
+                        // Zbytek API pouze pro přihlášené
+                        auth.requestMatchers("/api/**").authenticated();
+                        auth.anyRequest().authenticated();
+                    })
 
                     .sessionManagement(sm ->
                             sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -201,6 +207,7 @@ public class SecurityConfig {
                                         .write("{\"status\":\"ok\",\"message\":\"Odhlášeno\"}");
                             })
                     );
+
         }
 
         return http.build();
