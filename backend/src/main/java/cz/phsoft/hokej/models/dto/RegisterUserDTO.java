@@ -33,8 +33,6 @@ public class RegisterUserDTO {
     @NotBlank
     private String passwordConfirm;
 
-    // gettery / settery
-
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 

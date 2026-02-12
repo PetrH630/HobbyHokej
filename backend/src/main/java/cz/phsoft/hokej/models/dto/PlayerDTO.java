@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
-import java.util.Locale;
 
 /**
  * DTO, které reprezentuje hráče v systému.
@@ -101,8 +100,6 @@ public class PlayerDTO {
 
         updateFullName();
     }
-
-    // gettery / settery
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

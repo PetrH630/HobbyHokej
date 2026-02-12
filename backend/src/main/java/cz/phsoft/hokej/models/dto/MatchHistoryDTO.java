@@ -5,6 +5,19 @@ import cz.phsoft.hokej.data.enums.MatchStatus;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO reprezentující historický záznam změny zápasu.
+ *
+ * Slouží k přenosu dat o změnách zápasu z databázové vrstvy
+ * do prezentační vrstvy. Obsahuje kompletní snapshot stavu
+ * zápasu v okamžiku provedené změny včetně metadata o tom,
+ * kdy byla změna provedena a jaký typ akce ji vyvolal.
+ *
+ * DTO je typicky naplňováno na základě historické entity,
+ * která je vytvářena databázovým triggerem. Neobsahuje
+ * žádnou business logiku a slouží výhradně jako datový
+ * přenosový objekt mezi servisní a prezentační vrstvou.
+ */
 public class MatchHistoryDTO {
 
     private Long id;
@@ -127,9 +140,19 @@ public class MatchHistoryDTO {
         this.seasonId = seasonId;
     }
 
-    public Long getCreatedByUserId() { return createdByUserId; }
-    public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
+    public Long getCreatedByUserId() {
+        return createdByUserId;
+    }
 
-    public Long getLastModifiedByUserId() { return lastModifiedByUserId; }
-    public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
+    public void setCreatedByUserId(Long createdByUserId) {
+        this.createdByUserId = createdByUserId;
+    }
+
+    public Long getLastModifiedByUserId() {
+        return lastModifiedByUserId;
+    }
+
+    public void setLastModifiedByUserId(Long lastModifiedByUserId) {
+        this.lastModifiedByUserId = lastModifiedByUserId;
+    }
 }

@@ -39,8 +39,6 @@ public class PlayerSettingsDTO {
     private boolean notifyReminders;
     private Integer reminderHoursBefore;
 
-    // gettery / settery
-
     public String getContactEmail() {
         return contactEmail;
     }

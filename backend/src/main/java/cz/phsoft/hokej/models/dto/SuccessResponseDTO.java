@@ -36,8 +36,6 @@ public class SuccessResponseDTO {
         this.timestamp = timestamp;
     }
 
-    // gettery
-
     public String getMessage() { return message; }
     public Long getId() { return id; }
     public String getTimestamp() { return timestamp; }

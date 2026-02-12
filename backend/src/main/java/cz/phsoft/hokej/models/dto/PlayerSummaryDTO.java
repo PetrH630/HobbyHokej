@@ -20,8 +20,6 @@ public class PlayerSummaryDTO {
     private PlayerType type;
     private Team team;
 
-    // gettery / settery
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

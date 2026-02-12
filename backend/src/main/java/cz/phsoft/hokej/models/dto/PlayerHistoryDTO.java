@@ -3,21 +3,22 @@ package cz.phsoft.hokej.models.dto;
 import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.enums.Team;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
 /**
- * DTO, které reprezentuje hráče v systému a jeho historii.
- * <p>
- * Slouží pro auditní a přehledové účely. Obsahuje informace o tom,
- * jak se hráč v čase měnil, včetně původního časového razítka,
- * <p>
- * Datový model odpovídá záznamu v tabulce historie hráče.
+ * DTO reprezentující historický záznam změny hráče.
+ *
+ * Slouží k přenosu dat o změnách hráče z databázové vrstvy
+ * do prezentační vrstvy. Obsahuje kompletní snapshot stavu
+ * hráče v okamžiku provedené změny včetně informace o typu akce,
+ * času změny a původním časovém razítku vytvoření záznamu.
+ *
+ * DTO odpovídá záznamu uloženému v tabulce historie hráče,
+ * která je typicky naplňována databázovým triggerem.
+ * Neobsahuje žádnou business logiku a slouží výhradně
+ * jako datový přenosový objekt mezi servisní a prezentační vrstvou.
  */
-
 public class PlayerHistoryDTO {
 
     private Long id;
@@ -35,14 +36,44 @@ public class PlayerHistoryDTO {
     private PlayerStatus playerStatus;
     private LocalDateTime originalTimestamp;
 
-    // gettery / settery
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public LocalDateTime getChangedAt() {
+        return changedAt;
+    }
+
+    public void setChangedAt(LocalDateTime changedAt) {
+        this.changedAt = changedAt;
     }
 
     public String getName() {
@@ -115,37 +146,5 @@ public class PlayerHistoryDTO {
 
     public void setOriginalTimestamp(LocalDateTime originalTimestamp) {
         this.originalTimestamp = originalTimestamp;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getPlayerId() {
-        return playerId;
-    }
-
-    public void setPlayerId(Long playerId) {
-        this.playerId = playerId;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
-    }
-
-    public LocalDateTime getChangedAt() {
-        return changedAt;
-    }
-
-    public void setChangedAt(LocalDateTime changedAt) {
-        this.changedAt = changedAt;
     }
 }

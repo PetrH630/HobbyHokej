@@ -21,8 +21,6 @@ public class ForgottenPasswordResetDTO {
     @NotBlank(message = "Potvrzení nového hesla je povinné.")
     private String newPasswordConfirm;
 
-    // gettery / settery
-
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 

@@ -47,9 +47,6 @@ public class SeasonDTO {
      */
     private LocalDateTime timestamp;
 
-
-    // konstruktory
-
     public SeasonDTO() {}
 
     public SeasonDTO(Long id,
@@ -64,8 +61,6 @@ public class SeasonDTO {
         this.endDate = endDate;
         this.active = active;
     }
-
-    // gettery / settery
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

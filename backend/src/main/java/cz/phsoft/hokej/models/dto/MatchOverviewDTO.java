@@ -72,8 +72,6 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
-    // gettery / settery
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
