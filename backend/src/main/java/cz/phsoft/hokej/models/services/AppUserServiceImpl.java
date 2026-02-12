@@ -17,11 +17,11 @@ import cz.phsoft.hokej.models.services.email.EmailService;
 import cz.phsoft.hokej.models.services.notification.ForgottenPasswordResetContext;
 import cz.phsoft.hokej.models.services.notification.NotificationService;
 import cz.phsoft.hokej.models.services.notification.UserActivationContext;
+import cz.phsoft.hokej.models.services.demo.DemoModeGuard;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,42 +30,36 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Service pro správu aplikačních uživatelských účtů.
+ * Implementace servisní vrstvy pro správu aplikačních uživatelských účtů.
  *
- * Zajišťuje se registrace, aktivace a deaktivace účtů,
- * změna a reset hesla a aktualizace základních údajů uživatele.
- * Třída se stará o bezpečné uložení hesel, práci s ověřovacími
- * a resetovacími tokeny a napojení na notifikační systém.
+ * Zajišťuje registraci uživatele, aktivaci a deaktivaci účtu,
+ * změnu a reset hesla a aktualizaci základních údajů.
+ * Součástí odpovědnosti je bezpečné uložení hesel pomocí BCrypt
+ * a správa ověřovacích a resetovacích tokenů.
  *
- * Autentizace a autorizace se předpokládá v Spring Security,
- * nikoliv v této třídě.
+ * Notifikace o událostech jsou odesílány prostřednictvím NotificationService.
+ * Autentizace a autorizace jsou řešeny v rámci Spring Security
+ * a nejsou součástí odpovědnosti této třídy.
  */
 @Service
 public class AppUserServiceImpl implements AppUserService {
 
     @Value("${app.demo-mode:false}")
     private boolean isDemoMode;
+
     private static final Logger log = LoggerFactory.getLogger(AppUserServiceImpl.class);
 
     /**
-     * Výchozí heslo při resetu účtu administrátorem.
+     * Výchozí heslo používané při resetu účtu administrátorem.
      */
     private static final String DEFAULT_RESET_PASSWORD = "Player123";
 
     /**
-     * Základní URL aplikace používaná pro generování odkazů
-     * v aktivačních a resetovacích emailech.
+     * Základní URL aplikace používaná pro sestavení odkazů
+     * v aktivačních a resetovacích notifikacích.
      */
     @Value("${app.base-url}")
     private String baseUrl;
-
-    private String buildActivationLink(EmailVerificationTokenEntity token) {
-        return baseUrl + "/api/auth/verify?token=" + token.getToken();
-    }
-
-    private String buildResetPasswordlink(ForgottenPasswordResetTokenEntity token) {
-        return baseUrl + "/api/auth/reset-password?token=" + token.getToken();
-    }
 
     private final AppUserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -75,7 +69,22 @@ public class AppUserServiceImpl implements AppUserService {
     private final AppUserSettingsService appUserSettingsService;
     private final NotificationService notificationService;
     private final ForgottenPasswordResetTokenRepository forgottenPasswordResetTokenRepository;
-
+    private final DemoModeGuard demoModeGuard;
+    /**
+     * Vytvoří instanci servisní třídy.
+     *
+     * Závislosti jsou předány pomocí konstruktoru a jsou používány
+     * pro práci s databází, mapování dat a odesílání notifikací.
+     *
+     * @param userRepository repozitář pro práci s uživatelskými účty
+     * @param passwordEncoder encoder pro hashování a ověření hesel
+     * @param appUserMapper mapper pro převod mezi entitami a DTO
+     * @param emailService servis pro odesílání e-mailů
+     * @param tokenRepository repozitář pro ověřovací tokeny
+     * @param appUserSettingsService servis pro správu uživatelských nastavení
+     * @param notificationService servis pro odesílání notifikací
+     * @param forgottenPasswordResetTokenRepository repozitář pro resetovací tokeny
+     */
     public AppUserServiceImpl(AppUserRepository userRepository,
                               BCryptPasswordEncoder passwordEncoder,
                               AppUserMapper appUserMapper,
@@ -83,7 +92,8 @@ public class AppUserServiceImpl implements AppUserService {
                               EmailVerificationTokenRepository tokenRepository,
                               AppUserSettingsService appUserSettingsService,
                               NotificationService notificationService,
-                              ForgottenPasswordResetTokenRepository forgottenPasswordResetTokenRepository) {
+                              ForgottenPasswordResetTokenRepository forgottenPasswordResetTokenRepository,
+                              DemoModeGuard demoModeGuard) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.appUserMapper = appUserMapper;
@@ -92,21 +102,22 @@ public class AppUserServiceImpl implements AppUserService {
         this.appUserSettingsService = appUserSettingsService;
         this.notificationService = notificationService;
         this.forgottenPasswordResetTokenRepository = forgottenPasswordResetTokenRepository;
+        this.demoModeGuard = demoModeGuard;
     }
 
     /**
      * Zaregistruje nového uživatele.
      *
-     * Provádí se kontrola shody hesel a jedinečnosti emailu.
-     * Uživatel se vytvoří jako neaktivní, vygeneruje se ověřovací token
-     * a odešle se notifikační zpráva s aktivačním odkazem.
+     * Před vytvořením účtu se ověřuje shoda zadaných hesel
+     * a jedinečnost e-mailové adresy. Účet je vytvořen jako neaktivní,
+     * je vygenerován ověřovací token a je odeslána notifikace
+     * obsahující aktivační odkaz.
      *
      * @param dto registrační údaje uživatele
      */
     @Override
     @Transactional
     public void register(RegisterUserDTO dto) {
-
         ensurePasswordsMatch(dto.getPassword(), dto.getPasswordConfirm(), null);
         ensureEmailNotUsed(dto.getEmail(), null);
 
@@ -129,17 +140,19 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Aktivuje uživatelský účet na základě ověřovacího tokenu.
      *
-     * Token se ověří, zkontroluje se jeho platnost a případně
-     * se účet označí jako povolený. Pokud uživatel nemá nastavení,
-     * vytvoří se pro něj výchozí konfigurace.
+     * Token je vyhledán a je ověřena jeho platnost. Pokud je token neplatný
+     * nebo expirovaný, je vrácena hodnota false. Při úspěšné aktivaci
+     * je účet povolen a v případě chybějící konfigurace jsou vytvořena
+     * výchozí uživatelská nastavení. Použitý token je odstraněn.
+     *
+     * Po úspěšné aktivaci je odeslána notifikace o aktivaci účtu.
      *
      * @param token aktivační token
-     * @return true při úspěšné aktivaci, jinak false
+     * @return true, pokud byla aktivace provedena, jinak false
      */
     @Override
     @Transactional
     public boolean activateUser(String token) {
-
         EmailVerificationTokenEntity verificationToken =
                 tokenRepository.findByToken(token).orElse(null);
 
@@ -172,12 +185,13 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Aktivuje uživatelský účet v administraci.
      *
-     * Kontroluje se, zda není účet již aktivní. Pokud nemá uživatel
-     * nastavení, vytvoří se pro něj výchozí AppUserSettingsEntity.
-     * Všechny aktivační tokeny se odstraní a odešle se notifikace
-     * o úspěšné aktivaci.
+     * Ověřuje se, zda se nejedná o administrátorský účet a zda účet již není aktivní.
+     * Při úspěšné aktivaci jsou případná chybějící uživatelská nastavení vytvořena
+     * a všechny ověřovací tokeny uživatele jsou odstraněny.
      *
-     * @param id ID uživatele
+     * Po úspěšné aktivaci je odeslána notifikace o aktivaci účtu.
+     *
+     * @param id identifikátor uživatele
      */
     @Override
     public void activateUserByAdmin(Long id) {
@@ -212,34 +226,33 @@ public class AppUserServiceImpl implements AppUserService {
         if (newlyActivated) {
             notifyUser(user, NotificationType.USER_ACTIVATED);
         }
-
     }
 
     /**
-     * Aktualizuje základní údaje uživatele podle emailu.
+     * Aktualizuje základní údaje uživatele podle e-mailové adresy.
      *
-     * Při změně emailu se ověřuje, že nový email není obsazen
-     * jiným účtem. Po úspěšné aktualizaci se odešle notifikace.
+     * Při změně e-mailu se ověřuje, že nová e-mailová adresa není používána
+     * jiným účtem. V demo režimu je operace před zápisem do databáze zakázána.
+     * Po úspěšné aktualizaci je odeslána notifikace o změně údajů.
      *
-     * @param email email aktuálního uživatele
-     * @param dto   aktualizovaná data účtu
+     * @param email e-mailová adresa aktuálně přihlášeného uživatele
+     * @param dto aktualizovaná data účtu
      */
     @Override
     @Transactional
     public void updateUser(String email, AppUserDTO dto) {
-
         AppUserEntity user = findUserByEmailOrThrow(email);
 
         if (!user.getEmail().equals(dto.getEmail())) {
             ensureEmailNotUsed(dto.getEmail(), user.getId());
         }
 
-        // DEMO režim – operace se zakáže před uložením do DB
-        if (isDemoMode) {
-            throw new DemoModeOperationNotAllowedException(
-                    "Uživatel nebude změněn. Aplikace běží v DEMO režimu."
-            );
-        }
+        demoModeGuard.write(
+                user.getId(),
+                "Uživatel, který byl vytvořen aplikací, nebude změněn. " +
+                        "Aplikace běží v DEMO režimu. Změny budou skutečně provedeny " +
+                        "pouze u vámi vytvořených uživatelů."
+        );
 
         user.setName(dto.getName());
         user.setSurname(dto.getSurname());
@@ -250,9 +263,11 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vrací detail aktuálně přihlášeného uživatele.
+     * Vrátí detail aktuálně přihlášeného uživatele.
      *
-     * @param email email uživatele
+     * Uživatel je vyhledán podle e-mailové adresy a je převeden na DTO.
+     *
+     * @param email e-mailová adresa uživatele
      * @return DTO reprezentace uživatele
      */
     @Override
@@ -262,12 +277,12 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vrací všechny uživatele systému.
+     * Vrátí seznam všech uživatelů systému.
      *
-     * Výsledek se mapuje na DTO a používá se v administraci
-     * pro přehled a správu uživatelských účtů.
+     * Záznamy jsou načteny z databáze a jsou mapovány na DTO.
+     * Metoda se používá v administraci pro přehled a správu účtů.
      *
-     * @return seznam uživatelů
+     * @return seznam uživatelů ve formě DTO
      */
     @Override
     public List<AppUserDTO> getAllUsers() {
@@ -279,13 +294,13 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Změní heslo aktuálního uživatele.
      *
-     * Ověří se shoda nového hesla a potvrzení, poté se zkontroluje
-     * původní heslo pomocí BCrypt. Po úspěšné změně se odešle
-     * notifikace o změně hesla.
+     * Ověřuje se shoda nového hesla a jeho potvrzení a následně se ověřuje
+     * původní heslo. V demo režimu je operace před zápisem do databáze zakázána.
+     * Po úspěšné změně hesla je odeslána notifikace.
      *
-     * @param email              email uživatele
-     * @param oldPassword        původní heslo
-     * @param newPassword        nové heslo
+     * @param email e-mailová adresa uživatele
+     * @param oldPassword původní heslo
+     * @param newPassword nové heslo
      * @param newPasswordConfirm potvrzení nového hesla
      */
     @Override
@@ -307,12 +322,13 @@ public class AppUserServiceImpl implements AppUserService {
             throw new InvalidOldPasswordException();
         }
 
-        // DEMO režim – operace se zakáže před uložením do DB
-        if (isDemoMode) {
-            throw new DemoModeOperationNotAllowedException(
-                    "Heslo nebude změněno. Aplikace běží v DEMO režimu."
-            );
-        }
+        demoModeGuard.write(
+                user.getId(),
+                "Heslo u uživatele, který byl vytvořen aplikací, nebude změněno. " +
+                        "Aplikace běží v DEMO režimu. Změna hesla bude skutečně provedena " +
+                        "pouze u vámi vytvořených uživatelů."
+        );
+
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
@@ -322,16 +338,17 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Resetuje heslo uživatele na výchozí hodnotu.
      *
-     * Používá se v administraci při ručním resetu hesla. Po změně
-     * se odešle notifikace o resetu hesla.
+     * Metoda se používá v administraci při ručním resetu hesla.
+     * V demo režimu je operace před zápisem do databáze zakázána.
+     * Po úspěšném resetu je odeslána notifikace.
      *
-     * @param userId ID uživatele
+     * @param userId identifikátor uživatele
      */
     @Override
     @Transactional
     public void resetPassword(Long userId) {
         AppUserEntity user = findUserByIdOrThrow(userId);
-        // DEMO režim – operace se zakáže před uložením do DB
+
         if (isDemoMode) {
             throw new DemoModeOperationNotAllowedException(
                     "Heslo nebude resetováno. Aplikace běží v DEMO režimu."
@@ -347,10 +364,10 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Deaktivuje uživatelský účet v administraci.
      *
-     * Pokud je účet již deaktivovaný, vyhodí se výjimka.
-     * Po deaktivaci se odešle notifikace.
+     * Ověřuje se, zda se nejedná o administrátorský účet a zda účet již není deaktivovaný.
+     * Po úspěšné deaktivaci je odeslána notifikace o deaktivaci účtu.
      *
-     * @param id ID uživatele
+     * @param id identifikátor uživatele
      */
     @Override
     public void deactivateUserByAdmin(Long id) {
@@ -367,18 +384,27 @@ public class AppUserServiceImpl implements AppUserService {
                     "BE - Deaktivace účtu již byla provedena"
             );
         }
+
+        demoModeGuard.write(
+                user.getId(),
+                "Uživatel, který byl vytvořen aplikací, nebude deaktivován. " +
+                        "Aplikace běží v DEMO režimu. Deaktivace bude skutečně provedena " +
+                        "pouze u vámi vytvořených uživatelů."
+        );
+
         user.setEnabled(false);
         userRepository.save(user);
-        notifyUser(user, NotificationType.USER_DEACTIVATED);
 
+        notifyUser(user, NotificationType.USER_DEACTIVATED);
     }
 
+
     /**
-     * Vrací uživatele podle ID ve formě DTO.
+     * Vrátí uživatele podle identifikátoru ve formě DTO.
      *
-     * Používá se v administraci při zobrazení detailu účtu.
+     * Metoda se používá v administraci při zobrazení detailu účtu.
      *
-     * @param id ID uživatele
+     * @param id identifikátor uživatele
      * @return DTO reprezentace uživatele
      */
     public AppUserDTO getUserById(Long id) {
@@ -389,16 +415,16 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Vytvoří požadavek na reset zapomenutého hesla.
      *
-     * Případné staré tokeny se odstraní a vygeneruje se nový
-     * resetovací token. Navenek se neprozrazuje, zda email
-     * v systému existuje, kvůli bezpečnosti.
+     * Pokud uživatel pro daný e-mail neexistuje, není vyhozena chyba
+     * a metoda se ukončí, aby nebylo možné odvodit existenci účtu.
+     * Před vygenerováním nového tokenu jsou odstraněny případné staré tokeny.
+     * Následně je odeslána notifikace obsahující odkaz pro nastavení nového hesla.
      *
-     * @param email email uživatele
+     * @param email e-mailová adresa uživatele
      */
     @Override
     @Transactional
     public void requestForgottenPasswordReset(String email) {
-
         AppUserEntity user = userRepository.findByEmail(email)
                 .orElse(null);
 
@@ -410,7 +436,6 @@ public class AppUserServiceImpl implements AppUserService {
         forgottenPasswordResetTokenRepository.deleteByUser(user);
 
         ForgottenPasswordResetTokenEntity forgottenPasswordToken = createResetPasswordToken(user);
-
         String resetPasswordlink = buildResetPasswordlink(forgottenPasswordToken);
 
         log.info("Odkaz pro reset hesla {}: {}", user.getEmail(), resetPasswordlink);
@@ -423,18 +448,17 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vrací email uživatele svázaný s daným resetovacím tokenem.
+     * Vrátí e-mailovou adresu uživatele svázanou se zadaným resetovacím tokenem.
      *
-     * Ověřuje se platnost a neexpirovanost tokenu. Metoda se používá
+     * Token je vyhledán a je ověřena jeho platnost. Metoda se používá
      * při načítání formuláře pro zadání nového hesla.
      *
      * @param token resetovací token
-     * @return email uživatele
+     * @return e-mailová adresa uživatele
      */
     @Override
     @Transactional
     public String getForgottenPasswordResetEmail(String token) {
-
         ForgottenPasswordResetTokenEntity resetToken =
                 forgottenPasswordResetTokenRepository.findByToken(token)
                         .orElseThrow(InvalidResetTokenException::new);
@@ -449,17 +473,15 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Nastaví nové heslo na základě resetovacího tokenu.
      *
-     * Provádí se kontrola shody nového hesla a jeho potvrzení,
-     * ověření platnosti tokenu a následné uložení nového hesla
-     * v zahashované podobě. Token se poté odstraní
-     * a odešle se notifikace o dokončení resetu hesla.
+     * Ověřuje se shoda nového hesla a jeho potvrzení a platnost tokenu.
+     * Nové heslo je uloženo v zahashované podobě a použitý token je odstraněn.
+     * Po úspěšném dokončení je odeslána notifikace o dokončeném resetu hesla.
      *
      * @param dto data pro reset zapomenutého hesla
      */
     @Override
     @Transactional
     public void forgottenPasswordReset(ForgottenPasswordResetDTO dto) {
-
         ensurePasswordsMatch(
                 dto.getNewPassword(),
                 dto.getNewPasswordConfirm(),
@@ -476,17 +498,36 @@ public class AppUserServiceImpl implements AppUserService {
 
         AppUserEntity user = resetToken.getUser();
 
-        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
-        userRepository.save(user);
 
-        forgottenPasswordResetTokenRepository.delete(resetToken);
-
-        notifyUser(user, NotificationType.FORGOTTEN_PASSWORD_RESET_COMPLETED);
+        demoModeGuard.writeWithFinalize(
+                user.getId(),
+                "Heslo u uživatele, který byl vytvořen aplikací, nebude ve skutečnosti resetováno. " +
+                        "Aplikace běží v DEMO režimu. Reset a změna zapomenutého hesla bude skutečně provedena " +
+                        "pouze u vámi vytvořených uživatelů.",
+                () -> {
+                    user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+                    userRepository.save(user);
+                    forgottenPasswordResetTokenRepository.delete(resetToken);
+                    notifyUser(user, NotificationType.FORGOTTEN_PASSWORD_RESET_COMPLETED);
+                },
+                () -> {
+                    forgottenPasswordResetTokenRepository.delete(resetToken);
+                    notifyUser(user, NotificationType.FORGOTTEN_PASSWORD_RESET_COMPLETED);
+                }
+        );
     }
 
     // ==================================================
     // HELPER METODY
     // ==================================================
+
+    private String buildActivationLink(EmailVerificationTokenEntity token) {
+        return baseUrl + "/api/auth/verify?token=" + token.getToken();
+    }
+
+    private String buildResetPasswordlink(ForgottenPasswordResetTokenEntity token) {
+        return baseUrl + "/api/auth/reset-password?token=" + token.getToken();
+    }
 
     private AppUserEntity findUserByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
@@ -501,13 +542,16 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Ověří shodu hesla a jeho potvrzení.
      *
-     * Pokud se hodnoty neshodují, vyhodí se výjimka
-     * PasswordsDoNotMatchException s případnou vlastním textem.
+     * Pokud se hodnoty neshodují, je vyhozena výjimka PasswordsDoNotMatchException.
+     * Pokud je předán vlastní text, je použit jako chybová zpráva výjimky.
+     *
+     * @param password heslo
+     * @param confirm potvrzení hesla
+     * @param customMessage volitelná vlastní chybová zpráva
      */
     private void ensurePasswordsMatch(String password,
                                       String confirm,
                                       String customMessage) {
-
         if (password == null || confirm == null || !password.equals(confirm)) {
             if (customMessage == null) {
                 throw new PasswordsDoNotMatchException();
@@ -517,10 +561,13 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Ověří, že email není používán jiným uživatelem.
+     * Ověří, že e-mailová adresa není používána jiným uživatelem.
      *
-     * @param email         nový email
-     * @param currentUserId ID aktuálního uživatele nebo null při registraci
+     * Při registraci je currentUserId null. Při aktualizaci účtu se kontroluje,
+     * zda případně nalezený uživatel není totožný s aktualizovaným účtem.
+     *
+     * @param email e-mailová adresa určená ke kontrole
+     * @param currentUserId identifikátor aktuálního uživatele nebo null při registraci
      */
     private void ensureEmailNotUsed(String email, Long currentUserId) {
         userRepository.findByEmail(email).ifPresent(existing -> {
@@ -533,12 +580,13 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vytvoří nového uživatele z registračního DTO.
+     * Vytvoří nového uživatele na základě registračního DTO.
      *
-     * Uživatel se nastaví jako neaktivní s rolí hráče.
+     * Heslo je uloženo v zahashované podobě. Účet je vytvořen jako neaktivní
+     * a je mu nastavena výchozí role ROLE_PLAYER.
      *
      * @param dto registrační data
-     * @return nová entita uživatele
+     * @return nová entita uživatele připravená k uložení
      */
     private AppUserEntity createUserFromRegisterDto(RegisterUserDTO dto) {
         AppUserEntity user = appUserMapper.fromRegisterDto(dto);
@@ -549,13 +597,12 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vytvoří a uloží aktivační token pro uživatele.
+     * Vytvoří a uloží ověřovací token pro aktivaci účtu.
      *
-     * Token je platný omezenou dobu a používá se
-     * při aktivaci účtu přes email.
+     * Token má omezenou platnost a je používán při aktivaci účtu přes odkaz.
      *
      * @param user uživatel, pro kterého se token vytváří
-     * @return uložený aktivační token
+     * @return uložený ověřovací token
      */
     private EmailVerificationTokenEntity createVerificationToken(AppUserEntity user) {
         EmailVerificationTokenEntity token = new EmailVerificationTokenEntity();
@@ -566,9 +613,9 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Vytvoří a uloží resetovací token pro zapomenuté heslo.
+     * Vytvoří a uloží resetovací token pro proces resetu zapomenutého hesla.
      *
-     * Token se používá v procesu resetu hesla a má omezenou platnost.
+     * Token má omezenou platnost a je používán pro autorizaci nastavení nového hesla.
      *
      * @param user uživatel, pro kterého se token vytváří
      * @return uložený resetovací token
@@ -582,14 +629,25 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     /**
-     * Odesílá notifikaci uživateli bez kontextu.
+     * Odešle notifikaci uživateli bez kontextu.
+     *
+     * Volání je delegováno do NotificationService.
+     *
+     * @param user uživatel, kterému se notifikace odesílá
+     * @param type typ notifikace
      */
     private void notifyUser(AppUserEntity user, NotificationType type) {
         notificationService.notifyUser(user, type, null);
     }
 
     /**
-     * Odesílá notifikaci uživateli s volitelným kontextem.
+     * Odešle notifikaci uživateli s volitelným kontextem.
+     *
+     * Volání je delegováno do NotificationService.
+     *
+     * @param user uživatel, kterému se notifikace odesílá
+     * @param type typ notifikace
+     * @param context kontextová data pro šablonu notifikace
      */
     private void notifyUser(AppUserEntity user, NotificationType type, Object context) {
         notificationService.notifyUser(user, type, context);
