@@ -1,0 +1,359 @@
+.match-card {
+    position: relative;
+    padding: 16px;
+    border: 2px solid #000;
+    border-radius: 12px;
+    width: 240px;
+    max-width: 100%;
+    overflow: hidden;
+    /* aby nic nevylezlo z karty */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* condensed varianta – používá se pro uplynulé zápasy v seznamu */
+.match-card--condensed {
+    width: 100%;
+    /* karta přes celou šířku řádku */
+    max-width: 100%;
+}
+
+/* klikatelnost karty */
+.match-card.clickable {
+    cursor: pointer;
+}
+
+.match-card.clickable:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* zakázaná karta (tooltip overlay) */
+.match-card--disabled {
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+.match-card--disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.match-card-tooltip {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.match-card--disabled:hover .match-card-tooltip {
+    opacity: 1;
+}
+
+.match-id {
+    font-size: 1.1rem;
+}
+
+.match-day {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.match-date {
+    font-size: 1.2rem;
+}
+
+.player-icon {
+    font-size: 1.3rem;
+    margin-right: 15px;
+}
+
+.player-price-icon {
+    font-size: 0.9rem;
+    margin-right: 0;
+}
+
+.money-icon {
+    font-size: 1.5rem;
+    margin-right: 15px;
+}
+
+/* =========================================
+   STAV HRÁČE V ZÁPASE – IKONA + TEXT
+   ========================================= */
+
+.player-match-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.player-match-status-icon {
+    font-size: 1.5rem;
+}
+
+.player-match-status-text {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* =========================================
+   BARVY KARTY DLE PLAYER_MATCH_STATUS
+   ========================================= */
+
+/* 🟢 REGISTERED */
+.match-registered {
+    background-color: #29d158;
+    border-color: #09772f;
+}
+
+/* ⚪ UNREGISTERED */
+.match-unregistered {
+    background-color: #fff9db;
+    border-color: #ffe066;
+
+}
+
+/* 🔵 EXCUSED */
+.match-excused {
+    background-color: #27c3f39c;
+    border-color: #b6d4fe;
+}
+
+/* 🟠 RESERVED */
+.match-reserved {
+    background-color: #fff4e5;
+    border-color: #ffd8a8;
+}
+
+/* 🟡 NO_RESPONSE */
+.match-no-response {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+/* 🔴 NO_EXCUSED */
+.match-no-excused {
+    background-color: #fdecea;
+    border-color: #f5c2c7;
+}
+
+/* ===== BARVY DLE PLAYER_MATCH_STATUS (modifier) ===== */
+
+.player-match-status--registered .player-match-status-icon {
+    color: #018520;
+}
+
+.player-match-status--registered .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--unregistered .player-match-status-icon {
+    color: #f17108;
+}
+
+.player-match-status--unregistered .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--excused .player-match-status-icon {
+    color: #ffc107;
+}
+
+.player-match-status--excused .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--reserved .player-match-status-icon {
+    color: #0d6efd;
+}
+
+.player-match-status--reserved .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--no_response .player-match-status-icon {
+    color: #f8f9fa;
+}
+
+.player-match-status--no_response .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--no_excused .player-match-status-icon {
+    color: #dc3545;
+}
+
+.player-match-status--no_excused .player-match-status-text {
+    color: #750b16;
+}
+
+/* =========================
+   RESPONSIVE – MOBILE BASE
+   ========================= */
+@media (max-width: 576px) {
+    .match-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+/* základ – na mobilu jsou bloky pod sebou */
+.match-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+/* =========================
+   CONDENSED – TABLET (768–991)
+   grid v řádku, ikona nad textem, menší status
+   ========================= */
+@media (min-width: 768px) and (max-width: 991px) {
+    .match-card--condensed .match-card__body {
+        display: grid;
+        grid-template-columns:
+            110px
+            /* Pátek - X */
+            150px
+            /* datum+čas */
+            1fr
+            /* aréna */
+            110px
+            /* hráči */
+            130px;
+        /* status */
+        align-items: center;
+        column-gap: 0.75rem;
+        text-align: left;
+    }
+
+    .match-card--condensed .match-card__body>* {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* hráči – ikona + počet vedle sebe, centrované */
+    .match-card--condensed .players-count {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        text-align: center;
+    }
+
+    /* status buňka vycentrovaná v posledním sloupci */
+    .match-card--condensed .status-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* na tabletu: ikona NAD textem + menší písmo */
+    .match-card--condensed .player-match-status {
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .match-card--condensed .player-match-status-icon {
+        font-size: 1.1rem;
+    }
+
+    .match-card--condensed .player-match-status-text {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* bez přebytečných spodních mezer */
+    .match-card--condensed p,
+    .match-card--condensed .match-day,
+    .match-card--condensed .match-date {
+        margin-bottom: 0;
+    }
+}
+
+/* =========================
+   CONDENSED – DESKTOP (≥ 992)
+   grid v jednom řádku, status klasicky vedle sebe
+   ========================= */
+@media (min-width: 992px) {
+    .match-card--condensed .match-card__body {
+        display: grid;
+        grid-template-columns:
+            110px
+            /* Pátek - X */
+            160px
+            /* datum+čas */
+            1fr
+            /* aréna */
+            120px
+            /* hráči */
+            180px;
+        /* status */
+        align-items: center;
+        column-gap: 1rem;
+        text-align: left;
+    }
+
+    .match-card--condensed .match-card__body>* {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .match-card--condensed .players-count {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .match-card--condensed .status-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* na desktopu: ikona + text vedle sebe, větší */
+    .match-card--condensed .player-match-status {
+        flex-direction: row;
+        gap: 0.35rem;
+    }
+
+    .match-card--condensed .player-match-status-icon {
+        font-size: 1.5rem;
+    }
+
+    .match-card--condensed .player-match-status-text {
+        font-size: 1.3rem;
+    }
+
+    .match-card--condensed p,
+    .match-card--condensed .match-day,
+    .match-card--condensed .match-date {
+        margin-bottom: 0;
+    }
+
+    .match-card--condensed .status-cell .player-match-status {
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

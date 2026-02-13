@@ -1,0 +1,662 @@
+
+
+===== FILE: \CreatePlayerForm.jsx =====
+
+import { useState } from "react";
+
+const CreatePlayerForm = ({ onSubmit, onCancel, submitting }) => {
+    const [name, setName] = useState("");
+    const [surname, setSurname] = useState("");
+    const [nickName, setNickName] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [team, setTeam] = useState("DARK");
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        onSubmit({
+            name,
+            surname,
+            nickName: nickName || null,
+            phoneNumber: phoneNumber || null,
+            team,
+        });
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+                <label className="form-label">Jméno *</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    minLength={2}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">Příjmení *</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={surname}
+                    onChange={(e) => setSurname(e.target.value)}
+                    required
+                    minLength={2}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">
+                    Přezdívka (nepovinné)
+                </label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={nickName}
+                    onChange={(e) => setNickName(e.target.value)}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">
+                    Telefon (nepovinné)
+                </label>
+                <input
+                    type="tel"
+                    className="form-control"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">Tým</label>
+                <select
+                    className="form-select"
+                    value={team}
+                    onChange={(e) => setTeam(e.target.value)}
+                >
+                    <option value="DARK">DARK</option>
+                    <option value="LIGHT">LIGHT</option>
+                </select>
+            </div>
+
+            <div className="d-flex justify-content-between mt-4">
+                <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={onCancel}
+                    disabled={submitting}
+                >
+                    Zrušit
+                </button>
+
+                <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={submitting}
+                >
+                    {submitting ? "Ukládám…" : "Vytvořit hráče"}
+                </button>
+            </div>
+        </form>
+    );
+};
+
+export default CreatePlayerForm;
+
+===== FILE: \PlayerCard.css =====
+
+/* =========================
+   KARTA HRÁČE – ZÁKLAD
+   ========================= */
+.player-card {
+    box-sizing: border-box;
+    flex: 0 0 250px;
+    position: relative;
+    max-width: 250px;
+    width: 240px;
+    margin-top: 20px;
+    padding: 20px;
+
+    display: flex;
+
+    background-color: #ffffff;
+    border: 2px solid #dee2e6;
+    /* bootstrap gray-300 */
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+
+    border-radius: 12px;
+
+    transition:
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.player-card--active {
+    border: 3px solid #0d6efd;
+    /* Bootstrap primary */
+    box-shadow: 0 0 0 4px #0e489e;
+}
+
+/* =========================
+   OVERLAY TOOLTIP
+   ========================= */
+.player-card-tooltip {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+/* zobrazit overlay po najetí */
+.player-card--disabled:hover .player-card-tooltip {
+    opacity: 1;
+}
+
+/* =========================
+   Kolečko u vybraného hráče
+   ========================= */
+.active-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.5rem;
+}
+
+/* aktivní hráč */
+.active-indicator.active {
+    color: #1329a1;
+}
+
+/* neaktivní hráč */
+.active-indicator.inactive {
+    color: #a0a5aa;
+}
+
+/* =========================
+   INTERAKCE – JEN APPROVED
+   ========================= */
+.player-card.clickable {
+    cursor: pointer;
+}
+
+.player-card.clickable:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+.player-card.clickable:active {
+    transform: scale(1.01);
+}
+
+.player-card.clickable:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.4);
+}
+
+/* =========================
+   ZAKÁZANÉ KARTY
+   ========================= */
+.player-card--disabled {
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+.player-card--disabled:hover,
+.player-card--disabled:active,
+.player-card--disabled:focus-visible {
+    transform: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   STAVY HRÁČE (BARVY)
+   ========================= */
+.player-approved {
+    background-color: #64e98a;
+    border-color: #3da361;
+}
+
+.player-pending {
+    background-color: #fff4e5;
+    border-color: #ffd8a8;
+}
+
+.player-rejected {
+    background-color: #fdecea;
+    border-color: #f5c2c7;
+}
+
+/* =========================
+   IKONA TÝMU (OVERLAY)
+   ========================= */
+.team-icon-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 42px;
+}
+
+.team-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 42px;
+    line-height: 1;
+    background: transparent;
+}
+
+.team-icon.base {
+    color: #045ee6;
+}
+
+.team-icon.overlay {
+    color: #001833;
+}
+
+/* DARK tým */
+.team-icon-wrapper.team-dark .team-icon.base {
+    color: #045ee6;
+}
+
+/* LIGHT tým */
+.team-icon-wrapper.team-light .team-icon.base {
+    color: #ffffff;
+}
+
+/* =========================
+   TELEFON
+   ========================= */
+.phone-icon {
+    color: #0d6efd;
+    margin-right: 6px;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 576px) {
+    .player-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+===== FILE: \PlayerCard.jsx =====
+
+// src/components/PlayerCard.jsx
+import RoleGuard from "../RoleGuard";
+import { PhoneIcon, TeamDarkIcon, TeamLightIcon, PlayerIcon } from "../../icons";
+import { formatPhoneNumber } from "../../utils/formatPhoneNumber";
+import "./PlayerCard.css";
+
+const statusClassMap = {
+    APPROVED: "player-approved",
+    PENDING: "player-pending",
+    REJECTED: "player-rejected",
+};
+
+const statusTextMap = {
+    PENDING: "čeká na schválení",
+    REJECTED: "zamítnuto",
+    APPROVED: "schváleno",
+};
+
+const PlayerCard = ({ player, onSelect, isActive, disabledTooltip }) => {
+    const playerStatus = player.playerStatus ?? "PENDING";
+
+    const statusClass = statusClassMap[playerStatus] || "";
+    const statusText = statusTextMap[playerStatus] ?? playerStatus;
+
+    const isApproved = playerStatus === "APPROVED";
+    const isDarkTeam = player.team === "DARK";
+
+    const hasDisabledTooltip = !!disabledTooltip;
+    const isDisabled = !isApproved && hasDisabledTooltip;
+
+    const isClickable = isApproved && !!onSelect && !isDisabled;
+
+    return (
+        <div
+            className={[
+                "player-card",
+                statusClass,
+                isClickable ? "clickable" : "",
+                isDisabled ? "player-card--disabled" : "",
+                isActive ? "player-card--active" : "",
+            ]
+                .filter(Boolean)
+                .join(" ")}
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : -1}
+            onClick={isClickable ? onSelect : undefined}
+            onKeyDown={
+                isClickable
+                    ? (e) => e.key === "Enter" && onSelect()
+                    : undefined
+            }
+        >
+            {/* Indikátor aktivního hráče v pravém horním rohu */}
+            <PlayerIcon
+                className={`active-indicator ${isActive ? "active" : "inactive"
+                    }`}
+            />
+
+            <div className="card-body">
+                <h5 className="card-title mb-4 mt-3 text-center">
+                    {player.fullName}
+                </h5>
+
+                <div className="mb-2 text-center">
+                    <div
+                        className={`team-icon-wrapper ${isDarkTeam ? "team-dark" : "team-light"
+                            }`}
+                    >
+                        <TeamDarkIcon className="team-icon base" />
+                        <TeamLightIcon className="team-icon overlay" />
+                    </div>
+                </div>
+
+                <RoleGuard roles={["ROLE_ADMIN"]}>
+                    <p className="card-text text-center mb-2">
+                        <strong>Typ:</strong> {player.type}
+                    </p>
+                </RoleGuard>
+
+                <p className="card-text text-center mb-2">
+                    <strong>Status:</strong> {statusText}
+                </p>
+
+                <p className="card-text text-center mb-2">
+                    <PhoneIcon className="phone-icon" />+
+                    {formatPhoneNumber(player.phoneNumber)}
+                </p>
+            </div>
+
+            {isDisabled && (
+                <div className="player-card-tooltip">
+                    {disabledTooltip}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default PlayerCard;
+
+===== FILE: \PlayerMatchStatus.css =====
+
+/* základ */
+.player-match-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+/* ikona */
+.player-match-status-icon {
+    font-size: 1.5rem;
+}
+
+/* text */
+.player-match-status-text {
+    font-size: 1.5rem;
+}
+
+/* ===== STAVY HRÁČE (BARVY) – podle modifieru ===== */
+
+.player-match-status--registered .player-match-status-icon {
+    color: #018520;
+}
+
+.player-match-status--registered .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--unregistered .player-match-status-icon {
+    color: #f17108;
+}
+
+.player-match-status--unregistered .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--excused .player-match-status-icon {
+    color: #ffc107;
+}
+
+.player-match-status--excused .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--reserved .player-match-status-icon {
+    color: #0d6efd;
+}
+
+.player-match-status--reserved .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--no_response .player-match-status-icon {
+    color: #ddda0a;
+}
+
+.player-match-status--no_response .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--no_excused .player-match-status-icon {
+    color: #dc3545;
+}
+
+.player-match-status--no_excused .player-match-status-text {
+    color: #750b16;
+}
+
+===== FILE: \PlayerMatchStatus.jsx =====
+
+import "./PlayerMatchStatus.css";
+
+import {
+    RegisteredIcon,
+    UnregisteredIcon,
+    ExcusedIcon,
+    ReservedIcon,
+    NoResponseIcon,
+    NoExcusedIcon,
+} from "../../icons";
+
+/**
+ * Ikony pro STAV HRÁČE v zápase
+ */
+const PLAYER_MATCH_STATUS_ICON_MAP = {
+    REGISTERED: RegisteredIcon,
+    UNREGISTERED: UnregisteredIcon,
+    EXCUSED: ExcusedIcon,
+    SUBSTITUTE: ExcusedIcon,
+    RESERVED: ReservedIcon,
+    NO_RESPONSE: NoResponseIcon,
+    NO_EXCUSED: NoExcusedIcon,
+};
+
+/**
+ * Texty – nadcházející zápas
+ */
+const PLAYER_MATCH_STATUS_TEXT_UPCOMING = {
+    REGISTERED: "přihlášen",
+    UNREGISTERED: "odhlášen",
+    EXCUSED: "omluven",
+    SUBSTITUTE: "možná",
+    RESERVED: "náhradník",
+    NO_RESPONSE: "nepřihlášen",
+    NO_EXCUSED: "neomluven",
+};
+
+/**
+ * Texty – uplynulý zápas
+ */
+const PLAYER_MATCH_STATUS_TEXT_PAST = {
+    REGISTERED: "byl jsem",
+    UNREGISTERED: "nebyl jsem",
+    EXCUSED: "nemohl jsem",
+    SUBSTITUTE: "nebyl jsem",
+    RESERVED: "byl jsem náhradník",
+    NO_RESPONSE: "nereagoval jsem",
+    NO_EXCUSED: "nepřišel jsem",
+};
+
+const PlayerMatchStatus = ({
+    playerMatchStatus,
+    variant = "upcoming",
+}) => {
+    // 🔹 sjednocení – vždy pracujeme s jednou proměnnou
+    const normalizedStatus = playerMatchStatus ?? "NO_RESPONSE";
+
+    const StatusIcon = PLAYER_MATCH_STATUS_ICON_MAP[normalizedStatus];
+
+    const textMap =
+        variant === "past"
+            ? PLAYER_MATCH_STATUS_TEXT_PAST
+            : PLAYER_MATCH_STATUS_TEXT_UPCOMING;
+
+    const text = textMap[normalizedStatus] ?? normalizedStatus;
+
+    const modifier = normalizedStatus.toLowerCase(); // REGISTERED -> registered, NO_RESPONSE -> no_response
+
+    return (
+        <div className="text-center mb-3">
+            <span
+                className={`
+                    player-match-status
+                    player-match-status--${modifier}
+                `}
+            >
+                {StatusIcon && (
+                    <StatusIcon className="player-match-status-icon" />
+                )}
+                <strong className="player-match-status-text">
+                    {text}
+                </strong>
+            </span>
+        </div>
+    );
+};
+
+export default PlayerMatchStatus;
+
+===== FILE: \Players.css =====
+
+/* =========================
+   KONTEJNER SEZNAMU HRÁČŮ
+   ========================= */
+.player-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+
+.player-item {
+    display: flex;
+    max-width: 360px;
+}
+
+===== FILE: \Players.jsx =====
+
+// src/components/Players.jsx
+import { usePlayers } from "../../hooks/usePlayers";
+import PlayerCard from "./PlayerCard";
+import { setCurrentPlayer } from "../../api/playerApi";
+import { useNavigate } from "react-router-dom";
+import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
+
+import "./Players.css";
+
+const Players = () => {
+    const { players, loading, error } = usePlayers();
+    const navigate = useNavigate();
+
+    const { currentPlayer, refreshCurrentPlayer } = useCurrentPlayer();
+
+    const handleSelectPlayer = async (playerId) => {
+        try {
+            await setCurrentPlayer(playerId);
+            await refreshCurrentPlayer();
+            navigate("/matches");
+        } catch (err) {
+            console.error("Nelze nastavit aktuálního hráče", err);
+            alert("Nepodařilo se vybrat hráče.");
+        }
+    };
+
+    if (loading) return <p>Načítám hráče…</p>;
+    if (error) return <p className="text-danger">{error}</p>;
+
+    if (players.length === 0) {
+        return (
+            <div className="text-center mt-4">
+                <p className="mb-3">
+                    Ještě nemáte vytvořeného žádného hráče.
+                    <br />
+                    Chcete ho nyní vytvořit?
+                </p>
+
+                <button
+                    className="btn btn-primary"
+                    onClick={() => navigate("/createPlayer")}
+                >
+                    Vytvořit hráče
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container mt-3">
+            <div className="player-list">
+                {players.map((p) => (
+                    <div className="player-item" key={p.id}>
+                        <PlayerCard
+                            player={p}
+                            isActive={currentPlayer?.id === p.id}
+                            onSelect={() => handleSelectPlayer(p.id)}
+                            disabledTooltip={
+                                p.playerStatus === "PENDING"
+                                    ? "Hráč čeká na schválení administrátorem"
+                                    : p.playerStatus === "REJECTED"
+                                        ? "Hráč byl zamítnut administrátorem"
+                                        : ""
+                            }
+                        />
+                    </div>
+                ))}
+            </div>
+
+            <div className="text-center mt-4">
+                <button
+                    className="btn btn-outline-primary"
+                    onClick={() => navigate("/createPlayer")}
+                >
+                    Přidat dalšího hráče
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default Players;

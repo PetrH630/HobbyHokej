@@ -1,0 +1,89 @@
+
+
+===== FILE: \index.js =====
+
+export * from "./PlayerIcons";
+export * from "./NavigationIcons";
+export * from "./StatusIcons";
+export * from "./OtherIcons";
+
+===== FILE: \NavigationIcons.jsx =====
+
+import { GiHamburgerMenu } from "react-icons/gi";
+import { AiOutlineClose } from "react-icons/ai";
+
+export const HamburgerIcon = () => <GiHamburgerMenu />;
+export const CloseIcon = () => <AiOutlineClose />;
+
+===== FILE: \OtherIcons.jsx =====
+
+import { GiMoneyStack } from "react-icons/gi";
+
+export const MoneyIcon = (props) => <GiMoneyStack {...props} />;
+
+===== FILE: \PlayerIcons.jsx =====
+
+import { FaPhone, FaUser, FaShieldAlt } from "react-icons/fa";
+import { GiHockey } from "react-icons/gi";
+import { PiHockeyFill } from "react-icons/pi";
+import { VscJersey } from "react-icons/vsc";
+import { IoShirt, IoShirtOutline } from "react-icons/io5";
+import { FaCircle } from "react-icons/fa";
+
+export const PhoneIcon = (props) => <FaPhone {...props} />;
+export const UserIcon = (props) => <FaUser {...props} />;
+export const AdminIcon = (props) => <FaShieldAlt {...props} />;
+export const PlayerIcon = (props) => <GiHockey {...props} />;
+export const PlayerStatusIcon = (props) => <PiHockeyFill {...props} />;
+export const TeamDarkIcon = (props) => <IoShirt {...props} />;
+export const TeamLightIcon = (props) => <IoShirtOutline {...props} />;
+export const CurrentPlayerIcon = (props) => <FaCircle {...props} />;
+
+===== FILE: \StatusIcons.jsx =====
+
+import {
+    FaCheck,
+    FaTimes,
+    FaHandPaper,
+    FaHourglassHalf,
+    FaQuestion,
+    FaExclamationTriangle,
+} from "react-icons/fa";
+
+
+export const RegisteredIcon = (props) => <FaCheck {...props} 
+    fill="currentColor"
+    stroke="black"
+    strokeWidth={20}
+    strokeLinejoin="round"
+    strokeLinecap="round" />;
+export const UnregisteredIcon = (props) => <FaTimes {...props} 
+    fill="currentColor"
+    stroke="black"
+    strokeWidth={20}
+    strokeLinejoin="round"
+    strokeLinecap="round"/>;
+export const ExcusedIcon = (props) => <FaHandPaper {...props} 
+    fill="currentColor"
+    stroke="black"
+    strokeWidth={20}
+    strokeLinejoin="round"
+    strokeLinecap="round"/>;
+export const ReservedIcon = (props) => <FaHourglassHalf {...props} 
+    fill="currentColor"
+    stroke="black"
+    strokeWidth={20}
+    strokeLinejoin="round"
+    strokeLinecap="round"/>;
+export const NoResponseIcon = (props) => <FaQuestion {...props} 
+    fill="currentColor"
+    stroke="black"
+    strokeWidth={20}
+    strokeLinejoin="round"
+    strokeLinecap="round"/>;
+export const NoExcusedIcon = (props) => <FaExclamationTriangle {...props} 
+    fill="currentColor"
+    stroke="black"
+    strokeWidth={20}
+    strokeLinejoin="round"
+    strokeLinecap="round"/>;

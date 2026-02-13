@@ -1,0 +1,15 @@
+.footer {
+    width: 100%;
+    /* zabere celou šířku */
+    text-align: center;
+    /* vodorovně na střed */
+    padding: 20px 0;
+    /* prostor nahoře a dole */
+    background-color: #b0d4e6;
+    /* nebo jiná barva */
+}
+
+footer p {
+    text-align: center;
+    font-size: 18px;
+}

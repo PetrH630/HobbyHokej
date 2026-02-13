@@ -1,0 +1,107 @@
+/* wrapper dvou sloupců */
+.match-reg-info {
+    display: flex;
+    flex-wrap: wrap;
+    /* ← Tohle je to, co ti chybělo */
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* jednotlivý sloupec */
+.match-reg-team-col {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    background: #fafafa;
+}
+
+/* hlavička sloupce – ikona + počet */
+.match-reg-team-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* ikona týmu – vlastní className, aby se to nebilo s .team-icon jinde */
+.match-reg-team-icon-dark {
+    font-size: 32px;
+    flex-shrink: 0;
+    color: rgb(4, 59, 163);
+}
+
+.match-reg-team-icon-light {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+/* počet hráčů */
+.match-reg-team-count {
+    font-weight: bold;
+}
+
+/* seznam hráčů pod sebou */
+.match-reg-player-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* každý hráč na vlastní řádek */
+.match-reg-player-item {
+    display: block;
+    padding: 0;
+    margin: 0;
+}
+
+/* text pro prázdný seznam */
+.match-reg-player-empty {
+    color: #888;
+    font-style: italic;
+}
+
+.match-reg-other-col {
+    margin-top: 4px;
+    width: 100%;
+}
+
+/* 🟢 REGISTERED */
+.match-registered-r {
+    color: #018520;
+}
+
+/* ⚪ UNREGISTERED */
+.match-unregistered-r {
+    color: #f17108;
+}
+
+/* 🔵 EXCUSED */
+.match-excused-r {
+    color: #ffc107;
+}
+
+/* 🟠 RESERVED */
+.match-reserved-r {
+color: #0d6efd;
+}
+
+/* 🟡 NO_RESPONSE */
+.match-no-response-r {
+color: #ffc107;
+}
+
+/* 🔴 NO_EXCUSED */
+.match-no-excused-r {
+    color: #dc3545;
+}
+/* 🔴 NO_EXCUSED */
+.match-substituted-r {
+    color: #ffc107;
+}
+
+@media (max-width: 768px) {
+    .match-reg-info {
+        flex-direction: column;
+    }
+}

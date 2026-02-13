@@ -1,0 +1,116 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  /* odstraní horizontální scroll */
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* aby footer byl vždy dole */
+}
+
+.content {
+  flex: 1;
+  /* zabere volné místo mezi headerem a footerem */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.container {
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px 16px;
+}
+
+footer {
+  background: #222;
+  color: #0a0101;
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.inner {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
+
+}
+
+ul {
+  list-style-position: inside;
+  /* odrážka uvnitř */
+  padding-left: 1.2em;
+  /* prostor mezi okrajem a textem */
+  margin: 0.5em 0;
+  /* mezera nad a pod seznamem */
+  text-align: left;
+  /* aby text nebyl na středu */
+}
+
+li {
+  margin-bottom: 0.5em;
+  /* mezera mezi položkami */
+  line-height: 1.5em;
+  /* více vzduchu mezi řádky textu */
+}
+
+.slider {
+  height: 50vh;
+  /*border: 2px solid #0a0101;*/
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+}
+
+/* Globální backdrop pro všechny modaly */
+body.modal-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  /* pod modalem */
+}
+
+/* Zajistí, že modal je nad backdropem */
+.modal {
+  z-index: 1050;
+}
+
+/* Globální ztmavení stránky (mimo modaly) */
+body.dim-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+/* Cokoliv s touhle třídou zůstane "nad" ztmavením */
+.dim-keep {
+  position: relative;
+  z-index: 1050;
+}
+
+.global-dim-click {
+  position: fixed;
+  inset: 0;
+  z-index: 1045;
+}

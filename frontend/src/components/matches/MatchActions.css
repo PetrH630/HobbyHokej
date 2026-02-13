@@ -1,0 +1,10 @@
+/* společný styl akčních tlačítek */
+.action-btn {
+    min-width: 140px;
+    /* stejná šířka */
+    font-size: 1.2rem;
+    /* větší písmo */
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    /* lehce větší výška */
+}

@@ -1,0 +1,2482 @@
+
+
+===== FILE: \MatchActions.css =====
+
+/* společný styl akčních tlačítek */
+.action-btn {
+    min-width: 140px;
+    /* stejná šířka */
+    font-size: 1.2rem;
+    /* větší písmo */
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    /* lehce větší výška */
+}
+
+===== FILE: \MatchActions.jsx =====
+
+// src/components/MatchActions.jsx
+import "./MatchActions.css";
+
+const MatchActions = ({
+    playerMatchStatus,
+    onRegister,
+    onUnregister,
+    onExcuse,
+    onSubstitute,
+    disabled,
+}) => {
+    console.log(
+        "MatchActions status:",
+        playerMatchStatus,
+        "disabled:",
+        disabled
+    );
+
+    const renderButtons = () => {
+        switch (playerMatchStatus) {
+            case "NO_RESPONSE":
+                // žádná registrace – Budu / Nemohu (omluva) / možná
+                return (
+                    <div className="d-flex gap-2 justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Přijdu
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-outline-danger action-btn"
+                            onClick={onExcuse}
+                            disabled={disabled}
+                        >
+                            Nemůžu
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-outline-warning action-btn"
+                            onClick={onSubstitute}
+                            disabled={disabled}
+                        >
+                            Možná
+                        </button>
+                      
+                    </div>
+                );
+
+            case "REGISTERED":
+            case "RESERVED":
+                // přihlášen nebo náhradník – může se jen odhlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-outline-danger action-btn"
+                            onClick={onUnregister}
+                            disabled={disabled}
+                        >
+                            Nakonec nepříjdu
+                        </button>
+                    </div>
+                );
+
+            case "EXCUSED":
+            case "UNREGISTERED":
+                // omluven / odhlášen – může se znova přihlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Tak příjdu
+                        </button>
+                    </div>
+                );
+
+            case "SUBSTITUTE":
+            // možná - náhradník – může se znova přihlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Tak příjdu
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-danger action-btn"
+                            onClick={onUnregister}
+                            disabled={disabled}
+                        >
+                            Nemůžu
+                        </button>
+                    </div>
+                );
+
+            case "NO_EXCUSED":
+                // neomluven – stav uzavřen
+                return null;
+
+            default:
+                console.warn(
+                    "Neznámý status v MatchActions:",
+                    playerMatchStatus
+                );
+                return null;
+        }
+    };
+
+    return (
+        <div className="d-flex flex-wrap gap-2 justify-content-center mb-4">
+            {renderButtons()}
+        </div>
+    );
+};
+
+export default MatchActions;
+
+===== FILE: \MatchCard.css =====
+
+.match-card {
+    position: relative;
+    padding: 16px;
+    border: 2px solid #000;
+    border-radius: 12px;
+    width: 240px;
+    max-width: 100%;
+    overflow: hidden;
+    /* aby nic nevylezlo z karty */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* condensed varianta – používá se pro uplynulé zápasy v seznamu */
+.match-card--condensed {
+    width: 100%;
+    /* karta přes celou šířku řádku */
+    max-width: 100%;
+}
+
+/* klikatelnost karty */
+.match-card.clickable {
+    cursor: pointer;
+}
+
+.match-card.clickable:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* zakázaná karta (tooltip overlay) */
+.match-card--disabled {
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+.match-card--disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.match-card-tooltip {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.match-card--disabled:hover .match-card-tooltip {
+    opacity: 1;
+}
+
+.match-id {
+    font-size: 1.1rem;
+}
+
+.match-day {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.match-date {
+    font-size: 1.2rem;
+}
+
+.player-icon {
+    font-size: 1.3rem;
+    margin-right: 15px;
+}
+
+.player-price-icon {
+    font-size: 0.9rem;
+    margin-right: 0;
+}
+
+.money-icon {
+    font-size: 1.5rem;
+    margin-right: 15px;
+}
+
+/* =========================================
+   STAV HRÁČE V ZÁPASE – IKONA + TEXT
+   ========================================= */
+
+.player-match-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.player-match-status-icon {
+    font-size: 1.5rem;
+}
+
+.player-match-status-text {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* =========================================
+   BARVY KARTY DLE PLAYER_MATCH_STATUS
+   ========================================= */
+
+/* 🟢 REGISTERED */
+.match-registered {
+    background-color: #29d158;
+    border-color: #09772f;
+}
+
+/* ⚪ UNREGISTERED */
+.match-unregistered {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+/* 🔵 EXCUSED */
+.match-excused {
+    background-color: #27c3f39c;
+    border-color: #b6d4fe;
+}
+
+/* 🟠 RESERVED */
+.match-reserved {
+    background-color: #fff4e5;
+    border-color: #ffd8a8;
+}
+
+/* 🟡 NO_RESPONSE */
+.match-no-response {
+    background-color: #fff9db;
+    border-color: #ffe066;
+}
+
+/* 🔴 NO_EXCUSED */
+.match-no-excused {
+    background-color: #fdecea;
+    border-color: #f5c2c7;
+}
+
+/* ===== BARVY DLE PLAYER_MATCH_STATUS (modifier) ===== */
+
+.player-match-status--registered .player-match-status-icon {
+    color: #018520;
+}
+
+.player-match-status--registered .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--unregistered .player-match-status-icon {
+    color: #f17108;
+}
+
+.player-match-status--unregistered .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--excused .player-match-status-icon {
+    color: #ffc107;
+}
+
+.player-match-status--excused .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--reserved .player-match-status-icon {
+    color: #0d6efd;
+}
+
+.player-match-status--reserved .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--no_response .player-match-status-icon {
+    color: #ddda0a;
+}
+
+.player-match-status--no_response .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--no_excused .player-match-status-icon {
+    color: #dc3545;
+}
+
+.player-match-status--no_excused .player-match-status-text {
+    color: #750b16;
+}
+
+/* =========================
+   RESPONSIVE – MOBILE BASE
+   ========================= */
+@media (max-width: 576px) {
+    .match-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+/* základ – na mobilu jsou bloky pod sebou */
+.match-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+/* =========================
+   CONDENSED – TABLET (768–991)
+   grid v řádku, ikona nad textem, menší status
+   ========================= */
+@media (min-width: 768px) and (max-width: 991px) {
+    .match-card--condensed .match-card__body {
+        display: grid;
+        grid-template-columns:
+            90px
+            /* Pátek - X */
+            150px
+            /* datum+čas */
+            1fr
+            /* aréna */
+            110px
+            /* hráči */
+            130px;
+        /* status */
+        align-items: center;
+        column-gap: 0.75rem;
+        text-align: left;
+    }
+
+    .match-card--condensed .match-card__body>* {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* hráči – ikona + počet vedle sebe, centrované */
+    .match-card--condensed .players-count {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        text-align: center;
+    }
+
+    /* status buňka vycentrovaná v posledním sloupci */
+    .match-card--condensed .status-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* na tabletu: ikona NAD textem + menší písmo */
+    .match-card--condensed .player-match-status {
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .match-card--condensed .player-match-status-icon {
+        font-size: 1.1rem;
+    }
+
+    .match-card--condensed .player-match-status-text {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* bez přebytečných spodních mezer */
+    .match-card--condensed p,
+    .match-card--condensed .match-day,
+    .match-card--condensed .match-date {
+        margin-bottom: 0;
+    }
+}
+
+/* =========================
+   CONDENSED – DESKTOP (≥ 992)
+   grid v jednom řádku, status klasicky vedle sebe
+   ========================= */
+@media (min-width: 992px) {
+    .match-card--condensed .match-card__body {
+        display: grid;
+        grid-template-columns:
+            90px
+            /* Pátek - X */
+            160px
+            /* datum+čas */
+            1fr
+            /* aréna */
+            120px
+            /* hráči */
+            180px;
+        /* status */
+        align-items: center;
+        column-gap: 1rem;
+        text-align: left;
+    }
+
+    .match-card--condensed .match-card__body>* {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .match-card--condensed .players-count {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .match-card--condensed .status-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* na desktopu: ikona + text vedle sebe, větší */
+    .match-card--condensed .player-match-status {
+        flex-direction: row;
+        gap: 0.35rem;
+    }
+
+    .match-card--condensed .player-match-status-icon {
+        font-size: 1.5rem;
+    }
+
+    .match-card--condensed .player-match-status-text {
+        font-size: 1.3rem;
+    }
+
+    .match-card--condensed p,
+    .match-card--condensed .match-day,
+    .match-card--condensed .match-date {
+        margin-bottom: 0;
+    }
+
+    .match-card--condensed .status-cell .player-match-status {
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+===== FILE: \MatchCard.jsx =====
+
+// src/components/MatchCard.jsx
+import {
+    RegisteredIcon,
+    UnregisteredIcon,
+    ExcusedIcon,
+    ReservedIcon,
+    NoResponseIcon,
+    NoExcusedIcon,
+    UserIcon,
+    MoneyIcon,
+} from "../../icons";
+
+import "./MatchCard.css";
+
+const statusClassMap = {
+    REGISTERED: "match-registered",
+    UNREGISTERED: "match-unregistered",
+    EXCUSED: "match-excused",
+    RESERVED: "match-reserved",
+    SUBSTITUTE: "match-substitute",
+    NO_RESPONSE: "match-no-response",
+    NO_EXCUSED: "match-no-excused",
+};
+
+const statusTextUpcomingMap = {
+    REGISTERED: "BUDU",
+    UNREGISTERED: "ODHLÁŠEN",
+    EXCUSED: "NEMŮŽU",
+    RESERVED: "ČEKÁM",
+    SUBSTITUTE: "MOŽNÁ",
+    NO_RESPONSE: "",
+    NO_EXCUSED: "NEOMLUVEN",
+};
+
+const statusTextPastMap = {
+    REGISTERED: "",
+    NO_RESPONSE: "NEREAGOVAL",
+    NO_EXCUSED: "NEPŘIŠEL",
+    UNREGISTERED: "ODHLÁŠEN",
+    SUBSTITUTE: "ZADAL MOŽNÁ",
+    EXCUSED: "NEMOHL",
+    RESERVED: "ČEKAL",
+};
+
+const statusIconMap = {
+    REGISTERED: RegisteredIcon,
+    UNREGISTERED: UnregisteredIcon,
+    EXCUSED: ExcusedIcon,
+    RESERVED: ReservedIcon,
+    SUBSTITUTE: NoResponseIcon,
+    NO_RESPONSE: NoResponseIcon,
+    NO_EXCUSED: NoExcusedIcon,
+};
+
+const formatDateTime = (dateTime) => {
+    if (!dateTime) return null;
+
+    const iso = dateTime.replace(" ", "T");
+    const d = new Date(iso);
+
+    const dayName = new Intl.DateTimeFormat("cs-CZ", {
+        weekday: "long",
+    }).format(d);
+
+    const datePart = new Intl.DateTimeFormat("cs-CZ", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    }).format(d);
+
+    const timePart = d.toLocaleTimeString("cs-CZ", {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+
+    return {
+        day: dayName.charAt(0).toUpperCase() + dayName.slice(1),
+        dateTime: `${datePart} ${"  "} ${timePart}`,
+    };
+};
+
+const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
+    // 🔹 vždy pracujme s jednou proměnnou
+    const playerMatchStatus = match.playerMatchStatus ?? "NO_RESPONSE";
+
+    const statusText = condensed
+        ? statusTextPastMap[playerMatchStatus] ?? playerMatchStatus
+        : statusTextUpcomingMap[playerMatchStatus] ?? playerMatchStatus;
+
+    const statusClass = statusClassMap[playerMatchStatus] ?? "";
+    const StatusIcon = statusIconMap[playerMatchStatus] || null;
+
+    const hasDisabledTooltip = !!disabledTooltip;
+    const isRegistered = playerMatchStatus === "REGISTERED";
+
+    const isDisabledByTooltip = hasDisabledTooltip && !isRegistered;
+    const isClickable = !!onClick && !isDisabledByTooltip;
+
+    const formatted = formatDateTime(match.dateTime);
+
+    // pro BEM modifier – REGISTERED -> "registered", NO_RESPONSE -> "no_response"
+    const statusModifier = playerMatchStatus.toLowerCase();
+
+    const cardLayoutClass = condensed
+        ? "match-card--condensed"
+        : "match-card--default";
+
+
+    const handleClick = () => {
+        if (isClickable && onClick) {
+            onClick();
+        }
+    };
+
+    return (
+        <div
+            className={`match-card ${statusClass} ${cardLayoutClass} ${isClickable ? "clickable" : ""
+                } ${isDisabledByTooltip ? "match-card--disabled" : ""}`}
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : -1}
+            onClick={isClickable ? handleClick : undefined}
+            onKeyDown={
+                isClickable
+                    ? (e) => e.key === "Enter" && handleClick()
+                    : undefined
+            }
+        >
+            <div className="card-body match-card__body">
+                {formatted && (
+                    <>
+                        <h4 className="card-title text-muted text-center match-day">
+                            {formatted.day} {" - "} {match.matchNumber}
+                        </h4>
+
+                        <h3 className="text-center match-date">
+                            {formatted.dateTime}
+                        </h3>
+                    </>
+                )}
+
+                <p className="card-text text-center">
+                    {match.location}
+                </p>
+
+                {!condensed && match.description && (
+                    <p className="card-text">
+                        Popis: <strong>{match.description}</strong>
+                    </p>
+                )}
+
+                {
+                    <p className="card-text text-center  players-count">
+                        <UserIcon className="player-icon" />
+                        <strong>
+                            {match.inGamePlayers} / {match.maxPlayers}
+
+                        </strong>
+                    </p>
+                }
+
+                {!condensed && (
+                    <p className="card-text text-center">
+                        <MoneyIcon className="money-icon" />
+                        <strong>
+                            {match.pricePerRegisteredPlayer.toFixed(0)} Kč /{" "}
+                            <UserIcon className="player-price-icon" /> Kč
+                        </strong>
+                    </p>
+                )}
+
+                {/* 🔹 Stav hráče v zápase – ikona + text */}
+                <div className="text-center status-cell">
+                    <span
+                        className={`player-match-status player-match-status--${statusModifier}`}
+                    >
+                        {StatusIcon && (
+                            <StatusIcon className="player-match-status-icon" />
+                        )}
+                        <strong className="player-match-status-text">
+                            {statusText}
+                        </strong>
+                    </span>
+                </div>
+            </div>
+
+            {isDisabledByTooltip && (
+                <div className="match-card-tooltip">
+                    {disabledTooltip}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default MatchCard;
+
+===== FILE: \MatchDetail.jsx =====
+
+// src/components/MatchDetail.jsx
+import MatchHeader from "./MatchHeader";
+import PlayerMatchStatus from "../players/PlayerMatchStatus";
+import MatchActions from "./MatchActions";
+import MatchInfo from "./MatchInfo";
+
+const isMatchUpcoming = (match) => {
+    if (!match || !match.dateTime) {
+        // radši tlačítka zobrazit, než je vždy schovat
+        return true;
+    }
+
+    const raw = match.dateTime;
+    let matchDate;
+
+    if (raw instanceof Date) {
+        matchDate = raw;
+    } else if (typeof raw === "string") {
+        // backend posílá "2026-01-23 18:45:00"
+        // → uděláme z toho "2026-01-23T18:45:00"
+        const normalized = raw.includes("T") ? raw : raw.replace(" ", "T");
+        matchDate = new Date(normalized);
+    } else {
+        // neznámý formát – radši povolit tlačítka
+        return true;
+    }
+
+    if (Number.isNaN(matchDate.getTime())) {
+        // špatné datum – radši povolit tlačítka
+        return true;
+    }
+
+    const now = new Date();
+    return matchDate > now;
+};
+
+const MatchDetail = ({
+    match,
+    playerMatchStatus,
+    matchStatus,
+    loading,
+    error,
+    actionError,
+    onRegister,
+    onUnregister,
+    onExcuse,
+    onSubstitute, 
+    saving,
+    isPast,
+}) => {
+    if (loading) {
+        return (
+            <div className="container mt-4 text-center">
+                <p>Načítám detail zápasu…</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container mt-4 text-center">
+                <p className="text-danger mb-3">{error}</p>
+            </div>
+        );
+    }
+
+    if (!match) {
+        return (
+            <div className="container mt-4 text-center">
+                <p>Detail zápasu nebyl nalezen.</p>
+            </div>
+        );
+    }
+    const isUpcoming = isMatchUpcoming(match);
+
+    return (
+        <div className="container mt-3">
+            <MatchHeader match={match} />
+
+            <PlayerMatchStatus playerMatchStatus={match.playerMatchStatus}
+                variant={isPast ? "past" : "upcoming"} />
+
+            {actionError && (
+                <p className="text-danger text-center mb-2">{actionError}</p>
+            )}
+
+            {!isPast && (
+                <MatchActions
+                    playerMatchStatus={playerMatchStatus}
+                    onRegister={onRegister}
+                    onUnregister={onUnregister}
+                    onExcuse={onExcuse}
+                    onSubstitute={onSubstitute}
+                    disabled={saving}
+                />
+            )}
+
+            <MatchInfo match={match} />
+        </div>
+    );
+};
+
+export default MatchDetail;
+
+===== FILE: \MatchHeader.jsx =====
+
+// src/components/MatchActions.jsx
+import "./MatchActions.css";
+
+const MatchActions = ({
+    playerMatchStatus,
+    onRegister,
+    onUnregister,
+    onExcuse,
+    onSubstitute,
+    disabled,
+}) => {
+    console.log(
+        "MatchActions status:",
+        playerMatchStatus,
+        "disabled:",
+        disabled
+    );
+
+    const renderButtons = () => {
+        switch (playerMatchStatus) {
+            case "NO_RESPONSE":
+                // žádná registrace – Budu / Nemohu (omluva) / možná
+                return (
+                    <div className="d-flex gap-2 justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Budu
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-outline-danger action-btn"
+                            onClick={onExcuse}
+                            disabled={disabled}
+                        >
+                            Nemohu
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-outline-warning action-btn"
+                            onClick={onSubstitute}
+                            disabled={disabled}
+                        >
+                            Možná
+                        </button>
+
+                    </div>
+                );
+
+            case "REGISTERED":
+            case "RESERVED":
+                // přihlášen nebo náhradník – může se jen odhlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-outline-danger action-btn"
+                            onClick={onUnregister}
+                            disabled={disabled}
+                        >
+                            Nakonec nebudu
+                        </button>
+                    </div>
+                );
+
+            case "EXCUSED":
+            case "UNREGISTERED":
+                // omluven / odhlášen – může se znova přihlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Nakonec budu
+                        </button>
+                    </div>
+                );
+
+            case "SUBSTITUTE":
+                // možná - náhradník – může se znova přihlásit
+                return (
+                    <div className="d-flex justify-content-center">
+                        <button
+                            type="button"
+                            className="btn btn-success action-btn"
+                            onClick={onRegister}
+                            disabled={disabled}
+                        >
+                            Tak budu
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-danger action-btn"
+                            onClick={onUnregister}
+                            disabled={disabled}
+                        >
+                            Tak nebudu
+                        </button>
+                    </div>
+                );
+
+            case "NO_EXCUSED":
+                // neomluven – stav uzavřen
+                return null;
+
+            default:
+                console.warn(
+                    "Neznámý status v MatchActions:",
+                    playerMatchStatus
+                );
+                return null;
+        }
+    };
+
+    return (
+        <div className="d-flex flex-wrap gap-2 justify-content-center mb-4">
+            {renderButtons()}
+        </div>
+    );
+};
+
+export default MatchActions;
+
+===== FILE: \MatchInfo.jsx =====
+
+// src/components/MatchInfo.jsx
+
+const MatchInfo = ({ match }) => {
+    return (
+        <div className="card">
+            <div className="card-body">
+                {match.description && (
+                    <p className="card-text mb-2">
+                        <strong>Popis: </strong>
+                        {match.description}
+                    </p>
+                )}
+
+                <p className="card-text mb-2">
+                    <strong>Hráči: </strong>
+                    {match.inGamePlayers} / {match.maxPlayers}
+                </p>
+                <p className="card-text mb-2">
+                    <strong>Hráči: </strong>
+                    {match.inGamePlayersDark} / {match.maxPlayersLight}
+                </p>
+
+                {match.price != null && (
+                    <p className="card-text mb-2">
+                        <strong>Cena zápasu: </strong>
+                        {match.price} Kč
+                    </p>
+                )}
+
+                {match.pricePerRegisteredPlayer != null && (
+                    <p className="card-text mb-2">
+                        <strong>Cena / hráč: </strong>
+                        {match.pricePerRegisteredPlayer.toFixed(0)} Kč
+                    </p>
+                )}
+
+                
+            </div>
+        </div>
+    );
+};
+
+export default MatchInfo;
+
+===== FILE: \MatchOverview.jsx =====
+
+import React from "react";
+import { Link } from "react-router-dom";
+import { format } from 'date-fns';
+
+
+const MatchOverview = ({ match }) => {
+    if (!match) return null;
+
+    const formattedDateTime = format(match.dateTime, 'dd.MM.yyyy HH:mm');
+
+    return (
+        <section className="mb-3">
+            <div className="card h-100">
+                <div className="card-body">
+                    <h5 className="card-title">
+                        Hokej #{match.id} – {match.location}
+                    </h5>
+
+                    <h6 className="card-subtitle mb-2 text-muted">
+                        {formattedDateTime.toLocaleString()}
+
+                    </h6>
+
+                    {match.description && (
+                        <p className="card-text">{match.description}</p>
+                    )}
+
+                    <p className="card-text">
+                        <strong>Maximál hráči:</strong> {match.maxPlayers}
+                    </p>
+
+                    <p className="card-text">
+                        <strong>Cena:</strong> {match.price} Kč
+                    </p>
+                    <p className="card-text">
+                        <strong>Cena za hráče:</strong> {match.pricePerRegisterdPlayer} Kč
+                    </p>
+
+
+                    <Link
+                        to={`/match/${match.id}`}
+                        className="btn btn-primary mt-2"
+                    >
+                        Detail čehokoliv
+                    </Link>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+
+export default MatchOverview;
+
+===== FILE: \PastMatches.css =====
+
+/* =========================
+   KONTEJNER SEZNAMU UPLYNULÝCH ZÁPASŮ
+   ========================= */
+.past-match-list {
+    display: flex;
+    flex-direction: column;
+    /* ⬅ místo gridu jeden sloupec */
+    gap: 12px;
+}
+
+/* každý zápas přes celou šířku */
+.past-match-item {
+    width: 100%;
+    display: flex;
+}
+
+
+===== FILE: \PastMatches.jsx =====
+
+// src/components/PastMatches.jsx
+import { useState } from "react";
+import { useMyPassedMatches } from "../../hooks/useMyPassedMatches";
+import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
+import MatchCard from "./MatchCard";
+import { useNavigate } from "react-router-dom";
+
+import "./PastMatches.css";
+
+const FILTERS = {
+    ALL: "ALL",
+    REGISTERED: "REGISTERED",
+    EXCUSED_UNREGISTERED: "EXCUSED_UNREGISTERED",
+    NO_RESPONSE_SUBSTITUTE: "NO_RESPONSE_SUBSTITUTE",
+};
+
+/**
+ * Vrátí true, pokud daný zápas odpovídá zvolenému filtru.
+ */
+const matchPassesFilter = (match, filter) => {
+    const status = match.playerMatchStatus;
+
+    switch (filter) {
+        case FILTERS.REGISTERED:
+            return status === "REGISTERED";
+
+        case FILTERS.EXCUSED_UNREGISTERED:
+            return status === "EXCUSED" || status === "UNREGISTERED";
+
+        case FILTERS.NO_RESPONSE_SUBSTITUTE:
+            return status === "NO_RESPONSE" || status === "SUBSTITUTE";
+
+        case FILTERS.ALL:
+        default:
+            return true;
+    }
+};
+
+const PastMatches = () => {
+    const { matches, loading, error } = useMyPassedMatches();
+    const { currentPlayer } = useCurrentPlayer();
+    const navigate = useNavigate();
+
+    const [filter, setFilter] = useState(FILTERS.ALL);
+
+    if (loading) {
+        return <p>Načítám uplynulé zápasy…</p>;
+    }
+
+    if (error) {
+        return (
+            <div className="container mt-4 text-center">
+                <p className="mb-3 text-danger">{error}</p>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => navigate("/players")}
+                >
+                    Vybrat aktuálního hráče
+                </button>
+            </div>
+        );
+    }
+
+    if (!currentPlayer) {
+        return (
+            <div className="container mt-4 text-center">
+                <p className="mb-3">
+                    Nemáte vybraného aktuálního hráče.
+                </p>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => navigate("/players")}
+                >
+                    Vybrat hráče
+                </button>
+            </div>
+        );
+    }
+
+    if (matches.length === 0) {
+        return (
+            <div className="container mt-3 text-center">
+                <h4>Uplynulé zápasy</h4>
+                <p>Zatím nemáte žádné uplynulé zápasy.</p>
+            </div>
+        );
+    }
+
+    const sortedMatches = matches
+        .slice()
+        .sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+
+    const counts = {
+        all: sortedMatches.length,
+        registered: sortedMatches.filter(m =>
+            matchPassesFilter(m, FILTERS.REGISTERED)
+        ).length,
+        excusedUnregistered: sortedMatches.filter(m =>
+            matchPassesFilter(m, FILTERS.EXCUSED_UNREGISTERED)
+        ).length,
+        noResponseSubstitute: sortedMatches.filter(m =>
+            matchPassesFilter(m, FILTERS.NO_RESPONSE_SUBSTITUTE)
+        ).length,
+    };
+
+    const filteredMatches = sortedMatches.filter(m =>
+        matchPassesFilter(m, filter)
+    );
+
+    return (
+        <div className="container mt-3">
+            <h4 className="mb-3 text-center">
+                Uplynulé zápasy pro {currentPlayer.fullName}
+            </h4>
+
+            {/* Filtrovací tlačítka */}
+            <div className="d-flex justify-content-center mb-3">
+                <div className="btn-group" role="group" aria-label="Filtr uplynulých zápasů">
+                    <button
+                        type="button"
+                        className={
+                            filter === FILTERS.ALL
+                                ? "btn btn-primary"
+                                : "btn btn-outline-primary"
+                        }
+                        onClick={() => setFilter(FILTERS.ALL)}
+                    >
+                        Vše{" "}
+                        <span className="badge bg-light text-dark ms-1">
+                            {counts.all}
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={
+                            filter === FILTERS.REGISTERED
+                                ? "btn btn-primary"
+                                : "btn btn-outline-primary"
+                        }
+                        onClick={() => setFilter(FILTERS.REGISTERED)}
+                    >
+                        Byl{" "}
+                        <span className="badge bg-light text-dark ms-1">
+                            {counts.registered}
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={
+                            filter === FILTERS.EXCUSED_UNREGISTERED
+                                ? "btn btn-primary"
+                                : "btn btn-outline-primary"
+                        }
+                        onClick={() => setFilter(FILTERS.EXCUSED_UNREGISTERED)}
+                    >
+                        Odhlášen / omluven{" "}
+                        <span className="badge bg-light text-dark ms-1">
+                            {counts.excusedUnregistered}
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={
+                            filter === FILTERS.NO_RESPONSE_SUBSTITUTE
+                                ? "btn btn-primary"
+                                : "btn btn-outline-primary"
+                        }
+                        onClick={() => setFilter(FILTERS.NO_RESPONSE_SUBSTITUTE)}
+                    >
+                        Nereagoval / možná{" "}
+                        <span className="badge bg-light text-dark ms-1">
+                            {counts.noResponseSubstitute}
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            {filteredMatches.length === 0 && (
+                <p className="text-center mb-3">
+                    Pro zvolený filtr nemáte žádné uplynulé zápasy.
+                </p>
+            )}
+
+            <div className="past-match-list">
+                {filteredMatches.map(m => (
+                    <div className="past-match-item" key={m.id}>
+                        <MatchCard
+                            match={m}
+                            onClick={() =>
+                                navigate(`/matches/${m.id}`, {
+                                    state: { isPast: true },
+                                })
+                            }
+                            disabledTooltip="Nebyl jsi, nemáš oprávnění"
+                            condensed
+                        />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export default PastMatches;
+
+===== FILE: \UpcomingMatches.css =====
+
+/* =========================
+   KONTEJNER SEZNAMU ZÁPASŮ
+   ========================= */
+.match-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+
+.match-item {
+    display: flex;
+}
+
+/* jméno hráče nad seznamem */
+.player-name {
+    color: #010e5a;
+}
+
+===== FILE: \UpcomingMatches.jsx =====
+
+// src/components/UpcomingMatches.jsx (původně Match.jsx)
+import { useMyUpcomingMatches } from "../../hooks/useMyUpcomingMatches";
+import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
+import MatchCard from "./MatchCard";
+import { useNavigate } from "react-router-dom";
+
+import "./UpcomingMatches.css";
+
+const UpcomingMatches = () => {
+  const { matches, loading, error } = useMyUpcomingMatches();
+  const { currentPlayer } = useCurrentPlayer();
+  const navigate = useNavigate();
+
+  if (loading) {
+    return <p>Načítám nadcházející zápasy…</p>;
+  }
+
+  if (error) {
+    return (
+      <div className="container mt-4 text-center">
+        <p className="mb-3 text-danger">{error}</p>
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate("/players")}
+        >
+          Vybrat aktuálního hráče
+        </button>
+      </div>
+    );
+  }
+
+  if (!currentPlayer) {
+    return (
+      <div className="container mt-4 text-center">
+        <p className="mb-3">
+          Nemáte vybraného aktuálního hráče.
+          <br />
+          Prosím vyberte si hráče, pro kterého chcete zobrazit
+          nadcházející zápasy.
+        </p>
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate("/players")}
+        >
+          Vybrat hráče
+        </button>
+      </div>
+    );
+  }
+
+  if (matches.length === 0) {
+    return (
+      <div className="container mt-3">
+        <h3 className="mb-3 text-center">
+          Nadcházející zápasy pro {currentPlayer.fullName}
+        </h3>
+        <p className="text-center">
+          Aktuálně nemáte žádné nadcházející zápasy.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mt-3">
+      <h4 className="mb-1 text-center player-name">
+        {currentPlayer.fullName}
+      </h4>
+      <h4 className="mb-3 text-center">
+        Nadcházející zápasy:
+      </h4>
+
+      <div className="match-list">
+        {matches.map((m) => (
+          <div className="match-item" key={m.id}>
+            <MatchCard
+              match={m}
+              onClick={() =>
+                navigate(`/matches/${m.id}`, {
+                  state: { isPast: false }, // playerMatchStatus bereš z detailu
+                })
+              }
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default UpcomingMatches;
+
+===== FILE: \CreatePlayerForm.jsx =====
+
+import { useState } from "react";
+
+const CreatePlayerForm = ({ onSubmit, onCancel, submitting }) => {
+    const [name, setName] = useState("");
+    const [surname, setSurname] = useState("");
+    const [nickName, setNickName] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [team, setTeam] = useState("DARK");
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        onSubmit({
+            name,
+            surname,
+            nickName: nickName || null,
+            phoneNumber: phoneNumber || null,
+            team,
+        });
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+                <label className="form-label">Jméno *</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    minLength={2}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">Příjmení *</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={surname}
+                    onChange={(e) => setSurname(e.target.value)}
+                    required
+                    minLength={2}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">
+                    Přezdívka (nepovinné)
+                </label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={nickName}
+                    onChange={(e) => setNickName(e.target.value)}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">
+                    Telefon (nepovinné)
+                </label>
+                <input
+                    type="tel"
+                    className="form-control"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">Tým</label>
+                <select
+                    className="form-select"
+                    value={team}
+                    onChange={(e) => setTeam(e.target.value)}
+                >
+                    <option value="DARK">DARK</option>
+                    <option value="LIGHT">LIGHT</option>
+                </select>
+            </div>
+
+            <div className="d-flex justify-content-between mt-4">
+                <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={onCancel}
+                    disabled={submitting}
+                >
+                    Zrušit
+                </button>
+
+                <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={submitting}
+                >
+                    {submitting ? "Ukládám…" : "Vytvořit hráče"}
+                </button>
+            </div>
+        </form>
+    );
+};
+
+export default CreatePlayerForm;
+
+===== FILE: \PlayerCard.css =====
+
+/* =========================
+   KARTA HRÁČE – ZÁKLAD
+   ========================= */
+.player-card {
+    box-sizing: border-box;
+    flex: 0 0 250px;
+    position: relative;
+    max-width: 250px;
+    width: 240px;
+    margin-top: 20px;
+    padding: 20px;
+
+    display: flex;
+
+    background-color: #ffffff;
+    border: 2px solid #dee2e6;
+    /* bootstrap gray-300 */
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+
+    border-radius: 12px;
+
+    transition:
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.player-card--active {
+    border: 3px solid #0d6efd;
+    /* Bootstrap primary */
+    box-shadow: 0 0 0 4px #0e489e;
+}
+
+/* =========================
+   OVERLAY TOOLTIP
+   ========================= */
+.player-card-tooltip {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+/* zobrazit overlay po najetí */
+.player-card--disabled:hover .player-card-tooltip {
+    opacity: 1;
+}
+
+/* =========================
+   Kolečko u vybraného hráče
+   ========================= */
+.active-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.5rem;
+}
+
+/* aktivní hráč */
+.active-indicator.active {
+    color: #1329a1;
+}
+
+/* neaktivní hráč */
+.active-indicator.inactive {
+    color: #a0a5aa;
+}
+
+/* =========================
+   INTERAKCE – JEN APPROVED
+   ========================= */
+.player-card.clickable {
+    cursor: pointer;
+}
+
+.player-card.clickable:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+.player-card.clickable:active {
+    transform: scale(1.01);
+}
+
+.player-card.clickable:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.4);
+}
+
+/* =========================
+   ZAKÁZANÉ KARTY
+   ========================= */
+.player-card--disabled {
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+.player-card--disabled:hover,
+.player-card--disabled:active,
+.player-card--disabled:focus-visible {
+    transform: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   STAVY HRÁČE (BARVY)
+   ========================= */
+.player-approved {
+    background-color: #64e98a;
+    border-color: #3da361;
+}
+
+.player-pending {
+    background-color: #fff4e5;
+    border-color: #ffd8a8;
+}
+
+.player-rejected {
+    background-color: #fdecea;
+    border-color: #f5c2c7;
+}
+
+/* =========================
+   IKONA TÝMU (OVERLAY)
+   ========================= */
+.team-icon-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 42px;
+}
+
+.team-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 42px;
+    line-height: 1;
+    background: transparent;
+}
+
+.team-icon.base {
+    color: #045ee6;
+}
+
+.team-icon.overlay {
+    color: #001833;
+}
+
+/* DARK tým */
+.team-icon-wrapper.team-dark .team-icon.base {
+    color: #045ee6;
+}
+
+/* LIGHT tým */
+.team-icon-wrapper.team-light .team-icon.base {
+    color: #ffffff;
+}
+
+/* =========================
+   TELEFON
+   ========================= */
+.phone-icon {
+    color: #0d6efd;
+    margin-right: 6px;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 576px) {
+    .player-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+===== FILE: \PlayerCard.jsx =====
+
+// src/components/PlayerCard.jsx
+import RoleGuard from "../RoleGuard";
+import { PhoneIcon, TeamDarkIcon, TeamLightIcon, PlayerIcon } from "../../icons";
+import { formatPhoneNumber } from "../../utils/formatPhoneNumber";
+import "./PlayerCard.css";
+
+const statusClassMap = {
+    APPROVED: "player-approved",
+    PENDING: "player-pending",
+    REJECTED: "player-rejected",
+};
+
+const statusTextMap = {
+    PENDING: "čeká na schválení",
+    REJECTED: "zamítnuto",
+    APPROVED: "schváleno",
+};
+
+const PlayerCard = ({ player, onSelect, isActive, disabledTooltip }) => {
+    const playerStatus = player.playerStatus ?? "PENDING";
+
+    const statusClass = statusClassMap[playerStatus] || "";
+    const statusText = statusTextMap[playerStatus] ?? playerStatus;
+
+    const isApproved = playerStatus === "APPROVED";
+    const isDarkTeam = player.team === "DARK";
+
+    const hasDisabledTooltip = !!disabledTooltip;
+    const isDisabled = !isApproved && hasDisabledTooltip;
+
+    const isClickable = isApproved && !!onSelect && !isDisabled;
+
+    return (
+        <div
+            className={[
+                "player-card",
+                statusClass,
+                isClickable ? "clickable" : "",
+                isDisabled ? "player-card--disabled" : "",
+                isActive ? "player-card--active" : "",
+            ]
+                .filter(Boolean)
+                .join(" ")}
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : -1}
+            onClick={isClickable ? onSelect : undefined}
+            onKeyDown={
+                isClickable
+                    ? (e) => e.key === "Enter" && onSelect()
+                    : undefined
+            }
+        >
+            {/* Indikátor aktivního hráče v pravém horním rohu */}
+            <PlayerIcon
+                className={`active-indicator ${isActive ? "active" : "inactive"
+                    }`}
+            />
+
+            <div className="card-body">
+                <h5 className="card-title mb-4 mt-3 text-center">
+                    {player.fullName}
+                </h5>
+
+                <div className="mb-2 text-center">
+                    <div
+                        className={`team-icon-wrapper ${isDarkTeam ? "team-dark" : "team-light"
+                            }`}
+                    >
+                        <TeamDarkIcon className="team-icon base" />
+                        <TeamLightIcon className="team-icon overlay" />
+                    </div>
+                </div>
+
+                <RoleGuard roles={["ROLE_ADMIN"]}>
+                    <p className="card-text text-center mb-2">
+                        <strong>Typ:</strong> {player.type}
+                    </p>
+                </RoleGuard>
+
+                <p className="card-text text-center mb-2">
+                    <strong>Status:</strong> {statusText}
+                </p>
+
+                <p className="card-text text-center mb-2">
+                    <PhoneIcon className="phone-icon" />+
+                    {formatPhoneNumber(player.phoneNumber)}
+                </p>
+            </div>
+
+            {isDisabled && (
+                <div className="player-card-tooltip">
+                    {disabledTooltip}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default PlayerCard;
+
+===== FILE: \PlayerMatchStatus.css =====
+
+/* základ */
+.player-match-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+/* ikona */
+.player-match-status-icon {
+    font-size: 1.5rem;
+}
+
+/* text */
+.player-match-status-text {
+    font-size: 1.5rem;
+}
+
+/* ===== STAVY HRÁČE (BARVY) – podle modifieru ===== */
+
+.player-match-status--registered .player-match-status-icon {
+    color: #018520;
+}
+
+.player-match-status--registered .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--unregistered .player-match-status-icon {
+    color: #f17108;
+}
+
+.player-match-status--unregistered .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--excused .player-match-status-icon {
+    color: #ffc107;
+}
+
+.player-match-status--excused .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--reserved .player-match-status-icon {
+    color: #0d6efd;
+}
+
+.player-match-status--reserved .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--no_response .player-match-status-icon {
+    color: #ddda0a;
+}
+
+.player-match-status--no_response .player-match-status-text {
+    color: #030303;
+}
+
+.player-match-status--no_excused .player-match-status-icon {
+    color: #dc3545;
+}
+
+.player-match-status--no_excused .player-match-status-text {
+    color: #750b16;
+}
+
+===== FILE: \PlayerMatchStatus.jsx =====
+
+import "./PlayerMatchStatus.css";
+
+import {
+    RegisteredIcon,
+    UnregisteredIcon,
+    ExcusedIcon,
+    ReservedIcon,
+    NoResponseIcon,
+    NoExcusedIcon,
+} from "../../icons";
+
+/**
+ * Ikony pro STAV HRÁČE v zápase
+ */
+const PLAYER_MATCH_STATUS_ICON_MAP = {
+    REGISTERED: RegisteredIcon,
+    UNREGISTERED: UnregisteredIcon,
+    EXCUSED: ExcusedIcon,
+    SUBSTITUTE: ExcusedIcon,
+    RESERVED: ReservedIcon,
+    NO_RESPONSE: NoResponseIcon,
+    NO_EXCUSED: NoExcusedIcon,
+};
+
+/**
+ * Texty – nadcházející zápas
+ */
+const PLAYER_MATCH_STATUS_TEXT_UPCOMING = {
+    REGISTERED: "přihlášen",
+    UNREGISTERED: "odhlášen",
+    EXCUSED: "omluven",
+    SUBSTITUTE: "možná",
+    RESERVED: "náhradník",
+    NO_RESPONSE: "nepřihlášen",
+    NO_EXCUSED: "neomluven",
+};
+
+/**
+ * Texty – uplynulý zápas
+ */
+const PLAYER_MATCH_STATUS_TEXT_PAST = {
+    REGISTERED: "byl jsem",
+    UNREGISTERED: "nebyl jsem",
+    EXCUSED: "nemohl jsem",
+    SUBSTITUTE: "nebyl jsem",
+    RESERVED: "byl jsem náhradník",
+    NO_RESPONSE: "nereagoval jsem",
+    NO_EXCUSED: "nepřišel jsem",
+};
+
+const PlayerMatchStatus = ({
+    playerMatchStatus,
+    variant = "upcoming",
+}) => {
+    // 🔹 sjednocení – vždy pracujeme s jednou proměnnou
+    const normalizedStatus = playerMatchStatus ?? "NO_RESPONSE";
+
+    const StatusIcon = PLAYER_MATCH_STATUS_ICON_MAP[normalizedStatus];
+
+    const textMap =
+        variant === "past"
+            ? PLAYER_MATCH_STATUS_TEXT_PAST
+            : PLAYER_MATCH_STATUS_TEXT_UPCOMING;
+
+    const text = textMap[normalizedStatus] ?? normalizedStatus;
+
+    const modifier = normalizedStatus.toLowerCase(); // REGISTERED -> registered, NO_RESPONSE -> no_response
+
+    return (
+        <div className="text-center mb-3">
+            <span
+                className={`
+                    player-match-status
+                    player-match-status--${modifier}
+                `}
+            >
+                {StatusIcon && (
+                    <StatusIcon className="player-match-status-icon" />
+                )}
+                <strong className="player-match-status-text">
+                    {text}
+                </strong>
+            </span>
+        </div>
+    );
+};
+
+export default PlayerMatchStatus;
+
+===== FILE: \Players.css =====
+
+/* =========================
+   KONTEJNER SEZNAMU HRÁČŮ
+   ========================= */
+.player-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+
+.player-item {
+    display: flex;
+    max-width: 360px;
+}
+
+===== FILE: \Players.jsx =====
+
+// src/components/Players.jsx
+import { usePlayers } from "../../hooks/usePlayers";
+import PlayerCard from "./PlayerCard";
+import { setCurrentPlayer } from "../../api/playerApi";
+import { useNavigate } from "react-router-dom";
+import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
+
+import "./Players.css";
+
+const Players = () => {
+    const { players, loading, error } = usePlayers();
+    const navigate = useNavigate();
+
+    const { currentPlayer, refreshCurrentPlayer } = useCurrentPlayer();
+
+    const handleSelectPlayer = async (playerId) => {
+        try {
+            await setCurrentPlayer(playerId);
+            await refreshCurrentPlayer();
+            navigate("/matches");
+        } catch (err) {
+            console.error("Nelze nastavit aktuálního hráče", err);
+            alert("Nepodařilo se vybrat hráče.");
+        }
+    };
+
+    if (loading) return <p>Načítám hráče…</p>;
+    if (error) return <p className="text-danger">{error}</p>;
+
+    if (players.length === 0) {
+        return (
+            <div className="text-center mt-4">
+                <p className="mb-3">
+                    Ještě nemáte vytvořeného žádného hráče.
+                    <br />
+                    Chcete ho nyní vytvořit?
+                </p>
+
+                <button
+                    className="btn btn-primary"
+                    onClick={() => navigate("/createPlayer")}
+                >
+                    Vytvořit hráče
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container mt-3">
+            <div className="player-list">
+                {players.map((p) => (
+                    <div className="player-item" key={p.id}>
+                        <PlayerCard
+                            player={p}
+                            isActive={currentPlayer?.id === p.id}
+                            onSelect={() => handleSelectPlayer(p.id)}
+                            disabledTooltip={
+                                p.playerStatus === "PENDING"
+                                    ? "Hráč čeká na schválení administrátorem"
+                                    : p.playerStatus === "REJECTED"
+                                        ? "Hráč byl zamítnut administrátorem"
+                                        : ""
+                            }
+                        />
+                    </div>
+                ))}
+            </div>
+
+            <div className="text-center mt-4">
+                <button
+                    className="btn btn-outline-primary"
+                    onClick={() => navigate("/createPlayer")}
+                >
+                    Přidat dalšího hráče
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default Players;
+
+===== FILE: \Footer.css =====
+
+.footer {
+    width: 100%;
+    /* zabere celou šířku */
+    text-align: center;
+    /* vodorovně na střed */
+    padding: 20px 0;
+    /* prostor nahoře a dole */
+    background-color: #b0d4e6;
+    /* nebo jiná barva */
+}
+
+footer p {
+    text-align: center;
+    font-size: 18px;
+}
+
+===== FILE: \Footer.jsx =====
+
+import React from 'react'
+import "./Footer.css"
+
+const Footer = () => {
+  return (
+      <div className="footer">© 2025 Petr Hlista. Všechna práva vyhrazena.</div>
+  )
+}
+
+export default Footer
+
+===== FILE: \HeaderTop.css =====
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.header-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    /* položky vlevo, uprostřed, vpravo */
+    align-items: center;
+    padding: 5px 20px;
+    background-color: #b0d4e6;
+    font-size: 16px;
+    font-weight: bold;
+    
+    
+}
+
+
+/* Položky v headeru */
+.header-item {
+    margin: 0 10px;
+}
+
+/* Responsivně na mobilu */
+@media (max-width: 700px) {
+    .header-top {
+        flex-direction: column;
+        align-items: center;
+        font-size: 12px;
+    }
+
+    .header-item {
+        margin: 2px 0;
+    }
+
+    /* Skryj aktuality */
+    .header-item:first-child {
+        display: none;
+    }
+}
+
+.header-top {
+    background-color: #b0d4e6;
+}
+
+.header-top .inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 10px;
+}
+
+===== FILE: \HeaderTop.jsx =====
+
+import React from 'react'
+import "./HeaderTop.css"
+
+
+const HeaderTop = () => {
+  return (
+      <div className="header-top">
+          <div className="inner">
+              <div className="header-item">Aktuality: Aplikace v testování</div>
+              <div className="header-item">📞 +420 776 609 956</div>
+              <div className="header-item">✉ info@phsoft.cz</div>
+          </div>
+      </div>
+  );
+};
+
+export default HeaderTop
+
+===== FILE: \Navbar.css =====
+
+/* základ */
+.site-nav {
+    width: 100%;
+    background-color: #DEEFE7;
+}
+
+/* hlavní kontejner - desktop: logo vlevo, menu napravo */
+.navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* logo vlevo, ostatní doprava */
+    padding: 0 20px;
+    height: 70px;
+    box-sizing: border-box;
+}
+
+/* logo */
+.nav-header {
+    display: flex;
+    align-items: center;
+}
+
+.nav-logo {
+    width: 150px;
+    display: block;
+}
+
+.logo-text{
+    text-decoration: none;
+    
+}
+
+/* toggle (hamburger) - default hide (desktop) */
+.nav-toggle {
+    display: none;
+}
+
+/* menu (desktop) */
+.nav-list {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-list ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 20px;
+}
+
+.nav-list li {
+    margin: 0;
+}
+
+.nav-list a {
+    text-decoration: none;
+    color: #222;
+    padding: 8px 4px;
+}
+
+/* aktivní odkaz (přizpůsob si barvy) */
+.activeLink {
+    font-weight: 600;
+    border-bottom: 2px solid #1B5E20;
+}
+
+.nonactiveLink {
+    color: #222;
+}
+
+/* --- RESPONSIVE (mobile) --- */
+@media (max-width: 700px) {
+
+    .nav-toggle {
+        display: block;
+    }
+
+    .hamburger-btn {
+        background: none;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .hamburger-icon {
+        font-size: 26px;
+    }
+
+    /* OPRAVENÉ MENU */
+    .nav-list {
+        position: fixed;
+        top: 0;
+        left: 0;
+
+        height: 100vh;
+
+        width: 80%;
+        /* místo 120px */
+        max-width: 240px;
+        /* max šířka */
+
+        background-color: #DEEFE7;
+        display: flex;
+        flex-direction: column;
+        padding-top: 80px;
+        padding-left: 10px;
+        /* OK díky box-sizing */
+        box-sizing: border-box;
+
+        transform: translateX(-100%);
+        transition: transform 0.28s ease;
+
+        z-index: 1500;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .nav-list.show {
+        transform: translateX(0);
+    }
+
+    .nav-list.hide {
+        transform: translateX(-100%);
+    }
+
+    .nav-list ul {
+        flex-direction: column;
+        gap: 16px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .nav-list a {
+        font-size: 18px;
+    }
+
+    .nav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1200;
+    }
+}
+
+===== FILE: \Navbar.jsx =====
+
+// UI navbar bez API logiky, UI čisté, logika logout v API vrstvě.
+
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { AiOutlineClose } from "react-icons/ai";
+import { logoutUser } from "../api/authApi";
+import { useAuth } from "../hooks/useAuth";
+import { PlayerIcon } from "../icons";
+import { UserIcon } from "../icons";
+import { useCurrentPlayer } from "../hooks/useCurrentPlayer";
+
+import "./Navbar.css";
+
+const Navbar = () => {
+    const [showMenu, setShowMenu] = useState(false);
+    const { user, logout } = useAuth();
+    const { currentPlayer } = useCurrentPlayer()
+    const navigate = useNavigate();
+
+    const closeMenu = () => {
+        if (window.innerWidth < 700) {
+            setShowMenu(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        await logout();
+        navigate("/login");
+    };
+
+    return (
+        <nav className="navbar navbar-light bg-light">
+            <div className="container">
+                <span className="navbar-brand">
+                    <NavLink to="/" className="navbar-brand">Hokej App </NavLink>
+                    </span>
+
+                <button
+                    className="nav-toggle"
+                    onClick={() => setShowMenu(!showMenu)}
+                    aria-label="Toggle menu"
+                >
+                    {showMenu ? <AiOutlineClose /> : <GiHamburgerMenu />}
+                </button>
+
+                <div className={`nav-list ${showMenu ? "show" : "hide"}`}>
+                    <ul>
+                        <li>
+                            <NavLink to="/players" className={({ isActive }) =>
+                                isActive ? "activeLink" : "nonactiveLink"
+                            } onClick={closeMenu}>
+                                Hráči
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink to="/Matches" className={({ isActive }) =>
+                                isActive ? "activeLink" : "nonactiveLink"
+                            } onClick={closeMenu}>
+                                Zápasy
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink to="/Registrace" className={({ isActive }) =>
+                                isActive ? "activeLink" : "nonactiveLink"
+                            } onClick={closeMenu}>
+                                Registrace
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink to="/contact" className={({ isActive }) =>
+                                isActive ? "activeLink" : "nonactiveLink"
+                            } onClick={closeMenu}>
+                                Nastavení
+                            </NavLink>
+
+                        </li>
+                    </ul>
+                </div>
+                <div className="d-flex gap-3">
+                    {user && (
+                        <>
+                            <span>
+                                <UserIcon />{" "}
+                                {user.name} {user.surname}
+                                <div><PlayerIcon />{" "}  {currentPlayer
+                                    ? `${currentPlayer.name} ${currentPlayer.surname}`
+                                    : "Není vybrán hráč"}</div>
+                            </span>
+
+                            <button className="btn btn-outline-danger" onClick={handleLogout}>
+                                Odhlásit
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        </nav>
+    );
+};
+
+export default Navbar;
+
+===== FILE: \RoleGuard.jsx =====
+
+import { useAuth } from "../hooks/useAuth";
+
+const RoleGuard = ({ roles, children }) => {
+    const { user } = useAuth();
+
+    if (!user) return null;
+    if (!roles.includes(user.role)) return null;
+
+    return children;
+};
+
+export default RoleGuard;
+
+===== FILE: \ScrollToTop.jsx =====
+
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+const ScrollToTop = ({ resetPrefixes = [] }) => {
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        // Pokud aktuální path začíná některým prefixem → scroll na začátek
+        if (resetPrefixes.some(prefix => pathname.startsWith(prefix))) {
+            window.scrollTo(0, 0);
+        }
+        // Jinak nech scroll tam, kde byl
+    }, [pathname, resetPrefixes]);
+
+    return null;
+};
+
+export default ScrollToTop;
+
+===== FILE: \TestConnection.jsx =====
+
+import React, { useEffect, useState } from "react";
+
+
+const App = () => {
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/test")
+      .then((res) => res.text())
+      .then((data) => setMessage(data))
+      .catch((err) => setMessage("Chyba: " + err));
+  }, []);
+
+  return (
+    <div>
+      <h1>Test připojení k backendu</h1>
+      <p>{message}</p>
+    </div>
+  );
+};
+
+export default App;
