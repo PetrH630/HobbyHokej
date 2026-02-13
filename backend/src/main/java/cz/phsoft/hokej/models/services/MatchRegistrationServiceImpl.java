@@ -32,15 +32,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Implementace service pro správu registrací hráčů na zápasy.
- * <p>
- * Třída zajišťuje vytvoření a změny registrací, přepočítávání stavů
- * podle kapacity zápasu a poskytování přehledů registrací.
- * Současně spouští notifikace hráčům podle typu změny registrace.
- * <p>
- * Třída řeší business logiku registrací a stavových přechodů,
- * ale neřeší UI, autentizaci ani výběr aktuálního hráče.
- * Tyto oblasti náleží jiným vrstvám aplikace.
+ * Implementace service vrstvy, která se používá pro správu registrací hráčů na zápasy.
+ *
+ * V této třídě se zajišťuje vytváření a aktualizace registrací, vyhodnocování stavových přechodů
+ * podle kapacity zápasu a poskytování přehledů registrací pro zápas, hráče nebo sadu zápasů.
+ *
+ * Součástí odpovědnosti je také spouštění notifikací hráčům podle typu změny registrace a v případě potřeby
+ * také odesílání SMS zpráv registrovaným hráčům.
+ *
+ * Třída obsahuje business logiku registrací a souvisejících pravidel. Neřeší prezentaci, UI logiku ani výběr
+ * aktuálního hráče, které náleží jiným vrstvám aplikace.
  */
 @Service
 public class MatchRegistrationServiceImpl implements MatchRegistrationService {
@@ -87,18 +88,19 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     // ==========================================
 
     /**
-     * Vytvoří nebo aktualizuje registraci hráče na zápas.
-     * <p>
-     * Metoda načte zápas a hráče, ověří, že zápas patří do aktivní sezóny
-     * a že aktuální uživatel může registraci upravovat. Poté podle obsahu
-     * požadavku zvolí větev pro odhlášení, omluvu nebo registraci
-     * a nastaví odpovídající stav registrace. Společné údaje se převezmou
-     * z požadavku a registrace se uloží. Po odhlášení se stav registrací
-     * přepočítá a podle výsledného statusu se odešlou notifikace.
+     * Vytváří nebo aktualizuje registraci hráče na zápas.
      *
-     * @param playerId ID hráče
-     * @param request  požadavek na změnu registrace
-     * @return DTO výsledné registrace
+     * Nejprve se načte zápas a hráč a ověří se, že zápas patří do aktivní sezóny.
+     * Následně se vyhodnotí, zda aktuálně přihlášený uživatel může registraci upravovat s ohledem na roli
+     * a čas zápasu.
+     *
+     * Podle obsahu požadavku se zvolí větev pro odhlášení, omluvu nebo registraci a určí se cílový stav registrace.
+     * Společné údaje se převezmou z požadavku, registrace se uloží a při odhlášení se přepočítají stavy registrací
+     * pro daný zápas. Po uložení se podle výsledného stavu odešlou notifikace.
+     *
+     * @param playerId Identifikátor hráče, jehož registrace se upravuje.
+     * @param request Požadavek obsahující parametry změny registrace.
+     * @return DTO uložené registrace se stavem odpovídajícím vyhodnoceným pravidlům.
      */
     @Transactional
     @Override
@@ -155,14 +157,19 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Zpracuje větev pro registraci typu REGISTER, RESERVED nebo SUBSTITUTE.
-     * <p>
-     * Metoda nepovolí opakovanou registraci již registrovaného hráče.
-     * Při volbě SUBSTITUTE se hráč označí jako náhradník, který
-     * neblokuje kapacitu a může později přejít na jiný stav.
-     * Při běžné registraci se podle kapacity zápasu rozhodne,
-     * zda se použije stav REGISTERED nebo RESERVED. Případná
-     * předchozí omluva se odstraní.
+     * Vyhodnocuje registraci typu REGISTERED, RESERVED nebo SUBSTITUTE a vrací cílový stav registrace.
+     *
+     * Opakovaná registrace hráče, který je již ve stavu REGISTERED, se neumožňuje.
+     * Při volbě SUBSTITUTE se nastaví stav náhradníka, který neblokuje kapacitu zápasu.
+     * Při standardní registraci se podle kapacity zápasu určí stav REGISTERED nebo RESERVED.
+     *
+     * Případná omluva uložená na registraci se před nastavením cílového stavu odstraní.
+     *
+     * @param request Požadavek obsahující parametry změny registrace.
+     * @param match Zápas, ke kterému se registrace vztahuje.
+     * @param player Hráč, jehož registrace se upravuje.
+     * @param registration Existující registrace, nebo null v případě prvního zápisu.
+     * @return Cílový stav registrace odpovídající vyhodnoceným pravidlům.
      */
     private PlayerMatchStatus handleRegisterOrReserveOrSubstitute(
             MatchRegistrationRequest request,
@@ -202,11 +209,17 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Zpracuje odhlášení hráče ze zápasu (UNREGISTER).
-     * <p>
-     * Odhlášení je povoleno pouze v případě, že registrace existuje
-     * a má stav REGISTERED nebo RESERVED. Při úspěšném odhlášení
-     * se nastaví informace o omluvě a stav UNREGISTERED.
+     * Zpracovává odhlášení hráče ze zápasu a vrací cílový stav UNREGISTERED.
+     *
+     * Odhlášení se umožňuje pouze v případě, že registrace existuje a nachází se ve stavu REGISTERED nebo RESERVED.
+     * V opačném případě se vyhodí výjimka signalizující neexistující nebo nepovolenou registraci pro odhlášení.
+     *
+     * Při úspěšném odhlášení se uloží informace o omluvě z požadavku.
+     *
+     * @param request Požadavek obsahující parametry odhlášení.
+     * @param playerId Identifikátor hráče, jehož registrace se odhlašuje.
+     * @param registration Existující registrace hráče na zápas.
+     * @return Stav UNREGISTERED, který se má na registraci uložit.
      */
     private PlayerMatchStatus handleUnregister(
             MatchRegistrationRequest request,
@@ -229,12 +242,18 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Zpracuje omluvu hráče z účasti na zápase (EXCUSED).
-     * <p>
-     * Omluva je povolena pouze v případě, že hráč dosud nereagoval
-     * nebo byl veden jako náhradník, nebo byl veden jako neomluvený.
-     * Při úspěšné omluvě se nastaví důvod a poznámka a registrace
-     * se přepne do stavu EXCUSED.
+     * Zpracovává omluvu hráče z účasti na zápase a vrací cílový stav EXCUSED.
+     *
+     * Omluva se umožňuje pouze v případě, že hráč dosud nereagoval na zápas, je veden jako náhradník,
+     * nebo je ve stavu NO_EXCUSED. Při porušení pravidel se vyhodí výjimka signalizující nepovolený přechod.
+     *
+     * Při úspěšné omluvě se uloží důvod a poznámka omluvy z požadavku.
+     *
+     * @param request Požadavek obsahující parametry omluvy.
+     * @param match Zápas, ke kterému se omluva vztahuje.
+     * @param player Hráč, jehož omluva se zpracovává.
+     * @param registration Existující registrace, nebo null v případě prvního zápisu.
+     * @return Stav EXCUSED, který se má na registraci uložit.
      */
     private PlayerMatchStatus handleExcuse(
             MatchRegistrationRequest request,
@@ -248,7 +267,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                         || registration.getStatus() == PlayerMatchStatus.SUBSTITUTE
                         || registration.getStatus() == PlayerMatchStatus.NO_EXCUSED);
 
-
         if (!isNoResponseOrSubstitute) {
             throw new DuplicateRegistrationException(
                     request.getMatchId(),
@@ -256,6 +274,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                     "BE - Omluva je možná pouze pokud hráč dosud nereagoval na zápas, nebo byl náhradník."
             );
         }
+
         registration.setExcuseReason(request.getExcuseReason());
         registration.setExcuseNote(request.getExcuseNote());
 
@@ -263,11 +282,16 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Nastaví registraci do stavu NO_EXCUSED na základě rozhodnutí administrátora.
-     * <p>
+     * Nastavuje registraci do stavu NO_EXCUSED na základě rozhodnutí administrátora.
+     *
      * Zápas musí být již odehraný a předchozí stav registrace musí být REGISTERED.
-     * Případná omluva se odstraní a uloží se poznámka administrátora. Po změně
-     * se odešle notifikace podle nastaveného typu.
+     * Případná omluva se odstraní a uloží se poznámka administrátora. Po změně se odešle notifikace
+     * odpovídající výslednému stavu.
+     *
+     * @param matchId Identifikátor zápasu, pro který se stav upravuje.
+     * @param playerId Identifikátor hráče, jehož registrace se upravuje.
+     * @param adminNote Poznámka administrátora, která se uloží k registraci.
+     * @return DTO aktualizované registrace po změně stavu.
      */
     @Override
     @Transactional
@@ -321,18 +345,24 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
     // TODO
     /**
-     * Nastaví registraci do stavu EXCUSED na základě rozhodnutí administrátora/manažera
-     * poté co byl původně uložen se statutem NO_EXCUSED.
+     * Nastavuje registraci do stavu EXCUSED na základě rozhodnutí administrátora nebo manažera po předchozím NO_EXCUSED.
      *
      * Zápas musí být již odehraný a předchozí stav registrace musí být NO_EXCUSED.
-     * Případná poznámka administrátora se odstraní. Notifikace se neodesílá.
+     * Administrátorská poznámka se odstraní a uloží se důvod a poznámka omluvy.
+     * V této operaci se notifikace neodesílají.
+     *
+     * @param matchId Identifikátor zápasu, pro který se stav upravuje.
+     * @param playerId Identifikátor hráče, jehož registrace se upravuje.
+     * @param excuseReason Důvod omluvy, který se uloží k registraci.
+     * @param excuseNote Poznámka omluvy, která se uloží k registraci.
+     * @return DTO aktualizované registrace po změně stavu.
      */
     @Override
     @Transactional
     public MatchRegistrationDTO cancelNoExcused(Long matchId,
-                                              Long playerId,
-                                              ExcuseReason excuseReason,
-                                              String excuseNote) {
+                                                Long playerId,
+                                                ExcuseReason excuseReason,
+                                                String excuseNote) {
 
         MatchEntity match = getMatchOrThrow(matchId);
         PlayerEntity player = getPlayerOrThrow(playerId);
@@ -372,10 +402,13 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     // KONEC TODO
 
     /**
-     * Nastaví do registrace společné údaje z požadavku.
-     * <p>
-     * Upravuje tým, administrátorskou poznámku a případné informace
-     * o omluvě, pokud jsou v požadavku uvedeny.
+     * Nastavuje do registrace společné údaje převzaté z požadavku.
+     *
+     * V rámci zápisu se upravuje tým, administrátorská poznámka a informace o omluvě,
+     * pokud jsou v požadavku uvedeny.
+     *
+     * @param registration Registrace, která se má aktualizovat.
+     * @param request Požadavek obsahující hodnoty, které se mají zapsat do registrace.
      */
     private void applyRequestDetails(MatchRegistrationEntity registration,
                                      MatchRegistrationRequest request) {
@@ -411,9 +444,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Vrátí všechny registrace pro daný zápas omezené na aktuální sezónu.
-     * <p>
-     * Pokud zápas nepatří do aktuálně vybrané sezóny, vrátí se prázdný seznam.
+     * Vrací registrace pro daný zápas omezené na aktuálně vybranou sezónu.
+     *
+     * Pokud zápas nepatří do aktuálně vybrané sezóny, vrací se prázdný seznam.
+     *
+     * @param matchId Identifikátor zápasu, pro který se registrace načítají.
+     * @return Seznam registrací převedených do DTO pro daný zápas v rámci aktuální sezóny.
      */
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
@@ -429,9 +465,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Vrátí všechny registrace pro zadané zápasy omezené na aktuální sezónu.
-     * <p>
-     * Pokud je seznam ID prázdný nebo null, vrátí se prázdný seznam.
+     * Vrací registrace pro zadanou sadu zápasů omezené na aktuálně vybranou sezónu.
+     *
+     * Pokud je seznam identifikátorů zápasů null nebo prázdný, vrací se prázdný seznam.
+     *
+     * @param matchIds Seznam identifikátorů zápasů, pro které se registrace načítají.
+     * @return Seznam registrací převedených do DTO pro zadané zápasy v rámci aktuální sezóny.
      */
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds) {
@@ -448,7 +487,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Vrátí všechny registrace v systému omezené na aktuální sezónu.
+     * Vrací všechny registrace v systému omezené na aktuálně vybranou sezónu.
+     *
+     * @return Seznam všech registrací převedených do DTO v rámci aktuální sezóny.
      */
     @Override
     public List<MatchRegistrationDTO> getAllRegistrations() {
@@ -461,7 +502,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Vrátí všechny registrace zadaného hráče omezené na aktuální sezónu.
+     * Vrací registrace zadaného hráče omezené na aktuálně vybranou sezónu.
+     *
+     * @param playerId Identifikátor hráče, jehož registrace se načítají.
+     * @return Seznam registrací hráče převedených do DTO v rámci aktuální sezóny.
      */
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId) {
@@ -474,11 +518,13 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Vrátí hráče, kteří na daný zápas nijak nereagovali.
-     * <p>
-     * Registrace se berou bez ohledu na konkrétní stav.
-     * Pokud zápas nepatří do aktuálně vybrané sezóny,
-     * vrátí se prázdný seznam.
+     * Vrací hráče, kteří na daný zápas nijak nereagovali.
+     *
+     * Pokud zápas nepatří do aktuálně vybrané sezóny, vrací se prázdný seznam.
+     * Při vyhodnocování se používá množina hráčů, kteří mají k zápasu uloženou registraci v jakémkoliv stavu.
+     *
+     * @param matchId Identifikátor zápasu, pro který se hráči bez reakce vyhodnocují.
+     * @return Seznam hráčů bez reakce převedených do DTO v rámci aktuální sezóny.
      */
     @Override
     public List<PlayerDTO> getNoResponsePlayers(Long matchId) {
@@ -500,12 +546,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Přepočítá statusy REGISTERED a RESERVED pro daný zápas.
-     * <p>
-     * Registrace se seřadí podle času vytvoření a prvním hráčům
-     * do výše kapacity zápasu se nastaví stav REGISTERED.
-     * Ostatním se nastaví stav RESERVED. Náhradníci se do
-     * tohoto přepočtu nezahrnují.
+     * Přepočítává stavy REGISTERED a RESERVED pro daný zápas podle kapacity zápasu.
+     *
+     * Registrace se seřadí podle času vytvoření a prvním hráčům do výše kapacity zápasu se nastaví stav REGISTERED.
+     * Ostatním hráčům se nastaví stav RESERVED. Registrace ve stavu SUBSTITUTE se do přepočtu nezahrnují.
+     *
+     * @param matchId Identifikátor zápasu, pro který se stavy přepočítávají.
      */
     @Override
     @Transactional
@@ -535,8 +581,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     // =========================
 
     /**
-     * Odešle SMS všem hráčům, kteří jsou na daný zápas registrováni
-     * se statusem REGISTERED a mají povolené SMS notifikace.
+     * Odesílá SMS všem hráčům registrovaným na daný zápas ve stavu REGISTERED, kteří mají povolené SMS notifikace.
+     *
+     * Z registrací se načtou hráči a vyhodnotí se jejich nastavení notifikací. Pokud je SMS notifikace povolena,
+     * sestaví se text zprávy a provede se odeslání přes SmsService.
+     *
+     * @param matchId Identifikátor zápasu, pro který se SMS zprávy odesílají.
      */
     @Transactional
     public void sendSmsToRegisteredPlayers(Long matchId) {
@@ -557,21 +607,16 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 });
     }
 
-    // poznámka: sendNoResponseSmsForMatch je aktuálně zakomentovaný blok,
-    // takže dokumentace k němu se neřeší; pokud ho znovu aktivuješ,
-    // můžeme mu dopsat Javadoc ve stejném stylu.
-
     /**
-     * Obecná administrátorská operace pro změnu statusu registrace.
-     * <p>
-     * Metoda neumožňuje nastavit status NO_EXCUSED, protože ten má
-     * vlastní samostatnou logiku. Před změnou se ověří existence
-     * zápasu, hráče i samotné registrace.
+     * Provádí administrátorskou změnu stavu registrace.
      *
-     * @param matchId  ID zápasu
-     * @param playerId ID hráče
-     * @param status   cílový status registrace (mimo NO_EXCUSED)
-     * @return DTO aktualizované registrace
+     * Před změnou se ověří existence zápasu, hráče i registrace. Stav NO_EXCUSED se touto metodou nenastavuje,
+     * protože pro tento stav se používá samostatná operace s vlastní business logikou.
+     *
+     * @param matchId Identifikátor zápasu, pro který se stav upravuje.
+     * @param playerId Identifikátor hráče, jehož registrace se upravuje.
+     * @param status Cílový stav registrace, který se má nastavit.
+     * @return DTO aktualizované registrace po změně stavu.
      */
     @Override
     @Transactional
@@ -594,18 +639,30 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return matchRegistrationMapper.toDTO(updated);
     }
 
-
     // ====================================================
     // PRIVÁTNÍ HELPERY – NAČÍTÁNÍ ENTIT A ZÁKLADNÍ LOGIKA
     // ====================================================
 
     // TODO - možná změnit Object context na MatchRegistrationEntity entity
+    /**
+     * Deleguje odeslání notifikace hráči do NotificationService.
+     *
+     * Metoda se používá pro centralizaci volání notifikační služby a předání kontextu,
+     * který se použije při sestavení obsahu notifikace.
+     *
+     * @param player Hráč, kterému se notifikace odesílá.
+     * @param type Typ notifikace určující šablonu a význam zprávy.
+     * @param context Kontext notifikace, který se předává do notifikační vrstvy.
+     */
     private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {
         notificationService.notifyPlayer(player, type, context);
     }
 
     /**
-     * Vrátí množinu ID hráčů, kteří mají k zápasu nějakou registraci.
+     * Vrací množinu identifikátorů hráčů, kteří mají k zápasu uloženou registraci v jakémkoliv stavu.
+     *
+     * @param matchId Identifikátor zápasu, pro který se ID hráčů načítají.
+     * @return Množina identifikátorů hráčů, kteří na zápas reagovali vytvořením registrace.
      */
     private Set<Long> getRespondedPlayerIds(Long matchId) {
         return registrationRepository.findByMatchId(matchId).stream()
@@ -614,7 +671,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Najde zápas podle ID nebo vyhodí MatchNotFoundException.
+     * Načítá zápas podle identifikátoru nebo vyhazuje výjimku při neexistenci.
+     *
+     * @param matchId Identifikátor zápasu.
+     * @return Načtená entita zápasu.
      */
     private MatchEntity getMatchOrThrow(Long matchId) {
         return matchRepository.findById(matchId)
@@ -622,7 +682,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Najde hráče podle ID nebo vyhodí PlayerNotFoundException.
+     * Načítá hráče podle identifikátoru nebo vyhazuje výjimku při neexistenci.
+     *
+     * @param playerId Identifikátor hráče.
+     * @return Načtená entita hráče.
      */
     private PlayerEntity getPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)
@@ -630,7 +693,11 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Vrátí registraci hráče na zápas, pokud existuje, jinak null.
+     * Načítá registraci hráče na zápas, pokud existuje.
+     *
+     * @param playerId Identifikátor hráče.
+     * @param matchId Identifikátor zápasu.
+     * @return Entita registrace, nebo null pokud registrace neexistuje.
      */
     private MatchRegistrationEntity getRegistrationOrNull(Long playerId, Long matchId) {
         return registrationRepository
@@ -639,7 +706,11 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Vrátí registraci hráče na zápas nebo vyhodí RegistrationNotFoundException.
+     * Načítá registraci hráče na zápas nebo vyhazuje výjimku při neexistenci.
+     *
+     * @param playerId Identifikátor hráče.
+     * @param matchId Identifikátor zápasu.
+     * @return Načtená entita registrace.
      */
     private MatchRegistrationEntity getRegistrationOrThrow(Long playerId, Long matchId) {
         return registrationRepository
@@ -648,7 +719,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Zjistí, zda je ve zápase ještě volné místo pro stav REGISTERED.
+     * Vyhodnocuje, zda je v zápase dostupné místo pro registraci ve stavu REGISTERED.
+     *
+     * @param match Zápas, pro který se dostupnost místa vyhodnocuje.
+     * @return True, pokud počet registrovaných hráčů nedosahuje kapacity zápasu, jinak false.
      */
     private boolean isSlotAvailable(MatchEntity match) {
         long registeredCount = registrationRepository
@@ -659,10 +733,13 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     // TODO - ŘEŠENO NOTIFIKACEMI - ASI SMAZAT
 
     /**
-     * Bezpečně odešle SMS hráči z registrace.
-     * <p>
-     * Pokud je registrace nebo hráč null, metoda nic neprovede.
-     * Chyby při odesílání jsou pouze zalogovány.
+     * Odesílá SMS zprávu hráči navázanému na registraci, pokud je k dispozici telefonní číslo.
+     *
+     * Pokud registrace nebo hráč neexistují, metoda se ukončí bez provedení. Telefonní číslo se vyhodnocuje
+     * primárně z nastavení hráče a sekundárně z hodnoty uložené na hráči. Případné chyby při odesílání se pouze zalogují.
+     *
+     * @param registration Registrace, pro kterou se zpráva odesílá.
+     * @param message Text SMS zprávy.
      */
     private void sendSms(MatchRegistrationEntity registration, String message) {
         if (registration == null || registration.getPlayer() == null) {
@@ -697,15 +774,16 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Společná metoda pro změnu statusu registrace.
-     * <p>
-     * Nastaví nový status, případně aktualizuje čas změny
-     * a informaci o tom, kdo změnu provedl, a registraci uloží.
+     * Aktualizuje stav registrace a ukládá změnu do databáze.
      *
-     * @param registration    registrace ke změně
-     * @param status          nový status
-     * @param updatedBy       identifikace původce změny (user, admin, system)
-     * @param updateTimestamp příznak, zda má být přepsán čas na aktuální
+     * V rámci změny se nastaví nový stav, identifikace původce změny a volitelně se aktualizuje čas změny.
+     * Zápis se provádí přes repository vrstvu s okamžitým flush pro zajištění konzistence následných operací.
+     *
+     * @param registration Registrace, která se má aktualizovat.
+     * @param status Cílový stav registrace.
+     * @param updatedBy Identifikace původce změny.
+     * @param updateTimestamp Příznak určující, zda se má nastavit aktuální čas změny.
+     * @return Uložená entita registrace po změně stavu.
      */
     private MatchRegistrationEntity updateRegistrationStatus(
             MatchRegistrationEntity registration,
@@ -722,9 +800,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Převede status registrace na odpovídající typ notifikace.
-     * <p>
-     * Pokud se pro daný status notifikace neposílá, vrací se null.
+     * Mapuje stav registrace na typ notifikace.
+     *
+     * Pokud se pro daný stav notifikace neodesílá, vrací se null.
+     *
+     * @param newStatus Stav registrace, pro který se typ notifikace vyhodnocuje.
+     * @return Typ notifikace odpovídající stavu, nebo null pokud se notifikace neposílá.
      */
     private NotificationType resolveNotificationType(PlayerMatchStatus newStatus) {
         return switch (newStatus) {
@@ -740,19 +821,22 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Pomocná metoda pro získání aktuálního času.
-     * <p>
-     * Oddělení do samostatné metody usnadňuje testování.
+     * Vrací aktuální čas.
+     *
+     * Metoda se používá pro sjednocení přístupu k času a pro usnadnění testování.
+     *
+     * @return Aktuální čas jako LocalDateTime.
      */
     private LocalDateTime now() {
         return LocalDateTime.now();
     }
 
     /**
-     * Ověří, že zápas patří do aktivní sezóny.
-     * <p>
-     * Metoda se používá před zápisem registrace, aby se zabránilo
-     * změnám v neaktivních sezónách.
+     * Ověřuje, že zápas patří do aktivní sezóny.
+     *
+     * Kontrola se používá před zápisem registrace, aby se zabránilo změnám v neaktivních sezónách.
+     *
+     * @param match Zápas, který se má ověřit.
      */
     private void assertMatchInActiveSeason(MatchEntity match) {
         if (match.getSeason() == null || !match.getSeason().isActive()) {
@@ -763,11 +847,13 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Ověří, zda aktuálně přihlášený uživatel může měnit registraci na daný zápas.
-     * <p>
-     * Uživatel s rolí ADMIN nebo MANAGER není časově omezen.
-     * Uživatel s rolí PLAYER může registraci měnit pouze
-     * v definovaném časovém okně kolem začátku zápasu.
+     * Ověřuje, zda aktuálně přihlášený uživatel může měnit registraci na daný zápas.
+     *
+     * Uživatel s rolí ADMIN nebo MANAGER není časově omezen. Uživatel s rolí PLAYER může registraci měnit pouze
+     * v definovaném časovém okně po začátku zápasu. Při porušení pravidel se vyhazuje výjimka signalizující
+     * nepovolenou změnu.
+     *
+     * @param match Zápas, pro který se oprávnění vyhodnocuje.
      */
     private void assertPlayerCanModifyMatch(MatchEntity match) {
         if (!isCurrentUserPlayer()) {
@@ -782,13 +868,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Zjistí, zda je zápas ještě v časovém okně, ve kterém může hráč měnit registraci.
-     * <p>
-     * Zápas je považován za editovatelný pro hráče do třiceti minut
-     * po začátku zápasu. Po uplynutí této doby už změna registrace není povolena.
+     * Vyhodnocuje, zda je zápas v časovém okně, ve kterém může hráč měnit registraci.
      *
-     * @param match zápas, ke kterému se vztahuje registrace
-     * @return true, pokud je změna registrace ještě povolena
+     * Zápas se považuje za editovatelný pro hráče do třiceti minut po začátku zápasu.
+     *
+     * @param match Zápas, ke kterému se editovatelnost vyhodnocuje.
+     * @return True, pokud je změna registrace ještě povolena, jinak false.
      */
     private boolean isMatchEditableForPlayer(MatchEntity match) {
         LocalDateTime editLimit = match.getDateTime().plusMinutes(30);
@@ -796,12 +881,11 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Zjistí, zda má aktuálně přihlášený uživatel roli ROLE_PLAYER.
-     * <p>
-     * Metoda se používá pro odlišení časového omezení
-     * oproti administrátorům nebo manažerům.
+     * Vyhodnocuje, zda má aktuálně přihlášený uživatel roli ROLE_PLAYER.
      *
-     * @return true, pokud má uživatel roli PLAYER, jinak false
+     * Metoda se používá pro aplikaci časového omezení, které se vztahuje pouze na hráče.
+     *
+     * @return True, pokud má uživatel roli ROLE_PLAYER, jinak false.
      */
     private boolean isCurrentUserPlayer() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -818,10 +902,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     // ======================================
 
     /**
-     * Zjistí, zda daný zápas patří do aktuálně vybrané sezóny.
-     * <p>
-     * Porovnává se identifikátor sezóny zápasu s identifikátorem,
-     * který vrací metoda getCurrentSeasonIdOrActive.
+     * Vyhodnocuje, zda zápas patří do aktuálně vybrané sezóny.
+     *
+     * Porovnává se identifikátor sezóny zápasu s identifikátorem sezóny vráceným metodou getCurrentSeasonIdOrActive.
+     *
+     * @param match Zápas, který se má vyhodnotit.
+     * @return True, pokud zápas patří do aktuální sezóny, jinak false.
      */
     private boolean isMatchInCurrentSeason(MatchEntity match) {
         if (match == null || match.getSeason() == null) {
@@ -832,7 +918,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Zjistí, zda registrace patří k zápasu v aktuálně vybrané sezóně.
+     * Vyhodnocuje, zda registrace patří k zápasu v aktuálně vybrané sezóně.
+     *
+     * @param registration Registrace, která se má vyhodnotit.
+     * @return True, pokud registrace patří do aktuální sezóny, jinak false.
      */
     private boolean isRegistrationInCurrentSeason(MatchRegistrationEntity registration) {
         if (registration == null) {
@@ -842,13 +931,12 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     }
 
     /**
-     * Vrátí identifikátor sezóny, která se má použít pro filtrování registrací.
-     * <p>
-     * Nejprve se použije sezóna uložená v CurrentSeasonService.
-     * Pokud není k dispozici, použije se globálně aktivní sezóna
-     * ze SeasonService.
+     * Vrací identifikátor sezóny používané pro filtrování registrací.
      *
-     * @return ID aktuální nebo aktivní sezóny
+     * Primárně se používá sezóna uložená v CurrentSeasonService. Pokud není k dispozici, použije se
+     * globálně aktivní sezóna získaná ze SeasonService.
+     *
+     * @return Identifikátor aktuální nebo aktivní sezóny.
      */
     private Long getCurrentSeasonIdOrActive() {
         Long id = currentSeasonService.getCurrentSeasonIdOrDefault();

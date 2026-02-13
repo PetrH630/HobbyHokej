@@ -17,17 +17,21 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * HTTP filtr, který umožňuje administrátorovi dočasně zastoupit hráče.
+ * HTTP filtr umožňující administrátorovi dočasně vystupovat jménem hráče.
  *
- * Filtr čte hlavičku {@code X-Impersonate-PlayerId} a pokud je uživatel přihlášen
- * a má roli ADMIN, nastaví do {@link ImpersonationContext} identifikátor hráče,
- * který se má v daném requestu považovat za aktuálního.
+ * Filtr zpracovává hlavičku X-Impersonate-PlayerId. Pokud je hlavička přítomna,
+ * ověřuje se, že aktuálně přihlášený uživatel má roli ADMIN. Následně se kontroluje,
+ * že cílový hráč existuje a je ve stavu APPROVED.
  *
- * Filtr ověřuje, že hráč existuje a je ve stavu {@link PlayerStatus#APPROVED}.
- * V případě chyby vrací odpověď 403 a request dál nepokračuje.
+ * Pokud jsou všechny podmínky splněny, nastaví se identifikátor hráče
+ * do {@link ImpersonationContext}. Hodnota je uložena pomocí ThreadLocal
+ * a platí pouze po dobu zpracování jednoho HTTP požadavku.
  *
- * Identifikátor zastoupeného hráče se neukládá do session a platí pouze pro
- * daný request.
+ * V případě porušení pravidel je vrácena odpověď se statusem 403
+ * a zpracování requestu nepokračuje.
+ *
+ * Filtr je navržen jako bezpečnostní vrstva nad aplikační logikou
+ * a neukládá informace o impersonaci do session.
  */
 public class ImpersonationFilter extends OncePerRequestFilter {
 
@@ -41,6 +45,16 @@ public class ImpersonationFilter extends OncePerRequestFilter {
         this.playerRepository = playerRepository;
     }
 
+    /**
+     * Určuje, zda má být filtr přeskočen.
+     *
+     * Filtr se neaplikuje na autentizační endpointy, veřejné cesty,
+     * chybové stránky a favicon, aby nedocházelo k interferenci
+     * s přihlašovacím procesem nebo veřejnými zdroji.
+     *
+     * @param request Aktuální HTTP požadavek.
+     * @return True, pokud se filtr nemá aplikovat, jinak false.
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
@@ -50,6 +64,27 @@ public class ImpersonationFilter extends OncePerRequestFilter {
                 || path.startsWith("/favicon.ico");
     }
 
+    /**
+     * Zpracovává HTTP požadavek a případně aktivuje impersonaci hráče.
+     *
+     * Pokud hlavička X-Impersonate-PlayerId není přítomna, request pokračuje
+     * bez zásahu. Pokud je přítomna, provádí se následující kontroly:
+     * - uživatel musí být přihlášen,
+     * - uživatel musí mít roli ADMIN,
+     * - identifikátor hráče musí být validní,
+     * - hráč musí existovat a být ve stavu APPROVED.
+     *
+     * Při splnění podmínek se identifikátor hráče nastaví do
+     * {@link ImpersonationContext}. Po dokončení requestu se kontext
+     * vždy vyčistí v bloku finally, aby nedošlo k úniku hodnoty
+     * mezi jednotlivými požadavky.
+     *
+     * @param request HTTP požadavek.
+     * @param response HTTP odpověď.
+     * @param filterChain Řetězec filtrů, do kterého se deleguje další zpracování.
+     * @throws ServletException Pokud dojde k chybě na úrovni servletu.
+     * @throws IOException Pokud dojde k chybě při zápisu odpovědi.
+     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -110,11 +145,25 @@ public class ImpersonationFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Vyhodnocuje, zda má uživatel roli ADMIN.
+     *
+     * @param authentication Autentizační objekt aktuálního uživatele.
+     * @return True, pokud uživatel má roli ADMIN, jinak false.
+     */
     private boolean hasRoleAdmin(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
     }
 
+    /**
+     * Pokusí se převést textovou hodnotu na Long.
+     *
+     * Pokud převod selže, vrací se null.
+     *
+     * @param v Textová hodnota z hlavičky.
+     * @return Identifikátor hráče jako Long, nebo null při chybě.
+     */
     private Long parseLongOrNull(String v) {
         try {
             return Long.parseLong(v.trim());
@@ -123,6 +172,15 @@ public class ImpersonationFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Zapíše do odpovědi HTTP status 403 s JSON tělem.
+     *
+     * Metoda se používá při porušení pravidel impersonace.
+     *
+     * @param response HTTP odpověď.
+     * @param message Text chybové zprávy.
+     * @throws IOException Pokud dojde k chybě při zápisu odpovědi.
+     */
     private void writeForbidden(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -130,6 +188,12 @@ public class ImpersonationFilter extends OncePerRequestFilter {
         response.getWriter().write("{\"status\":\"forbidden\",\"message\":\"" + escapeJson(message) + "\"}");
     }
 
+    /**
+     * Escapuje text pro bezpečné vložení do JSON odpovědi.
+     *
+     * @param s Vstupní text.
+     * @return Escapovaný text.
+     */
     private String escapeJson(String s) {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
