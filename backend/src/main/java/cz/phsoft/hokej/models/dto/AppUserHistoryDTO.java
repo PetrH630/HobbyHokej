@@ -42,8 +42,6 @@ public class AppUserHistoryDTO {
     private Role role;
     private boolean enabled;
 
-    // gettery / settery
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

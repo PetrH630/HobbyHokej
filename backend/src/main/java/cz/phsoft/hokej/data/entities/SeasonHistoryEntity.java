@@ -61,8 +61,6 @@ public class SeasonHistoryEntity {
     @Column(name = "created_by_user_id")
     private Long createdByUserId;
 
-    // gettery / settery
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

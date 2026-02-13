@@ -129,7 +129,7 @@ public class PlayerInactivityPeriodController {
      * @return HTTP odpověď 204 No Content v případě úspěchu
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

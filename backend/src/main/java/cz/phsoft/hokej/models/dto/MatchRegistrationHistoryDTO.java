@@ -31,7 +31,7 @@ public class MatchRegistrationHistoryDTO {
     private PlayerMatchStatus status;
     private Team team;
 
-    // gettery / settery
+
 
     public Long getId() { return id; }
 

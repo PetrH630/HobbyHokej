@@ -798,7 +798,7 @@ public class DataInitializer {
      */
     private LocalDateTime randomTimestampForDemoData() {
         LocalDateTime from = LocalDateTime.of(2024, 11, 1, 0, 0);
-        LocalDateTime to = LocalDateTime.of(2025, 12, 20, 23, 59);
+        LocalDateTime to = LocalDateTime.of(2025, 2, 10, 23, 59);
 
         long fromEpoch = from.toEpochSecond(ZoneOffset.UTC);
         long toEpoch = to.toEpochSecond(ZoneOffset.UTC);

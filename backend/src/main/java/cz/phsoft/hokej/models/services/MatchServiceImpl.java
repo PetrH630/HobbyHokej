@@ -1097,7 +1097,8 @@ public class MatchServiceImpl implements MatchService {
 
         registrations.stream()
                 .filter(reg -> reg.getStatus() == PlayerMatchStatus.REGISTERED
-                        || reg.getStatus() == PlayerMatchStatus.RESERVED)
+                        || reg.getStatus() == PlayerMatchStatus.RESERVED
+                        || reg.getStatus() == PlayerMatchStatus.SUBSTITUTE)
                 .forEach(reg -> {
                     PlayerEntity player = reg.getPlayer();
 
@@ -1114,6 +1115,10 @@ public class MatchServiceImpl implements MatchService {
                                 player,
                                 NotificationType.MATCH_CANCELED,
                                 match
+                        );
+                        logger.info("CANCEL notify: matchId={}, regs={}",
+                                match.getId(),
+                                registrations.stream().map(r -> r.getStatus().name()).toList()
                         );
                     }
 

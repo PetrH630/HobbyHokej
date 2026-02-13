@@ -122,7 +122,6 @@ public class ApiError {
         this.details = details;
     }
 
-    // gettery a setter
     /**
      * Vrací čas vzniku chybové odpovědi.
      *

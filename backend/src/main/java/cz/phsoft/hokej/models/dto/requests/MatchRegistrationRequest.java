@@ -93,7 +93,7 @@ public class MatchRegistrationRequest {
      */
     private boolean substitute;
 
-    // --- gettery / settery ---
+
 
     public Long getPlayerId() {
         return playerId;

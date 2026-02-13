@@ -93,6 +93,12 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         NotificationDecision decision = notificationPreferencesService.evaluate(player, type);
+        log.info("notifyPlayer decision: type={}, playerId={}, sendUserEmail={}, sendPlayerEmail={}, sendSms={}",
+                type, player.getId(),
+                decision.isSendEmailToUser(),
+                decision.isSendEmailToPlayer(),
+                decision.isSendSmsToPlayer()
+        );
 
         // E-mail pro uživatele (AppUser).
         if (decision.isSendEmailToUser() && decision.getUserEmail() != null) {

@@ -25,7 +25,7 @@ public class ChangePasswordDTO {
     @NotBlank(message = "Potvrzení nového hesla je povinné.")
     private String newPasswordConfirm;
 
-    // gettery / settery
+
 
     public String getOldPassword() { return oldPassword; }
     public void setOldPassword(String oldPassword) { this.oldPassword = oldPassword; }

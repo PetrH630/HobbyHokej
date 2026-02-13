@@ -89,9 +89,7 @@ public class AppUserSettingsDTO {
      */
     private String defaultLandingPage;
 
-    // gettery / settery
-
-    public String getPlayerSelectionMode() {
+     public String getPlayerSelectionMode() {
         return playerSelectionMode;
     }
 

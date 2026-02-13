@@ -90,7 +90,7 @@ public class MatchRegistrationDTO {
         this.team = team;
     }
 
-    // gettery / settery
+
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
