@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.security.impersonation.ImpersonationFilter;
 
 import java.util.List;
 
@@ -55,9 +57,12 @@ public class SecurityConfig {
     @Value("${app.demo-mode:false}")
     private boolean isDemoMode;
 
+    private final PlayerRepository playerRepository;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService,
+                          PlayerRepository playerRepository) {
         this.userDetailsService = userDetailsService;
+        this.playerRepository = playerRepository;
     }
 
     // Password encoder
@@ -191,6 +196,11 @@ public class SecurityConfig {
 
                     .addFilterAt(
                             new CustomJsonLoginFilter("/api/auth/login", authManager),
+                            UsernamePasswordAuthenticationFilter.class
+                    )
+
+                    .addFilterAfter(
+                            new ImpersonationFilter(playerRepository),
                             UsernamePasswordAuthenticationFilter.class
                     )
 

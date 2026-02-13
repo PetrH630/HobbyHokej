@@ -10,6 +10,9 @@ import api from "./axios";
  * GET /api/players/me
  */
 export const getMyPlayers = async () => {
+    
+    
+    
     const res = await api.get("/players/me");
     return res.data;
 };
@@ -80,7 +83,7 @@ export const getAllPlayersAdmin = async () => {
  * GET /api/players/{id}
  * Role: ADMIN, MANAGER
  */
-export const getPlayerByIdAdmin = async (id) => {
+export const getPlayerById = async (id) => {
     const res = await api.get(`/players/${id}`);
     return res.data;
 };

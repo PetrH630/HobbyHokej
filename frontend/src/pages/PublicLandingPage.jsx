@@ -42,12 +42,15 @@ const PublicLandingPage = () => {
                             {/* LEFT */}
                             <div className="col-lg-7">
 
-                                <div className="mb-3 text-center">
+                                <div className="mb-4 d-flex justify-content-center">
                                     <img
                                         src="/hockey-clipart.svg"
                                         alt="Logo"
-                                        style={{ height: "120px" }}
-                                        
+                                        className="img-fluid"
+                                        style={{
+                                            maxWidth: "clamp(120px, 30vw, 220px)",
+                                            height: "auto"
+                                        }}
                                     />
                                 </div>
 
