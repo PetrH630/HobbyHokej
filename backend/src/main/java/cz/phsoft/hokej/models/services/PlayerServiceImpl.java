@@ -174,7 +174,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         return playerMapper.toDTO(saved);
     }
-
+    // TODO - Nebude probíhat mazání hráče - bude nastaven statut ARCHIVED
     /**
      * Smaže hráče podle ID.
      *

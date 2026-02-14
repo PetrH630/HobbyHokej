@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
  * Volitelné pole usedAt umožňuje evidovat okamžik použití tokenu.
  */
 @Entity
+@Table(name = "forgotten_password_reset_token_entity")
 public class ForgottenPasswordResetTokenEntity {
 
     @Id

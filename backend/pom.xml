@@ -83,14 +83,7 @@
         <version>0.11.5</version>
         <scope>runtime</scope>
     </dependency>
-    <dependency>
-        <groupId>io.jsonwebtoken</groupId>
-        <artifactId>jjwt-jackson</artifactId> <!-- nebo jjwt-gson -->
-        <version>0.11.5</version>
-        <scope>runtime</scope>
-    </dependency>
-
-        <dependency>
+            <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-envers</artifactId>
         </dependency>
@@ -134,7 +127,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Tohle je klíčové pro spustitelný Spring Boot JAR -->
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

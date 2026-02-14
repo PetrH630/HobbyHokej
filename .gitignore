@@ -66,7 +66,7 @@ application
 # Spring Boot – lokální konfigurace
 # =====================================
 src/main/resources/application-dev.properties
-src/main/resources/application-my-prod.properties
+src/main/resources/application-demo.properties
 src/main/resources/old-application.properties
 
 ### === Coverage & test artifacts ===
@@ -76,3 +76,4 @@ coverage/
 ### === Temporary files ===
 *.tmp
 *.swp
+/backend/src/main/resources/application-demo.properties
