@@ -16,6 +16,7 @@ import AdminMatchesTable from "../components/admin/AdminMatchesTable";
 import AdminMatchModal from "../components/admin/AdminMatchModal";
 import { useNotification } from "../context/NotificationContext";
 import CancelMatchModal from "../components/admin/CancelMatchModal";
+import BackButton from  "../components/BackButton";
 
 //  DEMO notifications
 import { useAppMode } from "../context/AppModeContext";
@@ -255,6 +256,8 @@ const AdminMatchesPage = () => {
     );
 
     return (
+        <>
+                <BackButton />
         <div className="container mt-4">
             <SeasonSelect />
 
@@ -316,6 +319,7 @@ const AdminMatchesPage = () => {
                 />
             )}
         </div>
+        </>
     );
 };
 

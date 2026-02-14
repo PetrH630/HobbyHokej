@@ -94,6 +94,17 @@ const App = () => (
             <Route path="settings" element={<SettingsPage />} />
             <Route path="my-inactivity" element={<MyInactivityPage />} />
 
+            
+            {/* TODO ADMIN/MANAGER – SPRÁVA */}
+            <Route
+              path="admin"
+              element={
+                <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+                  <AdminHomePage />
+                </RoleGuard>
+              }
+            />
+            
             {/* ADMIN/MANAGER – SPRÁVA HRÁČŮ */}
             <Route
               path="admin/players"

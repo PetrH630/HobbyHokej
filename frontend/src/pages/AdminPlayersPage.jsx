@@ -11,6 +11,7 @@ import { useAllPlayersAdminWithUsers } from "../hooks/useAllPlayersAdminWithUser
 import AdminPlayersTable from "../components/admin/AdminPlayersTable";
 import { useNotification } from "../context/NotificationContext";
 import AdminPlayerEditModal from "../components/admin/AdminPlayerEditModal";
+import BackButton from "../components/BackButton";
 
 /**
  * Stránka pro globální správu hráčů (ADMIN / MANAGER).
@@ -147,6 +148,8 @@ const AdminPlayersPage = () => {
     }, [players]);
 
     return (
+        <>
+        <BackButton />
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h1 className="h3 mb-0">Správa hráčů</h1>
@@ -178,6 +181,7 @@ const AdminPlayersPage = () => {
                 saving={editSaving}
             />
         </div>
+        </>
     );
 };
 

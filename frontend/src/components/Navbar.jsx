@@ -1,6 +1,6 @@
 // src/components/Navbar.jsx
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { AiOutlineClose } from "react-icons/ai";
 import { useAuth } from "../hooks/useAuth";
@@ -12,7 +12,6 @@ import "./Navbar.css";
 
 const Navbar = () => {
     const [showMenu, setShowMenu] = useState(false);
-    const [adminView, setAdminView] = useState(false); // přepíná Správa / hráčské menu na velkých
     const { user, logout } = useAuth();
     const {
         currentPlayer,
@@ -22,6 +21,9 @@ const Navbar = () => {
     } = useCurrentPlayer();
 
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const isAdminSection = location.pathname.startsWith("/app/admin");
 
     const toggleMenu = () => {
         setShowMenu((prev) => !prev);
@@ -29,10 +31,6 @@ const Navbar = () => {
 
     const closeMenu = () => {
         setShowMenu(false);
-    };
-
-    const toggleAdminView = () => {
-        setAdminView((prev) => !prev);
     };
 
     const handleLogout = async () => {
@@ -47,7 +45,24 @@ const Navbar = () => {
         await changeCurrentPlayer(Number(value));
     };
 
-    // Helper: hráčské linky (použijeme na desktopu uprostřed)
+    /**
+     * Přepínač Správa / Zavřít správu.
+     *
+     * Otevření Správy vždy přesměruje na AdminHomePage (/app/admin).
+     * Zavření Správy vrátí uživatele na hráčskou domovskou stránku (/app).
+     */
+    const handleAdminToggle = () => {
+        closeMenu();
+
+        if (isAdminSection) {
+            navigate("/app");
+            return;
+        }
+
+        navigate("/app/admin");
+    };
+
+    // Helper: hráčské linky (desktop uprostřed)
     const PlayerLinksInline = () => (
         <ul className="navbar-nav flex-row gap-3 mb-0">
             <RoleGuard roles={["ROLE_PLAYER", "ROLE_MANAGER"]}>
@@ -62,6 +77,7 @@ const Navbar = () => {
                         Hráč
                     </NavLink>
                 </li>
+
                 <li className="nav-item">
                     <NavLink
                         to="/app/matches"
@@ -73,6 +89,7 @@ const Navbar = () => {
                         Zápasy
                     </NavLink>
                 </li>
+
                 <li className="nav-item">
                     <NavLink
                         to="/app/settings"
@@ -84,6 +101,7 @@ const Navbar = () => {
                         Nastavení
                     </NavLink>
                 </li>
+
                 <li className="nav-item">
                     <NavLink
                         to="/app/my-inactivity"
@@ -105,6 +123,19 @@ const Navbar = () => {
             <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
                 <li className="nav-item">
                     <NavLink
+                        to="/app/admin"
+                        end
+                        className={({ isActive }) =>
+                            "nav-link" + (isActive ? " activeLink" : "")
+                        }
+                        onClick={closeMenu}
+                    >
+                        Přehled
+                    </NavLink>
+                </li>
+
+                <li className="nav-item">
+                    <NavLink
                         to="/app/admin/players"
                         className={({ isActive }) =>
                             "nav-link" + (isActive ? " activeLink" : "")
@@ -114,6 +145,7 @@ const Navbar = () => {
                         Hráči
                     </NavLink>
                 </li>
+
                 <li className="nav-item">
                     <NavLink
                         to="/app/admin/matches"
@@ -125,6 +157,7 @@ const Navbar = () => {
                         Zápasy
                     </NavLink>
                 </li>
+
                 <li className="nav-item">
                     <NavLink
                         to="/app/admin/seasons"
@@ -136,6 +169,7 @@ const Navbar = () => {
                         Sezóny
                     </NavLink>
                 </li>
+
                 <li className="nav-item">
                     <NavLink
                         to="/app/admin/inactivity"
@@ -147,6 +181,7 @@ const Navbar = () => {
                         Mimo
                     </NavLink>
                 </li>
+
                 <RoleGuard roles={["ROLE_ADMIN"]}>
                     <li className="nav-item">
                         <NavLink
@@ -162,6 +197,141 @@ const Navbar = () => {
                 </RoleGuard>
             </RoleGuard>
         </ul>
+    );
+
+    // Mobilní (stejné linky jako inline, jen vertikálně)
+    const PlayerLinksMobile = () => (
+        <RoleGuard roles={["ROLE_PLAYER", "ROLE_MANAGER"]}>
+            <nav className="mb-3">
+                <ul className="list-unstyled mb-2">
+                    <li>
+                        <NavLink
+                            to="/app/players"
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Hráč
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/app/matches"
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Zápasy
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/app/settings"
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Nastavení
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/app/my-inactivity"
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Mimo
+                        </NavLink>
+                    </li>
+                </ul>
+            </nav>
+        </RoleGuard>
+    );
+
+    const AdminLinksMobile = () => (
+        <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+            <div className="mb-2 fw-semibold">Správa:</div>
+            <nav className="mb-3">
+                <ul className="list-unstyled mb-2">
+                    <li>
+                        <NavLink
+                            to="/app/admin"
+                            end
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Přehled
+                        </NavLink>
+                    </li>
+
+                    <li>
+                        <NavLink
+                            to="/app/admin/players"
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Hráči
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/app/admin/matches"
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Zápasy
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/app/admin/seasons"
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Sezóny
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/app/admin/inactivity"
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Mimo
+                        </NavLink>
+                    </li>
+
+                    <RoleGuard roles={["ROLE_ADMIN"]}>
+                        <li>
+                            <NavLink
+                                to="/app/admin/users"
+                                className={({ isActive }) =>
+                                    "mobile-link" + (isActive ? " activeLink" : "")
+                                }
+                                onClick={closeMenu}
+                            >
+                                Uživatelé
+                            </NavLink>
+                        </li>
+                    </RoleGuard>
+                </ul>
+            </nav>
+        </RoleGuard>
     );
 
     return (
@@ -192,14 +362,14 @@ const Navbar = () => {
                                 <button
                                     type="button"
                                     className="btn btn-outline-secondary btn-sm me-2"
-                                    onClick={toggleAdminView}
+                                    onClick={handleAdminToggle}
                                 >
-                                    {adminView ? "Zavřít správu" : "Správa"}
+                                    {isAdminSection ? "Zavřít správu" : "Správa"}
                                 </button>
                             </RoleGuard>
 
-                            {/* Podle stavu adminView zobrazíme hráčské nebo admin linky */}
-                            {adminView ? <AdminLinksInline /> : <PlayerLinksInline />}
+                            {/* Podle URL zobrazíme hráčské nebo admin linky */}
+                            {isAdminSection ? <AdminLinksInline /> : <PlayerLinksInline />}
                         </div>
                     </div>
 
@@ -345,120 +515,18 @@ const Navbar = () => {
             {/* MOBILNÍ MENU – vyjíždí zleva */}
             <div className={"mobile-menu" + (showMenu ? " open" : "")}>
                 <div className="mobile-menu-inner">
-                    <RoleGuard roles={["ROLE_PLAYER", "ROLE_MANAGER"]}>
-                        <nav className="mb-3">
-                            <ul className="list-unstyled mb-2">
-                                <li>
-                                    <NavLink
-                                        to="/app/players"
-                                        className={({ isActive }) =>
-                                            "mobile-link" + (isActive ? " activeLink" : "")
-                                        }
-                                        onClick={closeMenu}
-                                    >
-                                        Hráč
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink
-                                        to="/app/matches"
-                                        className={({ isActive }) =>
-                                            "mobile-link" + (isActive ? " activeLink" : "")
-                                        }
-                                        onClick={closeMenu}
-                                    >
-                                        Zápasy
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink
-                                        to="/app/settings"
-                                        className={({ isActive }) =>
-                                            "mobile-link" + (isActive ? " activeLink" : "")
-                                        }
-                                        onClick={closeMenu}
-                                    >
-                                        Nastavení
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink
-                                        to="/app/my-inactivity"
-                                        className={({ isActive }) =>
-                                            "mobile-link" + (isActive ? " activeLink" : "")
-                                        }
-                                        onClick={closeMenu}
-                                    >
-                                        Mimo
-                                    </NavLink>
-                                </li>
-                            </ul>
-                        </nav>
-                    </RoleGuard>
+                    <PlayerLinksMobile />
+                    <AdminLinksMobile />
 
+                    {/* Mobilní Správa tlačítko (rychlý přechod na /app/admin) */}
                     <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
-                        <div className="mb-2 fw-semibold">Správa:</div>
-                        <nav className="mb-3">
-                            <ul className="list-unstyled mb-2">
-                                <li>
-                                    <NavLink
-                                        to="/app/admin/players"
-                                        className={({ isActive }) =>
-                                            "mobile-link" + (isActive ? " activeLink" : "")
-                                        }
-                                        onClick={closeMenu}
-                                    >
-                                        Hráči
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink
-                                        to="/app/admin/matches"
-                                        className={({ isActive }) =>
-                                            "mobile-link" + (isActive ? " activeLink" : "")
-                                        }
-                                        onClick={closeMenu}
-                                    >
-                                        Zápasy
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink
-                                        to="/app/admin/seasons"
-                                        className={({ isActive }) =>
-                                            "mobile-link" + (isActive ? " activeLink" : "")
-                                        }
-                                        onClick={closeMenu}
-                                    >
-                                        Sezóny
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink
-                                        to="/app/admin/inactivity"
-                                        className={({ isActive }) =>
-                                            "mobile-link" + (isActive ? " activeLink" : "")
-                                        }
-                                        onClick={closeMenu}
-                                    >
-                                        Mimo
-                                    </NavLink>
-                                </li>
-                                <RoleGuard roles={["ROLE_ADMIN"]}>
-                                    <li>
-                                        <NavLink
-                                            to="/app/admin/users"
-                                            className={({ isActive }) =>
-                                                "mobile-link" + (isActive ? " activeLink" : "")
-                                            }
-                                            onClick={closeMenu}
-                                        >
-                                            Uživatelé
-                                        </NavLink>
-                                    </li>
-                                </RoleGuard>
-                            </ul>
-                        </nav>
+                        <button
+                            type="button"
+                            className="btn btn-outline-secondary w-100 mt-2"
+                            onClick={handleAdminToggle}
+                        >
+                            {isAdminSection ? "Zavřít správu" : "Správa"}
+                        </button>
                     </RoleGuard>
 
                     {user && (
