@@ -2,11 +2,13 @@ package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.PlayerHistoryDTO;
+import cz.phsoft.hokej.models.dto.PlayerStatsDTO;
 import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.models.dto.requests.ChangePlayerUserRequest;
 import cz.phsoft.hokej.models.services.CurrentPlayerService;
 import cz.phsoft.hokej.models.services.PlayerHistoryService;
 import cz.phsoft.hokej.models.services.PlayerService;
+import cz.phsoft.hokej.models.services.PlayerStatsService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,13 +35,16 @@ public class PlayerController {
     private final PlayerService playerService;
     private final CurrentPlayerService currentPlayerService;
     private final PlayerHistoryService playerHistoryService;
+    private final PlayerStatsService playerStatsService;
 
     public PlayerController(PlayerService playerService,
                             CurrentPlayerService currentPlayerService,
-                            PlayerHistoryService playerHistoryService) {
+                            PlayerHistoryService playerHistoryService,
+                            PlayerStatsService playerStatsService) {
         this.playerService = playerService;
         this.currentPlayerService = currentPlayerService;
         this.playerHistoryService = playerHistoryService;
+        this.playerStatsService = playerStatsService;
     }
 
     // ADMIN / MANAGER – globální správa hráčů
@@ -264,5 +269,37 @@ public class PlayerController {
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
         return playerHistoryService.getHistoryForPlayer(currentPlayerId);
     }
+
+
+    /**
+     * Vrací statistiky pro aktuálně zvoleného hráče přihlášeného uživatele.
+     *
+     * Identita hráče se získává z {@link CurrentPlayerService}. Endpoint
+     * je určen pro zobrazení statistik k zápasům vlastním hráčem.
+     *
+     * @return seznam {@link PlayerStatsDTO} představujících statistiky aktuálního hráče
+     */
+    @GetMapping("/me/stats")
+    @PreAuthorize("isAuthenticated()")
+    public PlayerStatsDTO getMyPlayerStats() {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return playerStatsService.getPlayerStats(currentPlayerId);
+    }
+
+    /**
+     * Vrací statistiky pro aktuálně zvoleného hráče přihlášeného uživatele.
+     *
+     * je určen pro zobrazení statistik k zápasům hráče dle jeho ide.
+     * @param playerId ID hráče
+     * @return seznam {@link PlayerStatsDTO} představujících statistiky hráče dle id
+     */
+    @GetMapping("/{playerId}/stats")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public PlayerStatsDTO getPlayerStats(@PathVariable Long playerId) {
+        return playerStatsService.getPlayerStats(playerId);
+    }
+
+
 
 }

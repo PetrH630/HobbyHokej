@@ -8,6 +8,7 @@ import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerStatsDTO;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.EnumMap;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  * na související služby (aktuální sezóna, aktivní sezóna, období neaktivity,
  * registrace zápasů).
  */
+@Service
 public class PlayerStatsServiceImpl implements PlayerStatsService {
 
     private final PlayerRepository playerRepository;
