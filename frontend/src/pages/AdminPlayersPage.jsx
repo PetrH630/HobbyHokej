@@ -149,38 +149,38 @@ const AdminPlayersPage = () => {
 
     return (
         <>
-        <BackButton />
-        <div className="container mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-                <h1 className="h3 mb-0">Správa hráčů</h1>
+            <BackButton />
+            <div className="container mt-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h1 className="h3 mb-0">Správa hráčů</h1>
+                </div>
+
+                <p className="text-muted mb-3">
+                    Zde může administrátor (a částečně manažer) spravovat všechny
+                    hráče v systému. Akce schválit / zamítnout / upravit / smazat /
+                    změnit uživatele jsou dostupné pouze uživatelům s rolí ADMIN.
+                </p>
+
+                <AdminPlayersTable
+                    players={sortedPlayers}
+                    loading={loading}
+                    error={error}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onChangeUser={handleChangeUser}
+                />
+
+                {/* Modal pro úpravu hráče */}
+                <AdminPlayerEditModal
+                    player={editingPlayer}
+                    show={!!editingPlayer}
+                    onClose={handleCloseEdit}
+                    onSave={handleSaveEdit}
+                    saving={editSaving}
+                />
             </div>
-
-            <p className="text-muted mb-3">
-                Zde může administrátor (a částečně manažer) spravovat všechny
-                hráče v systému. Akce schválit / zamítnout / upravit / smazat /
-                změnit uživatele jsou dostupné pouze uživatelům s rolí ADMIN.
-            </p>
-
-            <AdminPlayersTable
-                players={sortedPlayers}
-                loading={loading}
-                error={error}
-                onApprove={handleApprove}
-                onReject={handleReject}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onChangeUser={handleChangeUser}
-            />
-
-            {/* Modal pro úpravu hráče */}
-            <AdminPlayerEditModal
-                player={editingPlayer}
-                show={!!editingPlayer}
-                onClose={handleCloseEdit}
-                onSave={handleSaveEdit}
-                saving={editSaving}
-            />
-        </div>
         </>
     );
 };

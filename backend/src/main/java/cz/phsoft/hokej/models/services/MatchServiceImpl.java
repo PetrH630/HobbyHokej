@@ -805,7 +805,6 @@ public class MatchServiceImpl implements MatchService {
      * @param playerId Identifikátor hráče, pro kterého se přehled sestavuje.
      * @return Seznam přehledů proběhlých zápasů převedených do {@link MatchOverviewDTO}.
      */
-    // TODO - OD DATA VYTVOŘENÍ HRÁČE
     @Override
     public List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
