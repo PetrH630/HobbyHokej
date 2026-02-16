@@ -11,7 +11,6 @@ import Players from "./pages/PlayersPage";
 import CreatePlayer from "./pages/CreatePlayer";
 import MatchDetailPage from "./pages/MatchDetailPage";
 import SettingsPage from "./pages/SettingsPage";
-import { AuthProvider } from "./hooks/useAuth";
 import ForgottenPasswordRequestPage from "./pages/ForgottenPasswordRequestPage";
 import ForgottenPasswordResetPage from "./pages/ForgottenPasswordResetPage";
 import { CurrentPlayerProvider } from "./hooks/useCurrentPlayer";
@@ -28,150 +27,148 @@ import AdminHomePage from "./pages/AdminHomePage";
 import AdminPlayersPage from "./pages/AdminPlayersPage";
 import RoleGuard from "./components/RoleGuard";
 
-//ADMIN MATCHES
+// ADMIN MATCHES
 import AdminMatchesPage from "./pages/AdminMatchesPage";
 
-//  ADMIN SEASONS
+// ADMIN SEASONS
 import AdminSeasonsPage from "./pages/AdminSeasonsPage";
 
-//  ADMIN USERS
+// ADMIN USERS
 import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminUserDetailPage from "./pages/AdminUserDetailPage";
 
-//  DEMO MODE CONTEXT
+// DEMO MODE CONTEXT
 import { AppModeProvider } from "./context/AppModeContext";
 
-//  veřejná úvodní stránka před loginem
+// veřejná úvodní stránka před loginem
 import PublicLandingPage from "./pages/PublicLandingPage";
 
-//  veřejný layout s topBarem
+// veřejný layout s topBarem
 import PublicLayout from "./pages/PublicLayout";
 
 const App = () => (
-  <AuthProvider>
-    <AppModeProvider>
-      <BrowserRouter>
-        <ScrollToTop resetPrefixes={["/"]} />
+  <AppModeProvider>
+    <BrowserRouter>
+      <ScrollToTop resetPrefixes={["/"]} />
 
-        <Routes>
-          {/*  VEŘEJNÁ ČÁST – s HeaderTop */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<PublicLandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/verify" element={<VerifyEmailPage />} />
-            <Route
-              path="/forgotten-password"
-              element={<ForgottenPasswordRequestPage />}
-            />
-            <Route
-              path="/reset-password"
-              element={<ForgottenPasswordResetPage />}
-            />
-          </Route>
-
-          {/*  Chráněná část aplikace – se SharedLayout + Navbar */}
+      <Routes>
+        {/* VEŘEJNÁ ČÁST – s HeaderTop */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<PublicLandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify" element={<VerifyEmailPage />} />
           <Route
-            path="/app"
+            path="/forgotten-password"
+            element={<ForgottenPasswordRequestPage />}
+          />
+          <Route
+            path="/reset-password"
+            element={<ForgottenPasswordResetPage />}
+          />
+        </Route>
+
+        {/* Chráněná část aplikace – se SharedLayout + Navbar */}
+        <Route
+          path="/app"
+          element={
+            <RequireAuth>
+              <CurrentPlayerProvider>
+                <SeasonProvider>
+                  <SharedLayout />
+                </SeasonProvider>
+              </CurrentPlayerProvider>
+            </RequireAuth>
+          }
+        >
+          {/* index = "/app" */}
+          <Route index element={<HomeDecider />} />
+
+          {/* nested routy bez "/" */}
+          <Route path="matches" element={<Matches />} />
+          <Route path="players" element={<Players />} />
+          <Route path="createPlayer" element={<CreatePlayer />} />
+          <Route path="matches/:id" element={<MatchDetailPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="my-inactivity" element={<MyInactivityPage />} />
+          <Route path="player" element={<PlayerHomePage />} />
+
+          {/* ADMIN/MANAGER – SPRÁVA */}
+          <Route
+            path="admin"
             element={
-              <RequireAuth>
-                <CurrentPlayerProvider>
-                  <SeasonProvider>
-                    <SharedLayout />
-                  </SeasonProvider>
-                </CurrentPlayerProvider>
-              </RequireAuth>
+              <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+                <AdminHomePage />
+              </RoleGuard>
             }
-          >
-            {/* index = "/app" */}
-            <Route index element={<HomeDecider />} />
+          />
 
-            {/* nested routy bez "/" */}
-            <Route path="matches" element={<Matches />} />
-            <Route path="players" element={<Players />} />
-            <Route path="createPlayer" element={<CreatePlayer />} />
-            <Route path="matches/:id" element={<MatchDetailPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="my-inactivity" element={<MyInactivityPage />} />
-            <Route path="player" element={<PlayerHomePage />} />
-            
-            {/* TODO ADMIN/MANAGER – SPRÁVA */}
-            <Route
-              path="admin"
-              element={
-                <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
-                  <AdminHomePage />
-                </RoleGuard>
-              }
-            />
-            
-            {/* ADMIN/MANAGER – SPRÁVA HRÁČŮ */}
-            <Route
-              path="admin/players"
-              element={
-                <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
-                  <AdminPlayersPage />
-                </RoleGuard>
-              }
-            />
+          {/* ADMIN/MANAGER – SPRÁVA HRÁČŮ */}
+          <Route
+            path="admin/players"
+            element={
+              <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+                <AdminPlayersPage />
+              </RoleGuard>
+            }
+          />
 
-            {/* ADMIN/MANAGER – SPRÁVA ZÁPASŮ */}
-            <Route
-              path="admin/matches"
-              element={
-                <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
-                  <AdminMatchesPage />
-                </RoleGuard>
-              }
-            />
+          {/* ADMIN/MANAGER – SPRÁVA ZÁPASŮ */}
+          <Route
+            path="admin/matches"
+            element={
+              <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+                <AdminMatchesPage />
+              </RoleGuard>
+            }
+          />
 
-            {/* ADMIN/MANAGER – SPRÁVA SEZÓN */}
-            <Route
-              path="admin/seasons"
-              element={
-                <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
-                  <AdminSeasonsPage />
-                </RoleGuard>
-              }
-            />
+          {/* ADMIN/MANAGER – SPRÁVA SEZÓN */}
+          <Route
+            path="admin/seasons"
+            element={
+              <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+                <AdminSeasonsPage />
+              </RoleGuard>
+            }
+          />
 
-            {/* ADMIN/MANAGER – SPRÁVA NEAKTIVIT */}
-            <Route
-              path="admin/inactivity"
-              element={
-                <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
-                  <AdminPlayersInactivityPage />
-                </RoleGuard>
-              }
-            />
+          {/* ADMIN/MANAGER – SPRÁVA NEAKTIVIT */}
+          <Route
+            path="admin/inactivity"
+            element={
+              <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+                <AdminPlayersInactivityPage />
+              </RoleGuard>
+            }
+          />
 
-            {/* ADMIN – SPRÁVA UŽIVATELŮ */}
-            <Route
-              path="admin/users"
-              element={
-                <RoleGuard roles={["ROLE_ADMIN"]}>
-                  <AdminUsersPage />
-                </RoleGuard>
-              }
-            />
-            <Route
-              path="admin/users/:id"
-              element={
-                <RoleGuard roles={["ROLE_ADMIN"]}>
-                  <AdminUserDetailPage />
-                </RoleGuard>
-              }
-            />
-          </Route>
+          {/* ADMIN – SPRÁVA UŽIVATELŮ */}
+          <Route
+            path="admin/users"
+            element={
+              <RoleGuard roles={["ROLE_ADMIN"]}>
+                <AdminUsersPage />
+              </RoleGuard>
+            }
+          />
+          <Route
+            path="admin/users/:id"
+            element={
+              <RoleGuard roles={["ROLE_ADMIN"]}>
+                <AdminUserDetailPage />
+              </RoleGuard>
+            }
+          />
+        </Route>
 
-          {/* fallback – cokoliv jiného → úvodní stránka */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        {/* fallback – cokoliv jiného → úvodní stránka */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
 
-        <ScrollToTopButton />
-      </BrowserRouter>
-    </AppModeProvider>
-  </AuthProvider>
+      <ScrollToTopButton />
+    </BrowserRouter>
+  </AppModeProvider>
 );
 
 export default App;

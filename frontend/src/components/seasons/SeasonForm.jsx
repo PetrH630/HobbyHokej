@@ -1,5 +1,5 @@
 // src/components/seasons/SeasonForm.jsx
-import DateTimePicker from "../forms/DateTimePicker";
+import DatePicker from "../forms/DatePicker";
 
 const SeasonForm = ({ values, onChange, errors = {} }) => {
     const handleInputChange = (e) => {
@@ -10,7 +10,7 @@ const SeasonForm = ({ values, onChange, errors = {} }) => {
     // kompatibilní handler pro DateTimePicker:
     // - buď zavolá onChange(event)
     // - nebo onChange(valueString)
-    const handleDateTimeChange = (name) => (valueOrEvent) => {
+    const handleDateChange = (name) => (valueOrEvent) => {
         const value =
             valueOrEvent?.target?.value !== undefined
                 ? valueOrEvent.target.value
@@ -53,11 +53,11 @@ const SeasonForm = ({ values, onChange, errors = {} }) => {
                         Začátek sezóny
                     </label>
 
-                    <DateTimePicker
+                    <DatePicker
                         id="season-startDate"
                         name="startDate"
                         value={values.startDate || ""}
-                        onChange={handleDateTimeChange("startDate")}
+                        onChange={handleDateChange("startDate")}
                         className={startDateClass}
                     />
 
@@ -73,11 +73,11 @@ const SeasonForm = ({ values, onChange, errors = {} }) => {
                         Konec sezóny
                     </label>
 
-                    <DateTimePicker
+                    <DatePicker
                         id="season-endDate"
                         name="endDate"
                         value={values.endDate || ""}
-                        onChange={handleDateTimeChange("endDate")}
+                        onChange={handleDateChange("endDate")}
                         className={endDateClass}
                     />
 

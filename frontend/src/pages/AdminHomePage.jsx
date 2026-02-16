@@ -6,13 +6,7 @@ import { useAllMatchesAdmin } from "../hooks/useAllMatchesAdmin";
 import { useAllSeasonsAdmin } from "../hooks/useAllSeasonsAdmin";
 import { useAllUsersAdmin } from "../hooks/useAllUsersAdmin";
 import { useAuth } from "../hooks/useAuth";
-// TODO - PO KLIKNUTÍ NA SPRÁVA
-/**
- * Admin/Manager dashboard (domovská stránka).
- *
- * Stránka je sdílená pro ADMIN i MANAGER. Pro MANAGER se zobrazí úvodní zpráva
- * a po jejím zavření se uživatel přesměruje na správu hráčů.
- */
+
 const AdminHomePage = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -97,7 +91,6 @@ const AdminHomePage = () => {
         });
     };
 
-    // Nadcházející zápasy z DB (z useAllMatchesAdmin)
     const upcomingMatches = useMemo(() => {
         const now = new Date();
         const list = Array.isArray(matches) ? matches : [];
@@ -147,7 +140,6 @@ const AdminHomePage = () => {
         ]
     );
 
-    // TODO: napojit na backend (viz „poslední aktivity“ návrh)
     const lastActivities = [
         { time: "Dnes 12:41", text: "Změněn čas zápasu (ukázka).", type: "change" },
         { time: "Dnes 10:05", text: "Schválen hráč (ukázka).", type: "approve" },
@@ -209,10 +201,7 @@ const AdminHomePage = () => {
                         title="Obnoví přehledové údaje z databáze"
                     >
                         Obnovit
-                    </button>
-                    <Link to="/admin/settings" className="btn btn-primary">
-                        Nastavení
-                    </Link>
+                    </button>                    
                 </div>
             </div>
 
@@ -366,12 +355,14 @@ const AdminHomePage = () => {
                                                     </td>
                                                     <td className="text-end">
                                                         {id ? (
-                                                            <Link
-                                                                to={`/app/admin/matches/${id}`}
-                                                                className="btn btn-sm btn-outline-secondary"
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-outline-primary"
+                                                                disabled
+                                                                title="Zatím není implementováno"
                                                             >
                                                                 Detail
-                                                            </Link>
+                                                            </button>
                                                         ) : (
                                                             <span className="text-muted small">—</span>
                                                         )}
@@ -398,7 +389,7 @@ const AdminHomePage = () => {
                         <div className="col-12">
                             <div className="card shadow-sm">
                                 <div className="card-header bg-white fw-semibold">
-                                    Poslední aktivity
+                                    Poslední aktivity - zatím neimplementováno
                                 </div>
                                 <div className="card-body">
                                     <ul className="list-group list-group-flush">
@@ -438,7 +429,7 @@ const AdminHomePage = () => {
                                     <div className="d-flex justify-content-between mb-2">
                                         <span className="text-muted">Prostředí</span>
                                         <span className="fw-semibold">
-                                            Produkce / Demo dle nastavení
+                                            Produkce / Demo dle nastavení 
                                         </span>
                                     </div>
                                     <div className="d-flex justify-content-between mb-2">
@@ -455,11 +446,10 @@ const AdminHomePage = () => {
                                     <hr />
 
                                     <div className="alert alert-light border mb-0">
-                                        <div className="fw-semibold mb-1">Co doplníme dál</div>
+                                        <div className="fw-semibold mb-1">Bude se doplňovat</div>
                                         <ul className="mb-0 small text-muted">
                                             <li>graf registrací na zápasy (7/30 dní)</li>
-                                            <li>rychlé schválení hráčů (pending)</li>
-                                            <li>upozornění na konflikty (duplicitní čas, chybějící sezóna)</li>
+                                            
                                         </ul>
                                     </div>
                                 </div>
