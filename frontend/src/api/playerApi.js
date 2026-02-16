@@ -168,4 +168,21 @@ export const getMyPlayerHistory = async () => {
     return res.data; // List<PlayerHistoryDTO>
 };
 
+/**
+ * Statistiky aktuálního hráče přihlášeného uživatele
+ * GET /api/players/me/stats
+ */
+export const getMyPlayerStats = async () => {
+    const res = await api.get("/players/me/stats");
+    return res.data; // PlayerStatsDTO
+};
+
+/**
+ * Statistiky hráče podle ID (ADMIN / MANAGER)
+ * GET /api/players/{playerId}/stats
+ */
+export const getPlayerStatsAdmin = async (playerId) => {
+    const res = await api.get(`/players/${playerId}/stats`);
+    return res.data; // PlayerStatsDTO
+};
 

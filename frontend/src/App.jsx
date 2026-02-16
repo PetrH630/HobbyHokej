@@ -20,7 +20,7 @@ import AdminPlayersInactivityPage from "./pages/AdminPlayersInactivityPage";
 import MyInactivityPage from "./pages/MyInactivityPage";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
-
+import PlayerHomePage from "./pages/PlayerHomePage";
 
 // ADMIN PAGES
 import HomeDecider from "./pages/HomeDecider";
@@ -93,7 +93,7 @@ const App = () => (
             <Route path="matches/:id" element={<MatchDetailPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="my-inactivity" element={<MyInactivityPage />} />
-
+            <Route path="player" element={<PlayerHomePage />} />
             
             {/* TODO ADMIN/MANAGER – SPRÁVA */}
             <Route

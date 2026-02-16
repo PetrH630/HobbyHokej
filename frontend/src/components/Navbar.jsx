@@ -45,12 +45,6 @@ const Navbar = () => {
         await changeCurrentPlayer(Number(value));
     };
 
-    /**
-     * Přepínač Správa / Zavřít správu.
-     *
-     * Otevření Správy vždy přesměruje na AdminHomePage (/app/admin).
-     * Zavření Správy vrátí uživatele na hráčskou domovskou stránku (/app).
-     */
     const handleAdminToggle = () => {
         closeMenu();
 
@@ -62,10 +56,22 @@ const Navbar = () => {
         navigate("/app/admin");
     };
 
-    // Helper: hráčské linky (desktop uprostřed)
+    // odkazy pro hráče
     const PlayerLinksInline = () => (
         <ul className="navbar-nav flex-row gap-3 mb-0">
             <RoleGuard roles={["ROLE_PLAYER", "ROLE_MANAGER"]}>
+                <li className="nav-item">
+                <NavLink
+                to="/app/player"
+                    end
+                    className={({ isActive }) =>
+                        "nav-link" + (isActive ? " activeLink" : "")
+                    }
+                    onClick={closeMenu}
+                >
+                    Přehled
+                </NavLink>
+                </li>
                 <li className="nav-item">
                     <NavLink
                         to="/app/players"
@@ -117,7 +123,7 @@ const Navbar = () => {
         </ul>
     );
 
-    // Helper: admin / manager linky (desktop uprostřed při Správa)
+    // odkazy pro Admin/Manager
     const AdminLinksInline = () => (
         <ul className="navbar-nav flex-row gap-3 mb-0">
             <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
@@ -199,7 +205,7 @@ const Navbar = () => {
         </ul>
     );
 
-    // Mobilní (stejné linky jako inline, jen vertikálně)
+    // Mobilní
     const PlayerLinksMobile = () => (
         <RoleGuard roles={["ROLE_PLAYER", "ROLE_MANAGER"]}>
             <nav className="mb-3">
@@ -354,7 +360,7 @@ const Navbar = () => {
                         </NavLink>
                     </div>
 
-                    {/* STŘED – linky uprostřed (jen LG a větší) */}
+                    {/* STŘED – odkazy uprostřed */}
                     <div className="d-none d-lg-flex flex-grow-1 justify-content-center">
                         <div className="d-flex align-items-center gap-3">
                             {/* Tlačítko Správa / Zavři správu – jen ADMIN / MANAGER */}
@@ -368,12 +374,12 @@ const Navbar = () => {
                                 </button>
                             </RoleGuard>
 
-                            {/* Podle URL zobrazíme hráčské nebo admin linky */}
+                            {/* Podle URL zobrazíme hráčské nebo admin odkazy */}
                             {isAdminSection ? <AdminLinksInline /> : <PlayerLinksInline />}
                         </div>
                     </div>
 
-                    {/* UPROSTŘED NA MALÝCH – uživatel + hráč nad sebou */}
+                    {/* UPROSTŘED NA MALÝCH  */}
                     {user && (
                         <div className="d-flex d-lg-none flex-column align-items-start mx-2 user-block-small">
                             {/* Řádek 1: uživatel */}
@@ -426,7 +432,7 @@ const Navbar = () => {
                         </div>
                     )}
 
-                    {/* PRAVÁ ČÁST – velké: uživatel + hráč + odhlásit; malé: hamburger */}
+                    {/* PRAVÁ ČÁST  */}
                     <div className="d-flex align-items-center flex-shrink-0">
                         {/* Velká zařízení – uživatel vpravo */}
                         {user && (
@@ -518,7 +524,7 @@ const Navbar = () => {
                     <PlayerLinksMobile />
                     <AdminLinksMobile />
 
-                    {/* Mobilní Správa tlačítko (rychlý přechod na /app/admin) */}
+                    {/* Mobilní  */}
                     <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
                         <button
                             type="button"

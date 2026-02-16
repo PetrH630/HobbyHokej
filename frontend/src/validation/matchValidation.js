@@ -4,7 +4,7 @@
  * Frontend validace pro MatchDTO.
  *
  * Očekávaná pole v values:
- *  - dateTime: string pro <input type="datetime-local"> (YYYY-MM-DDTHH:mm)
+ *  - dateTime: buď Date (Flatpickr), nebo string pro <input type="datetime-local"> (YYYY-MM-DDTHH:mm)
  *  - location: místo zápasu
  *  - description: volitelný popis
  *  - maxPlayers: maximální počet hráčů
@@ -13,8 +13,16 @@
 export const validateMatch = (values) => {
     const errors = {};
 
-    // dateTime – jen povinné, kontrolu na "v budoucnu" dělá backend (update)
-    if (!values.dateTime) {
+    // --- dateTime ---
+    const dt = values?.dateTime;
+
+    const isValidDateObject =
+        dt instanceof Date && !Number.isNaN(dt.getTime());
+
+    const isValidDateString =
+        typeof dt === "string" && dt.trim() !== "";
+
+    if (!dt || (!isValidDateObject && !isValidDateString)) {
         errors.dateTime = "Datum a čas zápasu je povinné.";
     }
 
@@ -33,12 +41,17 @@ export const validateMatch = (values) => {
     }
 
     // maxPlayers – @NotNull + rozumná kontrola > 0
-    if (values.maxPlayers === null || values.maxPlayers === undefined || values.maxPlayers === "") {
+    if (
+        values.maxPlayers === null ||
+        values.maxPlayers === undefined ||
+        values.maxPlayers === ""
+    ) {
         errors.maxPlayers = "Maximální počet hráčů je povinný.";
     } else {
         const maxPlayersNum = Number(values.maxPlayers);
         if (!Number.isInteger(maxPlayersNum) || maxPlayersNum <= 0) {
-            errors.maxPlayers = "Maximální počet hráčů musí být kladné celé číslo.";
+            errors.maxPlayers =
+                "Maximální počet hráčů musí být kladné celé číslo.";
         }
     }
 

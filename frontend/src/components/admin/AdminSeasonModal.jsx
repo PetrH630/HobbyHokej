@@ -12,7 +12,7 @@ const AdminSeasonModal = ({
     onSave,
     saving,
     allSeasons = [],
-    serverError, // text chyby z backendu (např. InvalidSeasonStateException apod.)
+    serverError, 
 }) => {
    
     if (!show) {
@@ -24,7 +24,7 @@ const AdminSeasonModal = ({
         name: season?.name || "",
         startDate: season?.startDate || "",
         endDate: season?.endDate || "",
-        active: season?.active ?? false, // 👈 držíme aktivní stav
+        active: season?.active ?? false, 
     });
 
     const [errors, setErrors] = useState({});
@@ -38,7 +38,7 @@ const AdminSeasonModal = ({
                 name: season.name || "",
                 startDate: season.startDate || "",
                 endDate: season.endDate || "",
-                active: season.active ?? false, // 👈 z backendu
+                active: season.active ?? false, 
             });
         } else {
             setValues({
@@ -46,7 +46,7 @@ const AdminSeasonModal = ({
                 name: "",
                 startDate: "",
                 endDate: "",
-                active: false, // nová sezóna je defaultně neaktivní
+                active: false, 
             });
         }
         setErrors({});
@@ -78,7 +78,7 @@ const AdminSeasonModal = ({
             name: values.name?.trim(),
             startDate: values.startDate,
             endDate: values.endDate,
-            active: values.active, // 👈 posíláme původní stav
+            active: values.active, 
         };
 
         onSave(payload);

@@ -12,3 +12,51 @@
     display: flex;
     max-width: 360px;
 }
+
+/* =========================
+   ZVÝRAZNĚNÍ VYBRANÉHO HRÁČE
+   ========================= */
+.selected-player-frame {
+    position: relative;
+    border-radius: 16px;
+}
+
+.selected-player-frame--on {
+    display: inline-block;
+    padding: 10px;
+    border-radius: 18px;
+
+    border: 2px solid rgba(13, 110, 253, 0.45);
+    background: rgba(13, 110, 253, 0.06);
+
+    box-shadow:
+        0 14px 28px rgba(0, 0, 0, 0.12),
+        0 0 0 6px rgba(13, 110, 253, 0.06);
+
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.selected-player-frame--on:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 16px 32px rgba(0, 0, 0, 0.14),
+        0 0 0 8px rgba(13, 110, 253, 0.08);
+}
+
+.selected-player-badge {
+    position: absolute;
+    top: -12px;
+    left: 14px;
+    z-index: 2;
+
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+
+    color: #0d6efd;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(13, 110, 253, 0.35);
+    backdrop-filter: blur(8px);
+}

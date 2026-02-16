@@ -1,16 +1,13 @@
-/* Logo v navbaru */
 .navbar-logo {
     height: 40px;
     width: auto;
     display: block;
 }
 
-/* Hlavní navbar */
 .main-navbar {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-/* Aktivní odkaz – navazuje na .nav-link z Bootstrapu */
 .navbar .nav-link {
     color: #222;
 }
@@ -25,7 +22,6 @@
     border-bottom: 2px solid #1B5E20;
 }
 
-/* Toggler – bez rámečku, jen ikona */
 .navbar-toggler {
     border: none;
     padding: 0.25rem 0.5rem;
@@ -35,18 +31,14 @@
     box-shadow: none;
 }
 
-/* Uživatel / hráč – velké displeje */
 .user-block span {
     white-space: nowrap;
 }
 
-/* Uživatel / hráč – malé displeje uprostřed */
 .user-block-small span {
     white-space: nowrap;
     font-size: 0.9rem;
 }
-
-/* === MOBILNÍ MENU (offcanvas zleva) === */
 
 .mobile-menu {
     position: fixed;
@@ -78,7 +70,6 @@
 padding: 1.25rem 1rem 1rem;
 }
 
-/* Odkazy v mobilním menu */
 .mobile-link {
     display: block;
     padding: 0.4rem 0;
@@ -96,7 +87,6 @@ padding: 1.25rem 1rem 1rem;
     font-weight: 600;
 }
 
-/* Overlay za menu */
 .mobile-menu-overlay {
     position: fixed;
     inset: 0;
@@ -113,7 +103,6 @@ padding: 1.25rem 1rem 1rem;
     pointer-events: auto;
 }
 
-/* Desktop drobnosti */
 @media (min-width: 992px) {
 
     .mobile-menu,

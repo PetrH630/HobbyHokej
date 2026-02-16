@@ -8,6 +8,7 @@ import {
 } from "../../api/playerInactivityApi";
 import { useNotification } from "../../context/NotificationContext";
 import { useGlobalModal } from "../../hooks/useGlobalModal";
+import DateTimePicker from "../forms/DateTimePicker";
 
 const toLocalInputValue = (isoOrNull) => {
     if (!isoOrNull) return "";
@@ -17,14 +18,13 @@ const toLocalInputValue = (isoOrNull) => {
 
 const parseLocalDateTime = (val) => {
     if (!val) return null;
-    const d = new Date(val); // datetime-local je ve formátu "YYYY-MM-DDTHH:mm"
+    const d = new Date(val); // očekává "YYYY-MM-DDTHH:mm"
     return Number.isNaN(d.getTime()) ? null : d;
 };
 
 const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
     useGlobalModal(true);
 
-    
     const { showNotification } = useNotification();
 
     const [periods, setPeriods] = useState([]);
@@ -106,17 +106,20 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
         resetValidation();
     };
 
-    const handleChange = (e) => {
+    const handleTextChange = (e) => {
         const { name, value } = e.target;
-
         setFormValues((prev) => ({ ...prev, [name]: value }));
-        // průběžně maž chybu daného pole
         setFieldErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
     const handleBlur = (e) => {
         const { name } = e.target;
         setTouched((prev) => ({ ...prev, [name]: true }));
+    };
+
+    const handleDateTimeChange = (name) => (valueString) => {
+        setFormValues((prev) => ({ ...prev, [name]: valueString }));
+        setFieldErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
     const validate = useMemo(() => {
@@ -127,9 +130,9 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
                 inactivityReason: "",
             };
 
-            const from = values.inactiveFrom?.trim() || "";
-            const to = values.inactiveTo?.trim() || "";
-            const reason = values.inactivityReason?.trim() || "";
+            const from = String(values.inactiveFrom ?? "").trim();
+            const to = String(values.inactiveTo ?? "").trim();
+            const reason = String(values.inactivityReason ?? "").trim();
 
             if (!from) nextErrors.inactiveFrom = "Vyplňte začátek neaktivity.";
             if (!to) nextErrors.inactiveTo = "Vyplňte konec neaktivity.";
@@ -148,7 +151,6 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
                 nextErrors.inactivityReason = "Maximální délka je 255 znaků.";
             }
 
-            // překryvy s existujícími obdobími (až když jsou obě hodnoty validní)
             if (fromDate && toDate && !nextErrors.inactiveFrom && !nextErrors.inactiveTo) {
                 const overlaps = (aFrom, aTo, bFrom, bTo) => aFrom < bTo && bFrom < aTo;
 
@@ -177,7 +179,6 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // označ pole jako touched, aby se zobrazily chyby
         setTouched({
             inactiveFrom: true,
             inactiveTo: true,
@@ -293,45 +294,51 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
                         {!loading && (
                             <>
                                 <h6 className="mb-2">
-                                    {editing
-                                        ? "Upravit období neaktivity"
-                                        : "Přidat nové období neaktivity"}
+                                    {editing ? "Upravit období neaktivity" : "Přidat nové období neaktivity"}
                                 </h6>
 
                                 <form className="row g-3 mb-4" onSubmit={handleSubmit} noValidate>
                                     <div className="col-md-6">
-                                        <label className="form-label">Začátek</label>
-                                        <input
-                                            type="datetime-local"
+                                        <label className="form-label" htmlFor="inactiveFrom">
+                                            Začátek
+                                        </label>
+
+                                        <DateTimePicker
+                                            id="inactiveFrom"
                                             name="inactiveFrom"
-                                            className={inputClass("inactiveFrom")}
                                             value={formValues.inactiveFrom}
-                                            onChange={handleChange}
+                                            onChange={handleDateTimeChange("inactiveFrom")}
                                             onBlur={handleBlur}
                                             disabled={saving}
+                                            className={inputClass("inactiveFrom")}
                                             required
                                         />
+
                                         {touched.inactiveFrom && fieldErrors.inactiveFrom && (
-                                            <div className="invalid-feedback">
+                                            <div className="invalid-feedback d-block">
                                                 {fieldErrors.inactiveFrom}
                                             </div>
                                         )}
                                     </div>
 
                                     <div className="col-md-6">
-                                        <label className="form-label">Konec</label>
-                                        <input
-                                            type="datetime-local"
+                                        <label className="form-label" htmlFor="inactiveTo">
+                                            Konec
+                                        </label>
+
+                                        <DateTimePicker
+                                            id="inactiveTo"
                                             name="inactiveTo"
-                                            className={inputClass("inactiveTo")}
                                             value={formValues.inactiveTo}
-                                            onChange={handleChange}
+                                            onChange={handleDateTimeChange("inactiveTo")}
                                             onBlur={handleBlur}
                                             disabled={saving}
+                                            className={inputClass("inactiveTo")}
                                             required
                                         />
+
                                         {touched.inactiveTo && fieldErrors.inactiveTo && (
-                                            <div className="invalid-feedback">
+                                            <div className="invalid-feedback d-block">
                                                 {fieldErrors.inactiveTo}
                                             </div>
                                         )}
@@ -346,29 +353,23 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
                                             name="inactivityReason"
                                             className={inputClass("inactivityReason")}
                                             value={formValues.inactivityReason}
-                                            onChange={handleChange}
+                                            onChange={handleTextChange}
                                             onBlur={handleBlur}
                                             disabled={saving}
                                             maxLength={255}
                                         />
                                         {touched.inactivityReason && fieldErrors.inactivityReason && (
-                                            <div className="invalid-feedback">
+                                            <div className="invalid-feedback d-block">
                                                 {fieldErrors.inactivityReason}
                                             </div>
                                         )}
                                         {!fieldErrors.inactivityReason && (
-                                            <div className="form-text">
-                                                Maximálně 255 znaků.
-                                            </div>
+                                            <div className="form-text">Maximálně 255 znaků.</div>
                                         )}
                                     </div>
 
                                     <div className="col-12 d-flex gap-2">
-                                        <button
-                                            type="submit"
-                                            className="btn btn-primary"
-                                            disabled={saving}
-                                        >
+                                        <button type="submit" className="btn btn-primary" disabled={saving}>
                                             {saving ? "Ukládám…" : editing ? "Uložit změny" : "Přidat období"}
                                         </button>
 
@@ -412,9 +413,7 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
                                                             {p.inactivityReason ? (
                                                                 p.inactivityReason
                                                             ) : (
-                                                                <span className="text-muted">
-                                                                    neuveden
-                                                                </span>
+                                                                <span className="text-muted">neuveden</span>
                                                             )}
                                                         </td>
                                                         <td className="text-end">
@@ -444,12 +443,7 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
                     </div>
 
                     <div className="modal-footer">
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={onClose}
-                            disabled={saving}
-                        >
+                        <button type="button" className="btn btn-secondary" onClick={onClose} disabled={saving}>
                             Zavřít
                         </button>
                     </div>

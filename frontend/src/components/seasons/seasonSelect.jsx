@@ -1,44 +1,33 @@
-// src/components/season/SeasonSelect.jsx
+// src/components/seasons/SeasonSelect.jsx
+import { useEffect, useState } from "react";
 import { useSeason } from "../../hooks/useSeason";
 
-const SeasonSelect = () => {
-    const {
-        seasons,
-        currentSeasonId,
-        changeSeason,
-        loading,
-        error,
-    } = useSeason();
+const SeasonSelect = ({ onSeasonChange }) => {
+    const { seasons, currentSeasonId, changeSeason, loading } = useSeason();
+    const [value, setValue] = useState(currentSeasonId ?? "");
 
-    if (error) {
-        return (
-            <div className="text-danger small">
-                {error}
-            </div>
-        );
-    }
+    useEffect(() => {
+        setValue(currentSeasonId ?? "");
+    }, [currentSeasonId]);
 
-    // když žádné sezóny nejsou, prostě nic nezobrazuj
-    if (!seasons || seasons.length === 0) {
-        return null;
-    }
+    const handleChange = async (e) => {
+        const seasonId = Number(e.target.value);
+        setValue(seasonId);
+
+        await changeSeason(seasonId);
+        onSeasonChange?.(seasonId);
+    };
 
     return (
-        <div className="d-flex align-items-center gap-2">
-            <label
-                htmlFor="seasonSelect"
-                className="form-label mb-0 me-2"
-                style={{ fontWeight: 500 }}
-            >
-                Sezóna:
-            </label>
+        <div className="d-inline-flex align-items-center gap-2">
+            <span className="fw-semibold">Sezóna:</span>
 
             <select
-                id="seasonSelect"
                 className="form-select form-select-sm w-auto"
-                value={currentSeasonId ?? ""}
-                onChange={(e) => changeSeason(Number(e.target.value))}
-                disabled={loading}
+                style={{ minWidth: "max-content" }}
+                value={value}
+                onChange={handleChange}
+                disabled={loading || seasons.length === 0}
             >
                 {seasons.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -46,12 +35,6 @@ const SeasonSelect = () => {
                     </option>
                 ))}
             </select>
-
-            {loading && (
-                <span className="text-muted small ms-2">
-                    Ukládám…
-                </span>
-            )}
         </div>
     );
 };

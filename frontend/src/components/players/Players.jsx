@@ -49,22 +49,40 @@ const Players = () => {
     return (
         <div className="container mt-3">
             <div className="player-list">
-                {players.map((p) => (
-                    <div className="player-item" key={p.id}>
-                        <PlayerCard
-                            player={p}
-                            isActive={currentPlayer?.id === p.id}
-                            onSelect={() => handleSelectPlayer(p.id)}
-                            disabledTooltip={
-                                p.playerStatus === "PENDING"
-                                    ? "Hráč čeká na schválení administrátorem"
-                                    : p.playerStatus === "REJECTED"
-                                        ? "Hráč byl zamítnut administrátorem"
-                                        : ""
-                            }
-                        />
-                    </div>
-                ))}
+                {players.map((p) => {
+                    const isActive = currentPlayer?.id === p.id;
+
+                    const disabledTooltip =
+                        p.playerStatus === "PENDING"
+                            ? "Hráč čeká na schválení administrátorem"
+                            : p.playerStatus === "REJECTED"
+                                ? "Hráč byl zamítnut administrátorem"
+                                : "";
+
+                    return (
+                        <div className="player-item" key={p.id}>
+                            <div
+                                className={`selected-player-frame ${isActive ? "selected-player-frame--on" : ""
+                                    }`}
+                                aria-label={isActive ? "Vybraný hráč" : undefined}
+                            >
+                                {isActive && (
+                                    <div className="selected-player-badge">
+                                        Vybraný hráč
+                                    </div>
+                                )}
+
+                                <PlayerCard
+                                    player={p}
+                                    // ✅ necháme false, aby se nerušily rámečky
+                                    isActive={false}
+                                    onSelect={() => handleSelectPlayer(p.id)}
+                                    disabledTooltip={disabledTooltip}
+                                />
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
             <div className="text-center mt-4">

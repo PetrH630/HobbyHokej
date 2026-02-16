@@ -3,53 +3,50 @@ import { useEffect, useState } from "react";
 import MatchForm from "../matches/MatchForm";
 import { validateMatch } from "../../validation/matchValidation";
 import { tryClearDemoNotifications } from "../../api/demoApi";
-import { useGlobalModal } from "../../hooks/useGlobalModal";
 
-
-// BE "yyyy-MM-dd HH:mm:ss" nebo ISO → "yyyy-MM-ddTHH:mm" pro <input type="datetime-local">
-const toInputDateTime = (value) => {
+// backend "yyyy-MM-dd HH:mm:ss" -> picker "YYYY-MM-DDTHH:mm"
+const toPickerValue = (value) => {
     if (!value) return "";
 
-    // Pokud už je to ve formátu s T (ISO 8601), jen uřízneme na minuty
-    if (value.includes("T")) {
-        return value.slice(0, 16); // yyyy-MM-ddTHH:mm
+    const s = String(value);
+
+    // ISO
+    if (s.includes("T")) {
+        return s.slice(0, 16);
     }
 
-    // Očekávaný formát "yyyy-MM-dd HH:mm:ss"
-    const [date, time] = value.split(" ");
-    if (!time) return value;
-
-    const [hh = "00", mm = "00"] = time.split(":");
-    return `${date}T${hh}:${mm}`;
+    // backend "yyyy-MM-dd HH:mm:ss"
+    return s.replace(" ", "T").slice(0, 16);
 };
 
-const AdminMatchModal = ({
-    match,
-    show,
-    onClose,
-    onSave,
-    saving,
-    serverError,
-}) => {
-    
+// picker "YYYY-MM-DDTHH:mm" -> backend "yyyy-MM-dd HH:mm:ss"
+const toBackendDateTime = (valueString) => {
+    if (!valueString) return null;
 
-    if (!show) {
-        return null;
+    // očekáváme "YYYY-MM-DDTHH:mm"
+    if (String(valueString).includes("T")) {
+        const [date, time] = String(valueString).split("T");
+        const [hh = "00", mm = "00"] = String(time).split(":");
+        return `${date} ${hh}:${mm}:00`;
     }
+
+    // fallback
+    return String(valueString);
+};
+
+const AdminMatchModal = ({ match, show, onClose, onSave, saving, serverError }) => {
+    if (!show) return null;
 
     const [values, setValues] = useState({
         id: match?.id ?? null,
-        dateTime: match?.dateTime ? toInputDateTime(match.dateTime) : "",
+        dateTime: match?.dateTime ? toPickerValue(match.dateTime) : "", // ✅ string
         location: match?.location || "",
         description: match?.description || "",
         maxPlayers:
             match?.maxPlayers !== undefined && match?.maxPlayers !== null
                 ? match.maxPlayers
                 : "",
-        price:
-            match?.price !== undefined && match?.price !== null
-                ? match.price
-                : "",
+        price: match?.price !== undefined && match?.price !== null ? match.price : "",
         matchStatus: match?.matchStatus || null,
         cancelReason: match?.cancelReason || null,
         matchNumber: match?.matchNumber || null,
@@ -57,25 +54,20 @@ const AdminMatchModal = ({
     });
 
     const [errors, setErrors] = useState({});
-
     const isNew = !values.id;
 
     useEffect(() => {
         if (match) {
             setValues({
                 id: match.id ?? null,
-                dateTime: match.dateTime ? toInputDateTime(match.dateTime) : "",
+                dateTime: match?.dateTime ? toPickerValue(match.dateTime) : "",
                 location: match.location || "",
                 description: match.description || "",
                 maxPlayers:
-                    match.maxPlayers !== undefined &&
-                        match.maxPlayers !== null
+                    match.maxPlayers !== undefined && match.maxPlayers !== null
                         ? match.maxPlayers
                         : "",
-                price:
-                    match.price !== undefined && match.price !== null
-                        ? match.price
-                        : "",
+                price: match.price !== undefined && match.price !== null ? match.price : "",
                 matchStatus: match.matchStatus || null,
                 cancelReason: match.cancelReason || null,
                 matchNumber: match.matchNumber || null,
@@ -115,28 +107,13 @@ const AdminMatchModal = ({
         const validationErrors = validateMatch(values);
         setErrors(validationErrors);
 
-        if (Object.keys(validationErrors).length > 0) {
-            return;
-        }
+        if (Object.keys(validationErrors).length > 0) return;
 
-        // DEMO: před operací vyčistit staré notifikace (pojistka proti "lepení")
-        // V produkci endpoint neexistuje → tryClearDemoNotifications to bezpečně ignoruje.
         await tryClearDemoNotifications();
-
-        // Převod dateTime z "yyyy-MM-ddTHH:mm" na "yyyy-MM-dd HH:mm:ss"
-        const toBackendDateTime = (value) => {
-            if (!value) return null;
-            if (value.includes("T")) {
-                const [date, time] = value.split("T");
-                const [hh = "00", mm = "00"] = time.split(":");
-                return `${date} ${hh}:${mm}:00`;
-            }
-            return value;
-        };
 
         const payload = {
             id: values.id,
-            dateTime: toBackendDateTime(values.dateTime),
+            dateTime: toBackendDateTime(values.dateTime), // ✅ string -> backend string
             location: values.location?.trim(),
             description:
                 values.description && values.description.trim() !== ""
@@ -147,29 +124,19 @@ const AdminMatchModal = ({
                     ? null
                     : Number(values.maxPlayers),
             price:
-                values.price === "" || values.price === null
-                    ? null
-                    : Number(values.price),
+                values.price === "" || values.price === null ? null : Number(values.price),
         };
 
         onSave(payload);
     };
 
-
     const handleClose = () => {
-        if (!saving) {
-            onClose();
-        }
+        if (!saving) onClose();
     };
 
     return (
         <>
-            <div
-                className="modal fade show d-block"
-                tabIndex="-1"
-                role="dialog"
-                aria-modal="true"
-            >
+            <div className="modal fade show d-block" tabIndex="-1" role="dialog" aria-modal="true">
                 <div className="modal-dialog modal-lg" role="document">
                     <div className="modal-content">
                         <form onSubmit={handleSubmit} noValidate>
@@ -178,44 +145,32 @@ const AdminMatchModal = ({
                                     <h5 className="modal-title">
                                         {isNew
                                             ? "Vytvořit nový zápas"
-                                            : `Upravit zápas #${values.id}${values.matchNumber
-                                                ? ` (č. ${values.matchNumber} v sezóně)`
-                                                : ""
+                                            : `Upravit zápas #${values.id}${values.matchNumber ? ` (č. ${values.matchNumber} v sezóně)` : ""
                                             }`}
                                     </h5>
                                     {!isNew && values.seasonId && (
-                                        <small className="text-muted">
-                                            Sezóna ID: {values.seasonId}
-                                        </small>
+                                        <small className="text-muted">Sezóna ID: {values.seasonId}</small>
                                     )}
                                 </div>
+
                                 <button
                                     type="button"
                                     className="btn-close"
                                     aria-label="Close"
                                     onClick={handleClose}
                                     disabled={saving}
-                                ></button>
+                                />
                             </div>
 
                             <div className="modal-body">
-                                {serverError && (
-                                    <div className="alert alert-danger">
-                                        {serverError}
-                                    </div>
-                                )}
+                                {serverError && <div className="alert alert-danger">{serverError}</div>}
 
-                                <MatchForm
-                                    values={values}
-                                    onChange={handleChange}
-                                    errors={errors}
-                                />
+                                <MatchForm values={values} onChange={handleChange} errors={errors} />
 
                                 {!isNew && (
                                     <div className="mt-3">
                                         <small className="text-muted">
-                                            Stav zápasu:{" "}
-                                            {values.matchStatus || "NENASTAVEN"}
+                                            Stav zápasu: {values.matchStatus || "NENASTAVEN"}
                                             {values.cancelReason &&
                                                 ` (důvod zrušení: ${values.cancelReason})`}
                                         </small>
@@ -232,11 +187,8 @@ const AdminMatchModal = ({
                                 >
                                     Zavřít
                                 </button>
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary"
-                                    disabled={saving}
-                                >
+
+                                <button type="submit" className="btn btn-primary" disabled={saving}>
                                     {saving
                                         ? isNew
                                             ? "Vytvářím zápas…"
@@ -250,6 +202,7 @@ const AdminMatchModal = ({
                     </div>
                 </div>
             </div>
+
             <div className="modal-backdrop fade show"></div>
         </>
     );

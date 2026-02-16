@@ -5,6 +5,9 @@ import AdminPlayerHistory from "./AdminPlayerHistory";
 import AdminPlayerInactivityModal from "./AdminPlayerInactivityModal";
 import { useGlobalDim } from "../../hooks/useGlobalDim";
 
+import PlayerStats from "../players/PlayerStats";
+import { usePlayerStatsAdmin } from "../../hooks/usePlayerStatsAdmin";
+
 const statusTextMap = {
     PENDING: "čeká na schválení",
     REJECTED: "zamítnuto",
@@ -25,14 +28,16 @@ const AdminPlayerCard = ({
     onEdit,
     onDelete,
     onChangeUser,
-    onInactivityChanged, // 👈 NOVĚ – callback z tabulky
+    onInactivityChanged,
 }) => {
     const [showHistory, setShowHistory] = useState(false);
     const [showInactivity, setShowInactivity] = useState(false);
 
-    const dimActive = showHistory; //  ztmavení pro "Historie" (karta zůstane viditelná)
+    // ✅ NOVĚ – statistiky
+    const [showStats, setShowStats] = useState(false);
 
-    //  stejná logika jako u AdminMatchCard
+    // dimujeme když je otevřená historie nebo statistiky
+    const dimActive = showHistory || showStats;
     useGlobalDim(dimActive);
 
     const playerStatus = player.playerStatus ?? "PENDING";
@@ -48,22 +53,41 @@ const AdminPlayerCard = ({
 
     const toggleHistory = () => {
         setShowHistory((prev) => !prev);
+        // ať nejsou otevřené obě sekce zároveň
+        setShowStats(false);
     };
 
-    //  když je dimActive, karta musí být neprůhledná a nad overlayem
+    const toggleStats = () => {
+        setShowStats((prev) => !prev);
+        setShowHistory(false);
+    };
+
+    // ✅ statistiky načítáme jen když jsou otevřené
+    const {
+        stats,
+        loading: statsLoading,
+        error: statsError,
+        reload: reloadStats,
+    } = usePlayerStatsAdmin(player.id, { enabled: showStats });
+
     const cardClassName =
         "card shadow-sm mb-3 " +
         (dimActive ? "bg-white dim-keep " : "") +
         (showHistory ? "border border-3 border-info " : "") +
+        (showStats ? "border border-3 border-primary " : "") +
         (isInactive ? "border-start border-4 border-warning" : "");
+
+    const closeOverlays = () => {
+        setShowHistory(false);
+        setShowStats(false);
+    };
 
     return (
         <>
-            {/*  klik mimo kartu zavře historii (vrstva je pod kartou, nad ztmavením) */}
             {dimActive && (
                 <div
                     className="global-dim-click"
-                    onClick={() => setShowHistory(false)}
+                    onClick={closeOverlays}
                     aria-hidden="true"
                 />
             )}
@@ -190,6 +214,18 @@ const AdminPlayerCard = ({
                                     Neaktivita
                                 </button>
 
+                                {/* ✅ NOVÉ – STATISTIKY */}
+                                <button
+                                    type="button"
+                                    className={
+                                        "btn btn-outline-primary" +
+                                        (showStats ? " active" : "")
+                                    }
+                                    onClick={toggleStats}
+                                >
+                                    {showStats ? "Skrýt statistiku" : "Statistika"}
+                                </button>
+
                                 <button
                                     type="button"
                                     className={
@@ -214,6 +250,30 @@ const AdminPlayerCard = ({
                     </RoleGuard>
                 </div>
 
+                {showStats && (
+                    <div className="card-body bg-white">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <h6 className="mb-0">Statistiky hráče #{player.id}</h6>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={reloadStats}
+                                disabled={statsLoading}
+                                title="Obnovit statistiky"
+                            >
+                                Obnovit
+                            </button>
+                        </div>
+
+                        <PlayerStats
+                            stats={stats}
+                            loading={statsLoading}
+                            error={statsError}
+                            onReload={reloadStats}
+                        />
+                    </div>
+                )}
+
                 {showHistory && (
                     <div className="card-body bg-white">
                         <h6 className="mb-2">Historie hráče #{player.id}</h6>
@@ -224,9 +284,8 @@ const AdminPlayerCard = ({
                 {showInactivity && (
                     <AdminPlayerInactivityModal
                         player={player}
-                        onClose={() => setShowInactivity(false)} // zavření bez uložení
+                        onClose={() => setShowInactivity(false)}
                         onSaved={() => {
-                            // po uložení
                             setShowInactivity(false);
                             onInactivityChanged && onInactivityChanged();
                         }}

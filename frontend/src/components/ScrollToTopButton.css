@@ -13,8 +13,7 @@
     cursor: pointer;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
-    z-index: 1050;
-    /* nad běžným obsahem */
+    z-index: 1050;   
 }
 
 .scroll-to-top-btn:hover {

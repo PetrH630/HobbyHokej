@@ -1,5 +1,9 @@
 package cz.phsoft.hokej.models.dto;
 
+import cz.phsoft.hokej.data.enums.Team;
+
+import java.util.Map;
+
 /**
  * Datový přenosový objekt reprezentující statistiku hráče
  * za aktuální sezónu.
@@ -24,6 +28,12 @@ public class PlayerStatsDTO {
      * Celkový počet odehraných zápasů v aktuální sezóně.
      */
     private int allMatchesInSeason;
+
+    /**
+     * Celkový počet odehraných zápasů dostupných pro hráče v aktuální sezóně.
+     */
+    private int allMatchesInSeasonForPlayer;
+
 
     /**
      * Počet zápasů, na které byl hráč registrován.
@@ -60,6 +70,18 @@ public class PlayerStatsDTO {
      */
     private int noExcused;
 
+    /**
+     * Domovský tým hráče uložený v databázi.
+     */
+    private Team homeTeam;
+
+    /**
+     * Počty registrací hráče podle týmu pro status REGISTERED.
+     */
+    private Map<Team, Integer> registeredByTeam;
+
+
+
     public Long getPlayerId() {
         return playerId;
     }
@@ -74,6 +96,14 @@ public class PlayerStatsDTO {
 
     public void setAllMatchesInSeason(int allMatchesInSeason) {
         this.allMatchesInSeason = allMatchesInSeason;
+    }
+
+    public int getAllMatchesInSeasonForPlayer() {
+        return allMatchesInSeasonForPlayer;
+    }
+
+    public void setAllMatchesInSeasonForPlayer(int allMatchesInSeasonForPlayer) {
+        this.allMatchesInSeasonForPlayer = allMatchesInSeasonForPlayer;
     }
 
     public int getRegistered() {
@@ -130,5 +160,21 @@ public class PlayerStatsDTO {
 
     public void setNoExcused(int noExcused) {
         this.noExcused = noExcused;
+    }
+
+    public Team getHomeTeam() {
+        return homeTeam;
+    }
+
+    public void setHomeTeam(Team homeTeam) {
+        this.homeTeam = homeTeam;
+    }
+
+    public Map<Team, Integer> getRegisteredByTeam() {
+        return registeredByTeam;
+    }
+
+    public void setRegisteredByTeam(Map<Team, Integer> registeredByTeam) {
+        this.registeredByTeam = registeredByTeam;
     }
 }

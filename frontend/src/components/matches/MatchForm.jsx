@@ -1,4 +1,5 @@
 // src/components/matches/MatchForm.jsx
+import DateTimePicker from "../forms/DateTimePicker";
 
 const MatchForm = ({ values, onChange, errors = {} }) => {
     const handleInputChange = (e) => {
@@ -6,16 +7,11 @@ const MatchForm = ({ values, onChange, errors = {} }) => {
         onChange({ [name]: value });
     };
 
-    const dateTimeClass =
-        "form-control" + (errors.dateTime ? " is-invalid" : "");
-    const locationClass =
-        "form-control" + (errors.location ? " is-invalid" : "");
-    const descriptionClass =
-        "form-control" + (errors.description ? " is-invalid" : "");
-    const maxPlayersClass =
-        "form-control" + (errors.maxPlayers ? " is-invalid" : "");
-    const priceClass =
-        "form-control" + (errors.price ? " is-invalid" : "");
+    const dateTimeClass = "form-control" + (errors.dateTime ? " is-invalid" : "");
+    const locationClass = "form-control" + (errors.location ? " is-invalid" : "");
+    const descriptionClass = "form-control" + (errors.description ? " is-invalid" : "");
+    const maxPlayersClass = "form-control" + (errors.maxPlayers ? " is-invalid" : "");
+    const priceClass = "form-control" + (errors.price ? " is-invalid" : "");
 
     return (
         <div>
@@ -26,16 +22,21 @@ const MatchForm = ({ values, onChange, errors = {} }) => {
                 <label className="form-label" htmlFor="match-dateTime">
                     Datum a čas zápasu
                 </label>
-                <input
-                    type="datetime-local"
+
+                <DateTimePicker
                     id="match-dateTime"
                     name="dateTime"
-                    className={dateTimeClass}
                     value={values.dateTime || ""}
-                    onChange={handleInputChange}
+                    onChange={(valueString) => onChange({ dateTime: valueString })}
+                    placeholder="Vyber datum a čas…"
+                    required
+                    className={dateTimeClass}
                 />
+
+                <div className="form-text">Vyber datum a čas začátku zápasu.</div>
+
                 {errors.dateTime && (
-                    <div className="invalid-feedback">
+                    <div className="invalid-feedback d-block">
                         {errors.dateTime}
                     </div>
                 )}

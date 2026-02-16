@@ -1,4 +1,5 @@
 // src/components/seasons/SeasonForm.jsx
+import DateTimePicker from "../forms/DateTimePicker";
 
 const SeasonForm = ({ values, onChange, errors = {} }) => {
     const handleInputChange = (e) => {
@@ -6,8 +7,19 @@ const SeasonForm = ({ values, onChange, errors = {} }) => {
         onChange({ [name]: value });
     };
 
-    const nameClass =
-        "form-control" + (errors.name ? " is-invalid" : "");
+    // kompatibilní handler pro DateTimePicker:
+    // - buď zavolá onChange(event)
+    // - nebo onChange(valueString)
+    const handleDateTimeChange = (name) => (valueOrEvent) => {
+        const value =
+            valueOrEvent?.target?.value !== undefined
+                ? valueOrEvent.target.value
+                : valueOrEvent;
+
+        onChange({ [name]: value });
+    };
+
+    const nameClass = "form-control" + (errors.name ? " is-invalid" : "");
     const startDateClass =
         "form-control" + (errors.startDate ? " is-invalid" : "");
     const endDateClass =
@@ -37,43 +49,40 @@ const SeasonForm = ({ values, onChange, errors = {} }) => {
 
             <div className="row">
                 <div className="col-md-6 mb-3">
-                    <label
-                        className="form-label"
-                        htmlFor="season-startDate"
-                    >
+                    <label className="form-label" htmlFor="season-startDate">
                         Začátek sezóny
                     </label>
-                    <input
-                        type="date"
+
+                    <DateTimePicker
                         id="season-startDate"
                         name="startDate"
-                        className={startDateClass}
                         value={values.startDate || ""}
-                        onChange={handleInputChange}
+                        onChange={handleDateTimeChange("startDate")}
+                        className={startDateClass}
                     />
+
                     {errors.startDate && (
-                        <div className="invalid-feedback">
+                        <div className="invalid-feedback d-block">
                             {errors.startDate}
                         </div>
                     )}
                 </div>
+
                 <div className="col-md-6 mb-3">
-                    <label
-                        className="form-label"
-                        htmlFor="season-endDate"
-                    >
+                    <label className="form-label" htmlFor="season-endDate">
                         Konec sezóny
                     </label>
-                    <input
-                        type="date"
+
+                    <DateTimePicker
                         id="season-endDate"
                         name="endDate"
-                        className={endDateClass}
                         value={values.endDate || ""}
-                        onChange={handleInputChange}
+                        onChange={handleDateTimeChange("endDate")}
+                        className={endDateClass}
                     />
+
                     {errors.endDate && (
-                        <div className="invalid-feedback">
+                        <div className="invalid-feedback d-block">
                             {errors.endDate}
                         </div>
                     )}

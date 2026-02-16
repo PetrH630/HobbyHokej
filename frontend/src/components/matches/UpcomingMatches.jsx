@@ -1,4 +1,5 @@
 // src/components/matches/UpcomingMatches.jsx
+import { useEffect, useRef } from "react";
 import { useMyUpcomingMatches } from "../../hooks/useMyUpcomingMatches";
 import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
 import MatchCard from "./MatchCard";
@@ -10,6 +11,36 @@ const UpcomingMatches = () => {
   const { matches, loading, error } = useMyUpcomingMatches();
   const { currentPlayer } = useCurrentPlayer();
   const navigate = useNavigate();
+
+  const firstMatchRef = useRef(null);
+  const hasAutoScrolledRef = useRef(false);
+
+  useEffect(() => {
+    if (loading || error) return;
+    if (!currentPlayer) return;
+    if (!Array.isArray(matches) || matches.length === 0) return;
+
+    // jen jednou po načtení
+    if (hasAutoScrolledRef.current) return;
+
+    const isSmallDevice = window.matchMedia("(max-width: 767.98px)").matches;
+    if (!isSmallDevice) return;
+
+    // auto-scroll jen pokud je uživatel "nahoře" (nezlobíme, když už scrolluje)
+    const isNearTop = window.scrollY < 200;
+    if (!isNearTop) return;
+
+    if (firstMatchRef.current) {
+      hasAutoScrolledRef.current = true;
+
+      window.setTimeout(() => {
+        firstMatchRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 150);
+    }
+  }, [loading, error, currentPlayer, matches]);
 
   if (loading) {
     return <p>Načítám nadcházející zápasy…</p>;
@@ -73,18 +104,38 @@ const UpcomingMatches = () => {
       </h4>
 
       <div className="match-list">
-        {matches.map((m) => (
-          <div className="match-item" key={m.id}>
-            <MatchCard
-              match={m}
-              onClick={() =>
-                navigate(`/app/matches/${m.id}`, {
-                  state: { isPast: false },
-                })
-              }
-            />
-          </div>
-        ))}
+        {matches.map((m, idx) => {
+          const isNext = idx === 0;
+
+          return (
+            <div
+              className={`match-item ${isNext ? "match-item--next" : ""}`}
+              key={m.id}
+              ref={isNext ? firstMatchRef : null}
+            >
+              <div
+                className={`next-match-frame ${isNext ? "next-match-frame--on" : ""
+                  }`}
+                aria-label={isNext ? "Nejbližší zápas" : undefined}
+              >
+                {isNext && (
+                  <div className="next-match-badge">
+                    Nejbližší zápas
+                  </div>
+                )}
+
+                <MatchCard
+                  match={m}
+                  onClick={() =>
+                    navigate(`/app/matches/${m.id}`, {
+                      state: { isPast: false },
+                    })
+                  }
+                />
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

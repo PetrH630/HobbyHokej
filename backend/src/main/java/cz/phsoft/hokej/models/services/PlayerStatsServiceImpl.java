@@ -3,6 +3,7 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
@@ -98,11 +99,22 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
                         .filter(match -> isPlayerActiveForMatch(player, match.getDateTime()))
                         .toList();
 
+        int allMatchesInSeasonForPlayer = availableMatches.size();
+
         PlayerStatsDTO statsDTO = new PlayerStatsDTO();
         statsDTO.setPlayerId(playerId);
         statsDTO.setAllMatchesInSeason(allMatchesInCurrentSeason);
+        statsDTO.setAllMatchesInSeasonForPlayer(allMatchesInSeasonForPlayer);
+        statsDTO.setHomeTeam(player.getTeam());
+
+        // vždy připravíme mapu se všemi týmy (ať je výstup stabilní pro FE)
+        EnumMap<Team, Integer> registeredByTeam = new EnumMap<>(Team.class);
+        for (Team t : Team.values()) {
+            registeredByTeam.put(t, 0);
+        }
 
         if (availableMatches.isEmpty()) {
+            statsDTO.setRegisteredByTeam(registeredByTeam);
             return statsDTO;
         }
 
@@ -121,6 +133,14 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
                         (a, b) -> a
                 ));
 
+        Map<Long, Team> playerTeamByMatchId = allRegistrations.stream()
+                .filter(r -> playerId.equals(r.getPlayerId()))
+                .collect(Collectors.toMap(
+                        MatchRegistrationDTO::getMatchId,
+                        MatchRegistrationDTO::getTeam,
+                        (a, b) -> a
+                ));
+
         EnumMap<PlayerMatchStatus, Integer> counts = new EnumMap<>(PlayerMatchStatus.class);
 
         for (MatchEntity match : availableMatches) {
@@ -128,7 +148,16 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
                     match.getId(),
                     PlayerMatchStatus.NO_RESPONSE
             );
+
             counts.merge(status, 1, Integer::sum);
+
+            // jen REGISTERED a jen podle team z registrace
+            if (status == PlayerMatchStatus.REGISTERED) {
+                Team team = playerTeamByMatchId.get(match.getId());
+                if (team != null) {
+                    registeredByTeam.merge(team, 1, Integer::sum);
+                }
+            }
         }
 
         statsDTO.setRegistered(counts.getOrDefault(PlayerMatchStatus.REGISTERED, 0));
@@ -138,6 +167,9 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
         statsDTO.setReserved(counts.getOrDefault(PlayerMatchStatus.RESERVED, 0));
         statsDTO.setNoResponse(counts.getOrDefault(PlayerMatchStatus.NO_RESPONSE, 0));
         statsDTO.setNoExcused(counts.getOrDefault(PlayerMatchStatus.NO_EXCUSED, 0));
+
+        // stabilní mapa pro FE (obsahuje všechny Team.values())
+        statsDTO.setRegisteredByTeam(registeredByTeam);
 
         return statsDTO;
     }

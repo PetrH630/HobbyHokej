@@ -6,8 +6,8 @@ const ScrollToTopButton = () => {
 
     useEffect(() => {
         const handleScroll = () => {
-            // zobrazit až po scrollnutí 300px
-            setVisible(window.scrollY > 300);
+            // zobrazit až po scrollnutí 100px
+            setVisible(window.scrollY > 100);
         };
 
         window.addEventListener("scroll", handleScroll);
