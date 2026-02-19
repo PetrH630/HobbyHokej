@@ -1,0 +1,17 @@
+Také doporučuju celý DataInitializer pustit jen v dev (a případně demo, pokud chceš seedovat demo data), např.:
+
+@Profile("dev")
+@Component
+public class DataInitializer { ... }
+
+nebo ještě lépe:
+@ConditionalOnProperty(name="app.seed.enabled", havingValue="true")
+a v application-dev.properties dát app.seed.enabled=true, v demo/prod false.
+
+Na malém zobrazení přejít na následující zápas - roll a zvýraznit rámečkem, na velkém rámeček a zvětšit,
+ať je hráč hned u nejbližšího zápasu
+
+-- WEDOS SPOUŠTĚNÍ ENV -- Pokud chceš, pošli mi ještě, - CHAT ORANŽOVÁ barva intelliJ
+jak to budeš na WEDOS spouštět (systemd service / docker / ručně) a
+ já ti napíšu přesně, kde nastavit ty ENV proměnné, aby se to
+ opravdu načítalo (protože .env soubor sám o sobě Spring na serveru nenačte).

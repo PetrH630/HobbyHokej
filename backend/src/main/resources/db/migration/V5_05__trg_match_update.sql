@@ -1,0 +1,35 @@
+CREATE TRIGGER trg_match_update
+AFTER UPDATE ON matches
+FOR EACH ROW
+BEGIN
+    INSERT INTO matches_history
+        (match_id,
+         original_timestamp,
+         action,
+         changed_at,
+         date_time,
+         location,
+         description,
+         max_players,
+         price,
+         match_status,
+         cancel_reason,
+         season_id,
+         created_by_user_id,
+         last_modified_by_user_id)
+    VALUES
+        (NEW.id,
+         NEW.timestamp,
+         'UPDATE',
+         NOW(),
+         NEW.date_time,
+         NEW.location,
+         NEW.description,
+         NEW.max_players,
+         NEW.price,
+         NEW.match_status,
+         NEW.cancel_reason,
+         NEW.season_id,
+         NEW.created_by_user_id,
+         NEW.last_modified_by_user_id);
+END;

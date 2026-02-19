@@ -1,0 +1,24 @@
+﻿Balíček (složka): data
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data
+
+Seznam souborů:
+package-info.java
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\package-info.java
+-----
+
+/**
+ * Datová vrstva aplikace.
+ *
+ * Obsahuje databázové entity, výčtové typy a repozitářovou vrstvu,
+ * která zajišťuje přístup k perzistentním datům.
+ *
+ * Tento balíček je používán modelovou a servisní vrstvou aplikace
+ * při práci s databází.
+ */
+package cz.phsoft.hokej.data;
+
+

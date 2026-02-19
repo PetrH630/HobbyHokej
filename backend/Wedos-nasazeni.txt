@@ -1,0 +1,149 @@
+.env
+.env.*
+application-*.local.properties
+
+----
+/etc/systemd/system/hokej.service
+
+[Unit]
+Description=HobbyHokej Spring Boot App
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/hokej
+EnvironmentFile=/var/www/hokej/.env
+ExecStart=/usr/bin/java -jar /var/www/hokej/hokej.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+
+Příkazy:
+
+sudo systemctl daemon-reload
+sudo systemctl enable hokej
+sudo systemctl start hokej
+sudo systemctl status hokej
+
+-- spuštění MariaDB10.6 v cmd - jako správce
+net start MariaDB106
+
+
+----
+DOCKER
+Do /opt/hobbyhokej/:
+docker-compose.yml
+.env
+backend/Dockerfile
+backend/app.jar (váš vybuilděný jar z lokálu)
+
+--  cd /opt/hobbyhokej
+    docker compose up -d --build
+    docker ps
+    docker logs -f hobbyhokej-backend
+
+    -------------------
+🛠 Postup krok za krokem
+1️⃣ Vytvoř složku
+mkdir -p /opt/hobbyhokej/backend
+cd /opt/hobbyhokej/backend
+
+2️⃣ Vytvoř Dockerfile
+nano Dockerfile
+
+
+Vlož přesně toto:
+
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+COPY app.jar /app/app.jar
+
+EXPOSE 8080
+
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+UseG1GC"
+
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar"]
+
+
+Ulož.
+
+📦 Co je důležité pochopit
+
+Tento Dockerfile říká:
+
+Vezmi hotový image s Java 17 (Temurin)
+
+Nastav pracovní adresář /app
+
+Zkopíruj do něj app.jar
+
+Spusť ho
+
+❗ Ale pozor
+
+Soubor se jmenuje:
+
+app.jar
+
+
+To znamená, že musíš na server nahrát svůj vybuilděný JAR pod tímto názvem.
+
+🧱 Teď musíš udělat lokální build
+
+Na svém počítači v projektu:
+
+mvn clean package -DskipTests
+
+
+Pak zjisti přesný název jar v target/.
+
+Například:
+
+HobbyHokej-1.0-SNAPSHOT.jar
+
+
+Nahraj ho na server a přejmenuj:
+
+scp target/HobbyHokej-1.0-SNAPSHOT.jar root@TVAJE_IP:/opt/hobbyhokej/backend/app.jar
+
+🐳 Až bude Dockerfile i app.jar na místě
+
+Spusť:
+
+cd /opt/hobbyhokej
+docker compose up -d --build
+
+
+Docker:
+
+vytvoří image
+
+spustí MariaDB 10.6.25
+
+spustí backend
+
+backend se připojí na DB přes mariadb hostname
+
+🔎 Kontrola
+docker ps
+docker logs -f hobbyhokej-backend
+
+
+Pokud uvidíš:
+
+Started HobbyHokejApplication
+
+
+jsi hotový 🎯
+
+💬 Teď důležitá otázka
+
+Jak se jmenuje tvůj jar v target/?
+
+A běží ti už Docker (docker --version)?

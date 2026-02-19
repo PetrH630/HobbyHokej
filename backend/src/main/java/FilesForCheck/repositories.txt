@@ -1,0 +1,939 @@
+﻿Balíček (složka): repositories
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories
+
+Seznam souborů:
+AppUserHistoryRepository.java
+AppUserRepository.java
+AppUserSettingsRepository.java
+EmailVerificationTokenRepository.java
+ForgottenPasswordResetTokenRepository.java
+MatchHistoryRepository.java
+MatchRegistrationHistoryRepository.java
+MatchRegistrationRepository.java
+MatchRepository.java
+package-info.java
+PlayerHistoryRepository.java
+PlayerInactivityPeriodRepository.java
+PlayerRepository.java
+PlayerSettingsRepository.java
+SeasonHistoryRepository.java
+SeasonRepository.java
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\AppUserHistoryRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.AppUserHistoryEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repozitář pro čtení historických záznamů uživatelů.
+ *
+ * Slouží pro auditní a přehledové účely. Zápis do historie
+ * zajišťují databázové triggery, nikoliv tento repozitář.
+ */
+public interface AppUserHistoryRepository extends JpaRepository<AppUserHistoryEntity, Long> {
+
+    /**
+     * Vrátí všechny historické záznamy pro daného uživatele,
+     * seřazené od nejnovější změny po nejstarší.
+     */
+    List<AppUserHistoryEntity> findByUserIdOrderByChangedAtDesc(Long userId);
+
+    List<AppUserHistoryEntity> findByEmailOrderByChangedAtDesc(String email);
+
+
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\AppUserRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s entitou AppUserEntity.
+ *
+ * Slouží k perzistenci a načítání uživatelských účtů
+ * z databáze pomocí Spring Data JPA.
+ */
+public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
+
+    /**
+     * Vyhledá uživatele podle e-mailové adresy.
+     *
+     * E-mail slouží jako unikátní identifikátor uživatele
+     * při přihlášení do aplikace.
+     *
+     * @param email e-mail uživatele
+     * @return uživatel zabalený v Optional, pokud existuje
+     */
+    Optional<AppUserEntity> findByEmail(String email);
+
+
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\AppUserSettingsRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s entitou AppUserSettingsEntity.
+ *
+ * Slouží k načítání a ukládání nastavení uživatelských účtů,
+ * oddělených od samotných uživatelů.
+ */
+public interface AppUserSettingsRepository extends JpaRepository<AppUserSettingsEntity, Long> {
+
+    /**
+     * Vyhledá nastavení podle uživatele.
+     *
+     * @param user uživatelský účet
+     * @return nastavení zabalené v Optional, pokud existuje
+     */
+    Optional<AppUserSettingsEntity> findByUser(AppUserEntity user);
+
+    /**
+     * Vyhledá nastavení podle e-mailu uživatele.
+     *
+     * @param email e-mail uživatele
+     * @return nastavení zabalené v Optional, pokud existuje
+     */
+    Optional<AppUserSettingsEntity> findByUserEmail(String email);
+
+    /**
+     * Ověří, zda existuje záznam nastavení pro daného uživatele.
+     *
+     * @param user uživatelský účet
+     * @return true, pokud nastavení existuje
+     */
+    Boolean existsByUser(AppUserEntity user);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\EmailVerificationTokenRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s entitou EmailVerificationTokenEntity.
+ *
+ * Slouží k ukládání a vyhledávání ověřovacích tokenů
+ * používaných při aktivaci uživatelských účtů.
+ */
+public interface EmailVerificationTokenRepository
+        extends JpaRepository<EmailVerificationTokenEntity, Long> {
+
+    /**
+     * Vyhledá ověřovací token podle jeho hodnoty.
+     *
+     * Používá se při ověřování aktivačního odkazu uživatele.
+     *
+     * @param token hodnota ověřovacího tokenu
+     * @return token zabalený v Optional, pokud existuje
+     */
+    Optional<EmailVerificationTokenEntity> findByToken(String token);
+
+    /**
+     * Smaže všechny ověřovací tokeny daného uživatele.
+     *
+     * Typicky se používá po úspěšné aktivaci účtu
+     * nebo při opakovaném posílání aktivačního e-mailu.
+     *
+     * @param user uživatel, jehož tokeny mají být smazány
+     */
+    void deleteByUser(AppUserEntity user);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\ForgottenPasswordResetTokenRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.ForgottenPasswordResetTokenEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s entitou ForgottenPasswordResetTokenEntity.
+ *
+ * Slouží k ukládání a vyhledávání resetovacích tokenů
+ * používaných při obnově zapomenutého hesla.
+ */
+public interface ForgottenPasswordResetTokenRepository
+        extends JpaRepository<ForgottenPasswordResetTokenEntity, Long> {
+
+    /**
+     * Vyhledá resetovací token podle jeho hodnoty.
+     *
+     * @param token hodnota resetovacího tokenu
+     * @return token zabalený v Optional, pokud existuje
+     */
+    Optional<ForgottenPasswordResetTokenEntity> findByToken(String token);
+
+    /**
+     * Smaže všechny resetovací tokeny daného uživatele.
+     *
+     * Typicky se používá po úspěšném nastavení nového hesla
+     * nebo při vynulování procesu resetu.
+     *
+     * @param user uživatel, jehož tokeny mají být smazány
+     */
+    void deleteByUser(AppUserEntity user);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\MatchHistoryRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchHistoryEntity;
+import cz.phsoft.hokej.data.entities.MatchHistoryEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+/**
+ * Repozitář pro čtení historických záznamů zápasů.
+ *
+ * Slouží pro auditní a přehledové účely. Zápis do historie
+ * zajišťují databázové triggery, nikoliv tento repozitář.
+ */
+public interface MatchHistoryRepository extends JpaRepository<MatchHistoryEntity, Long> {
+
+    /**
+     * Vrátí všechny historické záznamy pro daný zápas,
+     * seřazené od nejnovější změny po nejstarší.
+     */
+    List<MatchHistoryEntity> findByMatchIdOrderByChangedAtDesc(Long matchId);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\MatchRegistrationHistoryRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationHistoryEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+/**
+ * Repozitář pro práci s entitou MatchRegistrationHistoryEntity.
+ *
+ * Slouží k načítání historických záznamů změn
+ * registrací hráčů k zápasům.
+ */
+public interface MatchRegistrationHistoryRepository
+        extends JpaRepository<MatchRegistrationHistoryEntity, Long> {
+
+    /**
+     * Vrátí historii změn konkrétní registrace.
+     *
+     * Záznamy jsou seřazeny sestupně podle času změny,
+     * takže nejnovější změna je na prvním místě.
+     *
+     * @param matchRegistrationId ID původní registrace
+     * @return seznam historických záznamů
+     */
+    List<MatchRegistrationHistoryEntity>
+    findByMatchRegistrationIdOrderByChangedAtDesc(Long matchRegistrationId);
+
+    /**
+     * Vrátí historii všech změn registrací pro daný zápas.
+     *
+     * Používá se například pro administrativní přehledy
+     * nebo auditní kontrolu zápasu.
+     *
+     * @param matchId ID zápasu
+     * @return seznam historických záznamů
+     */
+    List<MatchRegistrationHistoryEntity>
+    findByMatchIdOrderByChangedAtDesc(Long matchId);
+
+    /**
+     * Vrátí historii změn registrací konkrétního hráče.
+     *
+     * Záznamy jsou seřazeny sestupně podle času změny.
+     *
+     * @param playerId ID hráče
+     * @return seznam historických záznamů
+     */
+    List<MatchRegistrationHistoryEntity>
+    findByPlayerIdOrderByChangedAtDesc(Long playerId);
+
+    /**
+     * Vrátí historii všech změn registrací konkrétního hráče
+     * v konkrétním zápase.
+     *
+     * @param matchId  ID zápasu
+     * @param playerId ID hráče
+     * @return seznam historických záznamů
+     */
+    List<MatchRegistrationHistoryEntity>
+    findByMatchIdAndPlayerIdOrderByChangedAtDesc(Long matchId, Long playerId);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\MatchRegistrationRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s entitou MatchRegistrationEntity.
+ *
+ * Slouží k načítání a správě registrací hráčů k zápasům,
+ * včetně kontroly existence registrace, počtů hráčů
+ * a vyhledávání podle zápasu nebo hráče.
+ */
+@Repository
+public interface MatchRegistrationRepository
+        extends JpaRepository<MatchRegistrationEntity, Long> {
+
+    /**
+     * Ověří, zda existuje registrace hráče k danému zápasu.
+     *
+     * Používá se zejména k rychlé kontrole existence
+     * registrace bez nutnosti načítat celou entitu.
+     *
+     * @param playerId ID hráče
+     * @param matchId  ID zápasu
+     * @return true, pokud registrace existuje
+     */
+    Boolean existsByPlayerIdAndMatchId(Long playerId, Long matchId);
+
+    /**
+     * Vrátí všechny registrace k danému zápasu.
+     *
+     * @param matchId ID zápasu
+     * @return seznam registrací
+     */
+    List<MatchRegistrationEntity> findByMatchId(Long matchId);
+
+    /**
+     * Vrátí všechny registrace daného hráče.
+     *
+     * @param playerId ID hráče
+     * @return seznam registrací
+     */
+    List<MatchRegistrationEntity> findByPlayerId(Long playerId);
+
+    /**
+     * Najde konkrétní registraci hráče k zápasu.
+     *
+     * @param playerId ID hráče
+     * @param matchId  ID zápasu
+     * @return registrace zabalená v Optional, pokud existuje
+     */
+    Optional<MatchRegistrationEntity> findByPlayerIdAndMatchId(Long playerId, Long matchId);
+
+    /**
+     * Spočítá počet registrací daného zápasu podle stavu.
+     *
+     * Typicky se používá pro zjištění aktuální
+     * obsazenosti zápasu.
+     *
+     * @param matchId ID zápasu
+     * @param status  stav registrace
+     * @return počet registrací v daném stavu
+     */
+    long countByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
+
+    /**
+     * Vrátí registrace pro více zápasů najednou.
+     *
+     * Používá se například při hromadném načítání
+     * registrací pro přehledy a statistiky.
+     *
+     * @param matchIds seznam ID zápasů
+     * @return seznam registrací
+     */
+    List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\MatchRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Repozitář pro práci s entitou MatchEntity.
+ *
+ * Slouží k načítání zápasů podle času konání a sezóny,
+ * zejména pro přehledy nadcházejících a odehraných zápasů.
+ */
+public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
+
+    // Zápasy podle data (nezávisle na sezóně)
+
+    /**
+     * Vrátí všechny zápasy konající se po zadaném čase.
+     *
+     * Zápasy jsou seřazeny vzestupně podle data a času konání,
+     * nejbližší zápas je na prvním místě.
+     *
+     * @param dateTime referenční datum a čas
+     * @return seznam nadcházejících zápasů
+     */
+    List<MatchEntity> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
+
+    /**
+     * Vrátí všechny zápasy konající se před zadaným časem.
+     *
+     * Zápasy jsou seřazeny sestupně podle data a času konání,
+     * nejnovější odehraný zápas je na prvním místě.
+     *
+     * @param dateTime referenční datum a čas
+     * @return seznam odehraných zápasů
+     */
+    List<MatchEntity> findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime dateTime);
+
+    // Zápasy v konkrétní sezóně
+
+    /**
+     * Vrátí všechny zápasy v dané sezóně seřazené
+     * vzestupně podle data a času konání.
+     *
+     * @param seasonId ID sezóny
+     * @return seznam zápasů v sezóně
+     */
+    List<MatchEntity> findAllBySeasonIdOrderByDateTimeAsc(Long seasonId);
+
+    /**
+     * Vrátí všechny zápasy v dané sezóně seřazené
+     * sestupně podle data a času konání.
+     *
+     * @param seasonId ID sezóny
+     * @return seznam zápasů v sezóně
+     */
+    List<MatchEntity> findAllBySeasonIdOrderByDateTimeDesc(Long seasonId);
+
+    // Zápasy v sezóně s časovým omezením
+
+    /**
+     * Vrátí zápasy v dané sezóně, které se konají
+     * po zadaném čase.
+     *
+     * Používá se zejména pro načítání nadcházejících
+     * zápasů v aktivní sezóně.
+     *
+     * @param seasonId ID sezóny
+     * @param from     referenční datum a čas
+     * @return seznam nadcházejících zápasů v sezóně
+     */
+    List<MatchEntity> findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(
+            Long seasonId,
+            LocalDateTime from
+    );
+
+    /**
+     * Vrátí zápasy v dané sezóně, které se konaly
+     * před zadaným časem.
+     *
+     * Používá se zejména pro přehled odehraných
+     * zápasů v sezóně.
+     *
+     * @param seasonId ID sezóny
+     * @param to       referenční datum a čas
+     * @return seznam odehraných zápasů v sezóně
+     */
+    List<MatchEntity> findBySeasonIdAndDateTimeBeforeOrderByDateTimeDesc(
+            Long seasonId,
+            LocalDateTime to
+    );
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\package-info.java
+-----
+
+/**
+ * Repozitářová vrstva aplikace.
+ *
+ * Obsahuje Spring Data JPA repozitáře pro přístup k databázi.
+ *
+ * Zajišťuje:
+ * - načítání a ukládání entit,
+ * - definici dotazovacích metod,
+ * - abstrahování práce s perzistencí dat.
+ *
+ * Repozitáře:
+ * - neobsahují business logiku,
+ * - jsou používány výhradně ve service vrstvě.
+ */
+package cz.phsoft.hokej.data.repositories;
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\PlayerHistoryRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.PlayerHistoryEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+/**
+ * Repozitář pro čtení historických záznamů hráčů.
+ *
+ * Slouží pro auditní a přehledové účely.
+ * Zápis do historie zajišťují databázové triggery.
+ */
+public interface PlayerHistoryRepository
+        extends JpaRepository<PlayerHistoryEntity, Long> {
+
+    /**
+     * Vrátí všechny historické záznamy pro daného hráče,
+     * seřazené od nejnovější změny po nejstarší.
+     */
+    List<PlayerHistoryEntity>
+    findByPlayerIdOrderByChangedAtDesc(Long playerId);
+}
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\PlayerInactivityPeriodRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Repozitář pro práci s entitou PlayerInactivityPeriodEntity.
+ *
+ * Slouží k evidenci a vyhledávání období neaktivity hráčů,
+ * zejména pro ověření dostupnosti hráče v konkrétním čase.
+ */
+@Repository
+public interface PlayerInactivityPeriodRepository
+        extends JpaRepository<PlayerInactivityPeriodEntity, Long> {
+
+    /**
+     * Ověří, zda je hráč v daném časovém intervalu neaktivní.
+     *
+     * Používá se například při registraci hráče na zápas
+     * nebo při kontrole jeho dostupnosti.
+     *
+     * @param player hráč, jehož neaktivita se ověřuje
+     * @param from   začátek kontrolovaného intervalu
+     * @param to     konec kontrolovaného intervalu
+     * @return true, pokud hráč spadá do období neaktivity
+     */
+    boolean existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
+            PlayerEntity player,
+            LocalDateTime from,
+            LocalDateTime to
+    );
+
+    /**
+     * Vrátí všechna období neaktivity hráče, která
+     * se překrývají se zadaným časovým intervalem.
+     *
+     * Používá se zejména při validaci vytváření
+     * nebo úpravy období neaktivity.
+     *
+     * @param player hráč
+     * @param from   začátek kontrolovaného intervalu
+     * @param to     konec kontrolovaného intervalu
+     * @return seznam překrývajících se období neaktivity
+     */
+    List<PlayerInactivityPeriodEntity>
+    findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
+            PlayerEntity player,
+            LocalDateTime from,
+            LocalDateTime to
+    );
+
+    /**
+     * Vrátí všechna období neaktivity daného hráče
+     * seřazená vzestupně podle začátku neaktivity.
+     *
+     * @param player hráč
+     * @return seznam období neaktivity hráče
+     */
+    List<PlayerInactivityPeriodEntity>
+    findByPlayerOrderByInactiveFromAsc(PlayerEntity player);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\PlayerRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s entitou PlayerEntity.
+ *
+ * Slouží k načítání a správě hráčů, zejména ve vztahu
+ * k uživatelským účtům a identifikaci hráčů podle jména
+ * nebo e-mailu vlastníka.
+ */
+public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
+
+    /**
+     * Najde hráče podle jeho ID.
+     *
+     * Překrývá základní metodu z JpaRepository tak,
+     * aby bylo možné vracet Optional.
+     *
+     * @param id ID hráče
+     * @return hráč zabalený v Optional, pokud existuje
+     */
+    Optional<PlayerEntity> findById(Long id);
+
+    /**
+     * Vrátí všechny hráče, jejichž ID není obsaženo
+     * v zadaném seznamu.
+     *
+     * Používá se například při filtrování dostupných hráčů.
+     *
+     * @param ids seznam ID hráčů, které mají být vyloučeny
+     * @return seznam hráčů
+     */
+    List<PlayerEntity> findByIdNotIn(List<Long> ids);
+
+    /**
+     * Ověří, zda již existuje hráč se stejným jménem a příjmením.
+     *
+     * Používá se jako ochrana proti duplicitnímu
+     * vytváření hráčů.
+     *
+     * @param name    jméno hráče
+     * @param surname příjmení hráče
+     * @return true, pokud hráč existuje
+     */
+    boolean existsByNameAndSurname(String name, String surname);
+
+    /**
+     * Najde hráče podle jména a příjmení.
+     *
+     * @param name    jméno hráče
+     * @param surname příjmení hráče
+     * @return hráč zabalený v Optional, pokud existuje
+     */
+    Optional<PlayerEntity> findByNameAndSurname(String name, String surname);
+
+    /**
+     * Najde jednoho hráče podle e-mailu uživatele,
+     * ke kterému je hráč přiřazen.
+     *
+     * Používá se zejména v případech, kdy má uživatel
+     * pouze jednoho hráče.
+     *
+     * @param email e-mail uživatele
+     * @return hráč zabalený v Optional, pokud existuje
+     */
+    Optional<PlayerEntity> findByUserEmail(String email);
+
+    /**
+     * Vrátí všechny hráče patřící danému uživateli.
+     *
+     * @param email e-mail uživatele
+     * @return seznam hráčů uživatele
+     */
+    List<PlayerEntity> findAllByUserEmail(String email);
+
+    /**
+     * Vrátí všechny hráče uživatele seřazené
+     * podle ID vzestupně.
+     *
+     * Používá se pro konzistentní výpis hráčů
+     * v uživatelském rozhraní.
+     *
+     * @param email e-mail uživatele
+     * @return seznam hráčů uživatele
+     */
+    List<PlayerEntity> findByUser_EmailOrderByIdAsc(String email);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\PlayerSettingsRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s entitou PlayerSettingsEntity.
+ *
+ * Slouží k načítání a správě nastavení hráčů
+ * (kontakty, notifikační preference).
+ */
+public interface PlayerSettingsRepository extends JpaRepository<PlayerSettingsEntity, Long> {
+
+    /**
+     * Vyhledá nastavení podle hráče.
+     *
+     * @param player hráč
+     * @return nastavení zabalené v Optional, pokud existuje
+     */
+    Optional<PlayerSettingsEntity> findByPlayer(PlayerEntity player);
+
+    /**
+     * Vyhledá nastavení podle ID hráče.
+     *
+     * @param playerId ID hráče
+     * @return nastavení zabalené v Optional, pokud existuje
+     */
+    Optional<PlayerSettingsEntity> findByPlayerId(Long playerId);
+
+    /**
+     * Ověří, zda existuje záznam nastavení pro daného hráče.
+     *
+     * @param player hráč
+     * @return true, pokud nastavení existuje
+     */
+    boolean existsByPlayer(PlayerEntity player);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\SeasonHistoryRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.SeasonHistoryEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+/**
+ * Repozitář pro práci s entitou SeasonHistoryEntity.
+ *
+ * Slouží k přístupu k historickým záznamům sezóny uloženým v databázi.
+ * Poskytuje základní CRUD operace zděděné z JpaRepository a
+ * specifické dotazy používané servisní vrstvou pro načítání historie
+ * konkrétní sezóny.
+ *
+ * Repozitář neobsahuje business logiku. Je používán servisní vrstvou,
+ * která zajišťuje aplikační pravidla a případné transformace dat.
+ */
+public interface SeasonHistoryRepository
+        extends JpaRepository<SeasonHistoryEntity, Long> {
+
+    /**
+     * Vrátí historii změn konkrétní sezóny.
+     *
+     * Záznamy jsou seřazeny sestupně podle času změny, takže
+     * nejnovější změna je na prvním místě.
+     *
+     * @param seasonId identifikátor sezóny, pro kterou se má historie načíst
+     * @return seznam historických záznamů dané sezóny seřazený od nejnovějšího
+     */
+    List<SeasonHistoryEntity> findBySeasonIdOrderByChangedAtDesc(Long seasonId);
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\repositories\SeasonRepository.java
+-----
+
+package cz.phsoft.hokej.data.repositories;
+
+import cz.phsoft.hokej.data.entities.SeasonEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repozitář pro práci s entitou SeasonEntity.
+ *
+ * Slouží k přístupu k datům sezón uloženým v databázi.
+ * Poskytuje základní CRUD operace zděděné z JpaRepository
+ * a specifické dotazy používané servisní vrstvou pro kontrolu
+ * jedinečnosti názvu, aktivní sezóny a časových překryvů.
+ *
+ * Repozitář neobsahuje business logiku. Ověřování aplikačních pravidel
+ * a rozhodování o dalším postupu je prováděno v servisní vrstvě.
+ */
+public interface SeasonRepository extends JpaRepository<SeasonEntity, Long> {
+
+    /**
+     * Ověří, zda existuje sezóna se zadaným názvem.
+     *
+     * Používá se při vytváření nové sezóny pro kontrolu
+     * jedinečnosti názvu.
+     *
+     * @param name název sezóny
+     * @return true, pokud sezóna se zadaným názvem existuje
+     */
+    boolean existsByName(String name);
+
+    /**
+     * Ověří, zda existuje jiná sezóna se zadaným názvem
+     * mimo zadané ID.
+     *
+     * Používá se při aktualizaci sezóny pro kontrolu,
+     * aby nedošlo ke kolizi názvů.
+     *
+     * @param name název sezóny
+     * @param id identifikátor sezóny, která má být z kontroly vynechána
+     * @return true, pokud existuje jiná sezóna se stejným názvem
+     */
+    boolean existsByNameAndIdNot(String name, Long id);
+
+    /**
+     * Vrátí aktuálně aktivní sezónu.
+     *
+     * V systému může být v jednom okamžiku aktivní
+     * maximálně jedna sezóna. Ověření tohoto pravidla
+     * je prováděno v servisní vrstvě.
+     *
+     * @return aktivní sezóna zabalená v Optional, pokud existuje
+     */
+    Optional<SeasonEntity> findByActiveTrue();
+
+    /**
+     * Vrátí všechny sezóny seřazené podle data začátku vzestupně.
+     *
+     * Používá se pro přehledové výpisy sezón
+     * v chronologickém pořadí.
+     *
+     * @return seznam sezón seřazený podle data začátku
+     */
+    List<SeasonEntity> findAllByOrderByStartDateAsc();
+
+    /**
+     * Ověří, zda existuje sezóna, která se časově překrývá
+     * se zadaným intervalem.
+     *
+     * Používá se při vytváření nové sezóny jako ochrana
+     * proti překrývajícím se časovým obdobím.
+     *
+     * @param endDate konec kontrolovaného intervalu
+     * @param startDate začátek kontrolovaného intervalu
+     * @return true, pokud existuje časový překryv
+     */
+    boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqual(
+            LocalDate endDate,
+            LocalDate startDate
+    );
+
+    /**
+     * Ověří, zda existuje jiná sezóna mimo zadané ID,
+     * která se časově překrývá se zadaným intervalem.
+     *
+     * Používá se při aktualizaci existující sezóny,
+     * aby nedošlo ke kolizi s jiným obdobím.
+     *
+     * @param endDate konec kontrolovaného intervalu
+     * @param startDate začátek kontrolovaného intervalu
+     * @param id identifikátor sezóny, která má být z kontroly vynechána
+     * @return true, pokud existuje časový překryv
+     */
+    boolean existsByStartDateLessThanEqualAndEndDateGreaterThanEqualAndIdNot(
+            LocalDate endDate,
+            LocalDate startDate,
+            Long id
+    );
+
+    /**
+     * Spočítá počet aktivních sezón.
+     *
+     * Používá se jako ochrana proti stavu,
+     * kdy by bylo aktivních více sezón současně.
+     * Kontrola konzistence je prováděna v servisní vrstvě.
+     *
+     * @return počet aktivních sezón
+     */
+    long countByActiveTrue();
+}
+
+

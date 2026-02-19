@@ -169,6 +169,30 @@ public class MatchRegistrationController {
         return matchRegistrationService.cancelNoExcused(matchId, playerId, excuseReason, excuseNote);
     }
 
+    /**
+     * Označuje hráče v konkrétním zápase jako neomluveně nepřítomného.
+     *
+     * Slouží k zaznamenání neomluvené absence hráče. Pro záznam může být
+     * doplněna interní poznámka administrátora nebo manažera.
+     *Aktuální hráč se získává
+     *      * z {@link CurrentPlayerService}.
+     * @param matchId   ID zápasu     *
+     * @return {@link MatchRegistrationDTO} s aktualizovaným stavem registrace
+     */
+    @PatchMapping("/me/{matchId}/change-team")
+    @PreAuthorize("isAuthenticated()")
+    public MatchRegistrationDTO changeRegistrationTeam(
+            @PathVariable Long matchId) {
+
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return matchRegistrationService.changeRegistrationTeam(currentPlayerId, matchId);
+    }
+
+
+
+
+
     // Uživatelská správa registrací pro aktuálního hráče
 
     /**

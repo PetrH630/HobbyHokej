@@ -139,6 +139,7 @@ Používány jsou profily:
 
 -   dev -- vývojové prostředí
 -   prod -- produkční prostředí
+-   demo -- produkční prostředí s omezenými přístupy
 
 Databázové migrace jsou spravovány pomocí Flyway a spouští se
 automaticky při startu aplikace.

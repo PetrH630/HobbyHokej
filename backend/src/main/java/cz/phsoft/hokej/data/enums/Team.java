@@ -13,5 +13,9 @@ public enum Team {
     /**
      * Světlý tým.
      */
-    LIGHT
+    LIGHT;
+
+    public Team opposite() {
+        return this == LIGHT ? DARK : LIGHT;
+    }
 }

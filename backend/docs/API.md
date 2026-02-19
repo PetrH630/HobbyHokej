@@ -31,10 +31,10 @@
     - Role:
         - `ADMIN`
         - `MANAGER`
-        - běžný přihlášený uživatel (bez speciální role)
+        - `PLAYER`
     - Kontrola:
         - anotace `@PreAuthorize` v controllerech
-        - pro běžného přihlášeného uživatele se používá `isAuthenticated()`
+        - pro běžného přihlášeného uživatele (PLAYER) se používá `isAuthenticated()`
 - Veřejné endpointy (nevyžadují přihlášení):
     - `/api/auth/register`
     - `/api/auth/verify`

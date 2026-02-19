@@ -1,0 +1,13 @@
+-- ============================================
+-- Vytvoření databáze hobby_hokej
+-- MariaDB 10.6
+-- ============================================
+
+-- Vytvoření databáze (pokud ještě neexistuje)
+CREATE DATABASE IF NOT EXISTS hobby_hokej
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE hobby_hokej;
+
+SELECT DATABASE() AS current_database;

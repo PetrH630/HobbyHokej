@@ -10,12 +10,12 @@ import java.util.List;
 
 /**
  * Rozhraní se používá pro správu registrací hráčů na zápasy.
- *
+ * <p>
  * Definuje kontrakt pro práci s účastí hráčů na zápasech
  * z pohledu business logiky aplikace. Poskytuje operace pro
  * vytvoření nebo změnu registrace, získávání přehledů a
  * administrativní zásahy do stavů registrací.
- *
+ * <p>
  * Rozhraní pracuje s DTO objekty a odděluje business logiku
  * od persistence vrstvy. Implementace je odpovědná za validace
  * a přechody stavů registrací.
@@ -24,12 +24,12 @@ public interface MatchRegistrationService {
 
     /**
      * Vytvoří nebo aktualizuje registraci hráče na zápas.
-     *
+     * <p>
      * Metoda slouží jako jednotný vstupní bod pro reakci hráče
      * na zápas. Registrace se podle potřeby vytvoří nebo upraví.
      * Implementace zajišťuje validaci vstupních dat, kontrolu
      * povolených přechodů stavů a uložení výsledné registrace.
-     *
+     * <p>
      * Typickým scénářem je přihlášení hráče k zápasu, odhlášení
      * nebo omluva z účasti.
      *
@@ -52,7 +52,7 @@ public interface MatchRegistrationService {
 
     /**
      * Vrátí seznam registrací pro více zápasů.
-     *
+     * <p>
      * Metoda se typicky používá pro hromadné přehledy
      * nebo statistiky přes více zápasů.
      *
@@ -64,7 +64,7 @@ public interface MatchRegistrationService {
     /**
      * Vrátí všechny registrace v systému omezené
      * na relevantní sezónu podle implementace.
-     *
+     * <p>
      * Metoda se používá zejména pro administrátorské přehledy.
      *
      * @return seznam všech registrací
@@ -81,7 +81,7 @@ public interface MatchRegistrationService {
 
     /**
      * Vrátí seznam hráčů, kteří dosud nereagovali na daný zápas.
-     *
+     * <p>
      * Metoda se používá například pro připomínkové notifikace
      * nebo pro přehledy nevyřešené účasti.
      *
@@ -92,7 +92,7 @@ public interface MatchRegistrationService {
 
     /**
      * Přepočítá stavy registrací pro daný zápas.
-     *
+     * <p>
      * Metoda slouží k zajištění konzistence stavů registrovaných
      * a rezervních hráčů podle kapacity zápasu, typicky po změnách
      * provedených administrátorem.
@@ -103,7 +103,7 @@ public interface MatchRegistrationService {
 
     /**
      * Změní stav registrace hráče na zápas.
-     *
+     * <p>
      * Metoda se používá převážně v administrátorském kontextu,
      * kde je nutné ručně upravit stav registrace. Nastavení
      * stavu NO_EXCUSED má vlastní logiku a řeší se samostatně.
@@ -121,7 +121,7 @@ public interface MatchRegistrationService {
 
     /**
      * Označí hráče jako neomluveného pro konkrétní zápas.
-     *
+     * <p>
      * Metoda se používá v administrátorském kontextu po vyhodnocení
      * účasti na zápase. Původní omluva se odstraní a registrace
      * se nastaví do stavu NO_EXCUSED včetně poznámky administrátora.
@@ -136,9 +136,14 @@ public interface MatchRegistrationService {
             Long playerId,
             String adminNote
     );
-    // TODO
+
     MatchRegistrationDTO cancelNoExcused(Long matchId,
                                          Long playerId,
                                          ExcuseReason excuseReason,
                                          String excuseNote);
+
+
+
+    MatchRegistrationDTO changeRegistrationTeam(Long matchId,
+                                                Long playerId);
 }

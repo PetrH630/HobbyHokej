@@ -1,0 +1,775 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="ANALYZE_TEST_SOURCES" value="false" />
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Upraven FE - responivita - tabulky nahrazeny CARD">
+      <change afterPath="$PROJECT_DIR$/.idea/dbnavigator.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/.env-prod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/Docker/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/Docker/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/TODO.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/VytvoreniDB.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/Wedos-nasazeni.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/allclasses-index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/allpackages-index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/constant-values.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/HobbyHokejApplication.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/config/AppConfig.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/config/AuditAspect.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/config/CustomJsonLoginFilter.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/config/CustomUserDetailsService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/config/DataInitializer.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/config/GlobalExceptionHandler.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/config/SecurityConfig.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/config/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/config/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/AppModeController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/AppUserController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/AppUserSettingsController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/AuthController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/CurrentPlayerController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/DebugController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/DemoNotificationController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/MatchController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/MatchRegistrationController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/MatchRegistrationHistoryController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/MeController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/PlayerController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/PlayerInactivityPeriodController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/PlayerSettingsController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/SeasonController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/TestController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/TestEmailController.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/controllers/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/AppUserEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/AppUserHistoryEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/AppUserSettingsEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/EmailVerificationTokenEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/ForgottenPasswordResetTokenEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/MatchEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/MatchHistoryEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/MatchRegistrationEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/MatchRegistrationHistoryEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/PlayerEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/PlayerHistoryEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/PlayerInactivityPeriodEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/PlayerSettingsEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/SeasonEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/SeasonHistoryEntity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/entities/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/ExcuseReason.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/GlobalNotificationLevel.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/MatchCancelReason.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/MatchStatus.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/NotificationCategory.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/NotificationChannel.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/NotificationType.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/PlayerMatchStatus.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/PlayerSelectionMode.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/PlayerStatus.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/PlayerType.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/Role.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/Team.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/enums/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/AppUserHistoryRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/AppUserRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/AppUserSettingsRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/EmailVerificationTokenRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/ForgottenPasswordResetTokenRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/MatchHistoryRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/MatchRegistrationHistoryRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/MatchRegistrationRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/MatchRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/PlayerHistoryRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/PlayerInactivityPeriodRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/PlayerRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/PlayerSettingsRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/SeasonHistoryRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/SeasonRepository.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/data/repositories/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/AccountNotActivatedException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/ApiError.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/BusinessException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/CurrentPlayerNotSelectedException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/DemoModeOperationNotAllowedException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/DuplicateNameSurnameException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/DuplicateRegistrationException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/DuplicateSeasonNameException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/ForbiddenPlayerAccessException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InactivityPeriodNotFoundException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InactivityPeriodOverlapException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidAdminActivateDeactivateException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidChangePlayerUserException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidInactivityPeriodDateException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidMatchDateTimeException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidMatchStatusException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidOldPasswordException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidPlayerStatusException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidResetTokenException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidSeasonPeriodDateException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidSeasonStateException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/InvalidUserActivationException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/MatchNotFoundException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/MatchRegistrationNotFoundException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/PasswordsDoNotMatchException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/PlayerNotFoundException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/RegistrationNotFoundException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/SeasonNotFoundException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/SeasonPeriodOverlapException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/UserAlreadyExistsException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/UserNotFoundException.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/exceptions/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/AppUserDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/AppUserHistoryDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/AppUserSettingsDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/ChangePasswordDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/DemoNotificationsDTO.DemoEmailDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/DemoNotificationsDTO.DemoSmsDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/DemoNotificationsDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/EmailDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/ForgottenPasswordResetDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/ImpersonationInfoDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/MatchDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/MatchDetailDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/MatchHistoryDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/MatchOverviewDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/MatchRegistrationDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/MatchRegistrationHistoryDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/NumberedMatchDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/PlayerDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/PlayerHistoryDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/PlayerInactivityPeriodDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/PlayerSettingsDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/PlayerStatsDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/PlayerSummaryDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/RegisterUserDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/SeasonDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/SeasonHistoryDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/SuccessResponseDTO.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/requests/ChangePlayerUserRequest.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/requests/MatchRegistrationRequest.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/requests/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/dto/requests/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/AppUserHistoryMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/AppUserMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/AppUserSettingsMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/MatchHistoryMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/MatchMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/MatchRegistrationHistoryMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/MatchRegistrationMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/PlayerHistoryMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/PlayerInactivityPeriodMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/PlayerMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/PlayerSettingsMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/SeasonHistoryMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/SeasonMapper.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/mappers/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/AppUserHistoryService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/AppUserHistoryServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/AppUserService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/AppUserServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/AppUserSettingsService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/AppUserSettingsServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/CurrentPlayerService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/CurrentPlayerServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/CurrentSeasonService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/CurrentSeasonServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/MatchHistoryService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/MatchHistoryServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/MatchRegistrationHistoryService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/MatchRegistrationHistoryServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/MatchRegistrationService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/MatchRegistrationServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/MatchService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/MatchServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/NotificationDecision.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerHistoryService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerHistoryServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerInactivityPeriodService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerInactivityPeriodServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerSettingsService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerSettingsServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerStatsService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/PlayerStatsServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/SeasonHistoryService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/SeasonHistoryServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/SeasonService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/SeasonServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/demo/DemoModeGuard.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/demo/DemoModePolicy.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/demo/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/demo/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/email/EmailMessageBuilder.EmailContent.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/email/EmailMessageBuilder.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/email/EmailService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/email/EmailWedosService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/email/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/email/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/DemoModeService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/DemoNotificationStore.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/ForgottenPasswordResetContext.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/MatchTimeChangeContext.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/NotificationContext.Builder.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/NotificationContext.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/NotificationPreferencesService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/NotificationPreferencesServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/NotificationService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/NotificationServiceImpl.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/UserActivationContext.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/notification/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/sms/SmsMessageBuilder.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/sms/SmsSchedulerService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/sms/SmsService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/sms/SmsTextBeeService.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/sms/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/models/services/sms/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/CurrentPlayerContext.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/CurrentPlayerFilter.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/PlayerSecurity.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/SessionKeys.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/impersonation/ImpersonationContext.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/impersonation/ImpersonationFilter.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/impersonation/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/impersonation/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/package-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/cz/phsoft/hokej/security/package-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/element-list" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/help-doc.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-1.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-10.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-11.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-12.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-13.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-14.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-15.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-16.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-17.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-18.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-19.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-2.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-20.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-21.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-3.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-4.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-5.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-6.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-7.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-8.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index-files/index-9.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/jquery-ui.overrides.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/legal/ADDITIONAL_LICENSE_INFO" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/legal/ASSEMBLY_EXCEPTION" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/legal/LICENSE" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/legal/jquery.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/legal/jqueryUI.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/member-search-index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/module-search-index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/overview-summary.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/overview-tree.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/package-search-index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/resources/glass.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/resources/x.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/script-dir/jquery-3.7.1.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/script-dir/jquery-ui.min.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/script-dir/jquery-ui.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/script.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/search.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/serialized-form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/stylesheet.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/tag-search-index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/docs/Javadoc/type-search-index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-16.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-17.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-18.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/logs/audit-2026-02-16.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/logs/audit-2026-02-17.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/logs/audit-2026-02-18.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/config.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/controllers.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/data.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/demo.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/dto.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/email.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/entities.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/enums.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/exceptions.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/hokej.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/impersonation.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/mappers.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/models.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/notification.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/repositories.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/requests.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/security.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/services.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/sms.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/DemoNotificationStore.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/sms/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_05__trg_match_update.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_06__trg_match_delete.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_07__trg_match_reg_insert.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_08__trg_match_reg_update.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_09__trg_match_reg_delete.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_10__trg_player_insert.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_11__trg_player_update.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_12__trg_player_delete.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_13__trg_season_insert.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_14__trg_season_update.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_15__trg_season_delete.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/create-migrations.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/redirect2.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/api/adminPlayersApi.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/common/ConfirmActionModal.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/common/SuccessModal.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/forms/DatePicker.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/forms/DateTimePicker.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/matches/CapacityRing.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerStats.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerStatsCharts.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/hooks/useMyPlayerStats.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/hooks/usePlayerStatsAdmin.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/PlayerHomePage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/utils/formatDate.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/utils/formatDateTime.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/utils/smoothScrollTo.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/vsechny_soubory.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/docs/API.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/API.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/logs/application.log" beforeDir="false" afterPath="$PROJECT_DIR$/backend/logs/application.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/logs/audit.log" beforeDir="false" afterPath="$PROJECT_DIR$/backend/logs/audit.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/controllers/MatchRegistrationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/controllers/MatchRegistrationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/enums/Team.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/enums/Team.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchRegistrationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchRegistrationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchRegistrationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchRegistrationServiceImpl.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Exception" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;PetrH630&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/PetrH630/HobbyHokej.git&quot;,
+    &quot;accountId&quot;: &quot;bad5fb43-3967-4949-9816-0e1713c97e02&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="jdkForImporter" value="temurin-17" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="MavenRunner">
+    <option name="jreName" value="temurin-17" />
+    <option name="vmOptions" value="-Dfile.encoding=UTF-8" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="39Akkq4gP3X7NK4xg4LdrY1Vq7D" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.HobbyHokej.executor&quot;: &quot;Run&quot;,
+    &quot;Application.HobbyHokejApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.HobbyHokej [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.HobbyHokej [install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.HobbyHokej [package].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/ProjektyPrace/HobbyHokej&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.project.maven.runner&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Projekty Práce\HobbyHokej\backend\src\main\resources\db\migration" />
+      <recent name="C:\Projekty Práce\HobbyHokej" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="HobbyHokej" type="Application" factoryName="Application">
+      <option name="ALTERNATIVE_JRE_PATH" value="temurin-17" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="MAIN_CLASS_NAME" value="cz.phsoft.hokej.HobbyHokejApplication" />
+      <module name="HobbyHokej" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="" />
+      <created>1770146408763</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1770146408763</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Vytvořena kopie projektu pro GIT a CV - HobbyHokej z projektu StaraGarda.">
+      <option name="closed" value="true" />
+      <created>1770147318466</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1770147318466</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Upraven gitignore">
+      <option name="closed" value="true" />
+      <created>1770147847409</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1770147847409</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Upraven gitignore">
+      <option name="closed" value="true" />
+      <created>1770148368847</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1770148368847</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Uprava - HobbyHokej, notifikace - nastavení pro manažera, a demo mod - zakázány některé fce">
+      <option name="closed" value="true" />
+      <created>1770545854143</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1770545854143</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Uprava - HobbyHokej, notifikace - nastavení pro manažera, a demo mod - zakázány některé fce">
+      <option name="closed" value="true" />
+      <created>1770546398367</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1770546398367</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Doplněno - Historie hráče + triggery">
+      <option name="closed" value="true" />
+      <created>1770625072875</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1770625072875</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Doplněno - Historie zápasu, Sezon, Uživatele - Entity, DTO, Mapper, Service">
+      <option name="closed" value="true" />
+      <created>1770631615369</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1770631615369</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Do controlleru - player, Match, AppUser doplněny endpointy">
+      <option name="closed" value="true" />
+      <created>1770640493913</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1770640493913</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Přidáno ověřování duplicity názvu sezony">
+      <option name="closed" value="true" />
+      <created>1770647263518</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1770647263518</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Úpravy na frontendu">
+      <option name="closed" value="true" />
+      <created>1770651329344</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1770651329344</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Do inactivityPeriod přidáno - inactivityReason, do MatchServiceImpl zapracováno - uplynulé zápasy se zobrazí hráči až od data vytvoření hráče - předělat Datainitializer">
+      <option name="closed" value="true" />
+      <created>1770767992665</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1770767992665</updated>
+    </task>
+    <task id="LOCAL-00012" summary="upraven DEMO mod a notifikace v DEMO modu - jdou do DTO pro frontend (modal)">
+      <option name="closed" value="true" />
+      <created>1770818862537</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1770818862537</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Doplněny komentáře u Controllers">
+      <option name="closed" value="true" />
+      <created>1770823042167</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1770823042167</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Doplněny komentáře u Entit">
+      <option name="closed" value="true" />
+      <created>1770824038871</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1770824038871</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Doplněny komentáře u Repository">
+      <option name="closed" value="true" />
+      <created>1770880650986</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1770880650986</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Doplněny komentáře u Exceptions">
+      <option name="closed" value="true" />
+      <created>1770880968838</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1770880968838</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Doplněny komentáře u DTO">
+      <option name="closed" value="true" />
+      <created>1770881570921</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1770881570921</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Doplněny komentáře u mapper">
+      <option name="closed" value="true" />
+      <created>1770882058228</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1770882058228</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Vytvořen DemoModeGuard a DemoModePolicy pro kontrolu DemoMod a userId &lt;=10 - nepůjde změnit heslo ani deaktivovat uživatel. jdu testovat">
+      <option name="closed" value="true" />
+      <created>1770885645516</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1770885645516</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Doplňování metod pro notifikace v demo režimu + frontendBaseUrl">
+      <option name="closed" value="true" />
+      <created>1770903198761</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1770903198762</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Úprava notifikaci">
+      <option name="closed" value="true" />
+      <created>1770979493535</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1770979493535</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Přidán FE">
+      <option name="closed" value="true" />
+      <created>1770990655582</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1770990655582</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Doplněna funkcionalita pro Impersonizaci - pro Admina">
+      <option name="closed" value="true" />
+      <created>1770999024940</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1770999024940</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Doplněny komentáře">
+      <option name="closed" value="true" />
+      <created>1771001656572</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1771001656572</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Vytvořena migrace flyway a upraven DataInitializer, triggery jsou u flyway. Oprava application properties.">
+      <option name="closed" value="true" />
+      <created>1771068205286</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1771068205286</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Na FE - Doplněna stránka přehledu pro Administrátora a Managera">
+      <option name="closed" value="true" />
+      <created>1771085809625</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1771085809667</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Doplněny statistiky hráče k zápasům v sezóně - PlayerStatsDTO, PlayerStatsService">
+      <option name="closed" value="true" />
+      <created>1771152897166</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1771152897169</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Doplněn endpoint do PlayerController pro stats">
+      <option name="closed" value="true" />
+      <created>1771156083321</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1771156083321</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Upraven Stats na FE">
+      <option name="closed" value="true" />
+      <created>1771175898299</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1771175898300</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Upraven DateTimePicker na FE, ještě zkontrolovat sezony">
+      <option name="closed" value="true" />
+      <created>1771229940052</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1771229940052</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Odstraněn Impersonate na FE">
+      <option name="closed" value="true" />
+      <created>1771269425532</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1771269425532</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Upraven FE - responivita - tabulky nahrazeny CARD">
+      <option name="closed" value="true" />
+      <created>1771489057500</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1771489057500</updated>
+    </task>
+    <task id="LOCAL-00033" summary="Upraven FE - responivita - tabulky nahrazeny CARD">
+      <option name="closed" value="true" />
+      <created>1771489131326</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1771489131326</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
+    <MESSAGE value="Do controlleru - player, Match, AppUser doplněny endpointy" />
+    <MESSAGE value="Přidáno ověřování duplicity názvu sezony" />
+    <MESSAGE value="Úpravy na frontendu" />
+    <MESSAGE value="Do inactivityPeriod přidáno - inactivityReason, do MatchServiceImpl zapracováno - uplynulé zápasy se zobrazí hráči až od data vytvoření hráče - předělat Datainitializer" />
+    <MESSAGE value="upraven DEMO mod a notifikace v DEMO modu - jdou do DTO pro frontend (modal)" />
+    <MESSAGE value="Doplněny komentáře u Controllers" />
+    <MESSAGE value="Doplněny komentáře u Entit" />
+    <MESSAGE value="Doplněny komentáře u Repository" />
+    <MESSAGE value="Doplněny komentáře u Exceptions" />
+    <MESSAGE value="Doplněny komentáře u DTO" />
+    <MESSAGE value="Doplněny komentáře u mapper" />
+    <MESSAGE value="Vytvořen DemoModeGuard a DemoModePolicy pro kontrolu DemoMod a userId &lt;=10 - nepůjde změnit heslo ani deaktivovat uživatel. jdu testovat" />
+    <MESSAGE value="Doplňování metod pro notifikace v demo režimu + frontendBaseUrl" />
+    <MESSAGE value="Úprava notifikaci" />
+    <MESSAGE value="Přidán FE" />
+    <MESSAGE value="Doplněna funkcionalita pro Impersonizaci - pro Admina" />
+    <MESSAGE value="Doplněny komentáře" />
+    <MESSAGE value="Vytvořena migrace flyway a upraven DataInitializer, triggery jsou u flyway. Oprava application properties." />
+    <MESSAGE value="Na FE - Doplněna stránka přehledu pro Administrátora a Managera" />
+    <MESSAGE value="Doplněny statistiky hráče k zápasům v sezóně - PlayerStatsDTO, PlayerStatsService" />
+    <MESSAGE value="Doplněn endpoint do PlayerController pro stats" />
+    <MESSAGE value="Upraven Stats na FE" />
+    <MESSAGE value="Upraven DateTimePicker na FE, ještě zkontrolovat sezony" />
+    <MESSAGE value="Odstraněn Impersonate na FE" />
+    <MESSAGE value="Upraven FE - responivita - tabulky nahrazeny CARD" />
+    <option name="LAST_COMMIT_MESSAGE" value="Upraven FE - responivita - tabulky nahrazeny CARD" />
+  </component>
+</project>

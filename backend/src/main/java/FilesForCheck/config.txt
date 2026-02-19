@@ -1,0 +1,1366 @@
+﻿Balíček (složka): config
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config
+
+Seznam souborů:
+AppConfig.java
+AuditAspect.java
+CustomJsonLoginFilter.java
+CustomUserDetailsService.java
+DataInitializer.java
+GlobalExceptionHandler.java
+package-info.java
+SecurityConfig.java
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\AppConfig.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+/**
+ * Aplikační konfigurace pro sdílené Spring beany.
+ *
+ * V této třídě se definují technické komponenty,
+ * které se používají napříč aplikací.
+ *
+ * V současné době se zde vytváří instance {@link RestTemplate},
+ * která slouží pro volání externích HTTP služeb.
+ */
+@Configuration
+public class AppConfig {
+
+    /**
+     * Vytváří instanci aplikační konfigurace.
+     *
+     * Konstruktor je prázdný, protože konfigurace je spravována
+     * Spring kontejnerem a neobsahuje žádnou vlastní logiku inicializace.
+     */
+    public AppConfig() {
+        // bez vlastní logiky
+    }
+
+    /**
+     * Vytváří a registruje instanci {@link RestTemplate}.
+     *
+     * Tato instance se používá pro synchronní volání
+     * externích HTTP API z aplikační logiky,
+     * typicky ze service vrstvy.
+     *
+     * @return nová instance {@link RestTemplate} spravovaná Spring kontejnerem
+     */
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\AuditAspect.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+
+/**
+ * Aspekt pro auditní logování service vrstvy.
+ *
+ * Používá se k centrálnímu zaznamenávání volání metod ve službách
+ * včetně argumentů, návratových hodnot a časových razítek. Chování
+ * aplikace se tímto aspektem nemění, pouze se doplňují auditní logy
+ * do samostatného loggeru.
+ */
+@Component
+@Aspect
+public class AuditAspect {
+
+    /**
+     * Speciální logger určený pouze pro auditní záznamy.
+     *
+     * Doporučuje se mít pro tento logger samostatný appender
+     * a oddělený soubor logu, aby byly auditní záznamy odděleny
+     * od běžných aplikačních logů.
+     */
+    private static final Logger logger = LoggerFactory.getLogger("AUDIT_LOGGER");
+
+    // Pointcut pro metody service vrstvy
+
+    /**
+     * Pointcut definující všechny metody ve service vrstvě aplikace.
+     *
+     * Zahrnuje všechny třídy a metody v balíčku
+     * {@code cz.phsoft.hokej.models.services..} včetně podbalíčků.
+     */
+    @Pointcut("within(cz.phsoft.hokej.models.services..*)")
+    public void serviceMethods() {
+        // Marker metoda pro pointcut
+    }
+
+    // Logování před voláním metody
+
+    /**
+     * Provádí auditní záznam před zavoláním jakékoli service metody.
+     *
+     * Zapisuje název metody, argumenty a aktuální čas. Slouží k evidenci
+     * začátku provádění operace a k pozdější analýze průběhu volání.
+     *
+     * @param joinPoint kontext volané metody
+     */
+    @Before("serviceMethods()")
+    public void logBefore(JoinPoint joinPoint) {
+
+        String methodName = joinPoint.getSignature().toShortString();
+        String args = java.util.Arrays.toString(joinPoint.getArgs());
+
+        logger.info(
+                "START {} at {} with args {}",
+                methodName,
+                LocalDateTime.now(),
+                args
+        );
+    }
+
+    // Logování po úspěšném dokončení metody
+
+    /**
+     * Provádí auditní záznam po úspěšném dokončení metody.
+     *
+     * Metoda se nespouští při vyhození výjimky. Zapisuje název metody,
+     * případné identifikátory hráče a návratovou hodnotu včetně času
+     * ukončení operace.
+     *
+     * @param joinPoint kontext volané metody
+     * @param result    návratová hodnota metody
+     */
+    @AfterReturning(
+            pointcut = "serviceMethods()",
+            returning = "result"
+    )
+    public void logAfterReturning(JoinPoint joinPoint, Object result) {
+
+        String methodName = joinPoint.getSignature().getName();
+        Object[] args = joinPoint.getArgs();
+
+        Long userId = null;
+        Long playerId = null;
+
+        // Pokus o extrakci business identifikátorů z parametrů metody
+        for (Object arg : args) {
+            if (arg instanceof PlayerEntity player) {
+                playerId = player.getId();
+            } else if (arg instanceof MatchRegistrationEntity registration) {
+                playerId = registration.getPlayer().getId();
+            } else if (arg instanceof Long id) {
+                // Případné rozlišení konkrétního ID lze doplnit podle konvence signatur metod
+            }
+        }
+
+        logger.info(
+                "END {} - userId={} playerId={} returned [{}] at {}",
+                methodName,
+                userId,
+                playerId,
+                result,
+                LocalDateTime.now()
+        );
+    }
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\CustomJsonLoginFilter.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Vlastní autentizační filtr pro REST přihlášení.
+ *
+ * Filtr rozšiřuje výchozí {@link UsernamePasswordAuthenticationFilter} tak,
+ * aby podporoval přihlášení jak pomocí formuláře, tak pomocí JSON payloadu.
+ * Standardní redirect chování Spring Security je nahrazeno JSON odpověďmi
+ * a po úspěšném přihlášení se vytváří HTTP session se SecurityContextem.
+ *
+ * Filtr je určen pro stavový (session-based) způsob autentizace. Pro
+ * stateless přístup s JWT by se použil jiný mechanismus.
+ */
+public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter {
+
+    /**
+     * Objekt pro čtení JSON z request body.
+     */
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /**
+     * Vytvoří filtr pro zadanou login URL.
+     *
+     * @param loginUrl    URL endpointu pro login, například {@code /api/auth/login}
+     * @param authManager instance {@link AuthenticationManager} používaná pro autentizaci
+     */
+    public CustomJsonLoginFilter(String loginUrl, AuthenticationManager authManager) {
+        setFilterProcessesUrl(loginUrl);
+        setAuthenticationManager(authManager);
+    }
+
+    // Pokus o autentizaci (login)
+
+    /**
+     * Pokusí se autentizovat uživatele na základě HTTP requestu.
+     *
+     * Podporované formáty:
+     * - {@code application/x-www-form-urlencoded} (klasický form login),
+     * - {@code application/json} (SPA frontend).
+     *
+     * Očekávaná pole:
+     * - {@code email} (případně {@code username} u form loginu),
+     * - {@code password}.
+     *
+     * @throws AuthenticationException při chybě přihlášení
+     */
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request,
+                                                HttpServletResponse response)
+            throws AuthenticationException {
+
+        try {
+            String email = null;
+            String password = null;
+
+            // Form login (x-www-form-urlencoded)
+            if (request.getContentType() != null &&
+                    request.getContentType().contains("application/x-www-form-urlencoded")) {
+
+                email = request.getParameter("username");
+                password = request.getParameter("password");
+            }
+
+            // JSON login (application/json)
+            if ((email == null || password == null) &&
+                    request.getContentType() != null &&
+                    request.getContentType().contains("application/json")) {
+
+                Map<String, String> json =
+                        objectMapper.readValue(request.getInputStream(), Map.class);
+
+                email = json.get("email");
+                password = json.get("password");
+            }
+
+            // Základní validace vstupů
+            if (email == null || password == null ||
+                    email.isBlank() || password.isBlank()) {
+
+                throw new BadCredentialsException("BE - Chybí přihlašovací údaje");
+            }
+
+            // Vytvoření Authentication tokenu
+            UsernamePasswordAuthenticationToken authRequest =
+                    new UsernamePasswordAuthenticationToken(email, password);
+
+            setDetails(request, authRequest);
+
+            // Delegace autentizace na AuthenticationManager
+            return this.getAuthenticationManager().authenticate(authRequest);
+
+        } catch (IOException e) {
+            // Chyba při čtení JSON body
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Úspěšný login
+
+    /**
+     * Zpracuje úspěšnou autentizaci.
+     *
+     * Do {@link SecurityContextHolder} se uloží autentizace, vytvoří se
+     * HTTP session a do ní se uloží {@link org.springframework.security.core.context.SecurityContext}.
+     * Následně se klientovi vrací JSON odpověď místo redirectu.
+     */
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult)
+            throws IOException, ServletException {
+
+        // Nastavení SecurityContext
+        SecurityContextHolder.getContext().setAuthentication(authResult);
+
+        // Vytvoření session a uložení kontextu
+        request.getSession(true).setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                SecurityContextHolder.getContext()
+        );
+
+        // JSON odpověď
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("status", "ok");
+        result.put("user", authResult.getName());
+
+        objectMapper.writeValue(response.getWriter(), result);
+    }
+
+    // Neúspěšný login
+
+    /**
+     * Zpracuje neúspěšnou autentizaci.
+     *
+     * Vrací se HTTP status 401 a JSON odpověď s informací o chybě.
+     * Rozlišuje se neaktivovaný účet, neplatné přihlašovací údaje
+     * a ostatní chyby při přihlášení.
+     */
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request,
+                                              HttpServletResponse response,
+                                              AuthenticationException failed)
+            throws IOException, ServletException {
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("status", "error");
+
+        if (failed.getCause() instanceof cz.phsoft.hokej.exceptions.AccountNotActivatedException) {
+            result.put("message", failed.getCause().getMessage());
+        } else if (failed instanceof BadCredentialsException) {
+            result.put("message", "BE - Neplatné přihlašovací údaje");
+        } else {
+            result.put("message", "BE - Chyba při přihlášení");
+        }
+
+        objectMapper.writeValue(response.getWriter(), result);
+    }
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\CustomUserDetailsService.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import cz.phsoft.hokej.exceptions.AccountNotActivatedException;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+/**
+ * Implementace {@link UserDetailsService} pro napojení Spring Security
+ * na databázový model uživatele.
+ *
+ * Třída načítá uživatele z databáze podle e-mailu, ověřuje, zda je účet
+ * aktivní, a převádí entitu {@link AppUserEntity} na objekt
+ * {@link UserDetails}, který Spring Security používá při autentizaci.
+ */
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+
+    /**
+     * Repozitář pro načítání uživatelů při přihlášení.
+     */
+    private final AppUserRepository appUserRepository;
+
+    public CustomUserDetailsService(AppUserRepository appUserRepository) {
+        this.appUserRepository = appUserRepository;
+    }
+
+    // Načtení uživatele pro Spring Security
+
+    /**
+     * Načte uživatele podle e-mailu pro potřeby autentizace.
+     *
+     * Metoda se volá Spring Security při přihlášení. V případě, že uživatel
+     * neexistuje, je vyhozena {@link UsernameNotFoundException}. Pokud účet
+     * existuje, ale není aktivní, je vyhozena {@link AccountNotActivatedException}.
+     *
+     * @param email e-mail zadaný uživatelem při přihlášení
+     * @return objekt {@link UserDetails} použitý pro autentizaci
+     * @throws UsernameNotFoundException    pokud uživatel s daným e-mailem neexistuje
+     * @throws AccountNotActivatedException pokud účet existuje, ale není aktivní
+     */
+    @Override
+    public UserDetails loadUserByUsername(String email)
+            throws UsernameNotFoundException {
+
+        // Načtení uživatele z databáze
+        AppUserEntity user = appUserRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("BE - Uživatel nenalezen")
+                );
+
+        // Kontrola aktivace účtu
+        if (!user.isEnabled()) {
+            // Výjimka se typicky zachytává ve filtru pro login a převádí na odpověď pro frontend
+            throw new AccountNotActivatedException();
+        }
+
+        // Mapování na UserDetails
+        return User.builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                // Role se ukládá bez prefixu ROLE_, Spring si prefix přidá automaticky
+                .roles(user.getRole().name().replace("ROLE_", ""))
+                // Disabled flag se drží konzistentní se stavem entity
+                .disabled(!user.isEnabled())
+                .build();
+    }
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\DataInitializer.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import cz.phsoft.hokej.data.entities.*;
+import cz.phsoft.hokej.data.enums.*;
+import cz.phsoft.hokej.data.repositories.*;
+import cz.phsoft.hokej.models.services.AppUserSettingsService;
+import cz.phsoft.hokej.models.services.PlayerSettingsService;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+/**
+ * Komponenta pro inicializaci ukázkových dat v databázi.
+ *
+ * Po startu aplikace se vytváří výchozí administrátor, ukázkoví hráči s uživateli,
+ * výchozí nastavení uživatelů a hráčů, sezóny, zápasy a ukázkové registrace.
+ *
+ * Inicializace se spouští pouze při zapnutí vlastnosti {@code app.seed.enabled=true}.
+ * Databázové triggery se v této třídě nevytvářejí, protože se spravují pomocí Flyway migrací.
+ */
+@Component
+@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true", matchIfMissing = false)
+public class DataInitializer {
+
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
+
+    private final PlayerRepository playerRepository;
+    private final MatchRepository matchRepository;
+    private final MatchRegistrationRepository matchRegistrationRepository;
+    private final AppUserRepository appUserRepository;
+    private final SeasonRepository seasonRepository;
+    private final AppUserSettingsRepository appUserSettingsRepository;
+    private final PlayerSettingsRepository playerSettingsRepository;
+    private final AppUserSettingsService appUserSettingService;
+    private final PlayerSettingsService playerSettingService;
+    private final JdbcTemplate jdbcTemplate;
+
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    public DataInitializer(PlayerRepository playerRepository,
+                           MatchRepository matchRepository,
+                           MatchRegistrationRepository matchRegistrationRepository,
+                           AppUserRepository appUserRepository,
+                           SeasonRepository seasonRepository,
+                           AppUserSettingsRepository appUserSettingsRepository,
+                           PlayerSettingsRepository playerSettingsRepository,
+                           AppUserSettingsService appUserSettingService,
+                           PlayerSettingsService playerSettingService,
+                           JdbcTemplate jdbcTemplate) {
+        this.playerRepository = playerRepository;
+        this.matchRepository = matchRepository;
+        this.matchRegistrationRepository = matchRegistrationRepository;
+        this.appUserRepository = appUserRepository;
+        this.seasonRepository = seasonRepository;
+        this.appUserSettingsRepository = appUserSettingsRepository;
+        this.playerSettingsRepository = playerSettingsRepository;
+        this.appUserSettingService = appUserSettingService;
+        this.playerSettingService = playerSettingService;
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    /**
+     * Spouští inicializaci ukázkových dat po startu aplikace.
+     *
+     * Metody se volají v pořadí tak, aby byly zachovány závislosti mezi entitami.
+     * Triggery se nevytvářejí, protože se spravují pomocí Flyway.
+     */
+    @PostConstruct
+    public void init() {
+        log.info("DataInitializer is enabled. Demo/test data initialization starts.");
+
+        initAdmin();
+        initPlayersAndUsers();
+        initUserSettings();
+        initPlayerSettings();
+        initSeasons();
+        initMatches();
+        initRegistrations();
+
+        log.info("Data initialization completed.");
+    }
+
+    /**
+     * Vytváří výchozího administrátora, pokud ještě neexistuje.
+     *
+     * Timestamp se po uložení upraví přes JdbcTemplate, protože AppUserEntity nastavuje
+     * timestamp při persistenci automaticky.
+     */
+    private void initAdmin() {
+        appUserRepository.findByEmail("admin@example.com").ifPresentOrElse(
+                existing -> log.info("Admin user already exists. Initialization is skipped."),
+                () -> {
+                    AppUserEntity admin = new AppUserEntity();
+                    admin.setName("admin");
+                    admin.setSurname("admin");
+                    admin.setEmail("admin@example.com");
+                    admin.setPassword(encoder.encode("Administrator123"));
+                    admin.setRole(Role.ROLE_ADMIN);
+                    admin.setEnabled(true);
+
+                    appUserRepository.save(admin);
+
+                    LocalDateTime fixedTimestamp = LocalDateTime.of(2024, 11, 1, 8, 0);
+                    jdbcTemplate.update(
+                            "UPDATE app_users SET timestamp = ? WHERE id = ?",
+                            fixedTimestamp,
+                            admin.getId()
+                    );
+
+                    log.info("Default admin user has been created (id={}).", admin.getId());
+                }
+        );
+    }
+
+    /**
+     * Vytváří testovací hráče a k nim přiřazené uživatele.
+     *
+     * Pokud již v databázi existují hráči, inicializace se přeskočí.
+     */
+    private void initPlayersAndUsers() {
+        if (playerRepository.count() > 0) {
+            log.info("Players already exist. Player initialization is skipped.");
+            return;
+        }
+
+        String[] names = {
+                "Jan", "Petr", "Jiří", "Josef", "Pavel",
+                "Martin", "Tomáš", "Jaroslav", "Miroslav", "Zdeněk"
+        };
+        String[] surnames = {
+                "Novák", "Svoboda", "Novotný", "Dvořák", "Černý",
+                "Procházka", "Kučera", "Veselý", "Horák", "Němec"
+        };
+
+        for (int i = 0; i < 10; i++) {
+            PlayerEntity player = new PlayerEntity();
+            AppUserEntity user = new AppUserEntity();
+
+            player.setName(names[i]);
+            user.setName(names[i]);
+
+            player.setSurname(surnames[i].toUpperCase());
+            user.setSurname(surnames[i].toUpperCase());
+
+            String email = "player" + (i + 1) + "@example.com";
+            user.setEmail(email);
+            user.setPassword(encoder.encode("Heslo123"));
+
+            switch (i) {
+                case 0, 1, 2 -> player.setType(PlayerType.VIP);
+                case 3, 4, 5, 6 -> player.setType(PlayerType.STANDARD);
+                default -> player.setType(PlayerType.BASIC);
+            }
+
+            player.setPhoneNumber("");
+            player.setTeam(i < 5 ? Team.DARK : Team.LIGHT);
+            player.setPlayerStatus(i < 8 ? PlayerStatus.APPROVED : PlayerStatus.PENDING);
+
+            user.setRole(i == 0 ? Role.ROLE_MANAGER : Role.ROLE_PLAYER);
+            user.setEnabled(true);
+
+            player.setUser(user);
+
+            LocalDateTime randomTs = randomTimestampForDemoData();
+            player.setTimestamp(randomTs);
+
+            appUserRepository.save(user);
+            playerRepository.save(player);
+
+            jdbcTemplate.update(
+                    "UPDATE app_users SET timestamp = ? WHERE id = ?",
+                    randomTs,
+                    user.getId()
+            );
+        }
+
+        log.info("Players and users have been initialized.");
+    }
+
+    /**
+     * Vytváří výchozí nastavení pro všechny uživatele, kteří je ještě nemají.
+     */
+    private void initUserSettings() {
+        log.info("User settings initialization starts.");
+
+        List<AppUserEntity> users = appUserRepository.findAll();
+        for (AppUserEntity user : users) {
+            boolean hasSettings = appUserSettingsRepository.existsByUser(user);
+            if (hasSettings) {
+                continue;
+            }
+
+            AppUserSettingsEntity settings =
+                    appUserSettingService.createDefaultSettingsForUser(user);
+
+            appUserSettingsRepository.save(settings);
+        }
+
+        log.info("User settings have been initialized.");
+    }
+
+    /**
+     * Vytváří výchozí nastavení pro všechny hráče, kteří je ještě nemají.
+     */
+    private void initPlayerSettings() {
+        log.info("Player settings initialization starts.");
+
+        List<PlayerEntity> players = playerRepository.findAll();
+        for (PlayerEntity player : players) {
+            boolean hasSettings = playerSettingsRepository.existsByPlayer(player);
+            if (hasSettings) {
+                continue;
+            }
+
+            PlayerSettingsEntity settings =
+                    playerSettingService.createDefaultSettingsForPlayer(player);
+
+            playerSettingsRepository.save(settings);
+        }
+
+        log.info("Player settings have been initialized.");
+    }
+
+    /**
+     * Vytváří výchozí sezóny, pokud žádné neexistují.
+     */
+    private void initSeasons() {
+        if (seasonRepository.count() > 0) {
+            log.info("Seasons already exist. Season initialization is skipped.");
+            return;
+        }
+
+        log.info("Season initialization starts.");
+
+        SeasonEntity season2024_2025 = new SeasonEntity();
+        season2024_2025.setName("2024/2025");
+        season2024_2025.setStartDate(LocalDate.of(2024, 11, 1));
+        season2024_2025.setEndDate(LocalDate.of(2025, 3, 31));
+        season2024_2025.setActive(false);
+        season2024_2025.setCreatedByUserId(2L);
+
+        SeasonEntity season2025_2026 = new SeasonEntity();
+        season2025_2026.setName("2025/2026");
+        season2025_2026.setStartDate(LocalDate.of(2025, 11, 1));
+        season2025_2026.setEndDate(LocalDate.of(2026, 3, 31));
+        season2025_2026.setActive(true);
+        season2025_2026.setCreatedByUserId(2L);
+
+        SeasonEntity season2026_2027 = new SeasonEntity();
+        season2026_2027.setName("2026/2027");
+        season2026_2027.setStartDate(LocalDate.of(2026, 11, 1));
+        season2026_2027.setEndDate(LocalDate.of(2027, 3, 31));
+        season2026_2027.setActive(false);
+        season2026_2027.setCreatedByUserId(2L);
+
+        seasonRepository.saveAll(List.of(season2024_2025, season2025_2026, season2026_2027));
+
+        log.info("Seasons have been initialized.");
+    }
+
+    /**
+     * Vytváří zápasy pro první dvě sezóny.
+     *
+     * Zápasy se generují po pátcích v rámci období sezóny.
+     * Pokud již existují zápasy, inicializace se přeskočí.
+     */
+    private void initMatches() {
+        if (matchRepository.count() > 0) {
+            log.info("Matches already exist. Match initialization is skipped.");
+            return;
+        }
+
+        List<SeasonEntity> seasons = seasonRepository.findAll();
+        if (seasons.isEmpty()) {
+            throw new IllegalStateException("Nelze inicializovat zápasy, protože neexistuje žádná sezóna.");
+        }
+
+        log.info("Match initialization starts.");
+
+        for (int j = 0; j < 2 && j < seasons.size(); j++) {
+            SeasonEntity actualSeason = seasons.get(j);
+
+            LocalDate startSeasonDate = actualSeason.getStartDate();
+            LocalDate endSeasonDate = actualSeason.getEndDate();
+
+            LocalDateTime firstMatchDate = startSeasonDate
+                    .with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
+                    .atTime(18, 45);
+
+            int fridaysCount = countFridays(startSeasonDate, endSeasonDate);
+
+            for (int i = 0; i < fridaysCount; i++) {
+                MatchEntity match = new MatchEntity();
+                match.setDateTime(firstMatchDate.plusWeeks(i));
+                match.setLocation("NĚJAKÁ HALA");
+                match.setDescription("");
+                match.setMaxPlayers(12);
+                match.setPrice(2200);
+                match.setMatchStatus(null);
+                match.setCancelReason(null);
+                match.setSeason(actualSeason);
+                match.setCreatedByUserId(2L);
+
+                matchRepository.save(match);
+            }
+        }
+
+        log.info("Matches have been initialized.");
+    }
+
+    /**
+     * Vytváří ukázkové registrace hráčů na zápasy.
+     *
+     * Registrace se vytvářejí pouze pro zápasy v blízké budoucnosti.
+     * Pokud již registrace existují, inicializace se přeskočí.
+     */
+    private void initRegistrations() {
+        if (matchRegistrationRepository.count() > 0) {
+            log.info("Match registrations already exist. Registration initialization is skipped.");
+            return;
+        }
+
+        LocalDateTime finalDate = LocalDateTime.now().plusWeeks(1);
+
+        List<MatchEntity> matches = matchRepository.findAll().stream()
+                .filter(m -> m.getDateTime().isBefore(finalDate))
+                .toList();
+
+        List<PlayerEntity> players = playerRepository.findAll().stream()
+                .filter(p -> p.getId() != null)
+                .filter(p -> p.getPlayerStatus() == PlayerStatus.APPROVED)
+                .toList();
+
+        if (matches.isEmpty() || players.size() < 6) {
+            log.info("Not enough data for registration initialization. Initialization is skipped.");
+            return;
+        }
+
+        for (MatchEntity match : matches) {
+            List<PlayerEntity> shuffledPlayers = new ArrayList<>(players);
+            Collections.shuffle(shuffledPlayers);
+            List<PlayerEntity> selectedPlayers = shuffledPlayers.subList(0, 8);
+
+            List<Integer> indexes = new ArrayList<>();
+            for (int i = 0; i < selectedPlayers.size(); i++) {
+                indexes.add(i);
+            }
+            Collections.shuffle(indexes);
+
+            int excusedIndex = indexes.get(0);
+            int unregisteredIndex1 = indexes.get(1);
+            int unregisteredIndex2 = indexes.get(2);
+
+            for (int i = 0; i < selectedPlayers.size(); i++) {
+                PlayerEntity player = selectedPlayers.get(i);
+
+                MatchRegistrationEntity reg = new MatchRegistrationEntity();
+                reg.setMatch(match);
+                reg.setPlayer(player);
+
+                if (i == excusedIndex) {
+                    reg.setStatus(PlayerMatchStatus.EXCUSED);
+                    reg.setExcuseReason(ExcuseReason.NEMOC);
+                    reg.setExcuseNote("chřipka");
+                } else if (i == unregisteredIndex1 || i == unregisteredIndex2) {
+                    reg.setStatus(PlayerMatchStatus.UNREGISTERED);
+                    reg.setExcuseReason(null);
+                    reg.setExcuseNote(null);
+                } else {
+                    reg.setStatus(PlayerMatchStatus.REGISTERED);
+                    reg.setExcuseReason(null);
+                    reg.setExcuseNote(null);
+                }
+
+                reg.setTeam(player.getTeam());
+                reg.setTimestamp(LocalDateTime.now());
+                reg.setCreatedBy("initializer");
+
+                matchRegistrationRepository.save(reg);
+            }
+        }
+
+        log.info("Match registrations have been initialized.");
+    }
+
+    /**
+     * Spočítá počet pátků v období včetně.
+     *
+     * @param from počáteční datum
+     * @param to koncové datum
+     * @return počet pátků v období
+     */
+    private int countFridays(LocalDate from, LocalDate to) {
+        if (to.isBefore(from)) {
+            return 0;
+        }
+
+        LocalDate firstFriday = from.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
+        if (firstFriday.isAfter(to)) {
+            return 0;
+        }
+
+        int count = 0;
+        for (LocalDate date = firstFriday; !date.isAfter(to); date = date.plusWeeks(1)) {
+            count++;
+        }
+        return count;
+    }
+
+    /**
+     * Vygeneruje náhodný timestamp v rozsahu určeném pro ukázková data.
+     *
+     * @return náhodný timestamp v UTC
+     */
+    private LocalDateTime randomTimestampForDemoData() {
+        LocalDateTime from = LocalDateTime.of(2024, 11, 1, 0, 0);
+        LocalDateTime to = LocalDateTime.of(2025, 2, 10, 23, 59);
+
+        long fromEpoch = from.toEpochSecond(ZoneOffset.UTC);
+        long toEpoch = to.toEpochSecond(ZoneOffset.UTC);
+
+        long randomEpoch = ThreadLocalRandom.current().nextLong(fromEpoch, toEpoch + 1);
+        return LocalDateTime.ofEpochSecond(randomEpoch, 0, ZoneOffset.UTC);
+    }
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\GlobalExceptionHandler.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import cz.phsoft.hokej.exceptions.ApiError;
+import cz.phsoft.hokej.exceptions.BusinessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Map;
+
+/**
+ * Globální handler výjimek pro REST API.
+ *
+ * Slouží k centralizovanému zachytávání výjimek z controllerů a service
+ * vrstvy, jejich převodu na jednotný JSON formát {@link ApiError} a
+ * k nastavení odpovídajících HTTP status kódů.
+ *
+ * Třída neřeší business logiku ani detailní logování. Tyto aspekty lze
+ * doplnit do jednotlivých handler metod podle potřeby.
+ */
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    // 1) Doménové výjimky
+
+    /**
+     * Zachytává výjimky typu {@link BusinessException}.
+     *
+     * Výjimka předává HTTP status, uživatelskou zprávu a další informace,
+     * které se používají při sestavení odpovědi {@link ApiError}.
+     */
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiError> handleBusinessException(
+            BusinessException ex,
+            HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                ex.getStatus().value(),
+                ex.getStatus().getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(error);
+    }
+
+    // 2) Přístup odepřen (Spring Security)
+
+    /**
+     * Zachytává {@link AccessDeniedException} vyhozenou Spring Security.
+     *
+     * Typicky jde o situace, kdy uživatel nemá potřebnou roli pro volání
+     * daného endpointu. Vrací se HTTP status 403 Forbidden.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex,
+                                                       HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(error);
+    }
+
+    // 3) Chybné vstupy (IllegalArgumentException)
+
+    /**
+     * Zachytává {@link IllegalArgumentException}.
+     *
+     * Používá se pro obecné validační chyby vstupů nebo nesprávné
+     * parametry předané do service vrstvy. Vrací se HTTP status 400.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex,
+                                                          HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    // 4) Neplatný stav aplikace (IllegalStateException)
+
+    /**
+     * Zachytává {@link IllegalStateException}.
+     *
+     * Používá se pro situace, kdy je aplikace v neplatném stavu a
+     * daná operace nemůže být provedena. Typicky se vrací HTTP status 409.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiError> handleIllegalState(IllegalStateException ex,
+                                                       HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+    // 5) Porušení integrity dat
+
+    /**
+     * Zachytává {@link DataIntegrityViolationException} z databázové vrstvy.
+     *
+     * Typicky jde o porušení unikátních omezení nebo jiné konflikty při
+     * ukládání dat. Z bezpečnostních důvodů se nevrací detailní databázová
+     * zpráva, ale obecnější chybové hlášení.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrity(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                "BE - Záznam porušuje unikátní omezení (pravděpodobně duplicitní hráč).",
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+    // 6) Neočekávané chyby (fallback)
+
+    /**
+     * Fallback handler pro všechny neošetřené výjimky.
+     *
+     * Slouží jako poslední ochrana proti pádu aplikace bez odpovědi
+     * a vrací jednotný formát chyby s HTTP statusem 500.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleAll(Exception ex,
+                                              HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                "BE - Došlo k neočekávané chybě na serveru.",
+                request.getRequestURI(),
+                request.getRemoteAddr()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+
+    // 7) Validační chyby (@Valid, Bean Validation)
+
+    /**
+     * Zachytává validační chyby vyvolané anotací {@code @Valid}.
+     *
+     * Do pole {@code details} se ukládá mapa ve tvaru název pole → text
+     * validační chyby. Vrací se HTTP status 400 Bad Request.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        Map<String, String> fieldErrors = new java.util.LinkedHashMap<>();
+
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            String fieldName = fieldError.getField();
+            String errorMessage = fieldError.getDefaultMessage();
+
+            fieldErrors.merge(
+                    fieldName,
+                    errorMessage,
+                    (existing, added) -> existing + "; " + added
+            );
+        }
+
+        ApiError error = new ApiError(
+                status.value(),
+                status.getReasonPhrase(),
+                "BE - Neplatná vstupní data.",
+                request.getRequestURI(),
+                request.getRemoteAddr(),
+                fieldErrors
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(error);
+    }
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\package-info.java
+-----
+
+/**
+ * Konfigurační třídy aplikace.
+ *
+ * Obsahuje:
+ * - obecnou konfiguraci Spring Boot aplikace,
+ * - nastavení beanů a integračních komponent,
+ * - konfiguraci technických aspektů (např. CORS, mail, SMS, logging).
+ *
+ * Tato vrstva:
+ * - neobsahuje business logiku,
+ * - připravuje prostředí a infrastrukturu pro běh aplikace.
+ */
+package cz.phsoft.hokej.config;
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\SecurityConfig.java
+-----
+
+package cz.phsoft.hokej.config;
+
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.security.impersonation.ImpersonationFilter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+/**
+ * Hlavní konfigurace Spring Security pro backend aplikace.
+ *
+ * Třída zajišťuje nastavení autentizace, autorizace endpointů,
+ * login mechanizmu, správy session a CORS.
+ * Používá produkční JSON login a rolově řízený přístup.
+ */
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final CustomUserDetailsService userDetailsService;
+    private final PlayerRepository playerRepository;
+
+    /**
+     * Příznak demo režimu.
+     *
+     * Pokud je {@code app.demo-mode=true}, některé operace mohou být
+     * omezeny na úrovni service vrstvy.
+     */
+    @Value("${app.demo-mode:false}")
+    private boolean isDemoMode;
+
+    /**
+     * Seznam povolených originů pro CORS.
+     *
+     * Příklad:
+     * app.cors.allowed-origins=http://localhost:5173,https://hokej.phsoft.cz
+     */
+    @Value("${app.cors.allowed-origins:http://localhost:5173,https://hokej.phsoft.cz}")
+    private String allowedOrigins;
+
+    public SecurityConfig(CustomUserDetailsService userDetailsService,
+                          PlayerRepository playerRepository) {
+        this.userDetailsService = userDetailsService;
+        this.playerRepository = playerRepository;
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig)
+            throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   AuthenticationManager authManager) throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})
+                .authenticationProvider(authenticationProvider())
+
+                .authorizeHttpRequests(auth -> {
+
+                    /*
+                     * Povolení CORS preflight requestů.
+                     */
+                    auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+
+                    /*
+                     * Veřejné endpointy.
+                     */
+                    auth.requestMatchers(
+                            "/api/auth/register",
+                            "/api/auth/verify",
+                            "/api/auth/login",
+                            "/api/auth/logout",
+                            "/api/auth/forgotten-password",
+                            "/api/auth/forgotten-password/info",
+                            "/api/auth/forgotten-password/reset",
+                            "/api/auth/reset-password",
+                            "/error",
+                            "/favicon.ico",
+                            "/public/**",
+                            "/api/inactivity/admin/me/**"
+                    ).permitAll();
+
+                    /*
+                     * DEMO režim: umožní číst demo notifikace bez přihlášení.
+                     */
+                    if (isDemoMode) {
+                        auth.requestMatchers("/api/demo/notifications/**").permitAll();
+                    }
+
+                    /*
+                     * Admin-only endpointy.
+                     */
+                    auth.requestMatchers("/api/admin/seasons/**").hasRole("ADMIN");
+                    auth.requestMatchers("/api/email/test/**").hasRole("ADMIN");
+                    auth.requestMatchers("/api/debug/me").hasRole("ADMIN");
+                    auth.requestMatchers("/api/test/**").hasRole("ADMIN");
+
+                    /*
+                     * Admin + Manager endpointy.
+                     */
+                    auth.requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER");
+
+                    /*
+                     * Zbytek API pouze pro přihlášené.
+                     */
+                    auth.requestMatchers("/api/**").authenticated();
+                    auth.anyRequest().authenticated();
+                })
+
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
+
+                .addFilterAt(
+                        new CustomJsonLoginFilter("/api/auth/login", authManager),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+
+                .addFilterAfter(
+                        new ImpersonationFilter(playerRepository),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout")
+                        .deleteCookies("JSESSIONID")
+                        .logoutSuccessHandler((request, response, auth) -> {
+                            request.getSession().removeAttribute("CURRENT_PLAYER_ID");
+                            request.getSession().removeAttribute("CURRENT_SEASON_ID");
+                            request.getSession().removeAttribute("CURRENT_SEASON_CUSTOM");
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter()
+                                    .write("{\"status\":\"ok\",\"message\":\"Odhlášeno\"}");
+                        })
+                );
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        List<String> origins = List.of(allowedOrigins.split("\\s*,\\s*"));
+        configuration.setAllowedOrigins(origins);
+
+        configuration.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+        );
+
+        configuration.setAllowedHeaders(
+                List.of("Content-Type", "Authorization", "X-Requested-With")
+        );
+
+        configuration.setAllowCredentials(true);
+
+        configuration.setExposedHeaders(List.of("Set-Cookie"));
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+}
+
+

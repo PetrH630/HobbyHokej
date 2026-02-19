@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang=cs>
+
+<head>
+    <meta charset=utf-8>
+    <meta name=viewport content="width=device-width,initial-scale=1">
+    <title>Aktualizace</title>
+    <style>
+        :root {
+            --b: #0078d7;
+            --f: #fff;
+            --m: rgba(255, 255, 255, .85);
+            --m2: rgba(255, 255, 255, .65)
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background: var(--b);
+            color: var(--f);
+            font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+            overflow: hidden;
+            user-select: none
+        }
+
+        .w {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px
+        }
+
+        .c {
+            max-width: 720px;
+            width: 100%
+        }
+
+        .s {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 22px;
+            position: relative;
+            animation: sp 1.1s linear infinite
+        }
+
+        .d {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--f);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%)
+        }
+
+        .d:nth-child(1) {
+            transform: translate(-50%, -50%) rotate(0) translate(28px);
+            opacity: .2
+        }
+
+        .d:nth-child(2) {
+            transform: translate(-50%, -50%) rotate(30deg) translate(28px);
+            opacity: .28
+        }
+
+        .d:nth-child(3) {
+            transform: translate(-50%, -50%) rotate(60deg) translate(28px);
+            opacity: .36
+        }
+
+        .d:nth-child(4) {
+            transform: translate(-50%, -50%) rotate(90deg) translate(28px);
+            opacity: .44
+        }
+
+        .d:nth-child(5) {
+            transform: translate(-50%, -50%) rotate(120deg) translate(28px);
+            opacity: .52
+        }
+
+        .d:nth-child(6) {
+            transform: translate(-50%, -50%) rotate(150deg) translate(28px);
+            opacity: .6
+        }
+
+        .d:nth-child(7) {
+            transform: translate(-50%, -50%) rotate(180deg) translate(28px);
+            opacity: .68
+        }
+
+        .d:nth-child(8) {
+            transform: translate(-50%, -50%) rotate(210deg) translate(28px);
+            opacity: .76
+        }
+
+        .d:nth-child(9) {
+            transform: translate(-50%, -50%) rotate(240deg) translate(28px);
+            opacity: .84
+        }
+
+        .d:nth-child(10) {
+            transform: translate(-50%, -50%) rotate(270deg) translate(28px);
+            opacity: .92
+        }
+
+        .d:nth-child(11) {
+            transform: translate(-50%, -50%) rotate(300deg) translate(28px);
+            opacity: 1
+        }
+
+        .d:nth-child(12) {
+            transform: translate(-50%, -50%) rotate(330deg) translate(28px);
+            opacity: .92
+        }
+
+        @keyframes sp {
+            from {
+                transform: rotate(0)
+            }
+
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .p {
+            font-size: 54px;
+            font-weight: 300;
+            letter-spacing: .5px;
+            margin: 6px 0
+        }
+
+        .l {
+            font-size: 22px;
+            font-weight: 350;
+            margin: 10px 0;
+            color: var(--m)
+        }
+
+        .sl {
+            font-size: 18px;
+            font-weight: 350;
+            margin: 10px 0 0;
+            color: var(--m2)
+        }
+
+        .h {
+            position: fixed;
+            left: 24px;
+            bottom: 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, .55)
+        }
+
+        .o {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px
+        }
+
+        .k {
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(255, 255, 255, .25);
+            backdrop-filter: blur(8px);
+            border-radius: 18px;
+            padding: 22px 22px 18px;
+            max-width: 520px;
+            width: 100%;
+            text-align: left
+        }
+
+        .k h2 {
+            margin: 0 0 8px;
+            font-weight: 600;
+            font-size: 20px
+        }
+
+        .k p {
+            margin: 8px 0;
+            color: rgba(255, 255, 255, .9);
+            line-height: 1.35
+        }
+
+        .b {
+            margin-top: 12px;
+            display: inline-block;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .3);
+            background: rgba(255, 255, 255, .12);
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer
+        }
+
+        .b:active {
+            transform: translateY(1px)
+        }
+    </style>
+</head>
+
+<body>
+    <div class=w>
+        <div class=c>
+            <div class=s aria-hidden=true>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+                <div class=d></div>
+            </div>
+            <div class=p><span id=p>0</span>%</div>
+            <div class=l>Probíhá „aktualizace“ (jen animace v prohlížeči). Nevypínejte počítač.</div>
+            <div class=sl>Tip: Esc zobrazí konec vtípku.</div>
+        </div>
+    </div>
+    <div class=h>Tohle nic nestahuje ani nikam nic neposílá 🙂</div>
+    <div class=o id=o role=dialog aria-modal=true>
+        <div class=k>
+            <h2>APRÍL 😄</h2>
+            <p>Tohle je jen HTML stránka s animací.</p>
+            <p>Žádná data se nestahují ani neodesílají.</p><a class=b id=c>Zavřít</a>
+        </div>
+    </div>
+    <script>(() => { const _ = String.fromCharCode, A = _(103, 101, 116, 69, 108, 101, 109, 101, 110, 116, 66, 121, 73, 100), B = _(97, 100, 100, 69, 118, 101, 110, 116, 76, 105, 115, 116, 101, 110, 101, 114), C = _(115, 116, 121, 108, 101), D = _(100, 105, 115, 112, 108, 97, 121), E = _(102, 108, 101, 120), F = _(110, 111, 110, 101), G = _(107, 101, 121), H = _(69, 115, 99, 97, 112, 101), I = document[A]("p"), J = document[A]("o"), K = document[A]("c"); let x = 0, r = 1; const d = t => t < 25 ? 120 + Math.random() * 180 : t < 60 ? 180 + Math.random() * 260 : t < 85 ? 260 + Math.random() * 420 : 380 + Math.random() * 700, s = t => t < 35 ? (Math.random() < .12 ? 2 : 1) : t < 80 ? (Math.random() < .18 ? 1 : 0) : t < 95 ? (Math.random() < .35 ? 1 : 0) : (Math.random() < .25 ? 1 : 0), S = () => { J[C][D] = E }, Hid = () => { J[C][D] = F }, T = () => { if (!r) return; x = Math.min(100, x + s(x)); I.textContent = "" + x; x >= 100 ? (r = 0, setTimeout(S, 650)) : setTimeout(T, d(x)) }; K[B]("click", Hid); addEventListener("keydown", e => { e[G] === H && (r = 0, S()) }); T() })();</script>
+</body>
+
+</html>

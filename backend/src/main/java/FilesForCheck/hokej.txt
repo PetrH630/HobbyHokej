@@ -1,0 +1,72 @@
+﻿Balíček (složka): hokej
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej
+
+Seznam souborů:
+HobbyHokejApplication.java
+package-info.java
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\HobbyHokejApplication.java
+-----
+
+package cz.phsoft.hokej;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+/**
+ * Hlavní spouštěcí třída aplikace Hokej – HobbyHokej.
+ *
+ * Odpovědnost třídy:
+ * - startuje Spring Boot aplikaci,
+ * - aktivuje Spring kontext,
+ * - zapíná podporu JPA repozitářů, plánování úloh a asynchronního zpracování.
+ *
+ * Třída neobsahuje žádnou business logiku. Slouží pouze jako vstupní bod
+ * pro JVM a konfiguraci základních Spring funkcí na úrovni aplikace.
+ */
+@SpringBootApplication
+@EnableJpaRepositories
+@EnableScheduling
+@EnableAsync
+public class HobbyHokejApplication {
+
+    /**
+     * Hlavní vstupní metoda aplikace.
+     *
+     * Spustí Spring Boot, inicializuje aplikační kontext
+     * a nahodí všechny nakonfigurované komponenty.
+     *
+     * @param args argumenty příkazové řádky předané aplikaci
+     */
+    public static void main(String[] args) {
+        SpringApplication.run(HobbyHokejApplication.class, args);
+    }
+}
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\package-info.java
+-----
+
+/**
+ * Kořenový balíček aplikace Hokej – Stará Garda.
+ *
+ * Obsahuje hlavní spouštěcí třídu aplikace a nadřazené balíčky
+ * pro jednotlivé vrstvy systému, jako jsou konfigurační třídy,
+ * controllerová vrstva, modelová vrstva a datová vrstva.
+ *
+ * Tento balíček je používán jako výchozí bod pro start aplikace
+ * a orientaci v jejích hlavních modulech.
+ *  Důležité podbalíčky:
+ *
+ */
+package cz.phsoft.hokej;
+
+

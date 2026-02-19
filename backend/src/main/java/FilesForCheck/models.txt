@@ -1,0 +1,24 @@
+﻿Balíček (složka): models
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models
+
+Seznam souborů:
+package-info.java
+
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\package-info.java
+-----
+
+/**
+ * Datová vrstva aplikace.
+ *
+ * Obsahuje databázové entity, výčtové typy a repozitářovou vrstvu,
+ * která zajišťuje přístup k perzistentním datům.
+ *
+ * Tento balíček je používán modelovou a servisní vrstvou aplikace
+ * při práci s databází.
+ */
+package cz.phsoft.hokej.data;
+
+
