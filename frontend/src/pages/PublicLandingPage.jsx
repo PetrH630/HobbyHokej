@@ -6,26 +6,53 @@ const PublicLandingPage = () => {
 
             {/* TOP BAR */}
             <div className="border-bottom bg-white shadow-sm">
-                <div className="container py-3 d-flex justify-content-between align-items-center">
-                    <div className="d-flex align-items-center gap-2">
-                        <img
-                            src="/hockey-clipart.svg"
-                            alt="Logo"
-                            style={{ height: "34px" }}
-                        />
-                        <div className="fw-bold fs-5">HobbyHokej App</div>
-                        <span className="badge bg-danger ms-2">DEMO</span>
-                    </div>
-                    <div className="d-flex gap-2">
-                        <Link to="/login" className="btn btn-primary btn-sm px-3">
-                            Přihlášení
-                        </Link>
-                        <Link to="/register" className="btn btn-outline-primary btn-sm px-3">
-                            Registrace
-                        </Link>
+                <div className="container py-3">
+
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+
+                        {/* ===== LEVÁ ČÁST ===== */}
+                        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+
+                            {/* Logo + název pod sebou na mobile */}
+                            <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+                                <img
+                                    src="/hockey-clipart.svg"
+                                    alt="Logo"
+                                    style={{ height: "34px" }}
+                                />
+
+                                <div className="fw-bold fs-5">
+                                    HobbyHokej App
+                                </div>
+                            </div>
+
+                            {/* Badge DEMO */}
+                            <span className="badge bg-danger">
+                                DEMO
+                            </span>
+                        </div>
+
+                        {/* ===== PRAVÁ ČÁST ===== */}
+                        <div className="d-flex flex-column flex-md-row gap-2 mt-3 mt-md-0">
+                            <Link
+                                to="/login"
+                                className="btn btn-primary btn-sm px-3"
+                            >
+                                Přihlášení
+                            </Link>
+
+                            <Link
+                                to="/register"
+                                className="btn btn-outline-primary btn-sm px-3"
+                            >
+                                Registrace
+                            </Link>
+                        </div>
+
                     </div>
                 </div>
             </div>
+
 
             {/* HERO */}
             <main className="flex-grow-1">
@@ -162,7 +189,7 @@ const PublicLandingPage = () => {
                                                 Kompletní správa systému – uživatelé, hráči, sezóny, zápasy.
                                             </div>
                                             <div className="small">
-                                                <strong>Email:</strong> administrator@example.com<br />
+                                                <strong>Email:</strong> admin@example.com<br />
                                                 <strong>Heslo:</strong> administrator123
                                             </div>
                                         </div>

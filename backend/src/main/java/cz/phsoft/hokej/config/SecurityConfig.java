@@ -1,9 +1,14 @@
 package cz.phsoft.hokej.config;
 
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.security.impersonation.ImpersonationFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,13 +16,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.security.impersonation.ImpersonationFilter;
 
 import java.util.List;
 
@@ -25,9 +26,8 @@ import java.util.List;
  * Hlavní konfigurace Spring Security pro backend aplikace.
  *
  * Třída zajišťuje nastavení autentizace, autorizace endpointů,
- * login mechanizmu, správy session a CORS. Konfigurace podporuje
- * testovací režim pro vývoj a produkční režim s REST loginem
- * a rolově řízeným přístupem.
+ * login mechanizmu, správy session a CORS.
+ * Používá produkční JSON login a rolově řízený přístup.
  */
 @Configuration
 @EnableWebSecurity
@@ -35,29 +35,25 @@ import java.util.List;
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
-
-    /**
-     * Příznak testovacího režimu.
-     *
-     * Pokud je {@code app.test-mode=true}, aplikace povoluje všechny
-     * endpointy a používá HTTP Basic autentizaci. Režim je určen pro
-     * lokální vývoj a testování v Postmanu bez potřeby řešit session.
-     */
-    @Value("${app.test-mode:false}")
-    private boolean isTestMode;
+    private final PlayerRepository playerRepository;
 
     /**
      * Příznak demo režimu.
      *
-     * Pokud je {@code app.demo-mode=true}, aplikace běží se stejným
-     * security nastavením jako v produkci, ale některé operace
-     * (např. změna hesla, mazání dat) mohou být na úrovni service
-     * blokované.
+     * Pokud je {@code app.demo-mode=true}, některé operace mohou být
+     * omezeny na úrovni service vrstvy.
      */
     @Value("${app.demo-mode:false}")
     private boolean isDemoMode;
 
-    private final PlayerRepository playerRepository;
+    /**
+     * Seznam povolených originů pro CORS.
+     *
+     * Příklad:
+     * app.cors.allowed-origins=http://localhost:5173,https://hokej.phsoft.cz
+     */
+    @Value("${app.cors.allowed-origins:http://localhost:5173,https://hokej.phsoft.cz}")
+    private String allowedOrigins;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
                           PlayerRepository playerRepository) {
@@ -65,27 +61,11 @@ public class SecurityConfig {
         this.playerRepository = playerRepository;
     }
 
-    // Password encoder
-
-    /**
-     * Encoder pro hashování a ověřování hesel pomocí BCrypt.
-     *
-     * Používá se při registraci, změně hesla i při samotné autentizaci.
-     */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Authentication provider
-
-    /**
-     * {@link DaoAuthenticationProvider} pro načítání uživatelů z databáze.
-     *
-     * Poskytuje napojení na {@link CustomUserDetailsService} a
-     * {@link BCryptPasswordEncoder}. Používá se při loginu přes
-     * {@link AuthenticationManager}.
-     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -94,155 +74,126 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // Authentication manager
-
-    /**
-     * Vytváří {@link AuthenticationManager} používaný při autentizaci.
-     *
-     * Manager je předáván do {@link CustomJsonLoginFilter}.
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig)
             throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
-    // Security filter chain
-
-    /**
-     * Hlavní bezpečnostní konfigurace HTTP vrstvy.
-     *
-     * Řeší:
-     * - vypnutí CSRF pro REST API,
-     * - povolení CORS pro SPA frontend,
-     * - autorizaci endpointů,
-     * - login (CustomJsonLoginFilter),
-     * - logout a správu session.
-     *
-     * V testovacím režimu povoluje všechny endpointy s HTTP Basic
-     * autentizací. V produkčním režimu aplikuje detailní pravidla
-     * pro jednotlivé endpointy a používá JSON login.
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    AuthenticationManager authManager) throws Exception {
 
-        http.csrf(csrf -> csrf.disable())
-                .cors(cors -> {
-                    // Použije corsConfigurationSource()
-                });
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})
+                .authenticationProvider(authenticationProvider())
 
-        if (isTestMode) {
-            // Testovací režim: vše povoleno, HTTP Basic
+                .authorizeHttpRequests(auth -> {
 
-            http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                    .httpBasic();
+                    /*
+                     * Povolení CORS preflight requestů.
+                     */
+                    auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
-        }
-        else {
-            // Produkční režim
+                    /*
+                     * Veřejné endpointy.
+                     */
+                    auth.requestMatchers(
+                            "/api/auth/register",
+                            "/api/auth/verify",
+                            "/api/auth/login",
+                            "/api/auth/logout",
+                            "/api/auth/forgotten-password",
+                            "/api/auth/forgotten-password/info",
+                            "/api/auth/forgotten-password/reset",
+                            "/api/auth/reset-password",
+                            "/error",
+                            "/favicon.ico",
+                            "/public/**",
+                            "/api/inactivity/admin/me/**"
+                    ).permitAll();
 
-            http
-                    .authenticationProvider(authenticationProvider())
+                    /*
+                     * DEMO režim: umožní číst demo notifikace bez přihlášení.
+                     */
+                    if (isDemoMode) {
+                        auth.requestMatchers("/api/demo/notifications/**").permitAll();
+                    }
 
-                    .authorizeHttpRequests(auth -> {
+                    /*
+                     * Admin-only endpointy.
+                     */
+                    auth.requestMatchers("/api/admin/seasons/**").hasRole("ADMIN");
+                    auth.requestMatchers("/api/email/test/**").hasRole("ADMIN");
+                    auth.requestMatchers("/api/debug/me").hasRole("ADMIN");
+                    auth.requestMatchers("/api/test/**").hasRole("ADMIN");
 
-                        // Veřejné endpointy
-                        auth.requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/verify",
-                                "/api/auth/login",
-                                "/api/auth/logout",
-                                "/api/auth/forgotten-password",
-                                "/api/auth/forgotten-password/info",
-                                "/api/auth/forgotten-password/reset",
-                                "/api/auth/reset-password",
-                                "/error",
-                                "/favicon.ico",
-                                "/public/**",
-                                "/api/inactivity/admin/me/**"
-                        ).permitAll();
+                    /*
+                     * Admin + Manager endpointy.
+                     */
+                    auth.requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER");
 
-                        // DEMO režim: umožní číst demo notifikace bez přihlášení
-                        if (isDemoMode) {
-                            auth.requestMatchers("/api/demo/notifications/**").permitAll();
+                    /*
+                     * Zbytek API pouze pro přihlášené.
+                     */
+                    auth.requestMatchers("/api/**").authenticated();
+                    auth.anyRequest().authenticated();
+                })
 
-                        }
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
 
-                        // Debug a test
-                        auth.requestMatchers(
-                                "/api/debug/me",
-                                "/api/test/**"
-                        ).hasRole("ADMIN");
+                .addFilterAt(
+                        new CustomJsonLoginFilter("/api/auth/login", authManager),
+                        UsernamePasswordAuthenticationFilter.class
+                )
 
-                        // Testovací e-maily
-                        auth.requestMatchers("/api/email/test/**").hasRole("ADMIN");
+                .addFilterAfter(
+                        new ImpersonationFilter(playerRepository),
+                        UsernamePasswordAuthenticationFilter.class
+                )
 
-                        // Admin / manager endpointy
-                        auth.requestMatchers("/api/admin/seasons/**").hasRole("ADMIN");
-                        auth.requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER");
-                        auth.requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER");
-                        auth.requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER");
-                        auth.requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER");
-
-                        // Zbytek API pouze pro přihlášené
-                        auth.requestMatchers("/api/**").authenticated();
-                        auth.anyRequest().authenticated();
-                    })
-
-                    .sessionManagement(sm ->
-                            sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                    )
-
-                    .addFilterAt(
-                            new CustomJsonLoginFilter("/api/auth/login", authManager),
-                            UsernamePasswordAuthenticationFilter.class
-                    )
-
-                    .addFilterAfter(
-                            new ImpersonationFilter(playerRepository),
-                            UsernamePasswordAuthenticationFilter.class
-                    )
-
-                    .logout(logout -> logout
-                            .logoutUrl("/api/auth/logout")
-                            .deleteCookies("JSESSIONID")
-                            .logoutSuccessHandler((request, response, auth) -> {
-                                request.getSession().removeAttribute("CURRENT_PLAYER_ID");
-                                request.getSession().removeAttribute("CURRENT_SEASON_ID");
-                                request.getSession().removeAttribute("CURRENT_SEASON_CUSTOM");
-                                response.setContentType("application/json");
-                                response.setCharacterEncoding("UTF-8");
-                                response.getWriter()
-                                        .write("{\"status\":\"ok\",\"message\":\"Odhlášeno\"}");
-                            })
-                    );
-
-        }
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout")
+                        .deleteCookies("JSESSIONID")
+                        .logoutSuccessHandler((request, response, auth) -> {
+                            request.getSession().removeAttribute("CURRENT_PLAYER_ID");
+                            request.getSession().removeAttribute("CURRENT_SEASON_ID");
+                            request.getSession().removeAttribute("CURRENT_SEASON_CUSTOM");
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter()
+                                    .write("{\"status\":\"ok\",\"message\":\"Odhlášeno\"}");
+                        })
+                );
 
         return http.build();
     }
 
-    // CORS konfigurace
-
-    /**
-     * CORS konfigurace pro SPA frontend (React / Vite).
-     *
-     * Povoluje původ {@code http://localhost:5173}, základní HTTP metody
-     * a hlavičky. Umožňuje přenos cookies (JSESSIONID) pro session-based
-     * autentizaci.
-     *
-     * V produkci se má konfigurace doplnit o produkční domény.
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        List<String> origins = List.of(allowedOrigins.split("\\s*,\\s*"));
+        configuration.setAllowedOrigins(origins);
+
+        configuration.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+        );
+
+        configuration.setAllowedHeaders(
+                List.of("Content-Type", "Authorization", "X-Requested-With")
+        );
+
         configuration.setAllowCredentials(true);
+
+        configuration.setExposedHeaders(List.of("Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();

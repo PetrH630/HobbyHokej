@@ -3,11 +3,19 @@
     padding: 16px;
     border: 2px solid #dee2e6;
     border-radius: 12px;
-    width: 240px;
+   
+    width: 100%;
     max-width: 100%;
+
     overflow: hidden;
     /* aby nic nevylezlo z karty */
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (min-width: 768px) {
+    .match-card {
+        width: 240px;
+    }
 }
 
 /* condensed varianta – používá se pro uplynulé zápasy v seznamu */
@@ -124,7 +132,6 @@
 .match-unregistered {
     background-color: #fff9db;
     border-color: #ffe066;
-
 }
 
 /* 🔵 EXCUSED */
@@ -199,16 +206,6 @@
 
 .player-match-status--no_excused .player-match-status-text {
     color: #750b16;
-}
-
-/* =========================
-   RESPONSIVE – MOBILE BASE
-   ========================= */
-@media (max-width: 576px) {
-    .match-card {
-        flex: 1 1 100%;
-        max-width: 100%;
-    }
 }
 
 /* základ – na mobilu jsou bloky pod sebou */
@@ -301,7 +298,7 @@
             /* datum+čas */
             1fr
             /* aréna */
-            120px
+            180px
             /* hráči */
             180px;
         /* status */
@@ -356,4 +353,15 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+}
+
+.players-count__wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.capacity-ring {
+    flex: 0 0 auto;
 }

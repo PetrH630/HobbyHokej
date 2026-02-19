@@ -1,4 +1,4 @@
-// src/components/admin/AdminPlayerRegistationHistory.jsx
+// src/components/admin/AdminPlayerRegistrationHistory.jsx
 
 import { usePlayerRegistrationHistoryAdmin } from "../../hooks/usePlayerRegistrationHistoryAdmin";
 import {
@@ -24,37 +24,49 @@ const AdminPlayerRegistrationHistory = ({ matchId, playerId }) => {
     );
 
     return (
-        <div className="table-responsive">
-            <table className="table table-sm table-striped table-hover align-middle">
-                <thead className="table-light">
-                    <tr>
-                        <th>Datum změny</th>
-                        <th>Status</th>
-                        <th>Tým</th>
-                        <th>Změnil</th>
-                        <th>Poznámka</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {sortedHistory.map((item) => (
-                        <tr key={item.id}>
-                            <td>{formatDateTime(item.changedAt)}</td>
-                            <td>
-                                <span className="text">
-                                    <strong>{statusLabel(item.status)}</strong>
-                                </span>
-                            </td>
-                            <td>{teamLabel(item.team)}</td>
-                            <td>{item.createdBy}</td>
-                            <td>
-                                {excuseReasonLabel(item.excuseReason)}{" "}
-                                {" - "}
+        <div className="d-flex flex-column gap-3">
+            {sortedHistory.map((item) => (
+                <div key={item.id} className="card shadow-sm">
+                    <div className="card-body">
+
+                        <div className="mb-2">
+                            <small className="text-muted">Datum změny:</small>{" "}
+                            <span className="fw-semibold">
+                                {formatDateTime(item.changedAt)}
+                            </span>
+                        </div>
+
+                        <hr className="my-2" />
+
+                        <div className="row g-2">
+
+                            <div className="col-12 col-md-4">
+                                <span className="fw-semibold">Změnil:</span>{" "}
+                                {item.createdBy}
+                            </div>
+
+                            <div className="col-12 col-md-4">
+                                <span className="fw-semibold">Status:</span>{" "}
+                                {statusLabel(item.status)}
+                            </div>
+
+                            <div className="col-12 col-md-4">
+                                <span className="fw-semibold">Tým:</span>{" "}
+                                {teamLabel(item.team)}
+                            </div>
+
+                            <div className="col-12">
+                                <span className="fw-semibold">Poznámka:</span>{" "}
+                                {excuseReasonLabel(item.excuseReason)}
+                                {item.adminNote || item.excuseNote ? " - " : ""}
                                 {item.adminNote || item.excuseNote}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            ))}
         </div>
     );
 };

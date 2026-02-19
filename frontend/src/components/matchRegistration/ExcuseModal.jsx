@@ -19,6 +19,8 @@ const ExcuseModal = ({
 
     if (!show) return null;
 
+    useGlobalModal(show);
+
     const modalTitle = isUnregisterFlow
         ? "Odhlásit se ze zápasu"
         : "Omluvit se ze zápasu";
@@ -44,7 +46,7 @@ const ExcuseModal = ({
                 aria-modal="true"
                 onClick={handleBackdropClick}
             >
-                <div className="modal-dialog" role="document" onClick={stopPropagation}>
+                <div className="modal-dialog modal-dialog-centered" role="document" onClick={stopPropagation}>
                     <div className="modal-content">
                         <div className="modal-header">
                             <h5 className="modal-title">{modalTitle}</h5>
@@ -117,7 +119,7 @@ const ExcuseModal = ({
                 </div>
             </div>
 
-            <div className="modal-backdrop fade show" onClick={handleBackdropClick} />
+            <div className="modal-backdrop fade show" aria-hidden="true" />
         </>
     );
 };

@@ -1,6 +1,5 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import SharedLayout from "./pages/SharedLayout";
 import ScrollToTop from "./components/ScrollToTop";
@@ -20,6 +19,7 @@ import MyInactivityPage from "./pages/MyInactivityPage";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import PlayerHomePage from "./pages/PlayerHomePage";
+import "./App.css";
 
 // ADMIN PAGES
 import HomeDecider from "./pages/HomeDecider";

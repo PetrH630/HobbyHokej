@@ -73,8 +73,7 @@ const Players = () => {
                                 )}
 
                                 <PlayerCard
-                                    player={p}
-                                    // ✅ necháme false, aby se nerušily rámečky
+                                    player={p}                                    
                                     isActive={false}
                                     onSelect={() => handleSelectPlayer(p.id)}
                                     disabledTooltip={disabledTooltip}

@@ -1,12 +1,6 @@
 // src/components/admin/AdminPlayerHistoryCard.jsx
-
-const formatDateTime = (dt) => {
-    if (!dt) return "-";
-    const safe = dt.replace(" ", "T");
-    const d = new Date(safe);
-    if (Number.isNaN(d.getTime())) return dt;
-    return d.toLocaleString("cs-CZ");
-};
+import { formatPhoneNumber } from "../../utils/formatPhoneNumber"
+import { formatDateTime } from "../../utils/formatDateTime";
 
 const playerStatusLabel = (status) => {
     switch (status) {
@@ -23,10 +17,12 @@ const playerStatusLabel = (status) => {
 
 const playerTypeLabel = (type) => {
     switch (type) {
-        case "ADULT":
-            return "Dospělý";
-        case "JUNIOR":
-            return "Junior";
+        case "VIP":
+            return "VIP";
+        case "STANDARD":
+            return "Standartní";
+        case "BASIC":
+            return "základní";
         default:
             return type || "-";
     }
@@ -48,7 +44,7 @@ const AdminPlayerHistoryCard = ({ item }) => {
         <div className="card mb-2 shadow-sm border border-2 border-secondary-subtle">
             <div className="card-body py-3 px-4">
                 <div className="d-flex justify-content-between align-items-start">
-                    {/* LEVÁ STRANA – údaje hráče v čase změny */}
+
                     <div>
                         <div className="fw-bold fs-6 mb-1">
                             {item.name} {item.surname?.toUpperCase()}{" "}
@@ -61,19 +57,13 @@ const AdminPlayerHistoryCard = ({ item }) => {
 
                         <div className="small text-muted mb-2">
                             {formatDateTime(item.changedAt)}{" "}
-                            {item.action && `• ${item.action}`}
+                            {item.action && ` ${item.action}`}
                         </div>
 
-                        {item.fullName && (
-                            <div className="small mb-1">
-                                <strong>Celé jméno:</strong>{" "}
-                                {item.fullName}
-                            </div>
-                        )}
 
                         <div className="small mb-1">
-                            <strong>Telefon:</strong>{" "}
-                            {item.phoneNumber || "-"}
+                            <strong>Tel:</strong>{" "}
+                            {formatPhoneNumber(item.phoneNumber) || "-"}
                         </div>
 
                         <div className="small mb-1">
@@ -94,22 +84,22 @@ const AdminPlayerHistoryCard = ({ item }) => {
                         {item.originalTimestamp && (
                             <div className="small text-muted mt-2">
                                 <strong>Původní založení:</strong>{" "}
+                                <div>
                                 {formatDateTime(item.originalTimestamp)}
+                                </div>
                             </div>
                         )}
-                    </div>
-
-                    {/* PRAVÁ STRANA – audit info */}
-                    <div className="text-end small text-muted ps-4 border-start">
-                        <div>
+                        <div className="small text-muted mt-2">
                             <strong>User ID:</strong>{" "}
                             {item.userId ?? "-"}
                         </div>
-                        <div>
+                        <div className="small text-muted mt-2">
                             <strong>Player ID:</strong>{" "}
                             {item.playerId ?? "-"}
                         </div>
                     </div>
+
+
                 </div>
             </div>
         </div>

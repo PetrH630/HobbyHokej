@@ -16,23 +16,17 @@
 - API root:
     - všechny endpointy mají prefix `/api/...`
 
----
-
 ### 1.2 Autentizace a session
 
 - Autentizace:
     - Spring Security (session-based)
 - Přihlášení:
-    - Endpoint: `POST /api/auth/login`
-    - Vstup:
-        - JSON s přihlašovacími údaji (email, password)
-    - Chování:
-        - ověření přihlašovacích údajů
-        - při úspěchu vytvoření HTTP session (cookie `JSESSIONID`)
+    - Endpoint: `POST /api/auth/login` *(konfigurace Spring Security; není explicitní controller metoda)*
+    - Vstup: JSON s přihlašovacími údaji (email, password)
+    - Výsledek: vytvoření HTTP session (cookie `JSESSIONID`)
 - Odhlášení:
-    - Endpoint: `POST /api/auth/logout`
-    - Chování:
-        - zneplatnění aktuální session
+    - Endpoint: `POST /api/auth/logout` *(konfigurace Spring Security; není explicitní controller metoda)*
+    - Výsledek: zneplatnění aktuální session
 - Autorizace:
     - Role:
         - `ADMIN`
@@ -42,15 +36,16 @@
         - anotace `@PreAuthorize` v controllerech
         - pro běžného přihlášeného uživatele se používá `isAuthenticated()`
 - Veřejné endpointy (nevyžadují přihlášení):
-    - registrace uživatele
-    - aktivace účtu přes e-mailový odkaz
-    - proces zapomenutého hesla
-    - redirect na frontend pro reset hesla
+    - `/api/auth/register`
+    - `/api/auth/verify`
+    - `/api/auth/forgotten-password`
+    - `/api/auth/forgotten-password/info`
+    - `/api/auth/forgotten-password/reset`
+    - `/api/auth/reset-password` *(redirect na frontend)*
+    - `/api/public/app-mode` *(informace o režimu aplikace)*
 
 Typické použití:
 - Frontend po přihlášení pracuje se session cookie automaticky, není potřeba posílat tokeny v hlavičkách.
-
----
 
 ### 1.3 Formát dat
 
@@ -77,10 +72,6 @@ Všechny výjimky jsou mapovány na jednotný JSON:
 
 - typ: `ApiError`
 - zpracování: `GlobalExceptionHandler`
-- typické zdroje chyb:
-    - validační chyby vstupu
-    - doménové výjimky (např. entita nenalezena)
-    - bezpečnostní chyby (nedostatečná oprávnění)
 
 Příklad struktury `ApiError`:
 
@@ -99,500 +90,231 @@ Příklad struktury `ApiError`:
 }
 ```
 
-- `details` obsahuje mapu polí → validační chybové zprávy.
+- `details` typicky obsahuje mapu polí → validační chybové zprávy.
 - `message` je stručný popis chyby pro uživatele / frontend.
 
 ---
 
-# 3. Autentizace a správa účtů (AuthController)
+# 3. Veřejné informace (AppModeController)
 
-Tato kapitola popisuje endpointy pro registraci, aktivaci účtu, přihlášení,
-logout a proces zapomenutého hesla. Používá je hlavně login/registrace
-část frontendu.
+Základní prefix: `/api/public`
 
-Každý endpoint je navržen tak, aby:
-- měl jasně oddělenou odpovědnost,
-- vracel konzistentní HTTP status kódy,
-- používal stejné DTO objekty napříč aplikací.
+## 3.1 Režim aplikace (demo/produkce)
+
+Endpoint: `GET /api/public/app-mode`  
+Role: veřejné
+
+Odpověď:
+- HTTP 200
+- JSON:
+```json
+{ "demoMode": true }
+```
 
 ---
 
-## 3.1 Registrace uživatele
+# 4. Autentizace a registrace (AuthController)
 
-Endpoint:  
-`POST /api/auth/register`
+Základní prefix: `/api/auth`
 
-Role:  
-Veřejné (bez přihlášení)
+## 4.1 Registrace uživatele
+
+Endpoint: `POST /api/auth/register`  
+Role: veřejné
 
 Vstup (`RegisterUserDTO`):
-- `name` – křestní jméno
-- `surname` – příjmení
-- `email` – e-mail uživatele (login)
-- `password` – heslo
-- `passwordConfirm` – potvrzení hesla
+- `name`
+- `surname`
+- `email`
+- `password`
+- `passwordConfirm`
 
-Chování:
-- kontrola shody hesel
-- kontrola jedinečnosti e-mailu
-- vytvoření **neaktivního** uživatelského účtu
-- vygenerování aktivačního tokenu
-- uložení tokenu
-- odeslání aktivačního e-mailu s odkazem
-
-Typické použití:
-- volá frontend registrační stránky po vyplnění formuláře.
-- uživatel se nemůže přihlásit, dokud neprojde aktivací e-mailem.
-
-Odpověď:
-
-Při úspěchu:
+Odpověď (úspěch):
 - HTTP 200
-- JSON např.:
-  ```json
-  {
-    "status": "ok",
-    "message": "Registrace úspěšná. Zkontrolujte email pro aktivaci účtu."
-  }
-  ```
+```json
+{
+  "status": "ok",
+  "message": "Registrace úspěšná. Zkontrolujte email pro aktivaci účtu."
+}
+```
 
-Při chybě:
-- HTTP 400 / 409 (duplicitní email)
-- tělo odpovědi: `ApiError`
+## 4.2 Aktivace účtu z e-mailu
 
----
-
-## 3.2 Aktivace účtu z e-mailu
-
-Endpoint:  
-`GET /api/auth/verify?token=...`
-
-Role:  
-Veřejné (bez přihlášení)
-
-Vstup:
-- query parametr `token` – aktivační token
-
-Chování:
-- ověření existence a platnosti tokenu
-- nalezení uživatele navázaného na token
-- aktivace uživatelského účtu
-- označení tokenu jako použitý / neplatný
-
-Typické použití:
-- uživatel klikne na odkaz v e-mailu,
-- backend provede aktivaci a může vrátit jednoduchý text nebo redirect na frontend.
+Endpoint: `GET /api/auth/verify?token=...`  
+Role: veřejné
 
 Odpověď:
+- HTTP 200 – text `"Účet byl úspěšně aktivován."`
+- HTTP 400 – text `"Neplatný nebo expirovaný aktivační odkaz."`
 
-Při úspěchu:
+## 4.3 Přihlášený uživatel (auth me)
+
+Endpoint: `GET /api/auth/me`  
+Role: přihlášený uživatel
+
+Odpověď:
 - HTTP 200
-- jednoduchý text (např. `"Účet byl úspěšně aktivován."`)
+- `AppUserDTO`
 
-Při chybě:
-- HTTP 400 / 404 / 410 (expirace tokenu)
-- `ApiError` nebo jednoduchá chybová hláška
+## 4.4 Redirect na frontend pro reset hesla
 
----
-
-## 3.3 Přihlášení
-
-Endpoint:  
-`POST /api/auth/login`
-
-Role:  
-Veřejné (bez přihlášení)
-
-Vstup:
-- JSON (např. `LoginRequestDTO`):
-  - `email` – přihlašovací e-mail
-  - `password` – heslo
+Endpoint: `GET /api/auth/reset-password?token=...`  
+Role: veřejné
 
 Chování:
-- ověření, že uživatel existuje a je aktivní
-- ověření hesla
-- vytvoření HTTP session
-- nastavení cookie `JSESSIONID`
-- vrácení informací o přihlášeném uživateli (id, role, jméno, email…)
+- HTTP 302 redirect na `${frontendBaseUrl}/reset-password?token=...`
 
-Typické použití:
-- login stránka; po úspěchu frontend uloží info o uživateli (např. do contextu)
-  a používá cookie k volání dalších endpointů.
+## 4.5 Zapomenuté heslo – vytvoření požadavku
 
-Odpověď:
-
-Při úspěchu:
-- HTTP 200
-- JSON (např. `AppUserDTO`)
-
-Při chybě:
-- HTTP 401 / 403
-- tělo odpovědi: `ApiError`
-
----
-
-## 3.4 Odhlášení
-
-Endpoint:  
-`POST /api/auth/logout`
-
-Role:  
-Přihlášený uživatel
-
-Vstup:
-- bez těla requestu
-
-Chování:
-- zneplatnění aktuální HTTP session
-- odhlášení uživatele
-
-Typické použití:
-- tlačítko „Odhlásit se“ ve frontendu.
-
-Odpověď:
-
-Při úspěchu:
-- HTTP 200 (bez těla nebo jednoduchý text)
-
----
-
-## 3.5 Zapomenuté heslo – vytvoření požadavku
-
-Endpoint:  
-`POST /api/auth/forgotten-password`
-
-Role:  
-Veřejné
+Endpoint: `POST /api/auth/forgotten-password`  
+Role: veřejné
 
 Vstup (`EmailDTO`):
-- `email` – e-mail uživatele
-
-Chování:
-- pokud uživatel existuje:
-  - vygeneruje se reset token
-  - token se uloží do DB
-  - odešle se e-mail s odkazem na reset hesla
-- pokud uživatel neexistuje:
-  - z bezpečnostních důvodů odpověď stejná (nezrazuje existenci účtu)
-
-Typické použití:
-- formulář „Zapomenuté heslo“ – zadání e-mailu.
+- `email`
 
 Odpověď:
+- HTTP 200 (bez těla)
 
-Vždy:
-- HTTP 200  
-- text / JSON potvrzující, že byl odeslán e-mail (nebo že požadavek byl přijat)
+## 4.6 Zapomenuté heslo – info o e-mailu k tokenu
 
-Technická chyba:
-- `ApiError` (např. problém s e-mail serverem)
-
----
-
-## 3.6 Zapomenuté heslo – info o e-mailu k tokenu
-
-Endpoint:  
-`GET /api/auth/forgotten-password/info?token=...`
-
-Role:  
-Veřejné
-
-Vstup:
-- `token` – reset token
-
-Chování:
-- ověření platnosti tokenu
-- získání e-mailu navázaného k tokenu
-- používá se pro zobrazení „Reset hesla pro: user@example.com“
+Endpoint: `GET /api/auth/forgotten-password/info?token=...`  
+Role: veřejné
 
 Odpověď:
-
-Při úspěchu:
 - HTTP 200
-- JSON:
-  ```json
-  { "email": "user@example.com" }
-  ```
+```json
+{ "email": "user@example.com" }
+```
 
-Při chybě:
-- HTTP 400 / 404 / 410
-- `ApiError`
+## 4.7 Zapomenuté heslo – nastavení nového hesla
 
----
-
-## 3.7 Zapomenuté heslo – nastavení nového hesla
-
-Endpoint:  
-`POST /api/auth/forgotten-password/reset`
-
-Role:  
-Veřejné
+Endpoint: `POST /api/auth/forgotten-password/reset`  
+Role: veřejné
 
 Vstup (`ForgottenPasswordResetDTO`):
-- `token` – reset token
-- `newPassword` – nové heslo
-- `newPasswordConfirm` – potvrzení nového hesla
-
-Chování:
-- ověření existence a platnosti tokenu
-- ověření shody hesel
-- nastavení nového hesla uživateli
-- invalidace tokenu
-
-Typické použití:
-- resetovací formulář na frontendu (otevřený z e-mailu).
-
-Odpověď:
-
-Při úspěchu:
-- HTTP 200 (bez těla nebo jednoduchý text)
-
-Při chybě:
-- HTTP 400 / 404 / 410
-- `ApiError`
-
----
-
-## 3.8 Redirect na frontend pro reset hesla
-
-Endpoint:  
-`GET /api/auth/reset-password?token=...`
-
-Role:  
-Veřejné
-
-Vstup:
-- query `token`
-
-Chování:
-- backend provede redirect (302) na URL frontendu, např.:
-  - `${frontendBaseUrl}/reset-password?token=...`
-- používá se, pokud odkaz v mailu vede na backendovou URL a backend přesměruje na SPA.
-
-Odpověď:
-
-Při úspěchu:
-- HTTP 302
-- hlavička `Location` s front-endovou URL
-
----
-
-## 3.9 Zjištění aktuálně přihlášeného uživatele
-
-Endpoint:  
-`GET /api/auth/me`
-
-Role:  
-Přihlášený uživatel
-
-Chování:
-- načte uživatele z `SecurityContext`
-- vrací základní informace o aktuálním uživateli (pro inicializaci UI po reloadu)
-
-Odpověď:
-
-Při úspěchu:
-- HTTP 200
-- `AppUserDTO`
-
-Při chybě:
-- HTTP 401 – nepřihlášený
-- `ApiError`
-
----
-
-# 4. Uživatelské účty (AppUserController)
-
-Tato kapitola řeší **správu uživatelských účtů** – jednak vlastní profil,
-jednak administraci uživatelů (pro ADMIN).
-
-Základní prefix:  
-`/api/users`
-
----
-
-## 4.1 Detail přihlášeného uživatele
-
-Endpoint:  
-`GET /api/users/me`
-
-Role:  
-Přihlášený uživatel
-
-Chování:
-- vrací detail účtu aktuálně přihlášeného uživatele
-- používá se pro zobrazení profilu / nastavení v uživatelském rozhraní
-
-Odpověď:
-- HTTP 200
-- `AppUserDTO`
-
----
-
-## 4.2 Aktualizace profilu přihlášeného uživatele
-
-Endpoint:  
-`PUT /api/users/me/update`
-
-Role:  
-Přihlášený uživatel
-
-Vstup:
-- `AppUserDTO` (editovatelná pole: jméno, příjmení apod.)
-
-Chování:
-- aktualizuje data účtu přihlášeného uživatele
-- login (e-mail) může zůstat neměnný (dle business logiky)
-
-Odpověď:
-- HTTP 200
-- textová zpráva (např. `"Uživatel byl změněn"`)
-
-Při chybě:
-- HTTP 400 – validační chyba
-- HTTP 401 – nepřihlášený
-- `ApiError`
-
----
-
-## 4.3 Změna hesla přihlášeného uživatele
-
-Endpoint:  
-`POST /api/users/me/change-password`
-
-Role:  
-Přihlášený uživatel
-
-Vstup (`ChangePasswordDTO`):
-- `oldPassword` – původní heslo
+- `token`
 - `newPassword`
 - `newPasswordConfirm`
 
-Chování:
-- ověří správnost původního hesla
-- ověří shodu nového hesla a potvrzení
-- nastaví nové heslo
-
-Typické použití:
-- stránka „Změna hesla“ v uživatelském profilu.
-
 Odpověď:
-- HTTP 200
-- `"Heslo úspěšně změněno"`
-
-Při chybě:
-- HTTP 400 / 401 / 403
-- `ApiError`
+- HTTP 200 (bez těla)
 
 ---
 
-## 4.4 Seznam všech uživatelů (ADMIN)
+# 5. Uživatelské účty (AppUserController)
 
-Endpoint:  
-`GET /api/users`
+Základní prefix: `/api/users`
 
-Role:  
-`ADMIN`
+## 5.1 Detail přihlášeného uživatele
 
-Chování:
-- vrátí seznam všech uživatelů v systému
-- používá se ve „Správě uživatelů“ pro administrátory
+Endpoint: `GET /api/users/me`  
+Role: přihlášený uživatel
+
+Odpověď:
+- HTTP 200
+- `AppUserDTO`
+
+## 5.2 Aktualizace profilu přihlášeného uživatele
+
+Endpoint: `PUT /api/users/me/update`  
+Role: přihlášený uživatel
+
+Vstup:
+- `AppUserDTO`
+
+Odpověď:
+- HTTP 200 – text `"Uživatel byl změněn"`
+
+## 5.3 Změna hesla přihlášeného uživatele
+
+Endpoint: `POST /api/users/me/change-password`  
+Role: přihlášený uživatel
+
+Vstup (`ChangePasswordDTO`):
+- `oldPassword`
+- `newPassword`
+- `newPasswordConfirm`
+
+Odpověď:
+- HTTP 200 – text `"Heslo úspěšně změněno"`
+
+## 5.4 Seznam všech uživatelů (ADMIN/MANAGER)
+
+Endpoint: `GET /api/users`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `AppUserDTO`
 
----
+## 5.5 Detail uživatele podle ID (ADMIN/MANAGER)
 
-## 4.5 Detail uživatele podle ID (ADMIN)
-
-Endpoint:  
-`GET /api/users/{id}`
-
-Role:  
-`ADMIN`
-
-Chování:
-- vrátí detail konkrétního uživatele
-
-Vstup:
-- `id` – ID uživatele
+Endpoint: `GET /api/users/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - `AppUserDTO`
 
-Při chybě:
-- HTTP 404 – uživatel nenalezen
-- `ApiError`
+## 5.6 Reset hesla uživatele (ADMIN)
 
----
+Endpoint: `POST /api/users/{id}/reset-password`  
+Role: `ADMIN`
 
-## 4.6 Reset hesla uživatele (ADMIN)
+Odpověď:
+- HTTP 200 – text `"Heslo resetováno na 'Player123'"`
 
-Endpoint:  
-`POST /api/users/{id}/reset-password`
+## 5.7 Aktivace / deaktivace uživatele (ADMIN)
 
-Role:  
-`ADMIN`
+Endpointy:
+- `PATCH /api/users/{id}/activate`
+- `PATCH /api/users/{id}/deactivate`
 
-Chování:
-- resetuje heslo danému uživateli na výchozí hodnotu (např. `"Player123"`)
-- používá se při podpoře uživatelů (když si neví rady se zapomenutým heslem)
+Role: `ADMIN`
+
+Odpověď:
+- HTTP 200 – textová zpráva
+
+## 5.8 Historie změn uživatele (ADMIN)
+
+Endpoint: `GET /api/users/{id}/history`  
+Role: `ADMIN`
 
 Odpověď:
 - HTTP 200
-- textová zpráva o úspěchu
+- seznam `AppUserHistoryDTO`
 
----
+## 5.9 Historie změn přihlášeného uživatele
 
-## 4.7 Aktivace / deaktivace uživatele (ADMIN)
-
-Endpointy:  
-`PATCH /api/users/{id}/activate`  
-`PATCH /api/users/{id}/deactivate`
-
-Role:  
-`ADMIN`
-
-Chování:
-- umožňují ručně aktivovat/deaktivovat účet
-- deaktivovaný uživatel se nemůže přihlásit
+Endpoint: `GET /api/users/me/history`  
+Role: přihlášený uživatel
 
 Odpověď:
 - HTTP 200
-- textová zpráva
-
-Při chybě:
-- HTTP 404 – uživatel nenalezen
-- `ApiError`
+- seznam `AppUserHistoryDTO`
 
 ---
 
-# 5. Nastavení účtu (AppUserSettingsController)
+# 6. Nastavení účtu (AppUserSettingsController)
 
-Nastavení účtu (`AppUserSettings`) obsahuje preference, které se váží na
-uživatelský účet jako celek (ne na konkrétního hráče).
+Základní prefix (controller): `/api/user`
 
-Základní prefix:  
-`/api/user/settings`
+## 6.1 Načtení nastavení uživatele
 
----
+Endpoint: `GET /api/user/settings`  
+Role: přihlášený uživatel
 
-## 5.1 Načtení nastavení uživatele
+Odpověď:
+- HTTP 200
+- `AppUserSettingsDTO`
 
-Endpoint:  
-`GET /api/user/settings`
+## 6.2 Uložení nastavení uživatele
 
-Role:  
-Přihlášený uživatel
+Endpoint: `PATCH /api/user/settings`  
+Role: přihlášený uživatel
 
-Chování:
-- načte nastavení pro aktuálně přihlášeného uživatele
-- pokud neexistuje, může se vytvořit s výchozími hodnotami
-
-Typické použití:
-- načtení uživatelských preferencí po přihlášení (např. jak vybrat aktuálního hráče).
+Vstup:
+- `AppUserSettingsDTO`
 
 Odpověď:
 - HTTP 200
@@ -600,351 +322,169 @@ Odpověď:
 
 ---
 
-## 5.2 Uložení nastavení uživatele
+# 7. Hráči (PlayerController)
 
-Endpoint:  
-`PATCH /api/user/settings`
+Základní prefix: `/api/players`
 
-Role:  
-Přihlášený uživatel
+## 7.1 Seznam všech hráčů (ADMIN/MANAGER)
 
-Vstup:
-- `AppUserSettingsDTO` s novými hodnotami
-
-Chování:
-- provede aktualizaci nastavení (částečnou / úplnou)
-- uložení preferencí (např. auto-výběr hráče po loginu)
-
-Odpověď:
-- HTTP 200
-- `AppUserSettingsDTO` v aktuálním stavu
-
-Při chybě:
-- HTTP 400 / 401 / 403
-- `ApiError`
-
----
-
-# 6. Hráči (PlayerController)
-
-Hráči (`Player`) reprezentují konkrétní osoby, které se účastní zápasů.
-Uživatel (AppUser) může mít více hráčů (např. rodič a děti).
-
-Základní prefix:  
-`/api/players`
-
----
-
-## 6.1 Oprávnění
-
-ADMIN / MANAGER:
-- plný CRUD nad hráči
-- schvalování / zamítání hráčů
-- změna vlastníka hráčů
-
-Běžný uživatel:
-- správa pouze vlastních hráčů:
-  - endpointy `/api/players/me...`
-
----
-
-## 6.2 Načtení seznamu všech hráčů (ADMIN / MANAGER)
-
-Endpoint:  
-`GET /api/players`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Chování:
-- vrací **všechny** hráče v systému
-- slouží pro administrační přehled hráčů
-- typicky se zde používají filtry (aktivní, neschválení apod.) na úrovni frontendu
+Endpoint: `GET /api/players`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `PlayerDTO`
 
----
+## 7.2 Detail hráče (ADMIN/MANAGER)
 
-## 6.3 Načtení detailu hráče (ADMIN / MANAGER)
-
-Endpoint:  
-`GET /api/players/{id}`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `id` – ID hráče
-
-Chování:
-- vrátí detail jednoho konkrétního hráče (vč. vazeb na uživatele, nastavení atd.)
-- vhodné pro detailní kartu hráče v administraci
+Endpoint: `GET /api/players/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - `PlayerDTO`
 
-Při chybě:
-- HTTP 404 – hráč nenalezen
-- `ApiError`
+## 7.3 Historie hráče (ADMIN/MANAGER)
 
----
-
-## 6.4 Vytvoření hráče (ADMIN / MANAGER)
-
-Endpoint:  
-`POST /api/players`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `PlayerDTO` – údaje nového hráče
-
-Chování:
-- vytvoří nového hráče (např. při registraci nového člena přes administraci)
-- může nastavit počáteční stav (např. „čeká na schválení“)
-
-Odpověď:
-- HTTP 201 (nebo 200)
-- `PlayerDTO` – nově vytvořený hráč
-
-Při chybě:
-- HTTP 400 / 403
-- `ApiError`
-
----
-
-## 6.5 Úprava hráče (ADMIN)
-
-Endpoint:  
-`PUT /api/players/{id}`
-
-Role:
-- `ADMIN`
-
-Vstup:
-- path `id` – ID hráče
-- tělo: `PlayerDTO` – nové hodnoty
-
-Chování:
-- aktualizuje existujícího hráče
-- typicky se používá pro administrativní opravy, změny údajů apod.
+Endpoint: `GET /api/players/{id}/history`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
-- `PlayerDTO` – upravený hráč
+- seznam `PlayerHistoryDTO`
 
----
+## 7.4 Vytvoření hráče (ADMIN/MANAGER)
 
-## 6.6 Smazání hráče (ADMIN)
-
-Endpoint:  
-`DELETE /api/players/{id}`
-
-Role:
-- `ADMIN`
-
-Chování:
-- smaže hráče z databáze
-- může být omezeno (např. pokud existují navázané zápasy) – logika v service
-
-Odpověď:
-- HTTP 200 nebo 204
-
-Při chybě:
-- HTTP 403 / 404
-- `ApiError`
-
----
-
-## 6.7 Schválení hráče
-
-Endpoint:  
-`PUT /api/players/{id}/approve`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Chování:
-- změní stav hráče na „schválený“
-- po schválení může být hráč plnohodnotně využíván pro registrace
+Endpoint: `POST /api/players`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
-- `SuccessResponseDTO` nebo text (dle implementace)
+- `PlayerDTO`
 
----
+## 7.5 Úprava hráče (ADMIN/MANAGER)
 
-## 6.8 Zamítnutí hráče
-
-Endpoint:  
-`PUT /api/players/{id}/reject`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Chování:
-- zamítne hráče, který čekal na schválení
-- může doplnit důvod zamítnutí (dle DTO)
+Endpoint: `PUT /api/players/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
+- `PlayerDTO`
 
----
+## 7.6 Smazání hráče (ADMIN/MANAGER)
 
-## 6.9 Změna vlastníka hráče (ADMIN / MANAGER)
-
-Endpoint:  
-`POST /api/players/{playerId}/change-user`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `playerId` – ID hráče
-- tělo – např. `ChangePlayerUserRequest` s `newUserId`
-
-Chování:
-- změní vazbu hráče na jiného uživatele (AppUser)
-- používá se při opravě chybně přiřazeného hráče
+Endpoint: `DELETE /api/players/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
-- textová zpráva o úspěchu
+- `SuccessResponseDTO`
 
----
+## 7.7 Schválení / zamítnutí hráče (ADMIN/MANAGER)
 
-## 6.10 Vytvoření hráče pro přihlášeného uživatele
+Endpointy:
+- `PUT /api/players/{id}/approve`
+- `PUT /api/players/{id}/reject`
 
-Endpoint:  
-`POST /api/players/me`
-
-Role:
-- přihlášený uživatel
-
-Vstup:
-- `PlayerDTO` s údaji hráče
-
-Chování:
-- vytvoří hráče navázaného na aktuálně přihlášeného uživatele
-- typicky používá rodič, který si zakládá hráče (dítě / sebe)
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
-- HTTP 201 / 200
-- `PlayerDTO` – nově vytvořený hráč
+- HTTP 200
+- `SuccessResponseDTO`
 
----
+## 7.8 Změna vlastníka hráče (ADMIN/MANAGER)
 
-## 6.11 Seznam hráčů přihlášeného uživatele
+Endpoint: `POST /api/players/{playerId}/change-user`  
+Role: `ADMIN` nebo `MANAGER`
 
-Endpoint:  
-`GET /api/players/me`
+Vstup (`ChangePlayerUserRequest`):
+- `newUserId`
 
-Role:
-- přihlášený uživatel
+Odpověď:
+- HTTP 200 – textová zpráva
 
-Chování:
-- vrátí všechy hráče, které patří aktuálnímu uživateli
-- používá se na stránce „Moji hráči“
+## 7.9 Vytvoření hráče pro přihlášeného uživatele
+
+Endpoint: `POST /api/players/me`  
+Role: přihlášený uživatel
+
+Odpověď:
+- HTTP 200
+- `PlayerDTO`
+
+## 7.10 Seznam hráčů přihlášeného uživatele
+
+Endpoint: `GET /api/players/me`  
+Role: přihlášený uživatel
 
 Odpověď:
 - HTTP 200
 - seznam `PlayerDTO`
 
----
+## 7.11 Úprava aktuálního hráče
 
-## 6.12 Úprava aktuálního hráče přihlášeného uživatele
-
-Endpoint:  
-`PUT /api/players/me`
-
-Role:
-- přihlášený uživatel
-
-Vstup:
-- `PlayerDTO` – nové hodnoty
-
-Chování:
-- v `CurrentPlayerService` se zjistí aktuální hráč
-- provede se aktualizace právě tohoto hráče
-- vhodné pro scénář „Editace profilu aktuálního hráče“.
+Endpoint: `PUT /api/players/me`  
+Role: přihlášený uživatel + vybraný current player
 
 Odpověď:
 - HTTP 200
-- `PlayerDTO` – aktualizovaný hráč
+- `PlayerDTO`
 
-Při chybě:
-- HTTP 400 / 401 / 404
-- `ApiError`
+## 7.12 Historie aktuálního hráče
+
+Endpoint: `GET /api/players/me/history`  
+Role: přihlášený uživatel + vybraný current player
+
+Odpověď:
+- HTTP 200
+- seznam `PlayerHistoryDTO`
+
+## 7.13 Statistiky aktuálního hráče
+
+Endpoint: `GET /api/players/me/stats`  
+Role: přihlášený uživatel + vybraný current player
+
+Odpověď:
+- HTTP 200
+- `PlayerStatsDTO`
+
+## 7.14 Statistiky hráče podle ID (ADMIN/MANAGER)
+
+Endpoint: `GET /api/players/{playerId}/stats`  
+Role: `ADMIN` nebo `MANAGER`
+
+Odpověď:
+- HTTP 200
+- `PlayerStatsDTO`
 
 ---
 
-# 7. Aktuální hráč (CurrentPlayerController)
+# 8. Aktuální hráč (CurrentPlayerController)
 
-Aktuální hráč je kontext, v němž uživatel pracuje – např. při registraci na
-zápas nebo zobrazení přehledu zápasů.
+Základní prefix: `/api/current-player`
 
-Základní prefix:  
-`/api/current-player`
+## 8.1 Nastavení aktuálního hráče
 
----
-
-## 7.1 Nastavení aktuálního hráče
-
-Endpoint:  
-`POST /api/current-player/{playerId}`
-
-Role:
-- přihlášený uživatel
-
-Chování:
-- ověří, že hráč existuje a je dostupný uživateli (vlastník / admin)
-- nastaví ho jako „current player“ v uživatelském kontextu
-- informace se použije např. v registračních endpointech `/me`
+Endpoint: `POST /api/current-player/{playerId}`  
+Role: přihlášený uživatel
 
 Odpověď:
 - HTTP 200
 - `SuccessResponseDTO`
 
----
+## 8.2 Automatický výběr aktuálního hráče
 
-## 7.2 Automatický výběr aktuálního hráče
-
-Endpoint:  
-`POST /api/current-player/auto-select`
-
-Role:
-- přihlášený uživatel
-
-Chování:
-- podívá se do `AppUserSettings` a podle nich vybere vhodného hráče
-  (např. prvního hráče, naposledy použitého atd.)
-- pokud uživatel žádného hráče nemá, vyhodí výjimku
+Endpoint: `POST /api/current-player/auto-select`  
+Role: přihlášený uživatel
 
 Odpověď:
 - HTTP 200
 - `SuccessResponseDTO`
 
-Při chybě:
-- HTTP 404 – není koho vybrat
-- `ApiError`
+## 8.3 Zjištění aktuálního hráče
 
----
-
-## 7.3 Zjištění aktuálního hráče
-
-Endpoint:  
-`GET /api/current-player`
-
-Role:
-- přihlášený uživatel
-
-Chování:
-- vrací `PlayerDTO` aktuálně nastaveného hráče
-- pokud není žádný nastaven, může vracet `null` nebo chybu dle implementace
+Endpoint: `GET /api/current-player`  
+Role: přihlášený uživatel
 
 Odpověď:
 - HTTP 200
@@ -952,30 +492,41 @@ Odpověď:
 
 ---
 
-# 8. Nastavení hráče (PlayerSettingsController)
+# 9. Nastavení hráče (PlayerSettingsController)
 
-Nastavení hráče (`PlayerSettings`) jsou preference vázané na konkrétního
-hráče, např. notifikace e-mailem/SMS pro daného hráče.
+Základní prefix: `/api`
 
-Základní prefix:  
-`/api`
+## 9.1 Načtení nastavení hráče podle ID
 
----
+Endpoint: `GET /api/players/{playerId}/settings`  
+Role: přihlášený uživatel
 
-## 8.1 Načtení nastavení libovolného hráče
+Odpověď:
+- HTTP 200
+- `PlayerSettingsDTO`
 
-Endpoint:  
-`GET /api/players/{playerId}/settings`
+## 9.2 Aktualizace nastavení hráče podle ID
 
-Role:
-- přihlášený uživatel
+Endpoint: `PATCH /api/players/{playerId}/settings`  
+Role: přihlášený uživatel
 
-Vstup:
-- `playerId` – ID hráče
+Odpověď:
+- HTTP 200
+- `PlayerSettingsDTO`
 
-Chování:
-- vrátí nastavení daného hráče
-- oprávnění: hráče musí vlastnit přihlášený uživatel nebo mít vyšší roli
+## 9.3 Načtení nastavení aktuálního hráče
+
+Endpoint: `GET /api/me/settings`  
+Role: přihlášený uživatel + vybraný current player
+
+Odpověď:
+- HTTP 200
+- `PlayerSettingsDTO`
+
+## 9.4 Aktualizace nastavení aktuálního hráče
+
+Endpoint: `PATCH /api/me/settings`  
+Role: přihlášený uživatel + vybraný current player
 
 Odpověď:
 - HTTP 200
@@ -983,637 +534,279 @@ Odpověď:
 
 ---
 
-## 8.2 Aktualizace nastavení libovolného hráče
+# 10. Sezóny (SeasonController)
 
-Endpoint:  
-`PATCH /api/players/{playerId}/settings`
+Základní prefix: `/api/seasons`
 
-Role:
-- přihlášený uživatel
+## 10.1 Vytvoření sezóny (ADMIN/MANAGER)
 
-Vstup:
-- path `playerId`
-- tělo: `PlayerSettingsDTO` – nové volby nastavení
-
-Chování:
-- aktualizuje nastavení hráče (např. zapnutí/vypnutí SMS notifikací)
-- používá se v administraci hráčů
-
-Odpověď:
-- HTTP 200
-- `PlayerSettingsDTO`
-
----
-
-## 8.3 Načtení nastavení aktuálního hráče
-
-Endpoint:  
-`GET /api/me/settings`
-
-Role:
-- přihlášený uživatel s nastaveným aktuálním hráčem
-
-Chování:
-- pomocí `CurrentPlayerService` se zjistí aktuální hráč
-- načtou se jeho `PlayerSettings`
-
-Odpověď:
-- HTTP 200
-- `PlayerSettingsDTO`
-
-Při chybě:
-- HTTP 401 / 404
-- `ApiError`
-
----
-
-## 8.4 Aktualizace nastavení aktuálního hráče
-
-Endpoint:  
-`PATCH /api/me/settings`
-
-Role:
-- přihlášený uživatel
-
-Vstup:
-- `PlayerSettingsDTO` – změny nastavení
-
-Chování:
-- aktualizuje nastavení hráče, který je právě nastaven jako „current“
-- používá se na stránce „Nastavení hráče“ pro běžného uživatele
-
-Odpověď:
-- HTTP 200
-- `PlayerSettingsDTO`
-
----
-
-# 9. Sezóny (SeasonController)
-
-Sezóny představují časová období (např. 2024/2025), ke kterým se vážou
-zápasy a statistiky.
-
-Základní prefix:  
-`/api/seasons`
-
----
-
-## 9.1 Vytvoření sezóny
-
-Endpoint:  
-`POST /api/seasons`
-
-Role:
-- `ADMIN`
-
-Vstup:
-- `SeasonDTO` – informace o sezóně
-
-Chování:
-- vytvoří novou sezónu v systému
-- standardně se po vytvoření automaticky nestává „aktivní“ (řeší se zvlášť)
+Endpoint: `POST /api/seasons`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 201
-- `SeasonDTO` – nově vytvořená sezóna
+- `SeasonDTO`
 
----
+## 10.2 Úprava sezóny (ADMIN/MANAGER)
 
-## 9.2 Úprava sezóny
-
-Endpoint:  
-`PUT /api/seasons/{id}`
-
-Role:
-- `ADMIN`
-
-Vstup:
-- `id` – ID sezóny
-- `SeasonDTO` – upravené údaje
-
-Chování:
-- aktualizuje existující sezónu (např. název, datumy)
+Endpoint: `PUT /api/seasons/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - `SeasonDTO`
 
-Při chybě:
-- HTTP 400 / 403 / 404
-- `ApiError`
+## 10.3 Historie sezóny (ADMIN/MANAGER)
 
----
+Endpoint: `GET /api/seasons/{id}/history`  
+Role: `ADMIN` nebo `MANAGER`
 
-## 9.3 Seznam sezón (ADMIN)
+Odpověď:
+- HTTP 200
+- seznam `SeasonHistoryDTO`
 
-Endpoint:  
-`GET /api/seasons`
+## 10.4 Seznam sezón (ADMIN/MANAGER)
 
-Role:
-- `ADMIN`
-
-Chování:
-- vrátí seznam všech sezón v systému
-- používá se v administračním přehledu sezón
+Endpoint: `GET /api/seasons`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `SeasonDTO`
 
----
+## 10.5 Aktivní sezóna (globální) (ADMIN/MANAGER)
 
-## 9.4 Aktivní sezóna (globální)
+Endpointy:
+- `GET /api/seasons/active`
+- `PUT /api/seasons/{id}/active`
 
-Endpointy:  
-`GET /api/seasons/active`  
-`PUT /api/seasons/{id}/active`
-
-Role:
-- `ADMIN`
-
-GET – Chování:
-- vrátí aktuálně globálně aktivní sezónu
-- slouží jako výchozí sezóna pro ostatní části aplikace
-
-PUT – Chování:
-- nastaví sezónu s daným `id` jako globálně aktivní
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
-- `SeasonDTO` – aktivní sezóna
+- `SeasonDTO`
 
-Při chybě:
-- HTTP 404 – sezóna nenalezena
-- `ApiError`
+## 10.6 Seznam sezón pro uživatele
 
----
-
-## 9.5 Seznam sezón pro uživatele
-
-Endpoint:  
-`GET /api/seasons/me`
-
-Role:
-- přihlášený uživatel
-
-Chování:
-- vrací seznam sezón dostupných pro volbu v uživatelském rozhraní
-- typicky stejný seznam jako pro admina, ale bez admin-specific detailů
+Endpoint: `GET /api/seasons/me`  
+Role: přihlášený uživatel
 
 Odpověď:
 - HTTP 200
 - seznam `SeasonDTO`
 
----
+## 10.7 Aktuální sezóna uživatele
 
-## 9.6 Aktuální sezóna uživatele
+Endpointy:
+- `GET /api/seasons/me/current`
+- `POST /api/seasons/me/current/{seasonId}`
 
-Endpointy:  
-`GET /api/seasons/me/current`  
-`POST /api/seasons/me/current/{seasonId}`
-
-Role:
-- přihlášený uživatel
-
-GET – Chování:
-- vrátí aktuálně zvolenou sezónu pro uživatele
-- pokud není nastavená, může vrátit globálně aktivní
-
-POST – Chování:
-- ověří existenci sezóny (`seasonId`)
-- nastaví sezónu jako „aktuální“ pro daného uživatele (v CurrentSeasonService)
+Role: přihlášený uživatel
 
 Odpověď:
-- HTTP 200
-
-Při chybě:
-- HTTP 400 / 404
-- `ApiError`
+- HTTP 200 (GET vrací `SeasonDTO` nebo `null`, POST nemá tělo)
 
 ---
 
-# 10. Období neaktivity hráče (PlayerInactivityPeriodController)
+# 11. Období neaktivity hráče (PlayerInactivityPeriodController)
 
-Období neaktivity eviduje, kdy se hráč **nemůže účastnit zápasů** (zranění,
-dovolená…). Tyto endpointy jsou primárně pro administraci.
+Základní prefix: `/api/inactivity/admin`
 
-Základní prefix:  
-`/api/inactivity/admin`
+## 11.1 Seznam všech období neaktivity (ADMIN/MANAGER)
 
----
-
-## 10.1 Seznam všech období neaktivity
-
-Endpoint:  
-`GET /api/inactivity/admin/all`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Chování:
-- vrátí seznam všech evidovaných období neaktivity pro všechny hráče
-- slouží pro náhled, kdo je dlouhodobě mimo hru
+Endpoint: `GET /api/inactivity/admin/all`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `PlayerInactivityPeriodDTO`
 
----
+## 11.2 Detail období neaktivity (ADMIN/MANAGER)
 
-## 10.2 Detail období neaktivity
-
-Endpoint:  
-`GET /api/inactivity/admin/{id}`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `id` – ID záznamu
-
-Chování:
-- načte detail konkrétního období neaktivity
+Endpoint: `GET /api/inactivity/admin/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - `PlayerInactivityPeriodDTO`
 
-Při chybě:
-- HTTP 404
-- `ApiError`
+## 11.3 Seznam období neaktivity pro hráče (ADMIN/MANAGER)
 
----
-
-## 10.3 Seznam období neaktivity pro hráče
-
-Endpoint:  
-`GET /api/inactivity/admin/player/{playerId}`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `playerId` – ID hráče
-
-Chování:
-- vrací všechna období neaktivity daného hráče
-- využitelné pro detail hráče v administraci
+Endpoint: `GET /api/inactivity/admin/player/{playerId}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `PlayerInactivityPeriodDTO`
 
----
+## 11.4 Vytvoření období neaktivity (ADMIN/MANAGER)
 
-## 10.4 Vytvoření období neaktivity
+Endpoint: `POST /api/inactivity/admin`  
+Role: `ADMIN` nebo `MANAGER`
 
-Endpoint:  
-`POST /api/inactivity/admin`
-
-Role:
-- `ADMIN`
-
-Vstup:
+Odpověď:
+- HTTP 200
 - `PlayerInactivityPeriodDTO`
 
-Chování:
-- vytvoří nový záznam neaktivity navázaný na konkrétního hráče
+## 11.5 Aktualizace období neaktivity (ADMIN/MANAGER)
+
+Endpoint: `PUT /api/inactivity/admin/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
-- `PlayerInactivityPeriodDTO` – vytvořený záznam
+- `PlayerInactivityPeriodDTO`
 
----
+## 11.6 Smazání období neaktivity (ADMIN/MANAGER)
 
-## 10.5 Aktualizace období neaktivity
-
-Endpoint:  
-`PUT /api/inactivity/admin/{id}`
-
-Role:
-- `ADMIN`
-
-Vstup:
-- `id` – ID záznamu
-- `PlayerInactivityPeriodDTO` – nové hodnoty
-
-Chování:
-- aktualizuje existující období neaktivity
-
-Odpověď:
-- HTTP 200
-- `PlayerInactivityPeriodDTO` – upravený záznam
-
----
-
-## 10.6 Smazání období neaktivity
-
-Endpoint:  
-`DELETE /api/inactivity/admin/{id}`
-
-Role:
-- `ADMIN`
-
-Vstup:
-- `id` – ID záznamu
-
-Chování:
-- smaže období neaktivity
-- ovlivňuje dostupnost hráče pro zápasy
+Endpoint: `DELETE /api/inactivity/admin/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 204
 
-Při chybě:
-- HTTP 403 / 404
-- `ApiError`
+## 11.7 Moje období neaktivity (aktuální hráč)
+
+Endpoint: `GET /api/inactivity/admin/me/all`  
+Role: přihlášený uživatel + vybraný current player
+
+Odpověď:
+- HTTP 200
+- seznam `PlayerInactivityPeriodDTO`
 
 ---
 
-# 11. Zápasy (MatchController)
+# 12. Zápasy (MatchController)
 
-Zápasy představují konkrétní utkání v čase, ke kterým se hráči registrují.
+Základní prefix: `/api/matches`
 
-Základní prefix:  
-`/api/matches`
+## 12.1 Seznam všech zápasů (ADMIN/MANAGER)
 
----
-
-## 11.1 Seznam všech zápasů (ADMIN / MANAGER)
-
-Endpoint:  
-`GET /api/matches`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Chování:
-- vrátí všechny zápasy v systému bez ohledu na stav (minulé / budoucí / zrušené)
-- používá se v administraci zápasů
+Endpoint: `GET /api/matches`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `MatchDTO`
 
----
+## 12.2 Nadcházející / minulé zápasy (ADMIN/MANAGER)
 
-## 11.2 Nadcházející zápasy (ADMIN / MANAGER)
+Endpointy:
+- `GET /api/matches/upcoming`
+- `GET /api/matches/past`
 
-Endpoint:  
-`GET /api/matches/upcoming`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Chování:
-- vrací seznam zápasů, které jsou v budoucnu a nejsou zrušené
-- vhodné pro plánování sestav, kontrolu registrací
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `MatchDTO`
 
----
+## 12.3 Vytvoření zápasu (ADMIN/MANAGER)
 
-## 11.3 Minulé zápasy (ADMIN / MANAGER)
-
-Endpoint:  
-`GET /api/matches/past`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Chování:
-- vrátí zápasy, které už proběhly
-- používá se pro zpětný přehled (docházka, statistiky)
-
-Odpověď:
-- HTTP 200
-- seznam `MatchDTO`
-
----
-
-## 11.4 Vytvoření zápasu (ADMIN)
-
-Endpoint:  
-`POST /api/matches`
-
-Role:
-- `ADMIN`
-
-Vstup:
-- `MatchDTO` – základní parametry zápasu (datum, čas, soupeř, místo, kapacita…)
-
-Chování:
-- vytvoří nový zápas v systému
-- na nový zápas se pak mohou hráči registrovat
-
-Odpověď:
-- HTTP 201 / 200
-- `MatchDTO` – nově vytvořený zápas
-
----
-
-## 11.5 Detail zápasu (ADMIN / MANAGER)
-
-Endpoint:  
-`GET /api/matches/{id}`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `id` – ID zápasu
-
-Chování:
-- vrátí administrativní detail zápasu (bez ohledu na konkrétního hráče)
+Endpoint: `POST /api/matches`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - `MatchDTO`
 
-Při chybě:
-- HTTP 404
+## 12.4 Detail zápasu (ADMIN/MANAGER)
 
----
-
-## 11.6 Úprava zápasu (ADMIN / MANAGER)
-
-Endpoint:  
-`PUT /api/matches/{id}`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `id` – ID zápasu
-- `MatchDTO` – nové hodnoty
-
-Chování:
-- aktualizuje existující zápas (čas, soupeř, parametry registrace…)
+Endpoint: `GET /api/matches/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
-- `MatchDTO` – aktualizovaný zápas
+- `MatchDTO`
 
----
+## 12.5 Historie zápasu (ADMIN/MANAGER)
 
-## 11.7 Smazání zápasu (ADMIN)
-
-Endpoint:  
-`DELETE /api/matches/{id}`
-
-Role:
-- `ADMIN`
-
-Vstup:
-- `id` – ID zápasu
-
-Chování:
-- smaže zápas ze systému
-- může být omezeno (pokud má registrace apod.)
+Endpoint: `GET /api/matches/{id}/history`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
-- `SuccessResponseDTO` (text)
+- seznam `MatchHistoryDTO`
 
----
+## 12.6 Úprava zápasu (ADMIN/MANAGER)
 
-## 11.8 Zápasy dostupné pro konkrétního hráče
+Endpoint: `PUT /api/matches/{id}`  
+Role: `ADMIN` nebo `MANAGER`
 
-Endpoint:  
-`GET /api/matches/available-for-player/{playerId}`
+Odpověď:
+- HTTP 200
+- `MatchDTO`
 
-Role:
-- `ADMIN` / `MANAGER`
+## 12.7 Smazání zápasu (ADMIN)
 
-Vstup:
-- `playerId` – ID hráče
+Endpoint: `DELETE /api/matches/{id}`  
+Role: `ADMIN`
 
-Chování:
-- vrátí zápasy, na které se daný hráč může registrovat podle nastavených pravidel
-  (čas, kapacita, stav zápasu)
+Odpověď:
+- HTTP 200
+- `SuccessResponseDTO`
+
+## 12.8 Zápasy dostupné pro konkrétního hráče (ADMIN/MANAGER)
+
+Endpoint: `GET /api/matches/available-for-player/{playerId}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `MatchDTO`
 
----
+## 12.9 Zrušení / obnovení zápasu (ADMIN/MANAGER)
 
-## 11.9 Zrušení zápasu
+Endpointy:
+- `PATCH /api/matches/{matchId}/cancel?reason=...`
+- `PATCH /api/matches/{matchId}/uncancel`
 
-Endpoint:  
-`PATCH /api/matches/{matchId}/cancel?reason=...`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `matchId` – ID zápasu
-- query `reason` – hodnota enumu `MatchCancelReason`
-
-Chování:
-- nastaví zápas do stavu „zrušený“ (+ uloží důvod)
-- typicky spouští notifikace hráčům (email/SMS)
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - `SuccessResponseDTO`
 
----
+## 12.10 Detail zápasu z pohledu hráče
 
-## 11.10 Obnovení zrušeného zápasu
-
-Endpoint:  
-`PATCH /api/matches/{matchId}/uncancel`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `matchId` – ID zápasu
-
-Chování:
-- vrátí zrušený zápas zpět do aktivního stavu
-
-Odpověď:
-- HTTP 200
-- `SuccessResponseDTO`
-
----
-
-## 11.11 Detail zápasu z pohledu hráče
-
-Endpoint:  
-`GET /api/matches/{id}/detail`
-
-Role:
-- přihlášený uživatel
-
-Vstup:
-- `id` – ID zápasu
-
-Chování:
-- vrátí detail zápasu rozšířený o informace k aktuálnímu hráči:
-  - zda je přihlášen
-  - jestli je náhradník
-  - kolik je volných míst
-  - případná omezení změny registrace
+Endpoint: `GET /api/matches/{id}/detail`  
+Role: přihlášený uživatel
 
 Odpověď:
 - HTTP 200
 - `MatchDetailDTO`
 
----
+## 12.11 Nejbližší zápas
 
-## 11.12 Nejbližší zápas
-
-Endpoint:  
-`GET /api/matches/next`
-
-Role:
-- přihlášený uživatel
-
-Chování:
-- vrátí jeden nejbližší nadcházející zápas (podle data/času)
-- používá se pro rychlý highlight „nejbližší zápas“ na homepage
+Endpoint: `GET /api/matches/next`  
+Role: přihlášený uživatel
 
 Odpověď:
 - HTTP 200
 - `MatchDTO` nebo `null`
 
----
+## 12.12 Nadcházející zápasy aktuálního hráče
 
-## 11.13 Nadcházející zápasy aktuálního hráče
-
-Endpoint:  
-`GET /api/matches/me/upcoming`
-
-Role:
-- přihlášený uživatel s aktuálním hráčem
-
-Chování:
-- vrátí nadcházející zápasy, které mají význam pro aktuálního hráče:
-  - je přihlášen
-  - nebo se může registrovat (dle logiky service)
+Endpoint: `GET /api/matches/me/upcoming`  
+Role: přihlášený uživatel + vybraný current player
 
 Odpověď:
 - HTTP 200
 - seznam `MatchDTO`
 
----
+## 12.13 Přehled nadcházejících zápasů (overview)
 
-## 11.14 Přehled nadcházejících zápasů (overview)
+Endpoint: `GET /api/matches/me/upcoming-overview`  
+Role: přihlášený uživatel + vybraný current player
 
-Endpoint:  
-`GET /api/matches/me/upcoming-overview`
+Odpověď:
+- HTTP 200
+- seznam `MatchOverviewDTO`
 
-Role:
-- přihlášený uživatel s aktuálním hráčem
+## 12.14 Všechny odehrané zápasy aktuálního hráče
 
-Chování:
-- vrací agregovaný seznam nadcházejících zápasů pro aktuálního hráče
-- DTO je přizpůsobené pro přehledové karty ve frontendu
+Endpoint: `GET /api/matches/me/all-passed`  
+Role: přihlášený uživatel + vybraný current player
 
 Odpověď:
 - HTTP 200
@@ -1621,197 +814,84 @@ Odpověď:
 
 ---
 
-## 11.15 Všechny odehrané zápasy aktuálního hráče
+# 13. Registrace hráčů na zápasy (MatchRegistrationController)
 
-Endpoint:  
-`GET /api/matches/me/all-passed`
+Základní prefix: `/api/registrations`
 
-Role:
-- přihlášený uživatel s aktuálním hráčem
+## 13.1 Přehled všech registrací (ADMIN/MANAGER)
 
-Chování:
-- vrátí všechny zápasy, které aktuální hráč odehrál (v minulosti)
-- slouží pro historii docházky / statistiky
-
-Odpověď:
-- HTTP 200
-- seznam `MatchOverviewDTO`
-
----
-
-# 12. Registrace hráčů na zápasy (MatchRegistrationController)
-
-Registrace hráčů na zápasy řeší, kdo jde na zápas, kdo je náhradník, omluvenka
-apod. Jde o jednu z klíčových částí aplikace.
-
-Základní prefix:  
-`/api/registrations`
-
----
-
-## 12.1 Přehled všech registrací (ADMIN / MANAGER)
-
-Endpoint:  
-`GET /api/registrations`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Chování:
-- vrátí **všechny** registrace ve všech zápasech
-- spíš administrativní / diagnostický přehled
+Endpoint: `GET /api/registrations`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `MatchRegistrationDTO`
 
----
+## 13.2 Registrace pro zápas / hráče (ADMIN/MANAGER)
 
-## 12.2 Registrace pro konkrétní zápas (ADMIN / MANAGER)
+Endpointy:
+- `GET /api/registrations/match/{matchId}`
+- `GET /api/registrations/player/{playerId}`
 
-Endpoint:  
-`GET /api/registrations/match/{matchId}`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `matchId` – ID zápasu
-
-Chování:
-- vrátí registrace (účast) všech hráčů pro daný zápas
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `MatchRegistrationDTO`
 
----
+## 13.3 Hráči bez reakce na zápas (ADMIN/MANAGER)
 
-## 12.3 Registrace pro konkrétního hráče (ADMIN / MANAGER)
-
-Endpoint:  
-`GET /api/registrations/player/{playerId}`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `playerId` – ID hráče
-
-Chování:
-- vrátí všechny registrace daného hráče napříč zápasy
-
-Odpověď:
-- HTTP 200
-- seznam `MatchRegistrationDTO`
-
----
-
-## 12.4 Hráči bez reakce na zápas
-
-Endpoint:  
-`GET /api/registrations/match/{matchId}/no-response`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `matchId` – ID zápasu
-
-Chování:
-- vrátí seznam hráčů, kteří:
-  - nejsou přihlášeni
-  - nejsou omluveni
-  - a zatím nijak nereagovali
+Endpoint: `GET /api/registrations/match/{matchId}/no-response`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
 - seznam `PlayerDTO`
 
----
+## 13.4 Upsert registrace za konkrétního hráče (ADMIN/MANAGER)
 
-## 12.5 Upsert registrace za konkrétního hráče (ADMIN / MANAGER)
+Endpoint: `POST /api/registrations/upsert/{playerId}`  
+Role: `ADMIN` nebo `MANAGER`
 
-Endpoint:  
-`POST /api/registrations/upsert/{playerId}`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- path `playerId`
-- tělo: `MatchRegistrationRequest`  
-  (obsahuje alespoň ID zápasu a cílový stav registrace)
-
-Chování:
-- pokud registrace neexistuje:
-  - vytvoří novou
-- pokud existuje:
-  - aktualizuje
-- umožňuje adminovi ručně zasahovat do registrací hráčů
-
-Odpověď:
-- HTTP 200
-- `MatchRegistrationDTO` – výsledný stav
-
----
-
-## 12.6 Označení neomluvené neúčasti
-
-Endpoint:  
-`PATCH /api/registrations/match/{matchId}/players/{playerId}/no-excused?adminNote=...`
-
-Role:
-- `ADMIN` / `MANAGER`
-
-Vstup:
-- `matchId` – ID zápasu
-- `playerId` – ID hráče
-- query `adminNote` (volitelné) – interní poznámka
-
-Chování:
-- nastaví stav registrace hráče na `NO_EXCUSED` (neomluvená neúčast)
-- zapisuje případnou poznámku admina
-
-Odpověď:
-- HTTP 200
-- `MatchRegistrationDTO` – aktualizovaná registrace
-
----
-
-## 12.7 Upsert registrace aktuálního hráče (/me)
-
-Endpoint:  
-`POST /api/registrations/me/upsert`
-
-Role:
-- přihlášený uživatel s aktuálním hráčem
-
-Vstup:
-- `MatchRegistrationRequest`
-
-Chování:
-- získá ID aktuálního hráče (`CurrentPlayerService`)
-- provede vytvoření nebo změnu registrace za tohoto hráče
-- používá se na stránce zápasu (přihlášení/odhlášení/omluva…)
+Vstup (`MatchRegistrationRequest`):
+- minimálně `matchId`
+- cílový stav / doplňující data dle DTO
 
 Odpověď:
 - HTTP 200
 - `MatchRegistrationDTO`
 
----
+## 13.5 Označení neomluvené neúčasti (ADMIN/MANAGER)
 
-## 12.8 Registrace aktuálního hráče
+Endpoint: `PATCH /api/registrations/match/{matchId}/players/{playerId}/no-excused?adminNote=...`  
+Role: `ADMIN` nebo `MANAGER`
 
-Endpoint:  
-`GET /api/registrations/me/for-current-player`
+Odpověď:
+- HTTP 200
+- `MatchRegistrationDTO`
 
-Role:
-- přihlášený uživatel s aktuálním hráčem
+## 13.6 Zrušení neomluvené neúčasti a nastavení omluvy (ADMIN/MANAGER)
 
-Chování:
-- vrátí všechny registrace aktuálního hráče
-- slouží pro přehled docházky hráče
+Endpoint: `PATCH /api/registrations/match/{matchId}/players/{playerId}/cancel-no-excused?excuseReason=...&excuseNote=...`  
+Role: `ADMIN` nebo `MANAGER`
+
+Odpověď:
+- HTTP 200
+- `MatchRegistrationDTO`
+
+## 13.7 Upsert registrace aktuálního hráče
+
+Endpoint: `POST /api/registrations/me/upsert`  
+Role: přihlášený uživatel + vybraný current player
+
+Odpověď:
+- HTTP 200
+- `MatchRegistrationDTO`
+
+## 13.8 Registrace aktuálního hráče
+
+Endpoint: `GET /api/registrations/me/for-current-player`  
+Role: přihlášený uživatel + vybraný current player
 
 Odpověď:
 - HTTP 200
@@ -1819,65 +899,23 @@ Odpověď:
 
 ---
 
-## 12.9 Přehled DTO – MatchRegistrationRequest
+# 14. Historie registrací (MatchRegistrationHistoryController)
 
-`MatchRegistrationRequest` – vstupní DTO pro změnu stavu registrace hráče:
+Základní prefix: `/api/registrations/history`
 
-Obsahuje typicky:
-- `matchId` – ID zápasu
-- cílový stav (např. `REGISTERED`, `UNREGISTERED`, `EXCUSED`…)
-- případný důvod omluvy / poznámka
+## 14.1 Historie aktuálního hráče pro daný zápas
 
----
+Endpoint: `GET /api/registrations/history/me/matches/{matchId}`  
+Role: přihlášený uživatel
 
-## 12.10 MatchRegistrationDTO
+Odpověď:
+- HTTP 200
+- seznam `MatchRegistrationHistoryDTO`
 
-`MatchRegistrationDTO` reprezentuje stav registrace:
+## 14.2 Historie konkrétního hráče pro daný zápas (ADMIN/MANAGER)
 
-- vazba na zápas
-- vazba na hráče
-- aktuální `PlayerMatchStatus`
-- čas vytvoření / změny
-- poznámky
-
-Používá se pouze pro čtení dat směrem na frontend.
-
----
-
-## 12.11 Stavy registrace hráče (PlayerMatchStatus)
-
-Výběr z enumu:
-
-- `REGISTERED` – hráč je přihlášen
-- `UNREGISTERED` – hráč odhlášen
-- `EXCUSED` – omluven
-- `SUBSTITUTE` – náhradník
-- `NO_EXCUSED` – neomluvená neúčast
-
----
-
-# 13. Historie registrací (MatchRegistrationHistoryController)
-
-Historie registrací slouží pro audit toho, jak se registrace v čase měnila.
-
-Základní prefix:  
-`/api/registrations/history`
-
----
-
-## 13.1 Historie aktuálního hráče pro daný zápas
-
-Endpoint:  
-`GET /api/registrations/history/me/matches/{matchId}`
-
-Role:
-- přihlášený uživatel s aktuálním hráčem
-
-Vstup:
-- `matchId` – ID zápasu
-
-Chování:
-- vrátí chronologii změn registrace aktuálního hráče na tento zápas
+Endpoint: `GET /api/registrations/history/admin/matches/{matchId}/players/{playerId}`  
+Role: `ADMIN` nebo `MANAGER`
 
 Odpověď:
 - HTTP 200
@@ -1885,82 +923,72 @@ Odpověď:
 
 ---
 
-## 13.2 Historie konkrétního hráče pro daný zápas (ADMIN)
+# 15. Uživatelský kontext (MeController)
 
-Endpoint:  
-`GET /api/registrations/history/admin/matches/{matchId}/players/{playerId}`
+Základní prefix: `/api/me`
 
-Role:
-- `ADMIN`
+## 15.1 Informace o impersonaci
 
-Vstup:
-- `matchId`
-- `playerId`
-
-Chování:
-- vrací historii registrace daného hráče na daný zápas
-- používá se např. při řešení sporů („byl jsem přihlášen / odhlášen…“)
+Endpoint: `GET /api/me/impersonation`  
+Role: přihlášení (v praxi; controller nemá anotaci, ale endpoint předpokládá security)
 
 Odpověď:
 - HTTP 200
-- seznam `MatchRegistrationHistoryDTO`
+- `ImpersonationInfoDTO`
+```json
+{ "impersonating": true, "playerId": 123, "playerName": "Jan Novák" }
+```
 
 ---
 
-# 14. Ladicí a testovací endpointy
+# 16. Demo notifikace (DemoNotificationController)
 
-Tyto endpointy jsou určeny spíše pro vývoj/testování.
+Základní prefix: `/api/demo/notifications`
 
----
+> Controller je aktivní pouze v demo režimu (`app.demo-mode=true`).  
+> Pokud demo režim není aktivní, endpointy nejsou registrovány a typicky vrací 404.
 
-## 14.1 Debug – zobrazení Authentication (DebugController)
+## 16.1 Načtení a vymazání zachycených demo notifikací
 
-Endpoint:  
-`GET /api/debug/me`
-
-Role:
-- typicky bez omezení v dev, v produkci by měl být vypnutý
-
-Chování:
-- vrací obsah `Authentication` objektu (přihlášený uživatel, role, autority)
+Endpoint: `GET /api/demo/notifications`  
+Role: dle zabezpečení aplikace (controller nemá `@PreAuthorize`)
 
 Odpověď:
 - HTTP 200
-- JSON s detailním pohledem na security kontext
+- `DemoNotificationsDTO`
+
+## 16.2 Vymazání demo notifikací
+
+Endpoint: `DELETE /api/demo/notifications`  
+Role: dle zabezpečení aplikace (controller nemá `@PreAuthorize`)
+
+Odpověď:
+- HTTP 204
 
 ---
 
-## 14.2 Test backendu (TestController)
+# 17. Ladicí a testovací endpointy
 
-Endpoint:  
-`GET /api/test`
+## 17.1 Debug – zobrazení Authentication (DebugController)
 
-Role:
-- `ADMIN`
-
-Chování:
-- jednoduchý test, že backend běží a funguje autorizace
+Endpoint: `GET /api/debug/me`
 
 Odpověď:
 - HTTP 200
-- např. text `"Backend je online!"`
+- JSON s obsahem `Authentication`
 
----
+## 17.2 Test backendu (TestController)
 
-## 14.3 Test e-mailu (TestEmailController)
+Endpoint: `GET /api/test`  
+Role: `ADMIN`
 
-Prefix controlleru:  
-`/api/email/test`
+Odpověď:
+- HTTP 200
+- text `"Backend je online!"`
 
-Endpoint:  
-`POST /api/email/test/send-mail`
+## 17.3 Test e-mailu (TestEmailController)
 
-Role:
-- typicky bez omezení v dev (v produkci zvaž omezit)
-
-Chování:
-- odešle testovací e-mail na nastavenou adresu
-- slouží k ověření e-mailové konfigurace
+Endpoint: `POST /api/email/test/send-mail`
 
 Odpověď:
 - HTTP 200
@@ -1968,193 +996,56 @@ Odpověď:
 
 ---
 
-> Poznámka: V kódu je i `TestSmsController`, který je zakomentovaný a není
-> součástí aktuálně používaného veřejného API.
+# 18. Přehled hlavních DTO a enumů
 
----
+Tato kapitola je orientační. Konkrétní struktury polí se řídí aktuálními DTO třídami na backendu.
 
-# 15. Přehled hlavních DTO a enumů
+## 18.1 DTO – uživatel
 
-Tato kapitola doplňuje předchozí popis endpointů o stručný přehled
-nejdůležitějších přenášených objektů. Slouží jako „rychlá mapa“ pro někoho,
-kdo API čte poprvé a chce pochopit, jaké struktury se v jednotlivých částech
-opakují.
+- `AppUserDTO`
+- `AppUserHistoryDTO`
+- `AppUserSettingsDTO`
+- `ChangePasswordDTO`
+- `RegisterUserDTO`
+- `ForgottenPasswordResetDTO`
+- `EmailDTO`
+- `ImpersonationInfoDTO`
+- `DemoNotificationsDTO`
 
----
+## 18.2 DTO – hráč
 
-## 15.1 DTO pro uživatele a nastavení
+- `PlayerDTO`
+- `PlayerHistoryDTO`
+- `PlayerStatsDTO`
+- `PlayerSettingsDTO`
+- `PlayerInactivityPeriodDTO`
+- `PlayerSummaryDTO`
 
-### AppUserDTO
+## 18.3 DTO – zápasy a registrace
 
-Použití:
-- návratová hodnota u endpointů pro správu uživatelů (`/api/users`, `/api/auth/me`).
+- `MatchDTO`
+- `MatchDetailDTO`
+- `MatchOverviewDTO`
+- `MatchHistoryDTO`
+- `MatchRegistrationDTO`
+- `MatchRegistrationHistoryDTO`
+- `NumberedMatchDTO`
+- `SeasonDTO`
+- `SeasonHistoryDTO`
+- `SuccessResponseDTO`
 
-Typický obsah:
-- `id` – ID uživatele
-- `name`, `surname`
-- `email`
-- `roles` – množina rolí (`ADMIN`, `MANAGER`, případně uživatel bez zvláštní role)
-- případně další pole (aktivní / neaktivní apod.)
 
-### AppUserSettingsDTO
+## 18.4 Enumy – přehled
 
-Použití:
-- endpointy `/api/user/settings`.
-
-Obsah (příklad):
-- preference související s přihlášeným uživatelem:
-  - jak se má vybírat aktuální hráč po loginu
-  - další globální preference účtu
-
----
-
-## 15.2 DTO pro hráče a jejich nastavení
-
-### PlayerDTO
-
-Použití:
-- ve všech endpointch `/api/players...`
-- jako součást jiných DTO (např. u registrací).
-
-Obsah:
-- základní informace o hráči (jméno, příjmení, číslo dresu, tým, stav schválení apod.)
-- odkaz na vlastníka (uživatele)
-
-### PlayerSettingsDTO
-
-Použití:
-- endpointy `/api/players/{playerId}/settings`, `/api/me/settings`.
-
-Obsah:
-- preferovaný způsob notifikací pro daného hráče
-- volby, zda hráč chce e-maily, SMS, kopie manažerovi atd.
-
----
-
-## 15.3 DTO pro sezóny
-
-### SeasonDTO
-
-Použití:
-- správa sezón (`/api/seasons`).
-
-Obsah:
-- název sezóny (např. „2024/2025“)
-- datum od / do (dle implementace)
-- příznak, zda je sezóna aktivní (globálně / pro uživatele)
-
----
-
-## 15.4 DTO pro zápasy
-
-### MatchDTO
-
-Použití:
-- většina zápasových endpointů (`/api/matches...`).
-
-Obsah:
-- základní informace o zápase:
-  - datum a čas
-  - soupeř
-  - místo
-  - kapacita (max. počet hráčů)
-  - stav zápasu (např. plánovaný, zrušený, odehraný)
-- může obsahovat agregované počty (počet přihlášených atd.)
-
-### MatchDetailDTO
-
-Použití:
-- endpoint `/api/matches/{id}/detail`.
-
-Obsah:
-- vše z `MatchDTO`
-- plus kontext vůči aktuálnímu hráči:
-  - stav registrace hráče
-  - zda je na soupisce / náhradník
-  - zda se může ještě odhlásit / přihlásit
-  - další informace pro klientské UI
-
-### MatchOverviewDTO
-
-Použití:
-- `/api/matches/me/upcoming-overview`
-- `/api/matches/me/all-passed`.
-
-Obsah:
-- kompaktní informace vhodné pro přehledové karty:
-  - základní info o zápase
-  - status z pohledu hráče
-  - souhrn počtu hráčů, výsledek apod. (dle implementace)
-
----
-
-## 15.5 DTO pro registrace
-
-### MatchRegistrationRequest
-
-Použití:
-- `POST /api/registrations/upsert/{playerId}`
-- `POST /api/registrations/me/upsert`.
-
-Obsah:
-- `matchId` – ID zápasu
-- cílový stav registrace (`PlayerMatchStatus`)
-- případně textový důvod, poznámka apod.
-
-### MatchRegistrationDTO
-
-Použití:
-- čtecí endpointy `/api/registrations...`.
-
-Obsah:
-- reference na zápas (MatchDTO nebo ID)
-- reference na hráče (PlayerDTO nebo ID)
-- aktuální stav (`PlayerMatchStatus`)
-- metadata (čas vytvoření / změny, poznámky…)
-
-### MatchRegistrationHistoryDTO
-
-Použití:
-- `/api/registrations/history/...`.
-
-Obsah:
-- záznam jednotlivých změn v čase
-- kdo změnu provedl, kdy a z jakého na jaký stav
-
----
-
-## 15.6 Enumy – přehled
-
-### Role
-
-Používá se v bezpečnostní vrstvě a v `AppUserDTO`:
-- `ADMIN` – plný přístup k administraci
-- `MANAGER` – správa zápasů, hráčů, registrací
-- běžný uživatel – bez speciálního označení, ale s právy „vlastníka“ nad svými hráči
-
-### PlayerMatchStatus
-
-Stavy registrace hráče (viz výše):
-- `REGISTERED`
-- `UNREGISTERED`
-- `EXCUSED`
-- `SUBSTITUTE`
-- `NO_EXCUSED`
-
-### MatchStatus
-
-Interní stav zápasu (příklad):
-- plánovaný
-- odehraný
-- zrušený
-
-### MatchCancelReason
-
-Používá se v endpointu `PATCH /api/matches/{matchId}/cancel`:
-- enum s důvody zrušení (např. málo hráčů, technické důvody, počasí…)
-
----
-
-Tento přehled DTO a enumů doplňuje popis endpointů a usnadňuje čtení API
-jako celku – je jasně vidět, jaké objekty se v jednotlivých oblastech
-opakují a jak spolu souvisí.
+- `Role`: `ROLE_PLAYER`, `ROLE_MANAGER`, `ROLE_ADMIN`
+- `PlayerMatchStatus`: `REGISTERED`, `UNREGISTERED`, `EXCUSED`, `RESERVED`, `NO_RESPONSE`, `SUBSTITUTE`, `NO_EXCUSED`
+- `MatchStatus`: `UNCANCELED`, `CANCELED`, `UPDATED`
+- `MatchCancelReason`: `NOT_ENOUGH_PLAYERS`, `TECHNICAL_ISSUE`, `WEATHER`, `ORGANIZER_DECISION`, `OTHER`
+- `ExcuseReason`: `NEMOC`, `PRACE`, `NECHE_SE_MI`, `JINE`
+- `PlayerStatus`: `PENDING`, `APPROVED`, `REJECTED`, `ARCHIVED`
+- `PlayerType`: `VIP`, `STANDARD`, `BASIC`
+- `Team`: `DARK`, `LIGHT`
+- `GlobalNotificationLevel`: `ALL`, `IMPORTANT_ONLY`, `NONE`
+- `NotificationCategory`: `REGISTRATION`, `MATCH_INFO`, `SYSTEM`
+- `NotificationChannel`: `EMAIL`, `SMS`
+- `NotificationType`: `MATCH_REGISTRATION_CREATED`, `MATCH_REGISTRATION_UPDATED`, `MATCH_REGISTRATION_CANCELED`, `MATCH_REGISTRATION_RESERVED`, `MATCH_REGISTRATION_SUBSTITUTE`, `MATCH_WAITING_LIST_MOVED_UP`, `MATCH_REGISTRATION_NO_RESPONSE`, `PLAYER_EXCUSED`, `PLAYER_NO_EXCUSED`, `MATCH_REMINDER`, `MATCH_CANCELED`, `MATCH_UNCANCELED`, `MATCH_TIME_CHANGED`, `PLAYER_CREATED`, `PLAYER_UPDATED`, `PLAYER_APPROVED`, `PLAYER_REJECTED`, `PLAYER_DELETED`, `PLAYER_CHANGE_USER`, `USER_CREATED`, `USER_ACTIVATED`, `USER_DEACTIVATED`, `USER_UPDATED`, `PASSWORD_RESET`, `USER_CHANGE_PASSWORD`, `FORGOTTEN_PASSWORD_RESET_REQUEST`, `FORGOTTEN_PASSWORD_RESET_COMPLETED`, `SECURITY_ALERT`

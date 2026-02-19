@@ -55,6 +55,30 @@ const MyInactivityPage = () => {
         return { all, current, nonCurrent };
     }, [periods]);
 
+    const getFilterLabel = (f) => {
+        switch (f) {
+            case FILTERS.CURRENT:
+                return "Aktuálně neaktivní";
+            case FILTERS.NON_CURRENT:
+                return "Neaktuální";
+            case FILTERS.ALL:
+            default:
+                return "Všechna";
+        }
+    };
+
+    const getFilterCount = (f) => {
+        switch (f) {
+            case FILTERS.CURRENT:
+                return counts.current;
+            case FILTERS.NON_CURRENT:
+                return counts.nonCurrent;
+            case FILTERS.ALL:
+            default:
+                return counts.all;
+        }
+    };
+
     if (loading) {
         return <p>Načítám informace o neaktivitě…</p>;
     }
@@ -107,57 +131,113 @@ const MyInactivityPage = () => {
                 <strong>{periods.length}</strong>
             </p>
 
-            {/* Filtrovací tlačítka – stejný styl jako admin */}
-            <div className="d-flex justify-content-center mb-4">
-                <div
-                    className="btn-group"
-                    role="group"
-                    aria-label="Filtr období neaktivity"
-                >
-                    <button
-                        type="button"
-                        className={
-                            filter === FILTERS.ALL
-                                ? "btn btn-primary"
-                                : "btn btn-outline-primary"
-                        }
-                        onClick={() => setFilter(FILTERS.ALL)}
-                    >
-                        Všechna{" "}
-                        <span className="badge bg-light text-dark ms-1">
-                            {counts.all}
-                        </span>
-                    </button>
+            {/* ===== FILTR ===== */}
+            <div className="mb-4">
 
-                    <button
-                        type="button"
-                        className={
-                            filter === FILTERS.CURRENT
-                                ? "btn btn-primary"
-                                : "btn btn-outline-primary"
-                        }
-                        onClick={() => setFilter(FILTERS.CURRENT)}
-                    >
-                        Aktuálně neaktivní{" "}
-                        <span className="badge bg-light text-dark ms-1">
-                            {counts.current}
-                        </span>
-                    </button>
+                {/* 📱 MOBILE – Dropdown */}
+                <div className="d-sm-none">
+                    <div className="dropdown w-100">
+                        <button
+                            className="btn btn-primary dropdown-toggle w-100"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            {getFilterLabel(filter)}{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {getFilterCount(filter)}
+                            </span>
+                        </button>
 
-                    <button
-                        type="button"
-                        className={
-                            filter === FILTERS.NON_CURRENT
-                                ? "btn btn-primary"
-                                : "btn btn-outline-primary"
-                        }
-                        onClick={() => setFilter(FILTERS.NON_CURRENT)}
+                        <ul className="dropdown-menu w-100">
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => setFilter(FILTERS.ALL)}
+                                >
+                                    Všechna ({counts.all})
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() =>
+                                        setFilter(FILTERS.CURRENT)
+                                    }
+                                >
+                                    Aktuálně neaktivní ({counts.current})
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() =>
+                                        setFilter(FILTERS.NON_CURRENT)
+                                    }
+                                >
+                                    Neaktuální ({counts.nonCurrent})
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                {/* 💻 DESKTOP – Button group */}
+                <div className="d-none d-sm-flex justify-content-center">
+                    <div
+                        className="btn-group"
+                        role="group"
+                        aria-label="Filtr období neaktivity"
                     >
-                        Neaktuální{" "}
-                        <span className="badge bg-light text-dark ms-1">
-                            {counts.nonCurrent}
-                        </span>
-                    </button>
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.ALL
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() => setFilter(FILTERS.ALL)}
+                        >
+                            Všechna{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.all}
+                            </span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.CURRENT
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() =>
+                                setFilter(FILTERS.CURRENT)
+                            }
+                        >
+                            Aktuálně neaktivní{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.current}
+                            </span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.NON_CURRENT
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() =>
+                                setFilter(FILTERS.NON_CURRENT)
+                            }
+                        >
+                            Neaktuální{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.nonCurrent}
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </div>
 

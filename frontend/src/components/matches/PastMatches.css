@@ -14,3 +14,23 @@
     display: flex;
 }
 
+.past-match-item--highlight {
+    position: relative;
+    border-radius: 12px;
+    box-shadow: 0 0 0 5px rgba(13, 110, 253, 0.55);
+    animation: pastMatchPulse 2s ease-out;
+}
+
+@keyframes pastMatchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.75);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.55);
+    }
+}

@@ -30,9 +30,8 @@ const isPastMatch = (match) => {
  * Vrátí true, pokud zápas odpovídá zvolenému filtru.
  */
 const matchPassesFilter = (match, filter) => {
-    const status = match.matchStatus; 
+    const status = match.matchStatus;
     const past = isPastMatch(match);
-
 
     switch (filter) {
         case FILTERS.FUTURE:
@@ -99,125 +98,224 @@ const AdminMatchesTable = ({
     // počty pro badge u jednotlivých filtrů
     const counts = {
         all: sortedMatches.length,
-        future: sortedMatches.filter((m) =>
-            matchPassesFilter(m, FILTERS.FUTURE)
-        ).length,
-        past: sortedMatches.filter((m) =>
-            matchPassesFilter(m, FILTERS.PAST)
-        ).length,
-        canceled: sortedMatches.filter((m) =>
-            matchPassesFilter(m, FILTERS.CANCELED)
-        ).length,
+        future: sortedMatches.filter((m) => matchPassesFilter(m, FILTERS.FUTURE))
+            .length,
+        past: sortedMatches.filter((m) => matchPassesFilter(m, FILTERS.PAST))
+            .length,
+        canceled: sortedMatches.filter((m) => matchPassesFilter(m, FILTERS.CANCELED))
+            .length,
         uncanceled: sortedMatches.filter((m) =>
             matchPassesFilter(m, FILTERS.UNCANCELED)
         ).length,
-        updated: sortedMatches.filter((m) =>
-            matchPassesFilter(m, FILTERS.UPDATED)
-        ).length,
+        updated: sortedMatches.filter((m) => matchPassesFilter(m, FILTERS.UPDATED))
+            .length,
     };
 
     const filteredMatches = sortedMatches.filter((m) =>
         matchPassesFilter(m, filter)
     );
 
+    const getFilterLabel = (f) => {
+        switch (f) {
+            case FILTERS.FUTURE:
+                return "Budoucí";
+            case FILTERS.PAST:
+                return "Uplynulé";
+            case FILTERS.CANCELED:
+                return "Zrušené";
+            case FILTERS.UNCANCELED:
+                return "Obnovené";
+            case FILTERS.UPDATED:
+                return "Změněné";
+            case FILTERS.ALL:
+            default:
+                return "Vše";
+        }
+    };
+
+    const getFilterCount = (f) => {
+        switch (f) {
+            case FILTERS.FUTURE:
+                return counts.future;
+            case FILTERS.PAST:
+                return counts.past;
+            case FILTERS.CANCELED:
+                return counts.canceled;
+            case FILTERS.UNCANCELED:
+                return counts.uncanceled;
+            case FILTERS.UPDATED:
+                return counts.updated;
+            case FILTERS.ALL:
+            default:
+                return counts.all;
+        }
+    };
+
     return (
         <div className="d-flex flex-column gap-3">
-            {/* Filtrovací tlačítka – podobně jako u PastMatches */}
-            <div className="d-flex justify-content-center mb-3">
-                <div
-                    className="btn-group"
-                    role="group"
-                    aria-label="Filtr zápasů"
-                >
-                    <button
-                        type="button"
-                        className={
-                            filter === FILTERS.ALL
-                                ? "btn btn-primary"
-                                : "btn btn-outline-primary"
-                        }
-                        onClick={() => setFilter(FILTERS.ALL)}
-                    >
-                        Vše{" "}
-                        <span className="badge bg-light text-dark ms-1">
-                            {counts.all}
-                        </span>
-                    </button>
+            {/* ===== FILTR ===== */}
+            <div className="mb-2">
+                {/* 📱 MOBILE – Dropdown */}
+                <div className="d-sm-none">
+                    <div className="dropdown w-100">
+                        <button
+                            className="btn btn-primary dropdown-toggle w-100"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            {getFilterLabel(filter)}{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {getFilterCount(filter)}
+                            </span>
+                        </button>
 
-                    <button
-                        type="button"
-                        className={
-                            filter === FILTERS.FUTURE
-                                ? "btn btn-primary"
-                                : "btn btn-outline-primary"
-                        }
-                        onClick={() => setFilter(FILTERS.FUTURE)}
-                    >
-                        Budoucí{" "}
-                        <span className="badge bg-light text-dark ms-1">
-                            {counts.future}
-                        </span>
-                    </button>
+                        <ul className="dropdown-menu w-100">
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => setFilter(FILTERS.ALL)}
+                                >
+                                    Vše ({counts.all})
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => setFilter(FILTERS.FUTURE)}
+                                >
+                                    Budoucí ({counts.future})
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => setFilter(FILTERS.PAST)}
+                                >
+                                    Uplynulé ({counts.past})
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => setFilter(FILTERS.CANCELED)}
+                                >
+                                    Zrušené ({counts.canceled})
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => setFilter(FILTERS.UNCANCELED)}
+                                >
+                                    Obnovené ({counts.uncanceled})
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => setFilter(FILTERS.UPDATED)}
+                                >
+                                    Změněné ({counts.updated})
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-                    <button
-                        type="button"
-                        className={
-                            filter === FILTERS.PAST
-                                ? "btn btn-primary"
-                                : "btn btn-outline-primary"
-                        }
-                        onClick={() => setFilter(FILTERS.PAST)}
-                    >
-                        Uplynulé{" "}
-                        <span className="badge bg-light text-dark ms-1">
-                            {counts.past}
-                        </span>
-                    </button>
+                {/* 💻 DESKTOP – Button group */}
+                <div className="d-none d-sm-flex justify-content-center">
+                    <div className="btn-group" role="group" aria-label="Filtr zápasů">
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.ALL
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() => setFilter(FILTERS.ALL)}
+                        >
+                            Vše{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.all}
+                            </span>
+                        </button>
 
-                    <button
-                        type="button"
-                        className={
-                            filter === FILTERS.CANCELED
-                                ? "btn btn-primary"
-                                : "btn btn-outline-primary"
-                        }
-                        onClick={() => setFilter(FILTERS.CANCELED)}
-                    >
-                        Zrušené{" "}
-                        <span className="badge bg-light text-dark ms-1">
-                            {counts.canceled}
-                        </span>
-                    </button>
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.FUTURE
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() => setFilter(FILTERS.FUTURE)}
+                        >
+                            Budoucí{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.future}
+                            </span>
+                        </button>
 
-                    <button
-                        type="button"
-                        className={
-                            filter === FILTERS.UNCANCELED
-                                ? "btn btn-primary"
-                                : "btn btn-outline-primary"
-                        }
-                        onClick={() => setFilter(FILTERS.UNCANCELED)}
-                    >
-                        Obnovené{" "}
-                        <span className="badge bg-light text-dark ms-1">
-                            {counts.uncanceled}
-                        </span>
-                    </button>
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.PAST
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() => setFilter(FILTERS.PAST)}
+                        >
+                            Uplynulé{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.past}
+                            </span>
+                        </button>
 
-                    <button
-                        type="button"
-                        className={
-                            filter === FILTERS.UPDATED
-                                ? "btn btn-primary"
-                                : "btn btn-outline-primary"
-                        }
-                        onClick={() => setFilter(FILTERS.UPDATED)}
-                    >
-                        Změněné{" "}
-                        <span className="badge bg-light text-dark ms-1">
-                            {counts.updated}
-                        </span>
-                    </button>
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.CANCELED
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() => setFilter(FILTERS.CANCELED)}
+                        >
+                            Zrušené{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.canceled}
+                            </span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.UNCANCELED
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() => setFilter(FILTERS.UNCANCELED)}
+                        >
+                            Obnovené{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.uncanceled}
+                            </span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.UPDATED
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() => setFilter(FILTERS.UPDATED)}
+                        >
+                            Změněné{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.updated}
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </div>
 

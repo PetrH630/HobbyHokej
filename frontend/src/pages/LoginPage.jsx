@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { loginUser } from "../api/authApi";
 import { useNavigate, Link } from "react-router-dom";
 import usePostLoginRedirect from "../hooks/usePostLoginRedirect";
+import "../App.css";
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -38,14 +39,15 @@ const LoginPage = () => {
             <div className="row justify-content-center">
                 <div className="col-12 d-flex justify-content-center">
                     <div
-                        className="card shadow p-4 mx-auto"
-                        style={{ maxWidth: "420px" }}
+                       className="card shadow p-4 mx-auto auth-card" 
+                       style={{ maxWidth: "420px" }}
+                        
                     >
                         <h3 className="text-center mb-2">HokejApp</h3>
                         <h5 className="text-center mb-4 text-muted">Přihlášení</h5>
                         
                         <h5 className="text-center mb-3">přístupy:</h5>
-                        <p>administrator@example.com - Role Admin<br></br>
+                        <p>BBB  admin@example.com - Role Admin<br></br>
                         "Administrator123"</p>
                         <p>player1@example.com - Role Manažer<br></br>
                             "Heslo123"</p>
@@ -64,7 +66,7 @@ const LoginPage = () => {
                                 <label className="form-label">E-mail</label>
                                 <input
                                     type="email"
-                                    className="form-control"
+                                   className="form-control"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
@@ -75,7 +77,7 @@ const LoginPage = () => {
                                 <label className="form-label">Heslo</label>
                                 <input
                                     type="password"
-                                    className="form-control"
+                                   className="form-control"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required

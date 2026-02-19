@@ -108,24 +108,24 @@ const AdminHomePage = () => {
     const stats = useMemo(
         () => [
             {
-                label: "Uživatelé",
+                label: "Uživatelů",
                 value: renderValue(usersLoading, usersCount),
                 helper: "Registrovaní v systému",
             },
             {
-                label: "Hráči",
+                label: "Hráčů",
                 value: renderValue(playersLoading, playersCount),
                 helper: "Včetně čekajících",
             },
             {
-                label: "Sezóny",
+                label: "Sezón",
                 value: renderValue(seasonsLoading, seasonsCount),
                 helper: "V databázi",
             },
             {
-                label: "Zápasy",
+                label: "Zápasů",
                 value: renderValue(matchesLoading, matchesCount),
-                helper: "Aktuální sezóna",
+                helper: "v aktuální sezóně",
             },
         ],
         [
@@ -201,7 +201,7 @@ const AdminHomePage = () => {
                         title="Obnoví přehledové údaje z databáze"
                     >
                         Obnovit
-                    </button>                    
+                    </button>
                 </div>
             </div>
 
@@ -288,7 +288,8 @@ const AdminHomePage = () => {
                 <div className="col-12 col-xl-7">
                     <div className="card shadow-sm h-100">
                         <div className="card-header bg-white">
-                            <div className="d-flex justify-content-between align-items-center">
+                            <div className="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-2">
+
                                 <div className="fw-semibold">Nadcházející zápasy</div>
                                 <Link
                                     to="/app/admin/matches"
@@ -299,80 +300,65 @@ const AdminHomePage = () => {
                             </div>
                         </div>
 
-                        <div className="table-responsive">
-                            <table className="table table-hover mb-0 align-middle">
-                                <thead className="table-light">
-                                    <tr>
-                                        <th>Datum</th>
-                                        <th>Soupeř</th>
-                                        <th>Místo</th>
-                                        <th>Status</th>
-                                        <th className="text-end">Akce</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {matchesLoading ? (
-                                        <tr>
-                                            <td colSpan={5} className="text-muted py-4">
-                                                Načítám zápasy…
-                                            </td>
-                                        </tr>
-                                    ) : upcomingMatches.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={5} className="text-muted py-4">
-                                                Žádné nadcházející zápasy.
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        upcomingMatches.map((m) => {
-                                            const dateObj = m._dateObj;
-                                            const opponent =
-                                                m?.opponentName ||
-                                                m?.opponent ||
-                                                m?.rival ||
-                                                m?.title ||
-                                                "—";
-                                            const place =
-                                                m?.place ||
-                                                m?.location ||
-                                                m?.stadium ||
-                                                "—";
-                                            const status =
-                                                m?.status ||
-                                                m?.matchStatus ||
-                                                "Plánováno";
-                                            const id = m?.id;
+                        
+                        <div className="card-body">
+                            {matchesLoading ? (
+                                <div className="text-muted py-2">Načítám zápasy…</div>
+                            ) : upcomingMatches.length === 0 ? (
+                                <div className="text-muted py-2">Žádné nadcházející zápasy.</div>
+                            ) : (
+                                <div className="d-flex flex-column gap-3">
+                                    {upcomingMatches.map((m) => {
+                                        const dateObj = m._dateObj;
+                                        const opponent =
+                                            m?.opponentName ||
+                                            m?.opponent ||
+                                            m?.rival ||
+                                            m?.title ||
+                                            "—";
+                                        const place =
+                                            m?.place ||
+                                            m?.location ||
+                                            m?.stadium ||
+                                            "—";
+                                        const status =
+                                            m?.status ||
+                                            m?.matchStatus ||
+                                            "Plánováno";
+                                        const id = m?.id;
 
-                                            return (
-                                                <tr key={id ?? `${opponent}-${dateObj?.toISOString()}`}>
-                                                    <td className="text-nowrap">
-                                                        {formatDateTime(dateObj)}
-                                                    </td>
-                                                    <td>{opponent}</td>
-                                                    <td className="text-nowrap">{place}</td>
-                                                    <td>
-                                                        <Badge text={status} />
-                                                    </td>
-                                                    <td className="text-end">
-                                                        {id ? (
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-sm btn-outline-primary"
-                                                                disabled
-                                                                title="Zatím není implementováno"
-                                                            >
-                                                                Detail
-                                                            </button>
-                                                        ) : (
-                                                            <span className="text-muted small">—</span>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
-                                    )}
-                                </tbody>
-                            </table>
+                                        return (
+                                            <div
+                                                key={id ?? `${opponent}-${dateObj?.toISOString()}`}
+                                                className="card border-0 shadow-sm"
+                                            >
+                                                <div className="card-body">
+                                                    <div className="d-flex flex-column flex-md-row justify-content-between gap-2">
+                                                        <div>
+                                                            <div className="text-muted small">Datum</div>
+                                                            <div className="fw-semibold">
+                                                                {formatDateTime(dateObj)}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-muted small">Místo</div>
+                                                            <div className="text-nowrap">{place}</div>
+                                                        </div>
+
+                                                        <div className="ms-md-auto">
+                                                            <div className="text-muted small">Status</div>
+                                                            <div>
+                                                                <Badge text={status} />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                   
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
 
                         <div className="card-body border-top">
@@ -428,8 +414,9 @@ const AdminHomePage = () => {
                                 <div className="card-body">
                                     <div className="d-flex justify-content-between mb-2">
                                         <span className="text-muted">Prostředí</span>
+                                        
                                         <span className="fw-semibold">
-                                            Produkce / Demo dle nastavení 
+                                            Demo dle nastavení
                                         </span>
                                     </div>
                                     <div className="d-flex justify-content-between mb-2">
@@ -446,10 +433,9 @@ const AdminHomePage = () => {
                                     <hr />
 
                                     <div className="alert alert-light border mb-0">
-                                        <div className="fw-semibold mb-1">Bude se doplňovat</div>
+                                        <div className="fw-semibold mb-1">Doplnit...</div>
                                         <ul className="mb-0 small text-muted">
-                                            <li>graf registrací na zápasy (7/30 dní)</li>
-                                            
+                                            <li></li>
                                         </ul>
                                     </div>
                                 </div>

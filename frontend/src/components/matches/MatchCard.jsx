@@ -9,7 +9,7 @@ import {
     UserIcon,
     MoneyIcon,
 } from "../../icons";
-
+import CapacityRing from "./CapacityRing";
 import "./MatchCard.css";
 
 const statusClassMap = {
@@ -149,12 +149,21 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
                 )}
 
                 {
-                    <p className="card-text text-center  players-count">
-                        <UserIcon className="player-icon" />
-                        <strong>
-                            {match.inGamePlayers} / {match.maxPlayers}
+                    <p className="card-text text-center players-count">
+                        <span className="players-count__wrap">
+                            <UserIcon className="player-icon" />
+                            <strong>
+                                {match.inGamePlayers} / {match.maxPlayers}{" "}
+                            </strong>
 
-                        </strong>
+                            <CapacityRing
+                                value={match.inGamePlayers}
+                                max={match.maxPlayers}
+                                size={50}
+                                stroke={10}
+                                title={`Obsazenost: ${match.inGamePlayers}/${match.maxPlayers}`}
+                            />
+                        </span>
                     </p>
                 }
 

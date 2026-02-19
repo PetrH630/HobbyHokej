@@ -1,4 +1,3 @@
-// src/components/admin/AdminMatchCard.jsx
 import { useState } from "react";
 import RoleGuard from "../RoleGuard";
 import AdminMatchHistory from "./AdminMatchHistory";
@@ -9,15 +8,26 @@ import {
     matchActionLabel,
 } from "../../utils/matchFormatter";
 import { useGlobalDim } from "../../hooks/useGlobalDim";
+import ConfirmActionModal from "../common/ConfirmActionModal";
+
+import {
+    InfoCircle,
+    PencilSquare,
+    ClockHistory,
+    XOctagon,
+    ArrowCounterclockwise,
+} from "react-bootstrap-icons";
 
 const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
     const [showHistory, setShowHistory] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
 
-    const isExpanded = showDetail || showHistory;
-    const dimActive = isExpanded; //  ztmavení platí pro detail i historii
+    // ✅ confirm jen pro zrušit/obnovit
+    const [confirmAction, setConfirmAction] = useState(null); // { type, title, message }
 
-    //  zapne globální ztmavení, když je detail nebo historie otevřená
+    const isExpanded = showDetail || showHistory;
+    const dimActive = isExpanded;
+
     useGlobalDim(dimActive);
 
     const statusText = matchStatusLabel(match.matchStatus);
@@ -43,7 +53,7 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
     const now = new Date();
     const isPast = matchDate ? matchDate < now : false;
 
-    // logika badge: zrušený > uplynulý > aktivní
+    // badge: zrušený > uplynulý > budoucí
     let badgeText = "budoucí";
     let badgeClass = "bg-success";
 
@@ -55,17 +65,9 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
         badgeClass = "bg-secondary";
     }
 
-    const toggleHistory = () => {
-        setShowHistory((prev) => !prev);
-    };
+    const toggleHistory = () => setShowHistory((prev) => !prev);
+    const toggleDetail = () => setShowDetail((prev) => !prev);
 
-    const toggleDetail = () => {
-        setShowDetail((prev) => !prev);
-    };
-
-    //  DŮLEŽITÉ:
-    // Když je otevřený detail nebo historie, karta musí být neprůhledná (žádné bg-opacity),
-    // aby se "neztmavila" přes overlay stránky.
     const cardClassName =
         "card shadow-sm mb-3 " +
         (isExpanded ? "border border-2 " : "") +
@@ -75,9 +77,11 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
                 ? "bg-danger bg-opacity-10"
                 : "");
 
+    const buildMatchTitle = () =>
+        `#${match.matchNumber ?? match.id} – ${formatDateTime(match.dateTime)}`;
+
     return (
         <>
-            {/*  klik mimo kartu zavře detail/historii (vrstva je pod kartou, nad ztmavením) */}
             {dimActive && (
                 <div
                     className="global-dim-click"
@@ -105,18 +109,24 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
                         </div>
 
                         <div className="col-md-4">
-                            <small className="text-muted d-block">Místo</small>
-                            {match.location || "-"}
+                            <small className="text-muted d-block">
+                                Místo: <strong>{match.location || "-"}</strong>
+                            </small>
                         </div>
 
                         <div className="col-md-2">
-                            <small className="text-muted d-block">Max. hráčů</small>
-                            {match.maxPlayers ?? "-"}
+                            <small className="text-muted d-block">
+                                Max. hráčů: <strong>{match.maxPlayers ?? "-"}</strong>
+                            </small>
                         </div>
 
                         <div className="col-md-2">
-                            <small className="text-muted d-block">Cena</small>
-                            {match.price != null ? `${match.price} Kč` : "-"}
+                            <small className="text-muted d-block">
+                                Cena:{" "}
+                                <strong>
+                                    {match.price != null ? `${match.price} Kč` : "-"}
+                                </strong>
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -125,77 +135,114 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
                 <div className="card-body border-bottom bg-light">
                     <div className="row align-items-center">
                         <div className="col-md-4">
-                            <small className="text-muted d-block">Stav</small>
-                            {statusText || "-"}
-                            {match.cancelReason && (
-                                <div>
-                                    <small className="text-muted d-block">
-                                        Důvod zrušení
-                                    </small>
-                                    <span>{cancelReasonText}</span>
-                                </div>
-                            )}
+                            <small className="text-muted d-block">
+                                Stav{" "}
+                                <strong>
+                                    {statusText || "-"}
+                                    {match.cancelReason && (
+                                        <div className="mt-1">
+                                            <small className="text-muted d-block">
+                                                Důvod zrušení
+                                            </small>
+                                            <span>{cancelReasonText}</span>
+                                        </div>
+                                    )}
+                                </strong>
+                            </small>
                         </div>
 
                         <div className="col-md-8">
                             <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
                                 <div className="d-flex justify-content-end">
-                                    <div className="btn-group btn-group-sm flex-wrap">
+                                    {/* ✅ jen styling + ikony, žádné nové položky */}
+                                    <div className="btn-group btn-group-sm flex-wrap gap-2">
                                         {/* DETAIL */}
                                         <button
                                             type="button"
                                             className={
-                                                "btn btn-outline-info" +
+                                                "btn btn-outline-info d-inline-flex align-items-center justify-content-center gap-1" +
                                                 (showDetail ? " active" : "")
                                             }
                                             onClick={toggleDetail}
+                                            title="Detail"
                                         >
-                                            {showDetail ? "Skrýt detail" : "Detail"}
+                                            <InfoCircle className="me-1" />
+                                            <span className="d-none d-md-inline text-nowrap">
+                                                {showDetail ? "Skrýt detail" : "Detail"}
+                                            </span>
                                         </button>
 
                                         {/* UPRAVIT */}
                                         <button
                                             type="button"
-                                            className="btn btn-primary"
+                                            className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-1"
                                             disabled={!onEdit}
                                             onClick={() => onEdit && onEdit(match)}
+                                            title="Upravit"
                                         >
-                                            Upravit
+                                            <PencilSquare className="me-1" />
+                                            <span className="d-none d-md-inline text-nowrap">
+                                                Upravit
+                                            </span>
                                         </button>
 
                                         {/* HISTORIE */}
                                         <button
                                             type="button"
                                             className={
-                                                "btn btn-outline-secondary" +
+                                                "btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-1" +
                                                 (showHistory ? " active" : "")
                                             }
                                             onClick={toggleHistory}
+                                            title="Historie"
                                         >
-                                            {showHistory ? "Skrýt historii" : "Historie"}
+                                            <ClockHistory className="me-1" />
+                                            <span className="d-none d-md-inline text-nowrap">
+                                                {showHistory ? "Skrýt historii" : "Historie"}
+                                            </span>
                                         </button>
 
-                                        {/* ZRUŠIT */}
+                                        {/* ZRUŠIT (s confirm) */}
                                         {!isCanceled && (
                                             <button
                                                 type="button"
-                                                className="btn btn-warning"
+                                                className="btn btn-warning d-inline-flex align-items-center justify-content-center gap-1"
                                                 disabled={!onCancel}
-                                                onClick={() => onCancel && onCancel(match)}
+                                                onClick={() =>
+                                                    setConfirmAction({
+                                                        type: "cancel",
+                                                        title: "Potvrzení zrušení",
+                                                        message: `Opravdu chcete zrušit zápas ${buildMatchTitle()}?`,
+                                                    })
+                                                }
+                                                title="Zrušit"
                                             >
-                                                Zrušit
+                                                <XOctagon className="me-1" />
+                                                <span className="d-none d-md-inline text-nowrap">
+                                                    Zrušit
+                                                </span>
                                             </button>
                                         )}
 
-                                        {/* OBNOVIT */}
+                                        {/* OBNOVIT (s confirm) */}
                                         {isCanceled && (
                                             <button
                                                 type="button"
-                                                className="btn btn-success"
+                                                className="btn btn-success d-inline-flex align-items-center justify-content-center gap-1"
                                                 disabled={!onUnCancel}
-                                                onClick={() => onUnCancel && onUnCancel(match.id)}
+                                                onClick={() =>
+                                                    setConfirmAction({
+                                                        type: "uncancel",
+                                                        title: "Potvrzení obnovení",
+                                                        message: `Opravdu chcete obnovit zápas ${buildMatchTitle()}?`,
+                                                    })
+                                                }
+                                                title="Obnovit"
                                             >
-                                                Obnovit
+                                                <ArrowCounterclockwise className="me-1" />
+                                                <span className="d-none d-md-inline text-nowrap">
+                                                    Obnovit
+                                                </span>
                                             </button>
                                         )}
                                     </div>
@@ -225,6 +272,26 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
                     </div>
                 )}
             </div>
+
+            {/* ✅ ConfirmActionModal */}
+            {confirmAction && (
+                <ConfirmActionModal
+                    show={true}
+                    title={confirmAction.title}
+                    message={confirmAction.message}
+                    confirmText={confirmAction.type === "cancel" ? "Zrušit" : "Obnovit"}
+                    confirmVariant={confirmAction.type === "cancel" ? "warning" : "success"}
+                    onClose={() => setConfirmAction(null)}
+                    onConfirm={() => {
+                        if (confirmAction.type === "cancel") {
+                            onCancel && onCancel(match);
+                        } else if (confirmAction.type === "uncancel") {
+                            onUnCancel && onUnCancel(match.id);
+                        }
+                        setConfirmAction(null);
+                    }}
+                />
+            )}
         </>
     );
 };

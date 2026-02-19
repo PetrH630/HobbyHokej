@@ -59,7 +59,7 @@ const AdminPlayerRegistrationHistoryModal = ({
                         />
                     </div>
                     <div className="modal-body">
-                        {/* 🔹 Akční tlačítka pro tohoto hráče */}
+                        
                         <div className="mb-3">
                             {isRegistered && !isNoExcused && (
                                 <button

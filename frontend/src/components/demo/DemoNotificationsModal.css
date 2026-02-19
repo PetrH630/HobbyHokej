@@ -1,5 +1,7 @@
 /* Tyrkysový styl pro DEMO modal */
 
+
+
 .demo-modal {
     border: 2px solid #17c3b2;
     border-radius: 0.75rem;
@@ -22,4 +24,43 @@
 
 .demo-modal .list-group-item {
     border-left: 4px solid #17c3b2;
+}
+.demo-modal .modal-body {
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+/* aby šel obsah modalu rolovat na mobilu */
+.demo-modal-body {
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* pěknější varování v HTML prefixu */
+.demo-warning-box {
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* fullscreen modal na mobilu – header/footer zůstanou, scrolluje body */
+@media (max-width: 576px) {
+    .demo-modal-body {
+        max-height: calc(100vh - 180px);
+    }
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+}
+.modal {
+    position: fixed;
+    inset: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
 }

@@ -1,15 +1,12 @@
+// src/hooks/useGlobalModal.js
 import { useEffect } from "react";
 
 export const useGlobalModal = (isOpen) => {
-    useEffect(() => {
-        if (isOpen) {
-            document.body.classList.add("modal-open");
-        } else {
-            document.body.classList.remove("modal-open");
-        }
+  useEffect(() => {
+    document.body.classList.toggle("modal-open", !!isOpen);
 
-        return () => {
-            document.body.classList.remove("modal-open");
-        };
-    }, [isOpen]);
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [isOpen]);
 };

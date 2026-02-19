@@ -17,6 +17,8 @@ import { useUserProfile } from "../hooks/useUserProfile";
 import RoleGuard from "../components/RoleGuard";
 import { validatePlayerProfile } from "../validation/playerValidation";
 
+import SuccessInfoModal from "../components/common/SuccessModal";
+
 // Frontend validace AppUserDTO (profil uživatele)
 const validateUserProfile = (values) => {
     const errors = {};
@@ -126,6 +128,25 @@ const validateChangePassword = (values) => {
 const SettingsPage = () => {
     const [activeTab, setActiveTab] = useState("player"); // "player" | "user"
 
+    // ✅ MODAL – stav + open/close
+    const [successModal, setSuccessModal] = useState({
+        show: false,
+        title: "Hotovo",
+        message: "",
+    });
+
+    const openSuccessModal = (message, title = "Hotovo") => {
+        setSuccessModal({
+            show: true,
+            title,
+            message,
+        });
+    };
+
+    const closeSuccessModal = () => {
+        setSuccessModal((prev) => ({ ...prev, show: false }));
+    };
+
     // === Aktuální hráč (profil) ===
     const {
         currentPlayer,
@@ -210,7 +231,12 @@ const SettingsPage = () => {
             };
 
             await updateMyCurrentPlayer(payload);
-            setProfileSuccess("Profil hráče byl úspěšně uložen.");
+
+            const msg = "Profil hráče byl úspěšně uložen.";
+            setProfileSuccess(msg);
+
+            // ✅ MODAL
+            openSuccessModal(msg, "Profil hráče");
         } catch (err) {
             const msg =
                 err?.response?.data?.message ||
@@ -272,6 +298,12 @@ const SettingsPage = () => {
         };
 
         await savePlayerSettings(payload);
+
+        // ✅ MODAL (nezasahuje do toho, co zobrazuje PlayerSettings komponenta)
+        openSuccessModal(
+            "Nastavení notifikací hráče bylo úspěšně uloženo.",
+            "Notifikace hráče"
+        );
     };
 
     // === Nastavení uživatele (AppUserSettingsDTO) ===
@@ -296,6 +328,12 @@ const SettingsPage = () => {
 
     const handleUserSubmit = async () => {
         await saveUserSettings(userFormValues);
+
+        // ✅ MODAL
+        openSuccessModal(
+            "Nastavení uživatelského účtu bylo úspěšně uloženo.",
+            "Nastavení účtu"
+        );
     };
 
     // === Změna hesla ===
@@ -342,11 +380,15 @@ const SettingsPage = () => {
 
             const message = await userApi.changeMyPassword(payload); // ⬅️ tady
 
-            setPasswordSuccess(
+            const okMsg =
                 typeof message === "string"
                     ? message
-                    : "Heslo bylo úspěšně změněno."
-            );
+                    : "Heslo bylo úspěšně změněno.";
+
+            setPasswordSuccess(okMsg);
+
+            // ✅ MODAL
+            openSuccessModal(okMsg, "Změna hesla");
 
             setPasswordValues({
                 oldPassword: "",
@@ -423,6 +465,12 @@ const SettingsPage = () => {
         }
 
         await saveUserProfile(userProfileValues);
+
+        // ✅ MODAL
+        openSuccessModal(
+            "Profil uživatele byl úspěšně uložen.",
+            "Profil uživatele"
+        );
     };
 
 
@@ -434,6 +482,14 @@ const SettingsPage = () => {
 
     return (
         <div className="container mt-0">
+            {/* ✅ MODAL – render (nic to nemaže, jen přidává) */}
+            <SuccessInfoModal
+                show={successModal.show}
+                title={successModal.title}
+                message={successModal.message}
+                onClose={closeSuccessModal}
+            />
+
             <h1 className="h4 mb-3">Nastavení</h1>
 
             <p className="text-muted mb-3">

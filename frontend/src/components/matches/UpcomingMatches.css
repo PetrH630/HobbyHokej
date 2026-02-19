@@ -22,40 +22,37 @@
    RÁMEČEK PRO NEJBLIŽŠÍ ZÁPAS
    ========================= */
 
-/* wrapper rámečku má defaultně šířku podle obsahu */
-.next-match-frame {
-    position: relative;
-    /* ✅ kvůli badge (absolute) */
-    display: inline-block;
-    /* shrink-to-fit */
-    width: fit-content;
-    /* kopíruje velikost karty */
-    max-width: 100%;
-    /* aby to nepřeteklo */
-    border-radius: 16px;
-}
 
-/* aktivní zvýraznění */
-.next-match-frame--on {
-    display: inline-block;
-    width: fit-content;
-    /* ✅ kopíruje MatchCard */
-    max-width: 100%;
-    padding: 10px;
-    border-radius: 18px;
-    border: 2px solid rgba(13, 110, 253, 0.45);
-    background: rgba(13, 110, 253, 0.06);
-    box-shadow:
-        0 14px 28px rgba(0, 0, 0, 0.12),
-        0 0 0 6px rgba(13, 110, 253, 0.06);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
+@media (min-width: 768px) {
+    .next-match-frame {
+        position: relative;
+        display: inline-block;
+        width: fit-content;
+        max-width: 100%;
+        border-radius: 16px;
+    }
 
-.next-match-frame--on:hover {
-    transform: translateY(-1px);
-    box-shadow:
-        0 16px 32px rgba(0, 0, 0, 0.14),
-        0 0 0 8px rgba(13, 110, 253, 0.08);
+    .next-match-frame--on {
+        position: relative;
+        display: inline-block;
+        width: fit-content;
+        max-width: 100%;
+        padding: 10px;
+        border-radius: 18px;
+        border: 2px solid rgba(13, 110, 253, 0.45);
+        background: rgba(13, 110, 253, 0.06);
+        box-shadow:
+            0 14px 28px rgba(0, 0, 0, 0.12),
+            0 0 0 6px rgba(13, 110, 253, 0.06);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .next-match-frame--on:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            0 16px 32px rgba(0, 0, 0, 0.14),
+            0 0 0 8px rgba(13, 110, 253, 0.08);
+    }
 }
 
 /* badge */
@@ -78,48 +75,66 @@
 }
 
 /* =========================
-   DEFAULT ŠÍŘKA KARTY
-   ========================= */
-.match-item .match-card {
-    width: 240px;
-    /* default karta */
-}
-
-/* =========================
-   MOBIL – full width pro wrapper i kartu
+   MOBIL – FULL WIDTH (žádné „desktop uprostřed“)
    ========================= */
 @media (max-width: 767.98px) {
     .match-list {
-        justify-content: stretch;
+        justify-content: flex-start;
+        /* místo center */
     }
 
     .match-item {
         width: 100%;
-        justify-content: center;
+        justify-content: stretch;
+        /* místo center */
     }
 
     .match-item--next {
         width: 100%;
-        justify-content: center;
+        justify-content: stretch;
         scroll-margin-top: 90px;
         /* ať scroll neskončí pod hlavičkou */
     }
 
-    /* na mobilu teprve plná šířka rámečku */
+    
+    .next-match-frame,
     .next-match-frame--on {
+        position: relative;
+        display: block;
         width: 100%;
-        max-width: 520px;
-        /* aby to nebylo komicky široké */
+        max-width: 100%;
+        border-radius: 16px;
     }
 
-    /* ať karta uvnitř opravdu vyplní rámeček */
-    .next-match-frame--on .match-card {
-        width: 100%;
+    
+    .next-match-frame--on {
+        padding: 10px;
+        border-radius: 18px;
+        border: 2px solid rgba(13, 110, 253, 0.45);
+        background: rgba(13, 110, 253, 0.06);
+        box-shadow:
+            0 14px 28px rgba(0, 0, 0, 0.12),
+            0 0 0 6px rgba(13, 110, 253, 0.06);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 }
 
-@media (max-width: 576px) {
-    .match-item .match-card {
-        width: 100%;
+.upcoming-match-highlight {
+    border-radius: 12px;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.55);
+    animation: upcomingMatchPulse 1.6s ease-out;
+}
+
+@keyframes upcomingMatchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.75);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.55);
     }
 }

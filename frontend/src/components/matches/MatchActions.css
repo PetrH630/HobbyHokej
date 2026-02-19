@@ -1,10 +1,40 @@
+/* src/components/MatchActions.css */
+
+/* Jeden společný wrapper pro všechna tlačítka:
+   - mobil: pod sebou, uprostřed, full width
+   - >= sm: vedle sebe, uprostřed */
+.match-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+    /* mobil: tlačítka přes celou šířku */
+    justify-content: center;
+    width: 100%;
+}
+
+@media (min-width: 576px) {
+    .match-actions {
+        flex-direction: row;
+        /* desktop: vedle sebe */
+        align-items: center;
+        justify-content: center;
+        /* desktop: uprostřed */
+    }
+}
+
 /* společný styl akčních tlačítek */
 .action-btn {
     min-width: 140px;
-    /* stejná šířka */
     font-size: 1.2rem;
-    /* větší písmo */
     font-weight: 600;
     padding: 0.6rem 1rem;
-    /* lehce větší výška */
+}
+
+/* mobil: full width (díky align-items:stretch bude hezky sedět) */
+@media (max-width: 575.98px) {
+    .action-btn {
+        width: 100%;
+        min-width: 0;
+    }
 }

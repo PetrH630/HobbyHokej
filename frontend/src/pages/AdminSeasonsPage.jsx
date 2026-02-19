@@ -11,6 +11,8 @@ import AdminSeasonsTable from "../components/admin/AdminSeasonsTable";
 import AdminSeasonModal from "../components/admin/AdminSeasonModal";
 import { useNotification } from "../context/NotificationContext";
 import BackButton from "../components/BackButton";
+import ConfirmActionModal from "../components/common/ConfirmActionModal";
+
 
 const AdminSeasonsPage = () => {
     const { seasons, loading, error, reload } = useAllSeasonsAdmin();
@@ -19,6 +21,7 @@ const AdminSeasonsPage = () => {
     const [editingSeason, setEditingSeason] = useState(null);
     const [saving, setSaving] = useState(false);
     const [serverError, setServerError] = useState(null);
+    const [confirmAction, setConfirmAction] = useState(null);
 
     const handleCreate = () => {
         setServerError(null);
@@ -38,21 +41,20 @@ const AdminSeasonsPage = () => {
 
     // NOVÉ: nastavení aktivní sezóny
     const handleSetActiveSeason = useCallback(
-        async (seasonId) => {
-            try {
-                await setActiveSeasonAdmin(seasonId);
-                showNotification("Sezóna byla nastavena jako aktivní.", "success");
-                await reload();
-            } catch (err) {
-                const message =
-                    err?.response?.data?.message ||
-                    err?.message ||
-                    "Nepodařilo se nastavit aktivní sezónu.";
-                showNotification(message, "danger");
-            }
+        (seasonId) => {
+            const season = seasons?.find((s) => s.id === seasonId);
+            const seasonName = season?.name || `#${seasonId}`;
+
+            setConfirmAction({
+                type: "setActiveSeason",
+                seasonId,
+                title: "Potvrzení změny aktivní sezóny",
+                message: `Opravdu chcete nastavit sezónu "${seasonName}" jako aktivní?`,
+            });
         },
-        [reload, showNotification]
+        [seasons]
     );
+
 
     const handleCloseModal = () => {
         if (!saving) {
@@ -134,6 +136,31 @@ const AdminSeasonsPage = () => {
                 allSeasons={seasons}
                 serverError={serverError}
             />
+                {confirmAction?.type === "setActiveSeason" && (
+                    <ConfirmActionModal
+                        show={true}
+                        title={confirmAction.title}
+                        message={confirmAction.message}
+                        confirmText="Nastavit jako aktivní"
+                        confirmVariant="primary"
+                        onClose={() => setConfirmAction(null)}
+                        onConfirm={async () => {
+                            try {
+                                await setActiveSeasonAdmin(confirmAction.seasonId);
+                                showNotification("Sezóna byla nastavena jako aktivní.", "success");
+                                await reload();
+                            } catch (err) {
+                                const message =
+                                    err?.response?.data?.message ||
+                                    err?.message ||
+                                    "Nepodařilo se nastavit aktivní sezónu.";
+                                showNotification(message, "danger");
+                            } finally {
+                                setConfirmAction(null);
+                            }
+                        }}
+                    />
+                )}
 
       
         </div>

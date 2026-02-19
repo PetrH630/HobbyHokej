@@ -61,16 +61,16 @@ const Navbar = () => {
         <ul className="navbar-nav flex-row gap-3 mb-0">
             <RoleGuard roles={["ROLE_PLAYER", "ROLE_MANAGER"]}>
                 <li className="nav-item">
-                <NavLink
-                to="/app/player"
-                    end
-                    className={({ isActive }) =>
-                        "nav-link" + (isActive ? " activeLink" : "")
-                    }
-                    onClick={closeMenu}
-                >
-                    Přehled
-                </NavLink>
+                    <NavLink
+                        to="/app/player"
+                        end
+                        className={({ isActive }) =>
+                            "nav-link" + (isActive ? " activeLink" : "")
+                        }
+                        onClick={closeMenu}
+                    >
+                        Přehled
+                    </NavLink>
                 </li>
                 <li className="nav-item">
                     <NavLink
@@ -212,6 +212,20 @@ const Navbar = () => {
                 <ul className="list-unstyled mb-2">
                     <li>
                         <NavLink
+                            to="/app/player"
+                            end
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Přehled
+                        </NavLink>
+                    </li>
+
+
+                    <li>
+                        <NavLink
                             to="/app/players"
                             className={({ isActive }) =>
                                 "mobile-link" + (isActive ? " activeLink" : "")
@@ -348,7 +362,7 @@ const Navbar = () => {
                     <div className="d-flex align-items-center flex-shrink-0">
                         <NavLink
                             to="/app"
-                            className="navbar-brand d-flex align-items-center gap-2 mb-0"
+                            className="navbar-brand brand-wrap mb-0"
                             onClick={closeMenu}
                         >
                             <img
@@ -356,8 +370,9 @@ const Navbar = () => {
                                 alt="Logo"
                                 className="navbar-logo"
                             />
-                            <span className="fw-bold">Hokej App</span>
+                            <span className="brand-text">HokejApp</span>
                         </NavLink>
+
                     </div>
 
                     {/* STŘED – odkazy uprostřed */}

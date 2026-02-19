@@ -5,7 +5,7 @@ const App = () => {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/test")
+    fetch("/api/test")
       .then((res) => res.text())
       .then((data) => setMessage(data))
       .catch((err) => setMessage("Chyba: " + err));

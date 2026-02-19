@@ -93,7 +93,7 @@ const AdminMatchInfo = ({ match, onRefresh }) => {
     return (
         <div className="card">
             <div className="card-body">
-                {/* HLAVIČKA */}
+                
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         {match.description && (
@@ -136,13 +136,8 @@ const AdminMatchInfo = ({ match, onRefresh }) => {
                             </small>
                         </p>
                     </div>
-
-                    {/* Můžeš tady nechat RoleGuard jen jako info, ale akce jsou až v modalu */}
-                    <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
-                        <span className="badge bg-info-subtle text-dark">
-                            Admin přehled
-                        </span>
-                    </RoleGuard>
+                
+                    
                 </div>
 
                 <h4 className="mt-4">Sestava:</h4>
@@ -151,8 +146,7 @@ const AdminMatchInfo = ({ match, onRefresh }) => {
                     onPlayerClick={setHistoryPlayer}
                 />
             </div>
-
-            {/* MODAL – HISTORIE REGISTRACÍ HRÁČE + akce bez omluvy */}
+            
             {historyPlayer && (
                 <AdminPlayerRegistrationHistoryModal
                     match={match}

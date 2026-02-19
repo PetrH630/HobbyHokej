@@ -1,4 +1,6 @@
 import React from 'react'
+import { useEffect } from "react";
+import {useLocation } from "react-router-dom";
 import UpcomingMatches from "../components/matches/UpcomingMatches";
 import PastMatches from "../components/matches/PastMatches";
 import { useCurrentPlayer } from "../hooks/useCurrentPlayer";
@@ -7,6 +9,14 @@ import SeasonSelect from "../components/seasons/seasonSelect";
 
 const matches = () => {
   const { currentPlayer, loading } = useCurrentPlayer();
+  const location = useLocation();
+
+  useEffect(() => {
+    const y = location.state?.restoreScrollY;
+    if (typeof y === "number") {
+      window.setTimeout(() => window.scrollTo(0, y), 0);
+    }
+  }, [location.state]);
 
   if (loading) {
     return <p>Načítám…</p>;

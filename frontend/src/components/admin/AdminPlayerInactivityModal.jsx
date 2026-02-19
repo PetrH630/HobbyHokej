@@ -1,5 +1,5 @@
 // src/components/admin/AdminPlayerInactivityModal.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     getInactivityByPlayerAdmin,
     createInactivityAdmin,
@@ -10,14 +10,12 @@ import { useNotification } from "../../context/NotificationContext";
 import { useGlobalModal } from "../../hooks/useGlobalModal";
 import DatePicker from "../forms/DatePicker";
 
-// z backendu "yyyy-MM-dd HH:mm:ss" nebo ISO -> "YYYY-MM-DD"
 const toLocalDateValue = (value) => {
     if (!value) return "";
     const s = String(value);
     return s.slice(0, 10);
 };
 
-// "YYYY-MM-DD" -> Date (LOCAL, bez timezone posunu)
 const parseLocalDate = (val) => {
     if (!val) return null;
     const s = String(val).trim();
@@ -30,11 +28,8 @@ const parseLocalDate = (val) => {
     return Number.isNaN(date.getTime()) ? null : date;
 };
 
-// "YYYY-MM-DD" -> "YYYY-MM-DDTHH:mm:ss" (LocalDateTime pro backend)
-
 const toBackendStartOfDay = (dateStr) => (dateStr ? `${dateStr}T00:00:00` : null);
 const toBackendEndOfDay = (dateStr) => (dateStr ? `${dateStr}T23:59:59` : null);
-
 
 const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
     useGlobalModal(true);
@@ -48,8 +43,8 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
 
     const [editing, setEditing] = useState(null);
     const [formValues, setFormValues] = useState({
-        inactiveFrom: "", // "YYYY-MM-DD"
-        inactiveTo: "",   // "YYYY-MM-DD"
+        inactiveFrom: "",
+        inactiveTo: "",
         inactivityReason: "",
     });
 
@@ -64,6 +59,9 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
         inactiveTo: "",
         inactivityReason: "",
     });
+
+   
+    const formRef = useRef(null);
 
     useEffect(() => {
         if (!player?.id) return;
@@ -108,7 +106,7 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
             inactiveTo: "",
             inactivityReason: "",
         });
-        resetValidation();
+        resetValidation(); 
     };
 
     const startEdit = (period) => {
@@ -119,6 +117,13 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
             inactivityReason: period.inactivityReason || "",
         });
         resetValidation();
+
+        setTimeout(() => {
+            formRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }, 100);
     };
 
     const handleTextChange = (e) => {
@@ -159,7 +164,6 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
             if (from && !fromDate) nextErrors.inactiveFrom = "Neplatný formát data.";
             if (to && !toDate) nextErrors.inactiveTo = "Neplatný formát data.";
 
-            // date-only: povolíme stejný den (od 00:00 do 23:59:59)
             if (fromDate && toDate && fromDate > toDate) {
                 nextErrors.inactiveTo = "Konec musí být stejný den nebo po začátku.";
             }
@@ -168,8 +172,6 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
                 nextErrors.inactivityReason = "Maximální délka je 255 znaků.";
             }
 
-            // překryvy intervalů — porovnáváme date-only, ale logiku držíme jako [from, to]
-            // protože do backendu jde do konce dne, překryv date-only je ok.
             if (fromDate && toDate && !nextErrors.inactiveFrom && !nextErrors.inactiveTo) {
                 const overlaps = (aFrom, aTo, bFrom, bTo) => aFrom <= bTo && bFrom <= aTo;
 
@@ -218,8 +220,8 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
 
             const payload = {
                 playerId: player.id,
-                inactiveFrom: toBackendStartOfDay(formValues.inactiveFrom), // ✅ 00:00:00
-                inactiveTo: toBackendEndOfDay(formValues.inactiveTo),       // ✅ 23:59:59
+                inactiveFrom: toBackendStartOfDay(formValues.inactiveFrom),
+                inactiveTo: toBackendEndOfDay(formValues.inactiveTo),
                 inactivityReason: formValues.inactivityReason.trim(),
             };
 
@@ -233,7 +235,9 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
             }
 
             setPeriods((prev) =>
-                editing ? prev.map((p) => (p.id === result.id ? result : p)) : [...prev, result]
+                editing
+                    ? prev.map((p) => (p.id === result.id ? result : p))
+                    : [...prev, result]
             );
 
             startCreate();
@@ -271,12 +275,17 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
         return d ? d.toLocaleDateString("cs-CZ") : v;
     };
 
-    // ✅ žádné zelené fajfky
     const inputClass = (name) => {
         const base = "form-control";
         if (!touched[name]) return base;
         return fieldErrors[name] ? `${base} is-invalid` : base;
     };
+
+    const sortedPeriods = useMemo(() => {
+        const list = [...(periods || [])];
+        list.sort((a, b) => new Date(b.inactiveFrom) - new Date(a.inactiveFrom));
+        return list;
+    }, [periods]);
 
     return (
         <div className="modal d-block" tabIndex="-1">
@@ -299,7 +308,12 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
                                     {editing ? "Upravit období neaktivity" : "Přidat nové období neaktivity"}
                                 </h6>
 
-                                <form className="row g-3 mb-4" onSubmit={handleSubmit} noValidate>
+                                <form
+                                    ref={formRef}
+                                    className="row g-3 mb-4"
+                                    onSubmit={handleSubmit}
+                                    noValidate
+                                >
                                     <div className="col-md-6">
                                         <label className="form-label" htmlFor="inactiveFrom">Začátek</label>
                                         <DatePicker
@@ -375,42 +389,50 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
                                 )}
 
                                 {periods.length > 0 && (
-                                    <div className="table-responsive">
-                                        <table className="table table-sm table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th>Od</th>
-                                                    <th>Do</th>
-                                                    <th>Důvod</th>
-                                                    <th className="text-end">Akce</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {periods.map((p) => (
-                                                    <tr key={p.id}>
-                                                        <td>{formatDate(p.inactiveFrom)}</td>
-                                                        <td>{formatDate(p.inactiveTo)}</td>
-                                                        <td>{p.inactivityReason || <span className="text-muted">neuveden</span>}</td>
-                                                        <td className="text-end">
+                                    <div className="d-flex flex-column gap-3">
+                                        {sortedPeriods.map((p) => (
+                                            <div key={p.id} className="card shadow-sm">
+                                                <div className="card-body">
+                                                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-start gap-2">
+                                                        <div>
+                                                            <div className="mb-1">
+                                                                <span className="fw-semibold">Od:</span>{" "}
+                                                                {formatDate(p.inactiveFrom)}
+                                                            </div>
+                                                            <div className="mb-1">
+                                                                <span className="fw-semibold">Do:</span>{" "}
+                                                                {formatDate(p.inactiveTo)}
+                                                            </div>
+                                                            <div className="mb-1">
+                                                                <span className="fw-semibold">Důvod:</span>{" "}
+                                                                {p.inactivityReason || (
+                                                                    <span className="text-muted">neuveden</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="d-flex flex-column flex-sm-row gap-2 ms-md-auto">
                                                             <button
-                                                                className="btn btn-sm btn-outline-primary me-2"
+                                                                type="button"
+                                                                className="btn btn-sm btn-outline-primary"
                                                                 onClick={() => startEdit(p)}
                                                                 disabled={saving}
                                                             >
                                                                 Upravit
                                                             </button>
                                                             <button
+                                                                type="button"
                                                                 className="btn btn-sm btn-outline-danger"
                                                                 onClick={() => handleDelete(p.id)}
                                                                 disabled={saving}
                                                             >
                                                                 Smazat
                                                             </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </>

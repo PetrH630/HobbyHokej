@@ -259,19 +259,27 @@ const AdminMatchesPage = () => {
         <>
                 <BackButton />
         <div className="container mt-4">
-            <SeasonSelect />
+            
 
-            <div className="d-flex justify-content-between align-items-center mb-3">
-                <h1 className="h3 mb-0">Správa zápasů</h1>
+                <div className="d-flex flex-column flex-md-row 
+                justify-content-between 
+                align-items-start align-items-md-center 
+                gap-2 mb-3">
 
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleCreate}
-                >
-                    Vytvořit nový zápas
-                </button>
-            </div>
+                    <h1 className="h3 mb-0">Správa zápasů</h1>
+
+                    <SeasonSelect />
+
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={handleCreate}
+                    >
+                        Vytvořit nový zápas
+                    </button>
+
+                </div>
+
 
             <p className="text-muted mb-3">
                 Zde může administrátor a manažer spravovat zápasy v systému –

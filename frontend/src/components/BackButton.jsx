@@ -8,7 +8,7 @@ const BackButton = ({ label = "Zpět" }) => {
             <button
                 type="button"
                 className="btn btn-outline-primary"
-                
+
                 onClick={() => navigate(-1)}
             >
                 ← {label}

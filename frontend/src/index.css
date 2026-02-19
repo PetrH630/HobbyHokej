@@ -1,116 +1,159 @@
+/*
+  index.css
+  Mobile-first globální nastavení aplikace
+*/
+
+/* reset + bezpečné rozměry + prevence dlouhých textů */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
+/* základní rozložení a prevence horizontálního scrollu */
 html,
 body {
-  margin: 0;
-  padding: 0;
   width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
-  /* odstraní horizontální scroll */
 }
 
+html {
+  font-size: 16px;
+}
+
+body {
+  font-size: 1rem;
+  line-height: 1.5;
+  background-color: #f8f9fa;
+}
+
+/* na mobilu trochu větší čitelnost */
+@media (max-width: 576px) {
+  html {
+    font-size: 18px;
+  }
+
+  body {
+    line-height: 1.6;
+  }
+}
+
+/* root */
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* vlastní container pro obsah (pokud nepoužíváš všude Bootstrap container) */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+/* hlavní layout */
 .layout {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  /* aby footer byl vždy dole */
 }
 
 .content {
   flex: 1;
-  /* zabere volné místo mezi headerem a footerem */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
-}
-
-.container {
-  max-width: 1600px;
   width: 100%;
-  margin: 0 auto;
-  padding: 10px 16px;
 }
 
+/* footer */
 footer {
   background: #222;
-  color: #0a0101;
+  color: #ffffff;
   padding: 20px 16px;
   text-align: center;
 }
 
-.inner {
-  width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 20px;
-
-}
-
+/* seznamy */
 ul {
   list-style-position: inside;
-  /* odrážka uvnitř */
   padding-left: 1.2em;
-  /* prostor mezi okrajem a textem */
   margin: 0.5em 0;
-  /* mezera nad a pod seznamem */
   text-align: left;
-  /* aby text nebyl na středu */
 }
 
 li {
   margin-bottom: 0.5em;
-  /* mezera mezi položkami */
   line-height: 1.5em;
-  /* více vzduchu mezi řádky textu */
 }
 
+/* slider */
 .slider {
   height: 50vh;
-  /*border: 2px solid #0a0101;*/
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
-
 }
 
-/* Globální backdrop pro všechny modaly */
-body.modal-open::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1040;
-  /* pod modalem */
-}
+/* =========================
+   DIM overlay (NE pro modaly)
+   ========================= */
 
-/* Zajistí, že modal je nad backdropem */
-.modal {
-  z-index: 1050;
-}
-
-/* Globální ztmavení stránky (mimo modaly) */
+/*
+  dim-open používáš pro vlastní ztmavení stránky (detail/historie apod.)
+  Bootstrap modaly si backdrop řeší samy – proto NEDĚLÁME modal-open::before.
+*/
 body.dim-open::before {
   content: "";
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 1040;
+  pointer-events: none;
+  /* overlay je jen vizuální */
 }
 
-/* Cokoliv s touhle třídou zůstane "nad" ztmavením */
+/* tvoje klikací vrstva pro zavření detailu/historie – musí být POD kartou, ale NAD dimem */
+.global-dim-click {
+  position: fixed;
+  inset: 0;
+  z-index: 1044;
+}
+
+/* prvky, které se mají udržet nad dimem */
 .dim-keep {
   position: relative;
   z-index: 1050;
 }
 
-.global-dim-click {
-  position: fixed;
-  inset: 0;
-  z-index: 1045;
+/* =========================
+   Bootstrap modal stacking
+   ========================= */
+
+/* Bootstrap 5 default: backdrop 1050, modal 1055
+   jen pro jistotu to zafixujeme (ať ti to nic nerozbije) */
+.modal-backdrop {
+  z-index: 1050;
+}
+
+.modal {
+  z-index: 1055;
+}
+
+/* obrázky a svg */
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* bootstrap tabulky budou scrollovat jen uvnitř */
+.table-responsive {
+  width: 100%;
 }

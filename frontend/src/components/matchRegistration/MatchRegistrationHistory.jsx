@@ -1,5 +1,5 @@
 // src/components/MatchRegistration/MatchRegistrationHistory.jsx
-import { useMyMatchRegistrationHistory } from "../..//hooks/useMatchRegistrationHistory";
+import { useMyMatchRegistrationHistory } from "../../hooks/useMatchRegistrationHistory";
 import {
     excuseReasonLabel,
     formatDateTime,
@@ -13,46 +13,58 @@ const MatchRegistrationHistory = ({ matchId }) => {
     if (loading) return <p>Načítám historii…</p>;
     if (error) return <p className="text-danger">{error}</p>;
 
-    if (history.length === 0) {
+    if (!history || history.length === 0) {
         return <p>Žádná historie registrací.</p>;
     }
+
     const sortedHistory = [...history].sort(
         (a, b) => new Date(b.changedAt) - new Date(a.changedAt)
     );
 
-
     return (
-        <div className="table-responsive">
-            <table className="table table-sm table-striped table-hover align-middle">
-                <thead className="table-light">
-                    <tr>
-                        <th>Datum změny</th>
-                        <th>Status</th>
-                        <th>Tým</th>
-                        <th>Změnil</th>
-                        <th>Poznámka</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {sortedHistory.map((item) => (
-                        <tr key={item.id}>
-                            <td>{formatDateTime(item.changedAt)}</td>
-                            <td>
-                                <span className="text">
-                                    <strong>{statusLabel(item.status)}</strong>
-                                </span>
+        <div className="d-flex flex-column gap-3">
+            {sortedHistory.map((item) => (
+                <div key={item.id} className="card shadow-sm">
+                    <div className="card-body">
 
-                            </td>
-                            <td>{teamLabel(item.team)}</td>
-                            <td>{item.createdBy}</td>
-                            <td>
-                                {excuseReasonLabel(item.excuseReason)} {" - "}
+                        <div className="mb-2">
+                            <span className="fw-semibold">Datum změny:</span>{" "}
+                            <div>
+                                {formatDateTime(item.changedAt)}
+                            </div>
+                        </div>
+
+                        <hr className="my-2" />
+
+                        <div className="row g-2">
+
+                            <div className="col-12 col-md-4">
+                                <span className="fw-semibold">Status:</span>{" "}
+                                <strong>{statusLabel(item.status)}</strong>
+                            </div>
+
+                            <div className="col-12 col-md-4">
+                                <span className="fw-semibold">Tým:</span>{" "}
+                                {teamLabel(item.team)}
+                            </div>
+
+                            <div className="col-12 col-md-4">
+                                <span className="fw-semibold">Změnil:</span>{" "}
+                                {item.createdBy}
+                            </div>
+
+                            <div className="col-12">
+                                <span className="fw-semibold">Poznámka:</span>{" "}
+                                {excuseReasonLabel(item.excuseReason)}
+                                {item.adminNote || item.excuseNote ? " - " : ""}
                                 {item.adminNote || item.excuseNote}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            ))}
         </div>
     );
 };
