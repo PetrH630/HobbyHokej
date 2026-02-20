@@ -1,13 +1,9 @@
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.data.enums.*;
 import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.data.repositories.MatchRepository;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
@@ -344,7 +340,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return matchRegistrationMapper.toDTO(updated);
     }
 
-
     /**
      * Nastavuje registraci do stavu EXCUSED na základě rozhodnutí administrátora nebo manažera po předchozím NO_EXCUSED.
      *
@@ -401,19 +396,16 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return matchRegistrationMapper.toDTO(updated);
     }
 
-
     /**
      * Změní tým hráče u existující registrace na zápas.
      *
-     * Metoda je používána pro přepnutí hráče mezi týmem LIGHT a DARK
-     * u zápasu, který se ještě neuskutečnil. Nejprve je ověřena existence
-     * zápasu a hráče. Následně je zkontrolováno, že datum zápasu je v budoucnosti
-     * a že aktuální stav registrace hráče je REGISTERED.
+     * Metoda je používána pro přepnutí hráče mezi týmem LIGHT a DARK.
+     * Nejprve je ověřena existence zápasu a hráče. Následně je zkontrolováno, že
+     * běžný hráč (ROLE_PLAYER) nemění tým u již proběhlého zápasu. Administrátor
+     * nebo manažer tuto operaci mohou provádět i zpětně.
      *
      * Pokud jsou splněny validační podmínky, je provedena aktualizace registrace.
      * Stav registrace zůstává REGISTERED, ale je přepnut tým na opačný.
-     * Aktualizace je delegována na metodu updateRegistrationStatus,
-     * která zajišťuje konzistenci změny a případný audit.
      *
      * Po úspěšné změně je vyhodnocen typ notifikace a v případě potřeby
      * je hráči odeslána odpovídající notifikace.
@@ -424,28 +416,40 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      * @param matchId identifikátor zápasu, u kterého má být tým změněn
      * @param playerId identifikátor hráče, jehož registrace má být upravena
      * @return aktualizovaná registrace převedená do DTO
-     * @throws InvalidMatchDateTimeException pokud je zápas již v minulosti
+     * @throws InvalidMatchDateTimeException pokud běžný hráč mění tým u již proběhlého zápasu
      * @throws InvalidPlayerStatusException pokud registrace není ve stavu REGISTERED
      */
     public MatchRegistrationDTO changeRegistrationTeam(Long playerId,
-                                                       Long matchId){
+                                                       Long matchId) {
 
         MatchEntity match = getMatchOrThrow(matchId);
         PlayerEntity player = getPlayerOrThrow(playerId);
 
-        if (match.getDateTime().isBefore(now())) {
+        // Debug informativně – aktuálně přihlášený uživatel a jeho autority
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            log.debug("changeRegistrationTeam – current user: {}", auth.getName());
+            log.debug("changeRegistrationTeam – authorities: {}", auth.getAuthorities());
+        } else {
+            log.debug("changeRegistrationTeam – no authenticated user");
+        }
+
+        // Časové omezení platí pouze pro hráče (ROLE_PLAYER).
+        // Admin / Manager mohou měnit tým i u minulých zápasů.
+        if (match.getDateTime().isBefore(now()) && isCurrentUserPlayer()) {
             throw new InvalidMatchDateTimeException(
                     "BE - Team lze změnit pouze u zápasu, které teprve budou."
             );
         }
+
         MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
         Team oldTeam = registration.getTeam();
+
         if (registration.getStatus() != PlayerMatchStatus.REGISTERED) {
             throw new InvalidPlayerStatusException(
                     "BE - Team lze změnit pouze z registrace REGISTERED."
             );
         }
-
 
         PlayerMatchStatus newStatus = PlayerMatchStatus.REGISTERED;
         Team newTeam = oldTeam.opposite();
@@ -702,7 +706,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     // PRIVÁTNÍ HELPERY – NAČÍTÁNÍ ENTIT A ZÁKLADNÍ LOGIKA
     // ====================================================
 
-    // TODO - možná změnit Object context na MatchRegistrationEntity entity
     /**
      * Deleguje odeslání notifikace hráči do NotificationService.
      *
@@ -788,8 +791,6 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
         return registeredCount < match.getMaxPlayers();
     }
-
-    // TODO - ŘEŠENO NOTIFIKACEMI - ASI SMAZAT
 
     /**
      * Odesílá SMS zprávu hráči navázanému na registraci, pokud je k dispozici telefonní číslo.
@@ -1005,8 +1006,4 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return seasonService.getActiveSeason().getId();
     }
 
-
-
-
 }
-

@@ -170,10 +170,8 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Označuje hráče v konkrétním zápase jako neomluveně nepřítomného.
+     * Mění team u přihlášeného hráče ke konkrétní registraci na opačný team.
      *
-     * Slouží k zaznamenání neomluvené absence hráče. Pro záznam může být
-     * doplněna interní poznámka administrátora nebo manažera.
      *Aktuální hráč se získává
      *      * z {@link CurrentPlayerService}.
      * @param matchId   ID zápasu     *
@@ -187,6 +185,22 @@ public class MatchRegistrationController {
         currentPlayerService.requireCurrentPlayer();
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
         return matchRegistrationService.changeRegistrationTeam(currentPlayerId, matchId);
+    }
+
+    /**
+     * Mění team u hráče dle jeho id na opačný team.
+     *
+     * @param playerId  ID hráče
+     * @param matchId   ID zápasu     *
+     * @return {@link MatchRegistrationDTO} s aktualizovaným stavem registrace
+     */
+    @PatchMapping("/{playerId}/{matchId}/change-team")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO changeRegistrationTeamAdmin(
+            @PathVariable Long playerId,
+            @PathVariable Long matchId) {
+
+        return matchRegistrationService.changeRegistrationTeam(playerId, matchId);
     }
 
 

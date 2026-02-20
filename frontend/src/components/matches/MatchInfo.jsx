@@ -7,6 +7,7 @@ import {
     markNoExcusedAdmin,
     cancelNoExcusedAdmin,
 } from "../../api/matchRegistrationApi";
+import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
 
 const parseDateTime = (dt) => {
     if (!dt) return null;
@@ -17,6 +18,7 @@ const parseDateTime = (dt) => {
 
 const MatchInfo = ({ match, onRefresh }) => {
     const { showNotification } = useNotification();
+    const { currentPlayer } = useCurrentPlayer();
 
     const [showNoExcuseModal, setShowNoExcuseModal] = useState(false);
     const [showCancelNoExcuseModal, setShowCancelNoExcuseModal] =
@@ -30,6 +32,41 @@ const MatchInfo = ({ match, onRefresh }) => {
     // seznamy hráčů pro výběr
     const registeredPlayers = match?.registeredPlayers ?? [];
     const noExcusedPlayers = match?.noExcusedPlayers ?? [];
+
+    /**
+     * Callback volaný z MatchRegistrationInfo po úspěšné změně týmu.
+     *
+     * @param {string} targetTeam - cílový tým ("DARK" / "LIGHT")
+     * @param {object} player - hráč, kterému byl tým změněn
+     * @param {object} updatedRegistration - aktualizovaná registrace z backendu
+     */
+    const handleSwitchTeam = async (targetTeam, player, updatedRegistration) => {
+        console.log("Team successfully changed:", {
+            targetTeam,
+            player,
+            updatedRegistration,
+            matchId: match.id,
+        });
+
+        if (!onRefresh) {
+            return;
+        }
+
+        try {
+            await onRefresh();
+        } catch (err) {
+            console.error(
+                "Chyba při obnově dat zápasu po změně týmu:",
+                err
+            );
+            if (showNotification) {
+                showNotification(
+                    "Tým byl změněn, ale nepodařilo se obnovit data zápasu.",
+                    "warning"
+                );
+            }
+        }
+    };
 
     const handleMarkNoExcuse = async (playerId, adminNote) => {
         try {
@@ -89,7 +126,7 @@ const MatchInfo = ({ match, onRefresh }) => {
     return (
         <div className="card">
             <div className="card-body">
-              {/* HLAVIČKA – vlevo info o zápase, vpravo admin tlačítka */}
+                {/* HLAVIČKA – vlevo info o zápase, vpravo admin tlačítka */}
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         {match.description && (
@@ -160,7 +197,11 @@ const MatchInfo = ({ match, onRefresh }) => {
                 </div>
 
                 <h4 className="mt-4">Sestava:</h4>
-                <MatchRegistrationInfo match={match} />
+                <MatchRegistrationInfo
+                    match={match}
+                    currentPlayer={currentPlayer}
+                    onSwitchTeam={handleSwitchTeam}
+                />
             </div>
 
             {/* MODAL – NEOMLUVIT HRÁČE */}
@@ -242,7 +283,9 @@ const NoExcuseModal = ({ match, saving, onConfirm, onClose }) => {
                                 </select>
                             </div>
                             <div className="mb-3">
-                                <label className="form-label">Poznámka (volitelné)</label>
+                                <label className="form-label">
+                                    Poznámka (volitelné)
+                                </label>
                                 <textarea
                                     className="form-control"
                                     rows="2"
@@ -255,7 +298,6 @@ const NoExcuseModal = ({ match, saving, onConfirm, onClose }) => {
                                     Poznámka se uloží k tomuto neomluvení hráče.
                                 </div>
                             </div>
-
 
                             {registered.length === 0 && (
                                 <div className="alert alert-info">
@@ -350,7 +392,9 @@ const CancelNoExcuseModal = ({ match, saving, onConfirm, onClose }) => {
                                 </select>
                             </div>
                             <div className="mb-3">
-                                <label className="form-label">Poznámka k omluvení (volitelné)</label>
+                                <label className="form-label">
+                                    Poznámka k omluvení (volitelné)
+                                </label>
                                 <textarea
                                     className="form-control"
                                     rows="2"

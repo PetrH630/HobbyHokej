@@ -6,6 +6,8 @@ import { useNotification } from "../../context/NotificationContext";
 import {
     markNoExcusedAdmin,
     cancelNoExcusedAdmin,
+    // TODO: import admin změny týmu
+    changeRegistrationTeamAdmin,
 } from "../../api/matchRegistrationApi";
 import AdminPlayerRegistrationHistoryModal from "./AdminPlayerRegistrationHistoryModal";
 
@@ -90,10 +92,32 @@ const AdminMatchInfo = ({ match, onRefresh }) => {
         await handleCancelNoExcuse(historyPlayer.id, excuseNote);
     };
 
+    // TODO: změna týmu pro aktuálně vybraného hráče v modalu
+    const handleChangeTeamForHistoryPlayer = async () => {
+        if (!historyPlayer) return;
+        try {
+            setSaving(true);
+            await changeRegistrationTeamAdmin(historyPlayer.id, match.id);
+            showNotification("Tým hráče byl změněn.", "success");
+            if (onRefresh) {
+                await onRefresh();
+            }
+        } catch (err) {
+            const msg =
+                err?.response?.data?.message ||
+                err?.message ||
+                "Změna týmu hráče se nezdařila.";
+            showNotification(msg, "danger");
+            // důležité: vyhodíme chybu dál, aby ji modal poznal a neukazoval success
+            throw err; // TODO
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
         <div className="card">
             <div className="card-body">
-                
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         {match.description && (
@@ -136,8 +160,6 @@ const AdminMatchInfo = ({ match, onRefresh }) => {
                             </small>
                         </p>
                     </div>
-                
-                    
                 </div>
 
                 <h4 className="mt-4">Sestava:</h4>
@@ -146,7 +168,7 @@ const AdminMatchInfo = ({ match, onRefresh }) => {
                     onPlayerClick={setHistoryPlayer}
                 />
             </div>
-            
+
             {historyPlayer && (
                 <AdminPlayerRegistrationHistoryModal
                     match={match}
@@ -155,6 +177,8 @@ const AdminMatchInfo = ({ match, onRefresh }) => {
                     onClose={() => setHistoryPlayer(null)}
                     onMarkNoExcuse={handleMarkNoExcuseForHistoryPlayer}
                     onCancelNoExcuse={handleCancelNoExcuseForHistoryPlayer}
+                    // TODO: předání handleru pro změnu týmu do modalu
+                    onChangeTeam={handleChangeTeamForHistoryPlayer}
                 />
             )}
         </div>
