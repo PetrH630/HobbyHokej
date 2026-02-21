@@ -15,6 +15,7 @@ import cz.phsoft.hokej.models.services.sms.SmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import cz.phsoft.hokej.models.services.notification.InAppNotificationService;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -46,10 +47,12 @@ public class NotificationServiceImpl implements NotificationService {
     private final SmsMessageBuilder smsMessageBuilder;
     private final EmailMessageBuilder emailMessageBuilder;
     private final NotificationPreferencesService notificationPreferencesService;
+    private final InAppNotificationService inAppNotificationService;
 
     // demo režim a úložiště notifikací pro demo
     private final DemoModeService demoModeService;
     private final DemoNotificationStore demoNotificationStore;
+
 
     /**
      * Typy notifikací, pro které se nemá posílat kopie manažerům.
@@ -70,7 +73,8 @@ public class NotificationServiceImpl implements NotificationService {
             EmailMessageBuilder emailMessageBuilder,
             NotificationPreferencesService notificationPreferencesService,
             DemoModeService demoModeService,
-            DemoNotificationStore demoNotificationStore
+            DemoNotificationStore demoNotificationStore,
+            InAppNotificationService inAppNotificationService
     ) {
         this.appUserRepository = appUserRepository;
         this.emailService = emailService;
@@ -80,6 +84,7 @@ public class NotificationServiceImpl implements NotificationService {
         this.notificationPreferencesService = notificationPreferencesService;
         this.demoModeService = demoModeService;
         this.demoNotificationStore = demoNotificationStore;
+        this.inAppNotificationService = inAppNotificationService;
     }
 
     @Override
@@ -159,6 +164,7 @@ public class NotificationServiceImpl implements NotificationService {
         } else {
             log.debug("Typ {} je v MANAGER_COPY_BLACKLIST – kopie manažerům se neposílá (notifyPlayer).", type);
         }
+        inAppNotificationService.storeForPlayer(player, type, context);
     }
 
     @Override
@@ -254,9 +260,9 @@ public class NotificationServiceImpl implements NotificationService {
                     continue;
                 }
 
-                // DEMO režim pro manager kopie v notifyUser
+
                 if (demoModeService.isDemoMode()) {
-                    // DEMO CHANGED: používáme novou signaturu addEmail(...)
+
                     demoNotificationStore.addEmail(
                             managerEmail,
                             managerContent.subject(),
@@ -273,11 +279,12 @@ public class NotificationServiceImpl implements NotificationService {
                         emailService.sendSimpleEmail(managerEmail, managerContent.subject(), managerContent.body());
                     }
                 }
-                // KONEC DEMO
+
             }
         } else {
             log.debug("Typ {} je v MANAGER_COPY_BLACKLIST – kopie manažerům se neposílá (notifyUser).", type);
         }
+        inAppNotificationService.storeForUser(user, type, context);
     }
 
     // Pomocné metody pro e-mail

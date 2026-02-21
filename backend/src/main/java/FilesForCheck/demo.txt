@@ -6,11 +6,9 @@ DemoModeGuard.java
 DemoModePolicy.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\demo\DemoModeGuard.java
 -----
-
 package cz.phsoft.hokej.models.services.demo;
 
 import cz.phsoft.hokej.exceptions.DemoModeOperationNotAllowedException;
@@ -30,14 +28,14 @@ public class DemoModeGuard {
     }
 
     /**
-     * Guard služba, která se používá pro blokování write operací v demo režimu.
+     * Guard sluĹľba, kterĂˇ se pouĹľĂ­vĂˇ pro blokovĂˇnĂ­ write operacĂ­ v demo reĹľimu.
      *
-     * Třída centralizuje kontrolu pravidel demo režimu tak, aby se podmínky
-     * nepsaly opakovaně v service vrstvách. Při pokusu o nepovolenou operaci
+     * TĹ™Ă­da centralizuje kontrolu pravidel demo reĹľimu tak, aby se podmĂ­nky
+     * nepsaly opakovanÄ› v service vrstvĂˇch. PĹ™i pokusu o nepovolenou operaci
      * se vyhazuje {@link DemoModeOperationNotAllowedException}.
      *
-     * Kontrola se vyhodnocuje na základě {@link DemoModePolicy}, která určuje,
-     * zda je daný uživatel považován za chráněného demo uživatele.
+     * Kontrola se vyhodnocuje na zĂˇkladÄ› {@link DemoModePolicy}, kterĂˇ urÄŤuje,
+     * zda je danĂ˝ uĹľivatel povaĹľovĂˇn za chrĂˇnÄ›nĂ©ho demo uĹľivatele.
      */
     public void write(Long userId, String message) {
         if (policy.isProtectedDemoUser(userId)) {
@@ -46,14 +44,14 @@ public class DemoModeGuard {
     }
 
     /**
-     * Provede write operaci, pokud je v demo režimu povolena.
+     * Provede write operaci, pokud je v demo reĹľimu povolena.
      *
-     * Pokud je uživatel vyhodnocen jako chráněný demo uživatel, operace se
-     * neprovede a vyhodí se {@link DemoModeOperationNotAllowedException}.
+     * Pokud je uĹľivatel vyhodnocen jako chrĂˇnÄ›nĂ˝ demo uĹľivatel, operace se
+     * neprovede a vyhodĂ­ se {@link DemoModeOperationNotAllowedException}.
      *
-     * @param userId Identifikátor uživatele, pro kterého se kontrola vyhodnocuje.
-     * @param message Chybová zpráva, která se použije při blokaci operace.
-     * @param action Akce reprezentující write operaci.
+     * @param userId IdentifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje.
+     * @param message ChybovĂˇ zprĂˇva, kterĂˇ se pouĹľije pĹ™i blokaci operace.
+     * @param action Akce reprezentujĂ­cĂ­ write operaci.
      */
     public void write(Long userId, String message, Runnable action) {
         write(userId, message);
@@ -61,16 +59,16 @@ public class DemoModeGuard {
     }
 
     /**
-     * Provede write operaci, pokud je v demo režimu povolena, a vrátí její výsledek.
+     * Provede write operaci, pokud je v demo reĹľimu povolena, a vrĂˇtĂ­ jejĂ­ vĂ˝sledek.
      *
-     * Pokud je uživatel vyhodnocen jako chráněný demo uživatel, operace se
-     * neprovede a vyhodí se {@link DemoModeOperationNotAllowedException}.
+     * Pokud je uĹľivatel vyhodnocen jako chrĂˇnÄ›nĂ˝ demo uĹľivatel, operace se
+     * neprovede a vyhodĂ­ se {@link DemoModeOperationNotAllowedException}.
      *
-     * @param userId Identifikátor uživatele, pro kterého se kontrola vyhodnocuje.
-     * @param message Chybová zpráva, která se použije při blokaci operace.
-     * @param action Akce reprezentující write operaci vracející výsledek.
-     * @return Výsledek provedené write operace.
-     * @param <T> Typ návratové hodnoty write operace.
+     * @param userId IdentifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje.
+     * @param message ChybovĂˇ zprĂˇva, kterĂˇ se pouĹľije pĹ™i blokaci operace.
+     * @param action Akce reprezentujĂ­cĂ­ write operaci vracejĂ­cĂ­ vĂ˝sledek.
+     * @return VĂ˝sledek provedenĂ© write operace.
+     * @param <T> Typ nĂˇvratovĂ© hodnoty write operace.
      */
     public <T> T write(Long userId, String message, Supplier<T> action) {
         write(userId, message);
@@ -78,19 +76,19 @@ public class DemoModeGuard {
     }
 
     /**
-     * Provede write operaci, pokud je v demo režimu povolena, nebo vyvolá blokaci s finalize krokem.
+     * Provede write operaci, pokud je v demo reĹľimu povolena, nebo vyvolĂˇ blokaci s finalize krokem.
      *
-     * Pokud je uživatel vyhodnocen jako chráněný demo uživatel, write operace se neprovede.
-     * Následně se provede finalize část v nové transakci a poté se vyhodí
+     * Pokud je uĹľivatel vyhodnocen jako chrĂˇnÄ›nĂ˝ demo uĹľivatel, write operace se neprovede.
+     * NĂˇslednÄ› se provede finalize ÄŤĂˇst v novĂ© transakci a potĂ© se vyhodĂ­
      * {@link DemoModeOperationNotAllowedException}.
      *
-     * Metoda se používá pro situace, kdy se má v demo režimu provést úklidová akce,
-     * například odstranění reset tokenu, a současně se má volajícímu vrátit chyba.
+     * Metoda se pouĹľĂ­vĂˇ pro situace, kdy se mĂˇ v demo reĹľimu provĂ©st ĂşklidovĂˇ akce,
+     * napĹ™Ă­klad odstranÄ›nĂ­ reset tokenu, a souÄŤasnÄ› se mĂˇ volajĂ­cĂ­mu vrĂˇtit chyba.
      *
-     * @param userId Identifikátor uživatele, pro kterého se kontrola vyhodnocuje.
-     * @param message Chybová zpráva, která se použije při blokaci operace.
-     * @param writeAction Akce reprezentující standardní write operaci.
-     * @param finalizeAction Akce reprezentující úklidovou operaci, která se má provést i v demo režimu.
+     * @param userId IdentifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje.
+     * @param message ChybovĂˇ zprĂˇva, kterĂˇ se pouĹľije pĹ™i blokaci operace.
+     * @param writeAction Akce reprezentujĂ­cĂ­ standardnĂ­ write operaci.
+     * @param finalizeAction Akce reprezentujĂ­cĂ­ Ăşklidovou operaci, kterĂˇ se mĂˇ provĂ©st i v demo reĹľimu.
      */
     public void writeWithFinalize(Long userId,
                                   String message,
@@ -108,12 +106,12 @@ public class DemoModeGuard {
     }
 
     /**
-     * Provede finalize operaci v nové transakci.
+     * Provede finalize operaci v novĂ© transakci.
      *
-     * Nová transakce se používá pro zajištění, že finalize operace bude provedena
-     * nezávisle na transakčním kontextu volající write operace, která je následně blokována.
+     * NovĂˇ transakce se pouĹľĂ­vĂˇ pro zajiĹˇtÄ›nĂ­, Ĺľe finalize operace bude provedena
+     * nezĂˇvisle na transakÄŤnĂ­m kontextu volajĂ­cĂ­ write operace, kterĂˇ je nĂˇslednÄ› blokovĂˇna.
      *
-     * @param finalizeAction Akce, která se má provést v nové transakci.
+     * @param finalizeAction Akce, kterĂˇ se mĂˇ provĂ©st v novĂ© transakci.
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected void runFinalizeInNewTransaction(Runnable finalizeAction) {
@@ -121,62 +119,57 @@ public class DemoModeGuard {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\demo\DemoModePolicy.java
 -----
-
 package cz.phsoft.hokej.models.services.demo;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Politika pro vyhodnocování pravidel demo režimu.
+ * Politika pro vyhodnocovĂˇnĂ­ pravidel demo reĹľimu.
  *
- * Třída se používá pro centralizaci rozhodování, zda je aplikace spuštěna
- * v demo režimu a zda je konkrétní uživatel považován za chráněného
- * demo uživatele. Tato politika je využívána zejména třídou DemoModeGuard
- * ve service vrstvě při blokování write operací.
+ * TĹ™Ă­da se pouĹľĂ­vĂˇ pro centralizaci rozhodovĂˇnĂ­, zda je aplikace spuĹˇtÄ›na
+ * v demo reĹľimu a zda je konkrĂ©tnĂ­ uĹľivatel povaĹľovĂˇn za chrĂˇnÄ›nĂ©ho
+ * demo uĹľivatele. Tato politika je vyuĹľĂ­vĂˇna zejmĂ©na tĹ™Ă­dou DemoModeGuard
+ * ve service vrstvÄ› pĹ™i blokovĂˇnĂ­ write operacĂ­.
  *
- * Aktivace demo režimu se řídí konfigurační vlastností aplikace.
+ * Aktivace demo reĹľimu se Ĺ™Ă­dĂ­ konfiguraÄŤnĂ­ vlastnostĂ­ aplikace.
  */
 @Component
 public class DemoModePolicy {
 
     /**
-     * Příznak určující, zda je aplikace spuštěna v demo režimu.
+     * PĹ™Ă­znak urÄŤujĂ­cĂ­, zda je aplikace spuĹˇtÄ›na v demo reĹľimu.
      *
-     * Hodnota se načítá z konfigurační vlastnosti app.demo-mode.
+     * Hodnota se naÄŤĂ­tĂˇ z konfiguraÄŤnĂ­ vlastnosti app.demo-mode.
      */
     @Value("${app.demo-mode:false}")
     private boolean demoMode;
 
     /**
-     * Vrací informaci, zda je aplikace spuštěna v demo režimu.
+     * VracĂ­ informaci, zda je aplikace spuĹˇtÄ›na v demo reĹľimu.
      *
-     * Metoda se používá zejména pro podmíněné chování ve service vrstvě.
+     * Metoda se pouĹľĂ­vĂˇ zejmĂ©na pro podmĂ­nÄ›nĂ© chovĂˇnĂ­ ve service vrstvÄ›.
      *
-     * @return True, pokud je demo režim aktivní, jinak false.
+     * @return True, pokud je demo reĹľim aktivnĂ­, jinak false.
      */
     public boolean isDemoMode() {
         return demoMode;
     }
 
     /**
-     * Vyhodnocuje, zda je daný uživatel považován za chráněného demo uživatele.
+     * Vyhodnocuje, zda je danĂ˝ uĹľivatel povaĹľovĂˇn za chrĂˇnÄ›nĂ©ho demo uĹľivatele.
      *
-     * Uživatel je považován za chráněného, pokud je aplikace spuštěna
-     * v demo režimu a jeho identifikátor spadá do definovaného rozsahu.
-     * Tato metoda se používá pro blokování write operací nad demonstračními daty.
+     * UĹľivatel je povaĹľovĂˇn za chrĂˇnÄ›nĂ©ho, pokud je aplikace spuĹˇtÄ›na
+     * v demo reĹľimu a jeho identifikĂˇtor spadĂˇ do definovanĂ©ho rozsahu.
+     * Tato metoda se pouĹľĂ­vĂˇ pro blokovĂˇnĂ­ write operacĂ­ nad demonstraÄŤnĂ­mi daty.
      *
-     * @param userId Identifikátor uživatele, který má být vyhodnocen.
-     * @return True, pokud je uživatel chráněný v demo režimu, jinak false.
+     * @param userId IdentifikĂˇtor uĹľivatele, kterĂ˝ mĂˇ bĂ˝t vyhodnocen.
+     * @return True, pokud je uĹľivatel chrĂˇnÄ›nĂ˝ v demo reĹľimu, jinak false.
      */
     public boolean isProtectedDemoUser(Long userId) {
         return demoMode && userId != null && userId <= 10;
     }
 }
-
-

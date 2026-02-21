@@ -8,11 +8,9 @@ EmailWedosService.java
 package-info.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\email\EmailMessageBuilder.java
 -----
-
 package cz.phsoft.hokej.models.services.email;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
@@ -32,22 +30,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 /**
- * Builder pro sestavování obsahu emailových notifikací.
+ * Builder pro sestavovĂˇnĂ­ obsahu emailovĂ˝ch notifikacĂ­.
  *
- * Třída slouží k centralizaci veškerých textů emailových zpráv
- * používaných v aplikaci. Na základě typu notifikace a kontextu
- * sestavuje předmět a tělo emailu, včetně rozhodnutí, zda se jedná
- * o HTML nebo plain text zprávu.
+ * TĹ™Ă­da slouĹľĂ­ k centralizaci veĹˇkerĂ˝ch textĹŻ emailovĂ˝ch zprĂˇv
+ * pouĹľĂ­vanĂ˝ch v aplikaci. Na zĂˇkladÄ› typu notifikace a kontextu
+ * sestavuje pĹ™edmÄ›t a tÄ›lo emailu, vÄŤetnÄ› rozhodnutĂ­, zda se jednĂˇ
+ * o HTML nebo plain text zprĂˇvu.
  *
- * Odpovědnost třídy:
- * - sestavení předmětu a těla emailu podle NotificationType,
- * - rozlišení cílového příjemce (uživatel, hráč, manažer),
- * - sjednocení formátu a struktury emailových zpráv.
+ * OdpovÄ›dnost tĹ™Ă­dy:
+ * - sestavenĂ­ pĹ™edmÄ›tu a tÄ›la emailu podle NotificationType,
+ * - rozliĹˇenĂ­ cĂ­lovĂ©ho pĹ™Ă­jemce (uĹľivatel, hrĂˇÄŤ, manaĹľer),
+ * - sjednocenĂ­ formĂˇtu a struktury emailovĂ˝ch zprĂˇv.
  *
- * Třída neřeší:
- * - samotné odesílání emailů,
- * - rozhodování, komu má být notifikace doručena,
- * - oprávnění, validaci vstupů ani načítání entit.
+ * TĹ™Ă­da neĹ™eĹˇĂ­:
+ * - samotnĂ© odesĂ­lĂˇnĂ­ emailĹŻ,
+ * - rozhodovĂˇnĂ­, komu mĂˇ bĂ˝t notifikace doruÄŤena,
+ * - oprĂˇvnÄ›nĂ­, validaci vstupĹŻ ani naÄŤĂ­tĂˇnĂ­ entit.
  */
 @Component
 public class EmailMessageBuilder {
@@ -59,36 +57,36 @@ public class EmailMessageBuilder {
     }
 
     /**
-     * Datový nosič pro obsah emailové zprávy.
+     * DatovĂ˝ nosiÄŤ pro obsah emailovĂ© zprĂˇvy.
      *
-     * Slouží jako návratová hodnota builderu a je následně
-     * předávána do EmailService k odeslání.
+     * SlouĹľĂ­ jako nĂˇvratovĂˇ hodnota builderu a je nĂˇslednÄ›
+     * pĹ™edĂˇvĂˇna do EmailService k odeslĂˇnĂ­.
      *
-     * @param subject předmět emailu
-     * @param body    tělo emailu
-     * @param html    příznak HTML obsahu
+     * @param subject pĹ™edmÄ›t emailu
+     * @param body    tÄ›lo emailu
+     * @param html    pĹ™Ă­znak HTML obsahu
      */
     public record EmailContent(String subject, String body, boolean html) {
     }
 
     /**
-     * Formátovač data a času zápasu používaný v emailových zprávách.
+     * FormĂˇtovaÄŤ data a ÄŤasu zĂˇpasu pouĹľĂ­vanĂ˝ v emailovĂ˝ch zprĂˇvĂˇch.
      */
     private static final DateTimeFormatter MATCH_DATETIME_FORMATTER =
             DateTimeFormatter.ofPattern("EEEE dd.MM.yyyy  HH:mm", new Locale("cs", "CZ"));
 
-    // Emailové zprávy pro manažera
+    // EmailovĂ© zprĂˇvy pro manaĹľera
 
     /**
-     * Vytváří kopii emailu určenou manažerovi.
+     * VytvĂˇĹ™Ă­ kopii emailu urÄŤenou manaĹľerovi.
      *
-     * Nejprve se pokusí sestavit email ve variantě pro uživatele,
-     * pokud není k dispozici, použije variantu pro hráče. Výsledná
-     * zpráva je upravena tak, aby bylo zřejmé, že se jedná o kopii
-     * určenou manažerovi.
+     * Nejprve se pokusĂ­ sestavit email ve variantÄ› pro uĹľivatele,
+     * pokud nenĂ­ k dispozici, pouĹľije variantu pro hrĂˇÄŤe. VĂ˝slednĂˇ
+     * zprĂˇva je upravena tak, aby bylo zĹ™ejmĂ©, Ĺľe se jednĂˇ o kopii
+     * urÄŤenou manaĹľerovi.
      *
-     * Pokud pro daný typ notifikace neexistuje žádná šablona,
-     * metoda vrací null.
+     * Pokud pro danĂ˝ typ notifikace neexistuje ĹľĂˇdnĂˇ Ĺˇablona,
+     * metoda vracĂ­ null.
      */
     public EmailContent buildForManager(NotificationType type,
                                         PlayerEntity player,
@@ -110,12 +108,12 @@ public class EmailMessageBuilder {
             return null;
         }
 
-        String subject = "[Kopie pro manažera] " + base.subject();
+        String subject = "[Kopie pro manaĹľera] " + base.subject();
 
         String body;
         if (base.html()) {
             body = """
-                    <p><strong>Zpráva pro manažera – %s</strong></p>
+                    <p><strong>ZprĂˇva pro manaĹľera â€“ %s</strong></p>
                     <hr>
                     %s
                     """.formatted(
@@ -124,7 +122,7 @@ public class EmailMessageBuilder {
             );
         } else {
             body = """
-                    Zpráva pro manažera – %s
+                    ZprĂˇva pro manaĹľera â€“ %s
                     ----------------------------------------
                     %s
                     """.formatted(
@@ -136,13 +134,13 @@ public class EmailMessageBuilder {
         return new EmailContent(subject, body, base.html());
     }
 
-    // Emailové zprávy pro uživatele
+    // EmailovĂ© zprĂˇvy pro uĹľivatele
 
     /**
-     * Sestavuje emailovou zprávu určenou aplikačnímu uživateli.
+     * Sestavuje emailovou zprĂˇvu urÄŤenou aplikaÄŤnĂ­mu uĹľivateli.
      *
-     * Z kontextu nebo z vazby přes hráče se určuje cílový uživatel,
-     * jeho jméno a kontaktní email. Samotná volba šablony je řízena
+     * Z kontextu nebo z vazby pĹ™es hrĂˇÄŤe se urÄŤuje cĂ­lovĂ˝ uĹľivatel,
+     * jeho jmĂ©no a kontaktnĂ­ email. SamotnĂˇ volba Ĺˇablony je Ĺ™Ă­zena
      * hodnotou NotificationType.
      */
     public EmailContent buildForUser(NotificationType type,
@@ -157,204 +155,204 @@ public class EmailMessageBuilder {
                         ? userEmail
                         : (user != null && user.getEmail() != null
                         ? user.getEmail()
-                        : "(neznámý email)");
+                        : "(neznĂˇmĂ˝ email)");
 
         String userName;
         if (user != null) {
             userName = fullUserName(user);
-            if ("(neznámý uživatel)".equals(userName)
-                    && !"(neznámý email)".equals(safeUserEmail)) {
+            if ("(neznĂˇmĂ˝ uĹľivatel)".equals(userName)
+                    && !"(neznĂˇmĂ˝ email)".equals(safeUserEmail)) {
                 userName = safeUserEmail;
             }
         } else {
-            userName = !"(neznámý email)".equals(safeUserEmail)
+            userName = !"(neznĂˇmĂ˝ email)".equals(safeUserEmail)
                     ? safeUserEmail
-                    : "(neznámý uživatel)";
+                    : "(neznĂˇmĂ˝ uĹľivatel)";
         }
 
         String playerName = fullPlayerName(player);
         String activationLink = resolveActivationLink(context);
-        String greeting = "Dobrý den " + escape(userName) + ",";
+        String greeting = "DobrĂ˝ den " + escape(userName) + ",";
 
-        // logika switch zůstává beze změny
+        // logika switch zĹŻstĂˇvĂˇ beze zmÄ›ny
         return switch (type) {
             // =====================================
-            // PLAYER – vazba hráče na uživatele
+            // PLAYER â€“ vazba hrĂˇÄŤe na uĹľivatele
             // =====================================
             case PLAYER_CREATED -> {
-                String subject = "Hráč vytvořen";
+                String subject = "HrĂˇÄŤ vytvoĹ™en";
 
                 String main = """
-                        <p>hráč <strong>%s</strong> byl úspěšně vytvořen.</p>
-                        <p>Počkejte prosím na schválení administrátorem.</p>
-                        <p>Budete o schválení informován e-mailem.</p>
-                        <p>Vaše kontaktní údaje:</p>
+                        <p>hrĂˇÄŤ <strong>%s</strong> byl ĂşspÄ›ĹˇnÄ› vytvoĹ™en.</p>
+                        <p>PoÄŤkejte prosĂ­m na schvĂˇlenĂ­ administrĂˇtorem.</p>
+                        <p>Budete o schvĂˇlenĂ­ informovĂˇn e-mailem.</p>
+                        <p>VaĹˇe kontaktnĂ­ Ăşdaje:</p>
                         <ul>
-                            <li>Jméno a příjmení: %s</li>
+                            <li>JmĂ©no a pĹ™Ă­jmenĂ­: %s</li>
                             <li>Email: %s</li>
                         </ul>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(playerName),
                         escape(userName),
                         escape(safeUserEmail)
                 );
 
-                String footer = "Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.";
+                String footer = "Tento e-mail byl vygenerovĂˇn automaticky, neodpovĂ­dejte prosĂ­m na nÄ›j.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case PLAYER_UPDATED -> {
-                String subject = "Hráč upraven";
+                String subject = "HrĂˇÄŤ upraven";
 
                 String main = """
-                        <p>údaje hráče <strong>%s</strong> byly aktualizovány.</p>
-                        <p>Vaše kontaktní údaje:</p>
+                        <p>Ăşdaje hrĂˇÄŤe <strong>%s</strong> byly aktualizovĂˇny.</p>
+                        <p>VaĹˇe kontaktnĂ­ Ăşdaje:</p>
                         <ul>
-                            <li>Jméno a příjmení: %s</li>
+                            <li>JmĂ©no a pĹ™Ă­jmenĂ­: %s</li>
                             <li>Email: %s</li>
                         </ul>
-                        <p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>Pokud jste zmÄ›ny neprovĂˇdÄ›l(a) vy, kontaktujte prosĂ­m administrĂˇtora.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(playerName),
                         escape(userName),
                         escape(safeUserEmail)
                 );
 
-                String footer = "Pokud jste změnu neprováděl(a) vy, kontaktujte prosím administrátora.";
+                String footer = "Pokud jste zmÄ›nu neprovĂˇdÄ›l(a) vy, kontaktujte prosĂ­m administrĂˇtora.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case PLAYER_APPROVED -> {
-                String subject = "Hráč schválen";
+                String subject = "HrĂˇÄŤ schvĂˇlen";
 
                 String main = """
-                        <p>hráč <strong>%s</strong> byl schválen administrátorem.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>hrĂˇÄŤ <strong>%s</strong> byl schvĂˇlen administrĂˇtorem.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(playerName)
                 );
 
-                String footer = "Tento e-mail má pouze informační charakter.";
+                String footer = "Tento e-mail mĂˇ pouze informaÄŤnĂ­ charakter.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case PLAYER_REJECTED -> {
-                String subject = "Hráč zamítnut";
+                String subject = "HrĂˇÄŤ zamĂ­tnut";
 
                 String main = """
-                        <p>hráč <strong>%s</strong> byl zamítnut administrátorem.</p>
-                        <p>V případě dotazů prosím kontaktujte administrátora.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>hrĂˇÄŤ <strong>%s</strong> byl zamĂ­tnut administrĂˇtorem.</p>
+                        <p>V pĹ™Ă­padÄ› dotazĹŻ prosĂ­m kontaktujte administrĂˇtora.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(playerName)
                 );
 
-                String footer = "Pokud máte otázky k zamítnutí hráče, kontaktujte administrátora.";
+                String footer = "Pokud mĂˇte otĂˇzky k zamĂ­tnutĂ­ hrĂˇÄŤe, kontaktujte administrĂˇtora.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case PLAYER_CHANGE_USER -> {
-                String subject = "Hráč přiřazen novému uživateli";
+                String subject = "HrĂˇÄŤ pĹ™iĹ™azen novĂ©mu uĹľivateli";
 
                 String main = """
-                        <p>hráč <strong>%s</strong> byl přiřazen novému uživateli.</p>
-                        <p>Nový uživatel:</p>
+                        <p>hrĂˇÄŤ <strong>%s</strong> byl pĹ™iĹ™azen novĂ©mu uĹľivateli.</p>
+                        <p>NovĂ˝ uĹľivatel:</p>
                         <ul>
-                            <li>Jméno a příjmení: %s</li>
+                            <li>JmĂ©no a pĹ™Ă­jmenĂ­: %s</li>
                             <li>Email: %s</li>
                         </ul>
-                        <p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>Pokud jste zmÄ›ny neprovĂˇdÄ›l(a) vy, kontaktujte prosĂ­m administrĂˇtora.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(playerName),
                         escape(userName),
                         escape(safeUserEmail)
                 );
 
-                String footer = "Pokud jste změnu neprováděl(a) vy, kontaktujte prosím administrátora.";
+                String footer = "Pokud jste zmÄ›nu neprovĂˇdÄ›l(a) vy, kontaktujte prosĂ­m administrĂˇtora.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             // =====================================
-            // USER – události kolem uživatelského účtu
+            // USER â€“ udĂˇlosti kolem uĹľivatelskĂ©ho ĂşÄŤtu
             // =====================================
 
             case USER_CREATED -> {
-                String subject = "Uživatel vytvořen";
+                String subject = "UĹľivatel vytvoĹ™en";
 
-                // blok s aktivačním odkazem, pokud existuje
+                // blok s aktivaÄŤnĂ­m odkazem, pokud existuje
                 String activationBlock = "";
                 if (activationLink != null && !activationLink.isBlank()) {
                     activationBlock = """
-                            <p>Pro dokončení registrace klikněte na následující odkaz:</p>
+                            <p>Pro dokonÄŤenĂ­ registrace kliknÄ›te na nĂˇsledujĂ­cĂ­ odkaz:</p>
                             <p><a href="%1$s">%1$s</a></p>
-                            <p>Odkaz je platný 24 hodin.</p>
+                            <p>Odkaz je platnĂ˝ 24 hodin.</p>
                             """.formatted(escape(activationLink));
                 }
 
                 String main = """
-                        <p>byl pro vás vytvořen uživatelský účet v aplikaci <strong>Hokej – Hobby Hokej</strong>.</p>
-                        <p>Přihlašovací email:</p>
+                        <p>byl pro vĂˇs vytvoĹ™en uĹľivatelskĂ˝ ĂşÄŤet v aplikaci <strong>Hokej â€“ Hobby Hokej</strong>.</p>
+                        <p>PĹ™ihlaĹˇovacĂ­ email:</p>
                         <ul>
                             <li>%s</li>
                         </ul>
                         %s
-                        <p>Pokud jste o vytvoření účtu nežádal(a), kontaktujte prosím administrátora.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>Pokud jste o vytvoĹ™enĂ­ ĂşÄŤtu neĹľĂˇdal(a), kontaktujte prosĂ­m administrĂˇtora.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(safeUserEmail),
                         activationBlock
                 );
 
-                String footer = "Pokud jste o vytvoření účtu nežádal(a), neprodleně kontaktujte administrátora.";
+                String footer = "Pokud jste o vytvoĹ™enĂ­ ĂşÄŤtu neĹľĂˇdal(a), neprodlenÄ› kontaktujte administrĂˇtora.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case USER_ACTIVATED -> {
-                String subject = "Účet byl aktivován";
+                String subject = "ĂšÄŤet byl aktivovĂˇn";
 
                 String main = """
-                        <p>váš uživatelský účet byl úspěšně <strong>aktivován</strong>.</p>
-                        <p>Nyní se můžete přihlásit do aplikace Hokej – Hobby Hokej a spravovat své hráče a přihlášky na zápasy.</p>
-                        <p>Přihlašovací email:</p>
+                        <p>vĂˇĹˇ uĹľivatelskĂ˝ ĂşÄŤet byl ĂşspÄ›ĹˇnÄ› <strong>aktivovĂˇn</strong>.</p>
+                        <p>NynĂ­ se mĹŻĹľete pĹ™ihlĂˇsit do aplikace Hokej â€“ Hobby Hokej a spravovat svĂ© hrĂˇÄŤe a pĹ™ihlĂˇĹˇky na zĂˇpasy.</p>
+                        <p>PĹ™ihlaĹˇovacĂ­ email:</p>
                         <ul>
                             <li>%s</li>
                         </ul>
-                        <p>Pokud jste o aktivaci účtu nežádal(a), kontaktujte prosím administrátora.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>Pokud jste o aktivaci ĂşÄŤtu neĹľĂˇdal(a), kontaktujte prosĂ­m administrĂˇtora.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(safeUserEmail)
                 );
 
-                String footer = "Pokud jste o aktivaci účtu nežádal(a), změňte si heslo a kontaktujte administrátora.";
+                String footer = "Pokud jste o aktivaci ĂşÄŤtu neĹľĂˇdal(a), zmÄ›Ĺte si heslo a kontaktujte administrĂˇtora.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case USER_UPDATED -> {
-                String subject = "Účet byl aktualizován";
+                String subject = "ĂšÄŤet byl aktualizovĂˇn";
 
                 String main = """
-                        <p>údaje vašeho účtu byly <strong>aktualizovány</strong>.</p>
-                        <p>Aktuální email účtu:</p>
+                        <p>Ăşdaje vaĹˇeho ĂşÄŤtu byly <strong>aktualizovĂˇny</strong>.</p>
+                        <p>AktuĂˇlnĂ­ email ĂşÄŤtu:</p>
                         <ul>
                             <li>%s</li>
                         </ul>
-                        <p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>Pokud jste zmÄ›ny neprovĂˇdÄ›l(a) vy, kontaktujte prosĂ­m administrĂˇtora.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(safeUserEmail)
                 );
 
-                String footer = "Pokud jste změny neprováděl(a) vy, co nejdříve změňte heslo a kontaktujte administrátora.";
+                String footer = "Pokud jste zmÄ›ny neprovĂˇdÄ›l(a) vy, co nejdĹ™Ă­ve zmÄ›Ĺte heslo a kontaktujte administrĂˇtora.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
@@ -363,14 +361,14 @@ public class EmailMessageBuilder {
                 String subject = "Reset hesla";
 
                 String main = """
-                        <p>byl proveden <strong>reset vašeho hesla</strong> pro účet %s.</p>
-                        <p>Pokud jste o reset hesla nežádal(a), kontaktujte prosím administrátora.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>byl proveden <strong>reset vaĹˇeho hesla</strong> pro ĂşÄŤet %s.</p>
+                        <p>Pokud jste o reset hesla neĹľĂˇdal(a), kontaktujte prosĂ­m administrĂˇtora.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(safeUserEmail)
                 );
 
-                String footer = "Pokud jste o reset hesla nežádal(a), ihned kontaktujte administrátora a zkontrolujte zabezpečení účtu.";
+                String footer = "Pokud jste o reset hesla neĹľĂˇdal(a), ihned kontaktujte administrĂˇtora a zkontrolujte zabezpeÄŤenĂ­ ĂşÄŤtu.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
@@ -381,79 +379,79 @@ public class EmailMessageBuilder {
 
                 String resetLink = ctx != null ? ctx.resetLink() : null;
 
-                String subject = "Obnovení zapomenutého hesla";
+                String subject = "ObnovenĂ­ zapomenutĂ©ho hesla";
 
                 String linkBlock = "";
                 if (resetLink != null && !resetLink.isBlank()) {
                     linkBlock = """
-                            <p>Pro nastavení nového hesla klikněte na následující odkaz:</p>
+                            <p>Pro nastavenĂ­ novĂ©ho hesla kliknÄ›te na nĂˇsledujĂ­cĂ­ odkaz:</p>
                             <p><a href="%1$s">%1$s</a></p>
-                            <p>Odkaz je platný po omezenou dobu. Pokud vyprší, požádejte prosím o nový reset hesla.</p>
+                            <p>Odkaz je platnĂ˝ po omezenou dobu. Pokud vyprĹˇĂ­, poĹľĂˇdejte prosĂ­m o novĂ˝ reset hesla.</p>
                             """.formatted(escape(resetLink));
                 }
 
                 String main = """
-                        <p>obdrželi jsme žádost o <strong>obnovení zapomenutého hesla</strong> k vašemu účtu v aplikaci <strong>Hokej – Hobby Hokej</strong>.</p>
+                        <p>obdrĹľeli jsme ĹľĂˇdost o <strong>obnovenĂ­ zapomenutĂ©ho hesla</strong> k vaĹˇemu ĂşÄŤtu v aplikaci <strong>Hokej â€“ Hobby Hokej</strong>.</p>
                         %s
-                        <p>Pokud jste o obnovení hesla nežádal(a) vy, můžete tento e-mail ignorovat.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>Pokud jste o obnovenĂ­ hesla neĹľĂˇdal(a) vy, mĹŻĹľete tento e-mail ignorovat.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(linkBlock);
 
-                String footer = "Pokud jste o reset hesla nežádal(a), zvažte prosím změnu hesla k vašemu e-mailu a zkontrolujte zabezpečení účtů.";
+                String footer = "Pokud jste o reset hesla neĹľĂˇdal(a), zvaĹľte prosĂ­m zmÄ›nu hesla k vaĹˇemu e-mailu a zkontrolujte zabezpeÄŤenĂ­ ĂşÄŤtĹŻ.";
 
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case FORGOTTEN_PASSWORD_RESET_COMPLETED -> {
-                String subject = "Heslo bylo úspěšně změněno";
+                String subject = "Heslo bylo ĂşspÄ›ĹˇnÄ› zmÄ›nÄ›no";
 
                 String main = """
-                        <p>vaše heslo bylo <strong>úspěšně změněno</strong> na základě žádosti o obnovení zapomenutého hesla.</p>
-                        <p>Pokud jste tuto změnu neprováděl(a) vy, neprodleně kontaktujte administrátora a změňte své heslo.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>vaĹˇe heslo bylo <strong>ĂşspÄ›ĹˇnÄ› zmÄ›nÄ›no</strong> na zĂˇkladÄ› ĹľĂˇdosti o obnovenĂ­ zapomenutĂ©ho hesla.</p>
+                        <p>Pokud jste tuto zmÄ›nu neprovĂˇdÄ›l(a) vy, neprodlenÄ› kontaktujte administrĂˇtora a zmÄ›Ĺte svĂ© heslo.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """;
 
-                String footer = "Pro zvýšení bezpečnosti doporučujeme používat silné heslo a nepoužívat stejné heslo pro více služeb.";
+                String footer = "Pro zvĂ˝ĹˇenĂ­ bezpeÄŤnosti doporuÄŤujeme pouĹľĂ­vat silnĂ© heslo a nepouĹľĂ­vat stejnĂ© heslo pro vĂ­ce sluĹľeb.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case SECURITY_ALERT -> {
-                String subject = "Bezpečnostní upozornění";
+                String subject = "BezpeÄŤnostnĂ­ upozornÄ›nĂ­";
 
                 String main = """
-                        <p>byla zaznamenána <strong>neobvyklá aktivita</strong> na vašem účtu (%s).</p>
-                        <p>Pokud jste to nebyl(a) vy, doporučujeme okamžitě změnit heslo a kontaktovat administrátora.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>byla zaznamenĂˇna <strong>neobvyklĂˇ aktivita</strong> na vaĹˇem ĂşÄŤtu (%s).</p>
+                        <p>Pokud jste to nebyl(a) vy, doporuÄŤujeme okamĹľitÄ› zmÄ›nit heslo a kontaktovat administrĂˇtora.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(safeUserEmail)
                 );
 
-                String footer = "Pro zvýšení bezpečnosti doporučujeme používat silné heslo a dvoufaktorové ověření (pokud je dostupné).";
+                String footer = "Pro zvĂ˝ĹˇenĂ­ bezpeÄŤnosti doporuÄŤujeme pouĹľĂ­vat silnĂ© heslo a dvoufaktorovĂ© ovÄ›Ĺ™enĂ­ (pokud je dostupnĂ©).";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
-            // pro ostatní typy user-email neposíláme
+            // pro ostatnĂ­ typy user-email neposĂ­lĂˇme
             default -> null;
         };
     }
 
-    // Emailové zprávy pro hráče
+    // EmailovĂ© zprĂˇvy pro hrĂˇÄŤe
 
     /**
-     * Sestavuje emailovou zprávu určenou hráči.
+     * Sestavuje emailovou zprĂˇvu urÄŤenou hrĂˇÄŤi.
      *
-     * Používá se především pro notifikace spojené se zápasy,
-     * registracemi, omluvami a změnami termínů.
+     * PouĹľĂ­vĂˇ se pĹ™edevĹˇĂ­m pro notifikace spojenĂ© se zĂˇpasy,
+     * registracemi, omluvami a zmÄ›nami termĂ­nĹŻ.
      */
     public EmailContent buildForPlayer(NotificationType type,
                                        PlayerEntity player,
                                        String playerEmail,
                                        Object context) {
 
-        // Nový uživatel při PLAYER_CHANGE_USER – ošetřeno proti null
+        // NovĂ˝ uĹľivatel pĹ™i PLAYER_CHANGE_USER â€“ oĹˇetĹ™eno proti null
         AppUserEntity user = (player != null) ? player.getUser() : null;
         String newUserFullName;
         String newUserEmail;
@@ -467,17 +465,17 @@ public class EmailMessageBuilder {
             } else if (user.getEmail() != null && !user.getEmail().isBlank()) {
                 newUserFullName = user.getEmail();
             } else {
-                newUserFullName = "(neznámý uživatel)";
+                newUserFullName = "(neznĂˇmĂ˝ uĹľivatel)";
             }
             newUserEmail = (user.getEmail() != null && !user.getEmail().isBlank())
                     ? user.getEmail()
                     : "(neuvedeno)";
         } else {
-            newUserFullName = "(neznámý uživatel)";
+            newUserFullName = "(neznĂˇmĂ˝ uĹľivatel)";
             newUserEmail = "(neuvedeno)";
         }
 
-        // Registrace z contextu – může být null, proto safe přístup
+        // Registrace z contextu â€“ mĹŻĹľe bĂ˝t null, proto safe pĹ™Ă­stup
         MatchRegistrationEntity registration = extractMatchRegistration(context);
         String excuseReason = (registration != null && registration.getExcuseReason() != null)
                 ? registration.getExcuseReason().toString()
@@ -487,7 +485,7 @@ public class EmailMessageBuilder {
                 : "";
 
         String playerName = fullPlayerName(player);
-        String greeting = "Dobrý den " + escape(playerName) + ",";
+        String greeting = "DobrĂ˝ den " + escape(playerName) + ",";
         MatchEntity match = extractMatch(context);
         String formattedDateTime = formatMatchDateTime(match);
         long registeredCount = countRegisteredPlayers(match);
@@ -506,52 +504,52 @@ public class EmailMessageBuilder {
             // REGISTRATION
             // =====================================
             case PLAYER_CHANGE_USER -> {
-                String subject = "Hráč přiřazen novému uživateli";
+                String subject = "HrĂˇÄŤ pĹ™iĹ™azen novĂ©mu uĹľivateli";
 
                 String main = """
-                        <p>hráč <strong>%s</strong> byl přiřazen novému uživateli.</p>
-                        <p>Nový uživatel:</p>
+                        <p>hrĂˇÄŤ <strong>%s</strong> byl pĹ™iĹ™azen novĂ©mu uĹľivateli.</p>
+                        <p>NovĂ˝ uĹľivatel:</p>
                         <ul>
-                            <li>Jméno a příjmení: %s</li>
+                            <li>JmĂ©no a pĹ™Ă­jmenĂ­: %s</li>
                             <li>Email: %s</li>
                         </ul>
-                        <p>Pokud jste změny neprováděl(a) vy, kontaktujte prosím administrátora.</p>
-                        <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                        <p>Pokud jste zmÄ›ny neprovĂˇdÄ›l(a) vy, kontaktujte prosĂ­m administrĂˇtora.</p>
+                        <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
                         """.formatted(
                         escape(playerName),
                         escape(newUserFullName),
                         escape(newUserEmail)
                 );
 
-                String footer = "Pokud jste změnu neprováděl(a) vy, kontaktujte prosím administrátora.";
+                String footer = "Pokud jste zmÄ›nu neprovĂˇdÄ›l(a) vy, kontaktujte prosĂ­m administrĂˇtora.";
                 String html = buildSimpleHtml(subject, greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case MATCH_REGISTRATION_CREATED -> {
-                String subject = "Potvrzení přihlášení na zápas";
+                String subject = "PotvrzenĂ­ pĹ™ihlĂˇĹˇenĂ­ na zĂˇpas";
 
                 String main = """
-                        <p>byl jste <strong>přihlášen</strong> na zápas.</p>
+                        <p>byl jste <strong>pĹ™ihlĂˇĹˇen</strong> na zĂˇpas.</p>
                         %s
-                        <p>Aktuálně přihlášeno: <strong>%d hráčů</strong>%s</p>
-                        <p>Hráč: %s<br/>
+                        <p>AktuĂˇlnÄ› pĹ™ihlĂˇĹˇeno: <strong>%d hrĂˇÄŤĹŻ</strong>%s</p>
+                        <p>HrĂˇÄŤ: %s<br/>
                         Email: %s</p>
-                        <p>Těšíme se na vás.<br/>App Hokej – Hobby Hokej.</p>
+                        <p>TÄ›ĹˇĂ­me se na vĂˇs.<br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         registeredCount,
                         maxPlayers > 0
-                                ? escape(String.format(" / z %d míst zbývá %d míst", maxPlayers, freeSlots))
+                                ? escape(String.format(" / z %d mĂ­st zbĂ˝vĂˇ %d mĂ­st", maxPlayers, freeSlots))
                                 : "",
                         escape(playerName),
                         escape(safeEmail)
                 );
 
-                String footer = "Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.";
-                String html = buildSimpleHtml("Přihlášení na zápas", greeting, main, footer);
+                String footer = "Tento e-mail byl vygenerovĂˇn automaticky, neodpovĂ­dejte prosĂ­m na nÄ›j.";
+                String html = buildSimpleHtml("PĹ™ihlĂˇĹˇenĂ­ na zĂˇpas", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
@@ -560,155 +558,155 @@ public class EmailMessageBuilder {
                         castContext(context, MatchRegistrationEntity.class);
                 String newStatus = reg != null && reg.getStatus() != null
                         ? reg.getStatus().name()
-                        : "neznámý";
+                        : "neznĂˇmĂ˝";
 
-                String subject = "Aktualizace registrace na zápas";
+                String subject = "Aktualizace registrace na zĂˇpas";
 
                 String main = """
-                        <p>vaše registrace na zápas byla <strong>aktualizována</strong>.</p>
+                        <p>vaĹˇe registrace na zĂˇpas byla <strong>aktualizovĂˇna</strong>.</p>
                         %s
-                        <p>Aktuální stav vaší registrace: <strong>%s</strong></p>
-                        <p>Hráč: %s<br/>
+                        <p>AktuĂˇlnĂ­ stav vaĹˇĂ­ registrace: <strong>%s</strong></p>
+                        <p>HrĂˇÄŤ: %s<br/>
                         Email: %s</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         escape(newStatus),
                         escape(playerName),
                         escape(safeEmail)
                 );
 
-                String footer = "Pokud jste změnu neprováděl(a) vy, kontaktujte prosím manažera nebo administrátora.";
+                String footer = "Pokud jste zmÄ›nu neprovĂˇdÄ›l(a) vy, kontaktujte prosĂ­m manaĹľera nebo administrĂˇtora.";
                 String html = buildSimpleHtml("Aktualizace registrace", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case MATCH_REGISTRATION_CANCELED -> {
-                String subject = "Odhlášení ze zápasu";
+                String subject = "OdhlĂˇĹˇenĂ­ ze zĂˇpasu";
 
                 String main = """
-                        <p>byl jste <strong>odhlášen</strong> ze zápasu.</p>
+                        <p>byl jste <strong>odhlĂˇĹˇen</strong> ze zĂˇpasu.</p>
                         %s
-                        <p>Důvod: %s</p>
-                        <p>Aktuálně přihlášeno: <strong>%d hráčů</strong>%s</p>
-                        <p>Hráč: %s<br/>
+                        <p>DĹŻvod: %s</p>
+                        <p>AktuĂˇlnÄ› pĹ™ihlĂˇĹˇeno: <strong>%d hrĂˇÄŤĹŻ</strong>%s</p>
+                        <p>HrĂˇÄŤ: %s<br/>
                         Email: %s</p>
-                        <p>Mrzí nás, že nepřijdete.</p>
-                        <p>Těšíme se na vás.<br/>App Hokej – Hobby Hokej.</p>
+                        <p>MrzĂ­ nĂˇs, Ĺľe nepĹ™ijdete.</p>
+                        <p>TÄ›ĹˇĂ­me se na vĂˇs.<br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         !excuseReason.isBlank()
                                 ? escape(String.format("  %s - %s", excuseReason, excuseNote))
                                 : "",
                         registeredCount,
                         maxPlayers > 0
-                                ? escape(String.format(" / z %d míst zbývá %d míst", maxPlayers, freeSlots))
+                                ? escape(String.format(" / z %d mĂ­st zbĂ˝vĂˇ %d mĂ­st", maxPlayers, freeSlots))
                                 : "",
                         escape(playerName),
                         escape(safeEmail)
                 );
 
-                String footer = "V případě, že se situace změní, můžete se na zápas zkusit znovu přihlásit, pokud bude volné místo.";
-                String html = buildSimpleHtml("Odhlášení ze zápasu", greeting, main, footer);
+                String footer = "V pĹ™Ă­padÄ›, Ĺľe se situace zmÄ›nĂ­, mĹŻĹľete se na zĂˇpas zkusit znovu pĹ™ihlĂˇsit, pokud bude volnĂ© mĂ­sto.";
+                String html = buildSimpleHtml("OdhlĂˇĹˇenĂ­ ze zĂˇpasu", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case MATCH_REGISTRATION_RESERVED -> {
-                String subject = "Přesunutí mezi náhradníky";
+                String subject = "PĹ™esunutĂ­ mezi nĂˇhradnĂ­ky";
 
                 String main = """
-                        <p>byl jste <strong>přesunut mezi náhradníky</strong> pro tento zápas.</p>
+                        <p>byl jste <strong>pĹ™esunut mezi nĂˇhradnĂ­ky</strong> pro tento zĂˇpas.</p>
                         %s
-                        <p>k tomuto došlo v důsledku snížení kapacity - maximálního počtu hráčů</p>
-                        <p>Aktuálně přihlášeno: <strong>%d hráčů</strong>%s</p>
-                        <p>Pokud se uvolní místo, budete automaticky přesunut mezi přihlášené hráče a obdržíte další e-mail.</p>
-                        <br/>App Hokej – Hobby Hokej.</p>
+                        <p>k tomuto doĹˇlo v dĹŻsledku snĂ­ĹľenĂ­ kapacity - maximĂˇlnĂ­ho poÄŤtu hrĂˇÄŤĹŻ</p>
+                        <p>AktuĂˇlnÄ› pĹ™ihlĂˇĹˇeno: <strong>%d hrĂˇÄŤĹŻ</strong>%s</p>
+                        <p>Pokud se uvolnĂ­ mĂ­sto, budete automaticky pĹ™esunut mezi pĹ™ihlĂˇĹˇenĂ© hrĂˇÄŤe a obdrĹľĂ­te dalĹˇĂ­ e-mail.</p>
+                        <br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         registeredCount,
                         maxPlayers > 0
-                                ? escape(String.format(" / kapacita %d hráčů", maxPlayers))
+                                ? escape(String.format(" / kapacita %d hrĂˇÄŤĹŻ", maxPlayers))
                                 : ""
                 );
 
-                String footer = "Status náhradníka znamená, že zatím nejste v hlavní sestavě, ale můžete být dodatečně potvrzen.";
-                String html = buildSimpleHtml("Přesunutí mezi náhradníky", greeting, main, footer);
+                String footer = "Status nĂˇhradnĂ­ka znamenĂˇ, Ĺľe zatĂ­m nejste v hlavnĂ­ sestavÄ›, ale mĹŻĹľete bĂ˝t dodateÄŤnÄ› potvrzen.";
+                String html = buildSimpleHtml("PĹ™esunutĂ­ mezi nĂˇhradnĂ­ky", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case MATCH_REGISTRATION_SUBSTITUTE -> {
-                String subject = "Registrace – možná účast (SUBSTITUTE)";
+                String subject = "Registrace â€“ moĹľnĂˇ ĂşÄŤast (SUBSTITUTE)";
 
                 String main = """
-                        <p>vaše registrace na zápas je nastavena jako <strong>„možná“ (SUBSTITUTE)</strong>.</p>
+                        <p>vaĹˇe registrace na zĂˇpas je nastavena jako <strong>â€žmoĹľnĂˇâ€ś (SUBSTITUTE)</strong>.</p>
                         %s
-                        <p>Můžete se kdykoliv přihlásit nebo omluvit.</p>
-                        <p>Aktuálně přihlášeno: <strong>%d hráčů</strong>%s</p>
-                        <br/>App Hokej – Hobby Hokej.</p>
+                        <p>MĹŻĹľete se kdykoliv pĹ™ihlĂˇsit nebo omluvit.</p>
+                        <p>AktuĂˇlnÄ› pĹ™ihlĂˇĹˇeno: <strong>%d hrĂˇÄŤĹŻ</strong>%s</p>
+                        <br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         registeredCount,
                         maxPlayers > 0
-                                ? escape(String.format(" / kapacita %d hráčů", maxPlayers))
+                                ? escape(String.format(" / kapacita %d hrĂˇÄŤĹŻ", maxPlayers))
                                 : ""
                 );
 
-                String footer = "Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.";
-                String html = buildSimpleHtml("Možná účast na zápase", greeting, main, footer);
+                String footer = "Tento e-mail byl vygenerovĂˇn automaticky, neodpovĂ­dejte prosĂ­m na nÄ›j.";
+                String html = buildSimpleHtml("MoĹľnĂˇ ĂşÄŤast na zĂˇpase", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case MATCH_WAITING_LIST_MOVED_UP -> {
-                String subject = "Přihlášení na zápas z náhradníků";
+                String subject = "PĹ™ihlĂˇĹˇenĂ­ na zĂˇpas z nĂˇhradnĂ­kĹŻ";
 
                 String main = """
-                        <p>dobrá zpráva – byli jste <strong>přesunut</strong> z čekací listiny mezi <strong>přihlášené hráče</strong>.</p>
+                        <p>dobrĂˇ zprĂˇva â€“ byli jste <strong>pĹ™esunut</strong> z ÄŤekacĂ­ listiny mezi <strong>pĹ™ihlĂˇĹˇenĂ© hrĂˇÄŤe</strong>.</p>
                         %s
-                        <p>Aktuálně přihlášeno: <strong>%d hráčů</strong>%s</p>
-                        <p>Těšíme se na vás.</p><br/>App Hokej – Hobby Hokej.</p>
+                        <p>AktuĂˇlnÄ› pĹ™ihlĂˇĹˇeno: <strong>%d hrĂˇÄŤĹŻ</strong>%s</p>
+                        <p>TÄ›ĹˇĂ­me se na vĂˇs.</p><br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         registeredCount,
                         maxPlayers > 0
-                                ? escape(String.format(" / volná místa: %d z %d", freeSlots, maxPlayers))
+                                ? escape(String.format(" / volnĂˇ mĂ­sta: %d z %d", freeSlots, maxPlayers))
                                 : ""
                 );
 
-                String footer = "Pokud se nemůžete zúčastnit, prosím co nejdříve se odhlaste, aby se uvolnilo místo pro dalšího hráče.";
-                String html = buildSimpleHtml("Přesun z čekací listiny", greeting, main, footer);
+                String footer = "Pokud se nemĹŻĹľete zĂşÄŤastnit, prosĂ­m co nejdĹ™Ă­ve se odhlaste, aby se uvolnilo mĂ­sto pro dalĹˇĂ­ho hrĂˇÄŤe.";
+                String html = buildSimpleHtml("PĹ™esun z ÄŤekacĂ­ listiny", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case MATCH_REGISTRATION_NO_RESPONSE -> {
-                String subject = "Připomenutí – nereagoval jste na zápas";
+                String subject = "PĹ™ipomenutĂ­ â€“ nereagoval jste na zĂˇpas";
 
                 String main = """
-                        <p>zatím jste <strong>nereagoval</strong> na zápas.</p>
+                        <p>zatĂ­m jste <strong>nereagoval</strong> na zĂˇpas.</p>
                         %s
-                        <p>Aktuálně přihlášeno: <strong>%d hráčů</strong>%s</p>
-                        <p>Prosíme, potvrďte co nejdříve, zda se zápasu zúčastníte, aby bylo možné sestavit týmy.</p>
-                        <br/>App Hokej – Hobby Hokej.</p>
+                        <p>AktuĂˇlnÄ› pĹ™ihlĂˇĹˇeno: <strong>%d hrĂˇÄŤĹŻ</strong>%s</p>
+                        <p>ProsĂ­me, potvrÄŹte co nejdĹ™Ă­ve, zda se zĂˇpasu zĂşÄŤastnĂ­te, aby bylo moĹľnĂ© sestavit tĂ˝my.</p>
+                        <br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         registeredCount,
                         maxPlayers > 0
-                                ? escape(String.format(" / volná místa: %d z %d", freeSlots, maxPlayers))
+                                ? escape(String.format(" / volnĂˇ mĂ­sta: %d z %d", freeSlots, maxPlayers))
                                 : ""
                 );
 
-                String footer = "Registraci můžete změnit po přihlášení do aplikace Hokej – Hobby Hokej.";
-                String html = buildSimpleHtml("Nereagovaná pozvánka", greeting, main, footer);
+                String footer = "Registraci mĹŻĹľete zmÄ›nit po pĹ™ihlĂˇĹˇenĂ­ do aplikace Hokej â€“ Hobby Hokej.";
+                String html = buildSimpleHtml("NereagovanĂˇ pozvĂˇnka", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
@@ -717,44 +715,44 @@ public class EmailMessageBuilder {
             // =====================================
 
             case PLAYER_EXCUSED -> {
-                String subject = "Omluva ze zápasu potvrzena";
+                String subject = "Omluva ze zĂˇpasu potvrzena";
 
                 String main = """
-                        <p>vaše <strong>omluva ze zápasu</strong> byla zaznamenána.</p>
+                        <p>vaĹˇe <strong>omluva ze zĂˇpasu</strong> byla zaznamenĂˇna.</p>
                         %s
-                        <p>Důvod: %s</p>
-                        <p>Děkujeme, že dáváte vědět včas.</p>
-                        <br/>App Hokej – Hobby Hokej.</p>
+                        <p>DĹŻvod: %s</p>
+                        <p>DÄ›kujeme, Ĺľe dĂˇvĂˇte vÄ›dÄ›t vÄŤas.</p>
+                        <br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         !excuseReason.isBlank()
                                 ? escape(String.format("  %s - %s", excuseReason, excuseNote))
                                 : ""
                 );
 
-                String footer = "Omluva pomáhá lépe plánovat sestavu na zápas.";
-                String html = buildSimpleHtml("Omluva ze zápasu", greeting, main, footer);
+                String footer = "Omluva pomĂˇhĂˇ lĂ©pe plĂˇnovat sestavu na zĂˇpas.";
+                String html = buildSimpleHtml("Omluva ze zĂˇpasu", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case PLAYER_NO_EXCUSED -> {
-                String subject = "Neomluvená neúčast na zápase";
+                String subject = "NeomluvenĂˇ neĂşÄŤast na zĂˇpase";
 
                 String main = """
-                        <p>byl jste označen jako <strong>neomluvený</strong> na zápas.</p>
+                        <p>byl jste oznaÄŤen jako <strong>neomluvenĂ˝</strong> na zĂˇpas.</p>
                         %s
-                        <p>Pokud se jedná o nedorozumění, kontaktujte prosím manažera nebo administrátora.</p>
-                        <br/>App Hokej – Hobby Hokej.</p>
+                        <p>Pokud se jednĂˇ o nedorozumÄ›nĂ­, kontaktujte prosĂ­m manaĹľera nebo administrĂˇtora.</p>
+                        <br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>"
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>"
                 );
 
-                String footer = "Opakované neomluvené absence mohou ovlivnit vaši prioritu při sestavování týmů.";
-                String html = buildSimpleHtml("Neomluvená neúčast", greeting, main, footer);
+                String footer = "OpakovanĂ© neomluvenĂ© absence mohou ovlivnit vaĹˇi prioritu pĹ™i sestavovĂˇnĂ­ tĂ˝mĹŻ.";
+                String html = buildSimpleHtml("NeomluvenĂˇ neĂşÄŤast", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
@@ -763,7 +761,7 @@ public class EmailMessageBuilder {
             // =====================================
 
             case MATCH_REMINDER -> {
-                String subject = "Připomenutí zápasu";
+                String subject = "PĹ™ipomenutĂ­ zĂˇpasu";
 
                 String pricePerPlayer =
                         (match != null && registeredCount > 0 && match.getPrice() != null)
@@ -771,74 +769,74 @@ public class EmailMessageBuilder {
                                 : "";
 
                 String main = """
-                        <p>připomínáme vám nadcházející <strong>zápas</strong>.</p>
+                        <p>pĹ™ipomĂ­nĂˇme vĂˇm nadchĂˇzejĂ­cĂ­ <strong>zĂˇpas</strong>.</p>
                         %s
-                        <p>Aktuálně přihlášeno: <strong>%d hráčů</strong>%s</p>
+                        <p>AktuĂˇlnÄ› pĹ™ihlĂˇĹˇeno: <strong>%d hrĂˇÄŤĹŻ</strong>%s</p>
                         %s
-                        <p>Prosíme, dorazte včas.</p>
-                        <br/>App Hokej – Hobby Hokej.</p>
+                        <p>ProsĂ­me, dorazte vÄŤas.</p>
+                        <br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         registeredCount,
                         maxPlayers > 0
-                                ? escape(String.format(" / volná místa: %d z %d", freeSlots, maxPlayers))
+                                ? escape(String.format(" / volnĂˇ mĂ­sta: %d z %d", freeSlots, maxPlayers))
                                 : "",
                         !pricePerPlayer.isBlank()
-                                ? "<p>Zatím je cena za hráče: " + pricePerPlayer + " Kč.</p>"
+                                ? "<p>ZatĂ­m je cena za hrĂˇÄŤe: " + pricePerPlayer + " KÄŤ.</p>"
                                 : ""
                 );
 
-                String footer = "Pokud se nemůžete zúčastnit, co nejdříve se prosím odhlaste v aplikaci.";
-                String html = buildSimpleHtml("Připomenutí zápasu", greeting, main, footer);
+                String footer = "Pokud se nemĹŻĹľete zĂşÄŤastnit, co nejdĹ™Ă­ve se prosĂ­m odhlaste v aplikaci.";
+                String html = buildSimpleHtml("PĹ™ipomenutĂ­ zĂˇpasu", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case MATCH_CANCELED -> {
-                String subject = "Zápas zrušen";
+                String subject = "ZĂˇpas zruĹˇen";
 
                 String main = """
-                        <p>omlouváme se, ale plánovaný <strong>zápas byl zrušen</strong>.</p>
+                        <p>omlouvĂˇme se, ale plĂˇnovanĂ˝ <strong>zĂˇpas byl zruĹˇen</strong>.</p>
                         %s
-                        <p>Důvod: %s</p>
-                        <br/>App Hokej – Hobby Hokej.</p>
+                        <p>DĹŻvod: %s</p>
+                        <br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín původně plánovaného zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>TermĂ­n pĹŻvodnÄ› plĂˇnovanĂ©ho zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         !matchCancelReason.isBlank()
                                 ? escape(matchCancelReason)
-                                : "Důvod neuveden"
+                                : "DĹŻvod neuveden"
                 );
 
-                String footer = "Děkujeme za pochopení. O případném náhradním termínu budete informováni.";
-                String html = buildSimpleHtml("Zápas zrušen", greeting, main, footer);
+                String footer = "DÄ›kujeme za pochopenĂ­. O pĹ™Ă­padnĂ©m nĂˇhradnĂ­m termĂ­nu budete informovĂˇni.";
+                String html = buildSimpleHtml("ZĂˇpas zruĹˇen", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case MATCH_UNCANCELED -> {
-                String subject = "Zápas obnoven";
+                String subject = "ZĂˇpas obnoven";
 
                 String main = """
-                        <p>Původně zrušený <strong>zápas byl obnoven</strong>.</p>
+                        <p>PĹŻvodnÄ› zruĹˇenĂ˝ <strong>zĂˇpas byl obnoven</strong>.</p>
                         %s
-                        <p>Zkontrolujte si prosím vaši registraci k zápasu v aplikaci, </p>
-                        <p>kde ji můžete případně ještě změnit</p>
-                        <br/>App Hokej – Hobby Hokej.</p>
+                        <p>Zkontrolujte si prosĂ­m vaĹˇi registraci k zĂˇpasu v aplikaci, </p>
+                        <p>kde ji mĹŻĹľete pĹ™Ă­padnÄ› jeĹˇtÄ› zmÄ›nit</p>
+                        <br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Termín původně plánovaného zápasu:</strong> " + escape(formattedDateTime) + "</p>"
+                                : "<p><strong>TermĂ­n pĹŻvodnÄ› plĂˇnovanĂ©ho zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>"
                 );
 
-                String footer = "Děkujeme za pochopení. O případném náhradním termínu budete informováni.";
-                String html = buildSimpleHtml("Zápas obnoven", greeting, main, footer);
+                String footer = "DÄ›kujeme za pochopenĂ­. O pĹ™Ă­padnĂ©m nĂˇhradnĂ­m termĂ­nu budete informovĂˇni.";
+                String html = buildSimpleHtml("ZĂˇpas obnoven", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
 
             case MATCH_TIME_CHANGED -> {
-                String subject = "Změna času nebo data zápasu";
+                String subject = "ZmÄ›na ÄŤasu nebo data zĂˇpasu";
 
                 LocalDateTime oldDateTime = null;
                 if (context instanceof MatchTimeChangeContext mtc) {
@@ -851,53 +849,53 @@ public class EmailMessageBuilder {
                 }
 
                 String main = """
-                        <p>došlo ke <strong>změně času</strong> plánovaného zápasu.</p>
+                        <p>doĹˇlo ke <strong>zmÄ›nÄ› ÄŤasu</strong> plĂˇnovanĂ©ho zĂˇpasu.</p>
                         %s
                         %s
-                        <p>Prosíme, zkontrolujte si nový termín v aplikaci a případně upravte svou účast.</p>
-                        <br/>App Hokej – Hobby Hokej.</p>
+                        <p>ProsĂ­me, zkontrolujte si novĂ˝ termĂ­n v aplikaci a pĹ™Ă­padnÄ› upravte svou ĂşÄŤast.</p>
+                        <br/>App Hokej â€“ Hobby Hokej.</p>
                         """.formatted(
                         formattedDateTime.isBlank()
                                 ? ""
-                                : "<p><strong>Nový termín zápasu:</strong> " + escape(formattedDateTime) + "</p>",
+                                : "<p><strong>NovĂ˝ termĂ­n zĂˇpasu:</strong> " + escape(formattedDateTime) + "</p>",
                         oldDateFormatted.isBlank()
                                 ? ""
-                                : "<p><strong>Původní termín:</strong> " + escape(oldDateFormatted) + "</p>"
+                                : "<p><strong>PĹŻvodnĂ­ termĂ­n:</strong> " + escape(oldDateFormatted) + "</p>"
                 );
 
-                String footer = "Změna času může být způsobena úpravou rozpisu ledu nebo jinými organizačními důvody.";
-                String html = buildSimpleHtml("Změna času zápasu", greeting, main, footer);
+                String footer = "ZmÄ›na ÄŤasu mĹŻĹľe bĂ˝t zpĹŻsobena Ăşpravou rozpisu ledu nebo jinĂ˝mi organizaÄŤnĂ­mi dĹŻvody.";
+                String html = buildSimpleHtml("ZmÄ›na ÄŤasu zĂˇpasu", greeting, main, footer);
                 yield new EmailContent(subject, html, true);
             }
             default -> null;
         };
     }
 
-    // Pomocné metody
+    // PomocnĂ© metody
 
     /**
-     * Sestaví celé jméno uživatele v bezpečné podobě.
+     * SestavĂ­ celĂ© jmĂ©no uĹľivatele v bezpeÄŤnĂ© podobÄ›.
      */
     private String fullUserName(AppUserEntity user) {
-        if (user == null) return "(neznámý uživatel)";
+        if (user == null) return "(neznĂˇmĂ˝ uĹľivatel)";
         String first = safe(user.getName());
         String last = safe(user.getSurname());
         String full = (first + " " + last).trim();
         if (full.isEmpty()) {
-            return user.getEmail() != null ? user.getEmail() : "(neznámý uživatel)";
+            return user.getEmail() != null ? user.getEmail() : "(neznĂˇmĂ˝ uĹľivatel)";
         }
         return full;
     }
 
     /**
-     * Vrací zobrazitelné jméno hráče.
+     * VracĂ­ zobrazitelnĂ© jmĂ©no hrĂˇÄŤe.
      */
     private String fullPlayerName(PlayerEntity player) {
-        if (player == null) return "(neznámý hráč)";
+        if (player == null) return "(neznĂˇmĂ˝ hrĂˇÄŤ)";
         if (player.getFullName() != null && !player.getFullName().isBlank()) {
             return player.getFullName();
         }
-        return "(beze jména)";
+        return "(beze jmĂ©na)";
     }
 
     private String safe(String s) {
@@ -929,7 +927,7 @@ public class EmailMessageBuilder {
     }
 
     /**
-     * Spočítá počet přihlášených hráčů k danému zápasu.
+     * SpoÄŤĂ­tĂˇ poÄŤet pĹ™ihlĂˇĹˇenĂ˝ch hrĂˇÄŤĹŻ k danĂ©mu zĂˇpasu.
      */
     private long countRegisteredPlayers(MatchEntity match) {
         if (match == null || match.getId() == null) {
@@ -968,7 +966,7 @@ public class EmailMessageBuilder {
     }
 
     /**
-     * Z kontextu určí aplikačního uživatele relevantního pro notifikaci.
+     * Z kontextu urÄŤĂ­ aplikaÄŤnĂ­ho uĹľivatele relevantnĂ­ho pro notifikaci.
      */
     private MatchEntity extractMatch(Object context) {
         if (context instanceof MatchRegistrationEntity reg) {
@@ -990,10 +988,10 @@ public class EmailMessageBuilder {
         return null;
     }
     /**
-     * Zjistí AppUserEntity:
+     * ZjistĂ­ AppUserEntity:
      * 1) z UserActivationContext (USER_CREATED / USER_ACTIVATED),
      * 2) z ForgottenPasswordResetContext (forgotten password reset),
-     * 3) přímo z AppUserEntity v contextu,
+     * 3) pĹ™Ă­mo z AppUserEntity v contextu,
      * 4) nebo z player.getUser().
      */
     private AppUserEntity resolveUser(PlayerEntity player, Object context) {
@@ -1013,7 +1011,7 @@ public class EmailMessageBuilder {
     }
 
     /**
-     * Z kontextu získá aktivační odkaz, pokud je k dispozici.
+     * Z kontextu zĂ­skĂˇ aktivaÄŤnĂ­ odkaz, pokud je k dispozici.
      */
     private String resolveActivationLink(Object context) {
         if (context instanceof UserActivationContext uac) {
@@ -1023,65 +1021,59 @@ public class EmailMessageBuilder {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\email\EmailService.java
 -----
-
 package cz.phsoft.hokej.models.services.email;
 
 /**
- * Rozhraní definující kontrakt pro odesílání emailových zpráv.
+ * RozhranĂ­ definujĂ­cĂ­ kontrakt pro odesĂ­lĂˇnĂ­ emailovĂ˝ch zprĂˇv.
  *
- * Slouží jako abstrahovaná vrstva nad konkrétní implementací
- * emailového providera. Umožňuje oddělit business logiku
- * notifikací od technického způsobu odesílání emailů.
+ * SlouĹľĂ­ jako abstrahovanĂˇ vrstva nad konkrĂ©tnĂ­ implementacĂ­
+ * emailovĂ©ho providera. UmoĹľĹuje oddÄ›lit business logiku
+ * notifikacĂ­ od technickĂ©ho zpĹŻsobu odesĂ­lĂˇnĂ­ emailĹŻ.
  *
- * Implementace rozhraní:
- * - nesmí propagovat chyby do business vrstvy,
- * - může odesílat emaily asynchronně,
- * - má fungovat v režimu best-effort.
+ * Implementace rozhranĂ­:
+ * - nesmĂ­ propagovat chyby do business vrstvy,
+ * - mĹŻĹľe odesĂ­lat emaily asynchronnÄ›,
+ * - mĂˇ fungovat v reĹľimu best-effort.
  */
 public interface EmailService {
 
     /**
-     * Odešle jednoduchý textový email.
+     * OdeĹˇle jednoduchĂ˝ textovĂ˝ email.
      */
     void sendSimpleEmail(String to, String subject, String text);
 
     /**
-     * Odešle email s HTML obsahem.
+     * OdeĹˇle email s HTML obsahem.
      */
     void sendHtmlEmail(String to, String subject, String htmlContent);
 
     /**
-     * Odešle textový aktivační email.
+     * OdeĹˇle textovĂ˝ aktivaÄŤnĂ­ email.
      */
     void sendActivationEmail(String to, String greetings, String activationLink);
 
     /**
-     * Odešle HTML aktivační email.
+     * OdeĹˇle HTML aktivaÄŤnĂ­ email.
      */
     void sendActivationEmailHTML(String to, String greetings, String activationLink);
 
     /**
-     * Odešle textový email o úspěšné aktivaci účtu.
+     * OdeĹˇle textovĂ˝ email o ĂşspÄ›ĹˇnĂ© aktivaci ĂşÄŤtu.
      */
     void sendSuccesActivationEmail(String to, String greetings);
 
     /**
-     * Odešle HTML email o úspěšné aktivaci účtu.
+     * OdeĹˇle HTML email o ĂşspÄ›ĹˇnĂ© aktivaci ĂşÄŤtu.
      */
     void sendSuccesActivationEmailHTML(String to, String greetings);
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\email\EmailWedosService.java
 -----
-
 package cz.phsoft.hokej.models.services.email;
 
 import jakarta.mail.MessagingException;
@@ -1096,13 +1088,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementace EmailService pro odesílání emailů přes SMTP (WEDOS).
+ * Implementace EmailService pro odesĂ­lĂˇnĂ­ emailĹŻ pĹ™es SMTP (WEDOS).
  *
- * Třída zapouzdřuje práci s JavaMailSenderem a představuje
- * centrální místo pro veškerou emailovou komunikaci aplikace.
+ * TĹ™Ă­da zapouzdĹ™uje prĂˇci s JavaMailSenderem a pĹ™edstavuje
+ * centrĂˇlnĂ­ mĂ­sto pro veĹˇkerou emailovou komunikaci aplikace.
  *
- * Odesílání emailů probíhá asynchronně a je možné jej globálně
- * vypnout pomocí konfigurační vlastnosti.
+ * OdesĂ­lĂˇnĂ­ emailĹŻ probĂ­hĂˇ asynchronnÄ› a je moĹľnĂ© jej globĂˇlnÄ›
+ * vypnout pomocĂ­ konfiguraÄŤnĂ­ vlastnosti.
  */
 @Service
 public class EmailWedosService implements EmailService {
@@ -1123,17 +1115,17 @@ public class EmailWedosService implements EmailService {
     }
 
     /**
-     * Odešle jednoduchý textový email.
+     * OdeĹˇle jednoduchĂ˝ textovĂ˝ email.
      *
-     * Pokud jsou emaily globálně vypnuté, zpráva se pouze zaloguje.
-     * Chyby při odesílání nejsou propagovány do vyšších vrstev.
+     * Pokud jsou emaily globĂˇlnÄ› vypnutĂ©, zprĂˇva se pouze zaloguje.
+     * Chyby pĹ™i odesĂ­lĂˇnĂ­ nejsou propagovĂˇny do vyĹˇĹˇĂ­ch vrstev.
      */
     @Override
     @Async
     public void sendSimpleEmail(String to, String subject, String text) {
 
         if (!emailEnabled) {
-            log.info("Email je vypnutý – zpráva nebyla odeslána na {}", to);
+            log.info("Email je vypnutĂ˝ â€“ zprĂˇva nebyla odeslĂˇna na {}", to);
             return;
         }
 
@@ -1145,24 +1137,24 @@ public class EmailWedosService implements EmailService {
             message.setFrom(fromEmail);
 
             mailSender.send(message);
-            log.debug("Textový email byl odeslán na {}", to);
+            log.debug("TextovĂ˝ email byl odeslĂˇn na {}", to);
 
         } catch (Exception e) {
-            log.error("Chyba při odesílání emailu na {}: {}", to, e.getMessage(), e);
+            log.error("Chyba pĹ™i odesĂ­lĂˇnĂ­ emailu na {}: {}", to, e.getMessage(), e);
         }
     }
 
     /**
-     * Odešle HTML email.
+     * OdeĹˇle HTML email.
      *
-     * Používá se například pro aktivační a notifikační emaily.
+     * PouĹľĂ­vĂˇ se napĹ™Ă­klad pro aktivaÄŤnĂ­ a notifikaÄŤnĂ­ emaily.
      */
     @Override
     @Async
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
 
         if (!emailEnabled) {
-            log.info("Email je vypnutý – HTML zpráva nebyla odeslána na {}", to);
+            log.info("Email je vypnutĂ˝ â€“ HTML zprĂˇva nebyla odeslĂˇna na {}", to);
             return;
         }
 
@@ -1178,21 +1170,21 @@ public class EmailWedosService implements EmailService {
 
             mailSender.send(mimeMessage);
 
-            log.debug("HTML email byl odeslán na {}", to);
+            log.debug("HTML email byl odeslĂˇn na {}", to);
 
         } catch (MessagingException e) {
-            log.error("Chyba při odesílání HTML emailu na {}: {}", to, e.getMessage(), e);
+            log.error("Chyba pĹ™i odesĂ­lĂˇnĂ­ HTML emailu na {}: {}", to, e.getMessage(), e);
         }
     }
 
-    // Konkrétní emaily – aktivace účtu
+    // KonkrĂ©tnĂ­ emaily â€“ aktivace ĂşÄŤtu
 
     @Override
     public void sendActivationEmail(String to, String greetings, String activationLink) {
-        String subject = "Potvrzení registrace – Hokej Hobby Hokej";
+        String subject = "PotvrzenĂ­ registrace â€“ Hokej Hobby Hokej";
         String text =
-                "Dobrý den, " + greetings + "\n\n" +
-                        "Pro aktivaci účtu klikněte na následující odkaz:\n" +
+                "DobrĂ˝ den, " + greetings + "\n\n" +
+                        "Pro aktivaci ĂşÄŤtu kliknÄ›te na nĂˇsledujĂ­cĂ­ odkaz:\n" +
                         activationLink + "\n\n" +
                         "Platnost odkazu je 24 hodin.";
 
@@ -1202,12 +1194,12 @@ public class EmailWedosService implements EmailService {
     @Override
     @Async
     public void sendActivationEmailHTML(String to, String greetings, String activationLink) {
-        String subject = "Potvrzení registrace – Hokej Hobby Hokej";
+        String subject = "PotvrzenĂ­ registrace â€“ Hokej Hobby Hokej";
         String html =
-                "<p>Dobrý den,</p>" +
+                "<p>DobrĂ˝ den,</p>" +
                         "<p>" + greetings + "</p>" +
-                        "<p>Pro aktivaci účtu klikněte na následující odkaz:</p>" +
-                        "<a href=\"" + activationLink + "\">Aktivovat účet</a>";
+                        "<p>Pro aktivaci ĂşÄŤtu kliknÄ›te na nĂˇsledujĂ­cĂ­ odkaz:</p>" +
+                        "<a href=\"" + activationLink + "\">Aktivovat ĂşÄŤet</a>";
 
         sendHtmlEmail(to, subject, html);
     }
@@ -1215,10 +1207,10 @@ public class EmailWedosService implements EmailService {
     @Override
     @Async
     public void sendSuccesActivationEmail(String to, String greetings) {
-        String subject = "Účet byl aktivován – Hokej Hobby Hokej";
+        String subject = "ĂšÄŤet byl aktivovĂˇn â€“ Hokej Hobby Hokej";
         String text =
-                "Dobrý den, " + greetings + "\n\n" +
-                        "Váš účet byl úspěšně aktivován.";
+                "DobrĂ˝ den, " + greetings + "\n\n" +
+                        "VĂˇĹˇ ĂşÄŤet byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn.";
 
         sendSimpleEmail(to, subject, text);
     }
@@ -1226,35 +1218,30 @@ public class EmailWedosService implements EmailService {
     @Override
     @Async
     public void sendSuccesActivationEmailHTML(String to, String greetings) {
-        String subject = "Účet byl aktivován – Hokej Hobby Hokej";
+        String subject = "ĂšÄŤet byl aktivovĂˇn â€“ Hokej Hobby Hokej";
         String html =
-                "<p>Dobrý den,</p>" +
+                "<p>DobrĂ˝ den,</p>" +
                         "<p>" + greetings + "</p>" +
-                        "<p>Váš účet byl úspěšně aktivován.</p>";
+                        "<p>VĂˇĹˇ ĂşÄŤet byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn.</p>";
 
         sendHtmlEmail(to, subject, html);
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\email\package-info.java
 -----
-
 /**
- * Emailový subsystém aplikace.
+ * EmailovĂ˝ subsystĂ©m aplikace.
  *
- * Zajišťuje:
- * - sestavení subjectu a těla emailových zpráv,
- * - rozhodování, zda se používá HTML nebo plain text,
- * - přípravu emailového obsahu podle typu notifikace.
+ * ZajiĹˇĹĄuje:
+ * - sestavenĂ­ subjectu a tÄ›la emailovĂ˝ch zprĂˇv,
+ * - rozhodovĂˇnĂ­, zda se pouĹľĂ­vĂˇ HTML nebo plain text,
+ * - pĹ™Ă­pravu emailovĂ©ho obsahu podle typu notifikace.
  *
  * Tato vrstva:
- * - neřeší business logiku,
- * - neřeší odeslání SMS,
- * - používá se z notifikačního subsystému a service vrstev.
+ * - neĹ™eĹˇĂ­ business logiku,
+ * - neĹ™eĹˇĂ­ odeslĂˇnĂ­ SMS,
+ * - pouĹľĂ­vĂˇ se z notifikaÄŤnĂ­ho subsystĂ©mu a service vrstev.
  */
 package cz.phsoft.hokej.models.services.email;
-
-

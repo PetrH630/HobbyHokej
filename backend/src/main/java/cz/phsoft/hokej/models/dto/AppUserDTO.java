@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.time.Instant;
 
 /**
  * DTO, které reprezentuje uživatelský účet aplikace.
@@ -70,6 +71,21 @@ public class AppUserDTO {
      */
     private LocalDateTime timestamp;
 
+    /**
+     * Čas předposledního přihlášení uživatele.
+     *
+     * Hodnota je nastavována při úspěšném přihlášení.
+     * Pokud je null, uživatel se ještě nepřihlásil.
+     */
+    private Instant lastLoginAt;
+
+    /**
+     * Čas posledního (aktuálního) přihlášení uživatele.
+     *
+     * Hodnota je nastavována při úspěšném přihlášení.
+     */
+    private Instant currentLoginAt;
+
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -94,4 +110,20 @@ public class AppUserDTO {
 
     public LocalDateTime getTimestamp() { return timestamp; }
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+
+    public Instant getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(Instant lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
+    public Instant getCurrentLoginAt() {
+        return currentLoginAt;
+    }
+
+    public void setCurrentLoginAt(Instant currentLoginAt) {
+        this.currentLoginAt = currentLoginAt;
+    }
 }

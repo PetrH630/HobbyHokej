@@ -6,11 +6,9 @@ HobbyHokejApplication.java
 package-info.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\HobbyHokejApplication.java
 -----
-
 package cz.phsoft.hokej;
 
 import org.springframework.boot.SpringApplication;
@@ -20,15 +18,15 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Hlavní spouštěcí třída aplikace Hokej – HobbyHokej.
+ * HlavnĂ­ spouĹˇtÄ›cĂ­ tĹ™Ă­da aplikace Hokej â€“ HobbyHokej.
  *
- * Odpovědnost třídy:
+ * OdpovÄ›dnost tĹ™Ă­dy:
  * - startuje Spring Boot aplikaci,
  * - aktivuje Spring kontext,
- * - zapíná podporu JPA repozitářů, plánování úloh a asynchronního zpracování.
+ * - zapĂ­nĂˇ podporu JPA repozitĂˇĹ™ĹŻ, plĂˇnovĂˇnĂ­ Ăşloh a asynchronnĂ­ho zpracovĂˇnĂ­.
  *
- * Třída neobsahuje žádnou business logiku. Slouží pouze jako vstupní bod
- * pro JVM a konfiguraci základních Spring funkcí na úrovni aplikace.
+ * TĹ™Ă­da neobsahuje ĹľĂˇdnou business logiku. SlouĹľĂ­ pouze jako vstupnĂ­ bod
+ * pro JVM a konfiguraci zĂˇkladnĂ­ch Spring funkcĂ­ na Ăşrovni aplikace.
  */
 @SpringBootApplication
 @EnableJpaRepositories
@@ -37,36 +35,31 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class HobbyHokejApplication {
 
     /**
-     * Hlavní vstupní metoda aplikace.
+     * HlavnĂ­ vstupnĂ­ metoda aplikace.
      *
-     * Spustí Spring Boot, inicializuje aplikační kontext
-     * a nahodí všechny nakonfigurované komponenty.
+     * SpustĂ­ Spring Boot, inicializuje aplikaÄŤnĂ­ kontext
+     * a nahodĂ­ vĹˇechny nakonfigurovanĂ© komponenty.
      *
-     * @param args argumenty příkazové řádky předané aplikaci
+     * @param args argumenty pĹ™Ă­kazovĂ© Ĺ™Ăˇdky pĹ™edanĂ© aplikaci
      */
     public static void main(String[] args) {
         SpringApplication.run(HobbyHokejApplication.class, args);
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\package-info.java
 -----
-
 /**
- * Kořenový balíček aplikace Hokej – Stará Garda.
+ * KoĹ™enovĂ˝ balĂ­ÄŤek aplikace Hokej â€“ StarĂˇ Garda.
  *
- * Obsahuje hlavní spouštěcí třídu aplikace a nadřazené balíčky
- * pro jednotlivé vrstvy systému, jako jsou konfigurační třídy,
- * controllerová vrstva, modelová vrstva a datová vrstva.
+ * Obsahuje hlavnĂ­ spouĹˇtÄ›cĂ­ tĹ™Ă­du aplikace a nadĹ™azenĂ© balĂ­ÄŤky
+ * pro jednotlivĂ© vrstvy systĂ©mu, jako jsou konfiguraÄŤnĂ­ tĹ™Ă­dy,
+ * controllerovĂˇ vrstva, modelovĂˇ vrstva a datovĂˇ vrstva.
  *
- * Tento balíček je používán jako výchozí bod pro start aplikace
- * a orientaci v jejích hlavních modulech.
- *  Důležité podbalíčky:
+ * Tento balĂ­ÄŤek je pouĹľĂ­vĂˇn jako vĂ˝chozĂ­ bod pro start aplikace
+ * a orientaci v jejĂ­ch hlavnĂ­ch modulech.
+ *  DĹŻleĹľitĂ© podbalĂ­ÄŤky:
  *
  */
 package cz.phsoft.hokej;
-
-

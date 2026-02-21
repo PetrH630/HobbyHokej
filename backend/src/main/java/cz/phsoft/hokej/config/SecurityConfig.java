@@ -19,6 +19,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import cz.phsoft.hokej.models.services.AppUserService;
+
 
 import java.util.List;
 
@@ -36,6 +38,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final PlayerRepository playerRepository;
+    private final AppUserService appUserService;
 
     /**
      * Příznak demo režimu.
@@ -56,9 +59,11 @@ public class SecurityConfig {
     private String allowedOrigins;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
-                          PlayerRepository playerRepository) {
+                          PlayerRepository playerRepository,
+                          AppUserService appUserService) {
         this.userDetailsService = userDetailsService;
         this.playerRepository = playerRepository;
+        this.appUserService = appUserService;
     }
 
     @Bean
@@ -149,7 +154,7 @@ public class SecurityConfig {
                 )
 
                 .addFilterAt(
-                        new CustomJsonLoginFilter("/api/auth/login", authManager),
+                        new CustomJsonLoginFilter("/api/auth/login", authManager, appUserService),
                         UsernamePasswordAuthenticationFilter.class
                 )
 

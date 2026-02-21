@@ -6,33 +6,31 @@ ImpersonationContext.java
 ImpersonationFilter.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\security\impersonation\ImpersonationContext.java
 -----
-
 package cz.phsoft.hokej.security.impersonation;
 
 /**
- * Kontext pro práci s impersonací hráče.
+ * Kontext pro prĂˇci s impersonacĂ­ hrĂˇÄŤe.
  *
- * Třída se používá pro dočasné uložení identifikátoru hráče,
- * za kterého aktuálně přihlášený uživatel vystupuje. Kontext je
- * uložen pomocí ThreadLocal, takže hodnota je vázána na konkrétní
- * vlákno zpracovávající požadavek.
+ * TĹ™Ă­da se pouĹľĂ­vĂˇ pro doÄŤasnĂ© uloĹľenĂ­ identifikĂˇtoru hrĂˇÄŤe,
+ * za kterĂ©ho aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel vystupuje. Kontext je
+ * uloĹľen pomocĂ­ ThreadLocal, takĹľe hodnota je vĂˇzĂˇna na konkrĂ©tnĂ­
+ * vlĂˇkno zpracovĂˇvajĂ­cĂ­ poĹľadavek.
  *
- * Typickým použitím je administrátorská funkce, kdy administrátor
- * nebo manažer dočasně přebírá identitu hráče pro účely testování
- * nebo kontroly chování aplikace.
+ * TypickĂ˝m pouĹľitĂ­m je administrĂˇtorskĂˇ funkce, kdy administrĂˇtor
+ * nebo manaĹľer doÄŤasnÄ› pĹ™ebĂ­rĂˇ identitu hrĂˇÄŤe pro ĂşÄŤely testovĂˇnĂ­
+ * nebo kontroly chovĂˇnĂ­ aplikace.
  *
- * Třída je statická utilita bez instancí. Životnost hodnoty je
- * omezená na dobu zpracování jednoho požadavku a musí být po jeho
- * dokončení vyčištěna voláním metody clear.
+ * TĹ™Ă­da je statickĂˇ utilita bez instancĂ­. Ĺ˝ivotnost hodnoty je
+ * omezenĂˇ na dobu zpracovĂˇnĂ­ jednoho poĹľadavku a musĂ­ bĂ˝t po jeho
+ * dokonÄŤenĂ­ vyÄŤiĹˇtÄ›na volĂˇnĂ­m metody clear.
  */
 public final class ImpersonationContext {
 
     /**
-     * ThreadLocal úložiště pro identifikátor impersonovaného hráče.
+     * ThreadLocal ĂşloĹľiĹˇtÄ› pro identifikĂˇtor impersonovanĂ©ho hrĂˇÄŤe.
      */
     private static final ThreadLocal<Long> IMPERSONATED_PLAYER_ID = new ThreadLocal<>();
 
@@ -40,58 +38,55 @@ public final class ImpersonationContext {
     }
 
     /**
-     * Nastaví identifikátor hráče, za kterého se má aktuálně vystupovat.
+     * NastavĂ­ identifikĂˇtor hrĂˇÄŤe, za kterĂ©ho se mĂˇ aktuĂˇlnÄ› vystupovat.
      *
-     * Hodnota se uloží do ThreadLocal kontextu a je dostupná
-     * po dobu zpracování aktuálního vlákna.
+     * Hodnota se uloĹľĂ­ do ThreadLocal kontextu a je dostupnĂˇ
+     * po dobu zpracovĂˇnĂ­ aktuĂˇlnĂ­ho vlĂˇkna.
      *
-     * @param playerId Identifikátor hráče, který má být impersonován.
+     * @param playerId IdentifikĂˇtor hrĂˇÄŤe, kterĂ˝ mĂˇ bĂ˝t impersonovĂˇn.
      */
     public static void setImpersonatedPlayerId(Long playerId) {
         IMPERSONATED_PLAYER_ID.set(playerId);
     }
 
     /**
-     * Vrátí identifikátor aktuálně impersonovaného hráče.
+     * VrĂˇtĂ­ identifikĂˇtor aktuĂˇlnÄ› impersonovanĂ©ho hrĂˇÄŤe.
      *
-     * Pokud impersonace není aktivní, vrací se null.
+     * Pokud impersonace nenĂ­ aktivnĂ­, vracĂ­ se null.
      *
-     * @return Identifikátor impersonovaného hráče, nebo null pokud není nastavena.
+     * @return IdentifikĂˇtor impersonovanĂ©ho hrĂˇÄŤe, nebo null pokud nenĂ­ nastavena.
      */
     public static Long getImpersonatedPlayerId() {
         return IMPERSONATED_PLAYER_ID.get();
     }
 
     /**
-     * Vyhodnocuje, zda je aktuálně aktivní impersonace.
+     * Vyhodnocuje, zda je aktuĂˇlnÄ› aktivnĂ­ impersonace.
      *
-     * Impersonace je považována za aktivní, pokud je v kontextu
-     * nastavena hodnota identifikátoru hráče.
+     * Impersonace je povaĹľovĂˇna za aktivnĂ­, pokud je v kontextu
+     * nastavena hodnota identifikĂˇtoru hrĂˇÄŤe.
      *
-     * @return True, pokud je impersonace aktivní, jinak false.
+     * @return True, pokud je impersonace aktivnĂ­, jinak false.
      */
     public static boolean isImpersonating() {
         return getImpersonatedPlayerId() != null;
     }
 
     /**
-     * Vyčistí kontext impersonace.
+     * VyÄŤistĂ­ kontext impersonace.
      *
-     * Metoda odstraní hodnotu z ThreadLocal úložiště.
-     * Musí být volána po dokončení požadavku, aby nedošlo
-     * k úniku kontextu mezi jednotlivými požadavky.
+     * Metoda odstranĂ­ hodnotu z ThreadLocal ĂşloĹľiĹˇtÄ›.
+     * MusĂ­ bĂ˝t volĂˇna po dokonÄŤenĂ­ poĹľadavku, aby nedoĹˇlo
+     * k Ăşniku kontextu mezi jednotlivĂ˝mi poĹľadavky.
      */
     public static void clear() {
         IMPERSONATED_PLAYER_ID.remove();
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\security\impersonation\ImpersonationFilter.java
 -----
-
 package cz.phsoft.hokej.security.impersonation;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
@@ -111,21 +106,21 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * HTTP filtr umožňující administrátorovi dočasně vystupovat jménem hráče.
+ * HTTP filtr umoĹľĹujĂ­cĂ­ administrĂˇtorovi doÄŤasnÄ› vystupovat jmĂ©nem hrĂˇÄŤe.
  *
- * Filtr zpracovává hlavičku X-Impersonate-PlayerId. Pokud je hlavička přítomna,
- * ověřuje se, že aktuálně přihlášený uživatel má roli ADMIN. Následně se kontroluje,
- * že cílový hráč existuje a je ve stavu APPROVED.
+ * Filtr zpracovĂˇvĂˇ hlaviÄŤku X-Impersonate-PlayerId. Pokud je hlaviÄŤka pĹ™Ă­tomna,
+ * ovÄ›Ĺ™uje se, Ĺľe aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel mĂˇ roli ADMIN. NĂˇslednÄ› se kontroluje,
+ * Ĺľe cĂ­lovĂ˝ hrĂˇÄŤ existuje a je ve stavu APPROVED.
  *
- * Pokud jsou všechny podmínky splněny, nastaví se identifikátor hráče
- * do {@link ImpersonationContext}. Hodnota je uložena pomocí ThreadLocal
- * a platí pouze po dobu zpracování jednoho HTTP požadavku.
+ * Pokud jsou vĹˇechny podmĂ­nky splnÄ›ny, nastavĂ­ se identifikĂˇtor hrĂˇÄŤe
+ * do {@link ImpersonationContext}. Hodnota je uloĹľena pomocĂ­ ThreadLocal
+ * a platĂ­ pouze po dobu zpracovĂˇnĂ­ jednoho HTTP poĹľadavku.
  *
- * V případě porušení pravidel je vrácena odpověď se statusem 403
- * a zpracování requestu nepokračuje.
+ * V pĹ™Ă­padÄ› poruĹˇenĂ­ pravidel je vrĂˇcena odpovÄ›ÄŹ se statusem 403
+ * a zpracovĂˇnĂ­ requestu nepokraÄŤuje.
  *
- * Filtr je navržen jako bezpečnostní vrstva nad aplikační logikou
- * a neukládá informace o impersonaci do session.
+ * Filtr je navrĹľen jako bezpeÄŤnostnĂ­ vrstva nad aplikaÄŤnĂ­ logikou
+ * a neuklĂˇdĂˇ informace o impersonaci do session.
  */
 public class ImpersonationFilter extends OncePerRequestFilter {
 
@@ -140,14 +135,14 @@ public class ImpersonationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Určuje, zda má být filtr přeskočen.
+     * UrÄŤuje, zda mĂˇ bĂ˝t filtr pĹ™eskoÄŤen.
      *
-     * Filtr se neaplikuje na autentizační endpointy, veřejné cesty,
-     * chybové stránky a favicon, aby nedocházelo k interferenci
-     * s přihlašovacím procesem nebo veřejnými zdroji.
+     * Filtr se neaplikuje na autentizaÄŤnĂ­ endpointy, veĹ™ejnĂ© cesty,
+     * chybovĂ© strĂˇnky a favicon, aby nedochĂˇzelo k interferenci
+     * s pĹ™ihlaĹˇovacĂ­m procesem nebo veĹ™ejnĂ˝mi zdroji.
      *
-     * @param request Aktuální HTTP požadavek.
-     * @return True, pokud se filtr nemá aplikovat, jinak false.
+     * @param request AktuĂˇlnĂ­ HTTP poĹľadavek.
+     * @return True, pokud se filtr nemĂˇ aplikovat, jinak false.
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -159,25 +154,25 @@ public class ImpersonationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Zpracovává HTTP požadavek a případně aktivuje impersonaci hráče.
+     * ZpracovĂˇvĂˇ HTTP poĹľadavek a pĹ™Ă­padnÄ› aktivuje impersonaci hrĂˇÄŤe.
      *
-     * Pokud hlavička X-Impersonate-PlayerId není přítomna, request pokračuje
-     * bez zásahu. Pokud je přítomna, provádí se následující kontroly:
-     * - uživatel musí být přihlášen,
-     * - uživatel musí mít roli ADMIN,
-     * - identifikátor hráče musí být validní,
-     * - hráč musí existovat a být ve stavu APPROVED.
+     * Pokud hlaviÄŤka X-Impersonate-PlayerId nenĂ­ pĹ™Ă­tomna, request pokraÄŤuje
+     * bez zĂˇsahu. Pokud je pĹ™Ă­tomna, provĂˇdĂ­ se nĂˇsledujĂ­cĂ­ kontroly:
+     * - uĹľivatel musĂ­ bĂ˝t pĹ™ihlĂˇĹˇen,
+     * - uĹľivatel musĂ­ mĂ­t roli ADMIN,
+     * - identifikĂˇtor hrĂˇÄŤe musĂ­ bĂ˝t validnĂ­,
+     * - hrĂˇÄŤ musĂ­ existovat a bĂ˝t ve stavu APPROVED.
      *
-     * Při splnění podmínek se identifikátor hráče nastaví do
-     * {@link ImpersonationContext}. Po dokončení requestu se kontext
-     * vždy vyčistí v bloku finally, aby nedošlo k úniku hodnoty
-     * mezi jednotlivými požadavky.
+     * PĹ™i splnÄ›nĂ­ podmĂ­nek se identifikĂˇtor hrĂˇÄŤe nastavĂ­ do
+     * {@link ImpersonationContext}. Po dokonÄŤenĂ­ requestu se kontext
+     * vĹľdy vyÄŤistĂ­ v bloku finally, aby nedoĹˇlo k Ăşniku hodnoty
+     * mezi jednotlivĂ˝mi poĹľadavky.
      *
-     * @param request HTTP požadavek.
-     * @param response HTTP odpověď.
-     * @param filterChain Řetězec filtrů, do kterého se deleguje další zpracování.
-     * @throws ServletException Pokud dojde k chybě na úrovni servletu.
-     * @throws IOException Pokud dojde k chybě při zápisu odpovědi.
+     * @param request HTTP poĹľadavek.
+     * @param response HTTP odpovÄ›ÄŹ.
+     * @param filterChain ĹetÄ›zec filtrĹŻ, do kterĂ©ho se deleguje dalĹˇĂ­ zpracovĂˇnĂ­.
+     * @throws ServletException Pokud dojde k chybÄ› na Ăşrovni servletu.
+     * @throws IOException Pokud dojde k chybÄ› pĹ™i zĂˇpisu odpovÄ›di.
      */
     @Override
     protected void doFilterInternal(
@@ -196,29 +191,29 @@ public class ImpersonationFilter extends OncePerRequestFilter {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
-                writeForbidden(response, "BE - Zastoupení je dostupné pouze pro přihlášeného administrátora.");
+                writeForbidden(response, "BE - ZastoupenĂ­ je dostupnĂ© pouze pro pĹ™ihlĂˇĹˇenĂ©ho administrĂˇtora.");
                 return;
             }
 
             if (!hasRoleAdmin(authentication)) {
-                writeForbidden(response, "BE - Zastoupení je dostupné pouze pro roli ADMIN.");
+                writeForbidden(response, "BE - ZastoupenĂ­ je dostupnĂ© pouze pro roli ADMIN.");
                 return;
             }
 
             Long playerId = parseLongOrNull(headerValue);
             if (playerId == null) {
-                writeForbidden(response, "BE - Neplatná hlavička X-Impersonate-PlayerId.");
+                writeForbidden(response, "BE - NeplatnĂˇ hlaviÄŤka X-Impersonate-PlayerId.");
                 return;
             }
 
             PlayerEntity player = playerRepository.findById(playerId).orElse(null);
             if (player == null) {
-                writeForbidden(response, "BE - Zastupovaný hráč neexistuje.");
+                writeForbidden(response, "BE - ZastupovanĂ˝ hrĂˇÄŤ neexistuje.");
                 return;
             }
 
             if (player.getPlayerStatus() != PlayerStatus.APPROVED) {
-                writeForbidden(response, "BE - Nelze zastoupit hráče, který není schválen administrátorem.");
+                writeForbidden(response, "BE - Nelze zastoupit hrĂˇÄŤe, kterĂ˝ nenĂ­ schvĂˇlen administrĂˇtorem.");
                 return;
             }
 
@@ -240,10 +235,10 @@ public class ImpersonationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Vyhodnocuje, zda má uživatel roli ADMIN.
+     * Vyhodnocuje, zda mĂˇ uĹľivatel roli ADMIN.
      *
-     * @param authentication Autentizační objekt aktuálního uživatele.
-     * @return True, pokud uživatel má roli ADMIN, jinak false.
+     * @param authentication AutentizaÄŤnĂ­ objekt aktuĂˇlnĂ­ho uĹľivatele.
+     * @return True, pokud uĹľivatel mĂˇ roli ADMIN, jinak false.
      */
     private boolean hasRoleAdmin(Authentication authentication) {
         return authentication.getAuthorities().stream()
@@ -251,12 +246,12 @@ public class ImpersonationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Pokusí se převést textovou hodnotu na Long.
+     * PokusĂ­ se pĹ™evĂ©st textovou hodnotu na Long.
      *
-     * Pokud převod selže, vrací se null.
+     * Pokud pĹ™evod selĹľe, vracĂ­ se null.
      *
-     * @param v Textová hodnota z hlavičky.
-     * @return Identifikátor hráče jako Long, nebo null při chybě.
+     * @param v TextovĂˇ hodnota z hlaviÄŤky.
+     * @return IdentifikĂˇtor hrĂˇÄŤe jako Long, nebo null pĹ™i chybÄ›.
      */
     private Long parseLongOrNull(String v) {
         try {
@@ -267,13 +262,13 @@ public class ImpersonationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Zapíše do odpovědi HTTP status 403 s JSON tělem.
+     * ZapĂ­Ĺˇe do odpovÄ›di HTTP status 403 s JSON tÄ›lem.
      *
-     * Metoda se používá při porušení pravidel impersonace.
+     * Metoda se pouĹľĂ­vĂˇ pĹ™i poruĹˇenĂ­ pravidel impersonace.
      *
-     * @param response HTTP odpověď.
-     * @param message Text chybové zprávy.
-     * @throws IOException Pokud dojde k chybě při zápisu odpovědi.
+     * @param response HTTP odpovÄ›ÄŹ.
+     * @param message Text chybovĂ© zprĂˇvy.
+     * @throws IOException Pokud dojde k chybÄ› pĹ™i zĂˇpisu odpovÄ›di.
      */
     private void writeForbidden(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -283,14 +278,12 @@ public class ImpersonationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Escapuje text pro bezpečné vložení do JSON odpovědi.
+     * Escapuje text pro bezpeÄŤnĂ© vloĹľenĂ­ do JSON odpovÄ›di.
      *
-     * @param s Vstupní text.
-     * @return Escapovaný text.
+     * @param s VstupnĂ­ text.
+     * @return EscapovanĂ˝ text.
      */
     private String escapeJson(String s) {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
-
-

@@ -73,4 +73,31 @@ export const cancelNoExcusedAdmin = async (matchId, playerId, excuseNote) => {
     return res.data;
 };
 
+/**
+ * Změní tým aktuálního hráče u daného zápasu.
+ *
+ * PATCH /api/registrations/me/{matchId}/change-team
+ */
+export const changeMyRegistrationTeam = async (matchId) => {
+    const res = await api.patch(
+        `/registrations/me/${matchId}/change-team`,
+        null,
+        { withCredentials: true }
+    );
+    return res.data;
+};
+
+/**
+ * TODO: ADMIN/MANAGER – změní tým hráče (dle playerId) na opačný v rámci daného zápasu.
+ *
+ * PATCH /api/registrations/{playerId}/{matchId}/change-team
+ */
+export const changeRegistrationTeamAdmin = async (playerId, matchId) => {
+    const res = await api.patch(
+        `/registrations/${playerId}/${matchId}/change-team`,
+        null
+    );
+    return res.data;
+};
+
 

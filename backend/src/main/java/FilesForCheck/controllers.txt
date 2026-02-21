@@ -13,6 +13,7 @@ MatchController.java
 MatchRegistrationController.java
 MatchRegistrationHistoryController.java
 MeController.java
+NotificationController.java
 package-info.java
 PlayerController.java
 PlayerInactivityPeriodController.java
@@ -23,11 +24,9 @@ TestEmailController.java
 TestSmsController.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\AppModeController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.services.notification.DemoModeService;
@@ -38,14 +37,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
- * REST controller, který se používá pro poskytování informací o aktuálním režimu aplikace.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro poskytovĂˇnĂ­ informacĂ­ o aktuĂˇlnĂ­m reĹľimu aplikace.
  *
- * Slouží k informování frontendové části o tom, zda je aplikace spuštěna
- * v demo režimu nebo ve standardním produkčním režimu. Na základě této
- * informace může frontend podmíněně zobrazovat nebo omezovat určitou
+ * SlouĹľĂ­ k informovĂˇnĂ­ frontendovĂ© ÄŤĂˇsti o tom, zda je aplikace spuĹˇtÄ›na
+ * v demo reĹľimu nebo ve standardnĂ­m produkÄŤnĂ­m reĹľimu. Na zĂˇkladÄ› tĂ©to
+ * informace mĹŻĹľe frontend podmĂ­nÄ›nÄ› zobrazovat nebo omezovat urÄŤitou
  * funkcionalitu.
  *
- * Veškerá logika vyhodnocení režimu aplikace se deleguje na {@link DemoModeService}.
+ * VeĹˇkerĂˇ logika vyhodnocenĂ­ reĹľimu aplikace se deleguje na {@link DemoModeService}.
  */
 @RestController
 @RequestMapping("/api/public")
@@ -58,12 +57,12 @@ public class AppModeController {
     }
 
     /**
-     * Vrací informaci o aktuálním režimu aplikace.
+     * VracĂ­ informaci o aktuĂˇlnĂ­m reĹľimu aplikace.
      *
-     * Hodnota je určena zejména pro frontendovou část systému,
-     * která na jejím základě upravuje chování uživatelského rozhraní.
+     * Hodnota je urÄŤena zejmĂ©na pro frontendovou ÄŤĂˇst systĂ©mu,
+     * kterĂˇ na jejĂ­m zĂˇkladÄ› upravuje chovĂˇnĂ­ uĹľivatelskĂ©ho rozhranĂ­.
      *
-     * @return mapování obsahující příznak demo režimu aplikace
+     * @return mapovĂˇnĂ­ obsahujĂ­cĂ­ pĹ™Ă­znak demo reĹľimu aplikace
      */
     @GetMapping("/app-mode")
     public Map<String, Object> getAppMode() {
@@ -73,12 +72,9 @@ public class AppModeController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\AppUserController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.AppUserDTO;
@@ -95,14 +91,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller, který se používá pro správu uživatelských účtů.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro sprĂˇvu uĹľivatelskĂ˝ch ĂşÄŤtĹŻ.
  *
- * Zajišťuje práci s přihlášeným uživatelem, včetně zobrazení profilu, historie změn
- * a změny hesla, a také administrativní správu uživatelů, která je vyhrazena roli
+ * ZajiĹˇĹĄuje prĂˇci s pĹ™ihlĂˇĹˇenĂ˝m uĹľivatelem, vÄŤetnÄ› zobrazenĂ­ profilu, historie zmÄ›n
+ * a zmÄ›ny hesla, a takĂ© administrativnĂ­ sprĂˇvu uĹľivatelĹŻ, kterĂˇ je vyhrazena roli
  * ADMIN/MANAGER.
  *
  *
- * Veškerá business logika se předává do {@link AppUserService}.
+ * VeĹˇkerĂˇ business logika se pĹ™edĂˇvĂˇ do {@link AppUserService}.
  */
 @RestController
 @RequestMapping("/api/users")
@@ -118,13 +114,13 @@ public class AppUserController {
     }
 
     /**
-     * Vrací detail aktuálně přihlášeného uživatele.
+     * VracĂ­ detail aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Identifikace uživatele se provádí podle e-mailu (username),
-     * který je získán z objektu {@link Authentication}.
+     * Identifikace uĹľivatele se provĂˇdĂ­ podle e-mailu (username),
+     * kterĂ˝ je zĂ­skĂˇn z objektu {@link Authentication}.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return DTO s detaily přihlášeného uživatele
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return DTO s detaily pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -133,11 +129,11 @@ public class AppUserController {
     }
 
     /**
-     * Aktualizuje údaje aktuálně přihlášeného uživatele.
+     * Aktualizuje Ăşdaje aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @param dto            DTO s aktualizovanými údaji uživatele
-     * @return HTTP odpověď s informací o úspěšné aktualizaci
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @param dto            DTO s aktualizovanĂ˝mi Ăşdaji uĹľivatele
+     * @return HTTP odpovÄ›ÄŹ s informacĂ­ o ĂşspÄ›ĹˇnĂ© aktualizaci
      */
     @PutMapping("/me/update")
     @PreAuthorize("isAuthenticated()")
@@ -147,18 +143,18 @@ public class AppUserController {
 
         String email = authentication.getName();
         appUserService.updateUser(email, dto);
-        return ResponseEntity.ok("Uživatel byl změněn");
+        return ResponseEntity.ok("UĹľivatel byl zmÄ›nÄ›n");
     }
 
     /**
-     * Mění heslo aktuálně přihlášeného uživatele.
+     * MÄ›nĂ­ heslo aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Staré heslo, nové heslo a potvrzení nového hesla se předává
-     * prostřednictvím DTO {@link ChangePasswordDTO}.
+     * StarĂ© heslo, novĂ© heslo a potvrzenĂ­ novĂ©ho hesla se pĹ™edĂˇvĂˇ
+     * prostĹ™ednictvĂ­m DTO {@link ChangePasswordDTO}.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @param dto            DTO obsahující staré a nové heslo
-     * @return HTTP odpověď s informací o úspěšné změně hesla
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @param dto            DTO obsahujĂ­cĂ­ starĂ© a novĂ© heslo
+     * @return HTTP odpovÄ›ÄŹ s informacĂ­ o ĂşspÄ›ĹˇnĂ© zmÄ›nÄ› hesla
      */
     @PostMapping("/me/change-password")
     @PreAuthorize("isAuthenticated()")
@@ -173,17 +169,17 @@ public class AppUserController {
                 dto.getNewPassword(),
                 dto.getNewPasswordConfirm()
         );
-        return ResponseEntity.ok("Heslo úspěšně změněno");
+        return ResponseEntity.ok("Heslo ĂşspÄ›ĹˇnÄ› zmÄ›nÄ›no");
     }
 
     // ADMIN
 
     /**
-     * Vrací seznam všech uživatelů v systému.
+     * VracĂ­ seznam vĹˇech uĹľivatelĹŻ v systĂ©mu.
      *
-     * Endpoint je dostupný pouze pro roli ADMIN.
+     * Endpoint je dostupnĂ˝ pouze pro roli ADMIN.
      *
-     * @return seznam uživatelů jako {@link AppUserDTO}
+     * @return seznam uĹľivatelĹŻ jako {@link AppUserDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -192,12 +188,12 @@ public class AppUserController {
     }
 
     /**
-     * Vrací detail uživatele podle jeho ID.
+     * VracĂ­ detail uĹľivatele podle jeho ID.
      *
-     * Endpoint je dostupný pouze pro roli ADMIN.
+     * Endpoint je dostupnĂ˝ pouze pro roli ADMIN.
      *
-     * @param id ID uživatele
-     * @return DTO s detaily vybraného uživatele
+     * @param id ID uĹľivatele
+     * @return DTO s detaily vybranĂ©ho uĹľivatele
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -206,57 +202,57 @@ public class AppUserController {
     }
 
     /**
-     * Resetuje heslo uživatele na výchozí hodnotu.
+     * Resetuje heslo uĹľivatele na vĂ˝chozĂ­ hodnotu.
      *
      * Operace je vyhrazena pouze pro roli ADMIN.
      *
-     * @param id ID uživatele, kterému se má heslo resetovat
-     * @return HTTP odpověď s informací o úspěšném resetu hesla
+     * @param id ID uĹľivatele, kterĂ©mu se mĂˇ heslo resetovat
+     * @return HTTP odpovÄ›ÄŹ s informacĂ­ o ĂşspÄ›ĹˇnĂ©m resetu hesla
      */
     @PostMapping("/{id}/reset-password")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> resetPassword(@PathVariable Long id) {
         appUserService.resetPassword(id);
-        return ResponseEntity.ok("Heslo resetováno na 'Player123'");
+        return ResponseEntity.ok("Heslo resetovĂˇno na 'Player123'");
     }
 
     /**
-     * Aktivuje účet uživatele.
+     * Aktivuje ĂşÄŤet uĹľivatele.
      *
      * Operace je vyhrazena pouze pro roli ADMIN.
      *
-     * @param id ID uživatele, který má být aktivován
-     * @return HTTP odpověď s informací o úspěšné aktivaci
+     * @param id ID uĹľivatele, kterĂ˝ mĂˇ bĂ˝t aktivovĂˇn
+     * @return HTTP odpovÄ›ÄŹ s informacĂ­ o ĂşspÄ›ĹˇnĂ© aktivaci
      */
     @PatchMapping("/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> activateUserByAdmin(@PathVariable Long id) {
         appUserService.activateUserByAdmin(id);
-        return ResponseEntity.ok("Uživatel byl úspěšně aktivován");
+        return ResponseEntity.ok("UĹľivatel byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn");
     }
 
     /**
-     * Deaktivuje účet uživatele.
+     * Deaktivuje ĂşÄŤet uĹľivatele.
      *
      * Operace je vyhrazena pouze pro roli ADMIN.
      *
-     * @param id ID uživatele, který má být deaktivován
-     * @return HTTP odpověď s informací o úspěšné deaktivaci
+     * @param id ID uĹľivatele, kterĂ˝ mĂˇ bĂ˝t deaktivovĂˇn
+     * @return HTTP odpovÄ›ÄŹ s informacĂ­ o ĂşspÄ›ĹˇnĂ© deaktivaci
      */
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deactivateUserByAdmin(@PathVariable Long id) {
         appUserService.deactivateUserByAdmin(id);
-        return ResponseEntity.ok("Uživatel byl úspěšně deaktivován");
+        return ResponseEntity.ok("UĹľivatel byl ĂşspÄ›ĹˇnÄ› deaktivovĂˇn");
     }
 
     /**
-     * Vrací historii uživatele dle id.
+     * VracĂ­ historii uĹľivatele dle id.
      *
      * Operace je vyhrazena pouze pro roli ADMIN.
      *
-     * @param id ID uživatele
-     * @return historie uživatele jako {@link List<AppUserHistoryDTO>}
+     * @param id ID uĹľivatele
+     * @return historie uĹľivatele jako {@link List<AppUserHistoryDTO>}
      */
     @GetMapping("/{id}/history")
     @PreAuthorize("hasRole('ADMIN')")
@@ -266,10 +262,10 @@ public class AppUserController {
     }
 
     /**
-     * Vrací historii aktuálně přihlášeného uživatele.
+     * VracĂ­ historii aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return historie uživatele jako {@link List<AppUserHistoryDTO>}
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return historie uĹľivatele jako {@link List<AppUserHistoryDTO>}
      */
     @GetMapping("/me/history")
     @PreAuthorize("isAuthenticated()")
@@ -284,12 +280,9 @@ public class AppUserController {
 
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\AppUserSettingsController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.AppUserSettingsDTO;
@@ -300,14 +293,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * REST controller, který se používá pro správu nastavení uživatele
- * na úrovni aplikačního účtu (AppUser).
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro sprĂˇvu nastavenĂ­ uĹľivatele
+ * na Ăşrovni aplikaÄŤnĂ­ho ĂşÄŤtu (AppUser).
  *
- * Pracuje s nastavením navázaným na účet uživatele, nikoli na aktuálního
- * hráče. Slouží například pro nastavení preferencí uživatele a režimu
- * výběru hráče po přihlášení.
+ * Pracuje s nastavenĂ­m navĂˇzanĂ˝m na ĂşÄŤet uĹľivatele, nikoli na aktuĂˇlnĂ­ho
+ * hrĂˇÄŤe. SlouĹľĂ­ napĹ™Ă­klad pro nastavenĂ­ preferencĂ­ uĹľivatele a reĹľimu
+ * vĂ˝bÄ›ru hrĂˇÄŤe po pĹ™ihlĂˇĹˇenĂ­.
  *
- * Veškerá business logika se předává do {@link AppUserSettingsService}.
+ * VeĹˇkerĂˇ business logika se pĹ™edĂˇvĂˇ do {@link AppUserSettingsService}.
  */
 @RestController
 @RequestMapping("/api/user")
@@ -320,13 +313,13 @@ public class AppUserSettingsController {
     }
 
     /**
-     * Vrací nastavení aktuálně přihlášeného uživatele.
+     * VracĂ­ nastavenĂ­ aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Uživatel se identifikuje pomocí e-mailu získaného z objektu
+     * UĹľivatel se identifikuje pomocĂ­ e-mailu zĂ­skanĂ©ho z objektu
      * {@link Authentication}.
      *
-     * @param auth autentizační kontext přihlášeného uživatele
-     * @return DTO s nastavením uživatele
+     * @param auth autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return DTO s nastavenĂ­m uĹľivatele
      */
     @GetMapping("/settings")
     @PreAuthorize("isAuthenticated()")
@@ -337,14 +330,14 @@ public class AppUserSettingsController {
     }
 
     /**
-     * Aktualizuje nastavení aktuálně přihlášeného uživatele.
+     * Aktualizuje nastavenĂ­ aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Očekává se, že frontend předá kompletní stav nastavení, který se
-     * aplikuje na účet uživatele.
+     * OÄŤekĂˇvĂˇ se, Ĺľe frontend pĹ™edĂˇ kompletnĂ­ stav nastavenĂ­, kterĂ˝ se
+     * aplikuje na ĂşÄŤet uĹľivatele.
      *
-     * @param auth       autentizační kontext přihlášeného uživatele
-     * @param requestDto DTO s novým nastavením uživatele
-     * @return DTO s aktualizovaným nastavením uživatele
+     * @param auth       autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @param requestDto DTO s novĂ˝m nastavenĂ­m uĹľivatele
+     * @return DTO s aktualizovanĂ˝m nastavenĂ­m uĹľivatele
      */
     @PatchMapping("/settings")
     @PreAuthorize("isAuthenticated()")
@@ -358,12 +351,9 @@ public class AppUserSettingsController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\AuthController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.AppUserDTO;
@@ -382,13 +372,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
- * REST controller, který se používá pro autentizaci a registraci uživatelů.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro autentizaci a registraci uĹľivatelĹŻ.
  *
- * Zajišťuje registraci nových uživatelů, aktivaci účtů pomocí ověřovacího
- * tokenu, práci s přihlášeným uživatelem a proces zapomenutého hesla
- * včetně vystavení tokenu a nastavení nového hesla.
+ * ZajiĹˇĹĄuje registraci novĂ˝ch uĹľivatelĹŻ, aktivaci ĂşÄŤtĹŻ pomocĂ­ ovÄ›Ĺ™ovacĂ­ho
+ * tokenu, prĂˇci s pĹ™ihlĂˇĹˇenĂ˝m uĹľivatelem a proces zapomenutĂ©ho hesla
+ * vÄŤetnÄ› vystavenĂ­ tokenu a nastavenĂ­ novĂ©ho hesla.
  *
- * Veškerá business logika se předává do {@link AppUserService}.
+ * VeĹˇkerĂˇ business logika se pĹ™edĂˇvĂˇ do {@link AppUserService}.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -397,10 +387,10 @@ public class AuthController {
     private final AppUserService appUserService;
 
     /**
-     * Základní URL frontendové SPA aplikace (React/Vite).
+     * ZĂˇkladnĂ­ URL frontendovĂ© SPA aplikace (React/Vite).
      *
-     * Tato hodnota se používá pro přesměrování uživatele při procesu
-     * resetu hesla, aby mohl být otevřen správný route na frontend aplikaci.
+     * Tato hodnota se pouĹľĂ­vĂˇ pro pĹ™esmÄ›rovĂˇnĂ­ uĹľivatele pĹ™i procesu
+     * resetu hesla, aby mohl bĂ˝t otevĹ™en sprĂˇvnĂ˝ route na frontend aplikaci.
      */
     @Value("${app.frontend-base-url}")
     private String frontendBaseUrl;
@@ -410,13 +400,13 @@ public class AuthController {
     }
 
     /**
-     * Registruje nového uživatele.
+     * Registruje novĂ©ho uĹľivatele.
      *
-     * Po úspěšné registraci se vytváří aktivační token a odesílá se
-     * aktivační e-mail s odkazem na aktivaci účtu.
+     * Po ĂşspÄ›ĹˇnĂ© registraci se vytvĂˇĹ™Ă­ aktivaÄŤnĂ­ token a odesĂ­lĂˇ se
+     * aktivaÄŤnĂ­ e-mail s odkazem na aktivaci ĂşÄŤtu.
      *
-     * @param dto registrační údaje nového uživatele
-     * @return HTTP odpověď s informací o úspěšné registraci
+     * @param dto registraÄŤnĂ­ Ăşdaje novĂ©ho uĹľivatele
+     * @return HTTP odpovÄ›ÄŹ s informacĂ­ o ĂşspÄ›ĹˇnĂ© registraci
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDTO dto) {
@@ -424,16 +414,16 @@ public class AuthController {
         return ResponseEntity.ok(
                 Map.of(
                         "status", "ok",
-                        "message", "Registrace úspěšná. Zkontrolujte email pro aktivaci účtu."
+                        "message", "Registrace ĂşspÄ›ĹˇnĂˇ. Zkontrolujte email pro aktivaci ĂşÄŤtu."
                 )
         );
     }
 
     /**
-     * Vrací informace o aktuálně přihlášeném uživateli.
+     * VracĂ­ informace o aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©m uĹľivateli.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return DTO s detaily přihlášeného uživatele
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return DTO s detaily pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -443,14 +433,14 @@ public class AuthController {
     }
 
     /**
-     * Aktivuje uživatelský účet na základě ověřovacího tokenu.
+     * Aktivuje uĹľivatelskĂ˝ ĂşÄŤet na zĂˇkladÄ› ovÄ›Ĺ™ovacĂ­ho tokenu.
      *
-     * Token se získává z aktivačního odkazu zaslaného po registraci
-     * a má omezenou platnost. V případě neplatného nebo expirovaného
-     * tokenu se vrací chyba 400.
+     * Token se zĂ­skĂˇvĂˇ z aktivaÄŤnĂ­ho odkazu zaslanĂ©ho po registraci
+     * a mĂˇ omezenou platnost. V pĹ™Ă­padÄ› neplatnĂ©ho nebo expirovanĂ©ho
+     * tokenu se vracĂ­ chyba 400.
      *
-     * @param token aktivační token
-     * @return textová informace o výsledku aktivace účtu
+     * @param token aktivaÄŤnĂ­ token
+     * @return textovĂˇ informace o vĂ˝sledku aktivace ĂşÄŤtu
      */
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
@@ -459,22 +449,22 @@ public class AuthController {
         if (!activated) {
             return ResponseEntity
                     .badRequest()
-                    .body("Neplatný nebo expirovaný aktivační odkaz.");
+                    .body("NeplatnĂ˝ nebo expirovanĂ˝ aktivaÄŤnĂ­ odkaz.");
         }
 
-        return ResponseEntity.ok("Účet byl úspěšně aktivován.");
+        return ResponseEntity.ok("ĂšÄŤet byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn.");
     }
 
     /**
-     * Přesměrovává uživatele z odkazu v e-mailu na frontendovou stránku
-     * pro nastavení nového hesla.
+     * PĹ™esmÄ›rovĂˇvĂˇ uĹľivatele z odkazu v e-mailu na frontendovou strĂˇnku
+     * pro nastavenĂ­ novĂ©ho hesla.
      *
-     * Backend provádí redirect na odpovídající route frontendové SPA
-     * a předává reset token jako query parametr. Samotná změna hesla
-     * se následně provádí pomocí REST endpointů pro zapomenuté heslo.
+     * Backend provĂˇdĂ­ redirect na odpovĂ­dajĂ­cĂ­ route frontendovĂ© SPA
+     * a pĹ™edĂˇvĂˇ reset token jako query parametr. SamotnĂˇ zmÄ›na hesla
+     * se nĂˇslednÄ› provĂˇdĂ­ pomocĂ­ REST endpointĹŻ pro zapomenutĂ© heslo.
      *
-     * @param token reset token pro zapomenuté heslo
-     * @return HTTP 302 s hlavičkou Location na frontendovou URL
+     * @param token reset token pro zapomenutĂ© heslo
+     * @return HTTP 302 s hlaviÄŤkou Location na frontendovou URL
      */
     @GetMapping("/reset-password")
     public ResponseEntity<Void> redirectResetPassword(@RequestParam String token) {
@@ -487,13 +477,13 @@ public class AuthController {
     }
 
     /**
-     * Vytváří požadavek na reset zapomenutého hesla.
+     * VytvĂˇĹ™Ă­ poĹľadavek na reset zapomenutĂ©ho hesla.
      *
-     * Na základě zadané e-mailové adresy se vytvoří reset token
-     * a odešle se e-mail s odkazem pro nastavení nového hesla.
+     * Na zĂˇkladÄ› zadanĂ© e-mailovĂ© adresy se vytvoĹ™Ă­ reset token
+     * a odeĹˇle se e-mail s odkazem pro nastavenĂ­ novĂ©ho hesla.
      *
-     * @param dto DTO s e-mailovou adresou uživatele
-     * @return HTTP odpověď 200 v případě úspěchu
+     * @param dto DTO s e-mailovou adresou uĹľivatele
+     * @return HTTP odpovÄ›ÄŹ 200 v pĹ™Ă­padÄ› ĂşspÄ›chu
      */
     @PostMapping("/forgotten-password")
     public ResponseEntity<Void> requestForgottenPassword(@RequestBody @Valid EmailDTO dto) {
@@ -502,13 +492,13 @@ public class AuthController {
     }
 
     /**
-     * Vrací informaci o e-mailu, ke kterému přísluší daný reset token.
+     * VracĂ­ informaci o e-mailu, ke kterĂ©mu pĹ™Ă­sluĹˇĂ­ danĂ˝ reset token.
      *
-     * Endpoint se používá například pro zobrazení e-mailové adresy
-     * na frontendové stránce pro reset hesla.
+     * Endpoint se pouĹľĂ­vĂˇ napĹ™Ă­klad pro zobrazenĂ­ e-mailovĂ© adresy
+     * na frontendovĂ© strĂˇnce pro reset hesla.
      *
      * @param token reset token
-     * @return mapování obsahující e-mail navázaný na token
+     * @return mapovĂˇnĂ­ obsahujĂ­cĂ­ e-mail navĂˇzanĂ˝ na token
      */
     @GetMapping("/forgotten-password/info")
     public ResponseEntity<Map<String, String>> getForgottenPasswordInfo(@RequestParam String token) {
@@ -517,13 +507,13 @@ public class AuthController {
     }
 
     /**
-     * Provádí nastavení nového hesla na základě reset tokenu.
+     * ProvĂˇdĂ­ nastavenĂ­ novĂ©ho hesla na zĂˇkladÄ› reset tokenu.
      *
-     * Informace o tokenu, novém hesle a jeho potvrzení se předává
-     * prostřednictvím {@link ForgottenPasswordResetDTO}.
+     * Informace o tokenu, novĂ©m hesle a jeho potvrzenĂ­ se pĹ™edĂˇvĂˇ
+     * prostĹ™ednictvĂ­m {@link ForgottenPasswordResetDTO}.
      *
-     * @param dto DTO obsahující token a nové heslo
-     * @return HTTP odpověď 200 v případě úspěchu
+     * @param dto DTO obsahujĂ­cĂ­ token a novĂ© heslo
+     * @return HTTP odpovÄ›ÄŹ 200 v pĹ™Ă­padÄ› ĂşspÄ›chu
      */
     @PostMapping("/forgotten-password/reset")
     public ResponseEntity<Void> forgottenPasswordReset(@RequestBody @Valid ForgottenPasswordResetDTO dto) {
@@ -532,12 +522,9 @@ public class AuthController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\CurrentPlayerController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerDTO;
@@ -552,15 +539,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller, který se používá pro práci s aktuálním hráčem
- * přihlášeného uživatele.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro prĂˇci s aktuĂˇlnĂ­m hrĂˇÄŤem
+ * pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
  *
- * Aktuální hráč představuje kontext, ve kterém uživatel pracuje
- * například při registraci na zápasy nebo při zobrazení statistik.
- * Controller umožňuje nastavení aktuálního hráče, automatický výběr
- * hráče po přihlášení a získání aktuálně zvoleného hráče.
+ * AktuĂˇlnĂ­ hrĂˇÄŤ pĹ™edstavuje kontext, ve kterĂ©m uĹľivatel pracuje
+ * napĹ™Ă­klad pĹ™i registraci na zĂˇpasy nebo pĹ™i zobrazenĂ­ statistik.
+ * Controller umoĹľĹuje nastavenĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe, automatickĂ˝ vĂ˝bÄ›r
+ * hrĂˇÄŤe po pĹ™ihlĂˇĹˇenĂ­ a zĂ­skĂˇnĂ­ aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
  *
- * Veškerá business logika se předává do {@link PlayerService}
+ * VeĹˇkerĂˇ business logika se pĹ™edĂˇvĂˇ do {@link PlayerService}
  * a {@link CurrentPlayerService}.
  */
 @RestController
@@ -577,14 +564,14 @@ public class CurrentPlayerController {
     }
 
     /**
-     * Nastavuje aktuálního hráče pro přihlášeného uživatele.
+     * Nastavuje aktuĂˇlnĂ­ho hrĂˇÄŤe pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Metoda se používá zejména v případech, kdy má uživatel přiřazeno
-     * více hráčů a potřebuje mezi nimi ručně přepínat.
+     * Metoda se pouĹľĂ­vĂˇ zejmĂ©na v pĹ™Ă­padech, kdy mĂˇ uĹľivatel pĹ™iĹ™azeno
+     * vĂ­ce hrĂˇÄŤĹŻ a potĹ™ebuje mezi nimi ruÄŤnÄ› pĹ™epĂ­nat.
      *
-     * @param playerId ID hráče, který má být nastaven jako aktuální
-     * @param auth     autentizační kontext přihlášeného uživatele
-     * @return DTO {@link SuccessResponseDTO} s informací o provedené změně
+     * @param playerId ID hrĂˇÄŤe, kterĂ˝ mĂˇ bĂ˝t nastaven jako aktuĂˇlnĂ­
+     * @param auth     autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return DTO {@link SuccessResponseDTO} s informacĂ­ o provedenĂ© zmÄ›nÄ›
      */
     @PostMapping("/{playerId}")
     @PreAuthorize("isAuthenticated()")
@@ -599,15 +586,15 @@ public class CurrentPlayerController {
     }
 
     /**
-     * Provádí automatický výběr aktuálního hráče pro přihlášeného
-     * uživatele podle nastavení v AppUserSettings.
+     * ProvĂˇdĂ­ automatickĂ˝ vĂ˝bÄ›r aktuĂˇlnĂ­ho hrĂˇÄŤe pro pĹ™ihlĂˇĹˇenĂ©ho
+     * uĹľivatele podle nastavenĂ­ v AppUserSettings.
      *
-     * Například může být vybrán první hráč podle ID nebo může být
-     * ponechán stav bez vybraného hráče, aby si uživatel vybral hráče
-     * ručně na frontendu.
+     * NapĹ™Ă­klad mĹŻĹľe bĂ˝t vybrĂˇn prvnĂ­ hrĂˇÄŤ podle ID nebo mĹŻĹľe bĂ˝t
+     * ponechĂˇn stav bez vybranĂ©ho hrĂˇÄŤe, aby si uĹľivatel vybral hrĂˇÄŤe
+     * ruÄŤnÄ› na frontendu.
      *
-     * @param auth autentizační kontext přihlášeného uživatele
-     * @return DTO {@link SuccessResponseDTO} s výsledkem automatického výběru
+     * @param auth autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return DTO {@link SuccessResponseDTO} s vĂ˝sledkem automatickĂ©ho vĂ˝bÄ›ru
      */
     @PostMapping("/auto-select")
     @PreAuthorize("isAuthenticated()")
@@ -619,11 +606,11 @@ public class CurrentPlayerController {
     }
 
     /**
-     * Vrací aktuálně zvoleného hráče přihlášeného uživatele.
+     * VracĂ­ aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Pokud není aktuální hráč nastaven, vrací se hodnota null.
+     * Pokud nenĂ­ aktuĂˇlnĂ­ hrĂˇÄŤ nastaven, vracĂ­ se hodnota null.
      *
-     * @return DTO {@link PlayerDTO} s detaily hráče nebo null
+     * @return DTO {@link PlayerDTO} s detaily hrĂˇÄŤe nebo null
      */
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -639,12 +626,9 @@ public class CurrentPlayerController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\DebugController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import org.springframework.security.core.Authentication;
@@ -652,23 +636,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller, který se používá pro ladění bezpečnostního kontextu.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro ladÄ›nĂ­ bezpeÄŤnostnĂ­ho kontextu.
  *
- * Umožňuje ověřit, zda je uživatel autentizován a jaké informace
- * jsou dostupné v objektu {@link Authentication}. Controller je určen
- * pouze pro vývojové prostředí a neměl by být vystaven v produkci.
+ * UmoĹľĹuje ovÄ›Ĺ™it, zda je uĹľivatel autentizovĂˇn a jakĂ© informace
+ * jsou dostupnĂ© v objektu {@link Authentication}. Controller je urÄŤen
+ * pouze pro vĂ˝vojovĂ© prostĹ™edĂ­ a nemÄ›l by bĂ˝t vystaven v produkci.
  */
 @RestController
 public class DebugController {
 
     /**
-     * Vrací aktuální objekt {@link Authentication}.
+     * VracĂ­ aktuĂˇlnĂ­ objekt {@link Authentication}.
      *
-     * Metoda se používá výhradně pro ladění a diagnostiku
-     * bezpečnostního kontextu.
+     * Metoda se pouĹľĂ­vĂˇ vĂ˝hradnÄ› pro ladÄ›nĂ­ a diagnostiku
+     * bezpeÄŤnostnĂ­ho kontextu.
      *
-     * @param auth autentizační kontext aktuálního uživatele
-     * @return objekt {@link Authentication} s informacemi o uživateli
+     * @param auth autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @return objekt {@link Authentication} s informacemi o uĹľivateli
      */
     @GetMapping("/api/debug/me")
     public Object me(Authentication auth) {
@@ -676,12 +660,9 @@ public class DebugController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\DemoNotificationController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.DemoNotificationsDTO;
@@ -691,12 +672,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * REST controller, který se používá pro práci s demo notifikacemi.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro prĂˇci s demo notifikacemi.
  *
- * Controller je registrován pouze v demo režimu. Pokud demo režim není aktivní,
- * endpointy nejsou součástí aplikace a vrací se odpověď 404.
+ * Controller je registrovĂˇn pouze v demo reĹľimu. Pokud demo reĹľim nenĂ­ aktivnĂ­,
+ * endpointy nejsou souÄŤĂˇstĂ­ aplikace a vracĂ­ se odpovÄ›ÄŹ 404.
  *
- * Práce s dočasným úložištěm notifikací se deleguje na {@link DemoNotificationStore}.
+ * PrĂˇce s doÄŤasnĂ˝m ĂşloĹľiĹˇtÄ›m notifikacĂ­ se deleguje na {@link DemoNotificationStore}.
  */
 @RestController
 @RequestMapping("/api/demo/notifications")
@@ -710,12 +691,12 @@ public class DemoNotificationController {
     }
 
     /**
-     * Vrací všechny zachycené demo notifikace a následně je vymaže z úložiště.
+     * VracĂ­ vĹˇechny zachycenĂ© demo notifikace a nĂˇslednÄ› je vymaĹľe z ĂşloĹľiĹˇtÄ›.
      *
-     * Endpoint slouží zejména pro frontendovou část aplikace,
-     * která zobrazuje simulované odeslané e-maily a SMS zprávy v demo režimu.
+     * Endpoint slouĹľĂ­ zejmĂ©na pro frontendovou ÄŤĂˇst aplikace,
+     * kterĂˇ zobrazuje simulovanĂ© odeslanĂ© e-maily a SMS zprĂˇvy v demo reĹľimu.
      *
-     * @return DTO obsahující seznam zachycených e-mailů a SMS zpráv
+     * @return DTO obsahujĂ­cĂ­ seznam zachycenĂ˝ch e-mailĹŻ a SMS zprĂˇv
      */
     @GetMapping
     public ResponseEntity<DemoNotificationsDTO> getDemoNotifications() {
@@ -724,12 +705,12 @@ public class DemoNotificationController {
     }
 
     /**
-     * Provede vyčištění zachycených demo notifikací bez jejich vrácení.
+     * Provede vyÄŤiĹˇtÄ›nĂ­ zachycenĂ˝ch demo notifikacĂ­ bez jejich vrĂˇcenĂ­.
      *
-     * Endpoint umožňuje explicitní smazání obsahu úložiště
-     * například při resetu demo prostředí.
+     * Endpoint umoĹľĹuje explicitnĂ­ smazĂˇnĂ­ obsahu ĂşloĹľiĹˇtÄ›
+     * napĹ™Ă­klad pĹ™i resetu demo prostĹ™edĂ­.
      *
-     * @return HTTP odpověď 204 No Content v případě úspěchu
+     * @return HTTP odpovÄ›ÄŹ 204 No Content v pĹ™Ă­padÄ› ĂşspÄ›chu
      */
     @DeleteMapping
     public ResponseEntity<Void> clearDemoNotifications() {
@@ -738,12 +719,9 @@ public class DemoNotificationController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\MatchController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
@@ -760,16 +738,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller, který se používá pro správu zápasů.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro sprĂˇvu zĂˇpasĹŻ.
  *
- * Zajišťuje administrativní operace nad zápasy pro role ADMIN a MANAGER,
- * včetně vytváření, aktualizace, mazání, zrušení a obnovení zápasů.
- * Zároveň poskytuje pohled na zápasy z perspektivy aktuálního hráče
- * a detail zápasu včetně informací o registracích.
+ * ZajiĹˇĹĄuje administrativnĂ­ operace nad zĂˇpasy pro role ADMIN a MANAGER,
+ * vÄŤetnÄ› vytvĂˇĹ™enĂ­, aktualizace, mazĂˇnĂ­, zruĹˇenĂ­ a obnovenĂ­ zĂˇpasĹŻ.
+ * ZĂˇroveĹ poskytuje pohled na zĂˇpasy z perspektivy aktuĂˇlnĂ­ho hrĂˇÄŤe
+ * a detail zĂˇpasu vÄŤetnÄ› informacĂ­ o registracĂ­ch.
  *
- * Veškerá business logika se deleguje do {@link MatchService},
- * práce s historií zápasů do {@link MatchHistoryService} a práce
- * s aktuálním hráčem do {@link CurrentPlayerService}.
+ * VeĹˇkerĂˇ business logika se deleguje do {@link MatchService},
+ * prĂˇce s historiĂ­ zĂˇpasĹŻ do {@link MatchHistoryService} a prĂˇce
+ * s aktuĂˇlnĂ­m hrĂˇÄŤem do {@link CurrentPlayerService}.
  */
 @RestController
 @RequestMapping("/api/matches")
@@ -787,15 +765,15 @@ public class MatchController {
         this.matchHistoryService = matchHistoryService;
     }
 
-    // ADMIN / MANAGER – globální správa zápasů
+    // ADMIN / MANAGER â€“ globĂˇlnĂ­ sprĂˇva zĂˇpasĹŻ
 
     /**
-     * Vrací seznam všech zápasů v systému.
+     * VracĂ­ seznam vĹˇech zĂˇpasĹŻ v systĂ©mu.
      *
-     * Endpoint je určen pro administrativní přehled zápasů a
-     * je dostupný pro role ADMIN a MANAGER.
+     * Endpoint je urÄŤen pro administrativnĂ­ pĹ™ehled zĂˇpasĹŻ a
+     * je dostupnĂ˝ pro role ADMIN a MANAGER.
      *
-     * @return seznam všech zápasů jako {@link MatchDTO}
+     * @return seznam vĹˇech zĂˇpasĹŻ jako {@link MatchDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -804,12 +782,12 @@ public class MatchController {
     }
 
     /**
-     * Vrací seznam všech nadcházejících zápasů.
+     * VracĂ­ seznam vĹˇech nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
-     * k přehledu budoucích zápasů v systému.
+     * Endpoint je dostupnĂ˝ pro role ADMIN a MANAGER a slouĹľĂ­
+     * k pĹ™ehledu budoucĂ­ch zĂˇpasĹŻ v systĂ©mu.
      *
-     * @return seznam nadcházejících zápasů jako {@link MatchDTO}
+     * @return seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ jako {@link MatchDTO}
      */
     @GetMapping("/upcoming")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -818,12 +796,12 @@ public class MatchController {
     }
 
     /**
-     * Vrací seznam všech již odehraných zápasů.
+     * VracĂ­ seznam vĹˇech jiĹľ odehranĂ˝ch zĂˇpasĹŻ.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a používá se
-     * pro přehled historicky odehraných zápasů.
+     * Endpoint je dostupnĂ˝ pro role ADMIN a MANAGER a pouĹľĂ­vĂˇ se
+     * pro pĹ™ehled historicky odehranĂ˝ch zĂˇpasĹŻ.
      *
-     * @return seznam odehraných zápasů jako {@link MatchDTO}
+     * @return seznam odehranĂ˝ch zĂˇpasĹŻ jako {@link MatchDTO}
      */
     @GetMapping("/past")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -832,14 +810,14 @@ public class MatchController {
     }
 
     /**
-     * Vytváří nový zápas.
+     * VytvĂˇĹ™Ă­ novĂ˝ zĂˇpas.
      *
-     * Vstupní data jsou validována pomocí bean validation a
-     * vlastní uložení zápasu se deleguje do servisní vrstvy.
+     * VstupnĂ­ data jsou validovĂˇna pomocĂ­ bean validation a
+     * vlastnĂ­ uloĹľenĂ­ zĂˇpasu se deleguje do servisnĂ­ vrstvy.
      * Operace je vyhrazena roli ADMIN.
      *
-     * @param matchDTO DTO s daty nového zápasu
-     * @return vytvořený zápas jako {@link MatchDTO}
+     * @param matchDTO DTO s daty novĂ©ho zĂˇpasu
+     * @return vytvoĹ™enĂ˝ zĂˇpas jako {@link MatchDTO}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -848,14 +826,14 @@ public class MatchController {
     }
 
     /**
-     * Vrací detail zápasu podle jeho ID v administrativním pohledu.
+     * VracĂ­ detail zĂˇpasu podle jeho ID v administrativnĂ­m pohledu.
      *
-     * Jedná se o pohled pro administrátora nebo manažera bez vazby
-     * na konkrétního hráče. Endpoint je vhodný pro editaci zápasu
-     * nebo pro jeho detailní kontrolu.
+     * JednĂˇ se o pohled pro administrĂˇtora nebo manaĹľera bez vazby
+     * na konkrĂ©tnĂ­ho hrĂˇÄŤe. Endpoint je vhodnĂ˝ pro editaci zĂˇpasu
+     * nebo pro jeho detailnĂ­ kontrolu.
      *
-     * @param id ID zápasu
-     * @return {@link MatchDTO} s detaily zápasu
+     * @param id ID zĂˇpasu
+     * @return {@link MatchDTO} s detaily zĂˇpasu
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -864,14 +842,14 @@ public class MatchController {
     }
 
     /**
-     * Vrací historii změn daného zápasu.
+     * VracĂ­ historii zmÄ›n danĂ©ho zĂˇpasu.
      *
-     * Historie slouží pro auditní účely a sledování průběžných
-     * úprav parametrů zápasu. Záznamy jsou získávány ze servisní
-     * vrstvy, která čte historii z databáze.
+     * Historie slouĹľĂ­ pro auditnĂ­ ĂşÄŤely a sledovĂˇnĂ­ prĹŻbÄ›ĹľnĂ˝ch
+     * Ăşprav parametrĹŻ zĂˇpasu. ZĂˇznamy jsou zĂ­skĂˇvĂˇny ze servisnĂ­
+     * vrstvy, kterĂˇ ÄŤte historii z databĂˇze.
      *
-     * @param id ID zápasu
-     * @return seznam {@link MatchHistoryDTO} představujících historii zápasu
+     * @param id ID zĂˇpasu
+     * @return seznam {@link MatchHistoryDTO} pĹ™edstavujĂ­cĂ­ch historii zĂˇpasu
      */
     @GetMapping("/{id}/history")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -880,15 +858,15 @@ public class MatchController {
     }
 
     /**
-     * Aktualizuje existující zápas.
+     * Aktualizuje existujĂ­cĂ­ zĂˇpas.
      *
-     * Vstupní data jsou validována a následná aktualizace se
-     * deleguje do servisní vrstvy. Endpoint je dostupný pro role
+     * VstupnĂ­ data jsou validovĂˇna a nĂˇslednĂˇ aktualizace se
+     * deleguje do servisnĂ­ vrstvy. Endpoint je dostupnĂ˝ pro role
      * ADMIN a MANAGER.
      *
-     * @param id  ID zápasu, který má být aktualizován
-     * @param dto DTO s aktualizovanými daty zápasu
-     * @return {@link MatchDTO} s uloženými změnami
+     * @param id  ID zĂˇpasu, kterĂ˝ mĂˇ bĂ˝t aktualizovĂˇn
+     * @param dto DTO s aktualizovanĂ˝mi daty zĂˇpasu
+     * @return {@link MatchDTO} s uloĹľenĂ˝mi zmÄ›nami
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -898,14 +876,14 @@ public class MatchController {
     }
 
     /**
-     * Odstraňuje zápas ze systému.
+     * OdstraĹuje zĂˇpas ze systĂ©mu.
      *
-     * Odstranění zápasu se používá výjimečně, například při
-     * chybně zadaném zápasu. Operace je vyhrazena pouze pro roli ADMIN
-     * a je realizována prostřednictvím servisní vrstvy.
+     * OdstranÄ›nĂ­ zĂˇpasu se pouĹľĂ­vĂˇ vĂ˝jimeÄŤnÄ›, napĹ™Ă­klad pĹ™i
+     * chybnÄ› zadanĂ©m zĂˇpasu. Operace je vyhrazena pouze pro roli ADMIN
+     * a je realizovĂˇna prostĹ™ednictvĂ­m servisnĂ­ vrstvy.
      *
-     * @param id ID zápasu, který má být odstraněn
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @param id ID zĂˇpasu, kterĂ˝ mĂˇ bĂ˝t odstranÄ›n
+     * @return {@link SuccessResponseDTO} s vĂ˝sledkem operace
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -915,15 +893,15 @@ public class MatchController {
     }
 
     /**
-     * Vrací seznam zápasů, které jsou dostupné pro konkrétního hráče.
+     * VracĂ­ seznam zĂˇpasĹŻ, kterĂ© jsou dostupnĂ© pro konkrĂ©tnĂ­ho hrĂˇÄŤe.
      *
-     * Dostupnost zápasů je určována na základě doménových pravidel,
-     * například podle kapacity nebo stavu zápasu. Endpoint je dostupný
-     * pro role ADMIN a MANAGER a slouží zejména pro administrativní práci
-     * s registracemi konkrétního hráče.
+     * Dostupnost zĂˇpasĹŻ je urÄŤovĂˇna na zĂˇkladÄ› domĂ©novĂ˝ch pravidel,
+     * napĹ™Ă­klad podle kapacity nebo stavu zĂˇpasu. Endpoint je dostupnĂ˝
+     * pro role ADMIN a MANAGER a slouĹľĂ­ zejmĂ©na pro administrativnĂ­ prĂˇci
+     * s registracemi konkrĂ©tnĂ­ho hrĂˇÄŤe.
      *
-     * @param playerId ID hráče
-     * @return seznam dostupných zápasů pro daného hráče jako {@link MatchDTO}
+     * @param playerId ID hrĂˇÄŤe
+     * @return seznam dostupnĂ˝ch zĂˇpasĹŻ pro danĂ©ho hrĂˇÄŤe jako {@link MatchDTO}
      */
     @GetMapping("/available-for-player/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -932,15 +910,15 @@ public class MatchController {
     }
 
     /**
-     * Ruší zápas a ukládá důvod zrušení.
+     * RuĹˇĂ­ zĂˇpas a uklĂˇdĂˇ dĹŻvod zruĹˇenĂ­.
      *
-     * Operace je dostupná pro role ADMIN a MANAGER a typicky
-     * spouští navazující proces notifikací pro dotčené hráče.
-     * Důvod zrušení je předáván jako enum {@link MatchCancelReason}.
+     * Operace je dostupnĂˇ pro role ADMIN a MANAGER a typicky
+     * spouĹˇtĂ­ navazujĂ­cĂ­ proces notifikacĂ­ pro dotÄŤenĂ© hrĂˇÄŤe.
+     * DĹŻvod zruĹˇenĂ­ je pĹ™edĂˇvĂˇn jako enum {@link MatchCancelReason}.
      *
-     * @param matchId ID zápasu, který má být zrušen
-     * @param reason  důvod zrušení zápasu
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @param matchId ID zĂˇpasu, kterĂ˝ mĂˇ bĂ˝t zruĹˇen
+     * @param reason  dĹŻvod zruĹˇenĂ­ zĂˇpasu
+     * @return {@link SuccessResponseDTO} s vĂ˝sledkem operace
      */
     @PatchMapping("/{matchId}/cancel")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -953,14 +931,14 @@ public class MatchController {
     }
 
     /**
-     * Obnovuje dříve zrušený zápas.
+     * Obnovuje dĹ™Ă­ve zruĹˇenĂ˝ zĂˇpas.
      *
-     * Obnovení zápasu vrací zápas do aktivního stavu a umožňuje
-     * další práci s registracemi hráčů. Operace je dostupná pro
-     * role ADMIN a MANAGER a zpracování je delegováno na servisní vrstvu.
+     * ObnovenĂ­ zĂˇpasu vracĂ­ zĂˇpas do aktivnĂ­ho stavu a umoĹľĹuje
+     * dalĹˇĂ­ prĂˇci s registracemi hrĂˇÄŤĹŻ. Operace je dostupnĂˇ pro
+     * role ADMIN a MANAGER a zpracovĂˇnĂ­ je delegovĂˇno na servisnĂ­ vrstvu.
      *
-     * @param matchId ID zápasu, který má být obnoven
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @param matchId ID zĂˇpasu, kterĂ˝ mĂˇ bĂ˝t obnoven
+     * @return {@link SuccessResponseDTO} s vĂ˝sledkem operace
      */
     @PatchMapping("/{matchId}/uncancel")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -969,17 +947,17 @@ public class MatchController {
         return ResponseEntity.ok(response);
     }
 
-    // Hráč – endpointy v kontextu aktuálního hráče
+    // HrĂˇÄŤ â€“ endpointy v kontextu aktuĂˇlnĂ­ho hrĂˇÄŤe
 
     /**
-     * Vrací detail konkrétního zápasu z pohledu hráče.
+     * VracĂ­ detail konkrĂ©tnĂ­ho zĂˇpasu z pohledu hrĂˇÄŤe.
      *
-     * Detail obsahuje informace o registracích, volných místech
-     * a možnostech úprav registrace pro aktuálního hráče. Endpoint
-     * je dostupný pro přihlášené uživatele.
+     * Detail obsahuje informace o registracĂ­ch, volnĂ˝ch mĂ­stech
+     * a moĹľnostech Ăşprav registrace pro aktuĂˇlnĂ­ho hrĂˇÄŤe. Endpoint
+     * je dostupnĂ˝ pro pĹ™ihlĂˇĹˇenĂ© uĹľivatele.
      *
-     * @param id ID zápasu
-     * @return {@link MatchDetailDTO} s detailem zápasu pro hráče
+     * @param id ID zĂˇpasu
+     * @return {@link MatchDetailDTO} s detailem zĂˇpasu pro hrĂˇÄŤe
      */
     @GetMapping("/{id}/detail")
     @PreAuthorize("isAuthenticated()")
@@ -988,12 +966,12 @@ public class MatchController {
     }
 
     /**
-     * Vrací nejbližší nadcházející zápas v systému.
+     * VracĂ­ nejbliĹľĹˇĂ­ nadchĂˇzejĂ­cĂ­ zĂˇpas v systĂ©mu.
      *
-     * Endpoint se používá například pro zobrazení nejbližšího
-     * zápasu na úvodní stránce aplikace pro přihlášeného uživatele.
+     * Endpoint se pouĹľĂ­vĂˇ napĹ™Ă­klad pro zobrazenĂ­ nejbliĹľĹˇĂ­ho
+     * zĂˇpasu na ĂşvodnĂ­ strĂˇnce aplikace pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * @return {@link MatchDTO} s nejbližším zápasem nebo null, pokud žádný neexistuje
+     * @return {@link MatchDTO} s nejbliĹľĹˇĂ­m zĂˇpasem nebo null, pokud ĹľĂˇdnĂ˝ neexistuje
      */
     @GetMapping("/next")
     @PreAuthorize("isAuthenticated()")
@@ -1002,15 +980,15 @@ public class MatchController {
     }
 
     /**
-     * Vrací seznam nadcházejících zápasů pro aktuálně zvoleného hráče.
+     * VracĂ­ seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ pro aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
      *
-     * Před voláním služby se vyžaduje, aby byl nastaven aktuální hráč.
-     * Samotné zjištění ID aktuálního hráče se zajišťuje pomocí
-     * {@link CurrentPlayerService}. Endpoint je dostupný pro
-     * přihlášené uživatele.
+     * PĹ™ed volĂˇnĂ­m sluĹľby se vyĹľaduje, aby byl nastaven aktuĂˇlnĂ­ hrĂˇÄŤ.
+     * SamotnĂ© zjiĹˇtÄ›nĂ­ ID aktuĂˇlnĂ­ho hrĂˇÄŤe se zajiĹˇĹĄuje pomocĂ­
+     * {@link CurrentPlayerService}. Endpoint je dostupnĂ˝ pro
+     * pĹ™ihlĂˇĹˇenĂ© uĹľivatele.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam nadcházejících zápasů pro aktuálního hráče jako {@link MatchDTO}
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ pro aktuĂˇlnĂ­ho hrĂˇÄŤe jako {@link MatchDTO}
      */
     @GetMapping("/me/upcoming")
     @PreAuthorize("isAuthenticated()")
@@ -1021,14 +999,14 @@ public class MatchController {
     }
 
     /**
-     * Vrací přehled nadcházejících zápasů pro aktuálního hráče.
+     * VracĂ­ pĹ™ehled nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ pro aktuĂˇlnĂ­ho hrĂˇÄŤe.
      *
-     * Přehled je určen zejména pro kompaktní zobrazení zápasů
-     * v uživatelském rozhraní, například v podobě karet. Skutečné
-     * načtení dat se deleguje na servisní vrstvu.
+     * PĹ™ehled je urÄŤen zejmĂ©na pro kompaktnĂ­ zobrazenĂ­ zĂˇpasĹŻ
+     * v uĹľivatelskĂ©m rozhranĂ­, napĹ™Ă­klad v podobÄ› karet. SkuteÄŤnĂ©
+     * naÄŤtenĂ­ dat se deleguje na servisnĂ­ vrstvu.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam {@link MatchOverviewDTO} s nadcházejícími zápasy pro hráče
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return seznam {@link MatchOverviewDTO} s nadchĂˇzejĂ­cĂ­mi zĂˇpasy pro hrĂˇÄŤe
      */
     @GetMapping("/me/upcoming-overview")
     @PreAuthorize("isAuthenticated()")
@@ -1039,16 +1017,16 @@ public class MatchController {
     }
 
     /**
-     * Vrací seznam všech již odehraných zápasů pro aktuálního hráče.
+     * VracĂ­ seznam vĹˇech jiĹľ odehranĂ˝ch zĂˇpasĹŻ pro aktuĂˇlnĂ­ho hrĂˇÄŤe.
      *
-     * Seznam slouží pro zobrazení historie zápasů daného hráče
-     * v uživatelském rozhraní. Endpoint je dostupný pro přihlášené
-     * uživatele a identita hráče se určuje pomocí {@link CurrentPlayerService}.
+     * Seznam slouĹľĂ­ pro zobrazenĂ­ historie zĂˇpasĹŻ danĂ©ho hrĂˇÄŤe
+     * v uĹľivatelskĂ©m rozhranĂ­. Endpoint je dostupnĂ˝ pro pĹ™ihlĂˇĹˇenĂ©
+     * uĹľivatele a identita hrĂˇÄŤe se urÄŤuje pomocĂ­ {@link CurrentPlayerService}.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam {@link MatchOverviewDTO} pro odehrané zápasy aktuálního hráče
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return seznam {@link MatchOverviewDTO} pro odehranĂ© zĂˇpasy aktuĂˇlnĂ­ho hrĂˇÄŤe
      */
-    // TODO - JEN ZÁPASY OD VYTVOŘENÍ HRÁČE
+    // TODO - JEN ZĂPASY OD VYTVOĹENĂŤ HRĂÄŚE
     @GetMapping("/me/all-passed")
     @PreAuthorize("isAuthenticated()")
     public List<MatchOverviewDTO> getAllMatchesForPlayer(Authentication authentication) {
@@ -1058,12 +1036,9 @@ public class MatchController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\MatchRegistrationController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
@@ -1081,16 +1056,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller, který se používá pro správu registrací hráčů na zápasy.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro sprĂˇvu registracĂ­ hrĂˇÄŤĹŻ na zĂˇpasy.
  *
- * Zajišťuje administrativní správu registrací pro role ADMIN a MANAGER
- * a správu registrací pro aktuálního hráče pod endpointy s prefixem /me.
- * Umožňuje registraci, odhlášení, evidenci omluv a neomluvené neúčasti
- * a také přehled registrací napříč zápasy.
+ * ZajiĹˇĹĄuje administrativnĂ­ sprĂˇvu registracĂ­ pro role ADMIN a MANAGER
+ * a sprĂˇvu registracĂ­ pro aktuĂˇlnĂ­ho hrĂˇÄŤe pod endpointy s prefixem /me.
+ * UmoĹľĹuje registraci, odhlĂˇĹˇenĂ­, evidenci omluv a neomluvenĂ© neĂşÄŤasti
+ * a takĂ© pĹ™ehled registracĂ­ napĹ™Ă­ÄŤ zĂˇpasy.
  *
- * Veškerá business logika se deleguje do {@link MatchRegistrationService},
- * informace o aktuálním hráči se získávají z {@link CurrentPlayerService}
- * a související doménová logika může být částečně řešena také v {@link MatchService}.
+ * VeĹˇkerĂˇ business logika se deleguje do {@link MatchRegistrationService},
+ * informace o aktuĂˇlnĂ­m hrĂˇÄŤi se zĂ­skĂˇvajĂ­ z {@link CurrentPlayerService}
+ * a souvisejĂ­cĂ­ domĂ©novĂˇ logika mĹŻĹľe bĂ˝t ÄŤĂˇsteÄŤnÄ› Ĺ™eĹˇena takĂ© v {@link MatchService}.
  */
 @RestController
 @RequestMapping("/api/registrations")
@@ -1108,15 +1083,15 @@ public class MatchRegistrationController {
         this.matchService = matchService;
     }
 
-    // ADMIN / MANAGER – globální správa registrací
+    // ADMIN / MANAGER â€“ globĂˇlnĂ­ sprĂˇva registracĂ­
 
     /**
-     * Vrací seznam všech registrací na všechny zápasy.
+     * VracĂ­ seznam vĹˇech registracĂ­ na vĹˇechny zĂˇpasy.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
-     * k přehledové správě registrací napříč celým systémem.
+     * Endpoint je dostupnĂ˝ pro role ADMIN a MANAGER a slouĹľĂ­
+     * k pĹ™ehledovĂ© sprĂˇvÄ› registracĂ­ napĹ™Ă­ÄŤ celĂ˝m systĂ©mem.
      *
-     * @return seznam všech registrací jako {@link MatchRegistrationDTO}
+     * @return seznam vĹˇech registracĂ­ jako {@link MatchRegistrationDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1125,13 +1100,13 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Vrací všechny registrace hráčů pro konkrétní zápas.
+     * VracĂ­ vĹˇechny registrace hrĂˇÄŤĹŻ pro konkrĂ©tnĂ­ zĂˇpas.
      *
-     * Endpoint se používá například při kontrole obsazenosti zápasu
-     * nebo při ruční úpravě registrací ze strany administrátora či manažera.
+     * Endpoint se pouĹľĂ­vĂˇ napĹ™Ă­klad pĹ™i kontrole obsazenosti zĂˇpasu
+     * nebo pĹ™i ruÄŤnĂ­ ĂşpravÄ› registracĂ­ ze strany administrĂˇtora ÄŤi manaĹľera.
      *
-     * @param matchId ID zápasu
-     * @return seznam registrací pro daný zápas jako {@link MatchRegistrationDTO}
+     * @param matchId ID zĂˇpasu
+     * @return seznam registracĂ­ pro danĂ˝ zĂˇpas jako {@link MatchRegistrationDTO}
      */
     @GetMapping("/match/{matchId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1140,13 +1115,13 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Vrací všechny registrace konkrétního hráče napříč zápasy.
+     * VracĂ­ vĹˇechny registrace konkrĂ©tnĂ­ho hrĂˇÄŤe napĹ™Ă­ÄŤ zĂˇpasy.
      *
-     * Endpoint se používá pro přehled účasti hráče v jednotlivých zápasech,
-     * typicky v administrativním rozhraní.
+     * Endpoint se pouĹľĂ­vĂˇ pro pĹ™ehled ĂşÄŤasti hrĂˇÄŤe v jednotlivĂ˝ch zĂˇpasech,
+     * typicky v administrativnĂ­m rozhranĂ­.
      *
-     * @param playerId ID hráče
-     * @return seznam registrací daného hráče jako {@link MatchRegistrationDTO}
+     * @param playerId ID hrĂˇÄŤe
+     * @return seznam registracĂ­ danĂ©ho hrĂˇÄŤe jako {@link MatchRegistrationDTO}
      */
     @GetMapping("/player/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1155,14 +1130,14 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Vrací seznam hráčů, kteří na pozvánku k danému zápasu zatím nereagovali.
+     * VracĂ­ seznam hrĂˇÄŤĹŻ, kteĹ™Ă­ na pozvĂˇnku k danĂ©mu zĂˇpasu zatĂ­m nereagovali.
      *
-     * Informace se používá například pro přehled hráčů, kteří se ještě
-     * nepřihlásili ani neomluvili, a může sloužit jako podklad pro
-     * následnou komunikaci ze strany manažera.
+     * Informace se pouĹľĂ­vĂˇ napĹ™Ă­klad pro pĹ™ehled hrĂˇÄŤĹŻ, kteĹ™Ă­ se jeĹˇtÄ›
+     * nepĹ™ihlĂˇsili ani neomluvili, a mĹŻĹľe slouĹľit jako podklad pro
+     * nĂˇslednou komunikaci ze strany manaĹľera.
      *
-     * @param matchId ID zápasu
-     * @return seznam hráčů bez reakce jako {@link PlayerDTO}
+     * @param matchId ID zĂˇpasu
+     * @return seznam hrĂˇÄŤĹŻ bez reakce jako {@link PlayerDTO}
      */
     @GetMapping("/match/{matchId}/no-response")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1171,15 +1146,15 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Vytváří nebo aktualizuje registraci za konkrétního hráče.
+     * VytvĂˇĹ™Ă­ nebo aktualizuje registraci za konkrĂ©tnĂ­ho hrĂˇÄŤe.
      *
-     * Endpoint se používá administrátorem nebo manažerem v situacích,
-     * kdy je potřeba hráče ručně zaregistrovat, odhlásit nebo změnit
-     * typ jeho účasti. Vstupní požadavek určuje cílový stav registrace.
+     * Endpoint se pouĹľĂ­vĂˇ administrĂˇtorem nebo manaĹľerem v situacĂ­ch,
+     * kdy je potĹ™eba hrĂˇÄŤe ruÄŤnÄ› zaregistrovat, odhlĂˇsit nebo zmÄ›nit
+     * typ jeho ĂşÄŤasti. VstupnĂ­ poĹľadavek urÄŤuje cĂ­lovĂ˝ stav registrace.
      *
-     * @param playerId ID hráče, za kterého se operace provádí
-     * @param request  požadavek na změnu registrace
-     * @return {@link MatchRegistrationDTO} s výsledným stavem registrace
+     * @param playerId ID hrĂˇÄŤe, za kterĂ©ho se operace provĂˇdĂ­
+     * @param request  poĹľadavek na zmÄ›nu registrace
+     * @return {@link MatchRegistrationDTO} s vĂ˝slednĂ˝m stavem registrace
      */
     @PostMapping("/upsert/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1191,15 +1166,15 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Označuje hráče v konkrétním zápase jako neomluveně nepřítomného.
+     * OznaÄŤuje hrĂˇÄŤe v konkrĂ©tnĂ­m zĂˇpase jako neomluvenÄ› nepĹ™Ă­tomnĂ©ho.
      *
-     * Slouží k zaznamenání neomluvené absence hráče. Pro záznam může být
-     * doplněna interní poznámka administrátora nebo manažera.
+     * SlouĹľĂ­ k zaznamenĂˇnĂ­ neomluvenĂ© absence hrĂˇÄŤe. Pro zĂˇznam mĹŻĹľe bĂ˝t
+     * doplnÄ›na internĂ­ poznĂˇmka administrĂˇtora nebo manaĹľera.
      *
-     * @param matchId   ID zápasu
-     * @param playerId  ID hráče
-     * @param adminNote volitelná interní poznámka k záznamu
-     * @return {@link MatchRegistrationDTO} s aktualizovaným stavem registrace
+     * @param matchId   ID zĂˇpasu
+     * @param playerId  ID hrĂˇÄŤe
+     * @param adminNote volitelnĂˇ internĂ­ poznĂˇmka k zĂˇznamu
+     * @return {@link MatchRegistrationDTO} s aktualizovanĂ˝m stavem registrace
      */
     @PatchMapping("/match/{matchId}/players/{playerId}/no-excused")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1212,17 +1187,17 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Ruší označení neomluvené absence hráče v konkrétním zápase a nastavuje omluvu.
+     * RuĹˇĂ­ oznaÄŤenĂ­ neomluvenĂ© absence hrĂˇÄŤe v konkrĂ©tnĂ­m zĂˇpase a nastavuje omluvu.
      *
-     * Slouží pro opravu dříve uložené neomluvené absence, například pokud
-     * byla absence vyhodnocena dodatečně jako omluvená. Důvod omluvy a poznámka
-     * se ukládají spolu s registrací.
+     * SlouĹľĂ­ pro opravu dĹ™Ă­ve uloĹľenĂ© neomluvenĂ© absence, napĹ™Ă­klad pokud
+     * byla absence vyhodnocena dodateÄŤnÄ› jako omluvenĂˇ. DĹŻvod omluvy a poznĂˇmka
+     * se uklĂˇdajĂ­ spolu s registracĂ­.
      *
-     * @param matchId      ID zápasu
-     * @param playerId     ID hráče
-     * @param excuseReason důvod omluvy
-     * @param excuseNote   poznámka k omluvě
-     * @return {@link MatchRegistrationDTO} s aktualizovaným stavem registrace
+     * @param matchId      ID zĂˇpasu
+     * @param playerId     ID hrĂˇÄŤe
+     * @param excuseReason dĹŻvod omluvy
+     * @param excuseNote   poznĂˇmka k omluvÄ›
+     * @return {@link MatchRegistrationDTO} s aktualizovanĂ˝m stavem registrace
      */
     @PatchMapping("/match/{matchId}/players/{playerId}/cancel-no-excused")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1235,18 +1210,56 @@ public class MatchRegistrationController {
         return matchRegistrationService.cancelNoExcused(matchId, playerId, excuseReason, excuseNote);
     }
 
-    // Uživatelská správa registrací pro aktuálního hráče
+    /**
+     * MÄ›nĂ­ team u pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe ke konkrĂ©tnĂ­ registraci na opaÄŤnĂ˝ team.
+     *
+     *AktuĂˇlnĂ­ hrĂˇÄŤ se zĂ­skĂˇvĂˇ
+     *      * z {@link CurrentPlayerService}.
+     * @param matchId   ID zĂˇpasu     *
+     * @return {@link MatchRegistrationDTO} s aktualizovanĂ˝m stavem registrace
+     */
+    @PatchMapping("/me/{matchId}/change-team")
+    @PreAuthorize("isAuthenticated()")
+    public MatchRegistrationDTO changeRegistrationTeam(
+            @PathVariable Long matchId) {
+
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return matchRegistrationService.changeRegistrationTeam(currentPlayerId, matchId);
+    }
 
     /**
-     * Spravuje registraci aktuálního hráče na zápas.
+     * MÄ›nĂ­ team u hrĂˇÄŤe dle jeho id na opaÄŤnĂ˝ team.
      *
-     * Podle obsahu {@link MatchRegistrationRequest} se provádí registrace,
-     * odhlášení, omluva nebo nastavení náhradníka. Aktuální hráč se získává
-     * z {@link CurrentPlayerService}. V případě, že aktuální hráč není zvolen,
+     * @param playerId  ID hrĂˇÄŤe
+     * @param matchId   ID zĂˇpasu     *
+     * @return {@link MatchRegistrationDTO} s aktualizovanĂ˝m stavem registrace
+     */
+    @PatchMapping("/{playerId}/{matchId}/change-team")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO changeRegistrationTeamAdmin(
+            @PathVariable Long playerId,
+            @PathVariable Long matchId) {
+
+        return matchRegistrationService.changeRegistrationTeam(playerId, matchId);
+    }
+
+
+
+
+
+    // UĹľivatelskĂˇ sprĂˇva registracĂ­ pro aktuĂˇlnĂ­ho hrĂˇÄŤe
+
+    /**
+     * Spravuje registraci aktuĂˇlnĂ­ho hrĂˇÄŤe na zĂˇpas.
+     *
+     * Podle obsahu {@link MatchRegistrationRequest} se provĂˇdĂ­ registrace,
+     * odhlĂˇĹˇenĂ­, omluva nebo nastavenĂ­ nĂˇhradnĂ­ka. AktuĂˇlnĂ­ hrĂˇÄŤ se zĂ­skĂˇvĂˇ
+     * z {@link CurrentPlayerService}. V pĹ™Ă­padÄ›, Ĺľe aktuĂˇlnĂ­ hrĂˇÄŤ nenĂ­ zvolen,
      * vyhazuje se {@link CurrentPlayerNotSelectedException}.
      *
-     * @param request požadavek na změnu registrace
-     * @return {@link MatchRegistrationDTO} s výsledným stavem registrace
+     * @param request poĹľadavek na zmÄ›nu registrace
+     * @return {@link MatchRegistrationDTO} s vĂ˝slednĂ˝m stavem registrace
      */
     @PostMapping("/me/upsert")
     @PreAuthorize("isAuthenticated()")
@@ -1264,13 +1277,13 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Vrací všechny registrace aktuálně zvoleného hráče.
+     * VracĂ­ vĹˇechny registrace aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
      *
-     * Endpoint se používá pro uživatelské zobrazení historie a stavu
-     * registrací hráče napříč zápasy. Identita hráče se získává z
+     * Endpoint se pouĹľĂ­vĂˇ pro uĹľivatelskĂ© zobrazenĂ­ historie a stavu
+     * registracĂ­ hrĂˇÄŤe napĹ™Ă­ÄŤ zĂˇpasy. Identita hrĂˇÄŤe se zĂ­skĂˇvĂˇ z
      * {@link CurrentPlayerService}.
      *
-     * @return seznam {@link MatchRegistrationDTO} pro aktuálního hráče
+     * @return seznam {@link MatchRegistrationDTO} pro aktuĂˇlnĂ­ho hrĂˇÄŤe
      */
     @GetMapping("/me/for-current-player")
     @PreAuthorize("isAuthenticated()")
@@ -1281,12 +1294,9 @@ public class MatchRegistrationController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\MatchRegistrationHistoryController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO;
@@ -1301,15 +1311,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * REST controller, který se používá pro práci s historií registrací
- * hráčů k zápasům.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro prĂˇci s historiĂ­ registracĂ­
+ * hrĂˇÄŤĹŻ k zĂˇpasĹŻm.
  *
- * Controller poskytuje uživatelský pohled na historii registrace
- * aktuálního hráče a administrativní audit historie registrací
- * konkrétního hráče. Controller je read-only a slouží pouze ke čtení
- * z tabulky historie registrací.
+ * Controller poskytuje uĹľivatelskĂ˝ pohled na historii registrace
+ * aktuĂˇlnĂ­ho hrĂˇÄŤe a administrativnĂ­ audit historie registracĂ­
+ * konkrĂ©tnĂ­ho hrĂˇÄŤe. Controller je read-only a slouĹľĂ­ pouze ke ÄŤtenĂ­
+ * z tabulky historie registracĂ­.
  *
- * Veškerá business logika se předává do
+ * VeĹˇkerĂˇ business logika se pĹ™edĂˇvĂˇ do
  * {@link MatchRegistrationHistoryService}.
  */
 @RestController
@@ -1322,17 +1332,17 @@ public class MatchRegistrationHistoryController {
         this.historyService = historyService;
     }
 
-    // Uživatelský přístup – aktuální hráč
+    // UĹľivatelskĂ˝ pĹ™Ă­stup â€“ aktuĂˇlnĂ­ hrĂˇÄŤ
 
     /**
-     * Vrací historii všech změn registrace aktuálně přihlášeného
-     * hráče pro daný zápas.
+     * VracĂ­ historii vĹˇech zmÄ›n registrace aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho
+     * hrĂˇÄŤe pro danĂ˝ zĂˇpas.
      *
-     * Metoda se používá například pro zobrazení historie registrace
-     * na detailu zápasu v uživatelském rozhraní.
+     * Metoda se pouĹľĂ­vĂˇ napĹ™Ă­klad pro zobrazenĂ­ historie registrace
+     * na detailu zĂˇpasu v uĹľivatelskĂ©m rozhranĂ­.
      *
-     * @param matchId ID zápasu
-     * @return seznam záznamů historie seřazených od nejnovějšího
+     * @param matchId ID zĂˇpasu
+     * @return seznam zĂˇznamĹŻ historie seĹ™azenĂ˝ch od nejnovÄ›jĹˇĂ­ho
      */
     @GetMapping("/me/matches/{matchId}")
     @PreAuthorize("isAuthenticated()")
@@ -1346,14 +1356,14 @@ public class MatchRegistrationHistoryController {
     }
 
     /**
-     * Vrací historii všech změn registrace konkrétního hráče pro daný zápas.
+     * VracĂ­ historii vĹˇech zmÄ›n registrace konkrĂ©tnĂ­ho hrĂˇÄŤe pro danĂ˝ zĂˇpas.
      *
-     * Metoda se používá pro administrativní audit, analýzu změn registrací
-     * a řešení případných sporů.
+     * Metoda se pouĹľĂ­vĂˇ pro administrativnĂ­ audit, analĂ˝zu zmÄ›n registracĂ­
+     * a Ĺ™eĹˇenĂ­ pĹ™Ă­padnĂ˝ch sporĹŻ.
      *
-     * @param matchId  ID zápasu
-     * @param playerId ID hráče
-     * @return seznam záznamů historie seřazených od nejnovějšího
+     * @param matchId  ID zĂˇpasu
+     * @param playerId ID hrĂˇÄŤe
+     * @return seznam zĂˇznamĹŻ historie seĹ™azenĂ˝ch od nejnovÄ›jĹˇĂ­ho
      */
     @GetMapping("/admin/matches/{matchId}/players/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1368,12 +1378,9 @@ public class MatchRegistrationHistoryController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\MeController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
@@ -1386,10 +1393,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 /**
- * REST controller poskytující informace o aktuálním uživatelském kontextu.
+ * REST controller poskytujĂ­cĂ­ informace o aktuĂˇlnĂ­m uĹľivatelskĂ©m kontextu.
  *
- * Obsahuje endpointy typu /api/me, které vrací informace
- * o aktuálním přihlášeném uživateli nebo režimu zastoupení.
+ * Obsahuje endpointy typu /api/me, kterĂ© vracĂ­ informace
+ * o aktuĂˇlnĂ­m pĹ™ihlĂˇĹˇenĂ©m uĹľivateli nebo reĹľimu zastoupenĂ­.
  */
 @RestController
 @RequestMapping("/api/me")
@@ -1402,14 +1409,14 @@ public class MeController {
     }
 
     /**
-     * Vrátí informaci o aktuálním režimu zastoupení.
+     * VrĂˇtĂ­ informaci o aktuĂˇlnĂ­m reĹľimu zastoupenĂ­.
      *
-     * Pokud je aktivní impersonace, vrátí identifikátor a jméno
-     * zastupovaného hráče. Pokud není aktivní, vrátí pouze příznak false.
+     * Pokud je aktivnĂ­ impersonace, vrĂˇtĂ­ identifikĂˇtor a jmĂ©no
+     * zastupovanĂ©ho hrĂˇÄŤe. Pokud nenĂ­ aktivnĂ­, vrĂˇtĂ­ pouze pĹ™Ă­znak false.
      *
-     * Endpoint vyžaduje přihlášení.
+     * Endpoint vyĹľaduje pĹ™ihlĂˇĹˇenĂ­.
      *
-     * @return informace o zastoupení
+     * @return informace o zastoupenĂ­
      */
     @GetMapping("/impersonation")
     public ResponseEntity<ImpersonationInfoDTO> getImpersonationInfo() {
@@ -1440,34 +1447,253 @@ public class MeController {
     }
 }
 
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\NotificationController.java
+-----
+package cz.phsoft.hokej.controllers;
 
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.NotificationEntity;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import cz.phsoft.hokej.data.repositories.NotificationRepository;
+import cz.phsoft.hokej.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.models.dto.NotificationBadgeDTO;
+import cz.phsoft.hokej.models.dto.NotificationDTO;
+import cz.phsoft.hokej.models.mappers.NotificationMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+/**
+ * REST controller pro prĂˇci s aplikaÄŤnĂ­mi notifikacemi.
+ *
+ * Poskytuje endpointy pro:
+ * - vĂ˝poÄŤet badge (poÄŤet nepĹ™eÄŤtenĂ˝ch notifikacĂ­),
+ * - naÄŤtenĂ­ notifikacĂ­ od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­,
+ * - naÄŤtenĂ­ poslednĂ­ch notifikacĂ­,
+ * - oznaÄŤenĂ­ notifikacĂ­ jako pĹ™eÄŤtenĂ˝ch.
+ *
+ * VeĹˇkerĂˇ logika ÄŤtenĂ­ je delegovĂˇna do NotificationRepository
+ * a mapovĂˇnĂ­ do NotificationMapper. Controller pracuje vĹľdy
+ * s aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝m uĹľivatelem.
+ */
+@RestController
+@RequestMapping("/api/notifications")
+public class NotificationController {
+
+    private static final Logger log = LoggerFactory.getLogger(NotificationController.class);
+
+    /**
+     * VĂ˝chozĂ­ poÄŤet dnĂ­, za kterĂ© se naÄŤtou notifikace,
+     * pokud uĹľivatel jeĹˇtÄ› nemĂˇ nastavenĂ© lastLoginAt.
+     */
+    private static final int DEFAULT_DAYS_IF_NO_LAST_LOGIN = 14;
+
+    private final NotificationRepository notificationRepository;
+    private final NotificationMapper notificationMapper;
+    private final AppUserRepository appUserRepository;
+    private final Clock clock;
+
+    public NotificationController(NotificationRepository notificationRepository,
+                                  NotificationMapper notificationMapper,
+                                  AppUserRepository appUserRepository,
+                                  Clock clock) {
+        this.notificationRepository = notificationRepository;
+        this.notificationMapper = notificationMapper;
+        this.appUserRepository = appUserRepository;
+        this.clock = clock;
+    }
+
+    /**
+     * VracĂ­ badge s poÄŤtem nepĹ™eÄŤtenĂ˝ch notifikacĂ­ od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
+     *
+     * Endpoint se pouĹľĂ­vĂˇ napĹ™Ă­klad pro zobrazenĂ­ ÄŤĂ­sla u ikony zvonku
+     * v navigaci aplikace.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @return DTO s informacemi o badge
+     */
+    @GetMapping("/badge")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<NotificationBadgeDTO> getBadge(Authentication authentication) {
+        AppUserEntity user = getCurrentUser(authentication);
+        Instant boundary = resolveBoundary(user);
+
+        long count = notificationRepository
+                .countByUserAndCreatedAtAfterAndReadAtIsNull(user, boundary);
+
+        NotificationBadgeDTO dto = new NotificationBadgeDTO();
+        dto.setUnreadCountSinceLastLogin(count);
+        dto.setLastLoginAt(user.getLastLoginAt());
+        dto.setCurrentLoginAt(user.getCurrentLoginAt());
+
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * VracĂ­ seznam notifikacĂ­ vytvoĹ™enĂ˝ch po poslednĂ­m pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     *
+     * Pokud uĹľivatel nemĂˇ lastLoginAt, pouĹľije se vĂ˝chozĂ­ ÄŤasovĂ© okno
+     * definovanĂ© konstantou DEFAULT_DAYS_IF_NO_LAST_LOGIN.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @return seznam notifikacĂ­ ve formÄ› DTO
+     */
+    @GetMapping("/since-last-login")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<NotificationDTO>> getSinceLastLogin(Authentication authentication) {
+        AppUserEntity user = getCurrentUser(authentication);
+        Instant boundary = resolveBoundary(user);
+
+        List<NotificationEntity> entities =
+                notificationRepository.findByUserAndCreatedAtAfterOrderByCreatedAtDesc(user, boundary);
+
+        List<NotificationDTO> dtos = notificationMapper.toDtoList(entities);
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * VracĂ­ poslednĂ­ notifikace aktuĂˇlnĂ­ho uĹľivatele.
+     *
+     * Parametr limit urÄŤuje maximĂˇlnĂ­ poÄŤet vrĂˇcenĂ˝ch zĂˇznamĹŻ.
+     * Pokud nenĂ­ zadĂˇn, pouĹľije se vĂ˝chozĂ­ hodnota 50
+     * (zĂˇvisĂ­ na implementaci NotificationRepository).
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @param limit volitelnĂ˝ limit poÄŤtu zĂˇznamĹŻ
+     * @return seznam notifikacĂ­ ve formÄ› DTO
+     */
+    @GetMapping("/recent")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<NotificationDTO>> getRecent(
+            Authentication authentication,
+            @RequestParam(name = "limit", required = false, defaultValue = "50") int limit
+    ) {
+        AppUserEntity user = getCurrentUser(authentication);
+
+        List<NotificationEntity> entities =
+                notificationRepository.findTop50ByUserOrderByCreatedAtDesc(user);
+
+        if (limit > 0 && entities.size() > limit) {
+            entities = entities.subList(0, limit);
+        }
+
+        List<NotificationDTO> dtos = notificationMapper.toDtoList(entities);
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * OznaÄŤĂ­ konkrĂ©tnĂ­ notifikaci jako pĹ™eÄŤtenou.
+     *
+     * Operace je idempotentnĂ­ â€“ pokud je notifikace jiĹľ pĹ™eÄŤtenĂˇ
+     * nebo neexistuje, nevyvolĂˇ se chyba.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @param id identifikĂˇtor notifikace
+     * @return HTTP 204 v pĹ™Ă­padÄ› ĂşspÄ›chu
+     */
+    @PostMapping("/{id}/read")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> markAsRead(Authentication authentication,
+                                           @PathVariable("id") Long id) {
+        AppUserEntity user = getCurrentUser(authentication);
+
+        notificationRepository.findByIdAndUser(id, user)
+                .ifPresent(entity -> {
+                    if (entity.getReadAt() == null) {
+                        entity.setReadAt(Instant.now(clock));
+                        notificationRepository.save(entity);
+                        log.debug("Notifikace {} oznaÄŤena jako pĹ™eÄŤtenĂˇ pro user {}", id, user.getId());
+                    }
+                });
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * OznaÄŤĂ­ vĹˇechny notifikace aktuĂˇlnĂ­ho uĹľivatele jako pĹ™eÄŤtenĂ©.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @return HTTP 204 v pĹ™Ă­padÄ› ĂşspÄ›chu
+     */
+    @PostMapping("/read-all")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> markAllAsRead(Authentication authentication) {
+        AppUserEntity user = getCurrentUser(authentication);
+
+        List<NotificationEntity> unread =
+                notificationRepository.findByUserAndReadAtIsNullOrderByCreatedAtDesc(user);
+
+        if (!unread.isEmpty()) {
+            Instant now = Instant.now(clock);
+            for (NotificationEntity entity : unread) {
+                entity.setReadAt(now);
+            }
+            notificationRepository.saveAll(unread);
+            log.debug("OznaÄŤeno {} notifikacĂ­ jako pĹ™eÄŤtenĂ˝ch pro user {}", unread.size(), user.getId());
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * UrÄŤuje ÄŤasovou hranici pro vĂ˝bÄ›r notifikacĂ­.
+     *
+     * Pokud mĂˇ uĹľivatel nastaven lastLoginAt, pouĹľije se tato hodnota.
+     * Jinak se pouĹľije aktuĂˇlnĂ­ ÄŤas mĂ­nus DEFAULT_DAYS_IF_NO_LAST_LOGIN dnĂ­.
+     */
+    private Instant resolveBoundary(AppUserEntity user) {
+        if (user.getLastLoginAt() != null) {
+            return user.getLastLoginAt();
+        }
+        return Instant.now(clock).minus(DEFAULT_DAYS_IF_NO_LAST_LOGIN, ChronoUnit.DAYS);
+    }
+
+    /**
+     * NaÄŤte entitu aktuĂˇlnĂ­ho uĹľivatele podle e-mailu
+     * z autentizaÄŤnĂ­ho kontextu.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext
+     * @return entita uĹľivatele
+     */
+    private AppUserEntity getCurrentUser(Authentication authentication) {
+        String email = authentication.getName();
+        return appUserRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+    }
+}
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\package-info.java
 -----
-
 /**
- * Controllerová vrstva aplikace.
+ * ControllerovĂˇ vrstva aplikace.
  *
- * Obsahuje REST kontrolery odpovědné za:
- * - příjem HTTP požadavků z frontend aplikace,
- * - validaci vstupních dat,
- * - mapování requestů na service vrstvu,
- * - návrat standardizovaných API odpovědí.
+ * Obsahuje REST kontrolery odpovÄ›dnĂ© za:
+ * - pĹ™Ă­jem HTTP poĹľadavkĹŻ z frontend aplikace,
+ * - validaci vstupnĂ­ch dat,
+ * - mapovĂˇnĂ­ requestĹŻ na service vrstvu,
+ * - nĂˇvrat standardizovanĂ˝ch API odpovÄ›dĂ­.
  *
  * Tato vrstva:
  * - neobsahuje business logiku,
- * - nepracuje přímo s databází,
- * - deleguje veškerou aplikační logiku na service třídy.
+ * - nepracuje pĹ™Ă­mo s databĂˇzĂ­,
+ * - deleguje veĹˇkerou aplikaÄŤnĂ­ logiku na service tĹ™Ă­dy.
  */
 
 package cz.phsoft.hokej.controllers;
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\PlayerController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerDTO;
@@ -1488,15 +1714,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller, který se používá pro správu hráčů.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro sprĂˇvu hrĂˇÄŤĹŻ.
  *
- * Zajišťuje administrativní správu hráčů pro role ADMIN a MANAGER,
- * včetně vytváření, aktualizace, mazání a schvalování hráčů, a také
- * správu hráčů z pohledu přihlášeného uživatele pod endpointy s prefixem /me.
+ * ZajiĹˇĹĄuje administrativnĂ­ sprĂˇvu hrĂˇÄŤĹŻ pro role ADMIN a MANAGER,
+ * vÄŤetnÄ› vytvĂˇĹ™enĂ­, aktualizace, mazĂˇnĂ­ a schvalovĂˇnĂ­ hrĂˇÄŤĹŻ, a takĂ©
+ * sprĂˇvu hrĂˇÄŤĹŻ z pohledu pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele pod endpointy s prefixem /me.
  *
- * Veškerá business logika se deleguje do {@link PlayerService}.
- * Historie změn hráčů se získává pomocí {@link PlayerHistoryService}
- * a práce s aktuálním hráčem se zajišťuje přes {@link CurrentPlayerService}.
+ * VeĹˇkerĂˇ business logika se deleguje do {@link PlayerService}.
+ * Historie zmÄ›n hrĂˇÄŤĹŻ se zĂ­skĂˇvĂˇ pomocĂ­ {@link PlayerHistoryService}
+ * a prĂˇce s aktuĂˇlnĂ­m hrĂˇÄŤem se zajiĹˇĹĄuje pĹ™es {@link CurrentPlayerService}.
  */
 @RestController
 @RequestMapping("/api/players")
@@ -1517,15 +1743,15 @@ public class PlayerController {
         this.playerStatsService = playerStatsService;
     }
 
-    // ADMIN / MANAGER – globální správa hráčů
+    // ADMIN / MANAGER â€“ globĂˇlnĂ­ sprĂˇva hrĂˇÄŤĹŻ
 
     /**
-     * Vrací seznam všech hráčů v systému.
+     * VracĂ­ seznam vĹˇech hrĂˇÄŤĹŻ v systĂ©mu.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
-     * pro přehledovou správu hráčů v administraci.
+     * Endpoint je dostupnĂ˝ pro role ADMIN a MANAGER a slouĹľĂ­
+     * pro pĹ™ehledovou sprĂˇvu hrĂˇÄŤĹŻ v administraci.
      *
-     * @return seznam všech hráčů jako {@link PlayerDTO}
+     * @return seznam vĹˇech hrĂˇÄŤĹŻ jako {@link PlayerDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1534,13 +1760,13 @@ public class PlayerController {
     }
 
     /**
-     * Vrací detail hráče podle jeho ID.
+     * VracĂ­ detail hrĂˇÄŤe podle jeho ID.
      *
-     * Endpoint je určen pro administrativní pohled na hráče,
-     * například pro úpravu jeho údajů.
+     * Endpoint je urÄŤen pro administrativnĂ­ pohled na hrĂˇÄŤe,
+     * napĹ™Ă­klad pro Ăşpravu jeho ĂşdajĹŻ.
      *
-     * @param id ID hráče
-     * @return {@link PlayerDTO} s detailem hráče
+     * @param id ID hrĂˇÄŤe
+     * @return {@link PlayerDTO} s detailem hrĂˇÄŤe
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1549,13 +1775,13 @@ public class PlayerController {
     }
 
     /**
-     * Vrací historii hráče podle jeho ID.
+     * VracĂ­ historii hrĂˇÄŤe podle jeho ID.
      *
-     * Historie obsahuje záznamy o změnách provedených nad daným hráčem
-     * a slouží pro auditní a přehledové účely.
+     * Historie obsahuje zĂˇznamy o zmÄ›nĂˇch provedenĂ˝ch nad danĂ˝m hrĂˇÄŤem
+     * a slouĹľĂ­ pro auditnĂ­ a pĹ™ehledovĂ© ĂşÄŤely.
      *
-     * @param id ID hráče
-     * @return seznam {@link PlayerHistoryDTO} představujících historii hráče
+     * @param id ID hrĂˇÄŤe
+     * @return seznam {@link PlayerHistoryDTO} pĹ™edstavujĂ­cĂ­ch historii hrĂˇÄŤe
      */
     @GetMapping("/{id}/history")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1564,13 +1790,13 @@ public class PlayerController {
     }
 
     /**
-     * Vytváří nového hráče administrátorem nebo manažerem.
+     * VytvĂˇĹ™Ă­ novĂ©ho hrĂˇÄŤe administrĂˇtorem nebo manaĹľerem.
      *
-     * Operace se používá při ručním zakládání hráče v systému,
-     * typicky pro dodatečné doplnění hráčů mimo uživatelské rozhraní.
+     * Operace se pouĹľĂ­vĂˇ pĹ™i ruÄŤnĂ­m zaklĂˇdĂˇnĂ­ hrĂˇÄŤe v systĂ©mu,
+     * typicky pro dodateÄŤnĂ© doplnÄ›nĂ­ hrĂˇÄŤĹŻ mimo uĹľivatelskĂ© rozhranĂ­.
      *
-     * @param playerDTO DTO s daty nového hráče
-     * @return vytvořený hráč jako {@link PlayerDTO}
+     * @param playerDTO DTO s daty novĂ©ho hrĂˇÄŤe
+     * @return vytvoĹ™enĂ˝ hrĂˇÄŤ jako {@link PlayerDTO}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1579,14 +1805,14 @@ public class PlayerController {
     }
 
     /**
-     * Aktualizuje údaje hráče v administrativním rozhraní.
+     * Aktualizuje Ăşdaje hrĂˇÄŤe v administrativnĂ­m rozhranĂ­.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
-     * k úpravě existujících údajů hráče.
+     * Endpoint je dostupnĂ˝ pro role ADMIN a MANAGER a slouĹľĂ­
+     * k ĂşpravÄ› existujĂ­cĂ­ch ĂşdajĹŻ hrĂˇÄŤe.
      *
-     * @param id  ID hráče
-     * @param dto DTO s aktualizovanými daty hráče
-     * @return aktualizovaný hráč jako {@link PlayerDTO}
+     * @param id  ID hrĂˇÄŤe
+     * @param dto DTO s aktualizovanĂ˝mi daty hrĂˇÄŤe
+     * @return aktualizovanĂ˝ hrĂˇÄŤ jako {@link PlayerDTO}
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1596,14 +1822,14 @@ public class PlayerController {
     }
 
     /**
-     * Odstraňuje hráče ze systému.
+     * OdstraĹuje hrĂˇÄŤe ze systĂ©mu.
      *
-     * Operace je dostupná pro role ADMIN a MANAGER a používá se
-     * pouze ve výjimečných situacích, například při chybném založení
-     * hráče. Samotné odstranění se provádí v servisní vrstvě.
+     * Operace je dostupnĂˇ pro role ADMIN a MANAGER a pouĹľĂ­vĂˇ se
+     * pouze ve vĂ˝jimeÄŤnĂ˝ch situacĂ­ch, napĹ™Ă­klad pĹ™i chybnĂ©m zaloĹľenĂ­
+     * hrĂˇÄŤe. SamotnĂ© odstranÄ›nĂ­ se provĂˇdĂ­ v servisnĂ­ vrstvÄ›.
      *
-     * @param id ID hráče
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @param id ID hrĂˇÄŤe
+     * @return {@link SuccessResponseDTO} s vĂ˝sledkem operace
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1613,14 +1839,14 @@ public class PlayerController {
     }
 
     /**
-     * Schvaluje hráče a nastavuje jeho stav na APPROVED.
+     * Schvaluje hrĂˇÄŤe a nastavuje jeho stav na APPROVED.
      *
-     * Endpoint se používá po kontrole údajů hráče administrátorem
-     * nebo manažerem. Schválení umožňuje hráči plnohodnotné využití
-     * systému.
+     * Endpoint se pouĹľĂ­vĂˇ po kontrole ĂşdajĹŻ hrĂˇÄŤe administrĂˇtorem
+     * nebo manaĹľerem. SchvĂˇlenĂ­ umoĹľĹuje hrĂˇÄŤi plnohodnotnĂ© vyuĹľitĂ­
+     * systĂ©mu.
      *
-     * @param id ID hráče
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @param id ID hrĂˇÄŤe
+     * @return {@link SuccessResponseDTO} s vĂ˝sledkem operace
      */
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1630,13 +1856,13 @@ public class PlayerController {
     }
 
     /**
-     * Zamítá hráče a nastavuje jeho stav na REJECTED.
+     * ZamĂ­tĂˇ hrĂˇÄŤe a nastavuje jeho stav na REJECTED.
      *
-     * Endpoint se používá v situacích, kdy hráč nesplňuje podmínky
-     * pro schválení, například z hlediska validity údajů.
+     * Endpoint se pouĹľĂ­vĂˇ v situacĂ­ch, kdy hrĂˇÄŤ nesplĹuje podmĂ­nky
+     * pro schvĂˇlenĂ­, napĹ™Ă­klad z hlediska validity ĂşdajĹŻ.
      *
-     * @param id ID hráče
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @param id ID hrĂˇÄŤe
+     * @return {@link SuccessResponseDTO} s vĂ˝sledkem operace
      */
     @PutMapping("/{id}/reject")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1646,15 +1872,15 @@ public class PlayerController {
     }
 
     /**
-     * Mění přiřazení hráče k aplikačnímu uživateli.
+     * MÄ›nĂ­ pĹ™iĹ™azenĂ­ hrĂˇÄŤe k aplikaÄŤnĂ­mu uĹľivateli.
      *
-     * Operace je určena pro roli ADMIN nebo MANAGER a používá se,
-     * pokud je potřeba hráče převést k jinému uživateli, například
-     * při změně vlastníka účtu.
+     * Operace je urÄŤena pro roli ADMIN nebo MANAGER a pouĹľĂ­vĂˇ se,
+     * pokud je potĹ™eba hrĂˇÄŤe pĹ™evĂ©st k jinĂ©mu uĹľivateli, napĹ™Ă­klad
+     * pĹ™i zmÄ›nÄ› vlastnĂ­ka ĂşÄŤtu.
      *
-     * @param playerId ID hráče
-     * @param request  požadavek obsahující ID nového uživatele
-     * @return textová zpráva o úspěšné změně přiřazení
+     * @param playerId ID hrĂˇÄŤe
+     * @param request  poĹľadavek obsahujĂ­cĂ­ ID novĂ©ho uĹľivatele
+     * @return textovĂˇ zprĂˇva o ĂşspÄ›ĹˇnĂ© zmÄ›nÄ› pĹ™iĹ™azenĂ­
      */
     @PostMapping("/{playerId}/change-user")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1664,21 +1890,21 @@ public class PlayerController {
     ) {
         playerService.changePlayerUser(playerId, request.getNewUserId());
         return ResponseEntity.ok(
-                "Hráč s id: " + playerId + " byl úspěšně přiřazen uživateli s ID: " + request.getNewUserId()
+                "HrĂˇÄŤ s id: " + playerId + " byl ĂşspÄ›ĹˇnÄ› pĹ™iĹ™azen uĹľivateli s ID: " + request.getNewUserId()
         );
     }
 
-    // Uživatelská správa hráčů přihlášeného uživatele
+    // UĹľivatelskĂˇ sprĂˇva hrĂˇÄŤĹŻ pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
 
     /**
-     * Vytváří nového hráče pro přihlášeného uživatele.
+     * VytvĂˇĹ™Ă­ novĂ©ho hrĂˇÄŤe pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Nový hráč se automaticky přiřazuje k uživatelskému účtu
-     * odvozenému z e-mailové adresy v objektu {@link Authentication}.
+     * NovĂ˝ hrĂˇÄŤ se automaticky pĹ™iĹ™azuje k uĹľivatelskĂ©mu ĂşÄŤtu
+     * odvozenĂ©mu z e-mailovĂ© adresy v objektu {@link Authentication}.
      *
-     * @param playerDTO      DTO s daty nového hráče
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return vytvořený hráč jako {@link PlayerDTO}
+     * @param playerDTO      DTO s daty novĂ©ho hrĂˇÄŤe
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return vytvoĹ™enĂ˝ hrĂˇÄŤ jako {@link PlayerDTO}
      */
     @PostMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -1691,13 +1917,13 @@ public class PlayerController {
     }
 
     /**
-     * Vrací seznam všech hráčů patřících přihlášenému uživateli.
+     * VracĂ­ seznam vĹˇech hrĂˇÄŤĹŻ patĹ™Ă­cĂ­ch pĹ™ihlĂˇĹˇenĂ©mu uĹľivateli.
      *
-     * Hráči se identifikují na základě e-mailové adresy uživatele
-     * získané z autentizačního kontextu.
+     * HrĂˇÄŤi se identifikujĂ­ na zĂˇkladÄ› e-mailovĂ© adresy uĹľivatele
+     * zĂ­skanĂ© z autentizaÄŤnĂ­ho kontextu.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam {@link PlayerDTO} patřících danému uživateli
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return seznam {@link PlayerDTO} patĹ™Ă­cĂ­ch danĂ©mu uĹľivateli
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -1707,14 +1933,14 @@ public class PlayerController {
     }
 
     /**
-     * Aktualizuje údaje aktuálně zvoleného hráče.
+     * Aktualizuje Ăşdaje aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
      *
-     * Před provedením aktualizace se vyžaduje, aby byl nastaven
-     * aktuální hráč v {@link CurrentPlayerService}. Aktualizace
-     * se následně deleguje do {@link PlayerService}.
+     * PĹ™ed provedenĂ­m aktualizace se vyĹľaduje, aby byl nastaven
+     * aktuĂˇlnĂ­ hrĂˇÄŤ v {@link CurrentPlayerService}. Aktualizace
+     * se nĂˇslednÄ› deleguje do {@link PlayerService}.
      *
-     * @param dto DTO s aktualizovanými daty hráče
-     * @return aktualizovaný hráč jako {@link PlayerDTO}
+     * @param dto DTO s aktualizovanĂ˝mi daty hrĂˇÄŤe
+     * @return aktualizovanĂ˝ hrĂˇÄŤ jako {@link PlayerDTO}
      */
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -1725,12 +1951,12 @@ public class PlayerController {
     }
 
     /**
-     * Vrací historii pro aktuálně zvoleného hráče přihlášeného uživatele.
+     * VracĂ­ historii pro aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Identita hráče se získává z {@link CurrentPlayerService}. Endpoint
-     * je určen pro uživatelské zobrazení historie změn nad vlastním hráčem.
+     * Identita hrĂˇÄŤe se zĂ­skĂˇvĂˇ z {@link CurrentPlayerService}. Endpoint
+     * je urÄŤen pro uĹľivatelskĂ© zobrazenĂ­ historie zmÄ›n nad vlastnĂ­m hrĂˇÄŤem.
      *
-     * @return seznam {@link PlayerHistoryDTO} představujících historii aktuálního hráče
+     * @return seznam {@link PlayerHistoryDTO} pĹ™edstavujĂ­cĂ­ch historii aktuĂˇlnĂ­ho hrĂˇÄŤe
      */
     @GetMapping("/me/history")
     @PreAuthorize("isAuthenticated()")
@@ -1742,12 +1968,12 @@ public class PlayerController {
 
 
     /**
-     * Vrací statistiky pro aktuálně zvoleného hráče přihlášeného uživatele.
+     * VracĂ­ statistiky pro aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Identita hráče se získává z {@link CurrentPlayerService}. Endpoint
-     * je určen pro zobrazení statistik k zápasům vlastním hráčem.
+     * Identita hrĂˇÄŤe se zĂ­skĂˇvĂˇ z {@link CurrentPlayerService}. Endpoint
+     * je urÄŤen pro zobrazenĂ­ statistik k zĂˇpasĹŻm vlastnĂ­m hrĂˇÄŤem.
      *
-     * @return seznam {@link PlayerStatsDTO} představujících statistiky aktuálního hráče
+     * @return seznam {@link PlayerStatsDTO} pĹ™edstavujĂ­cĂ­ch statistiky aktuĂˇlnĂ­ho hrĂˇÄŤe
      */
     @GetMapping("/me/stats")
     @PreAuthorize("isAuthenticated()")
@@ -1758,11 +1984,11 @@ public class PlayerController {
     }
 
     /**
-     * Vrací statistiky pro aktuálně zvoleného hráče přihlášeného uživatele.
+     * VracĂ­ statistiky pro aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * je určen pro zobrazení statistik k zápasům hráče dle jeho ide.
-     * @param playerId ID hráče
-     * @return seznam {@link PlayerStatsDTO} představujících statistiky hráče dle id
+     * je urÄŤen pro zobrazenĂ­ statistik k zĂˇpasĹŻm hrĂˇÄŤe dle jeho ide.
+     * @param playerId ID hrĂˇÄŤe
+     * @return seznam {@link PlayerStatsDTO} pĹ™edstavujĂ­cĂ­ch statistiky hrĂˇÄŤe dle id
      */
     @GetMapping("/{playerId}/stats")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1774,12 +2000,9 @@ public class PlayerController {
 
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\PlayerInactivityPeriodController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
@@ -1794,14 +2017,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller, který se používá pro administraci období neaktivity hráčů.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro administraci obdobĂ­ neaktivity hrĂˇÄŤĹŻ.
  *
- * Období neaktivity slouží k evidenci časových úseků, ve kterých se hráč
- * neúčastní zápasů, například z důvodu zranění nebo dovolené. Endpointy jsou
- * určeny pro role ADMIN a MANAGER a umožňují úplnou správu záznamů o neaktivitě.
+ * ObdobĂ­ neaktivity slouĹľĂ­ k evidenci ÄŤasovĂ˝ch ĂşsekĹŻ, ve kterĂ˝ch se hrĂˇÄŤ
+ * neĂşÄŤastnĂ­ zĂˇpasĹŻ, napĹ™Ă­klad z dĹŻvodu zranÄ›nĂ­ nebo dovolenĂ©. Endpointy jsou
+ * urÄŤeny pro role ADMIN a MANAGER a umoĹľĹujĂ­ Ăşplnou sprĂˇvu zĂˇznamĹŻ o neaktivitÄ›.
  *
- * Veškerá business logika se deleguje do {@link PlayerInactivityPeriodService}.
- * Informace o aktuálním hráči se získávají pomocí {@link CurrentPlayerService}.
+ * VeĹˇkerĂˇ business logika se deleguje do {@link PlayerInactivityPeriodService}.
+ * Informace o aktuĂˇlnĂ­m hrĂˇÄŤi se zĂ­skĂˇvajĂ­ pomocĂ­ {@link CurrentPlayerService}.
  */
 @RestController
 @RequestMapping("/api/inactivity/admin")
@@ -1817,12 +2040,12 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Vrací seznam všech záznamů o neaktivitě hráčů.
+     * VracĂ­ seznam vĹˇech zĂˇznamĹŻ o neaktivitÄ› hrĂˇÄŤĹŻ.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
-     * k přehledové správě všech evidovaných období neaktivity.
+     * Endpoint je dostupnĂ˝ pro role ADMIN a MANAGER a slouĹľĂ­
+     * k pĹ™ehledovĂ© sprĂˇvÄ› vĹˇech evidovanĂ˝ch obdobĂ­ neaktivity.
      *
-     * @return seznam období neaktivity jako {@link PlayerInactivityPeriodDTO}
+     * @return seznam obdobĂ­ neaktivity jako {@link PlayerInactivityPeriodDTO}
      */
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1831,13 +2054,13 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Vrací detail záznamu o neaktivitě podle jeho ID.
+     * VracĂ­ detail zĂˇznamu o neaktivitÄ› podle jeho ID.
      *
-     * Endpoint se používá pro zobrazení nebo kontrolu konkrétního
-     * záznamu před jeho úpravou či smazáním.
+     * Endpoint se pouĹľĂ­vĂˇ pro zobrazenĂ­ nebo kontrolu konkrĂ©tnĂ­ho
+     * zĂˇznamu pĹ™ed jeho Ăşpravou ÄŤi smazĂˇnĂ­m.
      *
-     * @param id ID záznamu o neaktivitě
-     * @return {@link PlayerInactivityPeriodDTO} s detailem období neaktivity
+     * @param id ID zĂˇznamu o neaktivitÄ›
+     * @return {@link PlayerInactivityPeriodDTO} s detailem obdobĂ­ neaktivity
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1847,13 +2070,13 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Vrací všechna období neaktivity pro konkrétního hráče.
+     * VracĂ­ vĹˇechna obdobĂ­ neaktivity pro konkrĂ©tnĂ­ho hrĂˇÄŤe.
      *
-     * Endpoint je vhodný například pro kontrolu dlouhodobé absence
-     * hráče nebo pro plánování jeho účasti na zápasech.
+     * Endpoint je vhodnĂ˝ napĹ™Ă­klad pro kontrolu dlouhodobĂ© absence
+     * hrĂˇÄŤe nebo pro plĂˇnovĂˇnĂ­ jeho ĂşÄŤasti na zĂˇpasech.
      *
-     * @param playerId ID hráče
-     * @return seznam období neaktivity pro daného hráče jako {@link PlayerInactivityPeriodDTO}
+     * @param playerId ID hrĂˇÄŤe
+     * @return seznam obdobĂ­ neaktivity pro danĂ©ho hrĂˇÄŤe jako {@link PlayerInactivityPeriodDTO}
      */
     @GetMapping("/player/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1862,14 +2085,14 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Vytváří nový záznam o neaktivitě hráče.
+     * VytvĂˇĹ™Ă­ novĂ˝ zĂˇznam o neaktivitÄ› hrĂˇÄŤe.
      *
-     * Vstupní data jsou validována pomocí bean validation a vlastní
-     * uložení záznamu se deleguje do servisní vrstvy. Operace je
-     * dostupná pro role ADMIN a MANAGER.
+     * VstupnĂ­ data jsou validovĂˇna pomocĂ­ bean validation a vlastnĂ­
+     * uloĹľenĂ­ zĂˇznamu se deleguje do servisnĂ­ vrstvy. Operace je
+     * dostupnĂˇ pro role ADMIN a MANAGER.
      *
-     * @param dto DTO s daty období neaktivity
-     * @return vytvořený záznam jako {@link PlayerInactivityPeriodDTO}
+     * @param dto DTO s daty obdobĂ­ neaktivity
+     * @return vytvoĹ™enĂ˝ zĂˇznam jako {@link PlayerInactivityPeriodDTO}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1881,15 +2104,15 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Aktualizuje existující záznam o neaktivitě hráče.
+     * Aktualizuje existujĂ­cĂ­ zĂˇznam o neaktivitÄ› hrĂˇÄŤe.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER. Aktualizace
-     * probíhá prostřednictvím servisní vrstvy a slouží k opravám
-     * nebo úpravám dříve zadaných údajů.
+     * Endpoint je dostupnĂ˝ pro role ADMIN a MANAGER. Aktualizace
+     * probĂ­hĂˇ prostĹ™ednictvĂ­m servisnĂ­ vrstvy a slouĹľĂ­ k opravĂˇm
+     * nebo ĂşpravĂˇm dĹ™Ă­ve zadanĂ˝ch ĂşdajĹŻ.
      *
-     * @param id  ID záznamu o neaktivitě
-     * @param dto DTO s aktualizovanými daty období neaktivity
-     * @return aktualizovaný záznam jako {@link PlayerInactivityPeriodDTO}
+     * @param id  ID zĂˇznamu o neaktivitÄ›
+     * @param dto DTO s aktualizovanĂ˝mi daty obdobĂ­ neaktivity
+     * @return aktualizovanĂ˝ zĂˇznam jako {@link PlayerInactivityPeriodDTO}
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1902,13 +2125,13 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Odstraňuje záznam o neaktivitě hráče.
+     * OdstraĹuje zĂˇznam o neaktivitÄ› hrĂˇÄŤe.
      *
-     * Operace je vyhrazena pouze pro roli ADMIN a používá se
-     * například při chybném zadání období neaktivity.
+     * Operace je vyhrazena pouze pro roli ADMIN a pouĹľĂ­vĂˇ se
+     * napĹ™Ă­klad pĹ™i chybnĂ©m zadĂˇnĂ­ obdobĂ­ neaktivity.
      *
-     * @param id ID záznamu o neaktivitě
-     * @return HTTP odpověď 204 No Content v případě úspěchu
+     * @param id ID zĂˇznamu o neaktivitÄ›
+     * @return HTTP odpovÄ›ÄŹ 204 No Content v pĹ™Ă­padÄ› ĂşspÄ›chu
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -1918,14 +2141,14 @@ public class PlayerInactivityPeriodController {
     }
 
     /**
-     * Vrací seznam období neaktivity aktuálně zvoleného hráče.
+     * VracĂ­ seznam obdobĂ­ neaktivity aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
      *
-     * Před voláním služby se vyžaduje, aby byl nastaven aktuální hráč
-     * v {@link CurrentPlayerService}. Endpoint je určen pro uživatelské
-     * zobrazení vlastních období neaktivity v rozhraní hráče.
+     * PĹ™ed volĂˇnĂ­m sluĹľby se vyĹľaduje, aby byl nastaven aktuĂˇlnĂ­ hrĂˇÄŤ
+     * v {@link CurrentPlayerService}. Endpoint je urÄŤen pro uĹľivatelskĂ©
+     * zobrazenĂ­ vlastnĂ­ch obdobĂ­ neaktivity v rozhranĂ­ hrĂˇÄŤe.
      *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam období neaktivity pro aktuálního hráče jako {@link PlayerInactivityPeriodDTO}
+     * @param authentication autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return seznam obdobĂ­ neaktivity pro aktuĂˇlnĂ­ho hrĂˇÄŤe jako {@link PlayerInactivityPeriodDTO}
      */
     @GetMapping("/me/all")
     @PreAuthorize("isAuthenticated()")
@@ -1936,12 +2159,9 @@ public class PlayerInactivityPeriodController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\PlayerSettingsController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.PlayerSettingsDTO;
@@ -1953,14 +2173,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * REST controller, který se používá pro správu nastavení hráče.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro sprĂˇvu nastavenĂ­ hrĂˇÄŤe.
  *
- * Pracuje s nastavením navázaným na konkrétního hráče a na aktuálního
- * hráče (currentPlayer). Umožňuje načítat a aktualizovat nastavení
- * pro libovolného hráče podle ID a pro hráče, který je aktuálně
- * vybrán v kontextu přihlášeného uživatele.
+ * Pracuje s nastavenĂ­m navĂˇzanĂ˝m na konkrĂ©tnĂ­ho hrĂˇÄŤe a na aktuĂˇlnĂ­ho
+ * hrĂˇÄŤe (currentPlayer). UmoĹľĹuje naÄŤĂ­tat a aktualizovat nastavenĂ­
+ * pro libovolnĂ©ho hrĂˇÄŤe podle ID a pro hrĂˇÄŤe, kterĂ˝ je aktuĂˇlnÄ›
+ * vybrĂˇn v kontextu pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
  *
- * Veškerá business logika se předává do {@link PlayerSettingsService}.
+ * VeĹˇkerĂˇ business logika se pĹ™edĂˇvĂˇ do {@link PlayerSettingsService}.
  */
 @RestController
 @RequestMapping("/api")
@@ -1975,18 +2195,18 @@ public class PlayerSettingsController {
         this.currentPlayerService = currentPlayerService;
     }
 
-    // Nastavení libovolného hráče podle ID
+    // NastavenĂ­ libovolnĂ©ho hrĂˇÄŤe podle ID
 
     /**
-     * Vrací nastavení konkrétního hráče podle jeho ID.
+     * VracĂ­ nastavenĂ­ konkrĂ©tnĂ­ho hrĂˇÄŤe podle jeho ID.
      *
-     * Ověření, zda hráč patří přihlášenému uživateli nebo zda má
-     * uživatel roli ADMIN či MANAGER, může být prováděno v této
-     * vrstvě nebo v service vrstvě.
+     * OvÄ›Ĺ™enĂ­, zda hrĂˇÄŤ patĹ™Ă­ pĹ™ihlĂˇĹˇenĂ©mu uĹľivateli nebo zda mĂˇ
+     * uĹľivatel roli ADMIN ÄŤi MANAGER, mĹŻĹľe bĂ˝t provĂˇdÄ›no v tĂ©to
+     * vrstvÄ› nebo v service vrstvÄ›.
      *
-     * @param playerId ID hráče
-     * @param auth     autentizační kontext přihlášeného uživatele
-     * @return DTO {@link PlayerSettingsDTO} s nastavením hráče
+     * @param playerId ID hrĂˇÄŤe
+     * @param auth     autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return DTO {@link PlayerSettingsDTO} s nastavenĂ­m hrĂˇÄŤe
      */
     @GetMapping("/players/{playerId}/settings")
     @PreAuthorize("isAuthenticated()")
@@ -1999,15 +2219,15 @@ public class PlayerSettingsController {
     }
 
     /**
-     * Aktualizuje nastavení konkrétního hráče podle jeho ID.
+     * Aktualizuje nastavenĂ­ konkrĂ©tnĂ­ho hrĂˇÄŤe podle jeho ID.
      *
-     * Kontrola vlastnictví hráče a oprávnění může být doplněna
-     * podle potřeb aplikace.
+     * Kontrola vlastnictvĂ­ hrĂˇÄŤe a oprĂˇvnÄ›nĂ­ mĹŻĹľe bĂ˝t doplnÄ›na
+     * podle potĹ™eb aplikace.
      *
-     * @param playerId   ID hráče
-     * @param requestDto DTO s novým nastavením hráče
-     * @param auth       autentizační kontext přihlášeného uživatele
-     * @return DTO {@link PlayerSettingsDTO} s aktualizovaným nastavením
+     * @param playerId   ID hrĂˇÄŤe
+     * @param requestDto DTO s novĂ˝m nastavenĂ­m hrĂˇÄŤe
+     * @param auth       autentizaÄŤnĂ­ kontext pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+     * @return DTO {@link PlayerSettingsDTO} s aktualizovanĂ˝m nastavenĂ­m
      */
     @PatchMapping("/players/{playerId}/settings")
     @PreAuthorize("isAuthenticated()")
@@ -2016,21 +2236,21 @@ public class PlayerSettingsController {
             @RequestBody PlayerSettingsDTO requestDto,
             Authentication auth
     ) {
-        // TODO: případná kontrola vlastnictví hráče
+        // TODO: pĹ™Ă­padnĂˇ kontrola vlastnictvĂ­ hrĂˇÄŤe
 
         PlayerSettingsDTO updated = playerSettingsService.updateSettingsForPlayer(playerId, requestDto);
         return ResponseEntity.ok(updated);
     }
 
-    // Nastavení aktuálního hráče (currentPlayer)
+    // NastavenĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe (currentPlayer)
 
     /**
-     * Vrací nastavení aktuálně vybraného hráče.
+     * VracĂ­ nastavenĂ­ aktuĂˇlnÄ› vybranĂ©ho hrĂˇÄŤe.
      *
-     * Před čtením nastavení se vyžaduje, aby byl v kontextu
-     * nastaven aktuální hráč.
+     * PĹ™ed ÄŤtenĂ­m nastavenĂ­ se vyĹľaduje, aby byl v kontextu
+     * nastaven aktuĂˇlnĂ­ hrĂˇÄŤ.
      *
-     * @return DTO {@link PlayerSettingsDTO} s nastavením aktuálního hráče
+     * @return DTO {@link PlayerSettingsDTO} s nastavenĂ­m aktuĂˇlnĂ­ho hrĂˇÄŤe
      */
     @GetMapping("/me/settings")
     @PreAuthorize("isAuthenticated()")
@@ -2045,14 +2265,14 @@ public class PlayerSettingsController {
     }
 
     /**
-     * Aktualizuje nastavení aktuálně vybraného hráče.
+     * Aktualizuje nastavenĂ­ aktuĂˇlnÄ› vybranĂ©ho hrĂˇÄŤe.
      *
-     * Informace o tom, který hráč je aktuální, se získává z
-     * {@link CurrentPlayerService}. Endpoint se používá například
-     * pro nastavení preferencí přímo z kontextu aktuálního hráče.
+     * Informace o tom, kterĂ˝ hrĂˇÄŤ je aktuĂˇlnĂ­, se zĂ­skĂˇvĂˇ z
+     * {@link CurrentPlayerService}. Endpoint se pouĹľĂ­vĂˇ napĹ™Ă­klad
+     * pro nastavenĂ­ preferencĂ­ pĹ™Ă­mo z kontextu aktuĂˇlnĂ­ho hrĂˇÄŤe.
      *
-     * @param requestDto DTO s novým nastavením aktuálního hráče
-     * @return DTO {@link PlayerSettingsDTO} s aktualizovaným nastavením
+     * @param requestDto DTO s novĂ˝m nastavenĂ­m aktuĂˇlnĂ­ho hrĂˇÄŤe
+     * @return DTO {@link PlayerSettingsDTO} s aktualizovanĂ˝m nastavenĂ­m
      */
     @PatchMapping("/me/settings")
     @PreAuthorize("isAuthenticated()")
@@ -2069,12 +2289,9 @@ public class PlayerSettingsController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\SeasonController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.SeasonDTO;
@@ -2092,14 +2309,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller, který se používá pro správu sezón.
+ * REST controller, kterĂ˝ se pouĹľĂ­vĂˇ pro sprĂˇvu sezĂłn.
  *
- * Zajišťuje administrativní správu sezón pro roli ADMIN včetně
- * vytváření, aktualizace a nastavení globálně aktivní sezóny.
- * Dále poskytuje endpointy pro práci s aktuální sezónou uživatele
+ * ZajiĹˇĹĄuje administrativnĂ­ sprĂˇvu sezĂłn pro roli ADMIN vÄŤetnÄ›
+ * vytvĂˇĹ™enĂ­, aktualizace a nastavenĂ­ globĂˇlnÄ› aktivnĂ­ sezĂłny.
+ * DĂˇle poskytuje endpointy pro prĂˇci s aktuĂˇlnĂ­ sezĂłnou uĹľivatele
  * pod prefixem /me.
  *
- * Veškerá business logika se předává do {@link SeasonService}
+ * VeĹˇkerĂˇ business logika se pĹ™edĂˇvĂˇ do {@link SeasonService}
  * a {@link CurrentSeasonService}.
  */
 @RestController
@@ -2121,13 +2338,13 @@ public class SeasonController {
         this.seasonHistoryService = seasonHistoryService;
     }
 
-    // ADMIN – globální správa sezón
+    // ADMIN â€“ globĂˇlnĂ­ sprĂˇva sezĂłn
 
     /**
-     * Vytváří novou sezónu.
+     * VytvĂˇĹ™Ă­ novou sezĂłnu.
      *
-     * @param seasonDTO DTO s daty nové sezóny
-     * @return vytvořená sezóna jako {@link SeasonDTO}
+     * @param seasonDTO DTO s daty novĂ© sezĂłny
+     * @return vytvoĹ™enĂˇ sezĂłna jako {@link SeasonDTO}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -2139,11 +2356,11 @@ public class SeasonController {
     }
 
     /**
-     * Aktualizuje existující sezónu.
+     * Aktualizuje existujĂ­cĂ­ sezĂłnu.
      *
-     * @param id        ID sezóny
-     * @param seasonDTO DTO s aktualizovanými daty sezóny
-     * @return aktualizovaná sezóna jako {@link SeasonDTO}
+     * @param id        ID sezĂłny
+     * @param seasonDTO DTO s aktualizovanĂ˝mi daty sezĂłny
+     * @return aktualizovanĂˇ sezĂłna jako {@link SeasonDTO}
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -2156,9 +2373,9 @@ public class SeasonController {
     }
 
     /**
-     * Vrací historii sezóny dle id.
+     * VracĂ­ historii sezĂłny dle id.
      *
-     * @param id ID sezóny
+     * @param id ID sezĂłny
      * @return historie sezony jako {@link List<SeasonHistoryDTO>}
      */
     @GetMapping("/{id}/history")
@@ -2170,12 +2387,12 @@ public class SeasonController {
     }
 
     /**
-     * Vrací seznam všech sezón v systému.
+     * VracĂ­ seznam vĹˇech sezĂłn v systĂ©mu.
      *
-     * Endpoint je v tuto chvíli omezen na roli ADMIN. Podle potřeby
-     * může být v budoucnu zpřístupněn širšímu okruhu uživatelů.
+     * Endpoint je v tuto chvĂ­li omezen na roli ADMIN. Podle potĹ™eby
+     * mĹŻĹľe bĂ˝t v budoucnu zpĹ™Ă­stupnÄ›n ĹˇirĹˇĂ­mu okruhu uĹľivatelĹŻ.
      *
-     * @return seznam sezón jako {@link SeasonDTO}
+     * @return seznam sezĂłn jako {@link SeasonDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -2185,12 +2402,12 @@ public class SeasonController {
     }
 
     /**
-     * Vrací aktuálně globálně aktivní sezónu.
+     * VracĂ­ aktuĂˇlnÄ› globĂˇlnÄ› aktivnĂ­ sezĂłnu.
      *
-     * Aktivní sezóna představuje výchozí období pro systémové operace,
-     * které nejsou vázány na konkrétní volbu uživatele.
+     * AktivnĂ­ sezĂłna pĹ™edstavuje vĂ˝chozĂ­ obdobĂ­ pro systĂ©movĂ© operace,
+     * kterĂ© nejsou vĂˇzĂˇny na konkrĂ©tnĂ­ volbu uĹľivatele.
      *
-     * @return aktivní sezóna jako {@link SeasonDTO}
+     * @return aktivnĂ­ sezĂłna jako {@link SeasonDTO}
      */
     @GetMapping("/active")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -2200,13 +2417,13 @@ public class SeasonController {
     }
 
     /**
-     * Nastavuje zadanou sezónu jako globálně aktivní.
+     * Nastavuje zadanou sezĂłnu jako globĂˇlnÄ› aktivnĂ­.
      *
-     * Po nastavení se informace o aktivní sezóně používá v dalších
-     * částech systému jako výchozí sezóna.
+     * Po nastavenĂ­ se informace o aktivnĂ­ sezĂłnÄ› pouĹľĂ­vĂˇ v dalĹˇĂ­ch
+     * ÄŤĂˇstech systĂ©mu jako vĂ˝chozĂ­ sezĂłna.
      *
-     * @param id ID sezóny, která má být nastavena jako aktivní
-     * @return nově aktivní sezóna jako {@link SeasonDTO}
+     * @param id ID sezĂłny, kterĂˇ mĂˇ bĂ˝t nastavena jako aktivnĂ­
+     * @return novÄ› aktivnĂ­ sezĂłna jako {@link SeasonDTO}
      */
     @PutMapping("/{id}/active")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -2216,15 +2433,15 @@ public class SeasonController {
         return ResponseEntity.ok(active);
     }
 
-    // Uživatelská práce s „mojí“ sezónou
+    // UĹľivatelskĂˇ prĂˇce s â€žmojĂ­â€ś sezĂłnou
 
     /**
-     * Vrací seznam všech sezón pro účely výběru na frontendu.
+     * VracĂ­ seznam vĹˇech sezĂłn pro ĂşÄŤely vĂ˝bÄ›ru na frontendu.
      *
-     * Jedná se o uživatelskou variantu endpointu, která se používá
-     * například pro zobrazení seznamu sezón v nabídce.
+     * JednĂˇ se o uĹľivatelskou variantu endpointu, kterĂˇ se pouĹľĂ­vĂˇ
+     * napĹ™Ă­klad pro zobrazenĂ­ seznamu sezĂłn v nabĂ­dce.
      *
-     * @return seznam sezón jako {@link SeasonDTO}
+     * @return seznam sezĂłn jako {@link SeasonDTO}
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -2233,12 +2450,12 @@ public class SeasonController {
     }
 
     /**
-     * Vrací sezónu, která je aktuálně vybraná pro přihlášeného uživatele.
+     * VracĂ­ sezĂłnu, kterĂˇ je aktuĂˇlnÄ› vybranĂˇ pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Pokud uživatel nemá explicitně vybranou sezónu, může být vrácena
-     * výchozí hodnota podle implementace {@link CurrentSeasonService}.
+     * Pokud uĹľivatel nemĂˇ explicitnÄ› vybranou sezĂłnu, mĹŻĹľe bĂ˝t vrĂˇcena
+     * vĂ˝chozĂ­ hodnota podle implementace {@link CurrentSeasonService}.
      *
-     * @return aktuální sezóna pro uživatele nebo null
+     * @return aktuĂˇlnĂ­ sezĂłna pro uĹľivatele nebo null
      */
     @GetMapping("/me/current")
     @PreAuthorize("isAuthenticated()")
@@ -2248,12 +2465,12 @@ public class SeasonController {
     }
 
     /**
-     * Nastavuje aktuální sezónu pro přihlášeného uživatele.
+     * Nastavuje aktuĂˇlnĂ­ sezĂłnu pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
      *
-     * Před nastavením se ověřuje, že sezóna existuje. Id sezóny
-     * se následně ukládá do kontextu aktuální sezóny uživatele.
+     * PĹ™ed nastavenĂ­m se ovÄ›Ĺ™uje, Ĺľe sezĂłna existuje. Id sezĂłny
+     * se nĂˇslednÄ› uklĂˇdĂˇ do kontextu aktuĂˇlnĂ­ sezĂłny uĹľivatele.
      *
-     * @param seasonId ID sezóny, která má být nastavena jako aktuální
+     * @param seasonId ID sezĂłny, kterĂˇ mĂˇ bĂ˝t nastavena jako aktuĂˇlnĂ­
      */
     @PostMapping("/me/current/{seasonId}")
     @PreAuthorize("isAuthenticated()")
@@ -2263,12 +2480,9 @@ public class SeasonController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\TestController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -2277,10 +2491,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Jednoduchý testovací REST controller.
+ * JednoduchĂ˝ testovacĂ­ REST controller.
  *
- * Slouží k ověření, že backend aplikace běží a že funguje
- * zabezpečení pro roli ADMIN.
+ * SlouĹľĂ­ k ovÄ›Ĺ™enĂ­, Ĺľe backend aplikace bÄ›ĹľĂ­ a Ĺľe funguje
+ * zabezpeÄŤenĂ­ pro roli ADMIN.
  */
 @RestController
 @RequestMapping("/api/test")
@@ -2288,9 +2502,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     /**
-     * Vrací jednoduchou textovou zprávu pro ověření, že backend je online.
+     * VracĂ­ jednoduchou textovou zprĂˇvu pro ovÄ›Ĺ™enĂ­, Ĺľe backend je online.
      *
-     * @return textová zpráva potvrzující běh backendu
+     * @return textovĂˇ zprĂˇva potvrzujĂ­cĂ­ bÄ›h backendu
      */
     @GetMapping
     public String hello() {
@@ -2298,12 +2512,9 @@ public class TestController {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\TestEmailController.java
 -----
-
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.services.email.EmailService;
@@ -2312,12 +2523,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Testovací REST controller pro odeslání e-mailu.
+ * TestovacĂ­ REST controller pro odeslĂˇnĂ­ e-mailu.
  *
- * Slouží k ověření konfigurace e-mailové služby v prostředí,
- * například při vývoji nebo testování.
+ * SlouĹľĂ­ k ovÄ›Ĺ™enĂ­ konfigurace e-mailovĂ© sluĹľby v prostĹ™edĂ­,
+ * napĹ™Ă­klad pĹ™i vĂ˝voji nebo testovĂˇnĂ­.
  *
- * Veškerá logika odesílání e-mailů se předává do {@link EmailService}.
+ * VeĹˇkerĂˇ logika odesĂ­lĂˇnĂ­ e-mailĹŻ se pĹ™edĂˇvĂˇ do {@link EmailService}.
  */
 @RestController
 @RequestMapping("/api/email/test")
@@ -2330,30 +2541,27 @@ public class TestEmailController {
     }
 
     /**
-     * Odesílá testovací e-mail na pevně danou adresu.
+     * OdesĂ­lĂˇ testovacĂ­ e-mail na pevnÄ› danou adresu.
      *
-     * Endpoint se používá pro ověření, že e-mailová služba je správně
-     * nakonfigurována a že lze e-maily z backendu odesílat.
+     * Endpoint se pouĹľĂ­vĂˇ pro ovÄ›Ĺ™enĂ­, Ĺľe e-mailovĂˇ sluĹľba je sprĂˇvnÄ›
+     * nakonfigurovĂˇna a Ĺľe lze e-maily z backendu odesĂ­lat.
      *
-     * @return textová zpráva o odeslání e-mailu
+     * @return textovĂˇ zprĂˇva o odeslĂˇnĂ­ e-mailu
      */
     @PostMapping("/send-mail")
     public String sendTestMail() {
         emailService.sendSimpleEmail(
                 "petrhlista@seznam.cz",
-                "APP - Testovací email",
+                "APP - TestovacĂ­ email",
                 "Ahoj, toto je test z backendu."
         );
-        return "Email odeslán";
+        return "Email odeslĂˇn";
     }
 }
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\TestSmsController.java
 -----
-
 /*
 package cz.phsoft.hokej.controllers;
 
@@ -2362,10 +2570,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Testovací REST controller pro odeslání SMS.
+ * TestovacĂ­ REST controller pro odeslĂˇnĂ­ SMS.
  *
- * Slouží k ověření, že integrace se službou SmsTextBee funguje
- * správně v daném prostředí.
+ * SlouĹľĂ­ k ovÄ›Ĺ™enĂ­, Ĺľe integrace se sluĹľbou SmsTextBee funguje
+ * sprĂˇvnÄ› v danĂ©m prostĹ™edĂ­.
  */
 /*
 @RestController
@@ -2378,17 +2586,15 @@ public class TestSmsController {
     }
 
     /**
-     * Odesílá testovací SMS na testovací telefonní číslo.
+     * OdesĂ­lĂˇ testovacĂ­ SMS na testovacĂ­ telefonnĂ­ ÄŤĂ­slo.
      *
-     * Endpoint se používá pro ověření funkčnosti SMS integrace.
+     * Endpoint se pouĹľĂ­vĂˇ pro ovÄ›Ĺ™enĂ­ funkÄŤnosti SMS integrace.
      */
     /*
     @GetMapping("/api/test-sms")
     public String sendTestSms() {
-        smsTextBeeService.sendSms("+420776609956", "testovací sms app-sg");
-        return "SMS byla odeslána na testovací číslo +420776609956";
+        smsTextBeeService.sendSms("+420776609956", "testovacĂ­ sms app-sg");
+        return "SMS byla odeslĂˇna na testovacĂ­ ÄŤĂ­slo +420776609956";
     }
 }
 */
-
-

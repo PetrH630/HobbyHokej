@@ -242,7 +242,7 @@ const AdminMatchRegistrationInfo = ({ match, onPlayerClick }) => {
                 </ul>
             </div>
 
-            {/* Bez omluvy */}
+            {/* Bez omluvy */} 
             <div className="match-reg-team-col">
                 <div className="match-reg-team-header">
                     <NoExcusedIcon className="match-no-excused-r" />

@@ -5,20 +5,16 @@ Seznam souborů:
 package-info.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\package-info.java
 -----
-
 /**
- * Datová vrstva aplikace.
+ * DatovĂˇ vrstva aplikace.
  *
- * Obsahuje databázové entity, výčtové typy a repozitářovou vrstvu,
- * která zajišťuje přístup k perzistentním datům.
+ * Obsahuje databĂˇzovĂ© entity, vĂ˝ÄŤtovĂ© typy a repozitĂˇĹ™ovou vrstvu,
+ * kterĂˇ zajiĹˇĹĄuje pĹ™Ă­stup k perzistentnĂ­m datĹŻm.
  *
- * Tento balíček je používán modelovou a servisní vrstvou aplikace
- * při práci s databází.
+ * Tento balĂ­ÄŤek je pouĹľĂ­vĂˇn modelovou a servisnĂ­ vrstvou aplikace
+ * pĹ™i prĂˇci s databĂˇzĂ­.
  */
 package cz.phsoft.hokej.data;
-
-

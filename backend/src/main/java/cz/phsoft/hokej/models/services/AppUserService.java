@@ -164,4 +164,6 @@ public interface AppUserService {
      * @param dto data pro reset zapomenutého hesla
      */
     void forgottenPasswordReset(ForgottenPasswordResetDTO dto);
+
+    void onSuccessfulLogin(String email);
 }

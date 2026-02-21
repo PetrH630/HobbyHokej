@@ -7,59 +7,54 @@ MatchRegistrationRequest.java
 package-info.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\requests\ChangePlayerUserRequest.java
 -----
-
 package cz.phsoft.hokej.models.dto.requests;
 
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Request DTO pro změnu přiřazeného uživatele k hráči.
+ * Request DTO pro zmÄ›nu pĹ™iĹ™azenĂ©ho uĹľivatele k hrĂˇÄŤi.
  *
- * Slouží jako vstupní objekt pro administrátorské endpointy,
- * které umožňují změnit vazbu mezi hráčem a aplikačním uživatelem.
- * Třída neobsahuje žádnou business logiku, používá se pouze
- * pro přenos dat z klienta do API vrstvy.
+ * SlouĹľĂ­ jako vstupnĂ­ objekt pro administrĂˇtorskĂ© endpointy,
+ * kterĂ© umoĹľĹujĂ­ zmÄ›nit vazbu mezi hrĂˇÄŤem a aplikaÄŤnĂ­m uĹľivatelem.
+ * TĹ™Ă­da neobsahuje ĹľĂˇdnou business logiku, pouĹľĂ­vĂˇ se pouze
+ * pro pĹ™enos dat z klienta do API vrstvy.
  */
 public class ChangePlayerUserRequest {
 
     /**
-     * ID nového uživatele, ke kterému má být hráč přiřazen.
+     * ID novĂ©ho uĹľivatele, ke kterĂ©mu mĂˇ bĂ˝t hrĂˇÄŤ pĹ™iĹ™azen.
      *
-     * Hodnota je povinná. Validace se provádí anotací {@link NotNull}
-     * a následně v servisní vrstvě při vyhledávání uživatele.
+     * Hodnota je povinnĂˇ. Validace se provĂˇdĂ­ anotacĂ­ {@link NotNull}
+     * a nĂˇslednÄ› v servisnĂ­ vrstvÄ› pĹ™i vyhledĂˇvĂˇnĂ­ uĹľivatele.
      */
     @NotNull
     private Long newUserId;
 
     /**
-     * Vrátí ID nového uživatele.
+     * VrĂˇtĂ­ ID novĂ©ho uĹľivatele.
      *
-     * @return ID uživatele
+     * @return ID uĹľivatele
      */
     public Long getNewUserId() {
         return newUserId;
     }
 
     /**
-     * Nastaví ID nového uživatele.
+     * NastavĂ­ ID novĂ©ho uĹľivatele.
      *
-     * @param newUserId ID uživatele, ke kterému má být hráč přiřazen
+     * @param newUserId ID uĹľivatele, ke kterĂ©mu mĂˇ bĂ˝t hrĂˇÄŤ pĹ™iĹ™azen
      */
     public void setNewUserId(Long newUserId) {
         this.newUserId = newUserId;
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\requests\MatchRegistrationRequest.java
 -----
-
 package cz.phsoft.hokej.models.dto.requests;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
@@ -68,90 +63,90 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 /**
- * Request DTO pro změnu registrace hráče na zápas.
+ * Request DTO pro zmÄ›nu registrace hrĂˇÄŤe na zĂˇpas.
  *
- * Slouží jako vstupní objekt pro operace:
- * - přihlášení hráče na zápas,
- * - odhlášení hráče ze zápasu,
- * - omluvení hráče,
- * - administrátorské zásahy do registrace.
+ * SlouĹľĂ­ jako vstupnĂ­ objekt pro operace:
+ * - pĹ™ihlĂˇĹˇenĂ­ hrĂˇÄŤe na zĂˇpas,
+ * - odhlĂˇĹˇenĂ­ hrĂˇÄŤe ze zĂˇpasu,
+ * - omluvenĂ­ hrĂˇÄŤe,
+ * - administrĂˇtorskĂ© zĂˇsahy do registrace.
  *
- * Typ a kombinace vyplněných polí určují,
- * jaká operace se v servisní vrstvě provede.
- * Tento request je zpracováván metodou
+ * Typ a kombinace vyplnÄ›nĂ˝ch polĂ­ urÄŤujĂ­,
+ * jakĂˇ operace se v servisnĂ­ vrstvÄ› provede.
+ * Tento request je zpracovĂˇvĂˇn metodou
  * MatchRegistrationService.upsertRegistration.
  *
- * Ne všechna pole jsou povinná. Jejich význam a validace
- * závisí na konkrétní operaci a business logice služby.
+ * Ne vĹˇechna pole jsou povinnĂˇ. Jejich vĂ˝znam a validace
+ * zĂˇvisĂ­ na konkrĂ©tnĂ­ operaci a business logice sluĹľby.
  */
 public class MatchRegistrationRequest {
 
     /**
-     * ID zápasu, ke kterému se registrace vztahuje.
+     * ID zĂˇpasu, ke kterĂ©mu se registrace vztahuje.
      *
-     * Hodnota je povinná a musí být kladná.
-     * Slouží k jednoznačnému určení zápasu,
-     * u kterého se registrace mění.
+     * Hodnota je povinnĂˇ a musĂ­ bĂ˝t kladnĂˇ.
+     * SlouĹľĂ­ k jednoznaÄŤnĂ©mu urÄŤenĂ­ zĂˇpasu,
+     * u kterĂ©ho se registrace mÄ›nĂ­.
      */
     @NotNull
     @Positive
     private Long matchId;
 
     /**
-     * ID hráče, kterého se operace týká.
+     * ID hrĂˇÄŤe, kterĂ©ho se operace tĂ˝kĂˇ.
      *
-     * Typické použití:
-     * - u endpointů typu "/me" může být null a hráč
-     *   se určuje podle přihlášeného uživatele,
-     * - u administrátorských operací se hodnota vyplňuje explicitně.
+     * TypickĂ© pouĹľitĂ­:
+     * - u endpointĹŻ typu "/me" mĹŻĹľe bĂ˝t null a hrĂˇÄŤ
+     *   se urÄŤuje podle pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele,
+     * - u administrĂˇtorskĂ˝ch operacĂ­ se hodnota vyplĹuje explicitnÄ›.
      */
     private Long playerId;
 
     /**
-     * Tým, do kterého je hráč přiřazen (například DARK nebo LIGHT).
+     * TĂ˝m, do kterĂ©ho je hrĂˇÄŤ pĹ™iĹ™azen (napĹ™Ă­klad DARK nebo LIGHT).
      *
-     * Používá se při nastavování nebo změně rozdělení týmů.
+     * PouĹľĂ­vĂˇ se pĹ™i nastavovĂˇnĂ­ nebo zmÄ›nÄ› rozdÄ›lenĂ­ tĂ˝mĹŻ.
      */
     private Team team;
 
     /**
-     * Důvod omluvy hráče.
+     * DĹŻvod omluvy hrĂˇÄŤe.
      *
-     * Používá se u operací, které představují omluvu
-     * nebo odhlášení se zdůvodněním.
+     * PouĹľĂ­vĂˇ se u operacĂ­, kterĂ© pĹ™edstavujĂ­ omluvu
+     * nebo odhlĂˇĹˇenĂ­ se zdĹŻvodnÄ›nĂ­m.
      */
     private ExcuseReason excuseReason;
 
     /**
-     * Volitelná textová poznámka k omluvě od hráče.
+     * VolitelnĂˇ textovĂˇ poznĂˇmka k omluvÄ› od hrĂˇÄŤe.
      *
-     * Umožňuje doplnit detailnější vysvětlení
-     * nad rámec strukturovaného ExcuseReason.
+     * UmoĹľĹuje doplnit detailnÄ›jĹˇĂ­ vysvÄ›tlenĂ­
+     * nad rĂˇmec strukturovanĂ©ho ExcuseReason.
      */
     private String excuseNote;
 
     /**
-     * Administrátorská poznámka k registraci.
+     * AdministrĂˇtorskĂˇ poznĂˇmka k registraci.
      *
-     * Používá se například pro označení no-show,
-     * interních komentářů nebo dalších technických poznámek.
+     * PouĹľĂ­vĂˇ se napĹ™Ă­klad pro oznaÄŤenĂ­ no-show,
+     * internĂ­ch komentĂˇĹ™ĹŻ nebo dalĹˇĂ­ch technickĂ˝ch poznĂˇmek.
      */
     private String adminNote;
 
     /**
-     * Příznak, že má dojít k odhlášení hráče ze zápasu.
+     * PĹ™Ă­znak, Ĺľe mĂˇ dojĂ­t k odhlĂˇĹˇenĂ­ hrĂˇÄŤe ze zĂˇpasu.
      *
-     * Pokud je true, request reprezentuje akci odhlášení
-     * (UNREGISTER) bez ohledu na ostatní volitelná pole.
+     * Pokud je true, request reprezentuje akci odhlĂˇĹˇenĂ­
+     * (UNREGISTER) bez ohledu na ostatnĂ­ volitelnĂˇ pole.
      */
     private boolean unregister;
 
     /**
-     * Příznak, že jde o registraci náhradníka.
+     * PĹ™Ă­znak, Ĺľe jde o registraci nĂˇhradnĂ­ka.
      *
      * Pokud je true, request reprezentuje akci SUBSTITUTE,
-     * tedy stav, kdy hráč projevil zájem, ale jeho účast
-     * není jistá (čeká se na uvolnění místa nebo potvrzení).
+     * tedy stav, kdy hrĂˇÄŤ projevil zĂˇjem, ale jeho ĂşÄŤast
+     * nenĂ­ jistĂˇ (ÄŤekĂˇ se na uvolnÄ›nĂ­ mĂ­sta nebo potvrzenĂ­).
      */
     private boolean substitute;
 
@@ -194,24 +189,19 @@ public class MatchRegistrationRequest {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\requests\package-info.java
 -----
-
 /**
- * DTO objekty reprezentující vstupní požadavky na API.
+ * DTO objekty reprezentujĂ­cĂ­ vstupnĂ­ poĹľadavky na API.
  *
- * Slouží k:
- * - přebírání dat z HTTP requestů,
- * - validaci vstupních hodnot pomocí anotací,
- * - oddělení vstupního modelu od doménových entit.
+ * SlouĹľĂ­ k:
+ * - pĹ™ebĂ­rĂˇnĂ­ dat z HTTP requestĹŻ,
+ * - validaci vstupnĂ­ch hodnot pomocĂ­ anotacĂ­,
+ * - oddÄ›lenĂ­ vstupnĂ­ho modelu od domĂ©novĂ˝ch entit.
  *
- * Tyto třídy:
- * - neobsahují business logiku,
- * - používají se v controllerech jako vstupní parametry.
+ * Tyto tĹ™Ă­dy:
+ * - neobsahujĂ­ business logiku,
+ * - pouĹľĂ­vajĂ­ se v controllerech jako vstupnĂ­ parametry.
  */
 package cz.phsoft.hokej.models.dto.requests;
-
-

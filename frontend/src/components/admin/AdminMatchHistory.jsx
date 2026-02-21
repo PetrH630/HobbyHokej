@@ -17,12 +17,24 @@ const AdminMatchHistory = ({ matchId }) => {
         return <p>Žádná historie změn zápasu.</p>;
     }
 
-    const sortedHistory = history
-        .slice()
-        .sort(
-            (a, b) =>
-                new Date(b.changedAt) - new Date(a.changedAt)
-        );
+    // 1) Seřadit vzestupně (od nejstarší po nejnovější) pro výpočet "předchozího" záznamu
+    const historyAsc = [...history].sort(
+        (a, b) => new Date(a.changedAt) - new Date(b.changedAt)
+    );
+
+    // 2) Mapování id -> předchozí záznam
+    const previousById = {};
+
+    for (let i = 1; i < historyAsc.length; i++) {
+        const prev = historyAsc[i - 1];
+        const curr = historyAsc[i];
+        previousById[curr.id] = prev;
+    }
+
+    // 3) Pro zobrazení chceme pořadí od nejnovějšího po nejstarší
+    const sortedHistory = [...historyAsc].sort(
+        (a, b) => new Date(b.changedAt) - new Date(a.changedAt)
+    );
 
     return (
         <div className="d-flex flex-column gap-2">
@@ -30,6 +42,7 @@ const AdminMatchHistory = ({ matchId }) => {
                 <AdminMatchHistoryCard
                     key={item.id}
                     item={item}
+                    previousItem={previousById[item.id] || null}
                 />
             ))}
         </div>

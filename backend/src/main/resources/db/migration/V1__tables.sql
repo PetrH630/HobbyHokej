@@ -6,7 +6,9 @@ CREATE TABLE `app_users` (
   `password` varchar(255) NOT NULL,
   `role` enum('ROLE_PLAYER','ROLE_MANAGER','ROLE_ADMIN') NOT NULL,
   `surname` varchar(255) NOT NULL,
-  `timestamp` datetime(6) NOT NULL
+  `timestamp` datetime(6) NOT NULL,
+  `last_login_at` datetime(6) DEFAULT NULL,
+  `current_login_at` datetime(6) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `app_users_history` (

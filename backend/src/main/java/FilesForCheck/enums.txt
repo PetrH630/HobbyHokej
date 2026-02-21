@@ -18,406 +18,386 @@ Role.java
 Team.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\ExcuseReason.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Důvody omluvy hráče z účasti na zápase.
+ * DĹŻvody omluvy hrĂˇÄŤe z ĂşÄŤasti na zĂˇpase.
  *
- * Hodnota se používá v registraci hráče pro evidenci
- * strukturovaného důvodu neúčasti.
+ * Hodnota se pouĹľĂ­vĂˇ v registraci hrĂˇÄŤe pro evidenci
+ * strukturovanĂ©ho dĹŻvodu neĂşÄŤasti.
  */
 public enum ExcuseReason {
 
     /**
-     * Hráč je nemocný.
+     * HrĂˇÄŤ je nemocnĂ˝.
      */
     NEMOC,
 
     /**
-     * Pracovní důvody bránící účasti.
+     * PracovnĂ­ dĹŻvody brĂˇnĂ­cĂ­ ĂşÄŤasti.
      */
     PRACE,
 
     /**
      * Nechce se mi.
      *
-     * Úmyslně ponechaný „lidský“ důvod.
+     * ĂšmyslnÄ› ponechanĂ˝ â€žlidskĂ˝â€ś dĹŻvod.
      */
     NECHE_SE_MI,
 
     /**
-     * Jiný neuvedený důvod.
+     * JinĂ˝ neuvedenĂ˝ dĹŻvod.
      */
     JINE
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\GlobalNotificationLevel.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Globální úroveň notifikací pro uživatele.
+ * GlobĂˇlnĂ­ ĂşroveĹ notifikacĂ­ pro uĹľivatele.
  *
- * Určuje, v jakém rozsahu budou uživateli doručovány notifikace
- * napříč všemi jeho hráči, bez ohledu na dílčí nastavení
- * jednotlivých hráčů.
+ * UrÄŤuje, v jakĂ©m rozsahu budou uĹľivateli doruÄŤovĂˇny notifikace
+ * napĹ™Ă­ÄŤ vĹˇemi jeho hrĂˇÄŤi, bez ohledu na dĂ­lÄŤĂ­ nastavenĂ­
+ * jednotlivĂ˝ch hrĂˇÄŤĹŻ.
  */
 public enum GlobalNotificationLevel {
 
     /**
-     * Všechny běžné notifikace.
+     * VĹˇechny bÄ›ĹľnĂ© notifikace.
      *
-     * Zahrnují například registrace, omluvy, změny zápasů,
-     * zrušení, připomínky a další standardní události.
+     * ZahrnujĂ­ napĹ™Ă­klad registrace, omluvy, zmÄ›ny zĂˇpasĹŻ,
+     * zruĹˇenĂ­, pĹ™ipomĂ­nky a dalĹˇĂ­ standardnĂ­ udĂˇlosti.
      */
     ALL,
 
     /**
-     * Pouze důležité události.
+     * Pouze dĹŻleĹľitĂ© udĂˇlosti.
      *
-     * Typicky se jedná o zrušení zápasu, změnu času nebo místa
-     * zápasu a další kritické informace.
+     * Typicky se jednĂˇ o zruĹˇenĂ­ zĂˇpasu, zmÄ›nu ÄŤasu nebo mĂ­sta
+     * zĂˇpasu a dalĹˇĂ­ kritickĂ© informace.
      */
     IMPORTANT_ONLY,
 
     /**
-     * Uživatel nechce žádné notifikace pro sebe.
+     * UĹľivatel nechce ĹľĂˇdnĂ© notifikace pro sebe.
      *
-     * Nastavení hráčů zůstává zachováno a může být použito
-     * pro doručování notifikací přímo hráčům.
+     * NastavenĂ­ hrĂˇÄŤĹŻ zĹŻstĂˇvĂˇ zachovĂˇno a mĹŻĹľe bĂ˝t pouĹľito
+     * pro doruÄŤovĂˇnĂ­ notifikacĂ­ pĹ™Ă­mo hrĂˇÄŤĹŻm.
      */
     NONE
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\MatchCancelReason.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Důvody zrušení zápasu.
+ * DĹŻvody zruĹˇenĂ­ zĂˇpasu.
  *
- * Hodnota se používá spolu se stavem zápasu pro přehledné
- * a strojově zpracovatelné určení, proč byl zápas zrušen.
+ * Hodnota se pouĹľĂ­vĂˇ spolu se stavem zĂˇpasu pro pĹ™ehlednĂ©
+ * a strojovÄ› zpracovatelnĂ© urÄŤenĂ­, proÄŤ byl zĂˇpas zruĹˇen.
  */
 public enum MatchCancelReason {
 
     /**
-     * Nedostatečný počet přihlášených hráčů.
+     * NedostateÄŤnĂ˝ poÄŤet pĹ™ihlĂˇĹˇenĂ˝ch hrĂˇÄŤĹŻ.
      */
-    NOT_ENOUGH_PLAYERS,     // málo hráčů
+    NOT_ENOUGH_PLAYERS,     // mĂˇlo hrĂˇÄŤĹŻ
 
     /**
-     * Technické problémy, například led, hala nebo doprava.
+     * TechnickĂ© problĂ©my, napĹ™Ă­klad led, hala nebo doprava.
      */
-    TECHNICAL_ISSUE,        // technické problémy (led, hala, bus…)
+    TECHNICAL_ISSUE,        // technickĂ© problĂ©my (led, hala, busâ€¦)
 
     /**
-     * Nepříznivé počasí.
+     * NepĹ™Ă­znivĂ© poÄŤasĂ­.
      */
-    WEATHER,                // počasí
+    WEATHER,                // poÄŤasĂ­
 
     /**
-     * Rozhodnutí organizátora.
+     * RozhodnutĂ­ organizĂˇtora.
      */
-    ORGANIZER_DECISION,     // rozhodnutí organizátora
+    ORGANIZER_DECISION,     // rozhodnutĂ­ organizĂˇtora
 
     /**
-     * Jiný důvod zrušení, blíže nespecifikovaný.
+     * JinĂ˝ dĹŻvod zruĹˇenĂ­, blĂ­Ĺľe nespecifikovanĂ˝.
      */
-    OTHER                   // jiný důvod
+    OTHER                   // jinĂ˝ dĹŻvod
 }
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\MatchStatus.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Stav zápasu z pohledu plánování a změn.
+ * Stav zĂˇpasu z pohledu plĂˇnovĂˇnĂ­ a zmÄ›n.
  *
- * Enum se používá k označení, zda je zápas zrušený,
- * znovu aktivovaný nebo zda došlo ke změně jeho termínu.
+ * Enum se pouĹľĂ­vĂˇ k oznaÄŤenĂ­, zda je zĂˇpas zruĹˇenĂ˝,
+ * znovu aktivovanĂ˝ nebo zda doĹˇlo ke zmÄ›nÄ› jeho termĂ­nu.
  */
 public enum MatchStatus {
 
     /**
-     * Zápas byl znovu aktivován po předchozím zrušení.
+     * ZĂˇpas byl znovu aktivovĂˇn po pĹ™edchozĂ­m zruĹˇenĂ­.
      */
-    UNCANCELED,     // znovu aktivovaný
+    UNCANCELED,     // znovu aktivovanĂ˝
 
     /**
-     * Zápas byl zrušen.
+     * ZĂˇpas byl zruĹˇen.
      */
-    CANCELED,      // zrušený
+    CANCELED,      // zruĹˇenĂ˝
 
     /**
-     * Došlo ke změně data nebo času zápasu.
+     * DoĹˇlo ke zmÄ›nÄ› data nebo ÄŤasu zĂˇpasu.
      */
-    UPDATED,        // změna data-času
+    UPDATED,        // zmÄ›na data-ÄŤasu
 }
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\NotificationCategory.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Základní kategorizace notifikací v systému.
+ * ZĂˇkladnĂ­ kategorizace notifikacĂ­ v systĂ©mu.
  *
- * Kategorie umožňuje jednodušší filtrování a rozhodování
- * nad typy notifikací, například pro nastavení preferencí
- * nebo logování.
+ * Kategorie umoĹľĹuje jednoduĹˇĹˇĂ­ filtrovĂˇnĂ­ a rozhodovĂˇnĂ­
+ * nad typy notifikacĂ­, napĹ™Ă­klad pro nastavenĂ­ preferencĂ­
+ * nebo logovĂˇnĂ­.
  */
 public enum NotificationCategory {
 
     /**
-     * Notifikace související s registracemi hráčů.
+     * Notifikace souvisejĂ­cĂ­ s registracemi hrĂˇÄŤĹŻ.
      *
-     * Jedná se například o přihlášení, odhlášení, omluvy
-     * nebo čekací listinu.
+     * JednĂˇ se napĹ™Ă­klad o pĹ™ihlĂˇĹˇenĂ­, odhlĂˇĹˇenĂ­, omluvy
+     * nebo ÄŤekacĂ­ listinu.
      */
-    REGISTRATION,   // přihlášení / odhlášení / omluvy / čekací listina
+    REGISTRATION,   // pĹ™ihlĂˇĹˇenĂ­ / odhlĂˇĹˇenĂ­ / omluvy / ÄŤekacĂ­ listina
 
     /**
-     * Notifikace informující o změnách kolem zápasu.
+     * Notifikace informujĂ­cĂ­ o zmÄ›nĂˇch kolem zĂˇpasu.
      *
-     * Typicky jde o změny času, zrušení nebo důležité
-     * organizační informace.
+     * Typicky jde o zmÄ›ny ÄŤasu, zruĹˇenĂ­ nebo dĹŻleĹľitĂ©
+     * organizaÄŤnĂ­ informace.
      */
-    MATCH_INFO,     // změna času, zrušení, info k zápasu
+    MATCH_INFO,     // zmÄ›na ÄŤasu, zruĹˇenĂ­, info k zĂˇpasu
 
     /**
-     * Systémové nebo bezpečnostní notifikace.
+     * SystĂ©movĂ© nebo bezpeÄŤnostnĂ­ notifikace.
      *
-     * Patří sem například reset hesla, bezpečnostní upozornění
-     * a další události spojené s účtem.
+     * PatĹ™Ă­ sem napĹ™Ă­klad reset hesla, bezpeÄŤnostnĂ­ upozornÄ›nĂ­
+     * a dalĹˇĂ­ udĂˇlosti spojenĂ© s ĂşÄŤtem.
      */
-    SYSTEM          // věci typu „reset hesla“, bezpečnost atd.
+    SYSTEM          // vÄ›ci typu â€žreset heslaâ€ś, bezpeÄŤnost atd.
 }
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\NotificationChannel.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Kanály, kterými mohou být doručovány notifikace.
+ * KanĂˇly, kterĂ˝mi mohou bĂ˝t doruÄŤovĂˇny notifikace.
  *
- * Enum se používá při rozhodování, zda se má notifikace poslat
- * e-mailem, SMS nebo více kanály.
+ * Enum se pouĹľĂ­vĂˇ pĹ™i rozhodovĂˇnĂ­, zda se mĂˇ notifikace poslat
+ * e-mailem, SMS nebo vĂ­ce kanĂˇly.
  */
 public enum NotificationChannel {
 
     /**
-     * Emailový kanál.
+     * EmailovĂ˝ kanĂˇl.
      */
     EMAIL,
 
     /**
-     * SMS kanál.
+     * SMS kanĂˇl.
      */
     SMS
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\NotificationType.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Konkrétní typy notifikací používaných v systému.
+ * KonkrĂ©tnĂ­ typy notifikacĂ­ pouĹľĂ­vanĂ˝ch v systĂ©mu.
  *
- * Každý typ notifikace je zařazen do kategorie
- * NotificationCategory a má příznak důležitosti.
- * Tyto informace se používají při rozhodování,
- * komu a jak budou notifikace doručovány.
+ * KaĹľdĂ˝ typ notifikace je zaĹ™azen do kategorie
+ * NotificationCategory a mĂˇ pĹ™Ă­znak dĹŻleĹľitosti.
+ * Tyto informace se pouĹľĂ­vajĂ­ pĹ™i rozhodovĂˇnĂ­,
+ * komu a jak budou notifikace doruÄŤovĂˇny.
  */
 public enum NotificationType {
 
     // REGISTRATION
 
     /**
-     * Vytvoření nové registrace hráče na zápas.
+     * VytvoĹ™enĂ­ novĂ© registrace hrĂˇÄŤe na zĂˇpas.
      */
     MATCH_REGISTRATION_CREATED(NotificationCategory.REGISTRATION, true),
 
     /**
-     * Aktualizace existující registrace.
+     * Aktualizace existujĂ­cĂ­ registrace.
      */
     MATCH_REGISTRATION_UPDATED(NotificationCategory.REGISTRATION, true),
 
     /**
-     * Zrušení registrace hráče na zápas.
+     * ZruĹˇenĂ­ registrace hrĂˇÄŤe na zĂˇpas.
      */
     MATCH_REGISTRATION_CANCELED(NotificationCategory.REGISTRATION, true),
 
     /**
-     * Přesunutí hráče do stavu rezervace (náhradník).
+     * PĹ™esunutĂ­ hrĂˇÄŤe do stavu rezervace (nĂˇhradnĂ­k).
      */
     MATCH_REGISTRATION_RESERVED(NotificationCategory.REGISTRATION, true),
 
     /**
-     * Registrace hráče jako náhradníka s neurčitou účastí.
+     * Registrace hrĂˇÄŤe jako nĂˇhradnĂ­ka s neurÄŤitou ĂşÄŤastĂ­.
      */
     MATCH_REGISTRATION_SUBSTITUTE(NotificationCategory.REGISTRATION, false),
 
     /**
-     * Informace o posunu hráče z čekací listiny výše.
+     * Informace o posunu hrĂˇÄŤe z ÄŤekacĂ­ listiny vĂ˝Ĺˇe.
      */
     MATCH_WAITING_LIST_MOVED_UP(NotificationCategory.REGISTRATION, true),
 
     /**
-     * Informace o tom, že hráč dosud nereagoval.
+     * Informace o tom, Ĺľe hrĂˇÄŤ dosud nereagoval.
      */
     MATCH_REGISTRATION_NO_RESPONSE(NotificationCategory.REGISTRATION, false),
 
     /**
-     * Hráč byl omluven z účasti na zápase.
+     * HrĂˇÄŤ byl omluven z ĂşÄŤasti na zĂˇpase.
      */
     PLAYER_EXCUSED(NotificationCategory.REGISTRATION, true),
 
     /**
-     * Hráč se neomluvil, ačkoliv byl přihlášen.
+     * HrĂˇÄŤ se neomluvil, aÄŤkoliv byl pĹ™ihlĂˇĹˇen.
      */
     PLAYER_NO_EXCUSED(NotificationCategory.REGISTRATION, true),
 
     // MATCH_INFO
 
     /**
-     * Připomínka nadcházejícího zápasu.
+     * PĹ™ipomĂ­nka nadchĂˇzejĂ­cĂ­ho zĂˇpasu.
      */
     MATCH_REMINDER(NotificationCategory.MATCH_INFO, true),
 
     /**
-     * Zrušení zápasu.
+     * ZruĹˇenĂ­ zĂˇpasu.
      */
     MATCH_CANCELED(NotificationCategory.MATCH_INFO, true),
 
     /**
-     * Znovu aktivovaný zápas po předchozím zrušení.
+     * Znovu aktivovanĂ˝ zĂˇpas po pĹ™edchozĂ­m zruĹˇenĂ­.
      */
     MATCH_UNCANCELED(NotificationCategory.MATCH_INFO, true),
 
     /**
-     * Změna času nebo dalších detailů zápasu.
+     * ZmÄ›na ÄŤasu nebo dalĹˇĂ­ch detailĹŻ zĂˇpasu.
      */
     MATCH_TIME_CHANGED(NotificationCategory.MATCH_INFO, true),
 
-    // SYSTEM – hráčské/uživatelské události
+    // SYSTEM â€“ hrĂˇÄŤskĂ©/uĹľivatelskĂ© udĂˇlosti
 
     /**
-     * Vytvoření nového hráče.
+     * VytvoĹ™enĂ­ novĂ©ho hrĂˇÄŤe.
      */
     PLAYER_CREATED(NotificationCategory.SYSTEM, true),
 
     /**
-     * Aktualizace údajů o hráči.
+     * Aktualizace ĂşdajĹŻ o hrĂˇÄŤi.
      */
     PLAYER_UPDATED(NotificationCategory.SYSTEM, false),
 
     /**
-     * Schválení hráče administrátorem.
+     * SchvĂˇlenĂ­ hrĂˇÄŤe administrĂˇtorem.
      */
     PLAYER_APPROVED(NotificationCategory.SYSTEM, true),
 
     /**
-     * Zamítnutí hráče administrátorem.
+     * ZamĂ­tnutĂ­ hrĂˇÄŤe administrĂˇtorem.
      */
     PLAYER_REJECTED(NotificationCategory.SYSTEM, true),
 
     /**
-     * Smazání hráče.
+     * SmazĂˇnĂ­ hrĂˇÄŤe.
      */
     PLAYER_DELETED(NotificationCategory.SYSTEM, true),
 
     /**
-     * Změna přiřazení hráče k jinému uživatelskému účtu.
+     * ZmÄ›na pĹ™iĹ™azenĂ­ hrĂˇÄŤe k jinĂ©mu uĹľivatelskĂ©mu ĂşÄŤtu.
      */
     PLAYER_CHANGE_USER(NotificationCategory.SYSTEM, true),
 
     // USER
 
     /**
-     * Vytvoření nového uživatelského účtu.
+     * VytvoĹ™enĂ­ novĂ©ho uĹľivatelskĂ©ho ĂşÄŤtu.
      */
     USER_CREATED(NotificationCategory.SYSTEM, true),
 
     /**
-     * Aktivace uživatelského účtu.
+     * Aktivace uĹľivatelskĂ©ho ĂşÄŤtu.
      */
     USER_ACTIVATED(NotificationCategory.SYSTEM, true),
 
     /**
-     * Deaktivace uživatelského účtu.
+     * Deaktivace uĹľivatelskĂ©ho ĂşÄŤtu.
      */
     USER_DEACTIVATED(NotificationCategory.SYSTEM, true),
 
     /**
-     * Aktualizace údajů o uživateli.
+     * Aktualizace ĂşdajĹŻ o uĹľivateli.
      */
     USER_UPDATED(NotificationCategory.SYSTEM, true),
 
-    // SYSTEM – SECURITY
+    // SYSTEM â€“ SECURITY
 
     /**
-     * Reset hesla uživatele.
+     * Reset hesla uĹľivatele.
      */
     PASSWORD_RESET(NotificationCategory.SYSTEM, true),
 
     /**
-     * Změna hesla uživatelem.
+     * ZmÄ›na hesla uĹľivatelem.
      */
     USER_CHANGE_PASSWORD(NotificationCategory.SYSTEM, true),
 
     /**
-     * Požadavek na reset zapomenutého hesla.
+     * PoĹľadavek na reset zapomenutĂ©ho hesla.
      */
     FORGOTTEN_PASSWORD_RESET_REQUEST(NotificationCategory.SYSTEM, true),
 
     /**
-     * Dokončení procesu resetu zapomenutého hesla.
+     * DokonÄŤenĂ­ procesu resetu zapomenutĂ©ho hesla.
      */
     FORGOTTEN_PASSWORD_RESET_COMPLETED(NotificationCategory.SYSTEM, true),
 
     /**
-     * Bezpečnostní upozornění (podezřelá aktivita a podobně).
+     * BezpeÄŤnostnĂ­ upozornÄ›nĂ­ (podezĹ™elĂˇ aktivita a podobnÄ›).
      */
     SECURITY_ALERT(NotificationCategory.SYSTEM, true);
 
     /**
-     * Kategorie notifikace (registrace, informace o zápase, systém).
+     * Kategorie notifikace (registrace, informace o zĂˇpase, systĂ©m).
      */
     private final NotificationCategory category;
 
     /**
-     * Příznak důležitosti notifikace.
+     * PĹ™Ă­znak dĹŻleĹľitosti notifikace.
      *
-     * Hodnota se používá například při filtrování podle
+     * Hodnota se pouĹľĂ­vĂˇ napĹ™Ă­klad pĹ™i filtrovĂˇnĂ­ podle
      * GlobalNotificationLevel.
      */
     private final boolean important;
@@ -436,184 +416,165 @@ public enum NotificationType {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\package-info.java
 -----
-
 /**
- * Výčtové typy používané v aplikaci.
+ * VĂ˝ÄŤtovĂ© typy pouĹľĂ­vanĂ© v aplikaci.
  *
- * Reprezentují pevně dané množiny hodnot,
- * které se používají v entitách, DTO a business logice.
+ * ReprezentujĂ­ pevnÄ› danĂ© mnoĹľiny hodnot,
+ * kterĂ© se pouĹľĂ­vajĂ­ v entitĂˇch, DTO a business logice.
  *
- * Výčtové typy slouží ke zpřesnění doménového modelu
- * a k omezení možných stavů na povolené hodnoty.
+ * VĂ˝ÄŤtovĂ© typy slouĹľĂ­ ke zpĹ™esnÄ›nĂ­ domĂ©novĂ©ho modelu
+ * a k omezenĂ­ moĹľnĂ˝ch stavĹŻ na povolenĂ© hodnoty.
  */
 package cz.phsoft.hokej.data.enums;
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\PlayerMatchStatus.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Stav registrace hráče k zápasu.
+ * Stav registrace hrĂˇÄŤe k zĂˇpasu.
  *
- * Jednotlivé hodnoty popisují, jaký je aktuální vztah hráče
- * k danému zápasu z hlediska účasti a reakce.
+ * JednotlivĂ© hodnoty popisujĂ­, jakĂ˝ je aktuĂˇlnĂ­ vztah hrĂˇÄŤe
+ * k danĂ©mu zĂˇpasu z hlediska ĂşÄŤasti a reakce.
  */
 public enum PlayerMatchStatus {
 
-    REGISTERED,   // registrován
-    UNREGISTERED, // odhlášen - chtěl, ale nemůže
-    EXCUSED,      // omluven - věděl, že nemůže
-    RESERVED,     // náhradník není kapacita, ale chce jít
-    NO_RESPONSE,  // bez odpovědi
-    SUBSTITUTE,   // náhradník-možná
-    NO_EXCUSED,   // neomluven - byl registrován a nepřišel
+    REGISTERED,   // registrovĂˇn
+    UNREGISTERED, // odhlĂˇĹˇen - chtÄ›l, ale nemĹŻĹľe
+    EXCUSED,      // omluven - vÄ›dÄ›l, Ĺľe nemĹŻĹľe
+    RESERVED,     // nĂˇhradnĂ­k nenĂ­ kapacita, ale chce jĂ­t
+    NO_RESPONSE,  // bez odpovÄ›di
+    SUBSTITUTE,   // nĂˇhradnĂ­k-moĹľnĂˇ
+    NO_EXCUSED,   // neomluven - byl registrovĂˇn a nepĹ™iĹˇel
 }
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\PlayerSelectionMode.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Způsob automatického výběru hráče pro uživatele.
+ * ZpĹŻsob automatickĂ©ho vĂ˝bÄ›ru hrĂˇÄŤe pro uĹľivatele.
  *
- * Používá se při přihlášení uživatele nebo při volání auto-select
- * logiky na backendu. Ovlivňuje, jaký hráč bude předvybrán v UI.
+ * PouĹľĂ­vĂˇ se pĹ™i pĹ™ihlĂˇĹˇenĂ­ uĹľivatele nebo pĹ™i volĂˇnĂ­ auto-select
+ * logiky na backendu. OvlivĹuje, jakĂ˝ hrĂˇÄŤ bude pĹ™edvybrĂˇn v UI.
  */
 public enum PlayerSelectionMode {
 
     /**
-     * Automaticky se vybere první hráč uživatele podle ID.
+     * Automaticky se vybere prvnĂ­ hrĂˇÄŤ uĹľivatele podle ID.
      *
-     * Typicky se jedná o nejstaršího (prvně založeného) hráče
-     * daného uživatele.
+     * Typicky se jednĂˇ o nejstarĹˇĂ­ho (prvnÄ› zaloĹľenĂ©ho) hrĂˇÄŤe
+     * danĂ©ho uĹľivatele.
      */
     FIRST_PLAYER,
 
     /**
-     * Po přihlášení se žádný hráč automaticky nevybere.
+     * Po pĹ™ihlĂˇĹˇenĂ­ se ĹľĂˇdnĂ˝ hrĂˇÄŤ automaticky nevybere.
      *
-     * Uživatel si musí hráče zvolit ručně, obvykle z nabídky
+     * UĹľivatel si musĂ­ hrĂˇÄŤe zvolit ruÄŤnÄ›, obvykle z nabĂ­dky
      * na frontendu.
      */
     ALWAYS_CHOOSE
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\PlayerStatus.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Stav hráče v rámci aplikace.
+ * Stav hrĂˇÄŤe v rĂˇmci aplikace.
  *
- * Stav se používá při schvalovacím procesu administrátorem
- * a může ovlivňovat viditelnost hráče v různých přehledech.
+ * Stav se pouĹľĂ­vĂˇ pĹ™i schvalovacĂ­m procesu administrĂˇtorem
+ * a mĹŻĹľe ovlivĹovat viditelnost hrĂˇÄŤe v rĹŻznĂ˝ch pĹ™ehledech.
  */
 public enum PlayerStatus {
-    PENDING,  // čeká na schválení
-    APPROVED, // schváleno administrátorem
-    REJECTED,  // zamítnuto
-    ARCHIVED   // TODO implementovat místo smazání hráče
+    PENDING,  // ÄŤekĂˇ na schvĂˇlenĂ­
+    APPROVED, // schvĂˇleno administrĂˇtorem
+    REJECTED,  // zamĂ­tnuto
+    ARCHIVED   // TODO implementovat mĂ­sto smazĂˇnĂ­ hrĂˇÄŤe
 }
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\PlayerType.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Typ hráče z hlediska kategorií nebo úrovně.
+ * Typ hrĂˇÄŤe z hlediska kategoriĂ­ nebo ĂşrovnÄ›.
  *
- * Enum se používá například pro odlišení různých úrovní
- * nebo rolí v rámci týmu, případně pro cenotvorbu.
+ * Enum se pouĹľĂ­vĂˇ napĹ™Ă­klad pro odliĹˇenĂ­ rĹŻznĂ˝ch ĂşrovnĂ­
+ * nebo rolĂ­ v rĂˇmci tĂ˝mu, pĹ™Ă­padnÄ› pro cenotvorbu.
  */
 public enum PlayerType {
     /**
-     * Hráč VIP kategorie.
+     * HrĂˇÄŤ VIP kategorie.
      */
     VIP,
 
     /**
-     * Standardní hráč.
+     * StandardnĂ­ hrĂˇÄŤ.
      */
     STANDARD,
 
     /**
-     * Základní typ hráče, výchozí hodnota.
+     * ZĂˇkladnĂ­ typ hrĂˇÄŤe, vĂ˝chozĂ­ hodnota.
      */
     BASIC
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\Role.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Role aplikačního uživatele.
+ * Role aplikaÄŤnĂ­ho uĹľivatele.
  *
- * Hodnoty se typicky mapují na autorizační systém Spring Security
- * (GrantedAuthority) a určují, k jakým funkcím má uživatel přístup.
+ * Hodnoty se typicky mapujĂ­ na autorizaÄŤnĂ­ systĂ©m Spring Security
+ * (GrantedAuthority) a urÄŤujĂ­, k jakĂ˝m funkcĂ­m mĂˇ uĹľivatel pĹ™Ă­stup.
  */
 public enum Role {
     /**
-     * Běžný uživatel zaměřený na práci s vlastními hráči a zápasy.
+     * BÄ›ĹľnĂ˝ uĹľivatel zamÄ›Ĺ™enĂ˝ na prĂˇci s vlastnĂ­mi hrĂˇÄŤi a zĂˇpasy.
      */
     ROLE_PLAYER,
     /**
-     * Manažer týmu s rozšířenými oprávněními pro správu hráčů a zápasů.
+     * ManaĹľer tĂ˝mu s rozĹˇĂ­Ĺ™enĂ˝mi oprĂˇvnÄ›nĂ­mi pro sprĂˇvu hrĂˇÄŤĹŻ a zĂˇpasĹŻ.
      */
     ROLE_MANAGER,
     /**
-     * Administrátor aplikace s plnými oprávněními.
+     * AdministrĂˇtor aplikace s plnĂ˝mi oprĂˇvnÄ›nĂ­mi.
      */
     ROLE_ADMIN
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\Team.java
 -----
-
 package cz.phsoft.hokej.data.enums;
 
 /**
- * Týmové rozdělení hráčů pro zápas.
+ * TĂ˝movĂ© rozdÄ›lenĂ­ hrĂˇÄŤĹŻ pro zĂˇpas.
  *
- * Enum se používá pro přiřazení hráče do jednoho ze dvou týmů.
+ * Enum se pouĹľĂ­vĂˇ pro pĹ™iĹ™azenĂ­ hrĂˇÄŤe do jednoho ze dvou tĂ˝mĹŻ.
  */
 public enum Team {
     /**
-     * Tmavý tým.
+     * TmavĂ˝ tĂ˝m.
      */
     DARK,
     /**
-     * Světlý tým.
+     * SvÄ›tlĂ˝ tĂ˝m.
      */
-    LIGHT
+    LIGHT;
+
+    public Team opposite() {
+        return this == LIGHT ? DARK : LIGHT;
+    }
 }
-
-

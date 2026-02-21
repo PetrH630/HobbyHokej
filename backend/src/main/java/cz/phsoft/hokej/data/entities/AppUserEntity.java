@@ -3,6 +3,7 @@ package cz.phsoft.hokej.data.entities;
 import cz.phsoft.hokej.data.enums.Role;
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -131,6 +132,21 @@ public class AppUserEntity {
         }
     }
 
+    /**
+     * Uchovává čas předposledního přihlášení uživatele.
+     * Používá se pro výpočet notifikací od posledního přihlášení.
+     */
+    @Column(name = "last_login_at")
+    private Instant lastLoginAt;
+
+    /**
+     * Uchovává čas posledního přihlášení uživatele.
+     * Aktualizuje se při každém úspěšném přihlášení.
+     */
+    @Column(name = "current_login_at")
+    private Instant currentLoginAt;
+
+
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
@@ -183,5 +199,21 @@ public class AppUserEntity {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public Instant getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(Instant lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
+    public Instant getCurrentLoginAt() {
+        return currentLoginAt;
+    }
+
+    public void setCurrentLoginAt(Instant currentLoginAt) {
+        this.currentLoginAt = currentLoginAt;
     }
 }

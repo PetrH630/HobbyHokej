@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.phsoft.hokej.models.services.AppUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,16 +37,27 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
      * Objekt pro čtení JSON z request body.
      */
     private final ObjectMapper objectMapper = new ObjectMapper();
+    /**
+     * Servis pro práci s uživatelskými účty.
+     *
+     * Používá se pro aktualizaci časových razítek přihlášení
+     * po úspěšné autentizaci.
+     */
+    private final AppUserService appUserService;
 
     /**
      * Vytvoří filtr pro zadanou login URL.
      *
-     * @param loginUrl    URL endpointu pro login, například {@code /api/auth/login}
-     * @param authManager instance {@link AuthenticationManager} používaná pro autentizaci
+     * @param loginUrl    URL endpointu pro login, například /api/auth/login
+     * @param authManager instance AuthenticationManager používaná pro autentizaci
+     * @param appUserService servis pro správu uživatelských účtů
      */
-    public CustomJsonLoginFilter(String loginUrl, AuthenticationManager authManager) {
+    public CustomJsonLoginFilter(String loginUrl,
+                                 AuthenticationManager authManager,
+                                 AppUserService appUserService) {
         setFilterProcessesUrl(loginUrl);
         setAuthenticationManager(authManager);
+        this.appUserService = appUserService;
     }
 
     // Pokus o autentizaci (login)
@@ -128,6 +141,10 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                                             FilterChain chain,
                                             Authentication authResult)
             throws IOException, ServletException {
+
+        // Aktualizace login timestampů v AppUserEntity
+        String email = authResult.getName();
+        appUserService.onSuccessfulLogin(email);
 
         // Nastavení SecurityContext
         SecurityContextHolder.getContext().setAuthentication(authResult);

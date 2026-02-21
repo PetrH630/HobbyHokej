@@ -11,6 +11,7 @@ MatchEntity.java
 MatchHistoryEntity.java
 MatchRegistrationEntity.java
 MatchRegistrationHistoryEntity.java
+NotificationEntity.java
 package-info.java
 PlayerEntity.java
 PlayerHistoryEntity.java
@@ -20,86 +21,85 @@ SeasonEntity.java
 SeasonHistoryEntity.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\AppUserEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.Role;
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
- * Entita reprezentující uživatelský účet aplikace.
+ * Entita reprezentujĂ­cĂ­ uĹľivatelskĂ˝ ĂşÄŤet aplikace.
  *
- * Slouží pro autentizaci a autorizaci uživatelů v systému.
- * Uchovává základní identifikační údaje, přihlašovací informace,
- * roli uživatele a stav aktivace účtu.
+ * SlouĹľĂ­ pro autentizaci a autorizaci uĹľivatelĹŻ v systĂ©mu.
+ * UchovĂˇvĂˇ zĂˇkladnĂ­ identifikaÄŤnĂ­ Ăşdaje, pĹ™ihlaĹˇovacĂ­ informace,
+ * roli uĹľivatele a stav aktivace ĂşÄŤtu.
  *
- * Jeden uživatel může mít přiřazeno více hráčů. Detailní uživatelské
- * preference a nastavení jsou odděleny do entity AppUserSettingsEntity.
+ * Jeden uĹľivatel mĹŻĹľe mĂ­t pĹ™iĹ™azeno vĂ­ce hrĂˇÄŤĹŻ. DetailnĂ­ uĹľivatelskĂ©
+ * preference a nastavenĂ­ jsou oddÄ›leny do entity AppUserSettingsEntity.
  */
 @Entity
 @Table(name = "app_users")
 public class AppUserEntity {
 
     /**
-     * Primární klíč uživatele.
+     * PrimĂˇrnĂ­ klĂ­ÄŤ uĹľivatele.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Křestní jméno uživatele.
+     * KĹ™estnĂ­ jmĂ©no uĹľivatele.
      */
     @Column(nullable = false)
     private String name;
 
     /**
-     * Příjmení uživatele.
-     * Při uložení je převáděno na velká písmena.
+     * PĹ™Ă­jmenĂ­ uĹľivatele.
+     * PĹ™i uloĹľenĂ­ je pĹ™evĂˇdÄ›no na velkĂˇ pĂ­smena.
      */
     @Column(nullable = false)
     private String surname;
 
     /**
-     * Unikátní e-mail uživatele sloužící pro přihlášení do systému.
+     * UnikĂˇtnĂ­ e-mail uĹľivatele slouĹľĂ­cĂ­ pro pĹ™ihlĂˇĹˇenĂ­ do systĂ©mu.
      */
     @Column(nullable = false, unique = true)
     private String email;
 
     /**
-     * Hash hesla uživatele.
-     * Heslo se nikdy neukládá v otevřené podobě.
+     * Hash hesla uĹľivatele.
+     * Heslo se nikdy neuklĂˇdĂˇ v otevĹ™enĂ© podobÄ›.
      */
     @Column(nullable = false)
     private String password;
 
     /**
-     * Role uživatele v systému.
-     * Určuje oprávnění uživatele při přístupu k jednotlivým endpointům.
+     * Role uĹľivatele v systĂ©mu.
+     * UrÄŤuje oprĂˇvnÄ›nĂ­ uĹľivatele pĹ™i pĹ™Ă­stupu k jednotlivĂ˝m endpointĹŻm.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
     /**
-     * Příznak aktivace účtu.
-     * Nastavuje se například po úspěšné e-mailové aktivaci účtu.
+     * PĹ™Ă­znak aktivace ĂşÄŤtu.
+     * Nastavuje se napĹ™Ă­klad po ĂşspÄ›ĹˇnĂ© e-mailovĂ© aktivaci ĂşÄŤtu.
      */
     @Column(nullable = false)
     private boolean enabled = false;
 
     /**
-     * Hráči přiřazení k tomuto uživateli.
+     * HrĂˇÄŤi pĹ™iĹ™azenĂ­ k tomuto uĹľivateli.
      *
-     * Vztah je typu one-to-many, kdy jeden uživatel může mít více hráčů.
-     * Životní cyklus hráčů je navázán na uživatele.
+     * Vztah je typu one-to-many, kdy jeden uĹľivatel mĹŻĹľe mĂ­t vĂ­ce hrĂˇÄŤĹŻ.
+     * Ĺ˝ivotnĂ­ cyklus hrĂˇÄŤĹŻ je navĂˇzĂˇn na uĹľivatele.
      */
     @OneToMany(
             mappedBy = "user",
@@ -109,11 +109,11 @@ public class AppUserEntity {
     private Set<PlayerEntity> players;
 
     /**
-     * Nastavení uživatele.
+     * NastavenĂ­ uĹľivatele.
      *
-     * Obsahuje například způsob výběru aktuálního hráče,
-     * nastavení notifikací a další preference.
-     * Jeden uživatel má právě jedno nastavení.
+     * Obsahuje napĹ™Ă­klad zpĹŻsob vĂ˝bÄ›ru aktuĂˇlnĂ­ho hrĂˇÄŤe,
+     * nastavenĂ­ notifikacĂ­ a dalĹˇĂ­ preference.
+     * Jeden uĹľivatel mĂˇ prĂˇvÄ› jedno nastavenĂ­.
      */
     @OneToOne(mappedBy = "user",
             cascade = CascadeType.ALL,
@@ -122,19 +122,19 @@ public class AppUserEntity {
     private AppUserSettingsEntity settings;
 
     /**
-     * Časové razítko uživatele.
+     * ÄŚasovĂ© razĂ­tko uĹľivatele.
      *
-     * Uchovává datum a čas poslední změny entity.
-     * Hodnota se aktualizuje při vytvoření i při každé úpravě záznamu.
+     * UchovĂˇvĂˇ datum a ÄŤas poslednĂ­ zmÄ›ny entity.
+     * Hodnota se aktualizuje pĹ™i vytvoĹ™enĂ­ i pĹ™i kaĹľdĂ© ĂşpravÄ› zĂˇznamu.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
-     * Metoda volaná před prvním uložením entity.
+     * Metoda volanĂˇ pĹ™ed prvnĂ­m uloĹľenĂ­m entity.
      *
-     * Nastavuje aktuální časové razítko a převádí příjmení
-     * na velká písmena.
+     * Nastavuje aktuĂˇlnĂ­ ÄŤasovĂ© razĂ­tko a pĹ™evĂˇdĂ­ pĹ™Ă­jmenĂ­
+     * na velkĂˇ pĂ­smena.
      */
     @PrePersist
     public void prePersist() {
@@ -145,10 +145,10 @@ public class AppUserEntity {
     }
 
     /**
-     * Metoda volaná před aktualizací entity.
+     * Metoda volanĂˇ pĹ™ed aktualizacĂ­ entity.
      *
-     * Aktualizuje časové razítko a převádí příjmení
-     * na velká písmena.
+     * Aktualizuje ÄŤasovĂ© razĂ­tko a pĹ™evĂˇdĂ­ pĹ™Ă­jmenĂ­
+     * na velkĂˇ pĂ­smena.
      */
     @PreUpdate
     public void preUpdate() {
@@ -157,6 +157,21 @@ public class AppUserEntity {
             this.surname = this.surname.toUpperCase();
         }
     }
+
+    /**
+     * UchovĂˇvĂˇ ÄŤas pĹ™edposlednĂ­ho pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     * PouĹľĂ­vĂˇ se pro vĂ˝poÄŤet notifikacĂ­ od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
+     */
+    @Column(name = "last_login_at")
+    private Instant lastLoginAt;
+
+    /**
+     * UchovĂˇvĂˇ ÄŤas poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     * Aktualizuje se pĹ™i kaĹľdĂ©m ĂşspÄ›ĹˇnĂ©m pĹ™ihlĂˇĹˇenĂ­.
+     */
+    @Column(name = "current_login_at")
+    private Instant currentLoginAt;
+
 
     public Long getId() { return id; }
 
@@ -193,9 +208,9 @@ public class AppUserEntity {
     public AppUserSettingsEntity getSettings() { return settings; }
 
     /**
-     * Nastavuje uživatelské nastavení a zároveň zajišťuje obousměrnou vazbu.
+     * Nastavuje uĹľivatelskĂ© nastavenĂ­ a zĂˇroveĹ zajiĹˇĹĄuje obousmÄ›rnou vazbu.
      *
-     * @param settings instance nastavení uživatele
+     * @param settings instance nastavenĂ­ uĹľivatele
      */
     public void setSettings(AppUserSettingsEntity settings) {
         this.settings = settings;
@@ -211,14 +226,27 @@ public class AppUserEntity {
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
+
+    public Instant getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(Instant lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
+    public Instant getCurrentLoginAt() {
+        return currentLoginAt;
+    }
+
+    public void setCurrentLoginAt(Instant currentLoginAt) {
+        this.currentLoginAt = currentLoginAt;
+    }
 }
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\AppUserHistoryEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.Role;
@@ -227,13 +255,13 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující historický záznam o uživateli.
+ * Entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam o uĹľivateli.
  *
- * Slouží pro auditní účely a uchovávání změn uživatelského účtu v čase.
- * Každý záznam představuje stav uživatele v okamžiku provedení operace
- * nad hlavní entitou AppUserEntity.
+ * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely a uchovĂˇvĂˇnĂ­ zmÄ›n uĹľivatelskĂ©ho ĂşÄŤtu v ÄŤase.
+ * KaĹľdĂ˝ zĂˇznam pĹ™edstavuje stav uĹľivatele v okamĹľiku provedenĂ­ operace
+ * nad hlavnĂ­ entitou AppUserEntity.
  *
- * Záznamy jsou typicky vytvářeny databázovým triggerem při operacích
+ * ZĂˇznamy jsou typicky vytvĂˇĹ™eny databĂˇzovĂ˝m triggerem pĹ™i operacĂ­ch
  * INSERT, UPDATE nebo DELETE.
  */
 @Entity
@@ -241,78 +269,78 @@ import java.time.LocalDateTime;
 public class AppUserHistoryEntity {
 
     /**
-     * Primární klíč historického záznamu.
+     * PrimĂˇrnĂ­ klĂ­ÄŤ historickĂ©ho zĂˇznamu.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Typ provedené operace.
+     * Typ provedenĂ© operace.
      *
-     * Typicky se jedná o hodnoty INSERT, UPDATE nebo DELETE.
+     * Typicky se jednĂˇ o hodnoty INSERT, UPDATE nebo DELETE.
      */
     @Column(name = "action", nullable = false)
     private String action;
 
     /**
-     * Datum a čas provedení změny.
+     * Datum a ÄŤas provedenĂ­ zmÄ›ny.
      *
-     * Udává okamžik vytvoření historického záznamu.
+     * UdĂˇvĂˇ okamĹľik vytvoĹ™enĂ­ historickĂ©ho zĂˇznamu.
      */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
     /**
-     * ID uživatele z hlavní tabulky app_users.
+     * ID uĹľivatele z hlavnĂ­ tabulky app_users.
      *
-     * Slouží pro propojení historického záznamu s původní entitou uživatele.
+     * SlouĹľĂ­ pro propojenĂ­ historickĂ©ho zĂˇznamu s pĹŻvodnĂ­ entitou uĹľivatele.
      */
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
     /**
-     * Původní časové razítko uživatele.
+     * PĹŻvodnĂ­ ÄŤasovĂ© razĂ­tko uĹľivatele.
      *
-     * Jedná se o hodnotu timestamp z AppUserEntity v okamžiku změny.
-     * Umožňuje dohledat přesný stav uživatele při konkrétní operaci.
+     * JednĂˇ se o hodnotu timestamp z AppUserEntity v okamĹľiku zmÄ›ny.
+     * UmoĹľĹuje dohledat pĹ™esnĂ˝ stav uĹľivatele pĹ™i konkrĂ©tnĂ­ operaci.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
     /**
-     * Jméno uživatele v okamžiku změny.
+     * JmĂ©no uĹľivatele v okamĹľiku zmÄ›ny.
      */
     @Column(name = "name", nullable = false)
     private String name;
 
     /**
-     * Příjmení uživatele v okamžiku změny.
+     * PĹ™Ă­jmenĂ­ uĹľivatele v okamĹľiku zmÄ›ny.
      */
     @Column(name = "surname", nullable = false)
     private String surname;
 
     /**
-     * E-mail uživatele v okamžiku změny.
+     * E-mail uĹľivatele v okamĹľiku zmÄ›ny.
      */
     @Column(name = "email", nullable = false)
     private String email;
 
     /**
-     * Role uživatele v okamžiku změny.
+     * Role uĹľivatele v okamĹľiku zmÄ›ny.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
 
     /**
-     * Stav aktivace účtu v okamžiku změny.
+     * Stav aktivace ĂşÄŤtu v okamĹľiku zmÄ›ny.
      */
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
     /**
-     * Bezparametrický konstruktor požadovaný JPA.
+     * BezparametrickĂ˝ konstruktor poĹľadovanĂ˝ JPA.
      */
     public AppUserHistoryEntity() {
     }
@@ -348,12 +376,9 @@ public class AppUserHistoryEntity {
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\AppUserSettingsEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
@@ -363,12 +388,12 @@ import jakarta.persistence.*;
 import java.time.LocalTime;
 
 /**
- * Entita uchovávající nastavení uživatelského účtu.
+ * Entita uchovĂˇvajĂ­cĂ­ nastavenĂ­ uĹľivatelskĂ©ho ĂşÄŤtu.
  *
- * Odděluje identitu uživatele (AppUserEntity) od jeho preferencí
- * a chování v systému (AppUserSettingsEntity). Slouží zejména
- * pro nastavení výběru hráče, globální úrovně notifikací a
- * preferencí souvisejících s uživatelským rozhraním.
+ * OddÄ›luje identitu uĹľivatele (AppUserEntity) od jeho preferencĂ­
+ * a chovĂˇnĂ­ v systĂ©mu (AppUserSettingsEntity). SlouĹľĂ­ zejmĂ©na
+ * pro nastavenĂ­ vĂ˝bÄ›ru hrĂˇÄŤe, globĂˇlnĂ­ ĂşrovnÄ› notifikacĂ­ a
+ * preferencĂ­ souvisejĂ­cĂ­ch s uĹľivatelskĂ˝m rozhranĂ­m.
  */
 @Entity
 @Table(name = "app_user_settings")
@@ -379,97 +404,97 @@ public class AppUserSettingsEntity {
     private Long id;
 
     /**
-     * Uživatel, ke kterému tato nastavení patří.
-     * Pro jednoho uživatele existuje právě jeden záznam nastavení.
+     * UĹľivatel, ke kterĂ©mu tato nastavenĂ­ patĹ™Ă­.
+     * Pro jednoho uĹľivatele existuje prĂˇvÄ› jeden zĂˇznam nastavenĂ­.
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private AppUserEntity user;
 
     /**
-     * Způsob automatického výběru hráče po přihlášení
-     * nebo při auto-select logice.
+     * ZpĹŻsob automatickĂ©ho vĂ˝bÄ›ru hrĂˇÄŤe po pĹ™ihlĂˇĹˇenĂ­
+     * nebo pĹ™i auto-select logice.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "player_selection_mode", nullable = false, length = 50)
     private PlayerSelectionMode playerSelectionMode = PlayerSelectionMode.FIRST_PLAYER;
 
     /**
-     * Globální úroveň notifikací pro uživatele.
-     * Určuje, kolik notifikací bude uživatel dostávat
-     * bez ohledu na nastavení konkrétních hráčů.
+     * GlobĂˇlnĂ­ ĂşroveĹ notifikacĂ­ pro uĹľivatele.
+     * UrÄŤuje, kolik notifikacĂ­ bude uĹľivatel dostĂˇvat
+     * bez ohledu na nastavenĂ­ konkrĂ©tnĂ­ch hrĂˇÄŤĹŻ.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "global_notification_level", nullable = false, length = 50)
     private GlobalNotificationLevel globalNotificationLevel = GlobalNotificationLevel.ALL;
 
     /**
-     * Úroveň notifikací, které má uživatel dostávat v roli manažera.
+     * ĂšroveĹ notifikacĂ­, kterĂ© mĂˇ uĹľivatel dostĂˇvat v roli manaĹľera.
      *
-     * Hodnota se používá při rozhodování, zda mají být zasílány
-     * kopie notifikací na e-mail uživatele, pokud má zároveň
-     * roli manažera. Nastavení ovlivňuje pouze manažerské kopie,
-     * nikoliv notifikace určené přímo tomuto uživateli nebo hráčům.
+     * Hodnota se pouĹľĂ­vĂˇ pĹ™i rozhodovĂˇnĂ­, zda majĂ­ bĂ˝t zasĂ­lĂˇny
+     * kopie notifikacĂ­ na e-mail uĹľivatele, pokud mĂˇ zĂˇroveĹ
+     * roli manaĹľera. NastavenĂ­ ovlivĹuje pouze manaĹľerskĂ© kopie,
+     * nikoliv notifikace urÄŤenĂ© pĹ™Ă­mo tomuto uĹľivateli nebo hrĂˇÄŤĹŻm.
      *
-     * Pokud je hodnota null, používá se hodnota globalNotificationLevel
-     * jako výchozí chování.
+     * Pokud je hodnota null, pouĹľĂ­vĂˇ se hodnota globalNotificationLevel
+     * jako vĂ˝chozĂ­ chovĂˇnĂ­.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "manager_notification_level", length = 50)
     private GlobalNotificationLevel managerNotificationLevel;
 
     /**
-     * Určuje, zda má uživatel dostávat kopie všech notifikací,
-     * které chodí jeho hráčům.
+     * UrÄŤuje, zda mĂˇ uĹľivatel dostĂˇvat kopie vĹˇech notifikacĂ­,
+     * kterĂ© chodĂ­ jeho hrĂˇÄŤĹŻm.
      *
-     * Příklad:
-     * true: rodič chce mít přehled o všem, co se děje u dětí.
-     * false: spoléhá se pouze na notifikace hráčů.
+     * PĹ™Ă­klad:
+     * true: rodiÄŤ chce mĂ­t pĹ™ehled o vĹˇem, co se dÄ›je u dÄ›tĂ­.
+     * false: spolĂ©hĂˇ se pouze na notifikace hrĂˇÄŤĹŻ.
      */
     @Column(name = "copy_all_player_notifications_to_user_email", nullable = false)
     private boolean copyAllPlayerNotificationsToUserEmail = true;
 
     /**
-     * Určuje, zda má uživatel dostávat notifikace i za hráče,
-     * kteří mají vlastní email (contactEmail v PlayerSettings).
+     * UrÄŤuje, zda mĂˇ uĹľivatel dostĂˇvat notifikace i za hrĂˇÄŤe,
+     * kteĹ™Ă­ majĂ­ vlastnĂ­ email (contactEmail v PlayerSettings).
      *
-     * Příklad:
-     * false: pokud má hráč vlastní email, chodí notifikace pouze jemu.
-     * true: uživatel dostává kopie notifikací i v tomto případě.
+     * PĹ™Ă­klad:
+     * false: pokud mĂˇ hrĂˇÄŤ vlastnĂ­ email, chodĂ­ notifikace pouze jemu.
+     * true: uĹľivatel dostĂˇvĂˇ kopie notifikacĂ­ i v tomto pĹ™Ă­padÄ›.
      */
     @Column(name = "receive_notifications_for_players_with_own_email", nullable = false)
     private boolean receiveNotificationsForPlayersWithOwnEmail = false;
 
     /**
-     * Určuje, zda má být používán denní souhrn (digest) místo
-     * jednotlivých notifikací během dne.
+     * UrÄŤuje, zda mĂˇ bĂ˝t pouĹľĂ­vĂˇn dennĂ­ souhrn (digest) mĂ­sto
+     * jednotlivĂ˝ch notifikacĂ­ bÄ›hem dne.
      */
     @Column(name = "email_digest_enabled", nullable = false)
     private boolean emailDigestEnabled = false;
 
     /**
-     * Čas, kdy má chodit souhrnný email, pokud je digest zapnutý.
+     * ÄŚas, kdy mĂˇ chodit souhrnnĂ˝ email, pokud je digest zapnutĂ˝.
      */
     @Column(name = "email_digest_time")
     private LocalTime emailDigestTime;
 
     /**
-     * Preferovaný jazyk uživatelského rozhraní.
-     * Například "cs" nebo "en".
+     * PreferovanĂ˝ jazyk uĹľivatelskĂ©ho rozhranĂ­.
+     * NapĹ™Ă­klad "cs" nebo "en".
      */
     @Column(name = "ui_language", length = 10)
     private String uiLanguage = "cs";
 
     /**
-     * Časová zóna uživatele.
-     * Například "Europe/Prague".
+     * ÄŚasovĂˇ zĂłna uĹľivatele.
+     * NapĹ™Ă­klad "Europe/Prague".
      */
     @Column(name = "timezone", length = 50)
     private String timezone = "Europe/Prague";
 
     /**
-     * Výchozí obrazovka po přihlášení.
-     * Z praktických důvodů je uložena jako řetězec.
+     * VĂ˝chozĂ­ obrazovka po pĹ™ihlĂˇĹˇenĂ­.
+     * Z praktickĂ˝ch dĹŻvodĹŻ je uloĹľena jako Ĺ™etÄ›zec.
      */
     @Column(name = "default_landing_page", length = 50)
     private String defaultLandingPage = "DASHBOARD";
@@ -567,12 +592,9 @@ public class AppUserSettingsEntity {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\EmailVerificationTokenEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.*;
@@ -580,10 +602,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující ověřovací token pro emailovou aktivaci uživatele.
+ * Entita reprezentujĂ­cĂ­ ovÄ›Ĺ™ovacĂ­ token pro emailovou aktivaci uĹľivatele.
  *
- * Slouží k ověření emailové adresy a aktivaci uživatelského účtu.
- * Token je časově omezený a navázaný na konkrétního uživatele.
+ * SlouĹľĂ­ k ovÄ›Ĺ™enĂ­ emailovĂ© adresy a aktivaci uĹľivatelskĂ©ho ĂşÄŤtu.
+ * Token je ÄŤasovÄ› omezenĂ˝ a navĂˇzanĂ˝ na konkrĂ©tnĂ­ho uĹľivatele.
  */
 @Entity
 @Table(name = "email_verification_tokens")
@@ -594,19 +616,19 @@ public class EmailVerificationTokenEntity {
     private Long id;
 
     /**
-     * Unikátní ověřovací token.
+     * UnikĂˇtnĂ­ ovÄ›Ĺ™ovacĂ­ token.
      */
     @Column(nullable = false, unique = true, length = 64)
     private String token;
 
     /**
-     * Datum a čas expirace tokenu.
+     * Datum a ÄŤas expirace tokenu.
      */
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
     /**
-     * Uživatel, ke kterému je token přiřazen.
+     * UĹľivatel, ke kterĂ©mu je token pĹ™iĹ™azen.
      */
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -629,23 +651,20 @@ public class EmailVerificationTokenEntity {
     public void setUser(AppUserEntity user) { this.user = user; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\ForgottenPasswordResetTokenEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující token pro reset zapomenutého hesla.
+ * Entita reprezentujĂ­cĂ­ token pro reset zapomenutĂ©ho hesla.
  *
- * Slouží k bezpečnému nastavení nového hesla uživatele.
- * Token je časově omezený a navázaný na konkrétního uživatele.
- * Volitelné pole usedAt umožňuje evidovat okamžik použití tokenu.
+ * SlouĹľĂ­ k bezpeÄŤnĂ©mu nastavenĂ­ novĂ©ho hesla uĹľivatele.
+ * Token je ÄŤasovÄ› omezenĂ˝ a navĂˇzanĂ˝ na konkrĂ©tnĂ­ho uĹľivatele.
+ * VolitelnĂ© pole usedAt umoĹľĹuje evidovat okamĹľik pouĹľitĂ­ tokenu.
  */
 @Entity
 @Table(name = "forgotten_password_reset_token_entity")
@@ -656,26 +675,26 @@ public class ForgottenPasswordResetTokenEntity {
     private Long id;
 
     /**
-     * Unikátní resetovací token.
+     * UnikĂˇtnĂ­ resetovacĂ­ token.
      */
     @Column(nullable = false, unique = true, length = 128)
     private String token;
 
     /**
-     * Uživatel, ke kterému token patří.
+     * UĹľivatel, ke kterĂ©mu token patĹ™Ă­.
      */
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private AppUserEntity user;
 
     /**
-     * Datum a čas expirace tokenu.
+     * Datum a ÄŤas expirace tokenu.
      */
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
     /**
-     * Datum a čas, kdy byl token použit.
-     * Hodnota je volitelná a slouží pro auditní účely.
+     * Datum a ÄŤas, kdy byl token pouĹľit.
+     * Hodnota je volitelnĂˇ a slouĹľĂ­ pro auditnĂ­ ĂşÄŤely.
      */
     private LocalDateTime usedAt;
 
@@ -700,12 +719,9 @@ public class ForgottenPasswordResetTokenEntity {
     public void setUsedAt(LocalDateTime usedAt) { this.usedAt = usedAt; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\MatchEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
@@ -715,114 +731,114 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující hokejový zápas.
+ * Entita reprezentujĂ­cĂ­ hokejovĂ˝ zĂˇpas.
  *
- * Uchovává základní informace o zápasu, jeho kapacitě,
- * ceně, aktuálním stavu a vazbě na sezónu.
- * Informace o účasti hráčů jsou uloženy v samostatné entitě
+ * UchovĂˇvĂˇ zĂˇkladnĂ­ informace o zĂˇpasu, jeho kapacitÄ›,
+ * cenÄ›, aktuĂˇlnĂ­m stavu a vazbÄ› na sezĂłnu.
+ * Informace o ĂşÄŤasti hrĂˇÄŤĹŻ jsou uloĹľeny v samostatnĂ© entitÄ›
  * MatchRegistrationEntity.
  *
- * Entita dále obsahuje auditní údaje o vytvoření a poslední
- * úpravě zápasu.
+ * Entita dĂˇle obsahuje auditnĂ­ Ăşdaje o vytvoĹ™enĂ­ a poslednĂ­
+ * ĂşpravÄ› zĂˇpasu.
  */
 @Entity
 @Table(name = "matches")
 public class MatchEntity {
 
     /**
-     * Primární klíč zápasu.
+     * PrimĂˇrnĂ­ klĂ­ÄŤ zĂˇpasu.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Datum a čas konání zápasu.
+     * Datum a ÄŤas konĂˇnĂ­ zĂˇpasu.
      */
     @Column(nullable = false)
     private LocalDateTime dateTime;
 
     /**
-     * Místo konání zápasu.
+     * MĂ­sto konĂˇnĂ­ zĂˇpasu.
      */
     @Column(nullable = false)
     private String location;
 
     /**
-     * Volitelný popis zápasu.
+     * VolitelnĂ˝ popis zĂˇpasu.
      *
-     * Slouží například pro doplňující informace o organizaci zápasu.
+     * SlouĹľĂ­ napĹ™Ă­klad pro doplĹujĂ­cĂ­ informace o organizaci zĂˇpasu.
      */
     private String description;
 
     /**
-     * Maximální počet hráčů povolených pro zápas.
+     * MaximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ povolenĂ˝ch pro zĂˇpas.
      *
-     * Hodnota se používá pro kontrolu kapacity při registraci hráčů.
+     * Hodnota se pouĹľĂ­vĂˇ pro kontrolu kapacity pĹ™i registraci hrĂˇÄŤĹŻ.
      */
     @Column(nullable = false)
     private Integer maxPlayers;
 
     /**
-     * Celková cena zápasu.
+     * CelkovĂˇ cena zĂˇpasu.
      *
-     * Hodnota může sloužit pro výpočet podílu jednotlivých hráčů.
+     * Hodnota mĹŻĹľe slouĹľit pro vĂ˝poÄŤet podĂ­lu jednotlivĂ˝ch hrĂˇÄŤĹŻ.
      */
     @Column(nullable = false)
     private Integer price;
 
     /**
-     * Aktuální stav zápasu.
+     * AktuĂˇlnĂ­ stav zĂˇpasu.
      *
-     * Stav určuje, zda je zápas plánovaný, zrušený nebo například odehraný.
+     * Stav urÄŤuje, zda je zĂˇpas plĂˇnovanĂ˝, zruĹˇenĂ˝ nebo napĹ™Ă­klad odehranĂ˝.
      */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
     /**
-     * Důvod zrušení zápasu.
+     * DĹŻvod zruĹˇenĂ­ zĂˇpasu.
      *
-     * Vyplňuje se pouze v případě, že je zápas zrušen.
+     * VyplĹuje se pouze v pĹ™Ă­padÄ›, Ĺľe je zĂˇpas zruĹˇen.
      */
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
 
     /**
-     * Sezóna, do které zápas patří.
+     * SezĂłna, do kterĂ© zĂˇpas patĹ™Ă­.
      *
-     * Každý zápas musí být přiřazen k existující sezóně.
+     * KaĹľdĂ˝ zĂˇpas musĂ­ bĂ˝t pĹ™iĹ™azen k existujĂ­cĂ­ sezĂłnÄ›.
      */
     @ManyToOne(optional = false)
     @JoinColumn(name = "season_id", nullable = false)
     private SeasonEntity season;
 
     /**
-     * Časové razítko zápasu.
+     * ÄŚasovĂ© razĂ­tko zĂˇpasu.
      *
-     * Uchovává datum a čas vytvoření nebo poslední změny zápasu.
-     * Hodnota se aktualizuje při každé změně záznamu.
+     * UchovĂˇvĂˇ datum a ÄŤas vytvoĹ™enĂ­ nebo poslednĂ­ zmÄ›ny zĂˇpasu.
+     * Hodnota se aktualizuje pĹ™i kaĹľdĂ© zmÄ›nÄ› zĂˇznamu.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
-     * ID uživatele, který zápas vytvořil.
+     * ID uĹľivatele, kterĂ˝ zĂˇpas vytvoĹ™il.
      *
-     * Slouží pro auditní účely.
+     * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely.
      */
     @Column(name = "created_by_user_id")
     private Long createdByUserId;
 
     /**
-     * ID uživatele, který zápas naposledy změnil.
+     * ID uĹľivatele, kterĂ˝ zĂˇpas naposledy zmÄ›nil.
      *
-     * Slouží pro auditní účely a sledování odpovědnosti za změny.
+     * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely a sledovĂˇnĂ­ odpovÄ›dnosti za zmÄ›ny.
      */
     @Column(name = "last_modified_by_user_id")
     private Long lastModifiedByUserId;
 
     /**
-     * Bezparametrický konstruktor požadovaný JPA.
+     * BezparametrickĂ˝ konstruktor poĹľadovanĂ˝ JPA.
      */
     public MatchEntity() {
     }
@@ -876,12 +892,9 @@ public class MatchEntity {
     public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\MatchHistoryEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
@@ -891,13 +904,13 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující historický záznam o zápasu.
+ * Entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam o zĂˇpasu.
  *
- * Slouží pro auditní účely a uchovávání změn zápasů v čase.
- * Každý záznam představuje stav zápasu v okamžiku provedení operace
- * nad hlavní entitou MatchEntity.
+ * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely a uchovĂˇvĂˇnĂ­ zmÄ›n zĂˇpasĹŻ v ÄŤase.
+ * KaĹľdĂ˝ zĂˇznam pĹ™edstavuje stav zĂˇpasu v okamĹľiku provedenĂ­ operace
+ * nad hlavnĂ­ entitou MatchEntity.
  *
- * Záznamy jsou typicky vytvářeny databázovým triggerem při operacích
+ * ZĂˇznamy jsou typicky vytvĂˇĹ™eny databĂˇzovĂ˝m triggerem pĹ™i operacĂ­ch
  * INSERT, UPDATE nebo DELETE.
  */
 @Entity
@@ -905,110 +918,110 @@ import java.time.LocalDateTime;
 public class MatchHistoryEntity {
 
     /**
-     * Primární klíč historického záznamu.
+     * PrimĂˇrnĂ­ klĂ­ÄŤ historickĂ©ho zĂˇznamu.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Typ provedené operace nad zápasem.
+     * Typ provedenĂ© operace nad zĂˇpasem.
      *
-     * Typicky se jedná o hodnoty INSERT, UPDATE nebo DELETE.
+     * Typicky se jednĂˇ o hodnoty INSERT, UPDATE nebo DELETE.
      */
     @Column(name = "action", nullable = false)
     private String action;
 
     /**
-     * Datum a čas provedení změny.
+     * Datum a ÄŤas provedenĂ­ zmÄ›ny.
      *
-     * Udává okamžik vytvoření historického záznamu.
+     * UdĂˇvĂˇ okamĹľik vytvoĹ™enĂ­ historickĂ©ho zĂˇznamu.
      */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
     /**
-     * ID zápasu z hlavní tabulky matches.
+     * ID zĂˇpasu z hlavnĂ­ tabulky matches.
      *
-     * Slouží pro propojení historického záznamu s původní entitou zápasu.
+     * SlouĹľĂ­ pro propojenĂ­ historickĂ©ho zĂˇznamu s pĹŻvodnĂ­ entitou zĂˇpasu.
      */
     @Column(name = "match_id", nullable = false)
     private Long matchId;
 
     /**
-     * Původní časové razítko zápasu.
+     * PĹŻvodnĂ­ ÄŤasovĂ© razĂ­tko zĂˇpasu.
      *
-     * Jedná se o hodnotu sloupce timestamp z MatchEntity
-     * v okamžiku provedení změny.
+     * JednĂˇ se o hodnotu sloupce timestamp z MatchEntity
+     * v okamĹľiku provedenĂ­ zmÄ›ny.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
     /**
-     * Datum a čas konání zápasu v okamžiku změny.
+     * Datum a ÄŤas konĂˇnĂ­ zĂˇpasu v okamĹľiku zmÄ›ny.
      */
     @Column(name = "date_time", nullable = false)
     private LocalDateTime dateTime;
 
     /**
-     * Místo konání zápasu v okamžiku změny.
+     * MĂ­sto konĂˇnĂ­ zĂˇpasu v okamĹľiku zmÄ›ny.
      */
     @Column(name = "location", nullable = false)
     private String location;
 
     /**
-     * Popis zápasu v okamžiku změny.
+     * Popis zĂˇpasu v okamĹľiku zmÄ›ny.
      */
     @Column(name = "description")
     private String description;
 
     /**
-     * Maximální počet hráčů povolených pro zápas v okamžiku změny.
+     * MaximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ povolenĂ˝ch pro zĂˇpas v okamĹľiku zmÄ›ny.
      */
     @Column(name = "max_players", nullable = false)
     private Integer maxPlayers;
 
     /**
-     * Cena zápasu v okamžiku změny.
+     * Cena zĂˇpasu v okamĹľiku zmÄ›ny.
      */
     @Column(name = "price", nullable = false)
     private Integer price;
 
     /**
-     * Stav zápasu v okamžiku změny.
+     * Stav zĂˇpasu v okamĹľiku zmÄ›ny.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "match_status")
     private MatchStatus matchStatus;
 
     /**
-     * Důvod zrušení zápasu v okamžiku změny.
+     * DĹŻvod zruĹˇenĂ­ zĂˇpasu v okamĹľiku zmÄ›ny.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "cancel_reason")
     private MatchCancelReason cancelReason;
 
     /**
-     * ID sezóny, do které zápas patřil v okamžiku změny.
+     * ID sezĂłny, do kterĂ© zĂˇpas patĹ™il v okamĹľiku zmÄ›ny.
      */
     @Column(name = "season_id", nullable = false)
     private Long seasonId;
 
     /**
-     * ID uživatele, který zápas původně vytvořil.
+     * ID uĹľivatele, kterĂ˝ zĂˇpas pĹŻvodnÄ› vytvoĹ™il.
      */
     @Column(name = "created_by_user_id")
     private Long createdByUserId;
 
     /**
-     * ID uživatele, který zápas naposledy změnil před vytvořením
-     * historického záznamu.
+     * ID uĹľivatele, kterĂ˝ zĂˇpas naposledy zmÄ›nil pĹ™ed vytvoĹ™enĂ­m
+     * historickĂ©ho zĂˇznamu.
      */
     @Column(name = "last_modified_by_user_id")
     private Long lastModifiedByUserId;
 
     /**
-     * Bezparametrický konstruktor požadovaný JPA.
+     * BezparametrickĂ˝ konstruktor poĹľadovanĂ˝ JPA.
      */
     public MatchHistoryEntity() {
     }
@@ -1059,12 +1072,9 @@ public class MatchHistoryEntity {
     public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\MatchRegistrationEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
@@ -1075,12 +1085,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující registraci hráče k zápasu.
+ * Entita reprezentujĂ­cĂ­ registraci hrĂˇÄŤe k zĂˇpasu.
  *
- * Uchovává informace o účasti hráče, jeho aktuálním stavu,
- * případné omluvě a administrativních poznámkách. Samostatná
- * entita umožňuje sledovat změny registrace a pracovat
- * s historií účasti.
+ * UchovĂˇvĂˇ informace o ĂşÄŤasti hrĂˇÄŤe, jeho aktuĂˇlnĂ­m stavu,
+ * pĹ™Ă­padnĂ© omluvÄ› a administrativnĂ­ch poznĂˇmkĂˇch. SamostatnĂˇ
+ * entita umoĹľĹuje sledovat zmÄ›ny registrace a pracovat
+ * s historiĂ­ ĂşÄŤasti.
  */
 @Entity
 @Table(name = "match_registrations")
@@ -1091,59 +1101,59 @@ public class MatchRegistrationEntity {
     private Long id;
 
     /**
-     * Zápas, ke kterému se registrace vztahuje.
+     * ZĂˇpas, ke kterĂ©mu se registrace vztahuje.
      */
     @ManyToOne
     @JoinColumn(name = "match_id", nullable = false)
     private MatchEntity match;
 
     /**
-     * Hráč, kterého se registrace týká.
+     * HrĂˇÄŤ, kterĂ©ho se registrace tĂ˝kĂˇ.
      */
     @ManyToOne
     @JoinColumn(name = "player_id", nullable = false)
     private PlayerEntity player;
 
     /**
-     * Aktuální stav registrace hráče k zápasu.
+     * AktuĂˇlnĂ­ stav registrace hrĂˇÄŤe k zĂˇpasu.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerMatchStatus status;
 
     /**
-     * Důvod omluvy hráče, pokud je hráč omluven.
+     * DĹŻvod omluvy hrĂˇÄŤe, pokud je hrĂˇÄŤ omluven.
      */
     @Enumerated(EnumType.STRING)
     private ExcuseReason excuseReason;
 
     /**
-     * Volitelná poznámka k omluvě hráče.
+     * VolitelnĂˇ poznĂˇmka k omluvÄ› hrĂˇÄŤe.
      */
     private String excuseNote;
 
     /**
-     * Administrativní poznámka k registraci.
+     * AdministrativnĂ­ poznĂˇmka k registraci.
      */
     private String adminNote;
 
     /**
-     * Tým, do kterého je hráč pro zápas zařazen.
+     * TĂ˝m, do kterĂ©ho je hrĂˇÄŤ pro zĂˇpas zaĹ™azen.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "team")
     private Team team;
 
     /**
-     * Časové razítko registrace.
-     * Používá se například pro určení pořadí přihlášení.
+     * ÄŚasovĂ© razĂ­tko registrace.
+     * PouĹľĂ­vĂˇ se napĹ™Ă­klad pro urÄŤenĂ­ poĹ™adĂ­ pĹ™ihlĂˇĹˇenĂ­.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
-     * Původ vytvoření registrace.
-     * Typické hodnoty jsou například "user" nebo "system".
+     * PĹŻvod vytvoĹ™enĂ­ registrace.
+     * TypickĂ© hodnoty jsou napĹ™Ă­klad "user" nebo "system".
      */
     @Column(nullable = false, updatable = true)
     private String createdBy;
@@ -1192,12 +1202,9 @@ public class MatchRegistrationEntity {
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\MatchRegistrationHistoryEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
@@ -1208,11 +1215,11 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující historický záznam změn registrace hráče k zápasu.
+ * Entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam zmÄ›n registrace hrĂˇÄŤe k zĂˇpasu.
  *
- * Slouží k auditování změn registrací, včetně vytvoření, úprav a zrušení.
- * Uchovává stav registrace v okamžiku změny a základní údaje o původu
- * provedené operace.
+ * SlouĹľĂ­ k auditovĂˇnĂ­ zmÄ›n registracĂ­, vÄŤetnÄ› vytvoĹ™enĂ­, Ăşprav a zruĹˇenĂ­.
+ * UchovĂˇvĂˇ stav registrace v okamĹľiku zmÄ›ny a zĂˇkladnĂ­ Ăşdaje o pĹŻvodu
+ * provedenĂ© operace.
  */
 @Entity
 @Table(name = "match_registration_history")
@@ -1223,77 +1230,77 @@ public class MatchRegistrationHistoryEntity {
     private Long id;
 
     /**
-     * Typ provedené operace nad registrací.
+     * Typ provedenĂ© operace nad registracĂ­.
      * Typicky hodnoty INSERT, UPDATE nebo DELETE.
      */
     @Column(name = "action", nullable = false)
     private String action;
 
     /**
-     * Administrativní poznámka vztahující se k registraci.
+     * AdministrativnĂ­ poznĂˇmka vztahujĂ­cĂ­ se k registraci.
      */
     @Column(name = "admin_note")
     private String adminNote;
 
     /**
-     * Datum a čas provedení změny.
+     * Datum a ÄŤas provedenĂ­ zmÄ›ny.
      */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
     /**
-     * Původ vytvoření nebo změny registrace.
+     * PĹŻvod vytvoĹ™enĂ­ nebo zmÄ›ny registrace.
      * Typicky hodnoty jako "user" nebo "system".
      */
     @Column(name = "created_by", nullable = false)
     private String createdBy;
 
     /**
-     * Textová poznámka k omluvě hráče.
+     * TextovĂˇ poznĂˇmka k omluvÄ› hrĂˇÄŤe.
      */
     @Column(name = "excuse_note")
     private String excuseNote;
 
     /**
-     * Důvod omluvy hráče, pokud byl stav omluvený.
+     * DĹŻvod omluvy hrĂˇÄŤe, pokud byl stav omluvenĂ˝.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "excuse_reason")
     private ExcuseReason excuseReason;
 
     /**
-     * ID zápasu, ke kterému se historický záznam vztahuje.
+     * ID zĂˇpasu, ke kterĂ©mu se historickĂ˝ zĂˇznam vztahuje.
      */
     @Column(name = "match_id", nullable = false)
     private Long matchId;
 
     /**
-     * ID původní registrace z hlavní tabulky registrací.
+     * ID pĹŻvodnĂ­ registrace z hlavnĂ­ tabulky registracĂ­.
      */
     @Column(name = "match_registration_id", nullable = false)
     private Long matchRegistrationId;
 
     /**
-     * Původní časové razítko registrace.
+     * PĹŻvodnĂ­ ÄŤasovĂ© razĂ­tko registrace.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
     /**
-     * ID hráče, kterého se historický záznam týká.
+     * ID hrĂˇÄŤe, kterĂ©ho se historickĂ˝ zĂˇznam tĂ˝kĂˇ.
      */
     @Column(name = "player_id", nullable = false)
     private Long playerId;
 
     /**
-     * Stav registrace v okamžiku změny.
+     * Stav registrace v okamĹľiku zmÄ›ny.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private PlayerMatchStatus status;
 
     /**
-     * Tým, do kterého byl hráč v daném okamžiku zařazen.
+     * TĂ˝m, do kterĂ©ho byl hrĂˇÄŤ v danĂ©m okamĹľiku zaĹ™azen.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "team")
@@ -1355,31 +1362,167 @@ public class MatchRegistrationHistoryEntity {
     public void setTeam(Team team) { this.team = team; }
 }
 
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\NotificationEntity.java
+-----
+package cz.phsoft.hokej.data.entities;
 
+import cz.phsoft.hokej.data.enums.NotificationType;
+import jakarta.persistence.*;
+
+import java.time.Instant;
+
+/**
+ * Entita reprezentujĂ­cĂ­ aplikaÄŤnĂ­ notifikaci.
+ *
+ * Notifikace vznikĂˇ pĹ™i udĂˇlostech definovanĂ˝ch v NotificationType.
+ * SlouĹľĂ­ pro:
+ * - zobrazenĂ­ badge (nepĹ™eÄŤtenĂ©),
+ * - pĹ™ehled udĂˇlostĂ­,
+ * - vĂ˝pis notifikacĂ­ od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
+ *
+ * VĹˇechny ÄŤasy jsou uklĂˇdĂˇny jako Instant (UTC).
+ */
+@Entity
+@Table(
+        name = "notifications",
+        indexes = {
+                @Index(name = "idx_notification_user", columnList = "user_id"),
+                @Index(name = "idx_notification_created_at", columnList = "created_at"),
+                @Index(name = "idx_notification_read_at", columnList = "read_at")
+        }
+)
+public class NotificationEntity {
+
+    /**
+     * PrimĂˇrnĂ­ klĂ­ÄŤ notifikace.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * UĹľivatel, kterĂ©mu je notifikace urÄŤena.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private AppUserEntity user;
+
+    /**
+     * VolitelnĂˇ vazba na hrĂˇÄŤe.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "player_id")
+    private PlayerEntity player;
+
+    /**
+     * Typ notifikace.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 100)
+    private NotificationType type;
+
+    /**
+     * StruÄŤnĂ˝ text notifikace pro zobrazenĂ­ v dropdownu.
+     */
+    @Column(name = "message_short", nullable = false, length = 255)
+    private String messageShort;
+
+    /**
+     * DetailnĂ­ text (volitelnĂ©).
+     */
+    @Column(name = "message_full", length = 2000)
+    private String messageFull;
+
+    /**
+     * ÄŚas vytvoĹ™enĂ­ notifikace.
+     */
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    /**
+     * ÄŚas pĹ™eÄŤtenĂ­ notifikace.
+     * Pokud je null â†’ notifikace je nepĹ™eÄŤtenĂˇ.
+     */
+    @Column(name = "read_at")
+    private Instant readAt;
+
+    /**
+     * UĹľivatel, kterĂ˝ akci zpĹŻsobil (napĹ™. admin).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private AppUserEntity createdBy;
+
+    /**
+     * AutomatickĂ© nastavenĂ­ createdAt pĹ™i persist.
+     */
+    @PrePersist
+    public void prePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
+    }
+
+    // ==================================================
+    // Business helper metody
+    // ==================================================
+
+    @Transient
+    public boolean isRead() {
+        return readAt != null;
+    }
+
+    // ==================================================
+    // Gettery / Settery
+    // ==================================================
+
+    public Long getId() { return id; }
+
+    public AppUserEntity getUser() { return user; }
+    public void setUser(AppUserEntity user) { this.user = user; }
+
+    public PlayerEntity getPlayer() { return player; }
+    public void setPlayer(PlayerEntity player) { this.player = player; }
+
+    public NotificationType getType() { return type; }
+    public void setType(NotificationType type) { this.type = type; }
+
+    public String getMessageShort() { return messageShort; }
+    public void setMessageShort(String messageShort) { this.messageShort = messageShort; }
+
+    public String getMessageFull() { return messageFull; }
+    public void setMessageFull(String messageFull) { this.messageFull = messageFull; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public Instant getReadAt() { return readAt; }
+    public void setReadAt(Instant readAt) { this.readAt = readAt; }
+
+    public AppUserEntity getCreatedBy() { return createdBy; }
+    public void setCreatedBy(AppUserEntity createdBy) { this.createdBy = createdBy; }
+}
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\package-info.java
 -----
-
 /**
- * Databázové entity aplikace.
+ * DatabĂˇzovĂ© entity aplikace.
  *
- * Reprezentují perzistentní doménový model systému
- * mapovaný pomocí JPA/Hibernate na databázové tabulky.
+ * ReprezentujĂ­ perzistentnĂ­ domĂ©novĂ˝ model systĂ©mu
+ * mapovanĂ˝ pomocĂ­ JPA/Hibernate na databĂˇzovĂ© tabulky.
  *
  * Entity:
- * - definují vztahy mezi daty (OneToMany, ManyToOne, apod.),
- * - nejsou určeny pro přímou komunikaci s frontendem,
- * - jsou používány výhradně v repository a service vrstvě.
+ * - definujĂ­ vztahy mezi daty (OneToMany, ManyToOne, apod.),
+ * - nejsou urÄŤeny pro pĹ™Ă­mou komunikaci s frontendem,
+ * - jsou pouĹľĂ­vĂˇny vĂ˝hradnÄ› v repository a service vrstvÄ›.
  */
 package cz.phsoft.hokej.data.entities;
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\PlayerEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.PlayerStatus;
@@ -1390,98 +1533,98 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující hráče v systému.
+ * Entita reprezentujĂ­cĂ­ hrĂˇÄŤe v systĂ©mu.
  *
- * Hráč představuje sportovní identitu používanou při registracích
- * na zápasy, notifikacích a vyhodnocování účasti. Hráč může,
- * ale nemusí mít přiřazen aplikační uživatelský účet.
+ * HrĂˇÄŤ pĹ™edstavuje sportovnĂ­ identitu pouĹľĂ­vanou pĹ™i registracĂ­ch
+ * na zĂˇpasy, notifikacĂ­ch a vyhodnocovĂˇnĂ­ ĂşÄŤasti. HrĂˇÄŤ mĹŻĹľe,
+ * ale nemusĂ­ mĂ­t pĹ™iĹ™azen aplikaÄŤnĂ­ uĹľivatelskĂ˝ ĂşÄŤet.
  *
- * Entita obsahuje základní identifikační údaje, stav hráče
- * v systému a vazbu na uživatele a nastavení hráče.
+ * Entita obsahuje zĂˇkladnĂ­ identifikaÄŤnĂ­ Ăşdaje, stav hrĂˇÄŤe
+ * v systĂ©mu a vazbu na uĹľivatele a nastavenĂ­ hrĂˇÄŤe.
  */
 @Entity
 @Table(name = "player_entity")
 public class PlayerEntity {
 
     /**
-     * Primární klíč hráče.
+     * PrimĂˇrnĂ­ klĂ­ÄŤ hrĂˇÄŤe.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Křestní jméno hráče.
+     * KĹ™estnĂ­ jmĂ©no hrĂˇÄŤe.
      */
     @Column(nullable = false)
     private String name;
 
     /**
-     * Příjmení hráče.
-     * Při nastavení je převáděno na velká písmena.
+     * PĹ™Ă­jmenĂ­ hrĂˇÄŤe.
+     * PĹ™i nastavenĂ­ je pĹ™evĂˇdÄ›no na velkĂˇ pĂ­smena.
      */
     @Column(nullable = false)
     private String surname;
 
     /**
-     * Volitelná přezdívka hráče.
+     * VolitelnĂˇ pĹ™ezdĂ­vka hrĂˇÄŤe.
      */
     private String nickname;
 
     /**
-     * Typ hráče v systému.
+     * Typ hrĂˇÄŤe v systĂ©mu.
      *
-     * Určuje například cenový nebo organizační režim hráče.
+     * UrÄŤuje napĹ™Ă­klad cenovĂ˝ nebo organizaÄŤnĂ­ reĹľim hrĂˇÄŤe.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerType type;
 
     /**
-     * Celé jméno hráče odvozené z křestního jména a příjmení.
+     * CelĂ© jmĂ©no hrĂˇÄŤe odvozenĂ© z kĹ™estnĂ­ho jmĂ©na a pĹ™Ă­jmenĂ­.
      *
-     * Hodnota se aktualizuje automaticky při změně jména nebo příjmení.
+     * Hodnota se aktualizuje automaticky pĹ™i zmÄ›nÄ› jmĂ©na nebo pĹ™Ă­jmenĂ­.
      */
     private String fullName;
 
     /**
-     * Telefonní číslo hráče.
+     * TelefonnĂ­ ÄŤĂ­slo hrĂˇÄŤe.
      *
-     * Používá se zejména pro zasílání SMS notifikací.
+     * PouĹľĂ­vĂˇ se zejmĂ©na pro zasĂ­lĂˇnĂ­ SMS notifikacĂ­.
      */
     private String phoneNumber;
 
     /**
-     * Tým, ke kterému je hráč přiřazen.
+     * TĂ˝m, ke kterĂ©mu je hrĂˇÄŤ pĹ™iĹ™azen.
      */
     @Enumerated(EnumType.STRING)
     private Team team;
 
     /**
-     * Aktuální stav hráče v systému.
+     * AktuĂˇlnĂ­ stav hrĂˇÄŤe v systĂ©mu.
      *
-     * Stav určuje například, zda je hráč čekající na schválení,
-     * schválený nebo zamítnutý.
+     * Stav urÄŤuje napĹ™Ă­klad, zda je hrĂˇÄŤ ÄŤekajĂ­cĂ­ na schvĂˇlenĂ­,
+     * schvĂˇlenĂ˝ nebo zamĂ­tnutĂ˝.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerStatus playerStatus = PlayerStatus.PENDING;
 
     /**
-     * Uživatelský účet, ke kterému hráč patří.
+     * UĹľivatelskĂ˝ ĂşÄŤet, ke kterĂ©mu hrĂˇÄŤ patĹ™Ă­.
      *
-     * Vazba je volitelná, protože hráč může existovat
-     * i bez přímé vazby na uživatelský účet.
+     * Vazba je volitelnĂˇ, protoĹľe hrĂˇÄŤ mĹŻĹľe existovat
+     * i bez pĹ™Ă­mĂ© vazby na uĹľivatelskĂ˝ ĂşÄŤet.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private AppUserEntity user;
 
     /**
-     * Nastavení hráče.
+     * NastavenĂ­ hrĂˇÄŤe.
      *
-     * Obsahuje například kontaktní údaje a notifikační preference.
-     * Jeden hráč má právě jedno PlayerSettingsEntity.
+     * Obsahuje napĹ™Ă­klad kontaktnĂ­ Ăşdaje a notifikaÄŤnĂ­ preference.
+     * Jeden hrĂˇÄŤ mĂˇ prĂˇvÄ› jedno PlayerSettingsEntity.
      */
     @OneToOne(mappedBy = "player",
             cascade = CascadeType.ALL,
@@ -1490,19 +1633,19 @@ public class PlayerEntity {
     private PlayerSettingsEntity settings;
 
     /**
-     * Časové razítko hráče.
+     * ÄŚasovĂ© razĂ­tko hrĂˇÄŤe.
      *
-     * Uchovává datum a čas vytvoření hráče.
-     * Hodnota se nastavuje při prvním uložení a dále se nemění.
+     * UchovĂˇvĂˇ datum a ÄŤas vytvoĹ™enĂ­ hrĂˇÄŤe.
+     * Hodnota se nastavuje pĹ™i prvnĂ­m uloĹľenĂ­ a dĂˇle se nemÄ›nĂ­.
      */
     @Column(nullable = false, updatable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
-     * Metoda volaná před prvním uložením entity.
+     * Metoda volanĂˇ pĹ™ed prvnĂ­m uloĹľenĂ­m entity.
      *
-     * Zajišťuje inicializaci časového razítka v případě,
-     * že nebylo nastaveno.
+     * ZajiĹˇĹĄuje inicializaci ÄŤasovĂ©ho razĂ­tka v pĹ™Ă­padÄ›,
+     * Ĺľe nebylo nastaveno.
      */
     @PrePersist
     protected void onCreate() {
@@ -1512,24 +1655,24 @@ public class PlayerEntity {
     }
 
     /**
-     * Bezparametrický konstruktor požadovaný JPA.
+     * BezparametrickĂ˝ konstruktor poĹľadovanĂ˝ JPA.
      *
-     * Výchozí typ hráče je nastaven na BASIC.
+     * VĂ˝chozĂ­ typ hrĂˇÄŤe je nastaven na BASIC.
      */
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
     }
 
     /**
-     * Konstruktor pro vytvoření hráče s inicializačními hodnotami.
+     * Konstruktor pro vytvoĹ™enĂ­ hrĂˇÄŤe s inicializaÄŤnĂ­mi hodnotami.
      *
-     * @param name         křestní jméno hráče
-     * @param surname      příjmení hráče
-     * @param nickname     přezdívka hráče
-     * @param type         typ hráče
-     * @param phoneNumber  telefonní číslo hráče
-     * @param team         tým hráče
-     * @param playerStatus aktuální stav hráče
+     * @param name         kĹ™estnĂ­ jmĂ©no hrĂˇÄŤe
+     * @param surname      pĹ™Ă­jmenĂ­ hrĂˇÄŤe
+     * @param nickname     pĹ™ezdĂ­vka hrĂˇÄŤe
+     * @param type         typ hrĂˇÄŤe
+     * @param phoneNumber  telefonnĂ­ ÄŤĂ­slo hrĂˇÄŤe
+     * @param team         tĂ˝m hrĂˇÄŤe
+     * @param playerStatus aktuĂˇlnĂ­ stav hrĂˇÄŤe
      */
     public PlayerEntity(String name,
                         String surname,
@@ -1596,9 +1739,9 @@ public class PlayerEntity {
     public PlayerSettingsEntity getSettings() { return settings; }
 
     /**
-     * Nastavuje nastavení hráče a zároveň zajišťuje obousměrnou vazbu.
+     * Nastavuje nastavenĂ­ hrĂˇÄŤe a zĂˇroveĹ zajiĹˇĹĄuje obousmÄ›rnou vazbu.
      *
-     * @param settings instance nastavení hráče
+     * @param settings instance nastavenĂ­ hrĂˇÄŤe
      */
     public void setSettings(PlayerSettingsEntity settings) {
         this.settings = settings;
@@ -1608,9 +1751,9 @@ public class PlayerEntity {
     }
 
     /**
-     * Aktualizuje celé jméno hráče podle aktuálního jména a příjmení.
+     * Aktualizuje celĂ© jmĂ©no hrĂˇÄŤe podle aktuĂˇlnĂ­ho jmĂ©na a pĹ™Ă­jmenĂ­.
      *
-     * Metoda je volána při změně jména nebo příjmení.
+     * Metoda je volĂˇna pĹ™i zmÄ›nÄ› jmĂ©na nebo pĹ™Ă­jmenĂ­.
      */
     private void updateFullName() {
         this.fullName = name + " " + surname;
@@ -1621,12 +1764,9 @@ public class PlayerEntity {
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\PlayerHistoryEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.PlayerStatus;
@@ -1637,114 +1777,114 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující historický záznam o hráči.
+ * Entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam o hrĂˇÄŤi.
  *
- * Slouží pro auditní účely a uchovávání změn hráčů v čase.
- * Každý záznam představuje stav hráče v okamžiku provedení operace
- * nad hlavní entitou PlayerEntity.
+ * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely a uchovĂˇvĂˇnĂ­ zmÄ›n hrĂˇÄŤĹŻ v ÄŤase.
+ * KaĹľdĂ˝ zĂˇznam pĹ™edstavuje stav hrĂˇÄŤe v okamĹľiku provedenĂ­ operace
+ * nad hlavnĂ­ entitou PlayerEntity.
  *
- * Záznamy jsou typicky vytvářeny databázovým triggerem při změně
- * údajů hráče.
+ * ZĂˇznamy jsou typicky vytvĂˇĹ™eny databĂˇzovĂ˝m triggerem pĹ™i zmÄ›nÄ›
+ * ĂşdajĹŻ hrĂˇÄŤe.
  */
 @Entity
 @Table(name = "player_entity_history")
 public class PlayerHistoryEntity {
 
     /**
-     * Primární klíč historického záznamu.
+     * PrimĂˇrnĂ­ klĂ­ÄŤ historickĂ©ho zĂˇznamu.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Typ provedené operace.
+     * Typ provedenĂ© operace.
      *
-     * Typicky se jedná o hodnoty CREATE, STATUS_CHANGE,
+     * Typicky se jednĂˇ o hodnoty CREATE, STATUS_CHANGE,
      * USER_CHANGE nebo DELETE.
      */
     @Column(name = "action", nullable = false)
     private String action;
 
     /**
-     * Datum a čas provedení změny.
+     * Datum a ÄŤas provedenĂ­ zmÄ›ny.
      *
-     * Udává okamžik vytvoření historického záznamu.
+     * UdĂˇvĂˇ okamĹľik vytvoĹ™enĂ­ historickĂ©ho zĂˇznamu.
      */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
     /**
-     * ID hráče z hlavní tabulky player_entity.
+     * ID hrĂˇÄŤe z hlavnĂ­ tabulky player_entity.
      *
-     * Slouží pro propojení historického záznamu s původní entitou hráče.
+     * SlouĹľĂ­ pro propojenĂ­ historickĂ©ho zĂˇznamu s pĹŻvodnĂ­ entitou hrĂˇÄŤe.
      */
     @Column(name = "player_id", nullable = false)
     private Long playerId;
 
     /**
-     * Původní časové razítko hráče.
+     * PĹŻvodnĂ­ ÄŤasovĂ© razĂ­tko hrĂˇÄŤe.
      *
-     * Jedná se o hodnotu sloupce timestamp z tabulky player_entity
-     * v okamžiku vytvoření historického záznamu.
+     * JednĂˇ se o hodnotu sloupce timestamp z tabulky player_entity
+     * v okamĹľiku vytvoĹ™enĂ­ historickĂ©ho zĂˇznamu.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
     /**
-     * Křestní jméno hráče v okamžiku změny.
+     * KĹ™estnĂ­ jmĂ©no hrĂˇÄŤe v okamĹľiku zmÄ›ny.
      */
     @Column(name = "name", nullable = false)
     private String name;
 
     /**
-     * Příjmení hráče v okamžiku změny.
+     * PĹ™Ă­jmenĂ­ hrĂˇÄŤe v okamĹľiku zmÄ›ny.
      */
     @Column(name = "surname", nullable = false)
     private String surname;
 
     /**
-     * Přezdívka hráče v okamžiku změny.
+     * PĹ™ezdĂ­vka hrĂˇÄŤe v okamĹľiku zmÄ›ny.
      */
     @Column(name = "nickname")
     private String nickname;
 
     /**
-     * Typ hráče v okamžiku změny.
+     * Typ hrĂˇÄŤe v okamĹľiku zmÄ›ny.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private PlayerType type;
 
     /**
-     * Celé jméno hráče v okamžiku změny.
+     * CelĂ© jmĂ©no hrĂˇÄŤe v okamĹľiku zmÄ›ny.
      */
     @Column(name = "full_name")
     private String fullName;
 
     /**
-     * Telefonní číslo hráče v okamžiku změny.
+     * TelefonnĂ­ ÄŤĂ­slo hrĂˇÄŤe v okamĹľiku zmÄ›ny.
      */
     @Column(name = "phone_number")
     private String phoneNumber;
 
     /**
-     * Tým hráče v okamžiku změny.
+     * TĂ˝m hrĂˇÄŤe v okamĹľiku zmÄ›ny.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "team")
     private Team team;
 
     /**
-     * Stav hráče v okamžiku změny.
+     * Stav hrĂˇÄŤe v okamĹľiku zmÄ›ny.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "player_status", nullable = false)
     private PlayerStatus playerStatus;
 
     /**
-     * ID uživatele, ke kterému byl hráč přiřazen
-     * v okamžiku vytvoření historického záznamu.
+     * ID uĹľivatele, ke kterĂ©mu byl hrĂˇÄŤ pĹ™iĹ™azen
+     * v okamĹľiku vytvoĹ™enĂ­ historickĂ©ho zĂˇznamu.
      */
     @Column(name = "user_id")
     private Long userId;
@@ -1792,12 +1932,9 @@ public class PlayerHistoryEntity {
     public void setUserId(Long userId) { this.userId = userId; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\PlayerInactivityPeriodEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.*;
@@ -1805,55 +1942,55 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující období neaktivity hráče.
+ * Entita reprezentujĂ­cĂ­ obdobĂ­ neaktivity hrĂˇÄŤe.
  *
- * Slouží k evidenci časových úseků, ve kterých se hráč
- * neúčastní zápasů, například z důvodu zranění nebo dovolené.
- * Období neaktivity se používá při vyhodnocování dostupnosti
- * hráče pro jednotlivé zápasy.
+ * SlouĹľĂ­ k evidenci ÄŤasovĂ˝ch ĂşsekĹŻ, ve kterĂ˝ch se hrĂˇÄŤ
+ * neĂşÄŤastnĂ­ zĂˇpasĹŻ, napĹ™Ă­klad z dĹŻvodu zranÄ›nĂ­ nebo dovolenĂ©.
+ * ObdobĂ­ neaktivity se pouĹľĂ­vĂˇ pĹ™i vyhodnocovĂˇnĂ­ dostupnosti
+ * hrĂˇÄŤe pro jednotlivĂ© zĂˇpasy.
  */
 @Entity
 @Table(name = "player_inactivity_period")
 public class PlayerInactivityPeriodEntity {
 
     /**
-     * Primární klíč záznamu o neaktivitě.
+     * PrimĂˇrnĂ­ klĂ­ÄŤ zĂˇznamu o neaktivitÄ›.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Hráč, ke kterému se období neaktivity vztahuje.
+     * HrĂˇÄŤ, ke kterĂ©mu se obdobĂ­ neaktivity vztahuje.
      *
-     * Vazba je povinná, protože každé období neaktivity
-     * musí být přiřazeno konkrétnímu hráči.
+     * Vazba je povinnĂˇ, protoĹľe kaĹľdĂ© obdobĂ­ neaktivity
+     * musĂ­ bĂ˝t pĹ™iĹ™azeno konkrĂ©tnĂ­mu hrĂˇÄŤi.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false)
     private PlayerEntity player;
 
     /**
-     * Začátek období neaktivity.
+     * ZaÄŤĂˇtek obdobĂ­ neaktivity.
      *
-     * Určuje datum a čas, od kterého je hráč považován za neaktivního.
+     * UrÄŤuje datum a ÄŤas, od kterĂ©ho je hrĂˇÄŤ povaĹľovĂˇn za neaktivnĂ­ho.
      */
     @Column(name = "inactive_from", nullable = false)
     private LocalDateTime inactiveFrom;
 
     /**
-     * Konec období neaktivity.
+     * Konec obdobĂ­ neaktivity.
      *
-     * Určuje datum a čas, do kterého je hráč považován za neaktivního.
+     * UrÄŤuje datum a ÄŤas, do kterĂ©ho je hrĂˇÄŤ povaĹľovĂˇn za neaktivnĂ­ho.
      */
     @Column(name = "inactive_to", nullable = false)
     private LocalDateTime inactiveTo;
 
     /**
-     * Důvod neaktivity hráče.
+     * DĹŻvod neaktivity hrĂˇÄŤe.
      *
-     * Slouží k evidenci příčiny absence, například zranění,
-     * dovolená nebo jiný osobní důvod.
+     * SlouĹľĂ­ k evidenci pĹ™Ă­ÄŤiny absence, napĹ™Ă­klad zranÄ›nĂ­,
+     * dovolenĂˇ nebo jinĂ˝ osobnĂ­ dĹŻvod.
      */
     @Column(name = "inactivity_reason", nullable = false)
     private String inactivityReason;
@@ -1883,22 +2020,19 @@ public class PlayerInactivityPeriodEntity {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\PlayerSettingsEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.*;
 
 /**
- * Entita uchovávající nastavení konkrétního hráče.
+ * Entita uchovĂˇvajĂ­cĂ­ nastavenĂ­ konkrĂ©tnĂ­ho hrĂˇÄŤe.
  *
- * Odděluje identitu hráče (PlayerEntity) od jeho kontaktních údajů
- * a detailních notifikačních preferencí. Nastavení se využívá
- * při rozhodování o tom, zda a jak budou hráči doručovány notifikace.
+ * OddÄ›luje identitu hrĂˇÄŤe (PlayerEntity) od jeho kontaktnĂ­ch ĂşdajĹŻ
+ * a detailnĂ­ch notifikaÄŤnĂ­ch preferencĂ­. NastavenĂ­ se vyuĹľĂ­vĂˇ
+ * pĹ™i rozhodovĂˇnĂ­ o tom, zda a jak budou hrĂˇÄŤi doruÄŤovĂˇny notifikace.
  */
 @Entity
 @Table(name = "player_settings")
@@ -1909,83 +2043,83 @@ public class PlayerSettingsEntity {
     private Long id;
 
     /**
-     * Hráč, ke kterému toto nastavení patří.
-     * Pro jednoho hráče existuje právě jeden záznam nastavení.
+     * HrĂˇÄŤ, ke kterĂ©mu toto nastavenĂ­ patĹ™Ă­.
+     * Pro jednoho hrĂˇÄŤe existuje prĂˇvÄ› jeden zĂˇznam nastavenĂ­.
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false, unique = true)
     private PlayerEntity player;
 
     /**
-     * Volitelný email hráče.
-     * Pokud není vyplněn, může se použít email uživatele (AppUserEntity).
+     * VolitelnĂ˝ email hrĂˇÄŤe.
+     * Pokud nenĂ­ vyplnÄ›n, mĹŻĹľe se pouĹľĂ­t email uĹľivatele (AppUserEntity).
      */
     @Column(name = "contact_email", length = 255)
     private String contactEmail;
 
     /**
-     * Volitelné telefonní číslo hráče pro SMS notifikace.
+     * VolitelnĂ© telefonnĂ­ ÄŤĂ­slo hrĂˇÄŤe pro SMS notifikace.
      */
     @Column(name = "contact_phone", length = 50)
     private String contactPhone;
 
     /**
-     * Příznak, zda má hráč dostávat emailové notifikace.
+     * PĹ™Ă­znak, zda mĂˇ hrĂˇÄŤ dostĂˇvat emailovĂ© notifikace.
      */
     @Column(name = "email_enabled", nullable = false)
     private boolean emailEnabled = true;
 
     /**
-     * Příznak, zda má hráč dostávat SMS notifikace.
+     * PĹ™Ă­znak, zda mĂˇ hrĂˇÄŤ dostĂˇvat SMS notifikace.
      */
     @Column(name = "sms_enabled", nullable = false)
     private boolean smsEnabled = false;
 
     /**
-     * Příznak, zda chce hráč notifikace o registraci a odhlášení.
+     * PĹ™Ă­znak, zda chce hrĂˇÄŤ notifikace o registraci a odhlĂˇĹˇenĂ­.
      */
     @Column(name = "notify_on_registration", nullable = false)
     private boolean notifyOnRegistration = true;
 
     /**
-     * Příznak, zda chce hráč notifikace o omluvách.
+     * PĹ™Ă­znak, zda chce hrĂˇÄŤ notifikace o omluvĂˇch.
      */
     @Column(name = "notify_on_excuse", nullable = false)
     private boolean notifyOnExcuse = true;
 
     /**
-     * Příznak, zda chce hráč notifikace o změnách zápasu.
+     * PĹ™Ă­znak, zda chce hrĂˇÄŤ notifikace o zmÄ›nĂˇch zĂˇpasu.
      */
     @Column(name = "notify_on_match_change", nullable = false)
     private boolean notifyOnMatchChange = true;
 
     /**
-     * Příznak, zda chce hráč notifikace o zrušení zápasu.
+     * PĹ™Ă­znak, zda chce hrĂˇÄŤ notifikace o zruĹˇenĂ­ zĂˇpasu.
      */
     @Column(name = "notify_on_match_cancel", nullable = false)
     private boolean notifyOnMatchCancel = true;
 
     /**
-     * Příznak, zda chce hráč notifikace o platbách nebo vyúčtování.
+     * PĹ™Ă­znak, zda chce hrĂˇÄŤ notifikace o platbĂˇch nebo vyĂşÄŤtovĂˇnĂ­.
      */
     @Column(name = "notify_on_payment", nullable = false)
     private boolean notifyOnPayment = false;
 
     /**
-     * Příznak, zda má hráč dostávat připomínky před zápasem.
+     * PĹ™Ă­znak, zda mĂˇ hrĂˇÄŤ dostĂˇvat pĹ™ipomĂ­nky pĹ™ed zĂˇpasem.
      */
     @Column(name = "notify_reminders", nullable = false)
     private boolean notifyReminders = true;
 
     /**
-     * Počet hodin před začátkem zápasu, kdy má být odeslána připomínka.
-     * Například hodnota 24 znamená připomínku den předem.
+     * PoÄŤet hodin pĹ™ed zaÄŤĂˇtkem zĂˇpasu, kdy mĂˇ bĂ˝t odeslĂˇna pĹ™ipomĂ­nka.
+     * NapĹ™Ă­klad hodnota 24 znamenĂˇ pĹ™ipomĂ­nku den pĹ™edem.
      */
     @Column(name = "reminder_hours_before")
     private Integer reminderHoursBefore = 24;
 
     /**
-     * Určuje, zda jsou povoleny notifikace týkající se registrací.
+     * UrÄŤuje, zda jsou povoleny notifikace tĂ˝kajĂ­cĂ­ se registracĂ­.
      */
     @Transient
     public boolean isRegistrationNotificationsEnabled() {
@@ -1993,7 +2127,7 @@ public class PlayerSettingsEntity {
     }
 
     /**
-     * Určuje, zda jsou povoleny notifikace týkající se omluv.
+     * UrÄŤuje, zda jsou povoleny notifikace tĂ˝kajĂ­cĂ­ se omluv.
      */
     @Transient
     public boolean isExcuseNotificationsEnabled() {
@@ -2001,8 +2135,8 @@ public class PlayerSettingsEntity {
     }
 
     /**
-     * Určuje, zda jsou povoleny notifikace týkající se informací o zápase,
-     * například změn a připomínek.
+     * UrÄŤuje, zda jsou povoleny notifikace tĂ˝kajĂ­cĂ­ se informacĂ­ o zĂˇpase,
+     * napĹ™Ă­klad zmÄ›n a pĹ™ipomĂ­nek.
      */
     @Transient
     public boolean isMatchInfoNotificationsEnabled() {
@@ -2012,8 +2146,8 @@ public class PlayerSettingsEntity {
     }
 
     /**
-     * Určuje, zda jsou povoleny systémové notifikace,
-     * například o platbách.
+     * UrÄŤuje, zda jsou povoleny systĂ©movĂ© notifikace,
+     * napĹ™Ă­klad o platbĂˇch.
      */
     @Transient
     public boolean isSystemNotificationsEnabled() {
@@ -2121,12 +2255,9 @@ public class PlayerSettingsEntity {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\SeasonEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.*;
@@ -2135,81 +2266,81 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující sezónu.
+ * Entita reprezentujĂ­cĂ­ sezĂłnu.
  *
- * Sezóna vymezuje časové období, do kterého spadají zápasy
- * a související statistiky. V systému může být v jednom okamžiku
- * označena právě jedna sezóna jako aktivní.
+ * SezĂłna vymezuje ÄŤasovĂ© obdobĂ­, do kterĂ©ho spadajĂ­ zĂˇpasy
+ * a souvisejĂ­cĂ­ statistiky. V systĂ©mu mĹŻĹľe bĂ˝t v jednom okamĹľiku
+ * oznaÄŤena prĂˇvÄ› jedna sezĂłna jako aktivnĂ­.
  *
- * Entita dále obsahuje auditní údaje o vytvoření a poslední
- * změně záznamu.
+ * Entita dĂˇle obsahuje auditnĂ­ Ăşdaje o vytvoĹ™enĂ­ a poslednĂ­
+ * zmÄ›nÄ› zĂˇznamu.
  */
 @Entity
 @Table(name = "season")
 public class SeasonEntity {
 
     /**
-     * Primární klíč sezóny.
+     * PrimĂˇrnĂ­ klĂ­ÄŤ sezĂłny.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Název sezóny.
+     * NĂˇzev sezĂłny.
      *
-     * Například hodnota ve formátu "2024/2025".
+     * NapĹ™Ă­klad hodnota ve formĂˇtu "2024/2025".
      */
     @Column(nullable = false)
     private String name;
 
     /**
-     * Datum začátku sezóny.
+     * Datum zaÄŤĂˇtku sezĂłny.
      *
-     * Určuje první den, od kterého jsou zápasy
-     * do sezóny zahrnovány.
+     * UrÄŤuje prvnĂ­ den, od kterĂ©ho jsou zĂˇpasy
+     * do sezĂłny zahrnovĂˇny.
      */
     @Column(nullable = false)
     private LocalDate startDate;
 
     /**
-     * Datum konce sezóny.
+     * Datum konce sezĂłny.
      *
-     * Určuje poslední den, do kterého sezóna trvá.
+     * UrÄŤuje poslednĂ­ den, do kterĂ©ho sezĂłna trvĂˇ.
      */
     @Column(nullable = false)
     private LocalDate endDate;
 
     /**
-     * Příznak, zda je sezóna aktuálně aktivní.
+     * PĹ™Ă­znak, zda je sezĂłna aktuĂˇlnÄ› aktivnĂ­.
      *
-     * Aktivní sezóna se používá jako výchozí při vytváření
-     * nových zápasů a při filtrování dat.
+     * AktivnĂ­ sezĂłna se pouĹľĂ­vĂˇ jako vĂ˝chozĂ­ pĹ™i vytvĂˇĹ™enĂ­
+     * novĂ˝ch zĂˇpasĹŻ a pĹ™i filtrovĂˇnĂ­ dat.
      */
     private boolean active;
 
     /**
-     * Identifikátor uživatele, který sezónu vytvořil.
+     * IdentifikĂˇtor uĹľivatele, kterĂ˝ sezĂłnu vytvoĹ™il.
      *
-     * Hodnota se nastavuje při vytvoření sezóny
-     * a slouží pro auditní účely.
+     * Hodnota se nastavuje pĹ™i vytvoĹ™enĂ­ sezĂłny
+     * a slouĹľĂ­ pro auditnĂ­ ĂşÄŤely.
      */
     @Column(name = "created_by_user_id")
     private Long createdByUserId;
 
     /**
-     * Časové razítko sezóny.
+     * ÄŚasovĂ© razĂ­tko sezĂłny.
      *
-     * Uchovává datum a čas vytvoření nebo poslední změny sezóny.
-     * Hodnota se aktualizuje při každém uložení entity.
+     * UchovĂˇvĂˇ datum a ÄŤas vytvoĹ™enĂ­ nebo poslednĂ­ zmÄ›ny sezĂłny.
+     * Hodnota se aktualizuje pĹ™i kaĹľdĂ©m uloĹľenĂ­ entity.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
-     * Metoda volaná před prvním uložením entity.
+     * Metoda volanĂˇ pĹ™ed prvnĂ­m uloĹľenĂ­m entity.
      *
-     * Nastavuje aktuální časové razítko.
+     * Nastavuje aktuĂˇlnĂ­ ÄŤasovĂ© razĂ­tko.
      */
     @PrePersist
     public void prePersist() {
@@ -2217,9 +2348,9 @@ public class SeasonEntity {
     }
 
     /**
-     * Metoda volaná před aktualizací entity.
+     * Metoda volanĂˇ pĹ™ed aktualizacĂ­ entity.
      *
-     * Aktualizuje časové razítko.
+     * Aktualizuje ÄŤasovĂ© razĂ­tko.
      */
     @PreUpdate
     public void preUpdate() {
@@ -2255,12 +2386,9 @@ public class SeasonEntity {
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\entities\SeasonHistoryEntity.java
 -----
-
 package cz.phsoft.hokej.data.entities;
 
 import jakarta.persistence.*;
@@ -2269,9 +2397,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující historický záznam o sezóně.
+ * Entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam o sezĂłnÄ›.
  *
- * Slouží pro auditní účely a sledování změn sezón v čase.
+ * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely a sledovĂˇnĂ­ zmÄ›n sezĂłn v ÄŤase.
  */
 @Entity
 @Table(name = "season_history")
@@ -2282,25 +2410,25 @@ public class SeasonHistoryEntity {
     private Long id;
 
     /**
-     * Typ provedené operace (INSERT, UPDATE, DELETE).
+     * Typ provedenĂ© operace (INSERT, UPDATE, DELETE).
      */
     @Column(nullable = false)
     private String action;
 
     /**
-     * Datum a čas provedení změny.
+     * Datum a ÄŤas provedenĂ­ zmÄ›ny.
      */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
     /**
-     * ID sezóny z hlavní tabulky season.
+     * ID sezĂłny z hlavnĂ­ tabulky season.
      */
     @Column(name = "season_id", nullable = false)
     private Long seasonId;
 
     /**
-     * Původní časové razítko sezóny.
+     * PĹŻvodnĂ­ ÄŤasovĂ© razĂ­tko sezĂłny.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
@@ -2318,8 +2446,8 @@ public class SeasonHistoryEntity {
     private boolean active;
 
     /**
-     * ID uživatele, který sezónu vytvořil.
-     * Zkopírováno z pole createdByUserId v SeasonEntity.
+     * ID uĹľivatele, kterĂ˝ sezĂłnu vytvoĹ™il.
+     * ZkopĂ­rovĂˇno z pole createdByUserId v SeasonEntity.
      */
     @Column(name = "created_by_user_id")
     private Long createdByUserId;
@@ -2354,5 +2482,3 @@ public class SeasonHistoryEntity {
     public Long getCreatedByUserId() { return createdByUserId; }
     public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
 }
-
-

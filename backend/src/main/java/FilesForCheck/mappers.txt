@@ -9,6 +9,7 @@ MatchHistoryMapper.java
 MatchMapper.java
 MatchRegistrationHistoryMapper.java
 MatchRegistrationMapper.java
+NotificationMapper.java
 package-info.java
 PlayerHistoryMapper.java
 PlayerInactivityPeriodMapper.java
@@ -18,11 +19,9 @@ SeasonHistoryMapper.java
 SeasonMapper.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\AppUserHistoryMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.AppUserHistoryEntity;
@@ -32,10 +31,10 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 /**
- * Mapper pro převod historických záznamů uživatelů
+ * Mapper pro pĹ™evod historickĂ˝ch zĂˇznamĹŻ uĹľivatelĹŻ
  * na jejich DTO reprezentace.
  *
- * Slouží výhradně pro čtecí účely a auditní přehledy.
+ * SlouĹľĂ­ vĂ˝hradnÄ› pro ÄŤtecĂ­ ĂşÄŤely a auditnĂ­ pĹ™ehledy.
  */
 @Mapper(componentModel = "spring")
 public interface AppUserHistoryMapper {
@@ -47,12 +46,9 @@ public interface AppUserHistoryMapper {
     );
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\AppUserMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
@@ -67,60 +63,60 @@ import org.mapstruct.MappingTarget;
 import java.util.List;
 
 /**
- * Mapper zajišťující převod mezi uživatelskými entitami
+ * Mapper zajiĹˇĹĄujĂ­cĂ­ pĹ™evod mezi uĹľivatelskĂ˝mi entitami
  * a jejich DTO reprezentacemi.
  *
- * Slouží k oddělení perzistenční vrstvy od API vrstvy.
- * Controllery pracují výhradně s DTO objekty, zatímco
- * databázová vrstva používá entity.
+ * SlouĹľĂ­ k oddÄ›lenĂ­ perzistenÄŤnĂ­ vrstvy od API vrstvy.
+ * Controllery pracujĂ­ vĂ˝hradnÄ› s DTO objekty, zatĂ­mco
+ * databĂˇzovĂˇ vrstva pouĹľĂ­vĂˇ entity.
  *
- * Mapper také zajišťuje bezpečné mapování, kdy citlivá
- * nebo systémově řízená pole nejsou přenášena z DTO
- * přímo do entit.
+ * Mapper takĂ© zajiĹˇĹĄuje bezpeÄŤnĂ© mapovĂˇnĂ­, kdy citlivĂˇ
+ * nebo systĂ©movÄ› Ĺ™Ă­zenĂˇ pole nejsou pĹ™enĂˇĹˇena z DTO
+ * pĹ™Ă­mo do entit.
  */
 @Mapper(componentModel = "spring")
 public interface AppUserMapper {
 
     /**
-     * Převede uživatelskou entitu na DTO.
+     * PĹ™evede uĹľivatelskou entitu na DTO.
      *
-     * Součástí DTO je i seznam hráčů přiřazených
-     * k danému uživateli.
+     * SouÄŤĂˇstĂ­ DTO je i seznam hrĂˇÄŤĹŻ pĹ™iĹ™azenĂ˝ch
+     * k danĂ©mu uĹľivateli.
      *
-     * @param entity entita uživatele
-     * @return DTO reprezentace uživatele
+     * @param entity entita uĹľivatele
+     * @return DTO reprezentace uĹľivatele
      */
     @Mapping(target = "players", source = "players")
     AppUserDTO toDTO(AppUserEntity entity);
 
     /**
-     * Převede seznam uživatelských entit na seznam DTO.
+     * PĹ™evede seznam uĹľivatelskĂ˝ch entit na seznam DTO.
      *
-     * @param entities seznam uživatelských entit
+     * @param entities seznam uĹľivatelskĂ˝ch entit
      * @return seznam DTO
      */
     List<AppUserDTO> toDtoList(List<AppUserEntity> entities);
 
     /**
-     * Převede entitu hráče na DTO.
+     * PĹ™evede entitu hrĂˇÄŤe na DTO.
      *
-     * Pole fullName se záměrně nemapuje, protože
-     * je skládáno jinde (např. v DTO logice).
+     * Pole fullName se zĂˇmÄ›rnÄ› nemapuje, protoĹľe
+     * je sklĂˇdĂˇno jinde (napĹ™. v DTO logice).
      *
-     * @param entity entita hráče
-     * @return DTO hráče
+     * @param entity entita hrĂˇÄŤe
+     * @return DTO hrĂˇÄŤe
      */
     @Mapping(target = "fullName", ignore = true)
     PlayerDTO toPlayerDTO(PlayerEntity entity);
 
     /**
-     * Převede registrační DTO na novou uživatelskou entitu.
+     * PĹ™evede registraÄŤnĂ­ DTO na novou uĹľivatelskou entitu.
      *
-     * Systémová pole nejsou mapována a jejich hodnoty
-     * jsou nastavovány v servisní vrstvě.
+     * SystĂ©movĂˇ pole nejsou mapovĂˇna a jejich hodnoty
+     * jsou nastavovĂˇny v servisnĂ­ vrstvÄ›.
      *
-     * @param dto registrační DTO
-     * @return nová entita uživatele
+     * @param dto registraÄŤnĂ­ DTO
+     * @return novĂˇ entita uĹľivatele
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
@@ -128,17 +124,19 @@ public interface AppUserMapper {
     @Mapping(target = "enabled", ignore = true)
     @Mapping(target = "players", ignore = true)
     @Mapping(target = "timestamp", ignore = true)
+    @Mapping(target = "lastLoginAt", ignore = true)
+    @Mapping(target = "currentLoginAt", ignore = true)
     AppUserEntity fromRegisterDto(RegisterUserDTO dto);
 
     /**
-     * Aktualizuje existující entitu uživatele
+     * Aktualizuje existujĂ­cĂ­ entitu uĹľivatele
      * hodnotami z DTO.
      *
-     * Identita, role, heslo a vazby na hráče
-     * nejsou z DTO přebírány.
+     * Identita, role, heslo a vazby na hrĂˇÄŤe
+     * nejsou z DTO pĹ™ebĂ­rĂˇny.
      *
-     * @param dto    zdrojové DTO
-     * @param entity cílová entita
+     * @param dto    zdrojovĂ© DTO
+     * @param entity cĂ­lovĂˇ entita
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
@@ -146,15 +144,14 @@ public interface AppUserMapper {
     @Mapping(target = "enabled", ignore = true)
     @Mapping(target = "players", ignore = true)
     @Mapping(target = "timestamp", ignore = true)
+    @Mapping(target = "lastLoginAt", ignore = true)
+    @Mapping(target = "currentLoginAt", ignore = true)
     void updateEntityFromDto(AppUserDTO dto, @MappingTarget AppUserEntity entity);
 }
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\AppUserSettingsMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
@@ -162,43 +159,40 @@ import cz.phsoft.hokej.models.dto.AppUserSettingsDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper pro převod mezi entitou uživatelského nastavení
- * a její DTO reprezentací.
+ * Mapper pro pĹ™evod mezi entitou uĹľivatelskĂ©ho nastavenĂ­
+ * a jejĂ­ DTO reprezentacĂ­.
  *
- * Slouží pro správu preferencí uživatele bez zásahu
- * do samotné identity uživatelského účtu.
+ * SlouĹľĂ­ pro sprĂˇvu preferencĂ­ uĹľivatele bez zĂˇsahu
+ * do samotnĂ© identity uĹľivatelskĂ©ho ĂşÄŤtu.
  */
 @Mapper(componentModel = "spring")
 public interface AppUserSettingsMapper {
 
     /**
-     * Převede entitu nastavení na DTO.
+     * PĹ™evede entitu nastavenĂ­ na DTO.
      *
-     * @param entity entita nastavení
-     * @return DTO nastavení
+     * @param entity entita nastavenĂ­
+     * @return DTO nastavenĂ­
      */
     AppUserSettingsDTO toDTO(AppUserSettingsEntity entity);
 
     /**
-     * Aktualizuje existující entitu nastavení hodnotami z DTO.
+     * Aktualizuje existujĂ­cĂ­ entitu nastavenĂ­ hodnotami z DTO.
      *
-     * Null hodnoty jsou ignorovány, aby nedošlo
-     * k nechtěnému přepsání existujících dat.
+     * Null hodnoty jsou ignorovĂˇny, aby nedoĹˇlo
+     * k nechtÄ›nĂ©mu pĹ™epsĂˇnĂ­ existujĂ­cĂ­ch dat.
      *
-     * @param dto    zdrojové DTO
-     * @param entity cílová entita
+     * @param dto    zdrojovĂ© DTO
+     * @param entity cĂ­lovĂˇ entita
      */
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDTO(AppUserSettingsDTO dto,
                              @MappingTarget AppUserSettingsEntity entity);
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\MatchHistoryMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.MatchHistoryEntity;
@@ -208,45 +202,42 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 /**
- * Mapper pro převod mezi entitou MatchHistoryEntity
- * a přenosovým objektem MatchHistoryDTO.
+ * Mapper pro pĹ™evod mezi entitou MatchHistoryEntity
+ * a pĹ™enosovĂ˝m objektem MatchHistoryDTO.
  *
- * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
+ * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
+ * definovanĂ˝ch metod tohoto rozhranĂ­.
  *
- * Mapper je používán servisní vrstvou pro převod historických
- * záznamů zápasu načtených z databáze do DTO objektů,
- * které jsou následně vráceny kontrolerem.
+ * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pro pĹ™evod historickĂ˝ch
+ * zĂˇznamĹŻ zĂˇpasu naÄŤtenĂ˝ch z databĂˇze do DTO objektĹŻ,
+ * kterĂ© jsou nĂˇslednÄ› vrĂˇceny kontrolerem.
  */
 @Mapper(componentModel = "spring")
 public interface MatchHistoryMapper {
 
     /**
-     * Převede entitu historického záznamu zápasu na DTO.
+     * PĹ™evede entitu historickĂ©ho zĂˇznamu zĂˇpasu na DTO.
      *
-     * @param entity entita reprezentující historický záznam zápasu
-     * @return DTO obsahující data historického záznamu
+     * @param entity entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam zĂˇpasu
+     * @return DTO obsahujĂ­cĂ­ data historickĂ©ho zĂˇznamu
      */
     MatchHistoryDTO toDTO(MatchHistoryEntity entity);
 
     /**
-     * Převede seznam entit historických záznamů zápasu na seznam DTO.
+     * PĹ™evede seznam entit historickĂ˝ch zĂˇznamĹŻ zĂˇpasu na seznam DTO.
      *
-     * @param entities seznam entit historických záznamů
-     * @return seznam DTO objektů
+     * @param entities seznam entit historickĂ˝ch zĂˇznamĹŻ
+     * @return seznam DTO objektĹŻ
      */
     List<MatchHistoryDTO> toDTOList(
             List<MatchHistoryEntity> entities
     );
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\MatchMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
@@ -256,34 +247,34 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 /**
- * Mapper pro převod mezi entitou zápasu a DTO.
+ * Mapper pro pĹ™evod mezi entitou zĂˇpasu a DTO.
  *
- * Řídí, jakým způsobem je vazba na sezónu
- * reprezentována v API vrstvě.
+ * ĹĂ­dĂ­, jakĂ˝m zpĹŻsobem je vazba na sezĂłnu
+ * reprezentovĂˇna v API vrstvÄ›.
  */
 @Mapper(componentModel = "spring")
 public interface MatchMapper {
 
     /**
-     * Převede entitu zápasu na DTO.
+     * PĹ™evede entitu zĂˇpasu na DTO.
      *
-     * Vazba na sezónu je reprezentována
-     * pouze pomocí identifikátoru.
+     * Vazba na sezĂłnu je reprezentovĂˇna
+     * pouze pomocĂ­ identifikĂˇtoru.
      *
-     * @param entity entita zápasu
-     * @return DTO zápasu
+     * @param entity entita zĂˇpasu
+     * @return DTO zĂˇpasu
      */
     @Mapping(source = "season.id", target = "seasonId")
     MatchDTO toDTO(MatchEntity entity);
 
     /**
-     * Převede DTO na novou entitu zápasu.
+     * PĹ™evede DTO na novou entitu zĂˇpasu.
      *
-     * Vazba na sezónu se nastavuje až
-     * v servisní vrstvě.
+     * Vazba na sezĂłnu se nastavuje aĹľ
+     * v servisnĂ­ vrstvÄ›.
      *
-     * @param dto DTO zápasu
-     * @return entita zápasu
+     * @param dto DTO zĂˇpasu
+     * @return entita zĂˇpasu
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "season", ignore = true)
@@ -293,13 +284,13 @@ public interface MatchMapper {
     MatchEntity toEntity(MatchDTO dto);
 
     /**
-     * Aktualizuje existující entitu zápasu.
+     * Aktualizuje existujĂ­cĂ­ entitu zĂˇpasu.
      *
-     * Vazba na sezónu se při aktualizaci
-     * nemění.
+     * Vazba na sezĂłnu se pĹ™i aktualizaci
+     * nemÄ›nĂ­.
      *
-     * @param dto    zdrojové DTO
-     * @param entity cílová entita
+     * @param dto    zdrojovĂ© DTO
+     * @param entity cĂ­lovĂˇ entita
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "season", ignore = true)
@@ -309,12 +300,9 @@ public interface MatchMapper {
     void updateEntity(MatchDTO dto, @MappingTarget MatchEntity entity);
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\MatchRegistrationHistoryMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.MatchRegistrationHistoryEntity;
@@ -324,46 +312,43 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 /**
- * Mapper pro převod mezi entitou MatchRegistrationHistoryEntity
- * a přenosovým objektem MatchRegistrationHistoryDTO.
+ * Mapper pro pĹ™evod mezi entitou MatchRegistrationHistoryEntity
+ * a pĹ™enosovĂ˝m objektem MatchRegistrationHistoryDTO.
  *
- * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
+ * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
+ * definovanĂ˝ch metod tohoto rozhranĂ­.
  *
- * Mapper je používán servisní vrstvou pro převod historických
- * záznamů registrací načtených z databáze do DTO objektů,
- * které jsou následně vráceny kontrolerem pro auditní
- * a přehledové účely.
+ * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pro pĹ™evod historickĂ˝ch
+ * zĂˇznamĹŻ registracĂ­ naÄŤtenĂ˝ch z databĂˇze do DTO objektĹŻ,
+ * kterĂ© jsou nĂˇslednÄ› vrĂˇceny kontrolerem pro auditnĂ­
+ * a pĹ™ehledovĂ© ĂşÄŤely.
  */
 @Mapper(componentModel = "spring")
 public interface MatchRegistrationHistoryMapper {
 
     /**
-     * Převede entitu historického záznamu registrace na DTO.
+     * PĹ™evede entitu historickĂ©ho zĂˇznamu registrace na DTO.
      *
-     * @param entity entita reprezentující historický záznam registrace
-     * @return DTO obsahující data historického záznamu
+     * @param entity entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam registrace
+     * @return DTO obsahujĂ­cĂ­ data historickĂ©ho zĂˇznamu
      */
     MatchRegistrationHistoryDTO toDTO(MatchRegistrationHistoryEntity entity);
 
     /**
-     * Převede seznam entit historických záznamů registrací na seznam DTO.
+     * PĹ™evede seznam entit historickĂ˝ch zĂˇznamĹŻ registracĂ­ na seznam DTO.
      *
-     * @param entities seznam entit historických záznamů registrací
-     * @return seznam DTO objektů
+     * @param entities seznam entit historickĂ˝ch zĂˇznamĹŻ registracĂ­
+     * @return seznam DTO objektĹŻ
      */
     List<MatchRegistrationHistoryDTO> toDTOList(
             List<MatchRegistrationHistoryEntity> entities
     );
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\MatchRegistrationMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
@@ -379,20 +364,20 @@ import org.mapstruct.Mapping;
 import java.util.List;
 
 /**
- * Mapper pro převod registrací hráčů na zápasy
- * mezi entitním a DTO modelem.
+ * Mapper pro pĹ™evod registracĂ­ hrĂˇÄŤĹŻ na zĂˇpasy
+ * mezi entitnĂ­m a DTO modelem.
  *
- * Zajišťuje konzistentní přenos stavu registrace,
- * omluv a administrativních metadat.
+ * ZajiĹˇĹĄuje konzistentnĂ­ pĹ™enos stavu registrace,
+ * omluv a administrativnĂ­ch metadat.
  */
 @Mapper(componentModel = "spring")
 public interface MatchRegistrationMapper {
 
     /**
-     * Vytvoří novou entitu registrace.
+     * VytvoĹ™Ă­ novou entitu registrace.
      *
-     * Systémová metadata jsou nastavena
-     * automaticky při mapování.
+     * SystĂ©movĂˇ metadata jsou nastavena
+     * automaticky pĹ™i mapovĂˇnĂ­.
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "timestamp", expression = "java(java.time.LocalDateTime.now())")
@@ -408,7 +393,7 @@ public interface MatchRegistrationMapper {
     );
 
     /**
-     * Převede entitu registrace na DTO.
+     * PĹ™evede entitu registrace na DTO.
      *
      * @param entity entita registrace
      * @return DTO registrace
@@ -418,7 +403,7 @@ public interface MatchRegistrationMapper {
     MatchRegistrationDTO toDTO(MatchRegistrationEntity entity);
 
     /**
-     * Převede seznam registrací na seznam DTO.
+     * PĹ™evede seznam registracĂ­ na seznam DTO.
      *
      * @param entities seznam entit
      * @return seznam DTO
@@ -426,32 +411,55 @@ public interface MatchRegistrationMapper {
     List<MatchRegistrationDTO> toDTOList(List<MatchRegistrationEntity> entities);
 }
 
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\NotificationMapper.java
+-----
+package cz.phsoft.hokej.models.mappers;
 
+import cz.phsoft.hokej.data.entities.NotificationEntity;
+import cz.phsoft.hokej.models.dto.NotificationDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.util.List;
+
+/**
+ * Mapper pro pĹ™evod mezi NotificationEntity a NotificationDTO.
+ *
+ * Kategorie a pĹ™Ă­znak dĹŻleĹľitosti se odvozujĂ­ z NotificationType.
+ * PĹ™Ă­znak read se odvozuje podle hodnoty readAt.
+ */
+@Mapper(componentModel = "spring")
+public interface NotificationMapper {
+
+    @Mapping(target = "category", expression = "java(entity.getType().getCategory())")
+    @Mapping(target = "important", expression = "java(entity.getType().isImportant())")
+    @Mapping(target = "read", expression = "java(entity.getReadAt() != null)")
+    NotificationDTO toDTO(NotificationEntity entity);
+
+    List<NotificationDTO> toDtoList(List<NotificationEntity> entities);
+}
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\package-info.java
 -----
-
 /**
- * Mapovací třídy pro převod mezi entitami a DTO objekty.
+ * MapovacĂ­ tĹ™Ă­dy pro pĹ™evod mezi entitami a DTO objekty.
  *
- * Zajišťuje se:
- * - převod databázových entit na DTO pro API,
- * - převod vstupních DTO na entity pro uložení,
- * - centralizace mapovací logiky na jedno místo.
+ * ZajiĹˇĹĄuje se:
+ * - pĹ™evod databĂˇzovĂ˝ch entit na DTO pro API,
+ * - pĹ™evod vstupnĂ­ch DTO na entity pro uloĹľenĂ­,
+ * - centralizace mapovacĂ­ logiky na jedno mĂ­sto.
  *
- * Mapovací třídy:
- * - neobsahují business logiku,
- * - používají se typicky ve service vrstvě.
+ * MapovacĂ­ tĹ™Ă­dy:
+ * - neobsahujĂ­ business logiku,
+ * - pouĹľĂ­vajĂ­ se typicky ve service vrstvÄ›.
  */
 package cz.phsoft.hokej.models.mappers;
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\PlayerHistoryMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.PlayerHistoryEntity;
@@ -461,46 +469,43 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 /**
- * Mapper pro převod mezi entitou PlayerHistoryEntity
- * a přenosovým objektem PlayerHistoryDTO.
+ * Mapper pro pĹ™evod mezi entitou PlayerHistoryEntity
+ * a pĹ™enosovĂ˝m objektem PlayerHistoryDTO.
  *
- * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
+ * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
+ * definovanĂ˝ch metod tohoto rozhranĂ­.
  *
- * Mapper je používán servisní vrstvou pro převod historických
- * záznamů hráče načtených z databáze do DTO objektů,
- * které jsou následně vráceny kontrolerem pro auditní
- * a přehledové účely.
+ * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pro pĹ™evod historickĂ˝ch
+ * zĂˇznamĹŻ hrĂˇÄŤe naÄŤtenĂ˝ch z databĂˇze do DTO objektĹŻ,
+ * kterĂ© jsou nĂˇslednÄ› vrĂˇceny kontrolerem pro auditnĂ­
+ * a pĹ™ehledovĂ© ĂşÄŤely.
  */
 @Mapper(componentModel = "spring")
 public interface PlayerHistoryMapper {
 
     /**
-     * Převede entitu historického záznamu hráče na DTO.
+     * PĹ™evede entitu historickĂ©ho zĂˇznamu hrĂˇÄŤe na DTO.
      *
-     * @param entity entita reprezentující historický záznam hráče
-     * @return DTO obsahující data historického záznamu
+     * @param entity entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam hrĂˇÄŤe
+     * @return DTO obsahujĂ­cĂ­ data historickĂ©ho zĂˇznamu
      */
     PlayerHistoryDTO toDTO(PlayerHistoryEntity entity);
 
     /**
-     * Převede seznam entit historických záznamů hráče na seznam DTO.
+     * PĹ™evede seznam entit historickĂ˝ch zĂˇznamĹŻ hrĂˇÄŤe na seznam DTO.
      *
-     * @param entities seznam entit historických záznamů hráče
-     * @return seznam DTO objektů
+     * @param entities seznam entit historickĂ˝ch zĂˇznamĹŻ hrĂˇÄŤe
+     * @return seznam DTO objektĹŻ
      */
     List<PlayerHistoryDTO> toDTOList(
             List<PlayerHistoryEntity> entities
     );
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\PlayerInactivityPeriodMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
@@ -509,42 +514,42 @@ import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper pro převod mezi entitou PlayerInactivityPeriodEntity
- * a přenosovým objektem PlayerInactivityPeriodDTO.
+ * Mapper pro pĹ™evod mezi entitou PlayerInactivityPeriodEntity
+ * a pĹ™enosovĂ˝m objektem PlayerInactivityPeriodDTO.
  *
- * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
+ * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
+ * definovanĂ˝ch metod tohoto rozhranĂ­.
  *
- * Mapper je používán servisní vrstvou při vytváření,
- * aktualizaci a načítání období neaktivity hráče.
- * Navázání entity na konkrétního hráče je zajištěno
- * pomocí kontextového parametru.
+ * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pĹ™i vytvĂˇĹ™enĂ­,
+ * aktualizaci a naÄŤĂ­tĂˇnĂ­ obdobĂ­ neaktivity hrĂˇÄŤe.
+ * NavĂˇzĂˇnĂ­ entity na konkrĂ©tnĂ­ho hrĂˇÄŤe je zajiĹˇtÄ›no
+ * pomocĂ­ kontextovĂ©ho parametru.
  */
 @Mapper(componentModel = "spring")
 public interface PlayerInactivityPeriodMapper {
 
     /**
-     * Převede entitu období neaktivity na DTO.
+     * PĹ™evede entitu obdobĂ­ neaktivity na DTO.
      *
-     * Identifikátor hráče je převzat z navázané entity hráče.
+     * IdentifikĂˇtor hrĂˇÄŤe je pĹ™evzat z navĂˇzanĂ© entity hrĂˇÄŤe.
      *
-     * @param entity entita období neaktivity
-     * @return DTO reprezentující období neaktivity
+     * @param entity entita obdobĂ­ neaktivity
+     * @return DTO reprezentujĂ­cĂ­ obdobĂ­ neaktivity
      */
     @Mapping(target = "playerId", source = "player.id")
     PlayerInactivityPeriodDTO toDTO(PlayerInactivityPeriodEntity entity);
 
     /**
-     * Převede DTO na novou entitu období neaktivity.
+     * PĹ™evede DTO na novou entitu obdobĂ­ neaktivity.
      *
-     * Identifikátor entity je ignorován, protože se vytváří
-     * nový záznam. Vazba na hráče je nastavena pomocí
-     * kontextového parametru.
+     * IdentifikĂˇtor entity je ignorovĂˇn, protoĹľe se vytvĂˇĹ™Ă­
+     * novĂ˝ zĂˇznam. Vazba na hrĂˇÄŤe je nastavena pomocĂ­
+     * kontextovĂ©ho parametru.
      *
-     * @param dto přenosový objekt období neaktivity
-     * @param player entita hráče předaná jako kontext
-     * @return nová entita období neaktivity
+     * @param dto pĹ™enosovĂ˝ objekt obdobĂ­ neaktivity
+     * @param player entita hrĂˇÄŤe pĹ™edanĂˇ jako kontext
+     * @return novĂˇ entita obdobĂ­ neaktivity
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "player", ignore = true)
@@ -552,28 +557,28 @@ public interface PlayerInactivityPeriodMapper {
                                           @Context PlayerEntity player);
 
     /**
-     * Aktualizuje existující entitu období neaktivity
+     * Aktualizuje existujĂ­cĂ­ entitu obdobĂ­ neaktivity
      * hodnotami z DTO.
      *
-     * Vazba na hráče se nemění a není mapována.
+     * Vazba na hrĂˇÄŤe se nemÄ›nĂ­ a nenĂ­ mapovĂˇna.
      *
-     * @param dto přenosový objekt obsahující nové hodnoty
-     * @param entity existující entita určená k aktualizaci
+     * @param dto pĹ™enosovĂ˝ objekt obsahujĂ­cĂ­ novĂ© hodnoty
+     * @param entity existujĂ­cĂ­ entita urÄŤenĂˇ k aktualizaci
      */
     @Mapping(target = "player", ignore = true)
     void updateEntityFromDto(PlayerInactivityPeriodDTO dto,
                              @MappingTarget PlayerInactivityPeriodEntity entity);
 
     /**
-     * Vytvoří novou instanci entity období neaktivity
-     * a nastaví vazbu na hráče předaného v kontextu.
+     * VytvoĹ™Ă­ novou instanci entity obdobĂ­ neaktivity
+     * a nastavĂ­ vazbu na hrĂˇÄŤe pĹ™edanĂ©ho v kontextu.
      *
-     * Používá se při vytváření nové entity v rámci mapování,
-     * aby byla zajištěna správná asociace s hráčem.
+     * PouĹľĂ­vĂˇ se pĹ™i vytvĂˇĹ™enĂ­ novĂ© entity v rĂˇmci mapovĂˇnĂ­,
+     * aby byla zajiĹˇtÄ›na sprĂˇvnĂˇ asociace s hrĂˇÄŤem.
      *
-     * @param dto přenosový objekt období neaktivity
-     * @param player entita hráče předaná jako kontext
-     * @return nově vytvořená entita s navázaným hráčem
+     * @param dto pĹ™enosovĂ˝ objekt obdobĂ­ neaktivity
+     * @param player entita hrĂˇÄŤe pĹ™edanĂˇ jako kontext
+     * @return novÄ› vytvoĹ™enĂˇ entita s navĂˇzanĂ˝m hrĂˇÄŤem
      */
     @ObjectFactory
     default PlayerInactivityPeriodEntity createEntity(
@@ -586,12 +591,9 @@ public interface PlayerInactivityPeriodMapper {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\PlayerMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
@@ -603,43 +605,43 @@ import org.mapstruct.MappingTarget;
 import java.util.List;
 
 /**
- * Mapper pro převod mezi entitou PlayerEntity
- * a přenosovým objektem PlayerDTO.
+ * Mapper pro pĹ™evod mezi entitou PlayerEntity
+ * a pĹ™enosovĂ˝m objektem PlayerDTO.
  *
- * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
+ * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
+ * definovanĂ˝ch metod tohoto rozhranĂ­.
  *
- * Mapper je používán servisní vrstvou při vytváření,
- * aktualizaci a načítání hráčů. Některé vlastnosti
- * nejsou mapovány automaticky, protože jsou odvozené
- * nebo řízené aplikační logikou.
+ * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pĹ™i vytvĂˇĹ™enĂ­,
+ * aktualizaci a naÄŤĂ­tĂˇnĂ­ hrĂˇÄŤĹŻ. NÄ›kterĂ© vlastnosti
+ * nejsou mapovĂˇny automaticky, protoĹľe jsou odvozenĂ©
+ * nebo Ĺ™Ă­zenĂ© aplikaÄŤnĂ­ logikou.
  */
 @Mapper(componentModel = "spring")
 public interface PlayerMapper {
 
     /**
-     * Převede entitu hráče na DTO.
+     * PĹ™evede entitu hrĂˇÄŤe na DTO.
      *
-     * Odvozená vlastnost fullName není mapována,
-     * protože je sestavována aplikační logikou.
+     * OdvozenĂˇ vlastnost fullName nenĂ­ mapovĂˇna,
+     * protoĹľe je sestavovĂˇna aplikaÄŤnĂ­ logikou.
      *
-     * @param entity entita hráče
-     * @return DTO reprezentující hráče
+     * @param entity entita hrĂˇÄŤe
+     * @return DTO reprezentujĂ­cĂ­ hrĂˇÄŤe
      */
     @Mapping(target = "fullName", ignore = true)
     PlayerDTO toDTO(PlayerEntity entity);
 
     /**
-     * Převede DTO na novou entitu hráče.
+     * PĹ™evede DTO na novou entitu hrĂˇÄŤe.
      *
-     * Vazba na uživatele není mapována a je nastavována
-     * servisní vrstvou. Stav hráče je při vytvoření
-     * implicitně nastaven na hodnotu PENDING.
-     * Časové razítko je řízeno databází nebo aplikační logikou.
+     * Vazba na uĹľivatele nenĂ­ mapovĂˇna a je nastavovĂˇna
+     * servisnĂ­ vrstvou. Stav hrĂˇÄŤe je pĹ™i vytvoĹ™enĂ­
+     * implicitnÄ› nastaven na hodnotu PENDING.
+     * ÄŚasovĂ© razĂ­tko je Ĺ™Ă­zeno databĂˇzĂ­ nebo aplikaÄŤnĂ­ logikou.
      *
-     * @param dto přenosový objekt hráče
-     * @return nová entita hráče
+     * @param dto pĹ™enosovĂ˝ objekt hrĂˇÄŤe
+     * @return novĂˇ entita hrĂˇÄŤe
      */
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
@@ -648,12 +650,12 @@ public interface PlayerMapper {
     PlayerEntity toEntity(PlayerDTO dto);
 
     /**
-     * Aktualizuje existující DTO hodnotami ze zdrojového DTO.
+     * Aktualizuje existujĂ­cĂ­ DTO hodnotami ze zdrojovĂ©ho DTO.
      *
-     * Identifikátor a časové razítko zůstávají beze změny.
+     * IdentifikĂˇtor a ÄŤasovĂ© razĂ­tko zĹŻstĂˇvajĂ­ beze zmÄ›ny.
      *
-     * @param source zdrojové DTO obsahující nové hodnoty
-     * @param target cílové DTO určené k aktualizaci
+     * @param source zdrojovĂ© DTO obsahujĂ­cĂ­ novĂ© hodnoty
+     * @param target cĂ­lovĂ© DTO urÄŤenĂ© k aktualizaci
      */
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "id", ignore = true)
@@ -661,13 +663,13 @@ public interface PlayerMapper {
     void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
 
     /**
-     * Aktualizuje existující entitu hráče hodnotami z DTO.
+     * Aktualizuje existujĂ­cĂ­ entitu hrĂˇÄŤe hodnotami z DTO.
      *
-     * Vazba na uživatele a časové razítko nejsou měněny,
-     * protože jsou řízeny servisní vrstvou nebo databází.
+     * Vazba na uĹľivatele a ÄŤasovĂ© razĂ­tko nejsou mÄ›nÄ›ny,
+     * protoĹľe jsou Ĺ™Ă­zeny servisnĂ­ vrstvou nebo databĂˇzĂ­.
      *
-     * @param source přenosový objekt obsahující nové hodnoty
-     * @param target existující entita určená k aktualizaci
+     * @param source pĹ™enosovĂ˝ objekt obsahujĂ­cĂ­ novĂ© hodnoty
+     * @param target existujĂ­cĂ­ entita urÄŤenĂˇ k aktualizaci
      */
     @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "user", ignore = true)
@@ -675,20 +677,17 @@ public interface PlayerMapper {
     void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
 
     /**
-     * Převede seznam entit hráčů na seznam DTO objektů.
+     * PĹ™evede seznam entit hrĂˇÄŤĹŻ na seznam DTO objektĹŻ.
      *
-     * @param players seznam entit hráčů
-     * @return seznam DTO reprezentací hráčů
+     * @param players seznam entit hrĂˇÄŤĹŻ
+     * @return seznam DTO reprezentacĂ­ hrĂˇÄŤĹŻ
      */
     List<PlayerDTO> toDTOList(List<PlayerEntity> players);
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\PlayerSettingsMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
@@ -696,50 +695,47 @@ import cz.phsoft.hokej.models.dto.PlayerSettingsDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper pro převod mezi entitou PlayerSettingsEntity
- * a přenosovým objektem PlayerSettingsDTO.
+ * Mapper pro pĹ™evod mezi entitou PlayerSettingsEntity
+ * a pĹ™enosovĂ˝m objektem PlayerSettingsDTO.
  *
- * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
+ * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
+ * definovanĂ˝ch metod tohoto rozhranĂ­.
  *
- * Mapper je používán servisní vrstvou při načítání
- * a aktualizaci hráčských nastavení. Při aktualizaci
- * jsou null hodnoty ignorovány, aby nedošlo k nechtěnému
- * přepsání existujících dat.
+ * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pĹ™i naÄŤĂ­tĂˇnĂ­
+ * a aktualizaci hrĂˇÄŤskĂ˝ch nastavenĂ­. PĹ™i aktualizaci
+ * jsou null hodnoty ignorovĂˇny, aby nedoĹˇlo k nechtÄ›nĂ©mu
+ * pĹ™epsĂˇnĂ­ existujĂ­cĂ­ch dat.
  */
 @Mapper(componentModel = "spring")
 public interface PlayerSettingsMapper {
 
     /**
-     * Převede entitu hráčských nastavení na DTO.
+     * PĹ™evede entitu hrĂˇÄŤskĂ˝ch nastavenĂ­ na DTO.
      *
-     * @param entity entita nastavení hráče
-     * @return DTO reprezentující nastavení hráče
+     * @param entity entita nastavenĂ­ hrĂˇÄŤe
+     * @return DTO reprezentujĂ­cĂ­ nastavenĂ­ hrĂˇÄŤe
      */
     PlayerSettingsDTO toDTO(PlayerSettingsEntity entity);
 
     /**
-     * Aktualizuje existující entitu hráčských nastavení
+     * Aktualizuje existujĂ­cĂ­ entitu hrĂˇÄŤskĂ˝ch nastavenĂ­
      * hodnotami z DTO.
      *
-     * Null hodnoty ve zdrojovém DTO nejsou mapovány,
-     * aby zůstaly zachovány původní hodnoty v entitě.
+     * Null hodnoty ve zdrojovĂ©m DTO nejsou mapovĂˇny,
+     * aby zĹŻstaly zachovĂˇny pĹŻvodnĂ­ hodnoty v entitÄ›.
      *
-     * @param dto přenosový objekt obsahující nové hodnoty
-     * @param entity existující entita určená k aktualizaci
+     * @param dto pĹ™enosovĂ˝ objekt obsahujĂ­cĂ­ novĂ© hodnoty
+     * @param entity existujĂ­cĂ­ entita urÄŤenĂˇ k aktualizaci
      */
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDTO(PlayerSettingsDTO dto,
                              @MappingTarget PlayerSettingsEntity entity);
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\SeasonHistoryMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.SeasonHistoryEntity;
@@ -749,44 +745,41 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 /**
- * Mapper pro převod mezi entitou SeasonHistoryEntity
- * a přenosovým objektem SeasonHistoryDTO.
+ * Mapper pro pĹ™evod mezi entitou SeasonHistoryEntity
+ * a pĹ™enosovĂ˝m objektem SeasonHistoryDTO.
  *
- * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
+ * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
+ * definovanĂ˝ch metod tohoto rozhranĂ­.
  *
- * Mapper je používán servisní vrstvou pro převod
- * historických záznamů sezóny načtených z databáze
- * do DTO objektů, které jsou následně vráceny kontrolerem
- * pro auditní a přehledové účely.
+ * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pro pĹ™evod
+ * historickĂ˝ch zĂˇznamĹŻ sezĂłny naÄŤtenĂ˝ch z databĂˇze
+ * do DTO objektĹŻ, kterĂ© jsou nĂˇslednÄ› vrĂˇceny kontrolerem
+ * pro auditnĂ­ a pĹ™ehledovĂ© ĂşÄŤely.
  */
 @Mapper(componentModel = "spring")
 public interface SeasonHistoryMapper {
 
     /**
-     * Převede entitu historického záznamu sezóny na DTO.
+     * PĹ™evede entitu historickĂ©ho zĂˇznamu sezĂłny na DTO.
      *
-     * @param entity entita reprezentující historický záznam sezóny
-     * @return DTO obsahující data historického záznamu
+     * @param entity entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam sezĂłny
+     * @return DTO obsahujĂ­cĂ­ data historickĂ©ho zĂˇznamu
      */
     SeasonHistoryDTO toDTO(SeasonHistoryEntity entity);
 
     /**
-     * Převede seznam entit historických záznamů sezóny na seznam DTO.
+     * PĹ™evede seznam entit historickĂ˝ch zĂˇznamĹŻ sezĂłny na seznam DTO.
      *
-     * @param entities seznam entit historických záznamů sezóny
-     * @return seznam DTO objektů
+     * @param entities seznam entit historickĂ˝ch zĂˇznamĹŻ sezĂłny
+     * @return seznam DTO objektĹŻ
      */
     List<SeasonHistoryDTO> toDTOList(List<SeasonHistoryEntity> entities);
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\SeasonMapper.java
 -----
-
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.SeasonEntity;
@@ -796,38 +789,38 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 /**
- * Mapper pro převod mezi entitou SeasonEntity
- * a přenosovým objektem SeasonDTO.
+ * Mapper pro pĹ™evod mezi entitou SeasonEntity
+ * a pĹ™enosovĂ˝m objektem SeasonDTO.
  *
- * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
+ * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
+ * definovanĂ˝ch metod tohoto rozhranĂ­.
  *
- * Mapper je používán servisní vrstvou při vytváření,
- * aktualizaci a načítání sezón. Některé vlastnosti
- * nejsou mapovány automaticky, protože jsou řízeny
- * aplikační logikou nebo databází.
+ * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pĹ™i vytvĂˇĹ™enĂ­,
+ * aktualizaci a naÄŤĂ­tĂˇnĂ­ sezĂłn. NÄ›kterĂ© vlastnosti
+ * nejsou mapovĂˇny automaticky, protoĹľe jsou Ĺ™Ă­zeny
+ * aplikaÄŤnĂ­ logikou nebo databĂˇzĂ­.
  */
 @Mapper(componentModel = "spring")
 public interface SeasonMapper {
 
     /**
-     * Převede entitu sezóny na DTO.
+     * PĹ™evede entitu sezĂłny na DTO.
      *
-     * @param entity entita sezóny
-     * @return DTO reprezentující sezónu
+     * @param entity entita sezĂłny
+     * @return DTO reprezentujĂ­cĂ­ sezĂłnu
      */
     SeasonDTO toDTO(SeasonEntity entity);
 
     /**
-     * Převede DTO na novou entitu sezóny.
+     * PĹ™evede DTO na novou entitu sezĂłny.
      *
-     * Identifikátor, časové razítko a informace o uživateli,
-     * který sezónu vytvořil, nejsou mapovány, protože jsou
-     * nastavovány servisní vrstvou nebo databází.
+     * IdentifikĂˇtor, ÄŤasovĂ© razĂ­tko a informace o uĹľivateli,
+     * kterĂ˝ sezĂłnu vytvoĹ™il, nejsou mapovĂˇny, protoĹľe jsou
+     * nastavovĂˇny servisnĂ­ vrstvou nebo databĂˇzĂ­.
      *
-     * @param dto přenosový objekt sezóny
-     * @return nová entita sezóny
+     * @param dto pĹ™enosovĂ˝ objekt sezĂłny
+     * @return novĂˇ entita sezĂłny
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "timestamp", ignore = true)
@@ -835,13 +828,13 @@ public interface SeasonMapper {
     SeasonEntity toEntity(SeasonDTO dto);
 
     /**
-     * Aktualizuje existující entitu sezóny hodnotami z DTO.
+     * Aktualizuje existujĂ­cĂ­ entitu sezĂłny hodnotami z DTO.
      *
-     * Identifikátor, časové razítko a informace o uživateli,
-     * který sezónu vytvořil, zůstávají beze změny.
+     * IdentifikĂˇtor, ÄŤasovĂ© razĂ­tko a informace o uĹľivateli,
+     * kterĂ˝ sezĂłnu vytvoĹ™il, zĹŻstĂˇvajĂ­ beze zmÄ›ny.
      *
-     * @param dto přenosový objekt obsahující nové hodnoty
-     * @param entity existující entita určená k aktualizaci
+     * @param dto pĹ™enosovĂ˝ objekt obsahujĂ­cĂ­ novĂ© hodnoty
+     * @param entity existujĂ­cĂ­ entita urÄŤenĂˇ k aktualizaci
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "timestamp", ignore = true)
@@ -849,5 +842,3 @@ public interface SeasonMapper {
     void updateEntityFromDTO(SeasonDTO dto,
                              @MappingTarget SeasonEntity entity);
 }
-
-

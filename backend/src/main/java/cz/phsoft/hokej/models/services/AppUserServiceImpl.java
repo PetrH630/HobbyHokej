@@ -29,6 +29,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import java.time.Clock;
+import java.time.Instant;
+
 /**
  * Implementace servisní vrstvy pro správu aplikačních uživatelských účtů.
  *
@@ -72,6 +75,8 @@ public class AppUserServiceImpl implements AppUserService {
     private final NotificationService notificationService;
     private final ForgottenPasswordResetTokenRepository forgottenPasswordResetTokenRepository;
     private final DemoModeGuard demoModeGuard;
+    private final Clock clock;
+
     /**
      * Vytvoří instanci servisní třídy.
      *
@@ -95,7 +100,8 @@ public class AppUserServiceImpl implements AppUserService {
                               AppUserSettingsService appUserSettingsService,
                               NotificationService notificationService,
                               ForgottenPasswordResetTokenRepository forgottenPasswordResetTokenRepository,
-                              DemoModeGuard demoModeGuard) {
+                              DemoModeGuard demoModeGuard,
+                              Clock clock) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.appUserMapper = appUserMapper;
@@ -105,6 +111,7 @@ public class AppUserServiceImpl implements AppUserService {
         this.notificationService = notificationService;
         this.forgottenPasswordResetTokenRepository = forgottenPasswordResetTokenRepository;
         this.demoModeGuard = demoModeGuard;
+        this.clock = clock;
     }
 
     /**
@@ -517,6 +524,30 @@ public class AppUserServiceImpl implements AppUserService {
                     notifyUser(user, NotificationType.FORGOTTEN_PASSWORD_RESET_COMPLETED);
                 }
         );
+    }
+
+    /**
+     * Aktualizuje časová razítka přihlášení uživatele.
+     *
+     * Při úspěšném přihlášení se původní hodnota currentLoginAt
+     * uloží do lastLoginAt a currentLoginAt se nastaví na aktuální čas.
+     * Metoda se používá v bezpečnostní vrstvě po úspěšné autentizaci.
+     *
+     * @param email e-mailová adresa přihlášeného uživatele
+     */
+    @Transactional
+    public void onSuccessfulLogin(String email) {
+        AppUserEntity user = findUserByEmailOrThrow(email);
+
+        Instant now = Instant.now(clock);
+
+        user.setLastLoginAt(user.getCurrentLoginAt());
+        user.setCurrentLoginAt(now);
+
+        userRepository.save(user);
+
+        log.info("Aktualizována přihlášení uživatele {}: lastLoginAt={}, currentLoginAt={}",
+                email, user.getLastLoginAt(), user.getCurrentLoginAt());
     }
 
     // ==================================================

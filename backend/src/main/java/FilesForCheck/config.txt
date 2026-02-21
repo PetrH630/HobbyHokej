@@ -10,13 +10,12 @@ DataInitializer.java
 GlobalExceptionHandler.java
 package-info.java
 SecurityConfig.java
-
+TimeConfig.java
 
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\AppConfig.java
 -----
-
 package cz.phsoft.hokej.config;
 
 import org.springframework.context.annotation.Bean;
@@ -24,35 +23,35 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Aplikační konfigurace pro sdílené Spring beany.
+ * AplikaÄŤnĂ­ konfigurace pro sdĂ­lenĂ© Spring beany.
  *
- * V této třídě se definují technické komponenty,
- * které se používají napříč aplikací.
+ * V tĂ©to tĹ™Ă­dÄ› se definujĂ­ technickĂ© komponenty,
+ * kterĂ© se pouĹľĂ­vajĂ­ napĹ™Ă­ÄŤ aplikacĂ­.
  *
- * V současné době se zde vytváří instance {@link RestTemplate},
- * která slouží pro volání externích HTTP služeb.
+ * V souÄŤasnĂ© dobÄ› se zde vytvĂˇĹ™Ă­ instance {@link RestTemplate},
+ * kterĂˇ slouĹľĂ­ pro volĂˇnĂ­ externĂ­ch HTTP sluĹľeb.
  */
 @Configuration
 public class AppConfig {
 
     /**
-     * Vytváří instanci aplikační konfigurace.
+     * VytvĂˇĹ™Ă­ instanci aplikaÄŤnĂ­ konfigurace.
      *
-     * Konstruktor je prázdný, protože konfigurace je spravována
-     * Spring kontejnerem a neobsahuje žádnou vlastní logiku inicializace.
+     * Konstruktor je prĂˇzdnĂ˝, protoĹľe konfigurace je spravovĂˇna
+     * Spring kontejnerem a neobsahuje ĹľĂˇdnou vlastnĂ­ logiku inicializace.
      */
     public AppConfig() {
-        // bez vlastní logiky
+        // bez vlastnĂ­ logiky
     }
 
     /**
-     * Vytváří a registruje instanci {@link RestTemplate}.
+     * VytvĂˇĹ™Ă­ a registruje instanci {@link RestTemplate}.
      *
-     * Tato instance se používá pro synchronní volání
-     * externích HTTP API z aplikační logiky,
+     * Tato instance se pouĹľĂ­vĂˇ pro synchronnĂ­ volĂˇnĂ­
+     * externĂ­ch HTTP API z aplikaÄŤnĂ­ logiky,
      * typicky ze service vrstvy.
      *
-     * @return nová instance {@link RestTemplate} spravovaná Spring kontejnerem
+     * @return novĂˇ instance {@link RestTemplate} spravovanĂˇ Spring kontejnerem
      */
     @Bean
     public RestTemplate restTemplate() {
@@ -60,12 +59,9 @@ public class AppConfig {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\AuditAspect.java
 -----
-
 package cz.phsoft.hokej.config;
 
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
@@ -82,48 +78,48 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 /**
- * Aspekt pro auditní logování service vrstvy.
+ * Aspekt pro auditnĂ­ logovĂˇnĂ­ service vrstvy.
  *
- * Používá se k centrálnímu zaznamenávání volání metod ve službách
- * včetně argumentů, návratových hodnot a časových razítek. Chování
- * aplikace se tímto aspektem nemění, pouze se doplňují auditní logy
- * do samostatného loggeru.
+ * PouĹľĂ­vĂˇ se k centrĂˇlnĂ­mu zaznamenĂˇvĂˇnĂ­ volĂˇnĂ­ metod ve sluĹľbĂˇch
+ * vÄŤetnÄ› argumentĹŻ, nĂˇvratovĂ˝ch hodnot a ÄŤasovĂ˝ch razĂ­tek. ChovĂˇnĂ­
+ * aplikace se tĂ­mto aspektem nemÄ›nĂ­, pouze se doplĹujĂ­ auditnĂ­ logy
+ * do samostatnĂ©ho loggeru.
  */
 @Component
 @Aspect
 public class AuditAspect {
 
     /**
-     * Speciální logger určený pouze pro auditní záznamy.
+     * SpeciĂˇlnĂ­ logger urÄŤenĂ˝ pouze pro auditnĂ­ zĂˇznamy.
      *
-     * Doporučuje se mít pro tento logger samostatný appender
-     * a oddělený soubor logu, aby byly auditní záznamy odděleny
-     * od běžných aplikačních logů.
+     * DoporuÄŤuje se mĂ­t pro tento logger samostatnĂ˝ appender
+     * a oddÄ›lenĂ˝ soubor logu, aby byly auditnĂ­ zĂˇznamy oddÄ›leny
+     * od bÄ›ĹľnĂ˝ch aplikaÄŤnĂ­ch logĹŻ.
      */
     private static final Logger logger = LoggerFactory.getLogger("AUDIT_LOGGER");
 
     // Pointcut pro metody service vrstvy
 
     /**
-     * Pointcut definující všechny metody ve service vrstvě aplikace.
+     * Pointcut definujĂ­cĂ­ vĹˇechny metody ve service vrstvÄ› aplikace.
      *
-     * Zahrnuje všechny třídy a metody v balíčku
-     * {@code cz.phsoft.hokej.models.services..} včetně podbalíčků.
+     * Zahrnuje vĹˇechny tĹ™Ă­dy a metody v balĂ­ÄŤku
+     * {@code cz.phsoft.hokej.models.services..} vÄŤetnÄ› podbalĂ­ÄŤkĹŻ.
      */
     @Pointcut("within(cz.phsoft.hokej.models.services..*)")
     public void serviceMethods() {
         // Marker metoda pro pointcut
     }
 
-    // Logování před voláním metody
+    // LogovĂˇnĂ­ pĹ™ed volĂˇnĂ­m metody
 
     /**
-     * Provádí auditní záznam před zavoláním jakékoli service metody.
+     * ProvĂˇdĂ­ auditnĂ­ zĂˇznam pĹ™ed zavolĂˇnĂ­m jakĂ©koli service metody.
      *
-     * Zapisuje název metody, argumenty a aktuální čas. Slouží k evidenci
-     * začátku provádění operace a k pozdější analýze průběhu volání.
+     * Zapisuje nĂˇzev metody, argumenty a aktuĂˇlnĂ­ ÄŤas. SlouĹľĂ­ k evidenci
+     * zaÄŤĂˇtku provĂˇdÄ›nĂ­ operace a k pozdÄ›jĹˇĂ­ analĂ˝ze prĹŻbÄ›hu volĂˇnĂ­.
      *
-     * @param joinPoint kontext volané metody
+     * @param joinPoint kontext volanĂ© metody
      */
     @Before("serviceMethods()")
     public void logBefore(JoinPoint joinPoint) {
@@ -139,17 +135,17 @@ public class AuditAspect {
         );
     }
 
-    // Logování po úspěšném dokončení metody
+    // LogovĂˇnĂ­ po ĂşspÄ›ĹˇnĂ©m dokonÄŤenĂ­ metody
 
     /**
-     * Provádí auditní záznam po úspěšném dokončení metody.
+     * ProvĂˇdĂ­ auditnĂ­ zĂˇznam po ĂşspÄ›ĹˇnĂ©m dokonÄŤenĂ­ metody.
      *
-     * Metoda se nespouští při vyhození výjimky. Zapisuje název metody,
-     * případné identifikátory hráče a návratovou hodnotu včetně času
-     * ukončení operace.
+     * Metoda se nespouĹˇtĂ­ pĹ™i vyhozenĂ­ vĂ˝jimky. Zapisuje nĂˇzev metody,
+     * pĹ™Ă­padnĂ© identifikĂˇtory hrĂˇÄŤe a nĂˇvratovou hodnotu vÄŤetnÄ› ÄŤasu
+     * ukonÄŤenĂ­ operace.
      *
-     * @param joinPoint kontext volané metody
-     * @param result    návratová hodnota metody
+     * @param joinPoint kontext volanĂ© metody
+     * @param result    nĂˇvratovĂˇ hodnota metody
      */
     @AfterReturning(
             pointcut = "serviceMethods()",
@@ -163,14 +159,14 @@ public class AuditAspect {
         Long userId = null;
         Long playerId = null;
 
-        // Pokus o extrakci business identifikátorů z parametrů metody
+        // Pokus o extrakci business identifikĂˇtorĹŻ z parametrĹŻ metody
         for (Object arg : args) {
             if (arg instanceof PlayerEntity player) {
                 playerId = player.getId();
             } else if (arg instanceof MatchRegistrationEntity registration) {
                 playerId = registration.getPlayer().getId();
             } else if (arg instanceof Long id) {
-                // Případné rozlišení konkrétního ID lze doplnit podle konvence signatur metod
+                // PĹ™Ă­padnĂ© rozliĹˇenĂ­ konkrĂ©tnĂ­ho ID lze doplnit podle konvence signatur metod
             }
         }
 
@@ -185,15 +181,13 @@ public class AuditAspect {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\CustomJsonLoginFilter.java
 -----
-
 package cz.phsoft.hokej.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.phsoft.hokej.models.services.AppUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -207,53 +201,65 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Vlastní autentizační filtr pro REST přihlášení.
+ * VlastnĂ­ autentizaÄŤnĂ­ filtr pro REST pĹ™ihlĂˇĹˇenĂ­.
  *
- * Filtr rozšiřuje výchozí {@link UsernamePasswordAuthenticationFilter} tak,
- * aby podporoval přihlášení jak pomocí formuláře, tak pomocí JSON payloadu.
- * Standardní redirect chování Spring Security je nahrazeno JSON odpověďmi
- * a po úspěšném přihlášení se vytváří HTTP session se SecurityContextem.
+ * Filtr rozĹˇiĹ™uje vĂ˝chozĂ­ {@link UsernamePasswordAuthenticationFilter} tak,
+ * aby podporoval pĹ™ihlĂˇĹˇenĂ­ jak pomocĂ­ formulĂˇĹ™e, tak pomocĂ­ JSON payloadu.
+ * StandardnĂ­ redirect chovĂˇnĂ­ Spring Security je nahrazeno JSON odpovÄ›ÄŹmi
+ * a po ĂşspÄ›ĹˇnĂ©m pĹ™ihlĂˇĹˇenĂ­ se vytvĂˇĹ™Ă­ HTTP session se SecurityContextem.
  *
- * Filtr je určen pro stavový (session-based) způsob autentizace. Pro
- * stateless přístup s JWT by se použil jiný mechanismus.
+ * Filtr je urÄŤen pro stavovĂ˝ (session-based) zpĹŻsob autentizace. Pro
+ * stateless pĹ™Ă­stup s JWT by se pouĹľil jinĂ˝ mechanismus.
  */
 public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     /**
-     * Objekt pro čtení JSON z request body.
+     * Objekt pro ÄŤtenĂ­ JSON z request body.
      */
     private final ObjectMapper objectMapper = new ObjectMapper();
+    /**
+     * Servis pro prĂˇci s uĹľivatelskĂ˝mi ĂşÄŤty.
+     *
+     * PouĹľĂ­vĂˇ se pro aktualizaci ÄŤasovĂ˝ch razĂ­tek pĹ™ihlĂˇĹˇenĂ­
+     * po ĂşspÄ›ĹˇnĂ© autentizaci.
+     */
+    private final AppUserService appUserService;
 
     /**
-     * Vytvoří filtr pro zadanou login URL.
+     * VytvoĹ™Ă­ filtr pro zadanou login URL.
      *
-     * @param loginUrl    URL endpointu pro login, například {@code /api/auth/login}
-     * @param authManager instance {@link AuthenticationManager} používaná pro autentizaci
+     * @param loginUrl    URL endpointu pro login, napĹ™Ă­klad /api/auth/login
+     * @param authManager instance AuthenticationManager pouĹľĂ­vanĂˇ pro autentizaci
+     * @param appUserService servis pro sprĂˇvu uĹľivatelskĂ˝ch ĂşÄŤtĹŻ
      */
-    public CustomJsonLoginFilter(String loginUrl, AuthenticationManager authManager) {
+    public CustomJsonLoginFilter(String loginUrl,
+                                 AuthenticationManager authManager,
+                                 AppUserService appUserService) {
         setFilterProcessesUrl(loginUrl);
         setAuthenticationManager(authManager);
+        this.appUserService = appUserService;
     }
 
     // Pokus o autentizaci (login)
 
     /**
-     * Pokusí se autentizovat uživatele na základě HTTP requestu.
+     * PokusĂ­ se autentizovat uĹľivatele na zĂˇkladÄ› HTTP requestu.
      *
-     * Podporované formáty:
-     * - {@code application/x-www-form-urlencoded} (klasický form login),
+     * PodporovanĂ© formĂˇty:
+     * - {@code application/x-www-form-urlencoded} (klasickĂ˝ form login),
      * - {@code application/json} (SPA frontend).
      *
-     * Očekávaná pole:
-     * - {@code email} (případně {@code username} u form loginu),
+     * OÄŤekĂˇvanĂˇ pole:
+     * - {@code email} (pĹ™Ă­padnÄ› {@code username} u form loginu),
      * - {@code password}.
      *
-     * @throws AuthenticationException při chybě přihlášení
+     * @throws AuthenticationException pĹ™i chybÄ› pĹ™ihlĂˇĹˇenĂ­
      */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
@@ -284,14 +290,14 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                 password = json.get("password");
             }
 
-            // Základní validace vstupů
+            // ZĂˇkladnĂ­ validace vstupĹŻ
             if (email == null || password == null ||
                     email.isBlank() || password.isBlank()) {
 
-                throw new BadCredentialsException("BE - Chybí přihlašovací údaje");
+                throw new BadCredentialsException("BE - ChybĂ­ pĹ™ihlaĹˇovacĂ­ Ăşdaje");
             }
 
-            // Vytvoření Authentication tokenu
+            // VytvoĹ™enĂ­ Authentication tokenu
             UsernamePasswordAuthenticationToken authRequest =
                     new UsernamePasswordAuthenticationToken(email, password);
 
@@ -301,19 +307,19 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
             return this.getAuthenticationManager().authenticate(authRequest);
 
         } catch (IOException e) {
-            // Chyba při čtení JSON body
+            // Chyba pĹ™i ÄŤtenĂ­ JSON body
             throw new RuntimeException(e);
         }
     }
 
-    // Úspěšný login
+    // ĂšspÄ›ĹˇnĂ˝ login
 
     /**
-     * Zpracuje úspěšnou autentizaci.
+     * Zpracuje ĂşspÄ›Ĺˇnou autentizaci.
      *
-     * Do {@link SecurityContextHolder} se uloží autentizace, vytvoří se
-     * HTTP session a do ní se uloží {@link org.springframework.security.core.context.SecurityContext}.
-     * Následně se klientovi vrací JSON odpověď místo redirectu.
+     * Do {@link SecurityContextHolder} se uloĹľĂ­ autentizace, vytvoĹ™Ă­ se
+     * HTTP session a do nĂ­ se uloĹľĂ­ {@link org.springframework.security.core.context.SecurityContext}.
+     * NĂˇslednÄ› se klientovi vracĂ­ JSON odpovÄ›ÄŹ mĂ­sto redirectu.
      */
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
@@ -322,16 +328,20 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                                             Authentication authResult)
             throws IOException, ServletException {
 
-        // Nastavení SecurityContext
+        // Aktualizace login timestampĹŻ v AppUserEntity
+        String email = authResult.getName();
+        appUserService.onSuccessfulLogin(email);
+
+        // NastavenĂ­ SecurityContext
         SecurityContextHolder.getContext().setAuthentication(authResult);
 
-        // Vytvoření session a uložení kontextu
+        // VytvoĹ™enĂ­ session a uloĹľenĂ­ kontextu
         request.getSession(true).setAttribute(
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 SecurityContextHolder.getContext()
         );
 
-        // JSON odpověď
+        // JSON odpovÄ›ÄŹ
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
@@ -342,14 +352,14 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         objectMapper.writeValue(response.getWriter(), result);
     }
 
-    // Neúspěšný login
+    // NeĂşspÄ›ĹˇnĂ˝ login
 
     /**
-     * Zpracuje neúspěšnou autentizaci.
+     * Zpracuje neĂşspÄ›Ĺˇnou autentizaci.
      *
-     * Vrací se HTTP status 401 a JSON odpověď s informací o chybě.
-     * Rozlišuje se neaktivovaný účet, neplatné přihlašovací údaje
-     * a ostatní chyby při přihlášení.
+     * VracĂ­ se HTTP status 401 a JSON odpovÄ›ÄŹ s informacĂ­ o chybÄ›.
+     * RozliĹˇuje se neaktivovanĂ˝ ĂşÄŤet, neplatnĂ© pĹ™ihlaĹˇovacĂ­ Ăşdaje
+     * a ostatnĂ­ chyby pĹ™i pĹ™ihlĂˇĹˇenĂ­.
      */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request,
@@ -367,21 +377,18 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         if (failed.getCause() instanceof cz.phsoft.hokej.exceptions.AccountNotActivatedException) {
             result.put("message", failed.getCause().getMessage());
         } else if (failed instanceof BadCredentialsException) {
-            result.put("message", "BE - Neplatné přihlašovací údaje");
+            result.put("message", "BE - NeplatnĂ© pĹ™ihlaĹˇovacĂ­ Ăşdaje");
         } else {
-            result.put("message", "BE - Chyba při přihlášení");
+            result.put("message", "BE - Chyba pĹ™i pĹ™ihlĂˇĹˇenĂ­");
         }
 
         objectMapper.writeValue(response.getWriter(), result);
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\CustomUserDetailsService.java
 -----
-
 package cz.phsoft.hokej.config;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
@@ -394,18 +401,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementace {@link UserDetailsService} pro napojení Spring Security
- * na databázový model uživatele.
+ * Implementace {@link UserDetailsService} pro napojenĂ­ Spring Security
+ * na databĂˇzovĂ˝ model uĹľivatele.
  *
- * Třída načítá uživatele z databáze podle e-mailu, ověřuje, zda je účet
- * aktivní, a převádí entitu {@link AppUserEntity} na objekt
- * {@link UserDetails}, který Spring Security používá při autentizaci.
+ * TĹ™Ă­da naÄŤĂ­tĂˇ uĹľivatele z databĂˇze podle e-mailu, ovÄ›Ĺ™uje, zda je ĂşÄŤet
+ * aktivnĂ­, a pĹ™evĂˇdĂ­ entitu {@link AppUserEntity} na objekt
+ * {@link UserDetails}, kterĂ˝ Spring Security pouĹľĂ­vĂˇ pĹ™i autentizaci.
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
     /**
-     * Repozitář pro načítání uživatelů při přihlášení.
+     * RepozitĂˇĹ™ pro naÄŤĂ­tĂˇnĂ­ uĹľivatelĹŻ pĹ™i pĹ™ihlĂˇĹˇenĂ­.
      */
     private final AppUserRepository appUserRepository;
 
@@ -413,54 +420,51 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.appUserRepository = appUserRepository;
     }
 
-    // Načtení uživatele pro Spring Security
+    // NaÄŤtenĂ­ uĹľivatele pro Spring Security
 
     /**
-     * Načte uživatele podle e-mailu pro potřeby autentizace.
+     * NaÄŤte uĹľivatele podle e-mailu pro potĹ™eby autentizace.
      *
-     * Metoda se volá Spring Security při přihlášení. V případě, že uživatel
-     * neexistuje, je vyhozena {@link UsernameNotFoundException}. Pokud účet
-     * existuje, ale není aktivní, je vyhozena {@link AccountNotActivatedException}.
+     * Metoda se volĂˇ Spring Security pĹ™i pĹ™ihlĂˇĹˇenĂ­. V pĹ™Ă­padÄ›, Ĺľe uĹľivatel
+     * neexistuje, je vyhozena {@link UsernameNotFoundException}. Pokud ĂşÄŤet
+     * existuje, ale nenĂ­ aktivnĂ­, je vyhozena {@link AccountNotActivatedException}.
      *
-     * @param email e-mail zadaný uživatelem při přihlášení
-     * @return objekt {@link UserDetails} použitý pro autentizaci
-     * @throws UsernameNotFoundException    pokud uživatel s daným e-mailem neexistuje
-     * @throws AccountNotActivatedException pokud účet existuje, ale není aktivní
+     * @param email e-mail zadanĂ˝ uĹľivatelem pĹ™i pĹ™ihlĂˇĹˇenĂ­
+     * @return objekt {@link UserDetails} pouĹľitĂ˝ pro autentizaci
+     * @throws UsernameNotFoundException    pokud uĹľivatel s danĂ˝m e-mailem neexistuje
+     * @throws AccountNotActivatedException pokud ĂşÄŤet existuje, ale nenĂ­ aktivnĂ­
      */
     @Override
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        // Načtení uživatele z databáze
+        // NaÄŤtenĂ­ uĹľivatele z databĂˇze
         AppUserEntity user = appUserRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("BE - Uživatel nenalezen")
+                        new UsernameNotFoundException("BE - UĹľivatel nenalezen")
                 );
 
-        // Kontrola aktivace účtu
+        // Kontrola aktivace ĂşÄŤtu
         if (!user.isEnabled()) {
-            // Výjimka se typicky zachytává ve filtru pro login a převádí na odpověď pro frontend
+            // VĂ˝jimka se typicky zachytĂˇvĂˇ ve filtru pro login a pĹ™evĂˇdĂ­ na odpovÄ›ÄŹ pro frontend
             throw new AccountNotActivatedException();
         }
 
-        // Mapování na UserDetails
+        // MapovĂˇnĂ­ na UserDetails
         return User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                // Role se ukládá bez prefixu ROLE_, Spring si prefix přidá automaticky
+                // Role se uklĂˇdĂˇ bez prefixu ROLE_, Spring si prefix pĹ™idĂˇ automaticky
                 .roles(user.getRole().name().replace("ROLE_", ""))
-                // Disabled flag se drží konzistentní se stavem entity
+                // Disabled flag se drĹľĂ­ konzistentnĂ­ se stavem entity
                 .disabled(!user.isEnabled())
                 .build();
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\DataInitializer.java
 -----
-
 package cz.phsoft.hokej.config;
 
 import cz.phsoft.hokej.data.entities.*;
@@ -487,13 +491,13 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Komponenta pro inicializaci ukázkových dat v databázi.
+ * Komponenta pro inicializaci ukĂˇzkovĂ˝ch dat v databĂˇzi.
  *
- * Po startu aplikace se vytváří výchozí administrátor, ukázkoví hráči s uživateli,
- * výchozí nastavení uživatelů a hráčů, sezóny, zápasy a ukázkové registrace.
+ * Po startu aplikace se vytvĂˇĹ™Ă­ vĂ˝chozĂ­ administrĂˇtor, ukĂˇzkovĂ­ hrĂˇÄŤi s uĹľivateli,
+ * vĂ˝chozĂ­ nastavenĂ­ uĹľivatelĹŻ a hrĂˇÄŤĹŻ, sezĂłny, zĂˇpasy a ukĂˇzkovĂ© registrace.
  *
- * Inicializace se spouští pouze při zapnutí vlastnosti {@code app.seed.enabled=true}.
- * Databázové triggery se v této třídě nevytvářejí, protože se spravují pomocí Flyway migrací.
+ * Inicializace se spouĹˇtĂ­ pouze pĹ™i zapnutĂ­ vlastnosti {@code app.seed.enabled=true}.
+ * DatabĂˇzovĂ© triggery se v tĂ©to tĹ™Ă­dÄ› nevytvĂˇĹ™ejĂ­, protoĹľe se spravujĂ­ pomocĂ­ Flyway migracĂ­.
  */
 @Component
 @ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true", matchIfMissing = false)
@@ -537,10 +541,10 @@ public class DataInitializer {
     }
 
     /**
-     * Spouští inicializaci ukázkových dat po startu aplikace.
+     * SpouĹˇtĂ­ inicializaci ukĂˇzkovĂ˝ch dat po startu aplikace.
      *
-     * Metody se volají v pořadí tak, aby byly zachovány závislosti mezi entitami.
-     * Triggery se nevytvářejí, protože se spravují pomocí Flyway.
+     * Metody se volajĂ­ v poĹ™adĂ­ tak, aby byly zachovĂˇny zĂˇvislosti mezi entitami.
+     * Triggery se nevytvĂˇĹ™ejĂ­, protoĹľe se spravujĂ­ pomocĂ­ Flyway.
      */
     @PostConstruct
     public void init() {
@@ -558,10 +562,10 @@ public class DataInitializer {
     }
 
     /**
-     * Vytváří výchozího administrátora, pokud ještě neexistuje.
+     * VytvĂˇĹ™Ă­ vĂ˝chozĂ­ho administrĂˇtora, pokud jeĹˇtÄ› neexistuje.
      *
-     * Timestamp se po uložení upraví přes JdbcTemplate, protože AppUserEntity nastavuje
-     * timestamp při persistenci automaticky.
+     * Timestamp se po uloĹľenĂ­ upravĂ­ pĹ™es JdbcTemplate, protoĹľe AppUserEntity nastavuje
+     * timestamp pĹ™i persistenci automaticky.
      */
     private void initAdmin() {
         appUserRepository.findByEmail("admin@example.com").ifPresentOrElse(
@@ -590,9 +594,9 @@ public class DataInitializer {
     }
 
     /**
-     * Vytváří testovací hráče a k nim přiřazené uživatele.
+     * VytvĂˇĹ™Ă­ testovacĂ­ hrĂˇÄŤe a k nim pĹ™iĹ™azenĂ© uĹľivatele.
      *
-     * Pokud již v databázi existují hráči, inicializace se přeskočí.
+     * Pokud jiĹľ v databĂˇzi existujĂ­ hrĂˇÄŤi, inicializace se pĹ™eskoÄŤĂ­.
      */
     private void initPlayersAndUsers() {
         if (playerRepository.count() > 0) {
@@ -601,12 +605,12 @@ public class DataInitializer {
         }
 
         String[] names = {
-                "Jan", "Petr", "Jiří", "Josef", "Pavel",
-                "Martin", "Tomáš", "Jaroslav", "Miroslav", "Zdeněk"
+                "Jan", "Petr", "JiĹ™Ă­", "Josef", "Pavel",
+                "Martin", "TomĂˇĹˇ", "Jaroslav", "Miroslav", "ZdenÄ›k"
         };
         String[] surnames = {
-                "Novák", "Svoboda", "Novotný", "Dvořák", "Černý",
-                "Procházka", "Kučera", "Veselý", "Horák", "Němec"
+                "NovĂˇk", "Svoboda", "NovotnĂ˝", "DvoĹ™Ăˇk", "ÄŚernĂ˝",
+                "ProchĂˇzka", "KuÄŤera", "VeselĂ˝", "HorĂˇk", "NÄ›mec"
         };
 
         for (int i = 0; i < 10; i++) {
@@ -655,7 +659,7 @@ public class DataInitializer {
     }
 
     /**
-     * Vytváří výchozí nastavení pro všechny uživatele, kteří je ještě nemají.
+     * VytvĂˇĹ™Ă­ vĂ˝chozĂ­ nastavenĂ­ pro vĹˇechny uĹľivatele, kteĹ™Ă­ je jeĹˇtÄ› nemajĂ­.
      */
     private void initUserSettings() {
         log.info("User settings initialization starts.");
@@ -677,7 +681,7 @@ public class DataInitializer {
     }
 
     /**
-     * Vytváří výchozí nastavení pro všechny hráče, kteří je ještě nemají.
+     * VytvĂˇĹ™Ă­ vĂ˝chozĂ­ nastavenĂ­ pro vĹˇechny hrĂˇÄŤe, kteĹ™Ă­ je jeĹˇtÄ› nemajĂ­.
      */
     private void initPlayerSettings() {
         log.info("Player settings initialization starts.");
@@ -699,7 +703,7 @@ public class DataInitializer {
     }
 
     /**
-     * Vytváří výchozí sezóny, pokud žádné neexistují.
+     * VytvĂˇĹ™Ă­ vĂ˝chozĂ­ sezĂłny, pokud ĹľĂˇdnĂ© neexistujĂ­.
      */
     private void initSeasons() {
         if (seasonRepository.count() > 0) {
@@ -736,10 +740,10 @@ public class DataInitializer {
     }
 
     /**
-     * Vytváří zápasy pro první dvě sezóny.
+     * VytvĂˇĹ™Ă­ zĂˇpasy pro prvnĂ­ dvÄ› sezĂłny.
      *
-     * Zápasy se generují po pátcích v rámci období sezóny.
-     * Pokud již existují zápasy, inicializace se přeskočí.
+     * ZĂˇpasy se generujĂ­ po pĂˇtcĂ­ch v rĂˇmci obdobĂ­ sezĂłny.
+     * Pokud jiĹľ existujĂ­ zĂˇpasy, inicializace se pĹ™eskoÄŤĂ­.
      */
     private void initMatches() {
         if (matchRepository.count() > 0) {
@@ -749,7 +753,7 @@ public class DataInitializer {
 
         List<SeasonEntity> seasons = seasonRepository.findAll();
         if (seasons.isEmpty()) {
-            throw new IllegalStateException("Nelze inicializovat zápasy, protože neexistuje žádná sezóna.");
+            throw new IllegalStateException("Nelze inicializovat zĂˇpasy, protoĹľe neexistuje ĹľĂˇdnĂˇ sezĂłna.");
         }
 
         log.info("Match initialization starts.");
@@ -769,7 +773,7 @@ public class DataInitializer {
             for (int i = 0; i < fridaysCount; i++) {
                 MatchEntity match = new MatchEntity();
                 match.setDateTime(firstMatchDate.plusWeeks(i));
-                match.setLocation("NĚJAKÁ HALA");
+                match.setLocation("NÄšJAKĂ HALA");
                 match.setDescription("");
                 match.setMaxPlayers(12);
                 match.setPrice(2200);
@@ -786,10 +790,10 @@ public class DataInitializer {
     }
 
     /**
-     * Vytváří ukázkové registrace hráčů na zápasy.
+     * VytvĂˇĹ™Ă­ ukĂˇzkovĂ© registrace hrĂˇÄŤĹŻ na zĂˇpasy.
      *
-     * Registrace se vytvářejí pouze pro zápasy v blízké budoucnosti.
-     * Pokud již registrace existují, inicializace se přeskočí.
+     * Registrace se vytvĂˇĹ™ejĂ­ pouze pro zĂˇpasy v blĂ­zkĂ© budoucnosti.
+     * Pokud jiĹľ registrace existujĂ­, inicializace se pĹ™eskoÄŤĂ­.
      */
     private void initRegistrations() {
         if (matchRegistrationRepository.count() > 0) {
@@ -838,7 +842,7 @@ public class DataInitializer {
                 if (i == excusedIndex) {
                     reg.setStatus(PlayerMatchStatus.EXCUSED);
                     reg.setExcuseReason(ExcuseReason.NEMOC);
-                    reg.setExcuseNote("chřipka");
+                    reg.setExcuseNote("chĹ™ipka");
                 } else if (i == unregisteredIndex1 || i == unregisteredIndex2) {
                     reg.setStatus(PlayerMatchStatus.UNREGISTERED);
                     reg.setExcuseReason(null);
@@ -861,11 +865,11 @@ public class DataInitializer {
     }
 
     /**
-     * Spočítá počet pátků v období včetně.
+     * SpoÄŤĂ­tĂˇ poÄŤet pĂˇtkĹŻ v obdobĂ­ vÄŤetnÄ›.
      *
-     * @param from počáteční datum
-     * @param to koncové datum
-     * @return počet pátků v období
+     * @param from poÄŤĂˇteÄŤnĂ­ datum
+     * @param to koncovĂ© datum
+     * @return poÄŤet pĂˇtkĹŻ v obdobĂ­
      */
     private int countFridays(LocalDate from, LocalDate to) {
         if (to.isBefore(from)) {
@@ -885,9 +889,9 @@ public class DataInitializer {
     }
 
     /**
-     * Vygeneruje náhodný timestamp v rozsahu určeném pro ukázková data.
+     * Vygeneruje nĂˇhodnĂ˝ timestamp v rozsahu urÄŤenĂ©m pro ukĂˇzkovĂˇ data.
      *
-     * @return náhodný timestamp v UTC
+     * @return nĂˇhodnĂ˝ timestamp v UTC
      */
     private LocalDateTime randomTimestampForDemoData() {
         LocalDateTime from = LocalDateTime.of(2024, 11, 1, 0, 0);
@@ -901,12 +905,9 @@ public class DataInitializer {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\GlobalExceptionHandler.java
 -----
-
 package cz.phsoft.hokej.config;
 
 import cz.phsoft.hokej.exceptions.ApiError;
@@ -924,25 +925,25 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Map;
 
 /**
- * Globální handler výjimek pro REST API.
+ * GlobĂˇlnĂ­ handler vĂ˝jimek pro REST API.
  *
- * Slouží k centralizovanému zachytávání výjimek z controllerů a service
- * vrstvy, jejich převodu na jednotný JSON formát {@link ApiError} a
- * k nastavení odpovídajících HTTP status kódů.
+ * SlouĹľĂ­ k centralizovanĂ©mu zachytĂˇvĂˇnĂ­ vĂ˝jimek z controllerĹŻ a service
+ * vrstvy, jejich pĹ™evodu na jednotnĂ˝ JSON formĂˇt {@link ApiError} a
+ * k nastavenĂ­ odpovĂ­dajĂ­cĂ­ch HTTP status kĂłdĹŻ.
  *
- * Třída neřeší business logiku ani detailní logování. Tyto aspekty lze
- * doplnit do jednotlivých handler metod podle potřeby.
+ * TĹ™Ă­da neĹ™eĹˇĂ­ business logiku ani detailnĂ­ logovĂˇnĂ­. Tyto aspekty lze
+ * doplnit do jednotlivĂ˝ch handler metod podle potĹ™eby.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 1) Doménové výjimky
+    // 1) DomĂ©novĂ© vĂ˝jimky
 
     /**
-     * Zachytává výjimky typu {@link BusinessException}.
+     * ZachytĂˇvĂˇ vĂ˝jimky typu {@link BusinessException}.
      *
-     * Výjimka předává HTTP status, uživatelskou zprávu a další informace,
-     * které se používají při sestavení odpovědi {@link ApiError}.
+     * VĂ˝jimka pĹ™edĂˇvĂˇ HTTP status, uĹľivatelskou zprĂˇvu a dalĹˇĂ­ informace,
+     * kterĂ© se pouĹľĂ­vajĂ­ pĹ™i sestavenĂ­ odpovÄ›di {@link ApiError}.
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(
@@ -962,13 +963,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // 2) Přístup odepřen (Spring Security)
+    // 2) PĹ™Ă­stup odepĹ™en (Spring Security)
 
     /**
-     * Zachytává {@link AccessDeniedException} vyhozenou Spring Security.
+     * ZachytĂˇvĂˇ {@link AccessDeniedException} vyhozenou Spring Security.
      *
-     * Typicky jde o situace, kdy uživatel nemá potřebnou roli pro volání
-     * daného endpointu. Vrací se HTTP status 403 Forbidden.
+     * Typicky jde o situace, kdy uĹľivatel nemĂˇ potĹ™ebnou roli pro volĂˇnĂ­
+     * danĂ©ho endpointu. VracĂ­ se HTTP status 403 Forbidden.
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex,
@@ -987,13 +988,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // 3) Chybné vstupy (IllegalArgumentException)
+    // 3) ChybnĂ© vstupy (IllegalArgumentException)
 
     /**
-     * Zachytává {@link IllegalArgumentException}.
+     * ZachytĂˇvĂˇ {@link IllegalArgumentException}.
      *
-     * Používá se pro obecné validační chyby vstupů nebo nesprávné
-     * parametry předané do service vrstvy. Vrací se HTTP status 400.
+     * PouĹľĂ­vĂˇ se pro obecnĂ© validaÄŤnĂ­ chyby vstupĹŻ nebo nesprĂˇvnĂ©
+     * parametry pĹ™edanĂ© do service vrstvy. VracĂ­ se HTTP status 400.
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex,
@@ -1012,13 +1013,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // 4) Neplatný stav aplikace (IllegalStateException)
+    // 4) NeplatnĂ˝ stav aplikace (IllegalStateException)
 
     /**
-     * Zachytává {@link IllegalStateException}.
+     * ZachytĂˇvĂˇ {@link IllegalStateException}.
      *
-     * Používá se pro situace, kdy je aplikace v neplatném stavu a
-     * daná operace nemůže být provedena. Typicky se vrací HTTP status 409.
+     * PouĹľĂ­vĂˇ se pro situace, kdy je aplikace v neplatnĂ©m stavu a
+     * danĂˇ operace nemĹŻĹľe bĂ˝t provedena. Typicky se vracĂ­ HTTP status 409.
      */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiError> handleIllegalState(IllegalStateException ex,
@@ -1037,14 +1038,14 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // 5) Porušení integrity dat
+    // 5) PoruĹˇenĂ­ integrity dat
 
     /**
-     * Zachytává {@link DataIntegrityViolationException} z databázové vrstvy.
+     * ZachytĂˇvĂˇ {@link DataIntegrityViolationException} z databĂˇzovĂ© vrstvy.
      *
-     * Typicky jde o porušení unikátních omezení nebo jiné konflikty při
-     * ukládání dat. Z bezpečnostních důvodů se nevrací detailní databázová
-     * zpráva, ale obecnější chybové hlášení.
+     * Typicky jde o poruĹˇenĂ­ unikĂˇtnĂ­ch omezenĂ­ nebo jinĂ© konflikty pĹ™i
+     * uklĂˇdĂˇnĂ­ dat. Z bezpeÄŤnostnĂ­ch dĹŻvodĹŻ se nevracĂ­ detailnĂ­ databĂˇzovĂˇ
+     * zprĂˇva, ale obecnÄ›jĹˇĂ­ chybovĂ© hlĂˇĹˇenĂ­.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(
@@ -1054,7 +1055,7 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(
                 HttpStatus.CONFLICT.value(),
                 "Conflict",
-                "BE - Záznam porušuje unikátní omezení (pravděpodobně duplicitní hráč).",
+                "BE - ZĂˇznam poruĹˇuje unikĂˇtnĂ­ omezenĂ­ (pravdÄ›podobnÄ› duplicitnĂ­ hrĂˇÄŤ).",
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
@@ -1064,13 +1065,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // 6) Neočekávané chyby (fallback)
+    // 6) NeoÄŤekĂˇvanĂ© chyby (fallback)
 
     /**
-     * Fallback handler pro všechny neošetřené výjimky.
+     * Fallback handler pro vĹˇechny neoĹˇetĹ™enĂ© vĂ˝jimky.
      *
-     * Slouží jako poslední ochrana proti pádu aplikace bez odpovědi
-     * a vrací jednotný formát chyby s HTTP statusem 500.
+     * SlouĹľĂ­ jako poslednĂ­ ochrana proti pĂˇdu aplikace bez odpovÄ›di
+     * a vracĂ­ jednotnĂ˝ formĂˇt chyby s HTTP statusem 500.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAll(Exception ex,
@@ -1079,7 +1080,7 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
-                "BE - Došlo k neočekávané chybě na serveru.",
+                "BE - DoĹˇlo k neoÄŤekĂˇvanĂ© chybÄ› na serveru.",
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
@@ -1089,13 +1090,13 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    // 7) Validační chyby (@Valid, Bean Validation)
+    // 7) ValidaÄŤnĂ­ chyby (@Valid, Bean Validation)
 
     /**
-     * Zachytává validační chyby vyvolané anotací {@code @Valid}.
+     * ZachytĂˇvĂˇ validaÄŤnĂ­ chyby vyvolanĂ© anotacĂ­ {@code @Valid}.
      *
-     * Do pole {@code details} se ukládá mapa ve tvaru název pole → text
-     * validační chyby. Vrací se HTTP status 400 Bad Request.
+     * Do pole {@code details} se uklĂˇdĂˇ mapa ve tvaru nĂˇzev pole â†’ text
+     * validaÄŤnĂ­ chyby. VracĂ­ se HTTP status 400 Bad Request.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationException(
@@ -1120,7 +1121,7 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(
                 status.value(),
                 status.getReasonPhrase(),
-                "BE - Neplatná vstupní data.",
+                "BE - NeplatnĂˇ vstupnĂ­ data.",
                 request.getRequestURI(),
                 request.getRemoteAddr(),
                 fieldErrors
@@ -1132,32 +1133,26 @@ public class GlobalExceptionHandler {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\package-info.java
 -----
-
 /**
- * Konfigurační třídy aplikace.
+ * KonfiguraÄŤnĂ­ tĹ™Ă­dy aplikace.
  *
  * Obsahuje:
  * - obecnou konfiguraci Spring Boot aplikace,
- * - nastavení beanů a integračních komponent,
- * - konfiguraci technických aspektů (např. CORS, mail, SMS, logging).
+ * - nastavenĂ­ beanĹŻ a integraÄŤnĂ­ch komponent,
+ * - konfiguraci technickĂ˝ch aspektĹŻ (napĹ™. CORS, mail, SMS, logging).
  *
  * Tato vrstva:
  * - neobsahuje business logiku,
- * - připravuje prostředí a infrastrukturu pro běh aplikace.
+ * - pĹ™ipravuje prostĹ™edĂ­ a infrastrukturu pro bÄ›h aplikace.
  */
 package cz.phsoft.hokej.config;
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\SecurityConfig.java
 -----
-
 package cz.phsoft.hokej.config;
 
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
@@ -1179,15 +1174,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import cz.phsoft.hokej.models.services.AppUserService;
+
 
 import java.util.List;
 
 /**
- * Hlavní konfigurace Spring Security pro backend aplikace.
+ * HlavnĂ­ konfigurace Spring Security pro backend aplikace.
  *
- * Třída zajišťuje nastavení autentizace, autorizace endpointů,
- * login mechanizmu, správy session a CORS.
- * Používá produkční JSON login a rolově řízený přístup.
+ * TĹ™Ă­da zajiĹˇĹĄuje nastavenĂ­ autentizace, autorizace endpointĹŻ,
+ * login mechanizmu, sprĂˇvy session a CORS.
+ * PouĹľĂ­vĂˇ produkÄŤnĂ­ JSON login a rolovÄ› Ĺ™Ă­zenĂ˝ pĹ™Ă­stup.
  */
 @Configuration
 @EnableWebSecurity
@@ -1196,29 +1193,32 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final PlayerRepository playerRepository;
+    private final AppUserService appUserService;
 
     /**
-     * Příznak demo režimu.
+     * PĹ™Ă­znak demo reĹľimu.
      *
-     * Pokud je {@code app.demo-mode=true}, některé operace mohou být
-     * omezeny na úrovni service vrstvy.
+     * Pokud je {@code app.demo-mode=true}, nÄ›kterĂ© operace mohou bĂ˝t
+     * omezeny na Ăşrovni service vrstvy.
      */
     @Value("${app.demo-mode:false}")
     private boolean isDemoMode;
 
     /**
-     * Seznam povolených originů pro CORS.
+     * Seznam povolenĂ˝ch originĹŻ pro CORS.
      *
-     * Příklad:
+     * PĹ™Ă­klad:
      * app.cors.allowed-origins=http://localhost:5173,https://hokej.phsoft.cz
      */
     @Value("${app.cors.allowed-origins:http://localhost:5173,https://hokej.phsoft.cz}")
     private String allowedOrigins;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
-                          PlayerRepository playerRepository) {
+                          PlayerRepository playerRepository,
+                          AppUserService appUserService) {
         this.userDetailsService = userDetailsService;
         this.playerRepository = playerRepository;
+        this.appUserService = appUserService;
     }
 
     @Bean
@@ -1252,12 +1252,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
 
                     /*
-                     * Povolení CORS preflight requestů.
+                     * PovolenĂ­ CORS preflight requestĹŻ.
                      */
                     auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
                     /*
-                     * Veřejné endpointy.
+                     * VeĹ™ejnĂ© endpointy.
                      */
                     auth.requestMatchers(
                             "/api/auth/register",
@@ -1275,7 +1275,7 @@ public class SecurityConfig {
                     ).permitAll();
 
                     /*
-                     * DEMO režim: umožní číst demo notifikace bez přihlášení.
+                     * DEMO reĹľim: umoĹľnĂ­ ÄŤĂ­st demo notifikace bez pĹ™ihlĂˇĹˇenĂ­.
                      */
                     if (isDemoMode) {
                         auth.requestMatchers("/api/demo/notifications/**").permitAll();
@@ -1298,7 +1298,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER");
 
                     /*
-                     * Zbytek API pouze pro přihlášené.
+                     * Zbytek API pouze pro pĹ™ihlĂˇĹˇenĂ©.
                      */
                     auth.requestMatchers("/api/**").authenticated();
                     auth.anyRequest().authenticated();
@@ -1309,7 +1309,7 @@ public class SecurityConfig {
                 )
 
                 .addFilterAt(
-                        new CustomJsonLoginFilter("/api/auth/login", authManager),
+                        new CustomJsonLoginFilter("/api/auth/login", authManager, appUserService),
                         UsernamePasswordAuthenticationFilter.class
                 )
 
@@ -1328,7 +1328,7 @@ public class SecurityConfig {
                             response.setContentType("application/json");
                             response.setCharacterEncoding("UTF-8");
                             response.getWriter()
-                                    .write("{\"status\":\"ok\",\"message\":\"Odhlášeno\"}");
+                                    .write("{\"status\":\"ok\",\"message\":\"OdhlĂˇĹˇeno\"}");
                         })
                 );
 
@@ -1363,4 +1363,28 @@ public class SecurityConfig {
     }
 }
 
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\config\TimeConfig.java
+-----
+package cz.phsoft.hokej.config;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.time.Clock;
+
+/**
+ * Konfigurace systĂ©movĂ©ho ÄŤasu.
+ *
+ * Poskytuje aplikaÄŤnĂ­ Clock, kterĂ˝ se pouĹľĂ­vĂˇ pro prĂˇci s ÄŤasem
+ * napĹ™Ă­ÄŤ aplikacĂ­, aby bylo moĹľnĂ© ÄŤas snadno testovat a udrĹľet
+ * konzistentnĂ­ nastavenĂ­ ÄŤasovĂ© zĂłny.
+ */
+@Configuration
+public class TimeConfig {
+
+    @Bean
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
+}

@@ -16,6 +16,8 @@ MatchHistoryDTO.java
 MatchOverviewDTO.java
 MatchRegistrationDTO.java
 MatchRegistrationHistoryDTO.java
+NotificationBadgeDTO.java
+NotificationDTO.java
 NumberedMatchDTO.java
 package-info.java
 PlayerDTO.java
@@ -30,11 +32,9 @@ SeasonHistoryDTO.java
 SuccessResponseDTO.java
 
 
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\AppUserDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.Role;
@@ -44,68 +44,84 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.time.Instant;
 
 /**
- * DTO, které reprezentuje uživatelský účet aplikace.
+ * DTO, kterĂ© reprezentuje uĹľivatelskĂ˝ ĂşÄŤet aplikace.
  *
- * Slouží k přenosu uživatelských dat mezi backendem a klientem.
- * Používá se například při správě uživatelů, zobrazení profilu
- * nebo při přihlášení a načítání základních informací o účtu.
+ * SlouĹľĂ­ k pĹ™enosu uĹľivatelskĂ˝ch dat mezi backendem a klientem.
+ * PouĹľĂ­vĂˇ se napĹ™Ă­klad pĹ™i sprĂˇvÄ› uĹľivatelĹŻ, zobrazenĂ­ profilu
+ * nebo pĹ™i pĹ™ihlĂˇĹˇenĂ­ a naÄŤĂ­tĂˇnĂ­ zĂˇkladnĂ­ch informacĂ­ o ĂşÄŤtu.
  *
- * DTO neobsahuje heslo. Pro změnu hesla se používá samostatné DTO.
+ * DTO neobsahuje heslo. Pro zmÄ›nu hesla se pouĹľĂ­vĂˇ samostatnĂ© DTO.
  *
  */
 public class AppUserDTO {
 
     private Long id;
 
-    @NotBlank(message = "Křestní jméno je povinné.")
+    @NotBlank(message = "KĹ™estnĂ­ jmĂ©no je povinnĂ©.")
     @Size(min = 2, max = 50)
     private String name;
 
-    @NotBlank(message = "Příjmení je povinné.")
+    @NotBlank(message = "PĹ™Ă­jmenĂ­ je povinnĂ©.")
     @Size(min = 2, max = 50)
     private String surname;
 
     /**
-     * Email uživatele, který se používá jako přihlašovací identifikátor.
+     * Email uĹľivatele, kterĂ˝ se pouĹľĂ­vĂˇ jako pĹ™ihlaĹˇovacĂ­ identifikĂˇtor.
      */
-    @NotBlank(message = "Email je povinný.")
-    @Email(message = "Email není ve správném formátu.")
+    @NotBlank(message = "Email je povinnĂ˝.")
+    @Email(message = "Email nenĂ­ ve sprĂˇvnĂ©m formĂˇtu.")
     private String email;
 
     /**
-     * Role uživatele v systému.
+     * Role uĹľivatele v systĂ©mu.
      *
-     * Ovlivňuje oprávnění k jednotlivým endpointům a funkcím.
+     * OvlivĹuje oprĂˇvnÄ›nĂ­ k jednotlivĂ˝m endpointĹŻm a funkcĂ­m.
      */
     private Role role;
 
     /**
-     * Příznak, zda je uživatelský účet aktivní.
+     * PĹ™Ă­znak, zda je uĹľivatelskĂ˝ ĂşÄŤet aktivnĂ­.
      *
-     * Neaktivní účet se nemůže přihlásit do aplikace.
+     * NeaktivnĂ­ ĂşÄŤet se nemĹŻĹľe pĹ™ihlĂˇsit do aplikace.
      */
     private boolean enabled;
 
     /**
-     * Hráči přiřazení k uživateli.
+     * HrĂˇÄŤi pĹ™iĹ™azenĂ­ k uĹľivateli.
      *
-     * Jedná se o datový pohled využívaný pro prezentační účely
-     * na straně klienta. DTO nenese zodpovědnost za správu tohoto
-     * vztahu v databázi.
+     * JednĂˇ se o datovĂ˝ pohled vyuĹľĂ­vanĂ˝ pro prezentaÄŤnĂ­ ĂşÄŤely
+     * na stranÄ› klienta. DTO nenese zodpovÄ›dnost za sprĂˇvu tohoto
+     * vztahu v databĂˇzi.
      */
     private Set<PlayerDTO> players;
 
     /**
-     * Časové razítko uživatele.
-     * Používá se pro zobrazení data a času vytvoření nebo
-     * poslední změny uživatelského účtu.
+     * ÄŚasovĂ© razĂ­tko uĹľivatele.
+     * PouĹľĂ­vĂˇ se pro zobrazenĂ­ data a ÄŤasu vytvoĹ™enĂ­ nebo
+     * poslednĂ­ zmÄ›ny uĹľivatelskĂ©ho ĂşÄŤtu.
      *
-     * Hodnota je spravována na backendu (entitou a triggery)
+     * Hodnota je spravovĂˇna na backendu (entitou a triggery)
      * a klient ji pouze zobrazuje.
      */
     private LocalDateTime timestamp;
+
+    /**
+     * ÄŚas pĹ™edposlednĂ­ho pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     *
+     * Hodnota je nastavovĂˇna pĹ™i ĂşspÄ›ĹˇnĂ©m pĹ™ihlĂˇĹˇenĂ­.
+     * Pokud je null, uĹľivatel se jeĹˇtÄ› nepĹ™ihlĂˇsil.
+     */
+    private Instant lastLoginAt;
+
+    /**
+     * ÄŚas poslednĂ­ho (aktuĂˇlnĂ­ho) pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     *
+     * Hodnota je nastavovĂˇna pĹ™i ĂşspÄ›ĹˇnĂ©m pĹ™ihlĂˇĹˇenĂ­.
+     */
+    private Instant currentLoginAt;
 
 
     public Long getId() { return id; }
@@ -131,14 +147,27 @@ public class AppUserDTO {
 
     public LocalDateTime getTimestamp() { return timestamp; }
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+
+    public Instant getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(Instant lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
+    public Instant getCurrentLoginAt() {
+        return currentLoginAt;
+    }
+
+    public void setCurrentLoginAt(Instant currentLoginAt) {
+        this.currentLoginAt = currentLoginAt;
+    }
 }
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\AppUserHistoryDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.Role;
@@ -146,34 +175,34 @@ import cz.phsoft.hokej.data.enums.Role;
 import java.time.LocalDateTime;
 
 /**
- * DTO reprezentující historický záznam o uživateli.
+ * DTO reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam o uĹľivateli.
  *
- * Slouží pro auditní a přehledové účely.
- * Obsahuje informace o změnách uživatelského účtu v čase,
- * včetně typu akce, původního časového razítka a aktuálních dat.
+ * SlouĹľĂ­ pro auditnĂ­ a pĹ™ehledovĂ© ĂşÄŤely.
+ * Obsahuje informace o zmÄ›nĂˇch uĹľivatelskĂ©ho ĂşÄŤtu v ÄŤase,
+ * vÄŤetnÄ› typu akce, pĹŻvodnĂ­ho ÄŤasovĂ©ho razĂ­tka a aktuĂˇlnĂ­ch dat.
  */
 public class AppUserHistoryDTO {
 
     private Long id;
 
     /**
-     * Typ provedené operace.
+     * Typ provedenĂ© operace.
      * Typicky hodnoty INSERT, UPDATE nebo DELETE.
      */
     private String action;
 
     /**
-     * Datum a čas provedení změny.
+     * Datum a ÄŤas provedenĂ­ zmÄ›ny.
      */
     private LocalDateTime changedAt;
 
     /**
-     * ID uživatele z hlavní tabulky app_users.
+     * ID uĹľivatele z hlavnĂ­ tabulky app_users.
      */
     private Long userId;
 
     /**
-     * Původní časové razítko uživatele.
+     * PĹŻvodnĂ­ ÄŤasovĂ© razĂ­tko uĹľivatele.
      */
     private LocalDateTime originalTimestamp;
 
@@ -214,100 +243,97 @@ public class AppUserHistoryDTO {
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\AppUserSettingsDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 /**
- * DTO pro nastavení uživatele na úrovni aplikačního účtu.
+ * DTO pro nastavenĂ­ uĹľivatele na Ăşrovni aplikaÄŤnĂ­ho ĂşÄŤtu.
  *
- * Reprezentuje datový model entity AppUserSettingsEntity na úrovni API.
- * Slouží pro přenos preferencí uživatele mezi backendem a frontendem,
- * zejména v oblasti výběru hráče, globálních notifikací a uživatelského
- * rozhraní.
+ * Reprezentuje datovĂ˝ model entity AppUserSettingsEntity na Ăşrovni API.
+ * SlouĹľĂ­ pro pĹ™enos preferencĂ­ uĹľivatele mezi backendem a frontendem,
+ * zejmĂ©na v oblasti vĂ˝bÄ›ru hrĂˇÄŤe, globĂˇlnĂ­ch notifikacĂ­ a uĹľivatelskĂ©ho
+ * rozhranĂ­.
  */
 public class AppUserSettingsDTO {
 
-    // výběr hráče
+    // vĂ˝bÄ›r hrĂˇÄŤe
 
     /**
-     * Způsob automatického výběru hráče po přihlášení.
+     * ZpĹŻsob automatickĂ©ho vĂ˝bÄ›ru hrĂˇÄŤe po pĹ™ihlĂˇĹˇenĂ­.
      *
-     * Hodnoty odpovídají enumu PlayerSelectionMode,
-     * například FIRST_PLAYER nebo ALWAYS_CHOOSE.
+     * Hodnoty odpovĂ­dajĂ­ enumu PlayerSelectionMode,
+     * napĹ™Ă­klad FIRST_PLAYER nebo ALWAYS_CHOOSE.
      */
     private String playerSelectionMode;
 
-    // globální notifikace
+    // globĂˇlnĂ­ notifikace
 
     /**
-     * Globální úroveň notifikací pro uživatele.
+     * GlobĂˇlnĂ­ ĂşroveĹ notifikacĂ­ pro uĹľivatele.
      *
-     * Hodnoty odpovídají enumu GlobalNotificationLevel,
-     * například ALL, IMPORTANT_ONLY nebo NONE.
+     * Hodnoty odpovĂ­dajĂ­ enumu GlobalNotificationLevel,
+     * napĹ™Ă­klad ALL, IMPORTANT_ONLY nebo NONE.
      */
     private String globalNotificationLevel;
 
     /**
-     * Úroveň notifikací, které má uživatel dostávat v roli manažera.
+     * ĂšroveĹ notifikacĂ­, kterĂ© mĂˇ uĹľivatel dostĂˇvat v roli manaĹľera.
      *
-     * Hodnoty odpovídají enumu GlobalNotificationLevel.
-     * Určuje, jaké kopie notifikací budou zasílány na e-mail
-     * uživatele jako manažera. Používá se pro filtrování kopií
-     * zpráv určených manažerům.
+     * Hodnoty odpovĂ­dajĂ­ enumu GlobalNotificationLevel.
+     * UrÄŤuje, jakĂ© kopie notifikacĂ­ budou zasĂ­lĂˇny na e-mail
+     * uĹľivatele jako manaĹľera. PouĹľĂ­vĂˇ se pro filtrovĂˇnĂ­ kopiĂ­
+     * zprĂˇv urÄŤenĂ˝ch manaĹľerĹŻm.
      *
-     * Pokud je tato hodnota na backendu null, používá se hodnota
-     * globalNotificationLevel jako výchozí.
+     * Pokud je tato hodnota na backendu null, pouĹľĂ­vĂˇ se hodnota
+     * globalNotificationLevel jako vĂ˝chozĂ­.
      */
     private String managerNotificationLevel;
 
     /**
-     * Určuje, zda má uživatel dostávat kopie všech notifikací
-     * svých hráčů na svůj email.
+     * UrÄŤuje, zda mĂˇ uĹľivatel dostĂˇvat kopie vĹˇech notifikacĂ­
+     * svĂ˝ch hrĂˇÄŤĹŻ na svĹŻj email.
      */
     private boolean copyAllPlayerNotificationsToUserEmail;
 
     /**
-     * Určuje, zda má uživatel dostávat notifikace i za hráče,
-     * kteří mají vlastní email.
+     * UrÄŤuje, zda mĂˇ uĹľivatel dostĂˇvat notifikace i za hrĂˇÄŤe,
+     * kteĹ™Ă­ majĂ­ vlastnĂ­ email.
      */
     private boolean receiveNotificationsForPlayersWithOwnEmail;
 
     /**
-     * Určuje, zda je aktivní denní souhrn e-mailů místo
-     * jednotlivých notifikací.
+     * UrÄŤuje, zda je aktivnĂ­ dennĂ­ souhrn e-mailĹŻ mĂ­sto
+     * jednotlivĂ˝ch notifikacĂ­.
      */
     private boolean emailDigestEnabled;
 
     /**
-     * Čas pro odeslání souhrnného e-mailu, pokud je denní digest aktivní.
+     * ÄŚas pro odeslĂˇnĂ­ souhrnnĂ©ho e-mailu, pokud je dennĂ­ digest aktivnĂ­.
      *
-     * Hodnota se zadává jako řetězec, například "20:00".
+     * Hodnota se zadĂˇvĂˇ jako Ĺ™etÄ›zec, napĹ™Ă­klad "20:00".
      */
     private String emailDigestTime;
 
     // UX / UI
 
     /**
-     * Preferovaný jazyk uživatelského rozhraní,
-     * například "cs" nebo "en".
+     * PreferovanĂ˝ jazyk uĹľivatelskĂ©ho rozhranĂ­,
+     * napĹ™Ă­klad "cs" nebo "en".
      */
     private String uiLanguage;
 
     /**
-     * Časová zóna uživatele, například "Europe/Prague".
+     * ÄŚasovĂˇ zĂłna uĹľivatele, napĹ™Ă­klad "Europe/Prague".
      */
     private String timezone;
 
     /**
-     * Výchozí obrazovka po přihlášení.
+     * VĂ˝chozĂ­ obrazovka po pĹ™ihlĂˇĹˇenĂ­.
      *
-     * Typicky odpovídá názvu sekce na frontendu,
-     * například "DASHBOARD", "MATCHES" nebo "PLAYERS".
+     * Typicky odpovĂ­dĂˇ nĂˇzvu sekce na frontendu,
+     * napĹ™Ă­klad "DASHBOARD", "MATCHES" nebo "PLAYERS".
      */
     private String defaultLandingPage;
 
@@ -392,12 +418,9 @@ public class AppUserSettingsDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\DemoNotificationsDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.NotificationType;
@@ -405,16 +428,16 @@ import cz.phsoft.hokej.data.enums.NotificationType;
 import java.util.List;
 
 /**
- * DTO pro přenos demo notifikací na frontend.
+ * DTO pro pĹ™enos demo notifikacĂ­ na frontend.
  *
- * Slouží k předání zachycených e-mailových a SMS notifikací,
- * které byly v demo režimu uloženy místo reálného odeslání.
- * Používá se zejména pro simulaci notifikačního systému
- * a pro zobrazení obsahu zpráv v uživatelském rozhraní.
+ * SlouĹľĂ­ k pĹ™edĂˇnĂ­ zachycenĂ˝ch e-mailovĂ˝ch a SMS notifikacĂ­,
+ * kterĂ© byly v demo reĹľimu uloĹľeny mĂ­sto reĂˇlnĂ©ho odeslĂˇnĂ­.
+ * PouĹľĂ­vĂˇ se zejmĂ©na pro simulaci notifikaÄŤnĂ­ho systĂ©mu
+ * a pro zobrazenĂ­ obsahu zprĂˇv v uĹľivatelskĂ©m rozhranĂ­.
  *
- * DTO neobsahuje žádnou business logiku. Slouží výhradně
- * jako datový přenosový objekt mezi servisní vrstvou
- * a prezentační vrstvou.
+ * DTO neobsahuje ĹľĂˇdnou business logiku. SlouĹľĂ­ vĂ˝hradnÄ›
+ * jako datovĂ˝ pĹ™enosovĂ˝ objekt mezi servisnĂ­ vrstvou
+ * a prezentaÄŤnĂ­ vrstvou.
  */
 public class DemoNotificationsDTO {
 
@@ -422,11 +445,11 @@ public class DemoNotificationsDTO {
     private List<DemoSmsDTO> sms;
 
     /**
-     * Vytvoří přenosový objekt obsahující seznam
-     * demo e-mailů a SMS zpráv.
+     * VytvoĹ™Ă­ pĹ™enosovĂ˝ objekt obsahujĂ­cĂ­ seznam
+     * demo e-mailĹŻ a SMS zprĂˇv.
      *
-     * @param emails seznam zachycených e-mailových zpráv
-     * @param sms seznam zachycených SMS zpráv
+     * @param emails seznam zachycenĂ˝ch e-mailovĂ˝ch zprĂˇv
+     * @param sms seznam zachycenĂ˝ch SMS zprĂˇv
      */
     public DemoNotificationsDTO(List<DemoEmailDTO> emails,
                                 List<DemoSmsDTO> sms) {
@@ -435,29 +458,29 @@ public class DemoNotificationsDTO {
     }
 
     /**
-     * Vrátí seznam zachycených e-mailových zpráv.
+     * VrĂˇtĂ­ seznam zachycenĂ˝ch e-mailovĂ˝ch zprĂˇv.
      *
-     * @return seznam demo e-mailů
+     * @return seznam demo e-mailĹŻ
      */
     public List<DemoEmailDTO> getEmails() {
         return emails;
     }
 
     /**
-     * Vrátí seznam zachycených SMS zpráv.
+     * VrĂˇtĂ­ seznam zachycenĂ˝ch SMS zprĂˇv.
      *
-     * @return seznam demo SMS zpráv
+     * @return seznam demo SMS zprĂˇv
      */
     public List<DemoSmsDTO> getSms() {
         return sms;
     }
 
     /**
-     * DTO reprezentující jednu zachycenou e-mailovou zprávu
-     * v demo režimu.
+     * DTO reprezentujĂ­cĂ­ jednu zachycenou e-mailovou zprĂˇvu
+     * v demo reĹľimu.
      *
-     * Obsahuje základní metadata e-mailu včetně příznaku,
-     * zda je tělo zprávy ve formátu HTML, a typu notifikace.
+     * Obsahuje zĂˇkladnĂ­ metadata e-mailu vÄŤetnÄ› pĹ™Ă­znaku,
+     * zda je tÄ›lo zprĂˇvy ve formĂˇtu HTML, a typu notifikace.
      */
     public static class DemoEmailDTO {
 
@@ -469,14 +492,14 @@ public class DemoNotificationsDTO {
         private String recipientKind;
 
         /**
-         * Vytvoří přenosový objekt reprezentující demo e-mail.
+         * VytvoĹ™Ă­ pĹ™enosovĂ˝ objekt reprezentujĂ­cĂ­ demo e-mail.
          *
-         * @param to e-mailová adresa příjemce
-         * @param subject předmět zprávy
-         * @param body obsah zprávy
-         * @param html příznak, zda je obsah ve formátu HTML
+         * @param to e-mailovĂˇ adresa pĹ™Ă­jemce
+         * @param subject pĹ™edmÄ›t zprĂˇvy
+         * @param body obsah zprĂˇvy
+         * @param html pĹ™Ă­znak, zda je obsah ve formĂˇtu HTML
          * @param type typ notifikace
-         * @param recipientKind typ příjemce, například USER, PLAYER nebo MANAGER
+         * @param recipientKind typ pĹ™Ă­jemce, napĹ™Ă­klad USER, PLAYER nebo MANAGER
          */
         public DemoEmailDTO(String to,
                             String subject,
@@ -493,25 +516,25 @@ public class DemoNotificationsDTO {
         }
 
         /**
-         * Vrátí e-mailovou adresu příjemce.
+         * VrĂˇtĂ­ e-mailovou adresu pĹ™Ă­jemce.
          *
-         * @return e-mailová adresa
+         * @return e-mailovĂˇ adresa
          */
         public String getTo() {
             return to;
         }
 
         /**
-         * Vrátí předmět zprávy.
+         * VrĂˇtĂ­ pĹ™edmÄ›t zprĂˇvy.
          *
-         * @return předmět e-mailu
+         * @return pĹ™edmÄ›t e-mailu
          */
         public String getSubject() {
             return subject;
         }
 
         /**
-         * Vrátí obsah zprávy.
+         * VrĂˇtĂ­ obsah zprĂˇvy.
          *
          * @return text nebo HTML obsah e-mailu
          */
@@ -520,7 +543,7 @@ public class DemoNotificationsDTO {
         }
 
         /**
-         * Vrátí informaci, zda je obsah zprávy ve formátu HTML.
+         * VrĂˇtĂ­ informaci, zda je obsah zprĂˇvy ve formĂˇtu HTML.
          *
          * @return true, pokud je obsah HTML
          */
@@ -529,7 +552,7 @@ public class DemoNotificationsDTO {
         }
 
         /**
-         * Vrátí typ notifikace.
+         * VrĂˇtĂ­ typ notifikace.
          *
          * @return typ notifikace
          */
@@ -538,9 +561,9 @@ public class DemoNotificationsDTO {
         }
 
         /**
-         * Vrátí typ příjemce notifikace.
+         * VrĂˇtĂ­ typ pĹ™Ă­jemce notifikace.
          *
-         * @return typ příjemce
+         * @return typ pĹ™Ă­jemce
          */
         public String getRecipientKind() {
             return recipientKind;
@@ -548,11 +571,11 @@ public class DemoNotificationsDTO {
     }
 
     /**
-     * DTO reprezentující jednu zachycenou SMS zprávu
-     * v demo režimu.
+     * DTO reprezentujĂ­cĂ­ jednu zachycenou SMS zprĂˇvu
+     * v demo reĹľimu.
      *
-     * Obsahuje telefonní číslo příjemce,
-     * text zprávy a typ notifikace.
+     * Obsahuje telefonnĂ­ ÄŤĂ­slo pĹ™Ă­jemce,
+     * text zprĂˇvy a typ notifikace.
      */
     public static class DemoSmsDTO {
 
@@ -561,10 +584,10 @@ public class DemoNotificationsDTO {
         private NotificationType type;
 
         /**
-         * Vytvoří přenosový objekt reprezentující demo SMS zprávu.
+         * VytvoĹ™Ă­ pĹ™enosovĂ˝ objekt reprezentujĂ­cĂ­ demo SMS zprĂˇvu.
          *
-         * @param to telefonní číslo příjemce
-         * @param text text SMS zprávy
+         * @param to telefonnĂ­ ÄŤĂ­slo pĹ™Ă­jemce
+         * @param text text SMS zprĂˇvy
          * @param type typ notifikace
          */
         public DemoSmsDTO(String to,
@@ -576,25 +599,25 @@ public class DemoNotificationsDTO {
         }
 
         /**
-         * Vrátí telefonní číslo příjemce.
+         * VrĂˇtĂ­ telefonnĂ­ ÄŤĂ­slo pĹ™Ă­jemce.
          *
-         * @return telefonní číslo
+         * @return telefonnĂ­ ÄŤĂ­slo
          */
         public String getTo() {
             return to;
         }
 
         /**
-         * Vrátí text SMS zprávy.
+         * VrĂˇtĂ­ text SMS zprĂˇvy.
          *
-         * @return text zprávy
+         * @return text zprĂˇvy
          */
         public String getText() {
             return text;
         }
 
         /**
-         * Vrátí typ notifikace.
+         * VrĂˇtĂ­ typ notifikace.
          *
          * @return typ notifikace
          */
@@ -604,27 +627,24 @@ public class DemoNotificationsDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\EmailDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * DTO pro zadání e-mailové adresy.
+ * DTO pro zadĂˇnĂ­ e-mailovĂ© adresy.
  *
- * Používá se u jednoduchých formulářů, kde uživatel zadává pouze email,
- * například při požadavku na reset zapomenutého hesla.
+ * PouĹľĂ­vĂˇ se u jednoduchĂ˝ch formulĂˇĹ™ĹŻ, kde uĹľivatel zadĂˇvĂˇ pouze email,
+ * napĹ™Ă­klad pĹ™i poĹľadavku na reset zapomenutĂ©ho hesla.
  */
 public class EmailDTO {
 
-    @NotBlank(message = "Email je povinný.")
-    @Email(message = "Email nemá platný formát.")
+    @NotBlank(message = "Email je povinnĂ˝.")
+    @Email(message = "Email nemĂˇ platnĂ˝ formĂˇt.")
     private String email;
 
     public String getEmail() {
@@ -636,33 +656,30 @@ public class EmailDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\ForgottenPasswordResetDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * DTO pro nastavení nového hesla na základě resetovacího tokenu.
+ * DTO pro nastavenĂ­ novĂ©ho hesla na zĂˇkladÄ› resetovacĂ­ho tokenu.
  *
- * Používá se v procesu zapomenutého hesla. Obsahuje token, nové heslo
- * a jeho potvrzení. Kontrola shody hesel se provádí v servisní vrstvě.
+ * PouĹľĂ­vĂˇ se v procesu zapomenutĂ©ho hesla. Obsahuje token, novĂ© heslo
+ * a jeho potvrzenĂ­. Kontrola shody hesel se provĂˇdĂ­ v servisnĂ­ vrstvÄ›.
  */
 public class ForgottenPasswordResetDTO {
 
-    @NotBlank(message = "Reset token je povinný.")
+    @NotBlank(message = "Reset token je povinnĂ˝.")
     private String token;
 
-    @NotBlank(message = "Nové heslo je povinné.")
-    @Size(min = 8, max = 64, message = "Nové heslo musí mít 8–64 znaků.")
+    @NotBlank(message = "NovĂ© heslo je povinnĂ©.")
+    @Size(min = 8, max = 64, message = "NovĂ© heslo musĂ­ mĂ­t 8â€“64 znakĹŻ.")
     private String newPassword;
 
-    @NotBlank(message = "Potvrzení nového hesla je povinné.")
+    @NotBlank(message = "PotvrzenĂ­ novĂ©ho hesla je povinnĂ©.")
     private String newPasswordConfirm;
 
     public String getToken() { return token; }
@@ -675,37 +692,34 @@ public class ForgottenPasswordResetDTO {
     public void setNewPasswordConfirm(String newPasswordConfirm) { this.newPasswordConfirm = newPasswordConfirm; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\ChangePasswordDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * DTO pro změnu hesla přihlášeného uživatele.
+ * DTO pro zmÄ›nu hesla pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
  *
- * Používá se při změně hesla z uživatelského profilu, kde je potřeba
- * ověřit původní heslo a nastavit nové. DTO obsahuje staré heslo,
- * nové heslo a jeho potvrzení. Kontrola shody nového hesla a potvrzení
- * se provádí v servisní vrstvě.
+ * PouĹľĂ­vĂˇ se pĹ™i zmÄ›nÄ› hesla z uĹľivatelskĂ©ho profilu, kde je potĹ™eba
+ * ovÄ›Ĺ™it pĹŻvodnĂ­ heslo a nastavit novĂ©. DTO obsahuje starĂ© heslo,
+ * novĂ© heslo a jeho potvrzenĂ­. Kontrola shody novĂ©ho hesla a potvrzenĂ­
+ * se provĂˇdĂ­ v servisnĂ­ vrstvÄ›.
  *
- * Všechna pole jsou povinná a nové heslo musí splňovat minimální délku.
+ * VĹˇechna pole jsou povinnĂˇ a novĂ© heslo musĂ­ splĹovat minimĂˇlnĂ­ dĂ©lku.
  */
 public class ChangePasswordDTO {
 
-    @NotBlank(message = "Původní heslo je povinné.")
+    @NotBlank(message = "PĹŻvodnĂ­ heslo je povinnĂ©.")
     private String oldPassword;
 
-    @NotBlank(message = "Nové heslo je povinné.")
-    @Size(min = 8, max = 64, message = "Nové heslo musí mít 8–64 znaků.")
+    @NotBlank(message = "NovĂ© heslo je povinnĂ©.")
+    @Size(min = 8, max = 64, message = "NovĂ© heslo musĂ­ mĂ­t 8â€“64 znakĹŻ.")
     private String newPassword;
 
-    @NotBlank(message = "Potvrzení nového hesla je povinné.")
+    @NotBlank(message = "PotvrzenĂ­ novĂ©ho hesla je povinnĂ©.")
     private String newPasswordConfirm;
 
 
@@ -720,19 +734,16 @@ public class ChangePasswordDTO {
     public void setNewPasswordConfirm(String newPasswordConfirm) { this.newPasswordConfirm = newPasswordConfirm; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\ImpersonationInfoDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 /**
- * DTO reprezentující informaci o aktuálním režimu zastoupení.
+ * DTO reprezentujĂ­cĂ­ informaci o aktuĂˇlnĂ­m reĹľimu zastoupenĂ­.
  *
- * Obsahuje příznak, zda je aktivní impersonace, a případně
- * identifikátor a jméno zastupovaného hráče.
+ * Obsahuje pĹ™Ă­znak, zda je aktivnĂ­ impersonace, a pĹ™Ă­padnÄ›
+ * identifikĂˇtor a jmĂ©no zastupovanĂ©ho hrĂˇÄŤe.
  */
 public class ImpersonationInfoDTO {
 
@@ -759,12 +770,9 @@ public class ImpersonationInfoDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\MatchDetailDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -778,21 +786,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Detailní DTO reprezentující jeden zápas včetně kontextu hráče
- * a agregovaných statistik.
+ * DetailnĂ­ DTO reprezentujĂ­cĂ­ jeden zĂˇpas vÄŤetnÄ› kontextu hrĂˇÄŤe
+ * a agregovanĂ˝ch statistik.
  *
- * Používá se zejména na stránce detailu zápasu, pro zobrazení
- * seznamů hráčů podle stavu registrace, pro zobrazení kapacity,
- * ceny a aktuální účasti. Kromě základních informací o zápasu
- * obsahuje i stav přihlášeného hráče a rozdělené seznamy hráčů
- * podle jednotlivých kategorií účasti.
+ * PouĹľĂ­vĂˇ se zejmĂ©na na strĂˇnce detailu zĂˇpasu, pro zobrazenĂ­
+ * seznamĹŻ hrĂˇÄŤĹŻ podle stavu registrace, pro zobrazenĂ­ kapacity,
+ * ceny a aktuĂˇlnĂ­ ĂşÄŤasti. KromÄ› zĂˇkladnĂ­ch informacĂ­ o zĂˇpasu
+ * obsahuje i stav pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe a rozdÄ›lenĂ© seznamy hrĂˇÄŤĹŻ
+ * podle jednotlivĂ˝ch kategoriĂ­ ĂşÄŤasti.
  */
 public class MatchDetailDTO implements NumberedMatchDTO {
 
     /**
-     * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
-     * Hodnota se nastavuje pouze na serveru a na klienta se vrací jako
-     * read-only údaj.
+     * PoĹ™adovĂ© ÄŤĂ­slo zĂˇpasu v sezĂłnÄ› poÄŤĂ­tanĂ© podle data v rĂˇmci danĂ© sezĂłny.
+     * Hodnota se nastavuje pouze na serveru a na klienta se vracĂ­ jako
+     * read-only Ăşdaj.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer matchNumber;
@@ -807,11 +815,11 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private Integer price;
 
     /**
-     * Kapacitní a agregační údaje zápasu.
+     * KapacitnĂ­ a agregaÄŤnĂ­ Ăşdaje zĂˇpasu.
      *
-     * Obsahují například maximální počet hráčů, počet přihlášených hráčů
-     * celkově a v jednotlivých týmech, počet náhradníků a počet hráčů
-     * v různých stavech účasti.
+     * ObsahujĂ­ napĹ™Ă­klad maximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ, poÄŤet pĹ™ihlĂˇĹˇenĂ˝ch hrĂˇÄŤĹŻ
+     * celkovÄ› a v jednotlivĂ˝ch tĂ˝mech, poÄŤet nĂˇhradnĂ­kĹŻ a poÄŤet hrĂˇÄŤĹŻ
+     * v rĹŻznĂ˝ch stavech ĂşÄŤasti.
      */
     private int maxPlayers;
     private int inGamePlayers;
@@ -825,41 +833,41 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private int remainingSlots;
 
     /**
-     * Cena přepočtená na jednoho přihlášeného hráče.
-     * Hodnota se počítá na serveru podle aktuálního stavu registrací.
+     * Cena pĹ™epoÄŤtenĂˇ na jednoho pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe.
+     * Hodnota se poÄŤĂ­tĂˇ na serveru podle aktuĂˇlnĂ­ho stavu registracĂ­.
      */
     private double pricePerRegisteredPlayer;
 
     /**
-     * Stav přihlášeného hráče k tomuto zápasu.
+     * Stav pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe k tomuto zĂˇpasu.
      */
     private PlayerMatchStatus playerMatchStatus;
 
     /**
-     * Informace o omluvě přihlášeného hráče, pokud je k dispozici.
+     * Informace o omluvÄ› pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe, pokud je k dispozici.
      */
     private ExcuseReason excuseReason;
     private String excuseNote;
 
     /**
-     * Stav zápasu a případný důvod jeho zrušení.
+     * Stav zĂˇpasu a pĹ™Ă­padnĂ˝ dĹŻvod jeho zruĹˇenĂ­.
      */
     private MatchStatus matchStatus;
     private MatchCancelReason cancelReason;
 
     /**
-     * ID sezóny, do které zápas patří.
+     * ID sezĂłny, do kterĂ© zĂˇpas patĹ™Ă­.
      * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
     /**
-     * Seznamy hráčů rozdělené podle stavu registrace.
+     * Seznamy hrĂˇÄŤĹŻ rozdÄ›lenĂ© podle stavu registrace.
      *
-     * Seznamy se používají pro přehledné zobrazení v uživatelském rozhraní,
-     * například pro zvýraznění přihlášených hráčů, náhradníků nebo
-     * neomluvených hráčů.
+     * Seznamy se pouĹľĂ­vajĂ­ pro pĹ™ehlednĂ© zobrazenĂ­ v uĹľivatelskĂ©m rozhranĂ­,
+     * napĹ™Ă­klad pro zvĂ˝raznÄ›nĂ­ pĹ™ihlĂˇĹˇenĂ˝ch hrĂˇÄŤĹŻ, nĂˇhradnĂ­kĹŻ nebo
+     * neomluvenĂ˝ch hrĂˇÄŤĹŻ.
      */
     private List<PlayerDTO> registeredPlayers;
     private List<PlayerDTO> registeredDarkPlayers;
@@ -1005,12 +1013,9 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\MatchDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -1026,19 +1031,19 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 /**
- * DTO, které reprezentuje základní informace o zápasu.
+ * DTO, kterĂ© reprezentuje zĂˇkladnĂ­ informace o zĂˇpasu.
  *
- * Slouží k přenosu dat o zápasech mezi backendem a klientem,
- * například při vytváření a editaci zápasů nebo v administrativních
- * přehledech. DTO neobsahuje business logiku ani vazby na entity
- * a slouží pouze jako transportní objekt.
+ * SlouĹľĂ­ k pĹ™enosu dat o zĂˇpasech mezi backendem a klientem,
+ * napĹ™Ă­klad pĹ™i vytvĂˇĹ™enĂ­ a editaci zĂˇpasĹŻ nebo v administrativnĂ­ch
+ * pĹ™ehledech. DTO neobsahuje business logiku ani vazby na entity
+ * a slouĹľĂ­ pouze jako transportnĂ­ objekt.
  */
 public class MatchDTO implements NumberedMatchDTO {
 
     /**
-     * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
-     * Hodnota se nastavuje pouze na serveru a na klienta se vrací jako
-     * read-only údaj.
+     * PoĹ™adovĂ© ÄŤĂ­slo zĂˇpasu v sezĂłnÄ› poÄŤĂ­tanĂ© podle data v rĂˇmci danĂ© sezĂłny.
+     * Hodnota se nastavuje pouze na serveru a na klienta se vracĂ­ jako
+     * read-only Ăşdaj.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer matchNumber;
@@ -1046,39 +1051,39 @@ public class MatchDTO implements NumberedMatchDTO {
     private Long id;
 
     /**
-     * Datum a čas konání zápasu.
+     * Datum a ÄŤas konĂˇnĂ­ zĂˇpasu.
      */
-    @NotNull(message = "Datum a čas zápasu je povinné.")
+    @NotNull(message = "Datum a ÄŤas zĂˇpasu je povinnĂ©.")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;
 
-    @NotBlank(message = "Místo zápasu je povinné.")
+    @NotBlank(message = "MĂ­sto zĂˇpasu je povinnĂ©.")
     @Size(min = 3, max = 70)
     private String location;
 
-    @Size(max = 255, message = "Popis může mít max 255 znaků.")
+    @Size(max = 255, message = "Popis mĹŻĹľe mĂ­t max 255 znakĹŻ.")
     private String description;
 
-    @NotNull(message = "Maximální počet hráčů je povinný")
+    @NotNull(message = "MaximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ je povinnĂ˝")
     private Integer maxPlayers;
 
-    @NotNull(message = "Cena je povinná")
+    @NotNull(message = "Cena je povinnĂˇ")
     private Integer price;
 
     /**
-     * Aktuální stav zápasu, například plánovaný, zrušený nebo odehraný.
+     * AktuĂˇlnĂ­ stav zĂˇpasu, napĹ™Ă­klad plĂˇnovanĂ˝, zruĹˇenĂ˝ nebo odehranĂ˝.
      */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
     /**
-     * Důvod zrušení zápasu, pokud byl zápas zrušen.
+     * DĹŻvod zruĹˇenĂ­ zĂˇpasu, pokud byl zĂˇpas zruĹˇen.
      */
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
 
     /**
-     * ID sezóny, do které zápas patří.
+     * ID sezĂłny, do kterĂ© zĂˇpas patĹ™Ă­.
      * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -1135,12 +1140,9 @@ public class MatchDTO implements NumberedMatchDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\MatchHistoryDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
@@ -1149,17 +1151,17 @@ import cz.phsoft.hokej.data.enums.MatchStatus;
 import java.time.LocalDateTime;
 
 /**
- * DTO reprezentující historický záznam změny zápasu.
+ * DTO reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam zmÄ›ny zĂˇpasu.
  *
- * Slouží k přenosu dat o změnách zápasu z databázové vrstvy
- * do prezentační vrstvy. Obsahuje kompletní snapshot stavu
- * zápasu v okamžiku provedené změny včetně metadata o tom,
- * kdy byla změna provedena a jaký typ akce ji vyvolal.
+ * SlouĹľĂ­ k pĹ™enosu dat o zmÄ›nĂˇch zĂˇpasu z databĂˇzovĂ© vrstvy
+ * do prezentaÄŤnĂ­ vrstvy. Obsahuje kompletnĂ­ snapshot stavu
+ * zĂˇpasu v okamĹľiku provedenĂ© zmÄ›ny vÄŤetnÄ› metadata o tom,
+ * kdy byla zmÄ›na provedena a jakĂ˝ typ akce ji vyvolal.
  *
- * DTO je typicky naplňováno na základě historické entity,
- * která je vytvářena databázovým triggerem. Neobsahuje
- * žádnou business logiku a slouží výhradně jako datový
- * přenosový objekt mezi servisní a prezentační vrstvou.
+ * DTO je typicky naplĹovĂˇno na zĂˇkladÄ› historickĂ© entity,
+ * kterĂˇ je vytvĂˇĹ™ena databĂˇzovĂ˝m triggerem. Neobsahuje
+ * ĹľĂˇdnou business logiku a slouĹľĂ­ vĂ˝hradnÄ› jako datovĂ˝
+ * pĹ™enosovĂ˝ objekt mezi servisnĂ­ a prezentaÄŤnĂ­ vrstvou.
  */
 public class MatchHistoryDTO {
 
@@ -1300,12 +1302,9 @@ public class MatchHistoryDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\MatchOverviewDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -1319,17 +1318,17 @@ import jakarta.persistence.Enumerated;
 import java.time.LocalDateTime;
 
 /**
- * Přehledové DTO reprezentující zápas v seznamu.
+ * PĹ™ehledovĂ© DTO reprezentujĂ­cĂ­ zĂˇpas v seznamu.
  *
- * Používá se v přehledech nadcházejících a minulých zápasů, v případech,
- * kdy stačí zjednodušený pohled na zápas doplněný o agregované informace
- * a stav aktuálního hráče. Typicky se používá na úvodních obrazovkách,
- * dashboardu nebo v kartách zápasů.
+ * PouĹľĂ­vĂˇ se v pĹ™ehledech nadchĂˇzejĂ­cĂ­ch a minulĂ˝ch zĂˇpasĹŻ, v pĹ™Ă­padech,
+ * kdy staÄŤĂ­ zjednoduĹˇenĂ˝ pohled na zĂˇpas doplnÄ›nĂ˝ o agregovanĂ© informace
+ * a stav aktuĂˇlnĂ­ho hrĂˇÄŤe. Typicky se pouĹľĂ­vĂˇ na ĂşvodnĂ­ch obrazovkĂˇch,
+ * dashboardu nebo v kartĂˇch zĂˇpasĹŻ.
  */
 public class MatchOverviewDTO implements NumberedMatchDTO {
 
     /**
-     * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
+     * PoĹ™adovĂ© ÄŤĂ­slo zĂˇpasu v sezĂłnÄ› poÄŤĂ­tanĂ© podle data v rĂˇmci danĂ© sezĂłny.
      * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -1345,27 +1344,27 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     private Integer price;
 
     /**
-     * Základní agregační údaje zápasu.
+     * ZĂˇkladnĂ­ agregaÄŤnĂ­ Ăşdaje zĂˇpasu.
      *
-     * Obsahují maximální počet hráčů a aktuální počet přihlášených
-     * hráčů v zápase.
+     * ObsahujĂ­ maximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ a aktuĂˇlnĂ­ poÄŤet pĹ™ihlĂˇĹˇenĂ˝ch
+     * hrĂˇÄŤĹŻ v zĂˇpase.
      */
     private int maxPlayers;
     private int inGamePlayers;
 
     /**
-     * Cena přepočtená na jednoho přihlášeného hráče.
-     * Hodnota se počítá na serveru.
+     * Cena pĹ™epoÄŤtenĂˇ na jednoho pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe.
+     * Hodnota se poÄŤĂ­tĂˇ na serveru.
      */
     private double pricePerRegisteredPlayer;
 
     /**
-     * Stav přihlášeného hráče k danému zápasu.
+     * Stav pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe k danĂ©mu zĂˇpasu.
      */
     private PlayerMatchStatus playerMatchStatus;
 
     /**
-     * Stav zápasu a případný důvod jeho zrušení.
+     * Stav zĂˇpasu a pĹ™Ă­padnĂ˝ dĹŻvod jeho zruĹˇenĂ­.
      */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
@@ -1374,7 +1373,7 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     private MatchCancelReason cancelReason;
 
     /**
-     * ID sezóny, do které zápas patří.
+     * ID sezĂłny, do kterĂ© zĂˇpas patĹ™Ă­.
      * Hodnota se nastavuje pouze na serveru.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -1433,12 +1432,9 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\MatchRegistrationDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
@@ -1448,67 +1444,67 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 /**
- * DTO, které reprezentuje registraci hráče k zápasu.
+ * DTO, kterĂ© reprezentuje registraci hrĂˇÄŤe k zĂˇpasu.
  *
- * Slouží k přenosu informací o stavu účasti hráče na konkrétním zápase
- * mezi backendem a klientem. Používá se při registraci, odhlášení,
- * omluvě hráče, v přehledech registrací a v administraci účasti.
+ * SlouĹľĂ­ k pĹ™enosu informacĂ­ o stavu ĂşÄŤasti hrĂˇÄŤe na konkrĂ©tnĂ­m zĂˇpase
+ * mezi backendem a klientem. PouĹľĂ­vĂˇ se pĹ™i registraci, odhlĂˇĹˇenĂ­,
+ * omluvÄ› hrĂˇÄŤe, v pĹ™ehledech registracĂ­ a v administraci ĂşÄŤasti.
  */
 public class MatchRegistrationDTO {
 
     /**
      * ID registrace.
      *
-     * Při vytváření nové registrace může být hodnota null.
+     * PĹ™i vytvĂˇĹ™enĂ­ novĂ© registrace mĹŻĹľe bĂ˝t hodnota null.
      * Hodnota se generuje na serveru.
      */
     private Long id;
 
-    @NotNull(message = "ID zápasu je povinné.")
-    @Positive(message = "ID zápasu musí být kladné.")
+    @NotNull(message = "ID zĂˇpasu je povinnĂ©.")
+    @Positive(message = "ID zĂˇpasu musĂ­ bĂ˝t kladnĂ©.")
     private Long matchId;
 
-    @NotNull(message = "ID hráče je povinné.")
-    @Positive(message = "ID hráče musí být kladné.")
+    @NotNull(message = "ID hrĂˇÄŤe je povinnĂ©.")
+    @Positive(message = "ID hrĂˇÄŤe musĂ­ bĂ˝t kladnĂ©.")
     private Long playerId;
 
     /**
-     * Aktuální stav registrace hráče k zápasu.
+     * AktuĂˇlnĂ­ stav registrace hrĂˇÄŤe k zĂˇpasu.
      */
     private PlayerMatchStatus status;
 
     /**
-     * Důvod omluvy, pokud je registrace ve stavu omluvené účasti.
+     * DĹŻvod omluvy, pokud je registrace ve stavu omluvenĂ© ĂşÄŤasti.
      */
     private ExcuseReason excuseReason;
 
     /**
-     * Textová poznámka k omluvě zadaná hráčem.
+     * TextovĂˇ poznĂˇmka k omluvÄ› zadanĂˇ hrĂˇÄŤem.
      */
     private String excuseNote;
 
     /**
-     * Interní poznámka administrátora k dané registraci.
+     * InternĂ­ poznĂˇmka administrĂˇtora k danĂ© registraci.
      */
     private String adminNote;
 
     /**
-     * Tým, do kterého je hráč přiřazen v daném zápase.
+     * TĂ˝m, do kterĂ©ho je hrĂˇÄŤ pĹ™iĹ™azen v danĂ©m zĂˇpase.
      */
     private Team team;
 
     /**
-     * Informace o původu registrace.
+     * Informace o pĹŻvodu registrace.
      *
-     * Typicky se používají hodnoty jako "user" pro akce hráče
-     * a "system" pro automatické změny provedené systémem.
+     * Typicky se pouĹľĂ­vajĂ­ hodnoty jako "user" pro akce hrĂˇÄŤe
+     * a "system" pro automatickĂ© zmÄ›ny provedenĂ© systĂ©mem.
      */
     @NotNull
     private String createdBy;
 
     /**
-     * Detail hráče. Používá se pro prezentační účely v přehledech
-     * registrací, aby nebylo nutné dělat další dotazy na hráče.
+     * Detail hrĂˇÄŤe. PouĹľĂ­vĂˇ se pro prezentaÄŤnĂ­ ĂşÄŤely v pĹ™ehledech
+     * registracĂ­, aby nebylo nutnĂ© dÄ›lat dalĹˇĂ­ dotazy na hrĂˇÄŤe.
      */
     private PlayerDTO playerDTO;
 
@@ -1564,12 +1560,9 @@ public class MatchRegistrationDTO {
     public void setPlayerDTO(PlayerDTO playerDTO) { this.playerDTO = playerDTO; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\MatchRegistrationHistoryDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
@@ -1579,13 +1572,13 @@ import cz.phsoft.hokej.data.enums.Team;
 import java.time.LocalDateTime;
 
 /**
- * DTO reprezentující historický záznam o registraci hráče k zápasu.
+ * DTO reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam o registraci hrĂˇÄŤe k zĂˇpasu.
  *
- * Slouží pro auditní a přehledové účely. Obsahuje informace o tom,
- * jak se registrace v čase měnila, včetně původního časového razítka,
- * akce, autora změny a stavů registrace.
+ * SlouĹľĂ­ pro auditnĂ­ a pĹ™ehledovĂ© ĂşÄŤely. Obsahuje informace o tom,
+ * jak se registrace v ÄŤase mÄ›nila, vÄŤetnÄ› pĹŻvodnĂ­ho ÄŤasovĂ©ho razĂ­tka,
+ * akce, autora zmÄ›ny a stavĹŻ registrace.
  *
- * Datový model odpovídá záznamu v tabulce historie registrací.
+ * DatovĂ˝ model odpovĂ­dĂˇ zĂˇznamu v tabulce historie registracĂ­.
  */
 public class MatchRegistrationHistoryDTO {
 
@@ -1658,69 +1651,309 @@ public class MatchRegistrationHistoryDTO {
     public void setTeam(Team team) { this.team = team; }
 }
 
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\NotificationBadgeDTO.java
+-----
+package cz.phsoft.hokej.models.dto;
 
+import java.time.Instant;
+
+/**
+ * DTO, kterĂ© reprezentuje badge s poÄŤtem nepĹ™eÄŤtenĂ˝ch notifikacĂ­.
+ *
+ * PouĹľĂ­vĂˇ se pro zobrazenĂ­ indikĂˇtoru novĂ˝ch notifikacĂ­ v UI.
+ * Hodnota unreadCountSinceLastLogin udĂˇvĂˇ poÄŤet nepĹ™eÄŤtenĂ˝ch
+ * notifikacĂ­ vytvoĹ™enĂ˝ch po poslednĂ­m pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+ */
+public class NotificationBadgeDTO {
+
+    /**
+     * PoÄŤet nepĹ™eÄŤtenĂ˝ch notifikacĂ­ vytvoĹ™enĂ˝ch po poslednĂ­m pĹ™ihlĂˇĹˇenĂ­.
+     */
+    private long unreadCountSinceLastLogin;
+
+    /**
+     * ÄŚas pĹ™edposlednĂ­ho pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     */
+    private Instant lastLoginAt;
+
+    /**
+     * ÄŚas poslednĂ­ho (aktuĂˇlnĂ­ho) pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     */
+    private Instant currentLoginAt;
+
+    public long getUnreadCountSinceLastLogin() {
+        return unreadCountSinceLastLogin;
+    }
+
+    public void setUnreadCountSinceLastLogin(long unreadCountSinceLastLogin) {
+        this.unreadCountSinceLastLogin = unreadCountSinceLastLogin;
+    }
+
+    public Instant getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(Instant lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
+    public Instant getCurrentLoginAt() {
+        return currentLoginAt;
+    }
+
+    public void setCurrentLoginAt(Instant currentLoginAt) {
+        this.currentLoginAt = currentLoginAt;
+    }
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\NotificationDTO.java
+-----
+package cz.phsoft.hokej.models.dto;
+
+import cz.phsoft.hokej.data.enums.NotificationCategory;
+import cz.phsoft.hokej.data.enums.NotificationType;
+
+import java.time.Instant;
+
+/**
+ * DTO, kterĂ© reprezentuje aplikaÄŤnĂ­ notifikaci pro uĹľivatele.
+ *
+ * SlouĹľĂ­ k pĹ™enosu notifikacĂ­ z backendu do klientskĂ© aplikace.
+ * PouĹľĂ­vĂˇ se pro zobrazenĂ­ badge, pĹ™ehledu poslednĂ­ch udĂˇlostĂ­
+ * a seznamu notifikacĂ­ od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
+ *
+ * DTO obsahuje zjednoduĹˇenĂ˝ text notifikace, zĂˇkladnĂ­ metadata
+ * (typ, kategorie, dĹŻleĹľitost) a ÄŤasovĂˇ razĂ­tka vytvoĹ™enĂ­
+ * a pĹ™Ă­padnĂ©ho pĹ™eÄŤtenĂ­.
+ *
+ * Informace o hrĂˇÄŤi jsou pĹ™edĂˇvĂˇny ve formÄ› PlayerDTO,
+ * pokud se danĂˇ notifikace vztahuje ke konkrĂ©tnĂ­mu hrĂˇÄŤi.
+ */
+public class NotificationDTO {
+
+    /**
+     * IdentifikĂˇtor notifikace.
+     */
+    private Long id;
+
+    /**
+     * Typ notifikace.
+     *
+     * OdpovĂ­dĂˇ hodnotÄ› v NotificationType a urÄŤuje
+     * konkrĂ©tnĂ­ udĂˇlost v systĂ©mu.
+     */
+    private NotificationType type;
+
+    /**
+     * Kategorie notifikace.
+     *
+     * Hodnota se obvykle odvozuje z NotificationType.
+     * PouĹľĂ­vĂˇ se pro filtrovĂˇnĂ­ a nastavenĂ­ preferencĂ­.
+     */
+    private NotificationCategory category;
+
+    /**
+     * PĹ™Ă­znak dĹŻleĹľitosti notifikace.
+     *
+     * Hodnota se obvykle odvozuje z NotificationType.
+     * PouĹľĂ­vĂˇ se napĹ™Ă­klad pĹ™i filtrovĂˇnĂ­ podle
+     * GlobalNotificationLevel.
+     */
+    private boolean important;
+
+    /**
+     * StruÄŤnĂ˝ text notifikace.
+     *
+     * PouĹľĂ­vĂˇ se pro zobrazenĂ­ v badge, pĹ™ehledu
+     * poslednĂ­ch udĂˇlostĂ­ a v zĂˇkladnĂ­m seznamu
+     * notifikacĂ­.
+     */
+    private String messageShort;
+
+    /**
+     * DetailnÄ›jĹˇĂ­ text notifikace.
+     *
+     * Je pouĹľĂ­vĂˇn pro pĹ™Ă­padnĂ© rozĹˇĂ­Ĺ™enĂ© zobrazenĂ­.
+     * U jednoduĹˇĹˇĂ­ch notifikacĂ­ mĹŻĹľe bĂ˝t null.
+     */
+    private String messageFull;
+
+    /**
+     * ÄŚas vytvoĹ™enĂ­ notifikace.
+     *
+     * Hodnota je uklĂˇdĂˇna jako Instant v UTC a
+     * pouĹľĂ­vĂˇ se pro seĹ™azenĂ­ a filtrovĂˇnĂ­
+     * (napĹ™Ă­klad od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­).
+     */
+    private Instant createdAt;
+
+    /**
+     * ÄŚas pĹ™eÄŤtenĂ­ notifikace.
+     *
+     * Pokud je hodnota null, notifikace je povaĹľovĂˇna
+     * za nepĹ™eÄŤtenou.
+     */
+    private Instant readAt;
+
+    /**
+     * PĹ™Ă­znak, zda byla notifikace pĹ™eÄŤtena.
+     *
+     * Hodnota se obvykle odvozuje podle toho,
+     * zda je readAt null. Pole je urÄŤeno pro
+     * pohodlnÄ›jĹˇĂ­ pouĹľitĂ­ na klientskĂ© stranÄ›.
+     */
+    private boolean read;
+
+    /**
+     * HrĂˇÄŤ, kterĂ©ho se notifikace tĂ˝kĂˇ.
+     *
+     * U notifikacĂ­ vĂˇzanĂ˝ch na konkrĂ©tnĂ­ho hrĂˇÄŤe
+     * se pouĹľĂ­vĂˇ PlayerDTO. U systĂ©movĂ˝ch
+     * notifikacĂ­ mĹŻĹľe bĂ˝t null.
+     */
+    private PlayerDTO player;
+
+    // ==========================================
+    // GETTERY A SETTERY
+    // ==========================================
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public NotificationType getType() {
+        return type;
+    }
+
+    public void setType(NotificationType type) {
+        this.type = type;
+    }
+
+    public NotificationCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(NotificationCategory category) {
+        this.category = category;
+    }
+
+    public boolean isImportant() {
+        return important;
+    }
+
+    public void setImportant(boolean important) {
+        this.important = important;
+    }
+
+    public String getMessageShort() {
+        return messageShort;
+    }
+
+    public void setMessageShort(String messageShort) {
+        this.messageShort = messageShort;
+    }
+
+    public String getMessageFull() {
+        return messageFull;
+    }
+
+    public void setMessageFull(String messageFull) {
+        this.messageFull = messageFull;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(Instant readAt) {
+        this.readAt = readAt;
+    }
+
+    public boolean isRead() {
+        return read;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
+    }
+
+    public PlayerDTO getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(PlayerDTO player) {
+        this.player = player;
+    }
+}
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\NumberedMatchDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 /**
- * Společné rozhraní pro DTO objekt reprezentující zápas
- * s přiřazeným pořadovým číslem v rámci sezóny.
+ * SpoleÄŤnĂ© rozhranĂ­ pro DTO objekt reprezentujĂ­cĂ­ zĂˇpas
+ * s pĹ™iĹ™azenĂ˝m poĹ™adovĂ˝m ÄŤĂ­slem v rĂˇmci sezĂłny.
  *
- * Rozhraní se používá u více typů DTO (například MatchDTO,
- * MatchDetailDTO, MatchOverviewDTO), aby bylo možné jednotně
- * nastavovat a číst pořadové číslo zápasu vypočítané na serveru.
+ * RozhranĂ­ se pouĹľĂ­vĂˇ u vĂ­ce typĹŻ DTO (napĹ™Ă­klad MatchDTO,
+ * MatchDetailDTO, MatchOverviewDTO), aby bylo moĹľnĂ© jednotnÄ›
+ * nastavovat a ÄŤĂ­st poĹ™adovĂ© ÄŤĂ­slo zĂˇpasu vypoÄŤĂ­tanĂ© na serveru.
  */
 public interface NumberedMatchDTO {
 
     /**
-     * Nastavuje pořadové číslo zápasu v sezóně.
+     * Nastavuje poĹ™adovĂ© ÄŤĂ­slo zĂˇpasu v sezĂłnÄ›.
      *
-     * Metoda se typicky volá v servisní nebo mapovací vrstvě.
+     * Metoda se typicky volĂˇ v servisnĂ­ nebo mapovacĂ­ vrstvÄ›.
      *
-     * @param matchNumber pořadové číslo v rozsahu 1..N
+     * @param matchNumber poĹ™adovĂ© ÄŤĂ­slo v rozsahu 1..N
      */
     void setMatchNumber(Integer matchNumber);
 
     /**
-     * Vrací pořadové číslo zápasu v sezóně.
+     * VracĂ­ poĹ™adovĂ© ÄŤĂ­slo zĂˇpasu v sezĂłnÄ›.
      *
-     * @return pořadové číslo nebo null, pokud není nastaveno
+     * @return poĹ™adovĂ© ÄŤĂ­slo nebo null, pokud nenĂ­ nastaveno
      */
     Integer getMatchNumber();
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\package-info.java
 -----
-
 /**
- * Datové přenosové objekty (DTO).
+ * DatovĂ© pĹ™enosovĂ© objekty (DTO).
  *
- * Slouží k přenosu dat mezi:
+ * SlouĹľĂ­ k pĹ™enosu dat mezi:
  * - controllerovou a service vrstvou,
  * - backendem a frontendem aplikace.
  *
  * DTO objekty:
- * - neobsahují business logiku,
- * - mohou obsahovat validační anotace,
- * - reprezentují data ve formátu vhodném pro API.
+ * - neobsahujĂ­ business logiku,
+ * - mohou obsahovat validaÄŤnĂ­ anotace,
+ * - reprezentujĂ­ data ve formĂˇtu vhodnĂ©m pro API.
  *
- * Mapování mezi entitami a DTO je řešeno pomocí mapperů.
+ * MapovĂˇnĂ­ mezi entitami a DTO je Ĺ™eĹˇeno pomocĂ­ mapperĹŻ.
  */
 package cz.phsoft.hokej.models.dto;
-
-
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\PlayerDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.PlayerStatus;
@@ -1734,67 +1967,67 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 /**
- * DTO, které reprezentuje hráče v systému.
+ * DTO, kterĂ© reprezentuje hrĂˇÄŤe v systĂ©mu.
  *
- * Slouží k přenosu dat o hráči mezi backendem a klientem při registraci,
- * správě profilu, přehledech a registracích na zápasy. DTO je nezávislé
- * na databázové vrstvě a neobsahuje perzistentní logiku. Obsahuje však
- * jednoduchou odvozenou hodnotu celého jména.
+ * SlouĹľĂ­ k pĹ™enosu dat o hrĂˇÄŤi mezi backendem a klientem pĹ™i registraci,
+ * sprĂˇvÄ› profilu, pĹ™ehledech a registracĂ­ch na zĂˇpasy. DTO je nezĂˇvislĂ©
+ * na databĂˇzovĂ© vrstvÄ› a neobsahuje perzistentnĂ­ logiku. Obsahuje vĹˇak
+ * jednoduchou odvozenou hodnotu celĂ©ho jmĂ©na.
  */
 public class PlayerDTO {
 
     /**
-     * ID hráče.
+     * ID hrĂˇÄŤe.
      *
-     * Při vytváření nového hráče může být hodnota null.
+     * PĹ™i vytvĂˇĹ™enĂ­ novĂ©ho hrĂˇÄŤe mĹŻĹľe bĂ˝t hodnota null.
      * Hodnota se generuje na serveru.
      */
     private Long id;
 
-    @NotBlank(message = "Křestní jméno je povinné.")
+    @NotBlank(message = "KĹ™estnĂ­ jmĂ©no je povinnĂ©.")
     @Size(min = 2, max = 50)
     private String name;
 
-    @NotBlank(message = "Příjmení je povinné.")
+    @NotBlank(message = "PĹ™Ă­jmenĂ­ je povinnĂ©.")
     @Size(min = 2, max = 50)
     private String surname;
 
     private String nickname;
 
     /**
-     * Celé jméno hráče.
+     * CelĂ© jmĂ©no hrĂˇÄŤe.
      *
-     * Hodnota se odvozuje z křestního jména a příjmení.
-     * Aktualizuje se při změně jména nebo příjmení.
+     * Hodnota se odvozuje z kĹ™estnĂ­ho jmĂ©na a pĹ™Ă­jmenĂ­.
+     * Aktualizuje se pĹ™i zmÄ›nÄ› jmĂ©na nebo pĹ™Ă­jmenĂ­.
      */
     private String fullName;
 
     @Pattern(
             regexp = "^\\+[1-9]\\d{1,14}$",
-            message = "Telefon musí být v mezinárodním formátu, např. +420123456789"
+            message = "Telefon musĂ­ bĂ˝t v mezinĂˇrodnĂ­m formĂˇtu, napĹ™. +420123456789"
     )
     private String phoneNumber;
 
 
     /**
-     * Typ hráče, například BASIC, STANDARD nebo VIP.
+     * Typ hrĂˇÄŤe, napĹ™Ă­klad BASIC, STANDARD nebo VIP.
      *
-     * Pokud není explicitně nastaven, používá se výchozí hodnota BASIC.
+     * Pokud nenĂ­ explicitnÄ› nastaven, pouĹľĂ­vĂˇ se vĂ˝chozĂ­ hodnota BASIC.
      */
     private PlayerType type;
 
     private Team team;
 
     /**
-     * Stav hráče v systému, například PENDING nebo APPROVED.
+     * Stav hrĂˇÄŤe v systĂ©mu, napĹ™Ă­klad PENDING nebo APPROVED.
      *
-     * Pokud není explicitně nastaven, používá se výchozí stav PENDING.
+     * Pokud nenĂ­ explicitnÄ› nastaven, pouĹľĂ­vĂˇ se vĂ˝chozĂ­ stav PENDING.
      */
     private PlayerStatus playerStatus;
 
     /**
-     * Časové razítko hráče.
-     * Používá se pro určení data a času u vytvoření, a změn uživatele.
+     * ÄŚasovĂ© razĂ­tko hrĂˇÄŤe.
+     * PouĹľĂ­vĂˇ se pro urÄŤenĂ­ data a ÄŤasu u vytvoĹ™enĂ­, a zmÄ›n uĹľivatele.
      */
     private LocalDateTime timestamp;
 
@@ -1858,10 +2091,10 @@ public class PlayerDTO {
         this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
     }
 
-    // interní logika
+    // internĂ­ logika
 
     /**
-     * Aktualizuje odvozené pole fullName při změně jména nebo příjmení.
+     * Aktualizuje odvozenĂ© pole fullName pĹ™i zmÄ›nÄ› jmĂ©na nebo pĹ™Ă­jmenĂ­.
      */
     private void updateFullName() {
         this.fullName = name + " " + surname;
@@ -1876,12 +2109,9 @@ public class PlayerDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\PlayerHistoryDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.PlayerStatus;
@@ -1891,17 +2121,17 @@ import cz.phsoft.hokej.data.enums.Team;
 import java.time.LocalDateTime;
 
 /**
- * DTO reprezentující historický záznam změny hráče.
+ * DTO reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam zmÄ›ny hrĂˇÄŤe.
  *
- * Slouží k přenosu dat o změnách hráče z databázové vrstvy
- * do prezentační vrstvy. Obsahuje kompletní snapshot stavu
- * hráče v okamžiku provedené změny včetně informace o typu akce,
- * času změny a původním časovém razítku vytvoření záznamu.
+ * SlouĹľĂ­ k pĹ™enosu dat o zmÄ›nĂˇch hrĂˇÄŤe z databĂˇzovĂ© vrstvy
+ * do prezentaÄŤnĂ­ vrstvy. Obsahuje kompletnĂ­ snapshot stavu
+ * hrĂˇÄŤe v okamĹľiku provedenĂ© zmÄ›ny vÄŤetnÄ› informace o typu akce,
+ * ÄŤasu zmÄ›ny a pĹŻvodnĂ­m ÄŤasovĂ©m razĂ­tku vytvoĹ™enĂ­ zĂˇznamu.
  *
- * DTO odpovídá záznamu uloženému v tabulce historie hráče,
- * která je typicky naplňována databázovým triggerem.
- * Neobsahuje žádnou business logiku a slouží výhradně
- * jako datový přenosový objekt mezi servisní a prezentační vrstvou.
+ * DTO odpovĂ­dĂˇ zĂˇznamu uloĹľenĂ©mu v tabulce historie hrĂˇÄŤe,
+ * kterĂˇ je typicky naplĹovĂˇna databĂˇzovĂ˝m triggerem.
+ * Neobsahuje ĹľĂˇdnou business logiku a slouĹľĂ­ vĂ˝hradnÄ›
+ * jako datovĂ˝ pĹ™enosovĂ˝ objekt mezi servisnĂ­ a prezentaÄŤnĂ­ vrstvou.
  */
 public class PlayerHistoryDTO {
 
@@ -2033,12 +2263,9 @@ public class PlayerHistoryDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\PlayerInactivityPeriodDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import jakarta.validation.constraints.NotNull;
@@ -2046,23 +2273,23 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 /**
- * DTO reprezentující období neaktivity hráče.
+ * DTO reprezentujĂ­cĂ­ obdobĂ­ neaktivity hrĂˇÄŤe.
  *
- * Slouží k přenosu informací o časovém intervalu, ve kterém se hráč
- * neúčastní zápasů, například z důvodu zranění nebo dlouhodobé absence.
+ * SlouĹľĂ­ k pĹ™enosu informacĂ­ o ÄŤasovĂ©m intervalu, ve kterĂ©m se hrĂˇÄŤ
+ * neĂşÄŤastnĂ­ zĂˇpasĹŻ, napĹ™Ă­klad z dĹŻvodu zranÄ›nĂ­ nebo dlouhodobĂ© absence.
  */
 public class PlayerInactivityPeriodDTO {
 
     private Long id;
     private Long playerId;
 
-    @NotNull(message = "Datum začátku neaktivity je povinné.")
+    @NotNull(message = "Datum zaÄŤĂˇtku neaktivity je povinnĂ©.")
     private LocalDateTime inactiveFrom;
 
-    @NotNull(message = "Datum konce neaktivity je povinné.")
+    @NotNull(message = "Datum konce neaktivity je povinnĂ©.")
     private LocalDateTime inactiveTo;
 
-    @NotNull(message = "Duvod neaktivity je povinný.")
+    @NotNull(message = "Duvod neaktivity je povinnĂ˝.")
     private String inactivityReason;
 
 
@@ -2088,41 +2315,38 @@ public class PlayerInactivityPeriodDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\PlayerSettingsDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import jakarta.validation.constraints.Pattern;
 
 /**
- * DTO pro nastavení hráče na úrovni PlayerSettingsEntity.
+ * DTO pro nastavenĂ­ hrĂˇÄŤe na Ăşrovni PlayerSettingsEntity.
  *
- * Slouží k přenosu preferencí hráče mezi backendem a frontendem,
- * zejména v oblasti kontaktních údajů a notifikačních kanálů.
- * DTO se používá jak pro zobrazení nastavení, tak pro jejich aktualizaci.
+ * SlouĹľĂ­ k pĹ™enosu preferencĂ­ hrĂˇÄŤe mezi backendem a frontendem,
+ * zejmĂ©na v oblasti kontaktnĂ­ch ĂşdajĹŻ a notifikaÄŤnĂ­ch kanĂˇlĹŻ.
+ * DTO se pouĹľĂ­vĂˇ jak pro zobrazenĂ­ nastavenĂ­, tak pro jejich aktualizaci.
  */
 public class PlayerSettingsDTO {
 
-    // kontaktní údaje
+    // kontaktnĂ­ Ăşdaje
 
     private String contactEmail;
 
     @Pattern(
             regexp = "^\\+[1-9]\\d{1,14}$",
-            message = "Telefon musí být v mezinárodním formátu, např. +420123456789"
+            message = "Telefon musĂ­ bĂ˝t v mezinĂˇrodnĂ­m formĂˇtu, napĹ™. +420123456789"
     )
     private String contactPhone;
 
-    // kanály
+    // kanĂˇly
 
     private boolean emailEnabled;
     private boolean smsEnabled;
 
-    // typy notifikací
+    // typy notifikacĂ­
 
     private boolean notifyOnRegistration;
     private boolean notifyOnExcuse;
@@ -2130,7 +2354,7 @@ public class PlayerSettingsDTO {
     private boolean notifyOnMatchCancel;
     private boolean notifyOnPayment;
 
-    // připomínky
+    // pĹ™ipomĂ­nky
 
     private boolean notifyReminders;
     private Integer reminderHoursBefore;
@@ -2226,12 +2450,9 @@ public class PlayerSettingsDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\PlayerStatsDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.Team;
@@ -2239,78 +2460,78 @@ import cz.phsoft.hokej.data.enums.Team;
 import java.util.Map;
 
 /**
- * Datový přenosový objekt reprezentující statistiku hráče
- * za aktuální sezónu.
+ * DatovĂ˝ pĹ™enosovĂ˝ objekt reprezentujĂ­cĂ­ statistiku hrĂˇÄŤe
+ * za aktuĂˇlnĂ­ sezĂłnu.
  *
- * Objekt slouží pro přenos agregovaných dat z service vrstvy
- * do controlleru a následně do klientské aplikace.
- * Obsahuje celkový počet zápasů v sezóně a počty zápasů
- * rozdělené podle jednotlivých registračních statusů.
+ * Objekt slouĹľĂ­ pro pĹ™enos agregovanĂ˝ch dat z service vrstvy
+ * do controlleru a nĂˇslednÄ› do klientskĂ© aplikace.
+ * Obsahuje celkovĂ˝ poÄŤet zĂˇpasĹŻ v sezĂłnÄ› a poÄŤty zĂˇpasĹŻ
+ * rozdÄ›lenĂ© podle jednotlivĂ˝ch registraÄŤnĂ­ch statusĹŻ.
  *
- * Instance tohoto objektu je vytvářena a naplňována
- * ve service vrstvě na základě vyhodnocení zápasů
- * a registrací hráče.
+ * Instance tohoto objektu je vytvĂˇĹ™ena a naplĹovĂˇna
+ * ve service vrstvÄ› na zĂˇkladÄ› vyhodnocenĂ­ zĂˇpasĹŻ
+ * a registracĂ­ hrĂˇÄŤe.
  */
 public class PlayerStatsDTO {
 
     /**
-     * Identifikátor hráče, pro kterého jsou statistiky počítány.
+     * IdentifikĂˇtor hrĂˇÄŤe, pro kterĂ©ho jsou statistiky poÄŤĂ­tĂˇny.
      */
     private Long playerId;
 
     /**
-     * Celkový počet odehraných zápasů v aktuální sezóně.
+     * CelkovĂ˝ poÄŤet odehranĂ˝ch zĂˇpasĹŻ v aktuĂˇlnĂ­ sezĂłnÄ›.
      */
     private int allMatchesInSeason;
 
     /**
-     * Celkový počet odehraných zápasů dostupných pro hráče v aktuální sezóně.
+     * CelkovĂ˝ poÄŤet odehranĂ˝ch zĂˇpasĹŻ dostupnĂ˝ch pro hrĂˇÄŤe v aktuĂˇlnĂ­ sezĂłnÄ›.
      */
     private int allMatchesInSeasonForPlayer;
 
 
     /**
-     * Počet zápasů, na které byl hráč registrován.
+     * PoÄŤet zĂˇpasĹŻ, na kterĂ© byl hrĂˇÄŤ registrovĂˇn.
      */
     private int registered;
 
     /**
-     * Počet zápasů, na které se hráč odhlásil.
+     * PoÄŤet zĂˇpasĹŻ, na kterĂ© se hrĂˇÄŤ odhlĂˇsil.
      */
     private int unregistered;
 
     /**
-     * Počet zápasů, ze kterých byl hráč omluven.
+     * PoÄŤet zĂˇpasĹŻ, ze kterĂ˝ch byl hrĂˇÄŤ omluven.
      */
     private int excused;
 
     /**
-     * Počet zápasů, ve kterých byl hráč jako možná budu.
+     * PoÄŤet zĂˇpasĹŻ, ve kterĂ˝ch byl hrĂˇÄŤ jako moĹľnĂˇ budu.
      */
     private int substituted;
 
     /**
-     * Počet zápasů, ve kterých byl hráč veden jako rezervní hráč.
+     * PoÄŤet zĂˇpasĹŻ, ve kterĂ˝ch byl hrĂˇÄŤ veden jako rezervnĂ­ hrĂˇÄŤ.
      */
     private int reserved;
 
     /**
-     * Počet zápasů, na které hráč nereagoval.
+     * PoÄŤet zĂˇpasĹŻ, na kterĂ© hrĂˇÄŤ nereagoval.
      */
     private int noResponse;
 
     /**
-     * Počet zápasů, ve kterých nebyl hráč omluven a zároveň nenastoupil.
+     * PoÄŤet zĂˇpasĹŻ, ve kterĂ˝ch nebyl hrĂˇÄŤ omluven a zĂˇroveĹ nenastoupil.
      */
     private int noExcused;
 
     /**
-     * Domovský tým hráče uložený v databázi.
+     * DomovskĂ˝ tĂ˝m hrĂˇÄŤe uloĹľenĂ˝ v databĂˇzi.
      */
     private Team homeTeam;
 
     /**
-     * Počty registrací hráče podle týmu pro status REGISTERED.
+     * PoÄŤty registracĂ­ hrĂˇÄŤe podle tĂ˝mu pro status REGISTERED.
      */
     private Map<Team, Integer> registeredByTeam;
 
@@ -2413,23 +2634,20 @@ public class PlayerStatsDTO {
     }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\PlayerSummaryDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.enums.Team;
 
 /**
- * Zjednodušené DTO reprezentující hráče.
+ * ZjednoduĹˇenĂ© DTO reprezentujĂ­cĂ­ hrĂˇÄŤe.
  *
- * Slouží pro přehledové a seznamové pohledy, kde není potřeba kompletní
- * detail hráče ani jeho stavové a notifikační informace. Typicky se používá
- * v seznamech hráčů nebo pro rychlé výběry.
+ * SlouĹľĂ­ pro pĹ™ehledovĂ© a seznamovĂ© pohledy, kde nenĂ­ potĹ™eba kompletnĂ­
+ * detail hrĂˇÄŤe ani jeho stavovĂ© a notifikaÄŤnĂ­ informace. Typicky se pouĹľĂ­vĂˇ
+ * v seznamech hrĂˇÄŤĹŻ nebo pro rychlĂ© vĂ˝bÄ›ry.
  */
 public class PlayerSummaryDTO {
 
@@ -2463,12 +2681,9 @@ public class PlayerSummaryDTO {
     public void setTeam(Team team) { this.team = team; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\RegisterUserDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import jakarta.validation.constraints.Email;
@@ -2476,24 +2691,24 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * DTO pro registraci nového uživatele.
+ * DTO pro registraci novĂ©ho uĹľivatele.
  *
- * Slouží k přenosu registračních údajů z klienta do backendu
- * při vytváření nového uživatelského účtu. DTO obsahuje základní
- * validační pravidla pro formát dat. Kontrola shody hesel a další
- * business validace se provádí v servisní vrstvě.
+ * SlouĹľĂ­ k pĹ™enosu registraÄŤnĂ­ch ĂşdajĹŻ z klienta do backendu
+ * pĹ™i vytvĂˇĹ™enĂ­ novĂ©ho uĹľivatelskĂ©ho ĂşÄŤtu. DTO obsahuje zĂˇkladnĂ­
+ * validaÄŤnĂ­ pravidla pro formĂˇt dat. Kontrola shody hesel a dalĹˇĂ­
+ * business validace se provĂˇdĂ­ v servisnĂ­ vrstvÄ›.
  */
 public class RegisterUserDTO {
 
-    @NotBlank(message = "Křestní jméno je povinné.")
+    @NotBlank(message = "KĹ™estnĂ­ jmĂ©no je povinnĂ©.")
     @Size(min = 2, max = 50)
     private String name;
 
-    @NotBlank(message = "Příjmení je povinné.")
+    @NotBlank(message = "PĹ™Ă­jmenĂ­ je povinnĂ©.")
     @Size(min = 2, max = 50)
     private String surname;
 
-    @NotBlank(message = "Email je povinný.")
+    @NotBlank(message = "Email je povinnĂ˝.")
     @Email
     private String email;
 
@@ -2520,12 +2735,9 @@ public class RegisterUserDTO {
     public void setPasswordConfirm(String passwordConfirm) { this.passwordConfirm = passwordConfirm; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\SeasonDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -2536,42 +2748,42 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * DTO reprezentující sezónu v aplikaci.
+ * DTO reprezentujĂ­cĂ­ sezĂłnu v aplikaci.
  *
- * Slouží k přenosu informací o sezónách mezi backendem a klientem,
- * například při správě sezón nebo výběru aktivní sezóny. Sezóna vymezuje
- * časové období, ve kterém se konají zápasy a ke kterému se vztahují
- * statistiky a přehledy.
+ * SlouĹľĂ­ k pĹ™enosu informacĂ­ o sezĂłnĂˇch mezi backendem a klientem,
+ * napĹ™Ă­klad pĹ™i sprĂˇvÄ› sezĂłn nebo vĂ˝bÄ›ru aktivnĂ­ sezĂłny. SezĂłna vymezuje
+ * ÄŤasovĂ© obdobĂ­, ve kterĂ©m se konajĂ­ zĂˇpasy a ke kterĂ©mu se vztahujĂ­
+ * statistiky a pĹ™ehledy.
  */
 public class SeasonDTO {
 
     private Long id;
 
     /**
-     * Název sezóny, například "2024/2025".
+     * NĂˇzev sezĂłny, napĹ™Ă­klad "2024/2025".
      */
-    @NotBlank(message = "např. 2025/2026")
+    @NotBlank(message = "napĹ™. 2025/2026")
     private String name;
 
-    @NotNull(message = "datum sezony OD musí být zadán")
+    @NotNull(message = "datum sezony OD musĂ­ bĂ˝t zadĂˇn")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
-    @NotNull(message = "datum sezony DO musí být zadán")
+    @NotNull(message = "datum sezony DO musĂ­ bĂ˝t zadĂˇn")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
     /**
-     * Příznak, zda je sezóna aktuálně aktivní.
+     * PĹ™Ă­znak, zda je sezĂłna aktuĂˇlnÄ› aktivnĂ­.
      *
-     * V systému může být v daném okamžiku aktivní nejvýše jedna sezóna.
+     * V systĂ©mu mĹŻĹľe bĂ˝t v danĂ©m okamĹľiku aktivnĂ­ nejvĂ˝Ĺˇe jedna sezĂłna.
      */
     private boolean active;
 
     /**
-     * Časové razítko sezóny.
-     * Slouží pro zobrazení data a času vytvoření / poslední změny sezóny.
-     * Hodnota je spravována na backendu.
+     * ÄŚasovĂ© razĂ­tko sezĂłny.
+     * SlouĹľĂ­ pro zobrazenĂ­ data a ÄŤasu vytvoĹ™enĂ­ / poslednĂ­ zmÄ›ny sezĂłny.
+     * Hodnota je spravovĂˇna na backendu.
      */
     private LocalDateTime timestamp;
 
@@ -2609,19 +2821,16 @@ public class SeasonDTO {
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\SeasonHistoryDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * DTO reprezentující historický záznam o sezóně.
+ * DTO reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam o sezĂłnÄ›.
  */
 public class SeasonHistoryDTO {
 
@@ -2637,7 +2846,7 @@ public class SeasonHistoryDTO {
     private boolean active;
 
     /**
-     * ID uživatele, který sezónu vytvořil.
+     * ID uĹľivatele, kterĂ˝ sezĂłnu vytvoĹ™il.
      */
     private Long createdByUserId;
 
@@ -2672,41 +2881,38 @@ public class SeasonHistoryDTO {
     public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
 }
 
-
-
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\SuccessResponseDTO.java
 -----
-
 package cz.phsoft.hokej.models.dto;
 
 /**
- * DTO reprezentující standardizovanou úspěšnou odpověď API.
+ * DTO reprezentujĂ­cĂ­ standardizovanou ĂşspÄ›Ĺˇnou odpovÄ›ÄŹ API.
  *
- * Používá se jako návratová hodnota u operací, které provedly změnu
- * stavu systému, například při vytvoření, aktualizaci, smazání
- * nebo schválení entity. Umožňuje vrátit textovou zprávu, ID
- * dotčené entity a čas vzniku odpovědi.
+ * PouĹľĂ­vĂˇ se jako nĂˇvratovĂˇ hodnota u operacĂ­, kterĂ© provedly zmÄ›nu
+ * stavu systĂ©mu, napĹ™Ă­klad pĹ™i vytvoĹ™enĂ­, aktualizaci, smazĂˇnĂ­
+ * nebo schvĂˇlenĂ­ entity. UmoĹľĹuje vrĂˇtit textovou zprĂˇvu, ID
+ * dotÄŤenĂ© entity a ÄŤas vzniku odpovÄ›di.
  */
 public class SuccessResponseDTO {
 
     /**
-     * Textová zpráva popisující výsledek operace.
+     * TextovĂˇ zprĂˇva popisujĂ­cĂ­ vĂ˝sledek operace.
      */
     private final String message;
 
     /**
-     * ID entity, které se operace týkala.
+     * ID entity, kterĂ© se operace tĂ˝kala.
      *
-     * Může být null, pokud operace nemá přímou vazbu na konkrétní entitu.
+     * MĹŻĹľe bĂ˝t null, pokud operace nemĂˇ pĹ™Ă­mou vazbu na konkrĂ©tnĂ­ entitu.
      */
     private final Long id;
 
     /**
-     * Čas vytvoření odpovědi.
+     * ÄŚas vytvoĹ™enĂ­ odpovÄ›di.
      *
-     * Čas se typicky předává ve formátu ISO-8601 a slouží
-     * k ladění nebo zobrazování v logu na frontendu.
+     * ÄŚas se typicky pĹ™edĂˇvĂˇ ve formĂˇtu ISO-8601 a slouĹľĂ­
+     * k ladÄ›nĂ­ nebo zobrazovĂˇnĂ­ v logu na frontendu.
      */
     private final String timestamp;
 
@@ -2720,5 +2926,3 @@ public class SuccessResponseDTO {
     public Long getId() { return id; }
     public String getTimestamp() { return timestamp; }
 }
-
-
