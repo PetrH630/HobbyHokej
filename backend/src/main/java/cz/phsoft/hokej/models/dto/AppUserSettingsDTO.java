@@ -84,8 +84,12 @@ public class AppUserSettingsDTO {
     /**
      * Výchozí obrazovka po přihlášení.
      *
-     * Typicky odpovídá názvu sekce na frontendu,
-     * například "DASHBOARD", "MATCHES" nebo "PLAYERS".
+     * Hodnota odpovídá enumu LandingPage na backendu.
+     * Je přenášena jako řetězec, například "DASHBOARD",
+     * "MATCHES" nebo "PLAYERS".
+     *
+     * Na backendu je hodnota převáděna na enum a ukládána
+     * jako typ LandingPage.
      */
     private String defaultLandingPage;
 

@@ -37,7 +37,7 @@ const ConfirmActionModal = ({
                                 className="btn btn-secondary"
                                 onClick={onClose}
                             >
-                                Zrušit
+                                Zavřít
                             </button>
 
                             <button

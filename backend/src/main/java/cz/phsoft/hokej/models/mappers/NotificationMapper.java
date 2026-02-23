@@ -16,9 +16,18 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface NotificationMapper {
 
-    @Mapping(target = "category", expression = "java(entity.getType().getCategory())")
-    @Mapping(target = "important", expression = "java(entity.getType().isImportant())")
-    @Mapping(target = "read", expression = "java(entity.getReadAt() != null)")
+    @Mapping(
+            target = "category",
+            expression = "java(entity.getType() != null ? entity.getType().getCategory() : null)"
+    )
+    @Mapping(
+            target = "important",
+            expression = "java(entity.getType() != null && entity.getType().isImportant())"
+    )
+    @Mapping(
+            target = "read",
+            expression = "java(entity.getReadAt() != null)"
+    )
     NotificationDTO toDTO(NotificationEntity entity);
 
     List<NotificationDTO> toDtoList(List<NotificationEntity> entities);

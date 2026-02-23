@@ -21,9 +21,7 @@ import {
 const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
     const [showHistory, setShowHistory] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
-
-    // ✅ confirm jen pro zrušit/obnovit
-    const [confirmAction, setConfirmAction] = useState(null); // { type, title, message }
+    const [confirmAction, setConfirmAction] = useState(null);
 
     const isExpanded = showDetail || showHistory;
     const dimActive = isExpanded;
@@ -43,17 +41,37 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
         return Number.isNaN(d.getTime()) ? null : d;
     };
 
-    const formatDateTime = (dt) => {
+    const formatWithDay = (dt) => {
         const d = parseDateTime(dt);
-        if (!d) return "-";
-        return d.toLocaleString("cs-CZ");
+        if (!d) return { day: "-", dateTime: "-" };
+
+        const dayName = new Intl.DateTimeFormat("cs-CZ", {
+            weekday: "long",
+        }).format(d);
+
+        const datePart = new Intl.DateTimeFormat("cs-CZ", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        }).format(d);
+
+        const timePart = d.toLocaleTimeString("cs-CZ", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+
+        return {
+            day: dayName.charAt(0).toUpperCase() + dayName.slice(1),
+            dateTime: `${datePart} ${timePart}`,
+        };
     };
+
+    const formatted = formatWithDay(match.dateTime);
 
     const matchDate = parseDateTime(match.dateTime);
     const now = new Date();
     const isPast = matchDate ? matchDate < now : false;
 
-    // badge: zrušený > uplynulý > budoucí
     let badgeText = "budoucí";
     let badgeClass = "bg-success";
 
@@ -78,7 +96,7 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
                 : "");
 
     const buildMatchTitle = () =>
-        `#${match.matchNumber ?? match.id} – ${formatDateTime(match.dateTime)}`;
+        `#${match.matchNumber ?? match.id} – ${formatted.dateTime}`;
 
     return (
         <>
@@ -97,18 +115,26 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
                 {/* === ŘÁDEK 1 – ZÁKLADNÍ INFO O ZÁPASE === */}
                 <div className="card-body border-bottom">
                     <div className="row align-items-center">
-                        <div className="col-md-4 fw-bold">
+                        <div className="col-md-2 fw-bold">
                             {match.matchNumber != null && (
                                 <span className="me-2">#{match.matchNumber}</span>
                             )}
-                            <span>{formatDateTime(match.dateTime)}</span>
+
+                            {/* ✅ Název dne */}
+                            <span className="text-muted me-2">
+                                {formatted.day}
+                            </span>
+                            </div>
+                            <div className="col-md-3 fw-bold">
+                            {/* Datum + čas */}
+                            <span>{formatted.dateTime}</span>
 
                             <span className={`badge ms-2 ${badgeClass}`}>
                                 {badgeText}
                             </span>
                         </div>
 
-                        <div className="col-md-4">
+                        <div className="col-md-3">
                             <small className="text-muted d-block">
                                 Místo: <strong>{match.location || "-"}</strong>
                             </small>
@@ -129,7 +155,8 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
                             </small>
                         </div>
                     </div>
-                </div>
+                </div>        
+          
 
                 {/* === ŘÁDEK 2 – STAV + AKCE === */}
                 <div className="card-body border-bottom bg-light">

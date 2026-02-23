@@ -3,6 +3,7 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
 import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.data.enums.LandingPage;
 import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
 import cz.phsoft.hokej.data.repositories.AppUserSettingsRepository;
 import cz.phsoft.hokej.data.repositories.AppUserRepository;
@@ -149,7 +150,7 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
         settings.setEmailDigestTime(null);
         settings.setUiLanguage("cs");
         settings.setTimezone("Europe/Prague");
-        settings.setDefaultLandingPage("DASHBOARD");
+        settings.setDefaultLandingPage(LandingPage.DASHBOARD);
 
         appUserSettingsRepository.save(settings);
 

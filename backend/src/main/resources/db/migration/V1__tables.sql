@@ -27,7 +27,7 @@ CREATE TABLE `app_users_history` (
 CREATE TABLE `app_user_settings` (
   `id` bigint(20) NOT NULL,
   `copy_all_player_notifications_to_user_email` bit(1) NOT NULL,
-  `default_landing_page` varchar(50) DEFAULT NULL,
+   `default_landing_page` enum('DASHBOARD','MATCHES','PLAYERS') NOT NULL DEFAULT 'DASHBOARD',
   `email_digest_enabled` bit(1) NOT NULL,
   `email_digest_time` time(6) DEFAULT NULL,
   `global_notification_level` enum('ALL','IMPORTANT_ONLY','NONE') NOT NULL,

@@ -2,6 +2,8 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
 import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.data.enums.LandingPage;
+
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
@@ -113,10 +115,13 @@ public class AppUserSettingsEntity {
 
     /**
      * Výchozí obrazovka po přihlášení.
-     * Z praktických důvodů je uložena jako řetězec.
+     *
+     * V databázi je uložena jako řetězcová hodnota ENUM (VARCHAR),
+     * v aplikační logice se používá enum LandingPage.
      */
-    @Column(name = "default_landing_page", length = 50)
-    private String defaultLandingPage = "DASHBOARD";
+    @Enumerated(EnumType.STRING)
+    @Column(name = "default_landing_page", nullable = false, length = 50)
+    private LandingPage defaultLandingPage = LandingPage.DASHBOARD;
 
     public Long getId() {
         return id;
@@ -202,11 +207,17 @@ public class AppUserSettingsEntity {
         this.timezone = timezone;
     }
 
-    public String getDefaultLandingPage() {
+    /**
+     * Vrací výchozí landing page jako String (pro DTO / MapStruct).
+     */
+    public LandingPage getDefaultLandingPage() {
         return defaultLandingPage;
     }
 
-    public void setDefaultLandingPage(String defaultLandingPage) {
+    /**
+     * Nastavuje výchozí landing page ze Stringu (pro DTO / MapStruct).
+     */
+    public void setDefaultLandingPage(LandingPage defaultLandingPage) {
         this.defaultLandingPage = defaultLandingPage;
     }
 }

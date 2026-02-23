@@ -7,6 +7,7 @@ import { useAuth } from "../hooks/useAuth";
 import { PlayerIcon, UserIcon, AdminIcon } from "../icons";
 import { useCurrentPlayer } from "../hooks/useCurrentPlayer";
 import RoleGuard from "./RoleGuard";
+import NotificationBell from "./notifications/NotificationBell";
 
 import "./Navbar.css";
 
@@ -34,9 +35,12 @@ const Navbar = () => {
     };
 
     const handleLogout = async () => {
-        await logout();
-        navigate("/login");
-        closeMenu();
+        try {
+            await logout();
+        } finally {
+            closeMenu();
+            window.location.replace("/login");
+        }
     };
 
     const handlePlayerChange = async (e) => {
@@ -210,6 +214,19 @@ const Navbar = () => {
         <RoleGuard roles={["ROLE_PLAYER", "ROLE_MANAGER"]}>
             <nav className="mb-3">
                 <ul className="list-unstyled mb-2">
+                    {/* Notifikace jako první položka pro hráče na mobilu */}
+                    <li>
+                        <NavLink
+                            to="/app/notifications"
+                            className={({ isActive }) =>
+                                "mobile-link" + (isActive ? " activeLink" : "")
+                            }
+                            onClick={closeMenu}
+                        >
+                            Notifikace
+                        </NavLink>
+                    </li>
+
                     <li>
                         <NavLink
                             to="/app/player"
@@ -222,7 +239,6 @@ const Navbar = () => {
                             Přehled
                         </NavLink>
                     </li>
-
 
                     <li>
                         <NavLink
@@ -372,7 +388,6 @@ const Navbar = () => {
                             />
                             <span className="brand-text">HokejApp</span>
                         </NavLink>
-
                     </div>
 
                     {/* STŘED – odkazy uprostřed */}
@@ -448,7 +463,7 @@ const Navbar = () => {
                     )}
 
                     {/* PRAVÁ ČÁST  */}
-                    <div className="d-flex align-items-center flex-shrink-0">
+                    <div className="d-flex flex-column flex-lg-row align-items-center flex-shrink-0">
                         {/* Velká zařízení – uživatel vpravo */}
                         {user && (
                             <div className="d-none d-lg-flex align-items-center gap-3 user-block me-2">
@@ -503,6 +518,9 @@ const Navbar = () => {
                                     </RoleGuard>
                                 </div>
 
+                                {/* Zvoneček s notifikacemi – jen desktop */}
+                                <NotificationBell />
+
                                 {/* Vpravo: tlačítko Odhlásit */}
                                 <button
                                     className="btn btn-outline-danger btn-sm"
@@ -513,7 +531,14 @@ const Navbar = () => {
                             </div>
                         )}
 
-                        {/* Malá zařízení – hamburger vpravo */}
+                        {/* Malá zařízení – zvoneček nad hamburgerem */}
+                        {user && (
+                            <div className="d-inline-flex d-lg-none mb-1">
+                                <NotificationBell />
+                            </div>
+                        )}
+
+                        {/* Malá zařízení – hamburger vpravo dole */}
                         <button
                             className="navbar-toggler d-lg-none"
                             type="button"

@@ -46,6 +46,9 @@ import PublicLandingPage from "./pages/PublicLandingPage";
 // veřejný layout s topBarem
 import PublicLayout from "./pages/PublicLayout";
 
+// NOTIFIKACE
+import NotificationsPage from "./pages/NotificationsPage";
+
 const App = () => (
   <AppModeProvider>
     <BrowserRouter>
@@ -92,6 +95,9 @@ const App = () => (
           <Route path="settings" element={<SettingsPage />} />
           <Route path="my-inactivity" element={<MyInactivityPage />} />
           <Route path="player" element={<PlayerHomePage />} />
+
+          {/* NOTIFIKACE – pro přihlášeného uživatele */}
+          <Route path="notifications" element={<NotificationsPage />} />
 
           {/* ADMIN/MANAGER – SPRÁVA */}
           <Route

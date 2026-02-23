@@ -1452,14 +1452,9 @@ public class MeController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.NotificationEntity;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.data.repositories.NotificationRepository;
-import cz.phsoft.hokej.exceptions.UserNotFoundException;
 import cz.phsoft.hokej.models.dto.NotificationBadgeDTO;
 import cz.phsoft.hokej.models.dto.NotificationDTO;
-import cz.phsoft.hokej.models.mappers.NotificationMapper;
+import cz.phsoft.hokej.models.services.notification.NotificationQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -1467,9 +1462,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -1481,9 +1473,9 @@ import java.util.List;
  * - naÄŤtenĂ­ poslednĂ­ch notifikacĂ­,
  * - oznaÄŤenĂ­ notifikacĂ­ jako pĹ™eÄŤtenĂ˝ch.
  *
- * VeĹˇkerĂˇ logika ÄŤtenĂ­ je delegovĂˇna do NotificationRepository
- * a mapovĂˇnĂ­ do NotificationMapper. Controller pracuje vĹľdy
- * s aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝m uĹľivatelem.
+ * VeĹˇkerĂˇ logika ÄŤtenĂ­ a zmÄ›ny stavu notifikacĂ­
+ * je delegovĂˇna do NotificationQueryService.
+ * Controller pracuje vĹľdy s aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝m uĹľivatelem.
  */
 @RestController
 @RequestMapping("/api/notifications")
@@ -1491,25 +1483,10 @@ public class NotificationController {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationController.class);
 
-    /**
-     * VĂ˝chozĂ­ poÄŤet dnĂ­, za kterĂ© se naÄŤtou notifikace,
-     * pokud uĹľivatel jeĹˇtÄ› nemĂˇ nastavenĂ© lastLoginAt.
-     */
-    private static final int DEFAULT_DAYS_IF_NO_LAST_LOGIN = 14;
+    private final NotificationQueryService notificationQueryService;
 
-    private final NotificationRepository notificationRepository;
-    private final NotificationMapper notificationMapper;
-    private final AppUserRepository appUserRepository;
-    private final Clock clock;
-
-    public NotificationController(NotificationRepository notificationRepository,
-                                  NotificationMapper notificationMapper,
-                                  AppUserRepository appUserRepository,
-                                  Clock clock) {
-        this.notificationRepository = notificationRepository;
-        this.notificationMapper = notificationMapper;
-        this.appUserRepository = appUserRepository;
-        this.clock = clock;
+    public NotificationController(NotificationQueryService notificationQueryService) {
+        this.notificationQueryService = notificationQueryService;
     }
 
     /**
@@ -1524,17 +1501,7 @@ public class NotificationController {
     @GetMapping("/badge")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<NotificationBadgeDTO> getBadge(Authentication authentication) {
-        AppUserEntity user = getCurrentUser(authentication);
-        Instant boundary = resolveBoundary(user);
-
-        long count = notificationRepository
-                .countByUserAndCreatedAtAfterAndReadAtIsNull(user, boundary);
-
-        NotificationBadgeDTO dto = new NotificationBadgeDTO();
-        dto.setUnreadCountSinceLastLogin(count);
-        dto.setLastLoginAt(user.getLastLoginAt());
-        dto.setCurrentLoginAt(user.getCurrentLoginAt());
-
+        NotificationBadgeDTO dto = notificationQueryService.getBadge(authentication);
         return ResponseEntity.ok(dto);
     }
 
@@ -1542,7 +1509,7 @@ public class NotificationController {
      * VracĂ­ seznam notifikacĂ­ vytvoĹ™enĂ˝ch po poslednĂ­m pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
      *
      * Pokud uĹľivatel nemĂˇ lastLoginAt, pouĹľije se vĂ˝chozĂ­ ÄŤasovĂ© okno
-     * definovanĂ© konstantou DEFAULT_DAYS_IF_NO_LAST_LOGIN.
+     * definovanĂ© v servisnĂ­ vrstvÄ›.
      *
      * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
      * @return seznam notifikacĂ­ ve formÄ› DTO
@@ -1550,13 +1517,7 @@ public class NotificationController {
     @GetMapping("/since-last-login")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<NotificationDTO>> getSinceLastLogin(Authentication authentication) {
-        AppUserEntity user = getCurrentUser(authentication);
-        Instant boundary = resolveBoundary(user);
-
-        List<NotificationEntity> entities =
-                notificationRepository.findByUserAndCreatedAtAfterOrderByCreatedAtDesc(user, boundary);
-
-        List<NotificationDTO> dtos = notificationMapper.toDtoList(entities);
+        List<NotificationDTO> dtos = notificationQueryService.getSinceLastLogin(authentication);
         return ResponseEntity.ok(dtos);
     }
 
@@ -1565,7 +1526,7 @@ public class NotificationController {
      *
      * Parametr limit urÄŤuje maximĂˇlnĂ­ poÄŤet vrĂˇcenĂ˝ch zĂˇznamĹŻ.
      * Pokud nenĂ­ zadĂˇn, pouĹľije se vĂ˝chozĂ­ hodnota 50
-     * (zĂˇvisĂ­ na implementaci NotificationRepository).
+     * (zĂˇvisĂ­ na implementaci servisnĂ­ vrstvy).
      *
      * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
      * @param limit volitelnĂ˝ limit poÄŤtu zĂˇznamĹŻ
@@ -1577,16 +1538,7 @@ public class NotificationController {
             Authentication authentication,
             @RequestParam(name = "limit", required = false, defaultValue = "50") int limit
     ) {
-        AppUserEntity user = getCurrentUser(authentication);
-
-        List<NotificationEntity> entities =
-                notificationRepository.findTop50ByUserOrderByCreatedAtDesc(user);
-
-        if (limit > 0 && entities.size() > limit) {
-            entities = entities.subList(0, limit);
-        }
-
-        List<NotificationDTO> dtos = notificationMapper.toDtoList(entities);
+        List<NotificationDTO> dtos = notificationQueryService.getRecent(authentication, limit);
         return ResponseEntity.ok(dtos);
     }
 
@@ -1604,17 +1556,7 @@ public class NotificationController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> markAsRead(Authentication authentication,
                                            @PathVariable("id") Long id) {
-        AppUserEntity user = getCurrentUser(authentication);
-
-        notificationRepository.findByIdAndUser(id, user)
-                .ifPresent(entity -> {
-                    if (entity.getReadAt() == null) {
-                        entity.setReadAt(Instant.now(clock));
-                        notificationRepository.save(entity);
-                        log.debug("Notifikace {} oznaÄŤena jako pĹ™eÄŤtenĂˇ pro user {}", id, user.getId());
-                    }
-                });
-
+        notificationQueryService.markAsRead(authentication, id);
         return ResponseEntity.noContent().build();
     }
 
@@ -1627,49 +1569,29 @@ public class NotificationController {
     @PostMapping("/read-all")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> markAllAsRead(Authentication authentication) {
-        AppUserEntity user = getCurrentUser(authentication);
-
-        List<NotificationEntity> unread =
-                notificationRepository.findByUserAndReadAtIsNullOrderByCreatedAtDesc(user);
-
-        if (!unread.isEmpty()) {
-            Instant now = Instant.now(clock);
-            for (NotificationEntity entity : unread) {
-                entity.setReadAt(now);
-            }
-            notificationRepository.saveAll(unread);
-            log.debug("OznaÄŤeno {} notifikacĂ­ jako pĹ™eÄŤtenĂ˝ch pro user {}", unread.size(), user.getId());
-        }
-
+        notificationQueryService.markAllAsRead(authentication);
         return ResponseEntity.noContent().build();
     }
 
     /**
-     * UrÄŤuje ÄŤasovou hranici pro vĂ˝bÄ›r notifikacĂ­.
+     * VracĂ­ vĹˇechny notifikace v systĂ©mu pro administrĂˇtorskĂ˝ pĹ™ehled.
      *
-     * Pokud mĂˇ uĹľivatel nastaven lastLoginAt, pouĹľije se tato hodnota.
-     * Jinak se pouĹľije aktuĂˇlnĂ­ ÄŤas mĂ­nus DEFAULT_DAYS_IF_NO_LAST_LOGIN dnĂ­.
-     */
-    private Instant resolveBoundary(AppUserEntity user) {
-        if (user.getLastLoginAt() != null) {
-            return user.getLastLoginAt();
-        }
-        return Instant.now(clock).minus(DEFAULT_DAYS_IF_NO_LAST_LOGIN, ChronoUnit.DAYS);
-    }
-
-    /**
-     * NaÄŤte entitu aktuĂˇlnĂ­ho uĹľivatele podle e-mailu
-     * z autentizaÄŤnĂ­ho kontextu.
+     * Endpoint je urÄŤen pro role ADMIN a MANAGER.
+     * Parametr limit omezuje maximĂˇlnĂ­ poÄŤet vrĂˇcenĂ˝ch zĂˇznamĹŻ.
      *
-     * @param authentication autentizaÄŤnĂ­ kontext
-     * @return entita uĹľivatele
+     * @param limit maximĂˇlnĂ­ poÄŤet vrĂˇcenĂ˝ch zĂˇznamĹŻ
+     * @return seznam notifikacĂ­ ve formÄ› DTO
      */
-    private AppUserEntity getCurrentUser(Authentication authentication) {
-        String email = authentication.getName();
-        return appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<List<NotificationDTO>> getAllNotifications(
+            @RequestParam(name = "limit", required = false, defaultValue = "500") int limit
+    ) {
+        List<NotificationDTO> dtos = notificationQueryService.getAllNotifications(limit);
+        return ResponseEntity.ok(dtos);
     }
 }
+
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\package-info.java

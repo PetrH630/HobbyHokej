@@ -1,53 +1,82 @@
 ﻿Balíček (složka): mappers
-Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers
 
 Seznam souborů:
-AppUserHistoryMapper.java
-AppUserMapper.java
-AppUserSettingsMapper.java
-MatchHistoryMapper.java
-MatchMapper.java
-MatchRegistrationHistoryMapper.java
-MatchRegistrationMapper.java
-NotificationMapper.java
-package-info.java
-PlayerHistoryMapper.java
-PlayerInactivityPeriodMapper.java
-PlayerMapper.java
-PlayerSettingsMapper.java
-SeasonHistoryMapper.java
-SeasonMapper.java
+AppUserHistoryMapperImpl.java
+AppUserMapperImpl.java
+AppUserSettingsMapperImpl.java
+MatchHistoryMapperImpl.java
+MatchMapperImpl.java
+MatchRegistrationHistoryMapperImpl.java
+MatchRegistrationMapperImpl.java
+NotificationMapperImpl.java
+PlayerHistoryMapperImpl.java
+PlayerInactivityPeriodMapperImpl.java
+PlayerMapperImpl.java
+PlayerSettingsMapperImpl.java
+SeasonHistoryMapperImpl.java
+SeasonMapperImpl.java
 
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\AppUserHistoryMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\AppUserHistoryMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.AppUserHistoryEntity;
 import cz.phsoft.hokej.models.dto.AppUserHistoryDTO;
-import org.mapstruct.Mapper;
-
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod historickĂ˝ch zĂˇznamĹŻ uĹľivatelĹŻ
- * na jejich DTO reprezentace.
- *
- * SlouĹľĂ­ vĂ˝hradnÄ› pro ÄŤtecĂ­ ĂşÄŤely a auditnĂ­ pĹ™ehledy.
- */
-@Mapper(componentModel = "spring")
-public interface AppUserHistoryMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class AppUserHistoryMapperImpl implements AppUserHistoryMapper {
 
-    AppUserHistoryDTO toDTO(AppUserHistoryEntity entity);
+    @Override
+    public AppUserHistoryDTO toDTO(AppUserHistoryEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    List<AppUserHistoryDTO> toDTOList(
-            List<AppUserHistoryEntity> entities
-    );
+        AppUserHistoryDTO appUserHistoryDTO = new AppUserHistoryDTO();
+
+        appUserHistoryDTO.setId( entity.getId() );
+        appUserHistoryDTO.setAction( entity.getAction() );
+        appUserHistoryDTO.setChangedAt( entity.getChangedAt() );
+        appUserHistoryDTO.setUserId( entity.getUserId() );
+        appUserHistoryDTO.setOriginalTimestamp( entity.getOriginalTimestamp() );
+        appUserHistoryDTO.setName( entity.getName() );
+        appUserHistoryDTO.setSurname( entity.getSurname() );
+        appUserHistoryDTO.setEmail( entity.getEmail() );
+        appUserHistoryDTO.setRole( entity.getRole() );
+        appUserHistoryDTO.setEnabled( entity.isEnabled() );
+
+        return appUserHistoryDTO;
+    }
+
+    @Override
+    public List<AppUserHistoryDTO> toDTOList(List<AppUserHistoryEntity> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<AppUserHistoryDTO> list = new ArrayList<AppUserHistoryDTO>( entities.size() );
+        for ( AppUserHistoryEntity appUserHistoryEntity : entities ) {
+            list.add( toDTO( appUserHistoryEntity ) );
+        }
+
+        return list;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\AppUserMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\AppUserMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
@@ -56,298 +85,417 @@ import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.models.dto.AppUserDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.RegisterUserDTO;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper zajiĹˇĹĄujĂ­cĂ­ pĹ™evod mezi uĹľivatelskĂ˝mi entitami
- * a jejich DTO reprezentacemi.
- *
- * SlouĹľĂ­ k oddÄ›lenĂ­ perzistenÄŤnĂ­ vrstvy od API vrstvy.
- * Controllery pracujĂ­ vĂ˝hradnÄ› s DTO objekty, zatĂ­mco
- * databĂˇzovĂˇ vrstva pouĹľĂ­vĂˇ entity.
- *
- * Mapper takĂ© zajiĹˇĹĄuje bezpeÄŤnĂ© mapovĂˇnĂ­, kdy citlivĂˇ
- * nebo systĂ©movÄ› Ĺ™Ă­zenĂˇ pole nejsou pĹ™enĂˇĹˇena z DTO
- * pĹ™Ă­mo do entit.
- */
-@Mapper(componentModel = "spring")
-public interface AppUserMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class AppUserMapperImpl implements AppUserMapper {
 
-    /**
-     * PĹ™evede uĹľivatelskou entitu na DTO.
-     *
-     * SouÄŤĂˇstĂ­ DTO je i seznam hrĂˇÄŤĹŻ pĹ™iĹ™azenĂ˝ch
-     * k danĂ©mu uĹľivateli.
-     *
-     * @param entity entita uĹľivatele
-     * @return DTO reprezentace uĹľivatele
-     */
-    @Mapping(target = "players", source = "players")
-    AppUserDTO toDTO(AppUserEntity entity);
+    @Override
+    public AppUserDTO toDTO(AppUserEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede seznam uĹľivatelskĂ˝ch entit na seznam DTO.
-     *
-     * @param entities seznam uĹľivatelskĂ˝ch entit
-     * @return seznam DTO
-     */
-    List<AppUserDTO> toDtoList(List<AppUserEntity> entities);
+        AppUserDTO appUserDTO = new AppUserDTO();
 
-    /**
-     * PĹ™evede entitu hrĂˇÄŤe na DTO.
-     *
-     * Pole fullName se zĂˇmÄ›rnÄ› nemapuje, protoĹľe
-     * je sklĂˇdĂˇno jinde (napĹ™. v DTO logice).
-     *
-     * @param entity entita hrĂˇÄŤe
-     * @return DTO hrĂˇÄŤe
-     */
-    @Mapping(target = "fullName", ignore = true)
-    PlayerDTO toPlayerDTO(PlayerEntity entity);
+        appUserDTO.setPlayers( playerEntitySetToPlayerDTOSet( entity.getPlayers() ) );
+        appUserDTO.setId( entity.getId() );
+        appUserDTO.setName( entity.getName() );
+        appUserDTO.setSurname( entity.getSurname() );
+        appUserDTO.setEmail( entity.getEmail() );
+        appUserDTO.setRole( entity.getRole() );
+        appUserDTO.setEnabled( entity.isEnabled() );
+        appUserDTO.setTimestamp( entity.getTimestamp() );
+        appUserDTO.setLastLoginAt( entity.getLastLoginAt() );
+        appUserDTO.setCurrentLoginAt( entity.getCurrentLoginAt() );
 
-    /**
-     * PĹ™evede registraÄŤnĂ­ DTO na novou uĹľivatelskou entitu.
-     *
-     * SystĂ©movĂˇ pole nejsou mapovĂˇna a jejich hodnoty
-     * jsou nastavovĂˇny v servisnĂ­ vrstvÄ›.
-     *
-     * @param dto registraÄŤnĂ­ DTO
-     * @return novĂˇ entita uĹľivatele
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "password", ignore = true)
-    @Mapping(target = "role", ignore = true)
-    @Mapping(target = "enabled", ignore = true)
-    @Mapping(target = "players", ignore = true)
-    @Mapping(target = "timestamp", ignore = true)
-    @Mapping(target = "lastLoginAt", ignore = true)
-    @Mapping(target = "currentLoginAt", ignore = true)
-    AppUserEntity fromRegisterDto(RegisterUserDTO dto);
+        return appUserDTO;
+    }
 
-    /**
-     * Aktualizuje existujĂ­cĂ­ entitu uĹľivatele
-     * hodnotami z DTO.
-     *
-     * Identita, role, heslo a vazby na hrĂˇÄŤe
-     * nejsou z DTO pĹ™ebĂ­rĂˇny.
-     *
-     * @param dto    zdrojovĂ© DTO
-     * @param entity cĂ­lovĂˇ entita
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "password", ignore = true)
-    @Mapping(target = "role", ignore = true)
-    @Mapping(target = "enabled", ignore = true)
-    @Mapping(target = "players", ignore = true)
-    @Mapping(target = "timestamp", ignore = true)
-    @Mapping(target = "lastLoginAt", ignore = true)
-    @Mapping(target = "currentLoginAt", ignore = true)
-    void updateEntityFromDto(AppUserDTO dto, @MappingTarget AppUserEntity entity);
+    @Override
+    public List<AppUserDTO> toDtoList(List<AppUserEntity> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<AppUserDTO> list = new ArrayList<AppUserDTO>( entities.size() );
+        for ( AppUserEntity appUserEntity : entities ) {
+            list.add( toDTO( appUserEntity ) );
+        }
+
+        return list;
+    }
+
+    @Override
+    public PlayerDTO toPlayerDTO(PlayerEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
+
+        PlayerDTO playerDTO = new PlayerDTO();
+
+        playerDTO.setId( entity.getId() );
+        playerDTO.setName( entity.getName() );
+        playerDTO.setSurname( entity.getSurname() );
+        playerDTO.setNickname( entity.getNickname() );
+        playerDTO.setType( entity.getType() );
+        playerDTO.setTeam( entity.getTeam() );
+        playerDTO.setPhoneNumber( entity.getPhoneNumber() );
+        playerDTO.setPlayerStatus( entity.getPlayerStatus() );
+        playerDTO.setTimestamp( entity.getTimestamp() );
+
+        return playerDTO;
+    }
+
+    @Override
+    public AppUserEntity fromRegisterDto(RegisterUserDTO dto) {
+        if ( dto == null ) {
+            return null;
+        }
+
+        AppUserEntity appUserEntity = new AppUserEntity();
+
+        appUserEntity.setName( dto.getName() );
+        appUserEntity.setSurname( dto.getSurname() );
+        appUserEntity.setEmail( dto.getEmail() );
+
+        return appUserEntity;
+    }
+
+    @Override
+    public void updateEntityFromDto(AppUserDTO dto, AppUserEntity entity) {
+        if ( dto == null ) {
+            return;
+        }
+
+        entity.setName( dto.getName() );
+        entity.setSurname( dto.getSurname() );
+        entity.setEmail( dto.getEmail() );
+    }
+
+    protected Set<PlayerDTO> playerEntitySetToPlayerDTOSet(Set<PlayerEntity> set) {
+        if ( set == null ) {
+            return null;
+        }
+
+        Set<PlayerDTO> set1 = new LinkedHashSet<PlayerDTO>( Math.max( (int) ( set.size() / .75f ) + 1, 16 ) );
+        for ( PlayerEntity playerEntity : set ) {
+            set1.add( toPlayerDTO( playerEntity ) );
+        }
+
+        return set1;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\AppUserSettingsMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\AppUserSettingsMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
+import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
 import cz.phsoft.hokej.models.dto.AppUserSettingsDTO;
-import org.mapstruct.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou uĹľivatelskĂ©ho nastavenĂ­
- * a jejĂ­ DTO reprezentacĂ­.
- *
- * SlouĹľĂ­ pro sprĂˇvu preferencĂ­ uĹľivatele bez zĂˇsahu
- * do samotnĂ© identity uĹľivatelskĂ©ho ĂşÄŤtu.
- */
-@Mapper(componentModel = "spring")
-public interface AppUserSettingsMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:51+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class AppUserSettingsMapperImpl implements AppUserSettingsMapper {
 
-    /**
-     * PĹ™evede entitu nastavenĂ­ na DTO.
-     *
-     * @param entity entita nastavenĂ­
-     * @return DTO nastavenĂ­
-     */
-    AppUserSettingsDTO toDTO(AppUserSettingsEntity entity);
+    @Override
+    public AppUserSettingsDTO toDTO(AppUserSettingsEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * Aktualizuje existujĂ­cĂ­ entitu nastavenĂ­ hodnotami z DTO.
-     *
-     * Null hodnoty jsou ignorovĂˇny, aby nedoĹˇlo
-     * k nechtÄ›nĂ©mu pĹ™epsĂˇnĂ­ existujĂ­cĂ­ch dat.
-     *
-     * @param dto    zdrojovĂ© DTO
-     * @param entity cĂ­lovĂˇ entita
-     */
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDTO(AppUserSettingsDTO dto,
-                             @MappingTarget AppUserSettingsEntity entity);
+        AppUserSettingsDTO appUserSettingsDTO = new AppUserSettingsDTO();
+
+        if ( entity.getPlayerSelectionMode() != null ) {
+            appUserSettingsDTO.setPlayerSelectionMode( entity.getPlayerSelectionMode().name() );
+        }
+        if ( entity.getGlobalNotificationLevel() != null ) {
+            appUserSettingsDTO.setGlobalNotificationLevel( entity.getGlobalNotificationLevel().name() );
+        }
+        if ( entity.getManagerNotificationLevel() != null ) {
+            appUserSettingsDTO.setManagerNotificationLevel( entity.getManagerNotificationLevel().name() );
+        }
+        appUserSettingsDTO.setCopyAllPlayerNotificationsToUserEmail( entity.isCopyAllPlayerNotificationsToUserEmail() );
+        appUserSettingsDTO.setReceiveNotificationsForPlayersWithOwnEmail( entity.isReceiveNotificationsForPlayersWithOwnEmail() );
+        appUserSettingsDTO.setEmailDigestEnabled( entity.isEmailDigestEnabled() );
+        if ( entity.getEmailDigestTime() != null ) {
+            appUserSettingsDTO.setEmailDigestTime( DateTimeFormatter.ISO_LOCAL_TIME.format( entity.getEmailDigestTime() ) );
+        }
+        appUserSettingsDTO.setUiLanguage( entity.getUiLanguage() );
+        appUserSettingsDTO.setTimezone( entity.getTimezone() );
+        appUserSettingsDTO.setDefaultLandingPage( entity.getDefaultLandingPage() );
+
+        return appUserSettingsDTO;
+    }
+
+    @Override
+    public void updateEntityFromDTO(AppUserSettingsDTO dto, AppUserSettingsEntity entity) {
+        if ( dto == null ) {
+            return;
+        }
+
+        if ( dto.getPlayerSelectionMode() != null ) {
+            entity.setPlayerSelectionMode( Enum.valueOf( PlayerSelectionMode.class, dto.getPlayerSelectionMode() ) );
+        }
+        if ( dto.getGlobalNotificationLevel() != null ) {
+            entity.setGlobalNotificationLevel( Enum.valueOf( GlobalNotificationLevel.class, dto.getGlobalNotificationLevel() ) );
+        }
+        if ( dto.getManagerNotificationLevel() != null ) {
+            entity.setManagerNotificationLevel( Enum.valueOf( GlobalNotificationLevel.class, dto.getManagerNotificationLevel() ) );
+        }
+        entity.setCopyAllPlayerNotificationsToUserEmail( dto.isCopyAllPlayerNotificationsToUserEmail() );
+        entity.setReceiveNotificationsForPlayersWithOwnEmail( dto.isReceiveNotificationsForPlayersWithOwnEmail() );
+        entity.setEmailDigestEnabled( dto.isEmailDigestEnabled() );
+        if ( dto.getEmailDigestTime() != null ) {
+            entity.setEmailDigestTime( LocalTime.parse( dto.getEmailDigestTime() ) );
+        }
+        if ( dto.getUiLanguage() != null ) {
+            entity.setUiLanguage( dto.getUiLanguage() );
+        }
+        if ( dto.getTimezone() != null ) {
+            entity.setTimezone( dto.getTimezone() );
+        }
+        if ( dto.getDefaultLandingPage() != null ) {
+            entity.setDefaultLandingPage( dto.getDefaultLandingPage() );
+        }
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\MatchHistoryMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\MatchHistoryMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.MatchHistoryEntity;
 import cz.phsoft.hokej.models.dto.MatchHistoryDTO;
-import org.mapstruct.Mapper;
-
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou MatchHistoryEntity
- * a pĹ™enosovĂ˝m objektem MatchHistoryDTO.
- *
- * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
- * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
- * definovanĂ˝ch metod tohoto rozhranĂ­.
- *
- * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pro pĹ™evod historickĂ˝ch
- * zĂˇznamĹŻ zĂˇpasu naÄŤtenĂ˝ch z databĂˇze do DTO objektĹŻ,
- * kterĂ© jsou nĂˇslednÄ› vrĂˇceny kontrolerem.
- */
-@Mapper(componentModel = "spring")
-public interface MatchHistoryMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class MatchHistoryMapperImpl implements MatchHistoryMapper {
 
-    /**
-     * PĹ™evede entitu historickĂ©ho zĂˇznamu zĂˇpasu na DTO.
-     *
-     * @param entity entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam zĂˇpasu
-     * @return DTO obsahujĂ­cĂ­ data historickĂ©ho zĂˇznamu
-     */
-    MatchHistoryDTO toDTO(MatchHistoryEntity entity);
+    @Override
+    public MatchHistoryDTO toDTO(MatchHistoryEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede seznam entit historickĂ˝ch zĂˇznamĹŻ zĂˇpasu na seznam DTO.
-     *
-     * @param entities seznam entit historickĂ˝ch zĂˇznamĹŻ
-     * @return seznam DTO objektĹŻ
-     */
-    List<MatchHistoryDTO> toDTOList(
-            List<MatchHistoryEntity> entities
-    );
+        MatchHistoryDTO matchHistoryDTO = new MatchHistoryDTO();
+
+        matchHistoryDTO.setId( entity.getId() );
+        matchHistoryDTO.setAction( entity.getAction() );
+        matchHistoryDTO.setChangedAt( entity.getChangedAt() );
+        matchHistoryDTO.setMatchId( entity.getMatchId() );
+        matchHistoryDTO.setOriginalTimestamp( entity.getOriginalTimestamp() );
+        matchHistoryDTO.setDateTime( entity.getDateTime() );
+        matchHistoryDTO.setLocation( entity.getLocation() );
+        matchHistoryDTO.setDescription( entity.getDescription() );
+        matchHistoryDTO.setMaxPlayers( entity.getMaxPlayers() );
+        matchHistoryDTO.setPrice( entity.getPrice() );
+        matchHistoryDTO.setMatchStatus( entity.getMatchStatus() );
+        matchHistoryDTO.setCancelReason( entity.getCancelReason() );
+        matchHistoryDTO.setSeasonId( entity.getSeasonId() );
+        matchHistoryDTO.setCreatedByUserId( entity.getCreatedByUserId() );
+        matchHistoryDTO.setLastModifiedByUserId( entity.getLastModifiedByUserId() );
+
+        return matchHistoryDTO;
+    }
+
+    @Override
+    public List<MatchHistoryDTO> toDTOList(List<MatchHistoryEntity> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<MatchHistoryDTO> list = new ArrayList<MatchHistoryDTO>( entities.size() );
+        for ( MatchHistoryEntity matchHistoryEntity : entities ) {
+            list.add( toDTO( matchHistoryEntity ) );
+        }
+
+        return list;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\MatchMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\MatchMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.SeasonEntity;
 import cz.phsoft.hokej.models.dto.MatchDTO;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou zĂˇpasu a DTO.
- *
- * ĹĂ­dĂ­, jakĂ˝m zpĹŻsobem je vazba na sezĂłnu
- * reprezentovĂˇna v API vrstvÄ›.
- */
-@Mapper(componentModel = "spring")
-public interface MatchMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:51+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class MatchMapperImpl implements MatchMapper {
 
-    /**
-     * PĹ™evede entitu zĂˇpasu na DTO.
-     *
-     * Vazba na sezĂłnu je reprezentovĂˇna
-     * pouze pomocĂ­ identifikĂˇtoru.
-     *
-     * @param entity entita zĂˇpasu
-     * @return DTO zĂˇpasu
-     */
-    @Mapping(source = "season.id", target = "seasonId")
-    MatchDTO toDTO(MatchEntity entity);
+    @Override
+    public MatchDTO toDTO(MatchEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede DTO na novou entitu zĂˇpasu.
-     *
-     * Vazba na sezĂłnu se nastavuje aĹľ
-     * v servisnĂ­ vrstvÄ›.
-     *
-     * @param dto DTO zĂˇpasu
-     * @return entita zĂˇpasu
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "season", ignore = true)
-    @Mapping(target = "timestamp", ignore = true)
-    @Mapping(target = "createdByUserId", ignore = true)
-    @Mapping(target = "lastModifiedByUserId", ignore = true)
-    MatchEntity toEntity(MatchDTO dto);
+        MatchDTO matchDTO = new MatchDTO();
 
-    /**
-     * Aktualizuje existujĂ­cĂ­ entitu zĂˇpasu.
-     *
-     * Vazba na sezĂłnu se pĹ™i aktualizaci
-     * nemÄ›nĂ­.
-     *
-     * @param dto    zdrojovĂ© DTO
-     * @param entity cĂ­lovĂˇ entita
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "season", ignore = true)
-    @Mapping(target = "timestamp", ignore = true)
-    @Mapping(target = "createdByUserId", ignore = true)
-    @Mapping(target = "lastModifiedByUserId", ignore = true)
-    void updateEntity(MatchDTO dto, @MappingTarget MatchEntity entity);
+        matchDTO.setSeasonId( entitySeasonId( entity ) );
+        matchDTO.setId( entity.getId() );
+        matchDTO.setDateTime( entity.getDateTime() );
+        matchDTO.setLocation( entity.getLocation() );
+        matchDTO.setDescription( entity.getDescription() );
+        matchDTO.setMaxPlayers( entity.getMaxPlayers() );
+        matchDTO.setPrice( entity.getPrice() );
+        matchDTO.setMatchStatus( entity.getMatchStatus() );
+        matchDTO.setCancelReason( entity.getCancelReason() );
+
+        return matchDTO;
+    }
+
+    @Override
+    public MatchEntity toEntity(MatchDTO dto) {
+        if ( dto == null ) {
+            return null;
+        }
+
+        MatchEntity matchEntity = new MatchEntity();
+
+        matchEntity.setDateTime( dto.getDateTime() );
+        matchEntity.setLocation( dto.getLocation() );
+        matchEntity.setDescription( dto.getDescription() );
+        matchEntity.setMaxPlayers( dto.getMaxPlayers() );
+        matchEntity.setPrice( dto.getPrice() );
+        matchEntity.setMatchStatus( dto.getMatchStatus() );
+        matchEntity.setCancelReason( dto.getCancelReason() );
+
+        return matchEntity;
+    }
+
+    @Override
+    public void updateEntity(MatchDTO dto, MatchEntity entity) {
+        if ( dto == null ) {
+            return;
+        }
+
+        entity.setDateTime( dto.getDateTime() );
+        entity.setLocation( dto.getLocation() );
+        entity.setDescription( dto.getDescription() );
+        entity.setMaxPlayers( dto.getMaxPlayers() );
+        entity.setPrice( dto.getPrice() );
+        entity.setMatchStatus( dto.getMatchStatus() );
+        entity.setCancelReason( dto.getCancelReason() );
+    }
+
+    private Long entitySeasonId(MatchEntity matchEntity) {
+        if ( matchEntity == null ) {
+            return null;
+        }
+        SeasonEntity season = matchEntity.getSeason();
+        if ( season == null ) {
+            return null;
+        }
+        Long id = season.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\MatchRegistrationHistoryMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\MatchRegistrationHistoryMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.MatchRegistrationHistoryEntity;
 import cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO;
-import org.mapstruct.Mapper;
-
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou MatchRegistrationHistoryEntity
- * a pĹ™enosovĂ˝m objektem MatchRegistrationHistoryDTO.
- *
- * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
- * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
- * definovanĂ˝ch metod tohoto rozhranĂ­.
- *
- * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pro pĹ™evod historickĂ˝ch
- * zĂˇznamĹŻ registracĂ­ naÄŤtenĂ˝ch z databĂˇze do DTO objektĹŻ,
- * kterĂ© jsou nĂˇslednÄ› vrĂˇceny kontrolerem pro auditnĂ­
- * a pĹ™ehledovĂ© ĂşÄŤely.
- */
-@Mapper(componentModel = "spring")
-public interface MatchRegistrationHistoryMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class MatchRegistrationHistoryMapperImpl implements MatchRegistrationHistoryMapper {
 
-    /**
-     * PĹ™evede entitu historickĂ©ho zĂˇznamu registrace na DTO.
-     *
-     * @param entity entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam registrace
-     * @return DTO obsahujĂ­cĂ­ data historickĂ©ho zĂˇznamu
-     */
-    MatchRegistrationHistoryDTO toDTO(MatchRegistrationHistoryEntity entity);
+    @Override
+    public MatchRegistrationHistoryDTO toDTO(MatchRegistrationHistoryEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede seznam entit historickĂ˝ch zĂˇznamĹŻ registracĂ­ na seznam DTO.
-     *
-     * @param entities seznam entit historickĂ˝ch zĂˇznamĹŻ registracĂ­
-     * @return seznam DTO objektĹŻ
-     */
-    List<MatchRegistrationHistoryDTO> toDTOList(
-            List<MatchRegistrationHistoryEntity> entities
-    );
+        MatchRegistrationHistoryDTO matchRegistrationHistoryDTO = new MatchRegistrationHistoryDTO();
+
+        matchRegistrationHistoryDTO.setId( entity.getId() );
+        matchRegistrationHistoryDTO.setAction( entity.getAction() );
+        matchRegistrationHistoryDTO.setAdminNote( entity.getAdminNote() );
+        matchRegistrationHistoryDTO.setChangedAt( entity.getChangedAt() );
+        matchRegistrationHistoryDTO.setCreatedBy( entity.getCreatedBy() );
+        matchRegistrationHistoryDTO.setExcuseNote( entity.getExcuseNote() );
+        matchRegistrationHistoryDTO.setExcuseReason( entity.getExcuseReason() );
+        matchRegistrationHistoryDTO.setMatchId( entity.getMatchId() );
+        matchRegistrationHistoryDTO.setMatchRegistrationId( entity.getMatchRegistrationId() );
+        matchRegistrationHistoryDTO.setOriginalTimestamp( entity.getOriginalTimestamp() );
+        matchRegistrationHistoryDTO.setPlayerId( entity.getPlayerId() );
+        matchRegistrationHistoryDTO.setStatus( entity.getStatus() );
+        matchRegistrationHistoryDTO.setTeam( entity.getTeam() );
+
+        return matchRegistrationHistoryDTO;
+    }
+
+    @Override
+    public List<MatchRegistrationHistoryDTO> toDTOList(List<MatchRegistrationHistoryEntity> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<MatchRegistrationHistoryDTO> list = new ArrayList<MatchRegistrationHistoryDTO>( entities.size() );
+        for ( MatchRegistrationHistoryEntity matchRegistrationHistoryEntity : entities ) {
+            list.add( toDTO( matchRegistrationHistoryEntity ) );
+        }
+
+        return list;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\MatchRegistrationMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\MatchRegistrationMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
@@ -355,490 +503,628 @@ import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod registracĂ­ hrĂˇÄŤĹŻ na zĂˇpasy
- * mezi entitnĂ­m a DTO modelem.
- *
- * ZajiĹˇĹĄuje konzistentnĂ­ pĹ™enos stavu registrace,
- * omluv a administrativnĂ­ch metadat.
- */
-@Mapper(componentModel = "spring")
-public interface MatchRegistrationMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class MatchRegistrationMapperImpl implements MatchRegistrationMapper {
 
-    /**
-     * VytvoĹ™Ă­ novou entitu registrace.
-     *
-     * SystĂ©movĂˇ metadata jsou nastavena
-     * automaticky pĹ™i mapovĂˇnĂ­.
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "timestamp", expression = "java(java.time.LocalDateTime.now())")
-    MatchRegistrationEntity toEntity(
-            MatchEntity match,
-            PlayerEntity player,
-            PlayerMatchStatus status,
-            ExcuseReason excuseReason,
-            String excuseNote,
-            Team team,
-            String adminNote,
-            String createdBy
-    );
+    @Override
+    public MatchRegistrationEntity toEntity(MatchEntity match, PlayerEntity player, PlayerMatchStatus status, ExcuseReason excuseReason, String excuseNote, Team team, String adminNote, String createdBy) {
+        if ( match == null && player == null && status == null && excuseReason == null && excuseNote == null && team == null && adminNote == null && createdBy == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede entitu registrace na DTO.
-     *
-     * @param entity entita registrace
-     * @return DTO registrace
-     */
-    @Mapping(target = "matchId", source = "match.id")
-    @Mapping(target = "playerId", source = "player.id")
-    MatchRegistrationDTO toDTO(MatchRegistrationEntity entity);
+        MatchRegistrationEntity matchRegistrationEntity = new MatchRegistrationEntity();
 
-    /**
-     * PĹ™evede seznam registracĂ­ na seznam DTO.
-     *
-     * @param entities seznam entit
-     * @return seznam DTO
-     */
-    List<MatchRegistrationDTO> toDTOList(List<MatchRegistrationEntity> entities);
+        if ( player != null ) {
+            matchRegistrationEntity.setTeam( player.getTeam() );
+        }
+        matchRegistrationEntity.setMatch( match );
+        matchRegistrationEntity.setStatus( status );
+        matchRegistrationEntity.setExcuseReason( excuseReason );
+        matchRegistrationEntity.setExcuseNote( excuseNote );
+        matchRegistrationEntity.setAdminNote( adminNote );
+        matchRegistrationEntity.setCreatedBy( createdBy );
+        matchRegistrationEntity.setTimestamp( java.time.LocalDateTime.now() );
+
+        return matchRegistrationEntity;
+    }
+
+    @Override
+    public MatchRegistrationDTO toDTO(MatchRegistrationEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
+
+        MatchRegistrationDTO matchRegistrationDTO = new MatchRegistrationDTO();
+
+        matchRegistrationDTO.setMatchId( entityMatchId( entity ) );
+        matchRegistrationDTO.setPlayerId( entityPlayerId( entity ) );
+        matchRegistrationDTO.setId( entity.getId() );
+        matchRegistrationDTO.setStatus( entity.getStatus() );
+        matchRegistrationDTO.setExcuseReason( entity.getExcuseReason() );
+        matchRegistrationDTO.setExcuseNote( entity.getExcuseNote() );
+        matchRegistrationDTO.setAdminNote( entity.getAdminNote() );
+        matchRegistrationDTO.setTeam( entity.getTeam() );
+        matchRegistrationDTO.setCreatedBy( entity.getCreatedBy() );
+
+        return matchRegistrationDTO;
+    }
+
+    @Override
+    public List<MatchRegistrationDTO> toDTOList(List<MatchRegistrationEntity> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<MatchRegistrationDTO> list = new ArrayList<MatchRegistrationDTO>( entities.size() );
+        for ( MatchRegistrationEntity matchRegistrationEntity : entities ) {
+            list.add( toDTO( matchRegistrationEntity ) );
+        }
+
+        return list;
+    }
+
+    private Long entityMatchId(MatchRegistrationEntity matchRegistrationEntity) {
+        if ( matchRegistrationEntity == null ) {
+            return null;
+        }
+        MatchEntity match = matchRegistrationEntity.getMatch();
+        if ( match == null ) {
+            return null;
+        }
+        Long id = match.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id;
+    }
+
+    private Long entityPlayerId(MatchRegistrationEntity matchRegistrationEntity) {
+        if ( matchRegistrationEntity == null ) {
+            return null;
+        }
+        PlayerEntity player = matchRegistrationEntity.getPlayer();
+        if ( player == null ) {
+            return null;
+        }
+        Long id = player.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\NotificationMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\NotificationMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.NotificationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.models.dto.NotificationDTO;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
+import cz.phsoft.hokej.models.dto.PlayerDTO;
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi NotificationEntity a NotificationDTO.
- *
- * Kategorie a pĹ™Ă­znak dĹŻleĹľitosti se odvozujĂ­ z NotificationType.
- * PĹ™Ă­znak read se odvozuje podle hodnoty readAt.
- */
-@Mapper(componentModel = "spring")
-public interface NotificationMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class NotificationMapperImpl implements NotificationMapper {
 
-    @Mapping(target = "category", expression = "java(entity.getType().getCategory())")
-    @Mapping(target = "important", expression = "java(entity.getType().isImportant())")
-    @Mapping(target = "read", expression = "java(entity.getReadAt() != null)")
-    NotificationDTO toDTO(NotificationEntity entity);
+    @Override
+    public NotificationDTO toDTO(NotificationEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    List<NotificationDTO> toDtoList(List<NotificationEntity> entities);
+        NotificationDTO notificationDTO = new NotificationDTO();
+
+        notificationDTO.setId( entity.getId() );
+        notificationDTO.setType( entity.getType() );
+        notificationDTO.setMessageShort( entity.getMessageShort() );
+        notificationDTO.setMessageFull( entity.getMessageFull() );
+        notificationDTO.setCreatedAt( entity.getCreatedAt() );
+        notificationDTO.setReadAt( entity.getReadAt() );
+        notificationDTO.setPlayer( playerEntityToPlayerDTO( entity.getPlayer() ) );
+
+        notificationDTO.setCategory( entity.getType() != null ? entity.getType().getCategory() : null );
+        notificationDTO.setImportant( entity.getType() != null && entity.getType().isImportant() );
+        notificationDTO.setRead( entity.getReadAt() != null );
+
+        return notificationDTO;
+    }
+
+    @Override
+    public List<NotificationDTO> toDtoList(List<NotificationEntity> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<NotificationDTO> list = new ArrayList<NotificationDTO>( entities.size() );
+        for ( NotificationEntity notificationEntity : entities ) {
+            list.add( toDTO( notificationEntity ) );
+        }
+
+        return list;
+    }
+
+    protected PlayerDTO playerEntityToPlayerDTO(PlayerEntity playerEntity) {
+        if ( playerEntity == null ) {
+            return null;
+        }
+
+        PlayerDTO playerDTO = new PlayerDTO();
+
+        playerDTO.setId( playerEntity.getId() );
+        playerDTO.setName( playerEntity.getName() );
+        playerDTO.setSurname( playerEntity.getSurname() );
+        playerDTO.setNickname( playerEntity.getNickname() );
+        playerDTO.setType( playerEntity.getType() );
+        playerDTO.setTeam( playerEntity.getTeam() );
+        playerDTO.setPhoneNumber( playerEntity.getPhoneNumber() );
+        playerDTO.setPlayerStatus( playerEntity.getPlayerStatus() );
+        playerDTO.setTimestamp( playerEntity.getTimestamp() );
+
+        return playerDTO;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\package-info.java
------
-/**
- * MapovacĂ­ tĹ™Ă­dy pro pĹ™evod mezi entitami a DTO objekty.
- *
- * ZajiĹˇĹĄuje se:
- * - pĹ™evod databĂˇzovĂ˝ch entit na DTO pro API,
- * - pĹ™evod vstupnĂ­ch DTO na entity pro uloĹľenĂ­,
- * - centralizace mapovacĂ­ logiky na jedno mĂ­sto.
- *
- * MapovacĂ­ tĹ™Ă­dy:
- * - neobsahujĂ­ business logiku,
- * - pouĹľĂ­vajĂ­ se typicky ve service vrstvÄ›.
- */
-package cz.phsoft.hokej.models.mappers;
-
------
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\PlayerHistoryMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\PlayerHistoryMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.PlayerHistoryEntity;
 import cz.phsoft.hokej.models.dto.PlayerHistoryDTO;
-import org.mapstruct.Mapper;
-
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou PlayerHistoryEntity
- * a pĹ™enosovĂ˝m objektem PlayerHistoryDTO.
- *
- * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
- * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
- * definovanĂ˝ch metod tohoto rozhranĂ­.
- *
- * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pro pĹ™evod historickĂ˝ch
- * zĂˇznamĹŻ hrĂˇÄŤe naÄŤtenĂ˝ch z databĂˇze do DTO objektĹŻ,
- * kterĂ© jsou nĂˇslednÄ› vrĂˇceny kontrolerem pro auditnĂ­
- * a pĹ™ehledovĂ© ĂşÄŤely.
- */
-@Mapper(componentModel = "spring")
-public interface PlayerHistoryMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class PlayerHistoryMapperImpl implements PlayerHistoryMapper {
 
-    /**
-     * PĹ™evede entitu historickĂ©ho zĂˇznamu hrĂˇÄŤe na DTO.
-     *
-     * @param entity entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam hrĂˇÄŤe
-     * @return DTO obsahujĂ­cĂ­ data historickĂ©ho zĂˇznamu
-     */
-    PlayerHistoryDTO toDTO(PlayerHistoryEntity entity);
+    @Override
+    public PlayerHistoryDTO toDTO(PlayerHistoryEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede seznam entit historickĂ˝ch zĂˇznamĹŻ hrĂˇÄŤe na seznam DTO.
-     *
-     * @param entities seznam entit historickĂ˝ch zĂˇznamĹŻ hrĂˇÄŤe
-     * @return seznam DTO objektĹŻ
-     */
-    List<PlayerHistoryDTO> toDTOList(
-            List<PlayerHistoryEntity> entities
-    );
+        PlayerHistoryDTO playerHistoryDTO = new PlayerHistoryDTO();
+
+        playerHistoryDTO.setId( entity.getId() );
+        playerHistoryDTO.setUserId( entity.getUserId() );
+        playerHistoryDTO.setPlayerId( entity.getPlayerId() );
+        playerHistoryDTO.setAction( entity.getAction() );
+        playerHistoryDTO.setChangedAt( entity.getChangedAt() );
+        playerHistoryDTO.setName( entity.getName() );
+        playerHistoryDTO.setSurname( entity.getSurname() );
+        playerHistoryDTO.setNickname( entity.getNickname() );
+        playerHistoryDTO.setFullName( entity.getFullName() );
+        playerHistoryDTO.setPhoneNumber( entity.getPhoneNumber() );
+        playerHistoryDTO.setType( entity.getType() );
+        playerHistoryDTO.setTeam( entity.getTeam() );
+        playerHistoryDTO.setPlayerStatus( entity.getPlayerStatus() );
+        playerHistoryDTO.setOriginalTimestamp( entity.getOriginalTimestamp() );
+
+        return playerHistoryDTO;
+    }
+
+    @Override
+    public List<PlayerHistoryDTO> toDTOList(List<PlayerHistoryEntity> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<PlayerHistoryDTO> list = new ArrayList<PlayerHistoryDTO>( entities.size() );
+        for ( PlayerHistoryEntity playerHistoryEntity : entities ) {
+            list.add( toDTO( playerHistoryEntity ) );
+        }
+
+        return list;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\PlayerInactivityPeriodMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\PlayerInactivityPeriodMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
 import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
-import org.mapstruct.*;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou PlayerInactivityPeriodEntity
- * a pĹ™enosovĂ˝m objektem PlayerInactivityPeriodDTO.
- *
- * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
- * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
- * definovanĂ˝ch metod tohoto rozhranĂ­.
- *
- * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pĹ™i vytvĂˇĹ™enĂ­,
- * aktualizaci a naÄŤĂ­tĂˇnĂ­ obdobĂ­ neaktivity hrĂˇÄŤe.
- * NavĂˇzĂˇnĂ­ entity na konkrĂ©tnĂ­ho hrĂˇÄŤe je zajiĹˇtÄ›no
- * pomocĂ­ kontextovĂ©ho parametru.
- */
-@Mapper(componentModel = "spring")
-public interface PlayerInactivityPeriodMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class PlayerInactivityPeriodMapperImpl implements PlayerInactivityPeriodMapper {
 
-    /**
-     * PĹ™evede entitu obdobĂ­ neaktivity na DTO.
-     *
-     * IdentifikĂˇtor hrĂˇÄŤe je pĹ™evzat z navĂˇzanĂ© entity hrĂˇÄŤe.
-     *
-     * @param entity entita obdobĂ­ neaktivity
-     * @return DTO reprezentujĂ­cĂ­ obdobĂ­ neaktivity
-     */
-    @Mapping(target = "playerId", source = "player.id")
-    PlayerInactivityPeriodDTO toDTO(PlayerInactivityPeriodEntity entity);
+    @Override
+    public PlayerInactivityPeriodDTO toDTO(PlayerInactivityPeriodEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede DTO na novou entitu obdobĂ­ neaktivity.
-     *
-     * IdentifikĂˇtor entity je ignorovĂˇn, protoĹľe se vytvĂˇĹ™Ă­
-     * novĂ˝ zĂˇznam. Vazba na hrĂˇÄŤe je nastavena pomocĂ­
-     * kontextovĂ©ho parametru.
-     *
-     * @param dto pĹ™enosovĂ˝ objekt obdobĂ­ neaktivity
-     * @param player entita hrĂˇÄŤe pĹ™edanĂˇ jako kontext
-     * @return novĂˇ entita obdobĂ­ neaktivity
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "player", ignore = true)
-    PlayerInactivityPeriodEntity toEntity(PlayerInactivityPeriodDTO dto,
-                                          @Context PlayerEntity player);
+        PlayerInactivityPeriodDTO playerInactivityPeriodDTO = new PlayerInactivityPeriodDTO();
 
-    /**
-     * Aktualizuje existujĂ­cĂ­ entitu obdobĂ­ neaktivity
-     * hodnotami z DTO.
-     *
-     * Vazba na hrĂˇÄŤe se nemÄ›nĂ­ a nenĂ­ mapovĂˇna.
-     *
-     * @param dto pĹ™enosovĂ˝ objekt obsahujĂ­cĂ­ novĂ© hodnoty
-     * @param entity existujĂ­cĂ­ entita urÄŤenĂˇ k aktualizaci
-     */
-    @Mapping(target = "player", ignore = true)
-    void updateEntityFromDto(PlayerInactivityPeriodDTO dto,
-                             @MappingTarget PlayerInactivityPeriodEntity entity);
+        playerInactivityPeriodDTO.setPlayerId( entityPlayerId( entity ) );
+        playerInactivityPeriodDTO.setId( entity.getId() );
+        playerInactivityPeriodDTO.setInactiveFrom( entity.getInactiveFrom() );
+        playerInactivityPeriodDTO.setInactiveTo( entity.getInactiveTo() );
+        playerInactivityPeriodDTO.setInactivityReason( entity.getInactivityReason() );
 
-    /**
-     * VytvoĹ™Ă­ novou instanci entity obdobĂ­ neaktivity
-     * a nastavĂ­ vazbu na hrĂˇÄŤe pĹ™edanĂ©ho v kontextu.
-     *
-     * PouĹľĂ­vĂˇ se pĹ™i vytvĂˇĹ™enĂ­ novĂ© entity v rĂˇmci mapovĂˇnĂ­,
-     * aby byla zajiĹˇtÄ›na sprĂˇvnĂˇ asociace s hrĂˇÄŤem.
-     *
-     * @param dto pĹ™enosovĂ˝ objekt obdobĂ­ neaktivity
-     * @param player entita hrĂˇÄŤe pĹ™edanĂˇ jako kontext
-     * @return novÄ› vytvoĹ™enĂˇ entita s navĂˇzanĂ˝m hrĂˇÄŤem
-     */
-    @ObjectFactory
-    default PlayerInactivityPeriodEntity createEntity(
-            PlayerInactivityPeriodDTO dto,
-            @Context PlayerEntity player
-    ) {
-        PlayerInactivityPeriodEntity entity = new PlayerInactivityPeriodEntity();
-        entity.setPlayer(player);
-        return entity;
+        return playerInactivityPeriodDTO;
+    }
+
+    @Override
+    public PlayerInactivityPeriodEntity toEntity(PlayerInactivityPeriodDTO dto, PlayerEntity player) {
+        if ( dto == null ) {
+            return null;
+        }
+
+        PlayerInactivityPeriodEntity playerInactivityPeriodEntity = createEntity( dto, player );
+
+        playerInactivityPeriodEntity.setInactiveFrom( dto.getInactiveFrom() );
+        playerInactivityPeriodEntity.setInactiveTo( dto.getInactiveTo() );
+        playerInactivityPeriodEntity.setInactivityReason( dto.getInactivityReason() );
+
+        return playerInactivityPeriodEntity;
+    }
+
+    @Override
+    public void updateEntityFromDto(PlayerInactivityPeriodDTO dto, PlayerInactivityPeriodEntity entity) {
+        if ( dto == null ) {
+            return;
+        }
+
+        entity.setId( dto.getId() );
+        entity.setInactiveFrom( dto.getInactiveFrom() );
+        entity.setInactiveTo( dto.getInactiveTo() );
+        entity.setInactivityReason( dto.getInactivityReason() );
+    }
+
+    private Long entityPlayerId(PlayerInactivityPeriodEntity playerInactivityPeriodEntity) {
+        if ( playerInactivityPeriodEntity == null ) {
+            return null;
+        }
+        PlayerEntity player = playerInactivityPeriodEntity.getPlayer();
+        if ( player == null ) {
+            return null;
+        }
+        Long id = player.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id;
     }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\PlayerMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\PlayerMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou PlayerEntity
- * a pĹ™enosovĂ˝m objektem PlayerDTO.
- *
- * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
- * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
- * definovanĂ˝ch metod tohoto rozhranĂ­.
- *
- * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pĹ™i vytvĂˇĹ™enĂ­,
- * aktualizaci a naÄŤĂ­tĂˇnĂ­ hrĂˇÄŤĹŻ. NÄ›kterĂ© vlastnosti
- * nejsou mapovĂˇny automaticky, protoĹľe jsou odvozenĂ©
- * nebo Ĺ™Ă­zenĂ© aplikaÄŤnĂ­ logikou.
- */
-@Mapper(componentModel = "spring")
-public interface PlayerMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class PlayerMapperImpl implements PlayerMapper {
 
-    /**
-     * PĹ™evede entitu hrĂˇÄŤe na DTO.
-     *
-     * OdvozenĂˇ vlastnost fullName nenĂ­ mapovĂˇna,
-     * protoĹľe je sestavovĂˇna aplikaÄŤnĂ­ logikou.
-     *
-     * @param entity entita hrĂˇÄŤe
-     * @return DTO reprezentujĂ­cĂ­ hrĂˇÄŤe
-     */
-    @Mapping(target = "fullName", ignore = true)
-    PlayerDTO toDTO(PlayerEntity entity);
+    @Override
+    public PlayerDTO toDTO(PlayerEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede DTO na novou entitu hrĂˇÄŤe.
-     *
-     * Vazba na uĹľivatele nenĂ­ mapovĂˇna a je nastavovĂˇna
-     * servisnĂ­ vrstvou. Stav hrĂˇÄŤe je pĹ™i vytvoĹ™enĂ­
-     * implicitnÄ› nastaven na hodnotu PENDING.
-     * ÄŚasovĂ© razĂ­tko je Ĺ™Ă­zeno databĂˇzĂ­ nebo aplikaÄŤnĂ­ logikou.
-     *
-     * @param dto pĹ™enosovĂ˝ objekt hrĂˇÄŤe
-     * @return novĂˇ entita hrĂˇÄŤe
-     */
-    @Mapping(target = "fullName", ignore = true)
-    @Mapping(target = "user", ignore = true)
-    @Mapping(target = "playerStatus", defaultValue = "PENDING")
-    @Mapping(target = "timestamp", ignore = true)
-    PlayerEntity toEntity(PlayerDTO dto);
+        PlayerDTO playerDTO = new PlayerDTO();
 
-    /**
-     * Aktualizuje existujĂ­cĂ­ DTO hodnotami ze zdrojovĂ©ho DTO.
-     *
-     * IdentifikĂˇtor a ÄŤasovĂ© razĂ­tko zĹŻstĂˇvajĂ­ beze zmÄ›ny.
-     *
-     * @param source zdrojovĂ© DTO obsahujĂ­cĂ­ novĂ© hodnoty
-     * @param target cĂ­lovĂ© DTO urÄŤenĂ© k aktualizaci
-     */
-    @Mapping(target = "fullName", ignore = true)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "timestamp", ignore = true)
-    void updatePlayerDTO(PlayerDTO source, @MappingTarget PlayerDTO target);
+        playerDTO.setId( entity.getId() );
+        playerDTO.setName( entity.getName() );
+        playerDTO.setSurname( entity.getSurname() );
+        playerDTO.setNickname( entity.getNickname() );
+        playerDTO.setType( entity.getType() );
+        playerDTO.setTeam( entity.getTeam() );
+        playerDTO.setPhoneNumber( entity.getPhoneNumber() );
+        playerDTO.setPlayerStatus( entity.getPlayerStatus() );
+        playerDTO.setTimestamp( entity.getTimestamp() );
 
-    /**
-     * Aktualizuje existujĂ­cĂ­ entitu hrĂˇÄŤe hodnotami z DTO.
-     *
-     * Vazba na uĹľivatele a ÄŤasovĂ© razĂ­tko nejsou mÄ›nÄ›ny,
-     * protoĹľe jsou Ĺ™Ă­zeny servisnĂ­ vrstvou nebo databĂˇzĂ­.
-     *
-     * @param source pĹ™enosovĂ˝ objekt obsahujĂ­cĂ­ novĂ© hodnoty
-     * @param target existujĂ­cĂ­ entita urÄŤenĂˇ k aktualizaci
-     */
-    @Mapping(target = "fullName", ignore = true)
-    @Mapping(target = "user", ignore = true)
-    @Mapping(target = "timestamp", ignore = true)
-    void updatePlayerEntity(PlayerDTO source, @MappingTarget PlayerEntity target);
+        return playerDTO;
+    }
 
-    /**
-     * PĹ™evede seznam entit hrĂˇÄŤĹŻ na seznam DTO objektĹŻ.
-     *
-     * @param players seznam entit hrĂˇÄŤĹŻ
-     * @return seznam DTO reprezentacĂ­ hrĂˇÄŤĹŻ
-     */
-    List<PlayerDTO> toDTOList(List<PlayerEntity> players);
+    @Override
+    public PlayerEntity toEntity(PlayerDTO dto) {
+        if ( dto == null ) {
+            return null;
+        }
+
+        PlayerEntity playerEntity = new PlayerEntity();
+
+        if ( dto.getPlayerStatus() != null ) {
+            playerEntity.setPlayerStatus( dto.getPlayerStatus() );
+        }
+        else {
+            playerEntity.setPlayerStatus( PlayerStatus.PENDING );
+        }
+        playerEntity.setId( dto.getId() );
+        playerEntity.setName( dto.getName() );
+        playerEntity.setSurname( dto.getSurname() );
+        playerEntity.setNickname( dto.getNickname() );
+        playerEntity.setType( dto.getType() );
+        playerEntity.setPhoneNumber( dto.getPhoneNumber() );
+        playerEntity.setTeam( dto.getTeam() );
+
+        return playerEntity;
+    }
+
+    @Override
+    public void updatePlayerDTO(PlayerDTO source, PlayerDTO target) {
+        if ( source == null ) {
+            return;
+        }
+
+        target.setName( source.getName() );
+        target.setSurname( source.getSurname() );
+        target.setNickname( source.getNickname() );
+        target.setType( source.getType() );
+        target.setTeam( source.getTeam() );
+        target.setPhoneNumber( source.getPhoneNumber() );
+        target.setPlayerStatus( source.getPlayerStatus() );
+    }
+
+    @Override
+    public void updatePlayerEntity(PlayerDTO source, PlayerEntity target) {
+        if ( source == null ) {
+            return;
+        }
+
+        target.setId( source.getId() );
+        target.setName( source.getName() );
+        target.setSurname( source.getSurname() );
+        target.setNickname( source.getNickname() );
+        target.setType( source.getType() );
+        target.setPhoneNumber( source.getPhoneNumber() );
+        target.setTeam( source.getTeam() );
+        target.setPlayerStatus( source.getPlayerStatus() );
+    }
+
+    @Override
+    public List<PlayerDTO> toDTOList(List<PlayerEntity> players) {
+        if ( players == null ) {
+            return null;
+        }
+
+        List<PlayerDTO> list = new ArrayList<PlayerDTO>( players.size() );
+        for ( PlayerEntity playerEntity : players ) {
+            list.add( toDTO( playerEntity ) );
+        }
+
+        return list;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\PlayerSettingsMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\PlayerSettingsMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
 import cz.phsoft.hokej.models.dto.PlayerSettingsDTO;
-import org.mapstruct.*;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou PlayerSettingsEntity
- * a pĹ™enosovĂ˝m objektem PlayerSettingsDTO.
- *
- * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
- * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
- * definovanĂ˝ch metod tohoto rozhranĂ­.
- *
- * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pĹ™i naÄŤĂ­tĂˇnĂ­
- * a aktualizaci hrĂˇÄŤskĂ˝ch nastavenĂ­. PĹ™i aktualizaci
- * jsou null hodnoty ignorovĂˇny, aby nedoĹˇlo k nechtÄ›nĂ©mu
- * pĹ™epsĂˇnĂ­ existujĂ­cĂ­ch dat.
- */
-@Mapper(componentModel = "spring")
-public interface PlayerSettingsMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:51+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class PlayerSettingsMapperImpl implements PlayerSettingsMapper {
 
-    /**
-     * PĹ™evede entitu hrĂˇÄŤskĂ˝ch nastavenĂ­ na DTO.
-     *
-     * @param entity entita nastavenĂ­ hrĂˇÄŤe
-     * @return DTO reprezentujĂ­cĂ­ nastavenĂ­ hrĂˇÄŤe
-     */
-    PlayerSettingsDTO toDTO(PlayerSettingsEntity entity);
+    @Override
+    public PlayerSettingsDTO toDTO(PlayerSettingsEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * Aktualizuje existujĂ­cĂ­ entitu hrĂˇÄŤskĂ˝ch nastavenĂ­
-     * hodnotami z DTO.
-     *
-     * Null hodnoty ve zdrojovĂ©m DTO nejsou mapovĂˇny,
-     * aby zĹŻstaly zachovĂˇny pĹŻvodnĂ­ hodnoty v entitÄ›.
-     *
-     * @param dto pĹ™enosovĂ˝ objekt obsahujĂ­cĂ­ novĂ© hodnoty
-     * @param entity existujĂ­cĂ­ entita urÄŤenĂˇ k aktualizaci
-     */
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDTO(PlayerSettingsDTO dto,
-                             @MappingTarget PlayerSettingsEntity entity);
+        PlayerSettingsDTO playerSettingsDTO = new PlayerSettingsDTO();
+
+        playerSettingsDTO.setContactEmail( entity.getContactEmail() );
+        playerSettingsDTO.setContactPhone( entity.getContactPhone() );
+        playerSettingsDTO.setEmailEnabled( entity.isEmailEnabled() );
+        playerSettingsDTO.setSmsEnabled( entity.isSmsEnabled() );
+        playerSettingsDTO.setNotifyOnRegistration( entity.isNotifyOnRegistration() );
+        playerSettingsDTO.setNotifyOnExcuse( entity.isNotifyOnExcuse() );
+        playerSettingsDTO.setNotifyOnMatchChange( entity.isNotifyOnMatchChange() );
+        playerSettingsDTO.setNotifyOnMatchCancel( entity.isNotifyOnMatchCancel() );
+        playerSettingsDTO.setNotifyOnPayment( entity.isNotifyOnPayment() );
+        playerSettingsDTO.setNotifyReminders( entity.isNotifyReminders() );
+        playerSettingsDTO.setReminderHoursBefore( entity.getReminderHoursBefore() );
+
+        return playerSettingsDTO;
+    }
+
+    @Override
+    public void updateEntityFromDTO(PlayerSettingsDTO dto, PlayerSettingsEntity entity) {
+        if ( dto == null ) {
+            return;
+        }
+
+        if ( dto.getContactEmail() != null ) {
+            entity.setContactEmail( dto.getContactEmail() );
+        }
+        if ( dto.getContactPhone() != null ) {
+            entity.setContactPhone( dto.getContactPhone() );
+        }
+        entity.setEmailEnabled( dto.isEmailEnabled() );
+        entity.setSmsEnabled( dto.isSmsEnabled() );
+        entity.setNotifyOnRegistration( dto.isNotifyOnRegistration() );
+        entity.setNotifyOnExcuse( dto.isNotifyOnExcuse() );
+        entity.setNotifyOnMatchChange( dto.isNotifyOnMatchChange() );
+        entity.setNotifyOnMatchCancel( dto.isNotifyOnMatchCancel() );
+        entity.setNotifyOnPayment( dto.isNotifyOnPayment() );
+        entity.setNotifyReminders( dto.isNotifyReminders() );
+        if ( dto.getReminderHoursBefore() != null ) {
+            entity.setReminderHoursBefore( dto.getReminderHoursBefore() );
+        }
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\SeasonHistoryMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\SeasonHistoryMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.SeasonHistoryEntity;
 import cz.phsoft.hokej.models.dto.SeasonHistoryDTO;
-import org.mapstruct.Mapper;
-
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou SeasonHistoryEntity
- * a pĹ™enosovĂ˝m objektem SeasonHistoryDTO.
- *
- * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
- * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
- * definovanĂ˝ch metod tohoto rozhranĂ­.
- *
- * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pro pĹ™evod
- * historickĂ˝ch zĂˇznamĹŻ sezĂłny naÄŤtenĂ˝ch z databĂˇze
- * do DTO objektĹŻ, kterĂ© jsou nĂˇslednÄ› vrĂˇceny kontrolerem
- * pro auditnĂ­ a pĹ™ehledovĂ© ĂşÄŤely.
- */
-@Mapper(componentModel = "spring")
-public interface SeasonHistoryMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:51+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class SeasonHistoryMapperImpl implements SeasonHistoryMapper {
 
-    /**
-     * PĹ™evede entitu historickĂ©ho zĂˇznamu sezĂłny na DTO.
-     *
-     * @param entity entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam sezĂłny
-     * @return DTO obsahujĂ­cĂ­ data historickĂ©ho zĂˇznamu
-     */
-    SeasonHistoryDTO toDTO(SeasonHistoryEntity entity);
+    @Override
+    public SeasonHistoryDTO toDTO(SeasonHistoryEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede seznam entit historickĂ˝ch zĂˇznamĹŻ sezĂłny na seznam DTO.
-     *
-     * @param entities seznam entit historickĂ˝ch zĂˇznamĹŻ sezĂłny
-     * @return seznam DTO objektĹŻ
-     */
-    List<SeasonHistoryDTO> toDTOList(List<SeasonHistoryEntity> entities);
+        SeasonHistoryDTO seasonHistoryDTO = new SeasonHistoryDTO();
+
+        seasonHistoryDTO.setId( entity.getId() );
+        seasonHistoryDTO.setAction( entity.getAction() );
+        seasonHistoryDTO.setChangedAt( entity.getChangedAt() );
+        seasonHistoryDTO.setSeasonId( entity.getSeasonId() );
+        seasonHistoryDTO.setOriginalTimestamp( entity.getOriginalTimestamp() );
+        seasonHistoryDTO.setName( entity.getName() );
+        seasonHistoryDTO.setStartDate( entity.getStartDate() );
+        seasonHistoryDTO.setEndDate( entity.getEndDate() );
+        seasonHistoryDTO.setActive( entity.isActive() );
+        seasonHistoryDTO.setCreatedByUserId( entity.getCreatedByUserId() );
+
+        return seasonHistoryDTO;
+    }
+
+    @Override
+    public List<SeasonHistoryDTO> toDTOList(List<SeasonHistoryEntity> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<SeasonHistoryDTO> list = new ArrayList<SeasonHistoryDTO>( entities.size() );
+        for ( SeasonHistoryEntity seasonHistoryEntity : entities ) {
+            list.add( toDTO( seasonHistoryEntity ) );
+        }
+
+        return list;
+    }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\mappers\SeasonMapper.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\generated-sources\annotations\cz\phsoft\hokej\models\mappers\SeasonMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.SeasonEntity;
 import cz.phsoft.hokej.models.dto.SeasonDTO;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
-/**
- * Mapper pro pĹ™evod mezi entitou SeasonEntity
- * a pĹ™enosovĂ˝m objektem SeasonDTO.
- *
- * SlouĹľĂ­ k oddÄ›lenĂ­ databĂˇzovĂ© vrstvy od prezentaÄŤnĂ­ vrstvy.
- * MapovĂˇnĂ­ je generovĂˇno knihovnou MapStruct na zĂˇkladÄ›
- * definovanĂ˝ch metod tohoto rozhranĂ­.
- *
- * Mapper je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pĹ™i vytvĂˇĹ™enĂ­,
- * aktualizaci a naÄŤĂ­tĂˇnĂ­ sezĂłn. NÄ›kterĂ© vlastnosti
- * nejsou mapovĂˇny automaticky, protoĹľe jsou Ĺ™Ă­zeny
- * aplikaÄŤnĂ­ logikou nebo databĂˇzĂ­.
- */
-@Mapper(componentModel = "spring")
-public interface SeasonMapper {
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-02-21T09:45:52+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
+)
+@Component
+public class SeasonMapperImpl implements SeasonMapper {
 
-    /**
-     * PĹ™evede entitu sezĂłny na DTO.
-     *
-     * @param entity entita sezĂłny
-     * @return DTO reprezentujĂ­cĂ­ sezĂłnu
-     */
-    SeasonDTO toDTO(SeasonEntity entity);
+    @Override
+    public SeasonDTO toDTO(SeasonEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
 
-    /**
-     * PĹ™evede DTO na novou entitu sezĂłny.
-     *
-     * IdentifikĂˇtor, ÄŤasovĂ© razĂ­tko a informace o uĹľivateli,
-     * kterĂ˝ sezĂłnu vytvoĹ™il, nejsou mapovĂˇny, protoĹľe jsou
-     * nastavovĂˇny servisnĂ­ vrstvou nebo databĂˇzĂ­.
-     *
-     * @param dto pĹ™enosovĂ˝ objekt sezĂłny
-     * @return novĂˇ entita sezĂłny
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "timestamp", ignore = true)
-    @Mapping(target = "createdByUserId", ignore = true)
-    SeasonEntity toEntity(SeasonDTO dto);
+        SeasonDTO seasonDTO = new SeasonDTO();
 
-    /**
-     * Aktualizuje existujĂ­cĂ­ entitu sezĂłny hodnotami z DTO.
-     *
-     * IdentifikĂˇtor, ÄŤasovĂ© razĂ­tko a informace o uĹľivateli,
-     * kterĂ˝ sezĂłnu vytvoĹ™il, zĹŻstĂˇvajĂ­ beze zmÄ›ny.
-     *
-     * @param dto pĹ™enosovĂ˝ objekt obsahujĂ­cĂ­ novĂ© hodnoty
-     * @param entity existujĂ­cĂ­ entita urÄŤenĂˇ k aktualizaci
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "timestamp", ignore = true)
-    @Mapping(target = "createdByUserId", ignore = true)
-    void updateEntityFromDTO(SeasonDTO dto,
-                             @MappingTarget SeasonEntity entity);
+        seasonDTO.setId( entity.getId() );
+        seasonDTO.setName( entity.getName() );
+        seasonDTO.setStartDate( entity.getStartDate() );
+        seasonDTO.setEndDate( entity.getEndDate() );
+        seasonDTO.setActive( entity.isActive() );
+        seasonDTO.setTimestamp( entity.getTimestamp() );
+
+        return seasonDTO;
+    }
+
+    @Override
+    public SeasonEntity toEntity(SeasonDTO dto) {
+        if ( dto == null ) {
+            return null;
+        }
+
+        SeasonEntity seasonEntity = new SeasonEntity();
+
+        seasonEntity.setName( dto.getName() );
+        seasonEntity.setStartDate( dto.getStartDate() );
+        seasonEntity.setEndDate( dto.getEndDate() );
+        seasonEntity.setActive( dto.isActive() );
+
+        return seasonEntity;
+    }
+
+    @Override
+    public void updateEntityFromDTO(SeasonDTO dto, SeasonEntity entity) {
+        if ( dto == null ) {
+            return;
+        }
+
+        entity.setName( dto.getName() );
+        entity.setStartDate( dto.getStartDate() );
+        entity.setEndDate( dto.getEndDate() );
+        entity.setActive( dto.isActive() );
+    }
 }

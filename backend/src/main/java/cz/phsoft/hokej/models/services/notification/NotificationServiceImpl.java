@@ -164,6 +164,8 @@ public class NotificationServiceImpl implements NotificationService {
         } else {
             log.debug("Typ {} je v MANAGER_COPY_BLACKLIST – kopie manažerům se neposílá (notifyPlayer).", type);
         }
+
+        System.out.println("typ notifikace: "  + type + " - " + context );
         inAppNotificationService.storeForPlayer(player, type, context);
     }
 

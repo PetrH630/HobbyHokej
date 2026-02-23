@@ -263,7 +263,7 @@ public class DataInitializer {
         SeasonEntity season2026_2027 = new SeasonEntity();
         season2026_2027.setName("2026/2027");
         season2026_2027.setStartDate(LocalDate.of(2026, 11, 1));
-        season2026_2027.setEndDate(LocalDate.of(2027, 3, 31));
+        season2026_2027.setEndDate(LocalDate.of(2027, 5, 31));
         season2026_2027.setActive(false);
         season2026_2027.setCreatedByUserId(2L);
 

@@ -5,7 +5,6 @@ import cz.phsoft.hokej.data.entities.NotificationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.repositories.NotificationRepository;
-import cz.phsoft.hokej.models.services.email.EmailMessageBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,8 +15,11 @@ import java.time.Instant;
 /**
  * Implementace služby pro ukládání aplikačních notifikací.
  *
- * Třída neřeší odesílání e-mailů ani SMS. Vytváří pouze
- * zjednodušené notifikace v databázi pro zobrazení v UI.
+ * Třída neřeší odesílání e-mailů ani SMS.
+ * Vytváří zjednodušené i detailní notifikace v databázi
+ * pro zobrazení v uživatelském rozhraní.
+ *
+ * Text notifikací se sestavuje pomocí InAppNotificationBuilder.
  */
 @Service
 public class InAppNotificationServiceImpl implements InAppNotificationService {
@@ -25,14 +27,14 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
     private static final Logger log = LoggerFactory.getLogger(InAppNotificationServiceImpl.class);
 
     private final NotificationRepository notificationRepository;
-    private final EmailMessageBuilder emailMessageBuilder;
+    private final InAppNotificationBuilder inAppNotificationBuilder;
     private final Clock clock;
 
     public InAppNotificationServiceImpl(NotificationRepository notificationRepository,
-                                        EmailMessageBuilder emailMessageBuilder,
+                                        InAppNotificationBuilder inAppNotificationBuilder,
                                         Clock clock) {
         this.notificationRepository = notificationRepository;
-        this.emailMessageBuilder = emailMessageBuilder;
+        this.inAppNotificationBuilder = inAppNotificationBuilder;
         this.clock = clock;
     }
 
@@ -48,13 +50,23 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
 
         AppUserEntity owner = player.getUser();
         if (owner == null) {
-            log.debug("InAppNotificationService.storeForPlayer: player {} nemá přiřazeného uživatele, nic se neukládá",
-                    player.getId());
+            log.debug(
+                    "InAppNotificationService.storeForPlayer: player {} nemá přiřazeného uživatele, nic se neukládá",
+                    player.getId()
+            );
             return;
         }
 
-        String messageShort = buildShortMessageForPlayer(type, player, context);
-        String messageFull = null; // lze doplnit později, pokud bude potřeba
+        InAppNotificationBuilder.InAppNotificationContent content =
+                buildContent(type, owner, player, context);
+
+        String messageShort = content != null && content.title() != null && !content.title().isBlank()
+                ? content.title()
+                : type.name();
+
+        String messageFull = content != null && content.message() != null && !content.message().isBlank()
+                ? content.message()
+                : type.name();
 
         NotificationEntity entity = new NotificationEntity();
         entity.setUser(owner);
@@ -80,8 +92,16 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
             return;
         }
 
-        String messageShort = buildShortMessageForUser(type, user, context);
-        String messageFull = null;
+        InAppNotificationBuilder.InAppNotificationContent content =
+                buildContent(type, user, null, context);
+
+        String messageShort = content != null && content.title() != null && !content.title().isBlank()
+                ? content.title()
+                : type.name();
+
+        String messageFull = content != null && content.message() != null && !content.message().isBlank()
+                ? content.message()
+                : type.name();
 
         NotificationEntity entity = new NotificationEntity();
         entity.setUser(user);
@@ -97,52 +117,21 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
     }
 
     /**
-     * Vytváří stručný text notifikace pro hráče.
+     * Sestavuje obsah in-app notifikace pomocí InAppNotificationBuilder.
      *
-     * Primárně se používá předmět e-mailu. Pokud není k dispozici,
-     * použije se fallback s názvem typu.
+     * Pokud builder vrátí null (pro daný NotificationType není definována
+     * šablona), vrací se také null a volající použije fallback type.name().
      */
-    private String buildShortMessageForPlayer(NotificationType type,
-                                              PlayerEntity player,
-                                              Object context) {
+    private InAppNotificationBuilder.InAppNotificationContent buildContent(NotificationType type,
+                                                                           AppUserEntity user,
+                                                                           PlayerEntity player,
+                                                                           Object context) {
         try {
-            // E-mail nepotřebujeme odeslat, stačí použít šablonu pro subject.
-            EmailMessageBuilder.EmailContent content =
-                    emailMessageBuilder.buildForPlayer(type, player, null, context);
-
-            if (content != null && content.subject() != null && !content.subject().isBlank()) {
-                return content.subject();
-            }
+            return inAppNotificationBuilder.build(type, user, player, context);
         } catch (Exception ex) {
-            log.debug("buildShortMessageForPlayer: chyba při sestavování subjectu pro type {}: {}",
+            log.debug("InAppNotificationService.buildContent: chyba při sestavování notifikace pro type {}: {}",
                     type, ex.getMessage());
+            return null;
         }
-
-        return type.name();
-    }
-
-    /**
-     * Vytváří stručný text notifikace pro uživatele.
-     *
-     * Primárně se používá předmět e-mailu. Pokud není k dispozici,
-     * použije se fallback s názvem typu.
-     */
-    private String buildShortMessageForUser(NotificationType type,
-                                            AppUserEntity user,
-                                            Object context) {
-        try {
-            String email = user.getEmail();
-            EmailMessageBuilder.EmailContent content =
-                    emailMessageBuilder.buildForUser(type, null, email, context);
-
-            if (content != null && content.subject() != null && !content.subject().isBlank()) {
-                return content.subject();
-            }
-        } catch (Exception ex) {
-            log.debug("buildShortMessageForUser: chyba při sestavování subjectu pro type {}: {}",
-                    type, ex.getMessage());
-        }
-
-        return type.name();
     }
 }

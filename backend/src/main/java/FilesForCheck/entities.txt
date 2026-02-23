@@ -383,6 +383,8 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
 import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.data.enums.LandingPage;
+
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
@@ -496,8 +498,9 @@ public class AppUserSettingsEntity {
      * VĂ˝chozĂ­ obrazovka po pĹ™ihlĂˇĹˇenĂ­.
      * Z praktickĂ˝ch dĹŻvodĹŻ je uloĹľena jako Ĺ™etÄ›zec.
      */
-    @Column(name = "default_landing_page", length = 50)
-    private String defaultLandingPage = "DASHBOARD";
+    @Enumerated(EnumType.STRING)
+    @Column(name = "default_landing_page", nullable=false, length = 50)
+    private LandingPage landingPage = LandingPage.DASHBOARD;
 
     public Long getId() {
         return id;
@@ -583,12 +586,12 @@ public class AppUserSettingsEntity {
         this.timezone = timezone;
     }
 
-    public String getDefaultLandingPage() {
-        return defaultLandingPage;
+    public LandingPage getLandingPage() {
+        return landingPage;
     }
 
-    public void setDefaultLandingPage(String defaultLandingPage) {
-        this.defaultLandingPage = defaultLandingPage;
+    public void setLandingPage(LandingPage landingPage) {
+        this.landingPage = landingPage;
     }
 }
 

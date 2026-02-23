@@ -22,7 +22,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -67,7 +67,7 @@ public class AppUserServiceImpl implements AppUserService {
     private String baseUrl;
 
     private final AppUserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final AppUserMapper appUserMapper;
     private final EmailService emailService;
     private final EmailVerificationTokenRepository tokenRepository;
@@ -93,7 +93,7 @@ public class AppUserServiceImpl implements AppUserService {
      * @param forgottenPasswordResetTokenRepository repozitář pro resetovací tokeny
      */
     public AppUserServiceImpl(AppUserRepository userRepository,
-                              BCryptPasswordEncoder passwordEncoder,
+                              PasswordEncoder passwordEncoder,
                               AppUserMapper appUserMapper,
                               EmailService emailService,
                               EmailVerificationTokenRepository tokenRepository,

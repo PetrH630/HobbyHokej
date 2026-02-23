@@ -4,6 +4,7 @@ Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\en
 Seznam souborů:
 ExcuseReason.java
 GlobalNotificationLevel.java
+LandingPage.java
 MatchCancelReason.java
 MatchStatus.java
 NotificationCategory.java
@@ -91,6 +92,17 @@ public enum GlobalNotificationLevel {
      * pro doruÄŤovĂˇnĂ­ notifikacĂ­ pĹ™Ă­mo hrĂˇÄŤĹŻm.
      */
     NONE
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\LandingPage.java
+-----
+package cz.phsoft.hokej.data.enums;
+
+public enum LandingPage {
+    DASHBOARD, // PĹ™ehled
+    PLAYERS,  // HrĂˇÄŤi
+    MATCHES,    // ZĂˇpasy
 }
 
 -----

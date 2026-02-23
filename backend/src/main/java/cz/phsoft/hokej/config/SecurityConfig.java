@@ -14,13 +14,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import cz.phsoft.hokej.models.services.AppUserService;
-
 
 import java.util.List;
 
@@ -38,7 +38,6 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final PlayerRepository playerRepository;
-    private final AppUserService appUserService;
 
     /**
      * Příznak demo režimu.
@@ -59,23 +58,21 @@ public class SecurityConfig {
     private String allowedOrigins;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
-                          PlayerRepository playerRepository,
-                          AppUserService appUserService) {
+                          PlayerRepository playerRepository) {
         this.userDetailsService = userDetailsService;
         this.playerRepository = playerRepository;
-        this.appUserService = appUserService;
     }
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
+    public DaoAuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
 
@@ -87,12 +84,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   AuthenticationManager authManager) throws Exception {
+                                                   AuthenticationManager authManager,
+                                                   AppUserService appUserService,
+                                                   DaoAuthenticationProvider authProvider) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
-                .authenticationProvider(authenticationProvider())
+                .authenticationProvider(authProvider)
 
                 .authorizeHttpRequests(auth -> {
 

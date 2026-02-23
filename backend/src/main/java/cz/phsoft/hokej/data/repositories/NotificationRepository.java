@@ -131,4 +131,14 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
     List<NotificationEntity> findByCreatedAtBeforeOrderByUserIdAscCreatedAtDesc(
             Instant threshold
     );
+
+    /**
+     * Vyhledává všechny notifikace v systému seřazené od nejnovějších.
+     *
+     * Metoda se používá zejména v administrátorském přehledu
+     * všech notifikací bez omezení na konkrétního uživatele.
+     *
+     * @return seznam všech notifikací seřazených podle času vytvoření
+     */
+    List<NotificationEntity> findAllByOrderByCreatedAtDesc();
 }

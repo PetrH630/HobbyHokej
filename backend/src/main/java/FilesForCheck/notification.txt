@@ -5,6 +5,7 @@ Seznam souborů:
 DemoModeService.java
 DemoNotificationStore.java
 ForgottenPasswordResetContext.java
+InAppNotificationBuilder.java
 InAppNotificationService.java
 InAppNotificationServiceImpl.java
 MatchTimeChangeContext.java
@@ -12,6 +13,8 @@ NotificationCleanupService.java
 NotificationContext.java
 NotificationPreferencesService.java
 NotificationPreferencesServiceImpl.java
+NotificationQueryService.java
+NotificationQueryServiceImpl.java
 NotificationService.java
 NotificationServiceImpl.java
 package-info.java
@@ -167,6 +170,473 @@ public record ForgottenPasswordResetContext(
 }
 
 -----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\InAppNotificationBuilder.java
+-----
+package cz.phsoft.hokej.models.services.notification;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.models.services.notification.MatchTimeChangeContext;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+/**
+ * Builder pro sestavovĂˇnĂ­ obsahu in-app notifikacĂ­.
+ *
+ * TĹ™Ă­da centralizuje texty krĂˇtkĂ˝ch zprĂˇv zobrazovanĂ˝ch v aplikaci
+ * (notifikaÄŤnĂ­ badge, pĹ™ehled poslednĂ­ch udĂˇlostĂ­, panel notifikacĂ­).
+ *
+ * OdpovÄ›dnost tĹ™Ă­dy:
+ * - sestavenĂ­ titulku a zprĂˇvy podle NotificationType,
+ * - vyuĹľitĂ­ kontextu (hrĂˇÄŤ, zĂˇpas, zmÄ›na ÄŤasu) pro doplnÄ›nĂ­ detailĹŻ,
+ * - udrĹľenĂ­ jednotnĂ©ho a struÄŤnĂ©ho stylu in-app textĹŻ.
+ *
+ * TĹ™Ă­da neĹ™eĹˇĂ­:
+ * - uloĹľenĂ­ do databĂˇze,
+ * - vĂ˝bÄ›r cĂ­lovĂ©ho uĹľivatele,
+ * - oprĂˇvnÄ›nĂ­ ani validaci vstupĹŻ.
+ */
+@Component
+public class InAppNotificationBuilder {
+
+    private final MatchRegistrationRepository registrationRepository;
+
+    public InAppNotificationBuilder(MatchRegistrationRepository registrationRepository) {
+        this.registrationRepository = registrationRepository;
+    }
+
+    /**
+     * DatovĂ˝ nosiÄŤ pro obsah in-app notifikace.
+     *
+     * @param title   krĂˇtkĂ˝ titulek notifikace
+     * @param message struÄŤnĂ˝ text zprĂˇvy
+     */
+    public record InAppNotificationContent(String title, String message) {
+    }
+
+    /**
+     * FormĂˇtovaÄŤ data a ÄŤasu zĂˇpasu pouĹľĂ­vanĂ˝ v in-app notifikacĂ­ch.
+     */
+    private static final DateTimeFormatter MATCH_DATETIME_FORMATTER =
+            DateTimeFormatter.ofPattern("EEEE dd.MM.yyyy HH:mm", new Locale("cs", "CZ"));
+
+    /**
+     * SestavĂ­ in-app notifikaci pro danĂ˝ typ udĂˇlosti.
+     *
+     * PĹ™edpoklĂˇdĂˇ se, Ĺľe cĂ­lovĂ˝ AppUserEntity (uĹľivatel) je jiĹľ
+     * vyĹ™eĹˇen volajĂ­cĂ­ sluĹľbou. HrĂˇÄŤ a context se pouĹľĂ­vajĂ­ pro
+     * doplnÄ›nĂ­ detailĹŻ (jmĂ©no hrĂˇÄŤe, zĂˇpas, zmÄ›na ÄŤasu).
+     */
+    public InAppNotificationContent build(NotificationType type,
+                                          AppUserEntity user,
+                                          PlayerEntity player,
+                                          Object context) {
+
+        String userName = fullUserName(user);
+        String playerName = fullPlayerName(player);
+
+        MatchEntity match = extractMatch(context);
+        String formattedDateTime = formatMatchDateTime(match);
+        long registeredCount = countRegisteredPlayers(match);
+        int maxPlayers = match != null ? match.getMaxPlayers() : 0;
+        long freeSlots = maxPlayers > 0 ? (maxPlayers - registeredCount) : 0;
+        String matchCancelReason =
+                (match != null && match.getCancelReason() != null)
+                        ? match.getCancelReason().toString()
+                        : "";
+
+        MatchRegistrationEntity registration = extractMatchRegistration(context);
+        String excuseReason = (registration != null && registration.getExcuseReason() != null)
+                ? registration.getExcuseReason().toString()
+                : "";
+        String excuseNote = (registration != null)
+                ? safe(registration.getExcuseNote())
+                : "";
+
+        return switch (type) {
+
+            // =====================================
+            // PLAYER â€“ vazba hrĂˇÄŤe na uĹľivatele
+            // =====================================
+
+            case PLAYER_CREATED -> {
+                String title = "HrĂˇÄŤ vytvoĹ™en";
+                String message = "HrĂˇÄŤ %s byl vytvoĹ™en a ÄŤekĂˇ na schvĂˇlenĂ­ administrĂˇtorem."
+                        .formatted(playerName);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case PLAYER_UPDATED -> {
+                String title = "HrĂˇÄŤ upraven";
+                String message = "Ăšdaje hrĂˇÄŤe %s byly aktualizovĂˇny."
+                        .formatted(playerName);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case PLAYER_APPROVED -> {
+                String title = "HrĂˇÄŤ schvĂˇlen";
+                String message = "HrĂˇÄŤ %s byl schvĂˇlen administrĂˇtorem."
+                        .formatted(playerName);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case PLAYER_REJECTED -> {
+                String title = "HrĂˇÄŤ zamĂ­tnut";
+                String message = "HrĂˇÄŤ %s byl zamĂ­tnut administrĂˇtorem."
+                        .formatted(playerName);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case PLAYER_CHANGE_USER -> {
+                String title = "HrĂˇÄŤ pĹ™iĹ™azen novĂ©mu uĹľivateli";
+                String message = "HrĂˇÄŤ %s byl pĹ™iĹ™azen jinĂ©mu uĹľivatelskĂ©mu ĂşÄŤtu."
+                        .formatted(playerName);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            // =====================================
+            // USER â€“ udĂˇlosti kolem uĹľivatelskĂ©ho ĂşÄŤtu
+            // =====================================
+
+            case USER_CREATED -> {
+                String title = "UĹľivatel vytvoĹ™en";
+                String message = "Byl vytvoĹ™en novĂ˝ uĹľivatelskĂ˝ ĂşÄŤet pro %s."
+                        .formatted(userName);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case USER_ACTIVATED -> {
+                String title = "ĂšÄŤet aktivovĂˇn";
+                String message = "VĂˇĹˇ uĹľivatelskĂ˝ ĂşÄŤet byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn.";
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case USER_UPDATED -> {
+                String title = "ĂšÄŤet aktualizovĂˇn";
+                String message = "Ăšdaje vaĹˇeho ĂşÄŤtu byly aktualizovĂˇny.";
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case PASSWORD_RESET -> {
+                String title = "Reset hesla";
+                String message = "Heslo k vaĹˇemu ĂşÄŤtu bylo resetovĂˇno.";
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case FORGOTTEN_PASSWORD_RESET_REQUEST -> {
+                String title = "Ĺ˝Ăˇdost o obnovenĂ­ hesla";
+                String message = "Byla pĹ™ijata ĹľĂˇdost o obnovenĂ­ zapomenutĂ©ho hesla k vaĹˇemu ĂşÄŤtu.";
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case FORGOTTEN_PASSWORD_RESET_COMPLETED -> {
+                String title = "Heslo zmÄ›nÄ›no";
+                String message = "Heslo k vaĹˇemu ĂşÄŤtu bylo ĂşspÄ›ĹˇnÄ› zmÄ›nÄ›no.";
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case SECURITY_ALERT -> {
+                String title = "BezpeÄŤnostnĂ­ upozornÄ›nĂ­";
+                String message = "Na vaĹˇem ĂşÄŤtu byla zaznamenĂˇna neobvyklĂˇ aktivita.";
+                yield new InAppNotificationContent(title, message);
+            }
+
+            // =====================================
+            // REGISTRACE NA ZĂPAS
+            // =====================================
+
+            case MATCH_REGISTRATION_CREATED -> {
+                String title = "PĹ™ihlĂˇĹˇenĂ­ na zĂˇpas";
+                String message = formattedDateTime.isBlank()
+                        ? "Byl jste pĹ™ihlĂˇĹˇen na zĂˇpas. HrĂˇÄŤ: %s."
+                        .formatted(playerName)
+                        : "Byl jste pĹ™ihlĂˇĹˇen na zĂˇpas %s. HrĂˇÄŤ: %s."
+                        .formatted(formattedDateTime, playerName);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case MATCH_REGISTRATION_UPDATED -> {
+                MatchRegistrationEntity reg =
+                        castContext(context, MatchRegistrationEntity.class);
+                String newStatus = reg != null && reg.getStatus() != null
+                        ? reg.getStatus().name()
+                        : "neznĂˇmĂ˝ stav";
+
+                String title = "Registrace aktualizovĂˇna";
+                String message = formattedDateTime.isBlank()
+                        ? "VaĹˇe registrace na zĂˇpas byla zmÄ›nÄ›na (%s)."
+                        .formatted(newStatus)
+                        : "VaĹˇe registrace na zĂˇpas %s byla zmÄ›nÄ›na (%s)."
+                        .formatted(formattedDateTime, newStatus);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case MATCH_REGISTRATION_CANCELED -> {
+                String title = "OdhlĂˇĹˇenĂ­ ze zĂˇpasu";
+                String reasonPart = !excuseReason.isBlank()
+                        ? " DĹŻvod: %s - %s.".formatted(excuseReason, excuseNote)
+                        : "";
+                String message = formattedDateTime.isBlank()
+                        ? "Byl jste odhlĂˇĹˇen ze zĂˇpasu.%s"
+                        .formatted(reasonPart)
+                        : "Byl jste odhlĂˇĹˇen ze zĂˇpasu %s.%s"
+                        .formatted(formattedDateTime, reasonPart);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case MATCH_REGISTRATION_RESERVED -> {
+                String title = "PĹ™esunut mezi nĂˇhradnĂ­ky";
+                String messageBase = formattedDateTime.isBlank()
+                        ? "Byl jste pĹ™esunut mezi nĂˇhradnĂ­ky pro zĂˇpas."
+                        : "Byl jste pĹ™esunut mezi nĂˇhradnĂ­ky pro zĂˇpas %s."
+                        .formatted(formattedDateTime);
+
+                String capacityPart = (maxPlayers > 0)
+                        ? " Kapacita zĂˇpasu: %d hrĂˇÄŤĹŻ.".formatted(maxPlayers)
+                        : "";
+
+                String message = messageBase + capacityPart;
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case MATCH_REGISTRATION_SUBSTITUTE -> {
+                String title = "MoĹľnĂˇ ĂşÄŤast (SUBSTITUTE)";
+                String messageBase = formattedDateTime.isBlank()
+                        ? "VaĹˇe registrace na zĂˇpas je nastavena jako â€šmoĹľnĂˇâ€."
+                        : "VaĹˇe registrace na zĂˇpas %s je nastavena jako â€šmoĹľnĂˇâ€."
+                        .formatted(formattedDateTime);
+
+                String capacityPart = (maxPlayers > 0)
+                        ? " Kapacita zĂˇpasu: %d hrĂˇÄŤĹŻ.".formatted(maxPlayers)
+                        : "";
+
+                String message = messageBase + capacityPart;
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case MATCH_WAITING_LIST_MOVED_UP -> {
+                String title = "PĹ™esun z ÄŤekacĂ­ listiny";
+                String freeSlotsPart = (maxPlayers > 0)
+                        ? " VolnĂˇ mĂ­sta: %d z %d.".formatted(freeSlots, maxPlayers)
+                        : "";
+                String message = formattedDateTime.isBlank()
+                        ? "Byl jste pĹ™esunut z ÄŤekacĂ­ listiny mezi pĹ™ihlĂˇĹˇenĂ© hrĂˇÄŤe.%s"
+                        .formatted(freeSlotsPart)
+                        : "Byl jste pĹ™esunut z ÄŤekacĂ­ listiny mezi pĹ™ihlĂˇĹˇenĂ© na zĂˇpas %s.%s"
+                        .formatted(formattedDateTime, freeSlotsPart);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case MATCH_REGISTRATION_NO_RESPONSE -> {
+                String title = "NereagovanĂˇ pozvĂˇnka";
+                String base = formattedDateTime.isBlank()
+                        ? "Dosud jste nereagoval na pozvĂˇnku k zĂˇpasu."
+                        : "Dosud jste nereagoval na pozvĂˇnku k zĂˇpasu %s."
+                        .formatted(formattedDateTime);
+
+                String countPart = (maxPlayers > 0)
+                        ? " PĹ™ihlĂˇĹˇeno: %d hrĂˇÄŤĹŻ, volnĂˇ mĂ­sta: %d z %d."
+                        .formatted(registeredCount, freeSlots, maxPlayers)
+                        : "";
+
+                String message = base + countPart;
+                yield new InAppNotificationContent(title, message);
+            }
+
+            // =====================================
+            // EXCUSE â€“ omluvy a neomluvenĂ© absence
+            // =====================================
+
+            case PLAYER_EXCUSED -> {
+                String title = "Omluva ze zĂˇpasu";
+                String reasonPart = !excuseReason.isBlank()
+                        ? " DĹŻvod: %s - %s.".formatted(excuseReason, excuseNote)
+                        : "";
+                String message = formattedDateTime.isBlank()
+                        ? "VaĹˇe omluva ze zĂˇpasu byla zaznamenĂˇna.%s"
+                        .formatted(reasonPart)
+                        : "VaĹˇe omluva ze zĂˇpasu %s byla zaznamenĂˇna.%s"
+                        .formatted(formattedDateTime, reasonPart);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case PLAYER_NO_EXCUSED -> {
+                String title = "NeomluvenĂˇ neĂşÄŤast";
+                String message = formattedDateTime.isBlank()
+                        ? "Byl jste oznaÄŤen jako neomluvenĂ˝ na zĂˇpas."
+                        : "Byl jste oznaÄŤen jako neomluvenĂ˝ na zĂˇpas %s."
+                        .formatted(formattedDateTime);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            // =====================================
+            // MATCH_INFO â€“ informace o zĂˇpase
+            // =====================================
+
+            case MATCH_REMINDER -> {
+                String title = "PĹ™ipomenutĂ­ zĂˇpasu";
+                String base = formattedDateTime.isBlank()
+                        ? "PĹ™ipomĂ­nĂˇme vĂˇm nadchĂˇzejĂ­cĂ­ zĂˇpas."
+                        : "PĹ™ipomĂ­nĂˇme vĂˇm nadchĂˇzejĂ­cĂ­ zĂˇpas %s."
+                        .formatted(formattedDateTime);
+
+                String countPart = (maxPlayers > 0)
+                        ? " PĹ™ihlĂˇĹˇeno: %d hrĂˇÄŤĹŻ, volnĂˇ mĂ­sta: %d z %d."
+                        .formatted(registeredCount, freeSlots, maxPlayers)
+                        : "";
+
+                String message = base + countPart;
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case MATCH_CANCELED -> {
+                String title = "ZĂˇpas zruĹˇen";
+                String reasonPart = !matchCancelReason.isBlank()
+                        ? " DĹŻvod: %s.".formatted(matchCancelReason)
+                        : "";
+                String message = formattedDateTime.isBlank()
+                        ? "PlĂˇnovanĂ˝ zĂˇpas byl zruĹˇen.%s"
+                        .formatted(reasonPart)
+                        : "ZĂˇpas %s byl zruĹˇen.%s"
+                        .formatted(formattedDateTime, reasonPart);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case MATCH_UNCANCELED -> {
+                String title = "ZĂˇpas obnoven";
+                String message = formattedDateTime.isBlank()
+                        ? "PĹŻvodnÄ› zruĹˇenĂ˝ zĂˇpas byl obnoven."
+                        : "PĹŻvodnÄ› zruĹˇenĂ˝ zĂˇpas %s byl obnoven."
+                        .formatted(formattedDateTime);
+                yield new InAppNotificationContent(title, message);
+            }
+
+            case MATCH_TIME_CHANGED -> {
+                String title = "ZmÄ›na ÄŤasu zĂˇpasu";
+
+                LocalDateTime oldDateTime = null;
+                if (context instanceof MatchTimeChangeContext mtc) {
+                    oldDateTime = mtc.oldDateTime();
+                }
+
+                String oldDateFormatted = "";
+                if (oldDateTime != null) {
+                    oldDateFormatted = oldDateTime.format(MATCH_DATETIME_FORMATTER);
+                }
+
+                String newPart = formattedDateTime.isBlank()
+                        ? "DoĹˇlo ke zmÄ›nÄ› ÄŤasu plĂˇnovanĂ©ho zĂˇpasu."
+                        : "DoĹˇlo ke zmÄ›nÄ› ÄŤasu zĂˇpasu na novĂ˝ termĂ­n %s."
+                        .formatted(formattedDateTime);
+
+                String oldPart = oldDateFormatted.isBlank()
+                        ? ""
+                        : " PĹŻvodnĂ­ termĂ­n: %s.".formatted(oldDateFormatted);
+
+                String message = newPart + oldPart;
+                yield new InAppNotificationContent(title, message);
+            }
+
+            // pro ostatnĂ­ typy in-app notifikaci nesestavujeme
+            default -> null;
+        };
+    }
+
+    // PomocnĂ© metody
+
+    /**
+     * SestavĂ­ zobrazitelnĂ© jmĂ©no uĹľivatele.
+     */
+    private String fullUserName(AppUserEntity user) {
+        if (user == null) return "(neznĂˇmĂ˝ uĹľivatel)";
+        String first = safe(user.getName());
+        String last = safe(user.getSurname());
+        String full = (first + " " + last).trim();
+        if (full.isEmpty()) {
+            return user.getEmail() != null ? user.getEmail() : "(neznĂˇmĂ˝ uĹľivatel)";
+        }
+        return full;
+    }
+
+    /**
+     * VracĂ­ zobrazitelnĂ© jmĂ©no hrĂˇÄŤe.
+     */
+    private String fullPlayerName(PlayerEntity player) {
+        if (player == null) return "(neznĂˇmĂ˝ hrĂˇÄŤ)";
+        if (player.getFullName() != null && !player.getFullName().isBlank()) {
+            return player.getFullName();
+        }
+        return "(beze jmĂ©na)";
+    }
+
+    private String safe(String s) {
+        return s == null ? "" : s;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T castContext(Object context, Class<T> expected) {
+        if (context == null) {
+            return null;
+        }
+        if (!expected.isInstance(context)) {
+            return null;
+        }
+        return (T) context;
+    }
+
+    private String formatMatchDateTime(MatchEntity match) {
+        if (match == null || match.getDateTime() == null) {
+            return "";
+        }
+        return match.getDateTime().format(MATCH_DATETIME_FORMATTER);
+    }
+
+    /**
+     * SpoÄŤĂ­tĂˇ poÄŤet pĹ™ihlĂˇĹˇenĂ˝ch hrĂˇÄŤĹŻ k danĂ©mu zĂˇpasu.
+     */
+    private long countRegisteredPlayers(MatchEntity match) {
+        if (match == null || match.getId() == null) {
+            return 0;
+        }
+        return registrationRepository.countByMatchIdAndStatus(
+                match.getId(),
+                PlayerMatchStatus.REGISTERED
+        );
+    }
+
+    /**
+     * Z kontextu urÄŤĂ­ zĂˇpas relevantnĂ­ pro notifikaci.
+     */
+    private MatchEntity extractMatch(Object context) {
+        if (context instanceof MatchRegistrationEntity reg) {
+            return reg.getMatch();
+        }
+        if (context instanceof MatchEntity match) {
+            return match;
+        }
+        if (context instanceof MatchTimeChangeContext mtc) {
+            return mtc.match();
+        }
+        return null;
+    }
+
+    private MatchRegistrationEntity extractMatchRegistration(Object context) {
+        if (context instanceof MatchRegistrationEntity reg) {
+            return reg;
+        }
+        return null;
+    }
+}
+
+-----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\InAppNotificationService.java
 -----
 package cz.phsoft.hokej.models.services.notification;
@@ -219,7 +689,6 @@ import cz.phsoft.hokej.data.entities.NotificationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
 import cz.phsoft.hokej.data.repositories.NotificationRepository;
-import cz.phsoft.hokej.models.services.email.EmailMessageBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -230,8 +699,11 @@ import java.time.Instant;
 /**
  * Implementace sluĹľby pro uklĂˇdĂˇnĂ­ aplikaÄŤnĂ­ch notifikacĂ­.
  *
- * TĹ™Ă­da neĹ™eĹˇĂ­ odesĂ­lĂˇnĂ­ e-mailĹŻ ani SMS. VytvĂˇĹ™Ă­ pouze
- * zjednoduĹˇenĂ© notifikace v databĂˇzi pro zobrazenĂ­ v UI.
+ * TĹ™Ă­da neĹ™eĹˇĂ­ odesĂ­lĂˇnĂ­ e-mailĹŻ ani SMS.
+ * VytvĂˇĹ™Ă­ zjednoduĹˇenĂ© i detailnĂ­ notifikace v databĂˇzi
+ * pro zobrazenĂ­ v uĹľivatelskĂ©m rozhranĂ­.
+ *
+ * Text notifikacĂ­ se sestavuje pomocĂ­ InAppNotificationBuilder.
  */
 @Service
 public class InAppNotificationServiceImpl implements InAppNotificationService {
@@ -239,14 +711,14 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
     private static final Logger log = LoggerFactory.getLogger(InAppNotificationServiceImpl.class);
 
     private final NotificationRepository notificationRepository;
-    private final EmailMessageBuilder emailMessageBuilder;
+    private final InAppNotificationBuilder inAppNotificationBuilder;
     private final Clock clock;
 
     public InAppNotificationServiceImpl(NotificationRepository notificationRepository,
-                                        EmailMessageBuilder emailMessageBuilder,
+                                        InAppNotificationBuilder inAppNotificationBuilder,
                                         Clock clock) {
         this.notificationRepository = notificationRepository;
-        this.emailMessageBuilder = emailMessageBuilder;
+        this.inAppNotificationBuilder = inAppNotificationBuilder;
         this.clock = clock;
     }
 
@@ -262,13 +734,23 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
 
         AppUserEntity owner = player.getUser();
         if (owner == null) {
-            log.debug("InAppNotificationService.storeForPlayer: player {} nemĂˇ pĹ™iĹ™azenĂ©ho uĹľivatele, nic se neuklĂˇdĂˇ",
-                    player.getId());
+            log.debug(
+                    "InAppNotificationService.storeForPlayer: player {} nemĂˇ pĹ™iĹ™azenĂ©ho uĹľivatele, nic se neuklĂˇdĂˇ",
+                    player.getId()
+            );
             return;
         }
 
-        String messageShort = buildShortMessageForPlayer(type, player, context);
-        String messageFull = null; // lze doplnit pozdÄ›ji, pokud bude potĹ™eba
+        InAppNotificationBuilder.InAppNotificationContent content =
+                buildContent(type, owner, player, context);
+
+        String messageShort = content != null && content.title() != null && !content.title().isBlank()
+                ? content.title()
+                : type.name();
+
+        String messageFull = content != null && content.message() != null && !content.message().isBlank()
+                ? content.message()
+                : type.name();
 
         NotificationEntity entity = new NotificationEntity();
         entity.setUser(owner);
@@ -294,8 +776,16 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
             return;
         }
 
-        String messageShort = buildShortMessageForUser(type, user, context);
-        String messageFull = null;
+        InAppNotificationBuilder.InAppNotificationContent content =
+                buildContent(type, user, null, context);
+
+        String messageShort = content != null && content.title() != null && !content.title().isBlank()
+                ? content.title()
+                : type.name();
+
+        String messageFull = content != null && content.message() != null && !content.message().isBlank()
+                ? content.message()
+                : type.name();
 
         NotificationEntity entity = new NotificationEntity();
         entity.setUser(user);
@@ -311,53 +801,22 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
     }
 
     /**
-     * VytvĂˇĹ™Ă­ struÄŤnĂ˝ text notifikace pro hrĂˇÄŤe.
+     * Sestavuje obsah in-app notifikace pomocĂ­ InAppNotificationBuilder.
      *
-     * PrimĂˇrnÄ› se pouĹľĂ­vĂˇ pĹ™edmÄ›t e-mailu. Pokud nenĂ­ k dispozici,
-     * pouĹľije se fallback s nĂˇzvem typu.
+     * Pokud builder vrĂˇtĂ­ null (pro danĂ˝ NotificationType nenĂ­ definovĂˇna
+     * Ĺˇablona), vracĂ­ se takĂ© null a volajĂ­cĂ­ pouĹľije fallback type.name().
      */
-    private String buildShortMessageForPlayer(NotificationType type,
-                                              PlayerEntity player,
-                                              Object context) {
+    private InAppNotificationBuilder.InAppNotificationContent buildContent(NotificationType type,
+                                                                           AppUserEntity user,
+                                                                           PlayerEntity player,
+                                                                           Object context) {
         try {
-            // E-mail nepotĹ™ebujeme odeslat, staÄŤĂ­ pouĹľĂ­t Ĺˇablonu pro subject.
-            EmailMessageBuilder.EmailContent content =
-                    emailMessageBuilder.buildForPlayer(type, player, null, context);
-
-            if (content != null && content.subject() != null && !content.subject().isBlank()) {
-                return content.subject();
-            }
+            return inAppNotificationBuilder.build(type, user, player, context);
         } catch (Exception ex) {
-            log.debug("buildShortMessageForPlayer: chyba pĹ™i sestavovĂˇnĂ­ subjectu pro type {}: {}",
+            log.debug("InAppNotificationService.buildContent: chyba pĹ™i sestavovĂˇnĂ­ notifikace pro type {}: {}",
                     type, ex.getMessage());
+            return null;
         }
-
-        return type.name();
-    }
-
-    /**
-     * VytvĂˇĹ™Ă­ struÄŤnĂ˝ text notifikace pro uĹľivatele.
-     *
-     * PrimĂˇrnÄ› se pouĹľĂ­vĂˇ pĹ™edmÄ›t e-mailu. Pokud nenĂ­ k dispozici,
-     * pouĹľije se fallback s nĂˇzvem typu.
-     */
-    private String buildShortMessageForUser(NotificationType type,
-                                            AppUserEntity user,
-                                            Object context) {
-        try {
-            String email = user.getEmail();
-            EmailMessageBuilder.EmailContent content =
-                    emailMessageBuilder.buildForUser(type, null, email, context);
-
-            if (content != null && content.subject() != null && !content.subject().isBlank()) {
-                return content.subject();
-            }
-        } catch (Exception ex) {
-            log.debug("buildShortMessageForUser: chyba pĹ™i sestavovĂˇnĂ­ subjectu pro type {}: {}",
-                    type, ex.getMessage());
-        }
-
-        return type.name();
     }
 }
 
@@ -810,6 +1269,266 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
 }
 
 -----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\NotificationQueryService.java
+-----
+package cz.phsoft.hokej.models.services.notification;
+
+import cz.phsoft.hokej.models.dto.NotificationBadgeDTO;
+import cz.phsoft.hokej.models.dto.NotificationDTO;
+import org.springframework.security.core.Authentication;
+
+import java.util.List;
+
+/**
+ * SluĹľba pro prĂˇci s aplikaÄŤnĂ­mi notifikacemi z pohledu UI.
+ *
+ * Poskytuje metody pro:
+ * - vĂ˝poÄŤet badge s poÄŤtem nepĹ™eÄŤtenĂ˝ch notifikacĂ­,
+ * - naÄŤtenĂ­ notifikacĂ­ od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­,
+ * - naÄŤtenĂ­ poslednĂ­ch notifikacĂ­,
+ * - oznaÄŤenĂ­ notifikacĂ­ jako pĹ™eÄŤtenĂ˝ch.
+ *
+ * VeĹˇkerĂˇ logika ÄŤtenĂ­ a zmÄ›ny stavu notifikacĂ­
+ * se deleguje do NotificationRepository a NotificationMapper.
+ * SluĹľba pracuje vĹľdy s aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝m uĹľivatelem
+ * na zĂˇkladÄ› Authentication kontextu.
+ */
+public interface NotificationQueryService {
+
+    /**
+     * VracĂ­ badge s poÄŤtem nepĹ™eÄŤtenĂ˝ch notifikacĂ­ od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @return DTO s informacemi o badge
+     */
+    NotificationBadgeDTO getBadge(Authentication authentication);
+
+    /**
+     * VracĂ­ seznam notifikacĂ­ vytvoĹ™enĂ˝ch po poslednĂ­m pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     *
+     * Pokud uĹľivatel nemĂˇ lastLoginAt, pouĹľije se vĂ˝chozĂ­ ÄŤasovĂ© okno.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @return seznam notifikacĂ­ ve formÄ› DTO
+     */
+    List<NotificationDTO> getSinceLastLogin(Authentication authentication);
+
+    /**
+     * VracĂ­ poslednĂ­ notifikace aktuĂˇlnĂ­ho uĹľivatele.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @param limit maximĂˇlnĂ­ poÄŤet vrĂˇcenĂ˝ch zĂˇznamĹŻ
+     * @return seznam notifikacĂ­ ve formÄ› DTO
+     */
+    List<NotificationDTO> getRecent(Authentication authentication, int limit);
+
+    /**
+     * OznaÄŤĂ­ konkrĂ©tnĂ­ notifikaci aktuĂˇlnĂ­ho uĹľivatele jako pĹ™eÄŤtenou.
+     *
+     * Operace je idempotentnĂ­ â€“ pokud je notifikace jiĹľ pĹ™eÄŤtenĂˇ
+     * nebo neexistuje, nevyvolĂˇ se chyba.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     * @param id identifikĂˇtor notifikace
+     */
+    void markAsRead(Authentication authentication, Long id);
+
+    /**
+     * OznaÄŤĂ­ vĹˇechny notifikace aktuĂˇlnĂ­ho uĹľivatele jako pĹ™eÄŤtenĂ©.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext aktuĂˇlnĂ­ho uĹľivatele
+     */
+    void markAllAsRead(Authentication authentication);
+
+    /**
+     * VracĂ­ vĹˇechny notifikace v systĂ©mu pro administrativnĂ­ pĹ™ehled.
+     *
+     * Parametr limit omezuje maximĂˇlnĂ­ poÄŤet vrĂˇcenĂ˝ch zĂˇznamĹŻ
+     * kvĹŻli vĂ˝konu a pĹ™ehlednosti.
+     *
+     * @param limit maximĂˇlnĂ­ poÄŤet vrĂˇcenĂ˝ch zĂˇznamĹŻ
+     * @return seznam notifikacĂ­ ve formÄ› DTO
+     */
+    List<NotificationDTO> getAllNotifications(int limit);
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\NotificationQueryServiceImpl.java
+-----
+package cz.phsoft.hokej.models.services.notification;
+
+import cz.phsoft.hokej.controllers.NotificationController;
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.NotificationEntity;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import cz.phsoft.hokej.data.repositories.NotificationRepository;
+import cz.phsoft.hokej.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.models.dto.NotificationBadgeDTO;
+import cz.phsoft.hokej.models.dto.NotificationDTO;
+import cz.phsoft.hokej.models.mappers.NotificationMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+/**
+ * Implementace sluĹľby pro ÄŤtenĂ­ a sprĂˇvu aplikaÄŤnĂ­ch notifikacĂ­
+ * z pohledu aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+ *
+ * TĹ™Ă­da:
+ * - naÄŤĂ­tĂˇ uĹľivatele podle Authentication pomocĂ­ AppUserRepository,
+ * - pouĹľĂ­vĂˇ NotificationRepository pro prĂˇci s entitami,
+ * - provĂˇdĂ­ mapovĂˇnĂ­ na DTO pomocĂ­ NotificationMapper,
+ * - urÄŤuje ÄŤasovou hranici podle lastLoginAt nebo vĂ˝chozĂ­ho okna.
+ *
+ * Controller deleguje veĹˇkerou logiku do tĂ©to sluĹľby
+ * a nepracuje pĹ™Ă­mo s repository.
+ */
+@Service
+public class NotificationQueryServiceImpl implements NotificationQueryService {
+
+    private static final Logger log = LoggerFactory.getLogger(NotificationQueryServiceImpl.class);
+
+    /**
+     * VĂ˝chozĂ­ poÄŤet dnĂ­, za kterĂ© se naÄŤtou notifikace,
+     * pokud uĹľivatel jeĹˇtÄ› nemĂˇ nastavenĂ© lastLoginAt.
+     */
+    private static final int DEFAULT_DAYS_IF_NO_LAST_LOGIN = 14;
+
+    private final NotificationRepository notificationRepository;
+    private final NotificationMapper notificationMapper;
+    private final AppUserRepository appUserRepository;
+    private final Clock clock;
+
+    public NotificationQueryServiceImpl(NotificationRepository notificationRepository,
+                                        NotificationMapper notificationMapper,
+                                        AppUserRepository appUserRepository,
+                                        Clock clock) {
+        this.notificationRepository = notificationRepository;
+        this.notificationMapper = notificationMapper;
+        this.appUserRepository = appUserRepository;
+        this.clock = clock;
+    }
+
+    @Override
+    public NotificationBadgeDTO getBadge(Authentication authentication) {
+        AppUserEntity user = getCurrentUser(authentication);
+        Instant boundary = resolveBoundary(user);
+
+        long count = notificationRepository
+                .countByUserAndCreatedAtAfterAndReadAtIsNull(user, boundary);
+
+        NotificationBadgeDTO dto = new NotificationBadgeDTO();
+        dto.setUnreadCountSinceLastLogin(count);
+        dto.setLastLoginAt(user.getLastLoginAt());
+        dto.setCurrentLoginAt(user.getCurrentLoginAt());
+
+        return dto;
+    }
+
+    @Override
+    public List<NotificationDTO> getSinceLastLogin(Authentication authentication) {
+        AppUserEntity user = getCurrentUser(authentication);
+        Instant boundary = resolveBoundary(user);
+
+        List<NotificationEntity> entities =
+                notificationRepository.findByUserAndCreatedAtAfterOrderByCreatedAtDesc(user, boundary);
+
+        return notificationMapper.toDtoList(entities);
+    }
+
+    @Override
+    public List<NotificationDTO> getRecent(Authentication authentication, int limit) {
+        AppUserEntity user = getCurrentUser(authentication);
+
+        List<NotificationEntity> entities =
+                notificationRepository.findTop50ByUserOrderByCreatedAtDesc(user);
+
+        if (limit > 0 && entities.size() > limit) {
+            entities = entities.subList(0, limit);
+        }
+
+        return notificationMapper.toDtoList(entities);
+    }
+
+    @Override
+    public void markAsRead(Authentication authentication, Long id) {
+        AppUserEntity user = getCurrentUser(authentication);
+
+        notificationRepository.findByIdAndUser(id, user)
+                .ifPresent(entity -> {
+                    if (entity.getReadAt() == null) {
+                        entity.setReadAt(Instant.now(clock));
+                        notificationRepository.save(entity);
+                        log.debug("Notifikace {} oznaÄŤena jako pĹ™eÄŤtenĂˇ pro user {}", id, user.getId());
+                    }
+                });
+    }
+
+    @Override
+    public void markAllAsRead(Authentication authentication) {
+        AppUserEntity user = getCurrentUser(authentication);
+
+        List<NotificationEntity> unread =
+                notificationRepository.findByUserAndReadAtIsNullOrderByCreatedAtDesc(user);
+
+        if (!unread.isEmpty()) {
+            Instant now = Instant.now(clock);
+            for (NotificationEntity entity : unread) {
+                entity.setReadAt(now);
+            }
+            notificationRepository.saveAll(unread);
+            log.debug("OznaÄŤeno {} notifikacĂ­ jako pĹ™eÄŤtenĂ˝ch pro user {}", unread.size(), user.getId());
+        }
+    }
+
+    @Override
+    public List<NotificationDTO> getAllNotifications(int limit) {
+        List<NotificationEntity> entities = notificationRepository.findAllByOrderByCreatedAtDesc();
+
+        if (limit > 0 && entities.size() > limit) {
+            entities = entities.subList(0, limit);
+        }
+
+        return notificationMapper.toDtoList(entities);
+    }
+
+    /**
+     * UrÄŤuje ÄŤasovou hranici pro vĂ˝bÄ›r notifikacĂ­.
+     *
+     * Pokud mĂˇ uĹľivatel nastaven lastLoginAt, pouĹľije se tato hodnota.
+     * Jinak se pouĹľije aktuĂˇlnĂ­ ÄŤas mĂ­nus DEFAULT_DAYS_IF_NO_LAST_LOGIN dnĂ­.
+     *
+     * @param user uĹľivatel, pro kterĂ©ho se ÄŤasovĂˇ hranice urÄŤuje
+     * @return ÄŤasovĂˇ hranice pro vĂ˝bÄ›r notifikacĂ­
+     */
+    private Instant resolveBoundary(AppUserEntity user) {
+        if (user.getLastLoginAt() != null) {
+            return user.getLastLoginAt();
+        }
+        return Instant.now(clock).minus(DEFAULT_DAYS_IF_NO_LAST_LOGIN, ChronoUnit.DAYS);
+    }
+
+    /**
+     * NaÄŤte entitu aktuĂˇlnĂ­ho uĹľivatele podle e-mailu
+     * z autentizaÄŤnĂ­ho kontextu.
+     *
+     * @param authentication autentizaÄŤnĂ­ kontext
+     * @return entita uĹľivatele
+     */
+    private AppUserEntity getCurrentUser(Authentication authentication) {
+        String email = authentication.getName();
+        return appUserRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+    }
+}
+
+-----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\NotificationService.java
 -----
 package cz.phsoft.hokej.models.services.notification;
@@ -1038,6 +1757,8 @@ public class NotificationServiceImpl implements NotificationService {
         } else {
             log.debug("Typ {} je v MANAGER_COPY_BLACKLIST â€“ kopie manaĹľerĹŻm se neposĂ­lĂˇ (notifyPlayer).", type);
         }
+
+        System.out.println("typ notifikace: "  + type + " - " + context );
         inAppNotificationService.storeForPlayer(player, type, context);
     }
 
