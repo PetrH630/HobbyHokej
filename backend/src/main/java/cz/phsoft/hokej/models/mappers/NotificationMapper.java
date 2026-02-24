@@ -28,6 +28,10 @@ public interface NotificationMapper {
             target = "read",
             expression = "java(entity.getReadAt() != null)"
     )
+    @Mapping(
+            target = "matchId",
+            expression = "java(entity.getMatch() != null ? entity.getMatch().getId() : null)"
+    )
     NotificationDTO toDTO(NotificationEntity entity);
 
     List<NotificationDTO> toDtoList(List<NotificationEntity> entities);

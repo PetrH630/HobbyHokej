@@ -60,6 +60,7 @@ package cz.phsoft.hokej.data.repositories;
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -81,6 +82,7 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
      */
     Optional<AppUserEntity> findByEmail(String email);
 
+    List<AppUserEntity> findByEnabledTrue();
 
 }
 
@@ -753,6 +755,7 @@ public interface PlayerInactivityPeriodRepository
 package cz.phsoft.hokej.data.repositories;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -841,6 +844,18 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      * @return seznam hrĂˇÄŤĹŻ uĹľivatele
      */
     List<PlayerEntity> findByUser_EmailOrderByIdAsc(String email);
+
+    /**
+     * VracĂ­ vĹˇechny hrĂˇÄŤe v danĂ©m stavu.
+     */
+    List<PlayerEntity> findByPlayerStatus(PlayerStatus playerStatus);
+
+    /**
+     * PohodlnĂˇ metoda pro vĹˇechny schvĂˇlenĂ© hrĂˇÄŤe.
+     */
+    default List<PlayerEntity> findApprovedPlayers() {
+        return findByPlayerStatus(PlayerStatus.APPROVED);
+    }
 }
 
 -----

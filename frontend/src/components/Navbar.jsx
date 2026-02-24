@@ -143,7 +143,7 @@ const Navbar = () => {
                         to="/app/admin"
                         end
                         className={({ isActive }) =>
-                            "nav-link" + (isActive ? " activeLink" : "")
+                            "nav-link admin-link" + (isActive ? " activeLink" : "")
                         }
                         onClick={closeMenu}
                     >
@@ -155,7 +155,7 @@ const Navbar = () => {
                     <NavLink
                         to="/app/admin/players"
                         className={({ isActive }) =>
-                            "nav-link" + (isActive ? " activeLink" : "")
+                            "nav-link admin-link" + (isActive ? " activeLink" : "")
                         }
                         onClick={closeMenu}
                     >
@@ -167,7 +167,7 @@ const Navbar = () => {
                     <NavLink
                         to="/app/admin/matches"
                         className={({ isActive }) =>
-                            "nav-link" + (isActive ? " activeLink" : "")
+                            "nav-link admin-link" + (isActive ? " activeLink" : "")
                         }
                         onClick={closeMenu}
                     >
@@ -179,7 +179,7 @@ const Navbar = () => {
                     <NavLink
                         to="/app/admin/seasons"
                         className={({ isActive }) =>
-                            "nav-link" + (isActive ? " activeLink" : "")
+                            "nav-link admin-link" + (isActive ? " activeLink" : "")
                         }
                         onClick={closeMenu}
                     >
@@ -191,7 +191,7 @@ const Navbar = () => {
                     <NavLink
                         to="/app/admin/inactivity"
                         className={({ isActive }) =>
-                            "nav-link" + (isActive ? " activeLink" : "")
+                            "nav-link admin-link" + (isActive ? " activeLink" : "")
                         }
                         onClick={closeMenu}
                     >
@@ -204,7 +204,7 @@ const Navbar = () => {
                         <NavLink
                             to="/app/admin/users"
                             className={({ isActive }) =>
-                                "nav-link" + (isActive ? " activeLink" : "")
+                                "nav-link admin-link" + (isActive ? " activeLink" : "")
                             }
                             onClick={closeMenu}
                         >
@@ -293,7 +293,8 @@ const Navbar = () => {
                             to="/app/admin"
                             end
                             className={({ isActive }) =>
-                                "mobile-link" + (isActive ? " activeLink" : "")
+                                "mobile-link admin-link" +
+                                (isActive ? " activeLink" : "")
                             }
                             onClick={closeMenu}
                         >
@@ -305,7 +306,8 @@ const Navbar = () => {
                         <NavLink
                             to="/app/admin/players"
                             className={({ isActive }) =>
-                                "mobile-link" + (isActive ? " activeLink" : "")
+                                "mobile-link admin-link" +
+                                (isActive ? " activeLink" : "")
                             }
                             onClick={closeMenu}
                         >
@@ -316,7 +318,8 @@ const Navbar = () => {
                         <NavLink
                             to="/app/admin/matches"
                             className={({ isActive }) =>
-                                "mobile-link" + (isActive ? " activeLink" : "")
+                                "mobile-link admin-link" +
+                                (isActive ? " activeLink" : "")
                             }
                             onClick={closeMenu}
                         >
@@ -327,7 +330,8 @@ const Navbar = () => {
                         <NavLink
                             to="/app/admin/seasons"
                             className={({ isActive }) =>
-                                "mobile-link" + (isActive ? " activeLink" : "")
+                                "mobile-link admin-link" +
+                                (isActive ? " activeLink" : "")
                             }
                             onClick={closeMenu}
                         >
@@ -338,7 +342,8 @@ const Navbar = () => {
                         <NavLink
                             to="/app/admin/inactivity"
                             className={({ isActive }) =>
-                                "mobile-link" + (isActive ? " activeLink" : "")
+                                "mobile-link admin-link" +
+                                (isActive ? " activeLink" : "")
                             }
                             onClick={closeMenu}
                         >
@@ -351,7 +356,8 @@ const Navbar = () => {
                             <NavLink
                                 to="/app/admin/users"
                                 className={({ isActive }) =>
-                                    "mobile-link" + (isActive ? " activeLink" : "")
+                                    "mobile-link admin-link" +
+                                    (isActive ? " activeLink" : "")
                                 }
                                 onClick={closeMenu}
                             >
@@ -387,7 +393,7 @@ const Navbar = () => {
                     {/* STŘED – odkazy uprostřed (desktop) */}
                     <div className="d-none d-lg-flex flex-grow-1 justify-content-center">
                         <div className="d-flex align-items-center gap-3">
-                            {/* Tlačítko Správa / Zavřít správu – jen ADMIN / MANAGER */}
+                            {/* Tlačítko Správa / Zavřít správce – jen ADMIN / MANAGER */}
                             <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
                                 <button
                                     type="button"

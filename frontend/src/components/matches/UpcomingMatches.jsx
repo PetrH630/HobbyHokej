@@ -105,20 +105,21 @@ const UpcomingMatches = () => {
 
       <div className="match-list">
         {matches.map((m, idx) => {
-          const isNext = idx === 0;
+          const isFirst = idx === 0;
+          const isNextHighlighted = isFirst && m.matchStatus !== "CANCELED";
 
           return (
             <div
-              className={`match-item ${isNext ? "match-item--next" : ""}`}
+              className={`match-item ${isFirst ? "match-item--next" : ""}`}
               key={m.id}
-              ref={isNext ? firstMatchRef : null}
+              ref={isFirst ? firstMatchRef : null}
             >
               <div
-                className={`next-match-frame ${isNext ? "next-match-frame--on" : ""
+                className={`next-match-frame ${isNextHighlighted ? "next-match-frame--on" : ""
                   }`}
-                aria-label={isNext ? "Nejbližší zápas" : undefined}
+                aria-label={isNextHighlighted ? "Nejbližší zápas" : undefined}
               >
-                {isNext && (
+                {isNextHighlighted && (
                   <div className="next-match-badge">
                     Nejbližší zápas
                   </div>

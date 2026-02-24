@@ -90,11 +90,12 @@ const PlayerHomePage = () => {
                     <p className="text-muted mb-0">
                         Přihlášen:{" "}
                         <span className="fw-semibold">{displayName}</span>{" "}
-                        <div>
+                        </p>
+                    <p className="text-muted mb-0">
                         Hráč:{" "}
                         <span className="fw-semibold">{playerLabel}</span>
-                        </div>
-                    </p>
+                        </p>
+                
                     <p className="text-muted mb-0">
                         Poslední přihlášení:{" "}
                         <span className="fw-semibold">

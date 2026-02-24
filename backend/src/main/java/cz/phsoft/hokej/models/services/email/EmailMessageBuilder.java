@@ -464,9 +464,7 @@ public class EmailMessageBuilder {
 
         // Registrace z contextu – může být null, proto safe přístup
         MatchRegistrationEntity registration = extractMatchRegistration(context);
-        String excuseReason = (registration != null && registration.getExcuseReason() != null)
-                ? registration.getExcuseReason().toString()
-                : "";
+        String excuseReason = assignExcuseReason(registration);
         String excuseNote = (registration != null)
                 ? safe(registration.getExcuseNote())
                 : "";
@@ -478,10 +476,7 @@ public class EmailMessageBuilder {
         long registeredCount = countRegisteredPlayers(match);
         int maxPlayers = match != null ? match.getMaxPlayers() : 0;
         long freeSlots = maxPlayers > 0 ? (maxPlayers - registeredCount) : 0;
-        String matchCancelReason =
-                (match != null && match.getCancelReason() != null)
-                        ? match.getCancelReason().toString()
-                        : "";
+        String matchCancelReason = assignMatchCancelReason(match);
 
         String safeEmail = (playerEmail != null && !playerEmail.isBlank())
                 ? playerEmail
@@ -1070,4 +1065,43 @@ public class EmailMessageBuilder {
         String html = buildSimpleHtml(subject, greeting, main, footer);
         return new EmailContent(subject, html, true);
     }
+
+    // pomocné metody
+    /**
+     * Vrací čitelný popis důvodu zrušení zápasu.
+     * Pokud není důvod nastaven, vrací prázdný řetězec.
+     */
+    private String assignMatchCancelReason(MatchEntity match) {
+        if (match == null || match.getCancelReason() == null) {
+            return "";
+        }
+
+        return switch (match.getCancelReason()) {
+            case NOT_ENOUGH_PLAYERS -> "nedostatečný počet hráčů";
+            case TECHNICAL_ISSUE -> "Technické problémy (led, hala…)";
+            case WEATHER -> "Nepříznivé počasí";
+            case ORGANIZER_DECISION -> "Rozhodnutí organizátora";
+            case OTHER -> "Jiný důvod";
+            default -> "nezadaný nebo neznámý důvod";
+        };
+    }
+
+    /**
+     * Vrací čitelný popis důvodu omluvy ze zápasu.
+     * Pokud není důvod nastaven, vrací prázdný řetězec.
+     */
+    private String assignExcuseReason(MatchRegistrationEntity registration) {
+        if (registration == null || registration.getExcuseReason() == null) {
+            return "";
+        }
+
+        return switch (registration.getExcuseReason()) {
+            case NEMOC -> "nemoc";
+            case PRACE -> "pracovní povinnosti";
+            case NECHE_SE_MI -> "nechce se mi";
+            case JINE -> "jiný důvod";
+            default -> "neznámý důvod";
+        };
+    }
+
 }

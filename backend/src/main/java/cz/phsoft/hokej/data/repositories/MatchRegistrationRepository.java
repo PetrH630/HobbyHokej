@@ -21,7 +21,7 @@ public interface MatchRegistrationRepository
 
     /**
      * Ověří, zda existuje registrace hráče k danému zápasu.
-     *
+     * <p>
      * Používá se zejména k rychlé kontrole existence
      * registrace bez nutnosti načítat celou entitu.
      *
@@ -58,7 +58,7 @@ public interface MatchRegistrationRepository
 
     /**
      * Spočítá počet registrací daného zápasu podle stavu.
-     *
+     * <p>
      * Typicky se používá pro zjištění aktuální
      * obsazenosti zápasu.
      *
@@ -70,7 +70,7 @@ public interface MatchRegistrationRepository
 
     /**
      * Vrátí registrace pro více zápasů najednou.
-     *
+     * <p>
      * Používá se například při hromadném načítání
      * registrací pro přehledy a statistiky.
      *
@@ -78,4 +78,29 @@ public interface MatchRegistrationRepository
      * @return seznam registrací
      */
     List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
+
+    /**
+     * Najde všechny registrace pro daný zápas a daný stav hráče.
+     *
+     * @param matchId ID zápasu
+     * @param status  stav registrace hráče
+     * @return seznam registrací
+     */
+    List<MatchRegistrationEntity> findByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
+
+    /**
+     * Najde všechny registrace pro daný zápas a daný stav hráče,
+     * u kterých ještě nebyla odeslána připomínka MATCH_REMINDER.
+     * <p>
+     * Příznak reminderAlreadySent slouží k tomu, aby plánovač
+     * neposílal připomínku vícekrát pro stejnou registraci.
+     *
+     * @param matchId ID zápasu
+     * @param status  stav registrace hráče
+     * @return seznam registrací bez odeslaného reminderu
+     */
+    List<MatchRegistrationEntity> findByMatchIdAndStatusAndReminderAlreadySentFalse(
+            Long matchId,
+            PlayerMatchStatus status
+    );
 }

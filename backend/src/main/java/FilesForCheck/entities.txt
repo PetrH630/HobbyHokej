@@ -1383,17 +1383,6 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
-/**
- * Entita reprezentujĂ­cĂ­ aplikaÄŤnĂ­ notifikaci.
- *
- * Notifikace vznikĂˇ pĹ™i udĂˇlostech definovanĂ˝ch v NotificationType.
- * SlouĹľĂ­ pro:
- * - zobrazenĂ­ badge (nepĹ™eÄŤtenĂ©),
- * - pĹ™ehled udĂˇlostĂ­,
- * - vĂ˝pis notifikacĂ­ od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
- *
- * VĹˇechny ÄŤasy jsou uklĂˇdĂˇny jako Instant (UTC).
- */
 @Entity
 @Table(
         name = "notifications",
@@ -1405,69 +1394,57 @@ import java.time.Instant;
 )
 public class NotificationEntity {
 
-    /**
-     * PrimĂˇrnĂ­ klĂ­ÄŤ notifikace.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * UĹľivatel, kterĂ©mu je notifikace urÄŤena.
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private AppUserEntity user;
 
-    /**
-     * VolitelnĂˇ vazba na hrĂˇÄŤe.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id")
     private PlayerEntity player;
 
-    /**
-     * Typ notifikace.
-     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
     private NotificationType type;
 
-    /**
-     * StruÄŤnĂ˝ text notifikace pro zobrazenĂ­ v dropdownu.
-     */
     @Column(name = "message_short", nullable = false, length = 255)
     private String messageShort;
 
-    /**
-     * DetailnĂ­ text (volitelnĂ©).
-     */
     @Column(name = "message_full", length = 2000)
     private String messageFull;
 
-    /**
-     * ÄŚas vytvoĹ™enĂ­ notifikace.
-     */
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    /**
-     * ÄŚas pĹ™eÄŤtenĂ­ notifikace.
-     * Pokud je null â†’ notifikace je nepĹ™eÄŤtenĂˇ.
-     */
     @Column(name = "read_at")
     private Instant readAt;
 
-    /**
-     * UĹľivatel, kterĂ˝ akci zpĹŻsobil (napĹ™. admin).
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
     private AppUserEntity createdBy;
 
     /**
-     * AutomatickĂ© nastavenĂ­ createdAt pĹ™i persist.
+     * EmailovĂˇ adresa (nebo vĂ­ce adres oddÄ›lenĂ˝ch ÄŤĂˇrkou),
+     * na kterou byla notifikace skuteÄŤnÄ› odesĂ­lĂˇna
+     * e-mailem (podle nastavenĂ­ a rozhodnutĂ­ NotificationDecision).
+     *
+     * Pokud se e-mail neposĂ­lal, je hodnota null.
      */
+    @Column(name = "email_to", length = 255)
+    private String emailTo;
+
+    /**
+     * TelefonnĂ­ ÄŤĂ­slo, na kterĂ© byla notifikace
+     * skuteÄŤnÄ› odesĂ­lĂˇna formou SMS.
+     *
+     * Pokud se SMS neposĂ­lala, je hodnota null.
+     */
+    @Column(name = "sms_to", length = 50)
+    private String smsTo;
+
     @PrePersist
     public void prePersist() {
         if (this.createdAt == null) {
@@ -1475,18 +1452,12 @@ public class NotificationEntity {
         }
     }
 
-    // ==================================================
-    // Business helper metody
-    // ==================================================
-
     @Transient
     public boolean isRead() {
         return readAt != null;
     }
 
-    // ==================================================
-    // Gettery / Settery
-    // ==================================================
+    // Gettery / settery
 
     public Long getId() { return id; }
 
@@ -1513,6 +1484,12 @@ public class NotificationEntity {
 
     public AppUserEntity getCreatedBy() { return createdBy; }
     public void setCreatedBy(AppUserEntity createdBy) { this.createdBy = createdBy; }
+
+    public String getEmailTo() { return emailTo; }
+    public void setEmailTo(String emailTo) { this.emailTo = emailTo; }
+
+    public String getSmsTo() { return smsTo; }
+    public void setSmsTo(String smsTo) { this.smsTo = smsTo; }
 }
 
 -----

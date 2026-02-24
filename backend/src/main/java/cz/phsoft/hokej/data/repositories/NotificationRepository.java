@@ -1,7 +1,9 @@
 package cz.phsoft.hokej.data.repositories;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.NotificationEntity;
+import cz.phsoft.hokej.data.enums.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
@@ -30,7 +32,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
      * k nejstarším. Metoda se používá pro výpis notifikací
      * od posledního přihlášení.
      *
-     * @param user        uživatel, pro kterého se notifikace hledají
+     * @param user         uživatel, pro kterého se notifikace hledají
      * @param createdAfter časová hranice (notifikace vytvořené po tomto čase)
      * @return seznam notifikací
      */
@@ -46,7 +48,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
      * Metoda se používá pro zobrazení počtu nových notifikací (badge)
      * od posledního přihlášení.
      *
-     * @param user        uživatel, pro kterého se notifikace počítají
+     * @param user         uživatel, pro kterého se notifikace počítají
      * @param createdAfter časová hranice (notifikace vytvořené po tomto čase)
      * @return počet nepřečtených notifikací
      */
@@ -141,4 +143,23 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
      * @return seznam všech notifikací seřazených podle času vytvoření
      */
     List<NotificationEntity> findAllByOrderByCreatedAtDesc();
+
+    /**
+     * Vyhledává notifikaci podle kombinace uživatel – zápas – typ.
+     *
+     * Metoda se používá pro deduplikaci událostních notifikací
+     * (např. MATCH_CANCELED, MATCH_TIME_CHANGED), aby se
+     * pro stejného uživatele a stejný zápas daný typ
+     * notifikace nevytvářel vícekrát.
+     *
+     * @param user  uživatel, pro kterého se notifikace hledá
+     * @param match zápas, ke kterému se notifikace vztahuje
+     * @param type  typ notifikace
+     * @return existující notifikace, pokud byla již vytvořena
+     */
+    Optional<NotificationEntity> findByUserAndMatchAndType(
+            AppUserEntity user,
+            MatchEntity match,
+            NotificationType type
+    );
 }

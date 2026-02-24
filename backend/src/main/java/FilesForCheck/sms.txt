@@ -323,6 +323,7 @@ public class SmsMessageBuilder {
         String statusText = switch (matchStatus) {
             case CANCELED -> "byl zruĹˇen";
             case UNCANCELED -> "byl obnoven";
+            case UPDATED -> "byl zmÄ›nÄ›n";
             default -> "neznĂˇmĂ˝ stav";
         };
 
@@ -385,6 +386,42 @@ public class SmsMessageBuilder {
                 .append(match.getMaxPlayers())
                 .append(", cena na hrĂˇÄŤe: ")
                 .append(String.format("%.2f KÄŤ", pricePerPlayer));
+
+        return sb.toString();
+    }
+
+    // v SmsMessageBuilder.java â€“ ke konci tĹ™Ă­dy
+
+    /**
+     * SestavĂ­ SMS pro speciĂˇlnĂ­ zprĂˇvu od administrĂˇtora.
+     *
+     * PouĹľĂ­vĂˇ konzistentnĂ­ prefix a jednoduchĂ˝ formĂˇt.
+     *
+     * @param title   titulek zprĂˇvy (napĹ™. "ZmÄ›na ÄŤasu trĂ©ninku")
+     * @param message text zprĂˇvy
+     * @param player  hrĂˇÄŤ, kterĂ©ho se zprĂˇva tĂ˝kĂˇ (volitelnÄ› pro doplnÄ›nĂ­ jmĂ©na)
+     * @return text SMS
+     */
+    public String buildSpecialMessage(String title,
+                                      String message,
+                                      PlayerEntity player) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("HobbyHokej â€“ ");
+
+        if (title != null && !title.isBlank()) {
+            sb.append(title.trim());
+        } else {
+            sb.append("zprĂˇva od sprĂˇvce");
+        }
+
+        if (player != null && player.getFullName() != null && !player.getFullName().isBlank()) {
+            sb.append(" (hrĂˇÄŤ: ").append(player.getFullName()).append(")");
+        }
+
+        if (message != null && !message.isBlank()) {
+            sb.append(": ").append(message.replaceAll("\\s+", " ").trim());
+        }
 
         return sb.toString();
     }

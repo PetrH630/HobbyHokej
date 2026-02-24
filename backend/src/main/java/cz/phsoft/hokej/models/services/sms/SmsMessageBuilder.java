@@ -111,9 +111,14 @@ public class SmsMessageBuilder {
                 yield buildMessageRegistration(reg);
             }
 
-            // Obecné info / změny zápasu
-            case MATCH_REMINDER,
-                 MATCH_CANCELED,
+            case MATCH_REMINDER -> {
+                MatchEntity match = castContext(context, MatchEntity.class);
+                if (match == null) {
+                    yield null;
+                }
+                yield buildMessageReminder(match);
+            }
+            case MATCH_CANCELED,
                  MATCH_TIME_CHANGED -> {
                 MatchEntity match = castContext(context, MatchEntity.class);
                 if (match == null) {
@@ -125,6 +130,25 @@ public class SmsMessageBuilder {
             // ostatní typy se přes SMS neposílají
             default -> null;
         };
+    }
+
+    public String buildMessageReminder(MatchEntity match) {
+
+        Long registeredCount = matchRegistrationRepository
+                .countByMatchIdAndStatus(
+                        match.getId(),
+                        PlayerMatchStatus.REGISTERED
+                );
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_hokej - připomínka zápasu ")
+                .append(match.getDateTime().format(dateFormatter))
+                .append(", přihlášeno: ")
+                .append(registeredCount)
+                .append("/")
+                .append(match.getMaxPlayers());
+
+        return sb.toString();
     }
 
     /**
@@ -295,6 +319,7 @@ public class SmsMessageBuilder {
         String statusText = switch (matchStatus) {
             case CANCELED -> "byl zrušen";
             case UNCANCELED -> "byl obnoven";
+            case UPDATED -> "byl změněn";
             default -> "neznámý stav";
         };
 

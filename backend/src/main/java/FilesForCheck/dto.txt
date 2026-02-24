@@ -29,6 +29,7 @@ PlayerSummaryDTO.java
 RegisterUserDTO.java
 SeasonDTO.java
 SeasonHistoryDTO.java
+SpecialNotificationTargetDTO.java
 SuccessResponseDTO.java
 
 
@@ -1721,187 +1722,70 @@ import cz.phsoft.hokej.data.enums.NotificationType;
 
 import java.time.Instant;
 
-/**
- * DTO, kterĂ© reprezentuje aplikaÄŤnĂ­ notifikaci pro uĹľivatele.
- *
- * SlouĹľĂ­ k pĹ™enosu notifikacĂ­ z backendu do klientskĂ© aplikace.
- * PouĹľĂ­vĂˇ se pro zobrazenĂ­ badge, pĹ™ehledu poslednĂ­ch udĂˇlostĂ­
- * a seznamu notifikacĂ­ od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
- *
- * DTO obsahuje zjednoduĹˇenĂ˝ text notifikace, zĂˇkladnĂ­ metadata
- * (typ, kategorie, dĹŻleĹľitost) a ÄŤasovĂˇ razĂ­tka vytvoĹ™enĂ­
- * a pĹ™Ă­padnĂ©ho pĹ™eÄŤtenĂ­.
- *
- * Informace o hrĂˇÄŤi jsou pĹ™edĂˇvĂˇny ve formÄ› PlayerDTO,
- * pokud se danĂˇ notifikace vztahuje ke konkrĂ©tnĂ­mu hrĂˇÄŤi.
- */
 public class NotificationDTO {
 
-    /**
-     * IdentifikĂˇtor notifikace.
-     */
     private Long id;
-
-    /**
-     * Typ notifikace.
-     *
-     * OdpovĂ­dĂˇ hodnotÄ› v NotificationType a urÄŤuje
-     * konkrĂ©tnĂ­ udĂˇlost v systĂ©mu.
-     */
     private NotificationType type;
-
-    /**
-     * Kategorie notifikace.
-     *
-     * Hodnota se obvykle odvozuje z NotificationType.
-     * PouĹľĂ­vĂˇ se pro filtrovĂˇnĂ­ a nastavenĂ­ preferencĂ­.
-     */
     private NotificationCategory category;
-
-    /**
-     * PĹ™Ă­znak dĹŻleĹľitosti notifikace.
-     *
-     * Hodnota se obvykle odvozuje z NotificationType.
-     * PouĹľĂ­vĂˇ se napĹ™Ă­klad pĹ™i filtrovĂˇnĂ­ podle
-     * GlobalNotificationLevel.
-     */
     private boolean important;
-
-    /**
-     * StruÄŤnĂ˝ text notifikace.
-     *
-     * PouĹľĂ­vĂˇ se pro zobrazenĂ­ v badge, pĹ™ehledu
-     * poslednĂ­ch udĂˇlostĂ­ a v zĂˇkladnĂ­m seznamu
-     * notifikacĂ­.
-     */
     private String messageShort;
-
-    /**
-     * DetailnÄ›jĹˇĂ­ text notifikace.
-     *
-     * Je pouĹľĂ­vĂˇn pro pĹ™Ă­padnĂ© rozĹˇĂ­Ĺ™enĂ© zobrazenĂ­.
-     * U jednoduĹˇĹˇĂ­ch notifikacĂ­ mĹŻĹľe bĂ˝t null.
-     */
     private String messageFull;
-
-    /**
-     * ÄŚas vytvoĹ™enĂ­ notifikace.
-     *
-     * Hodnota je uklĂˇdĂˇna jako Instant v UTC a
-     * pouĹľĂ­vĂˇ se pro seĹ™azenĂ­ a filtrovĂˇnĂ­
-     * (napĹ™Ă­klad od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­).
-     */
     private Instant createdAt;
-
-    /**
-     * ÄŚas pĹ™eÄŤtenĂ­ notifikace.
-     *
-     * Pokud je hodnota null, notifikace je povaĹľovĂˇna
-     * za nepĹ™eÄŤtenou.
-     */
     private Instant readAt;
-
-    /**
-     * PĹ™Ă­znak, zda byla notifikace pĹ™eÄŤtena.
-     *
-     * Hodnota se obvykle odvozuje podle toho,
-     * zda je readAt null. Pole je urÄŤeno pro
-     * pohodlnÄ›jĹˇĂ­ pouĹľitĂ­ na klientskĂ© stranÄ›.
-     */
     private boolean read;
-
-    /**
-     * HrĂˇÄŤ, kterĂ©ho se notifikace tĂ˝kĂˇ.
-     *
-     * U notifikacĂ­ vĂˇzanĂ˝ch na konkrĂ©tnĂ­ho hrĂˇÄŤe
-     * se pouĹľĂ­vĂˇ PlayerDTO. U systĂ©movĂ˝ch
-     * notifikacĂ­ mĹŻĹľe bĂ˝t null.
-     */
     private PlayerDTO player;
 
-    // ==========================================
-    // GETTERY A SETTERY
-    // ==========================================
+    /**
+     * EmailovĂˇ adresa (nebo vĂ­ce adres oddÄ›lenĂ˝ch ÄŤĂˇrkou),
+     * na kterou byl e-mail skuteÄŤnÄ› odesĂ­lĂˇn.
+     *
+     * Pokud e-mail neodchĂˇzel, je null.
+     */
+    private String emailTo;
 
-    public Long getId() {
-        return id;
-    }
+    /**
+     * TelefonnĂ­ ÄŤĂ­slo, na kterĂ© byla odeslĂˇna SMS.
+     * Pokud SMS neodchĂˇzela, je null.
+     */
+    private String smsTo;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // GETTERY / SETTERY
 
-    public NotificationType getType() {
-        return type;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setType(NotificationType type) {
-        this.type = type;
-    }
+    public NotificationType getType() { return type; }
+    public void setType(NotificationType type) { this.type = type; }
 
-    public NotificationCategory getCategory() {
-        return category;
-    }
+    public NotificationCategory getCategory() { return category; }
+    public void setCategory(NotificationCategory category) { this.category = category; }
 
-    public void setCategory(NotificationCategory category) {
-        this.category = category;
-    }
+    public boolean isImportant() { return important; }
+    public void setImportant(boolean important) { this.important = important; }
 
-    public boolean isImportant() {
-        return important;
-    }
+    public String getMessageShort() { return messageShort; }
+    public void setMessageShort(String messageShort) { this.messageShort = messageShort; }
 
-    public void setImportant(boolean important) {
-        this.important = important;
-    }
+    public String getMessageFull() { return messageFull; }
+    public void setMessageFull(String messageFull) { this.messageFull = messageFull; }
 
-    public String getMessageShort() {
-        return messageShort;
-    }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
-    public void setMessageShort(String messageShort) {
-        this.messageShort = messageShort;
-    }
+    public Instant getReadAt() { return readAt; }
+    public void setReadAt(Instant readAt) { this.readAt = readAt; }
 
-    public String getMessageFull() {
-        return messageFull;
-    }
+    public boolean isRead() { return read; }
+    public void setRead(boolean read) { this.read = read; }
 
-    public void setMessageFull(String messageFull) {
-        this.messageFull = messageFull;
-    }
+    public PlayerDTO getPlayer() { return player; }
+    public void setPlayer(PlayerDTO player) { this.player = player; }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+    public String getEmailTo() { return emailTo; }
+    public void setEmailTo(String emailTo) { this.emailTo = emailTo; }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getReadAt() {
-        return readAt;
-    }
-
-    public void setReadAt(Instant readAt) {
-        this.readAt = readAt;
-    }
-
-    public boolean isRead() {
-        return read;
-    }
-
-    public void setRead(boolean read) {
-        this.read = read;
-    }
-
-    public PlayerDTO getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(PlayerDTO player) {
-        this.player = player;
-    }
+    public String getSmsTo() { return smsTo; }
+    public void setSmsTo(String smsTo) { this.smsTo = smsTo; }
 }
 
 -----
@@ -2883,6 +2767,82 @@ public class SeasonHistoryDTO {
 
     public Long getCreatedByUserId() { return createdByUserId; }
     public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\SpecialNotificationTargetDTO.java
+-----
+package cz.phsoft.hokej.models.dto;
+
+/**
+ * DTO reprezentujĂ­cĂ­ jednoho moĹľnĂ©ho pĹ™Ă­jemce speciĂˇlnĂ­ zprĂˇvy.
+ *
+ * PouĹľĂ­vĂˇ se v admin UI pro vĂ˝bÄ›r cĂ­lovĂ˝ch uĹľivatelĹŻ a hrĂˇÄŤĹŻ.
+ */
+public class SpecialNotificationTargetDTO {
+
+    /**
+     * ID uĹľivatele, ke kterĂ©mu cĂ­l patĹ™Ă­.
+     */
+    private Long userId;
+
+    /**
+     * ID hrĂˇÄŤe, pokud se jednĂˇ o hrĂˇÄŤskĂ˝ cĂ­l.
+     * Pokud je null, jde o ÄŤistĂ©ho uĹľivatele bez hrĂˇÄŤe.
+     */
+    private Long playerId;
+
+    /**
+     * ZobrazovanĂ© jmĂ©no v UI (napĹ™. "Jan NOVĂK (hrĂˇÄŤ)").
+     */
+    private String displayName;
+
+    /**
+     * Typ cĂ­le ("PLAYER" nebo "USER").
+     */
+    private String type;
+
+    public SpecialNotificationTargetDTO() {
+    }
+
+    public SpecialNotificationTargetDTO(Long userId, Long playerId, String displayName, String type) {
+        this.userId = userId;
+        this.playerId = playerId;
+        this.displayName = displayName;
+        this.type = type;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }
 
 -----

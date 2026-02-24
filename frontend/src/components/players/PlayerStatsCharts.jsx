@@ -117,27 +117,28 @@ const PlayerStatsCharts = ({ totals, loading }) => {
                     </div>
 
                     <div className="card-body" style={{ height: 320 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={series}
-                                    dataKey="value"
-                                    nameKey="label"
-                                    innerRadius="55%"
-                                    outerRadius="80%"
-                                    paddingAngle={2}
-                                >
-                                    {series.map((s) => (
-                                        <Cell key={s.key} fill={s.color} />
-                                    ))}
-                                </Pie>
+                        <div style={{ width: "100%", height: "100%", minWidth: 0 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={series}
+                                        dataKey="value"
+                                        nameKey="label"
+                                        innerRadius="55%"
+                                        outerRadius="80%"
+                                        paddingAngle={2}
+                                    >
+                                        {series.map((s) => (
+                                            <Cell key={s.key} fill={s.color} />
+                                        ))}
+                                    </Pie>
 
-                                <Tooltip content={<TooltipBox />} />
-                                <Legend verticalAlign="bottom" height={36} />
-                            </PieChart>
-                        </ResponsiveContainer>
+                                    <Tooltip content={<TooltipBox />} />
+                                    <Legend verticalAlign="bottom" height={36} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
 
-                        
                     </div>
                 </div>
             </div>
@@ -150,26 +151,28 @@ const PlayerStatsCharts = ({ totals, loading }) => {
                     </div>
 
                     <div className="card-body" style={{ height: 320 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                                data={series}
-                                margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="label" />
-                                <YAxis allowDecimals={false} />
-                                <Tooltip content={<TooltipBox />} />
+                        <div style={{ width: "100%", height: "100%", minWidth: 0 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart
+                                    data={series}
+                                    margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="label" />
+                                    <YAxis allowDecimals={false} />
+                                    <Tooltip content={<TooltipBox />} />
 
-                                {/* fill je fallback, konkrétní barvy dáváme přes Cell */}
-                                <Bar dataKey="value" fill="#0d6efd">
-                                    {series.map((s) => (
-                                        <Cell key={s.key} fill={s.color} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
+                                    {/* fill je fallback, konkrétní barvy dáváme přes Cell */}
+                                    <Bar dataKey="value" fill="#0d6efd">
+                                        {series.map((s) => (
+                                            <Cell key={s.key} fill={s.color} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
 
-                       
+
                     </div>
                 </div>
             </div>

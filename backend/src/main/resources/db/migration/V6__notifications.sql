@@ -2,6 +2,7 @@ CREATE TABLE `notifications` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `player_id` bigint(20) DEFAULT NULL,
+  `match_id` bigint(20) DEFAULT NULL,
   `type` varchar(100) NOT NULL,
   `message_short` varchar(255) NOT NULL,
   `message_full` varchar(2000) DEFAULT NULL,
@@ -12,12 +13,16 @@ CREATE TABLE `notifications` (
   `created_by_user_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_notification_user` (`user_id`),
+  KEY `idx_notification_match` (`match_id`),
   KEY `idx_notification_created_at` (`created_at`),
   KEY `idx_notification_read_at` (`read_at`),
+  UNIQUE KEY `uk_notification_user_match_type` (`user_id`, `match_id`, `type`),
   CONSTRAINT `FK_notification_user`
     FOREIGN KEY (`user_id`) REFERENCES `app_users` (`id`),
   CONSTRAINT `FK_notification_player`
     FOREIGN KEY (`player_id`) REFERENCES `player_entity` (`id`),
+  CONSTRAINT `FK_notification_match`
+    FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`),
   CONSTRAINT `FK_notification_created_by`
     FOREIGN KEY (`created_by_user_id`) REFERENCES `app_users` (`id`)
 ) ENGINE=InnoDB

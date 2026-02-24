@@ -81,6 +81,16 @@ public class MatchRegistrationEntity {
     @Column(nullable = false, updatable = true)
     private String createdBy;
 
+    /**
+     * Příznak, že připomínka MATCH_REMINDER už byla
+     * pro tuto registraci odeslána.
+     *
+     * Slouží k tomu, aby plánovač neposílal připomínku
+     * stejnému hráči pro stejný zápas vícekrát.
+     */
+    @Column(name = "reminder_already_sent", nullable = false)
+    private boolean reminderAlreadySent = false;
+
     public MatchRegistrationEntity() {
     }
 
@@ -123,4 +133,12 @@ public class MatchRegistrationEntity {
     public String getCreatedBy() { return createdBy; }
 
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public boolean isReminderAlreadySent() {
+        return reminderAlreadySent;
+    }
+
+    public void setReminderAlreadySent(boolean reminderAlreadySent) {
+        this.reminderAlreadySent = reminderAlreadySent;
+    }
 }

@@ -31,6 +31,7 @@ TestSmsController.java
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.models.dto.DemoNotificationsDTO;
+import cz.phsoft.hokej.models.dto.SpecialNotificationTargetDTO;
 import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
 import cz.phsoft.hokej.models.services.notification.DemoModeService;
 import cz.phsoft.hokej.models.services.notification.DemoNotificationStore;
@@ -40,6 +41,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controller pro administrĂˇtorskĂ© notifikace.
@@ -97,6 +100,12 @@ public class AdminNotificationController {
 
         // PRODUKCE â€“ beze zmÄ›ny
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/special/targets")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<List<SpecialNotificationTargetDTO>> getSpecialNotificationTargets() {
+        return ResponseEntity.ok(specialNotificationService.getSpecialNotificationTargets());
     }
 }
 

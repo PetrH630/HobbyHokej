@@ -91,4 +91,6 @@ public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
             Long seasonId,
             LocalDateTime to
     );
+
+    List<MatchEntity> findByDateTimeBetween(LocalDateTime from, LocalDateTime to);
 }

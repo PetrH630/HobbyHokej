@@ -63,7 +63,23 @@
     transition: opacity 0.2s ease;
 }
 
-.match-card--disabled:hover .match-card-tooltip {
+.match-card-tooltip-inner {
+    text-align: center;
+}
+
+.match-card-tooltip-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.match-card-tooltip-reason {
+    font-size: 1.2rem;
+}
+
+.match-card--disabled:hover .match-card-tooltip,
+.match-card--canceled:hover .match-card-tooltip {
     opacity: 1;
 }
 
@@ -224,7 +240,7 @@
         display: grid;
         grid-template-columns:
             110px
-            /* Pátek - X */
+            /* Pátek - X + stav zápasu*/
             150px
             /* datum+čas */
             1fr
@@ -293,7 +309,7 @@
         display: grid;
         grid-template-columns:
             110px
-            /* Pátek - X */
+            /* Pátek - X a pod tím stav zápasu*/
             160px
             /* datum+čas */
             1fr
@@ -365,3 +381,90 @@
 .capacity-ring {
     flex: 0 0 auto;
 }
+
+/* =========================================
+   BARVY STAVU ZÁPASU (matchStatus)
+   ========================================= */
+
+/* 🔥 ZRUŠENÝ */
+.match-card__match-status--canceled strong {
+    color: #c00000;
+    /* rudě červená */
+}
+
+/* 🟠 OBNOVENÝ */
+.match-card__match-status--uncanceled strong {
+    color: #880576;
+    /* sytě oranžová */
+}
+
+/* 🔵 ZMĚNĚNÝ */
+.match-card__match-status--updated strong {
+    color: #0a2a88;
+    /* tmavě modrá */
+}
+
+/* DEFAULT (Odehraný, Plánovaný) – beze změny */
+.match-card__match-status--default strong {
+    color: inherit;
+}
+
+/* =========================================
+   ZRUŠENÝ ZÁPAS – DIAGONÁLNÍ PŘEŠKRTNUTÍ
+   ========================================= */
+
+.match-card--canceled {
+    cursor: default;
+    background-color: #f1f3f5;
+    border-color: #ced4da;
+    
+}
+
+/* červený diagonální pruh */
+.match-card--canceled::before {
+    content: "";
+    position: absolute;
+    bottom: -40%;
+    left: -40%;
+    width: 200%;
+    height: 60px;
+    background: rgba(200, 0, 0, 0.35);
+    transform: rotate(-45deg);
+    z-index: 5;
+    transition: opacity 0.2s ease;
+}
+
+/* text ZRUŠENÝ */
+.match-card--canceled::after {
+    content: "ZRUŠENÝ";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: rgba(180, 0, 0, 0.6);
+    letter-spacing: 0.2em;
+
+    white-space: nowrap;
+    text-transform: uppercase;
+
+    z-index: 6;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(150, 0, 0, 0);
+    transition: opacity 0.2s ease;
+}
+
+/* zruší hover efekt přiblížení */
+.match-card--canceled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* 💥 při hoveru schovat diagonální pruh i text */
+.match-card--canceled:hover::before,
+.match-card--canceled:hover::after {
+    opacity: 0;
+}
+

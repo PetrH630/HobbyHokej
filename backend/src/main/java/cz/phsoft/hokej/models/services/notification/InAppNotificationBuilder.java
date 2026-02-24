@@ -74,15 +74,10 @@ public class InAppNotificationBuilder {
         long registeredCount = countRegisteredPlayers(match);
         int maxPlayers = match != null ? match.getMaxPlayers() : 0;
         long freeSlots = maxPlayers > 0 ? (maxPlayers - registeredCount) : 0;
-        String matchCancelReason =
-                (match != null && match.getCancelReason() != null)
-                        ? match.getCancelReason().toString()
-                        : "";
+        String matchCancelReason = assignMatchCancelReason(match);
 
         MatchRegistrationEntity registration = extractMatchRegistration(context);
-        String excuseReason = (registration != null && registration.getExcuseReason() != null)
-                ? registration.getExcuseReason().toString()
-                : "";
+        String excuseReason = assignExcuseReason(registration);
         String excuseNote = (registration != null)
                 ? safe(registration.getExcuseNote())
                 : "";
@@ -262,10 +257,10 @@ public class InAppNotificationBuilder {
             }
 
             case MATCH_REGISTRATION_NO_RESPONSE -> {
-                String title = "Nereagovaná pozvánka";
+                String title = "Bez reakce na zápas";
                 String base = formattedDateTime.isBlank()
-                        ? "Dosud jste nereagoval na pozvánku k zápasu."
-                        : "Dosud jste nereagoval na pozvánku k zápasu %s."
+                        ? "Dosud jste nereagoval na zápas."
+                        : "Dosud jste nereagoval na zápas %s."
                         .formatted(formattedDateTime);
 
                 String countPart = (maxPlayers > 0)
@@ -459,5 +454,42 @@ public class InAppNotificationBuilder {
             return reg;
         }
         return null;
+    }
+
+    // pomocná metoda pro důvod zrušení zápasu
+    /**
+     * Vrací čitelný popis důvodu zrušení zápasu.
+     * Pokud není důvod nastaven, vrací prázdný řetězec.
+     */
+    private String assignMatchCancelReason(MatchEntity match) {
+        if (match == null || match.getCancelReason() == null) {
+            return "";
+        }
+
+        return switch (match.getCancelReason()) {
+            case NOT_ENOUGH_PLAYERS -> "nedostatečný počet hráčů";
+            case TECHNICAL_ISSUE -> "Technické problémy (led, hala…)";
+            case WEATHER -> "Nepříznivé počasí";
+            case ORGANIZER_DECISION -> "Rozhodnutí organizátora";
+            case OTHER -> "Jiný důvod";
+            default -> "neznámý důvod";
+        };
+    }
+    /**
+     * Vrací čitelný popis důvodu omluvy ze zápasu.
+     * Pokud není důvod nastaven, vrací prázdný řetězec.
+     */
+    private String assignExcuseReason(MatchRegistrationEntity registration) {
+        if (registration == null || registration.getExcuseReason() == null) {
+            return "";
+        }
+
+        return switch (registration.getExcuseReason()) {
+            case NEMOC -> "nemoc";
+            case PRACE -> "pracovní povinnosti";
+            case NECHE_SE_MI -> "nechce se mi";
+            case JINE -> "jiný důvod";
+            default -> "neznámý důvod";
+        };
     }
 }

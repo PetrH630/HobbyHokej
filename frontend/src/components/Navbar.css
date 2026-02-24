@@ -22,6 +22,21 @@
     border-bottom: 2px solid #1B5E20;
 }
 
+/* 🔴🟣 ADMIN/SPRÁVCE – speciální barva odkazů */
+.navbar .nav-link.admin-link {
+    color: #9b1c64;
+    /* rudofialová */
+}
+
+.navbar .nav-link.admin-link:hover {
+    color: #c2185b;
+}
+
+/* aktivní admin odkaz – jiná spodní linka než hráč */
+.navbar .nav-link.admin-link.activeLink {
+    border-bottom-color: #c2185b;
+}
+
 .navbar-toggler {
     border: none;
     padding: 0.25rem 0.5rem;
@@ -67,7 +82,7 @@
 }
 
 .mobile-menu-inner {
-padding: 1.25rem 1rem 1rem;
+    padding: 1.25rem 1rem 1rem;
 }
 
 .mobile-link {
@@ -85,6 +100,19 @@ padding: 1.25rem 1rem 1rem;
 
 .mobile-link.activeLink {
     font-weight: 600;
+}
+
+/* 🔴🟣 ADMIN odkazy v mobilním menu */
+.mobile-link.admin-link {
+    color: #9b1c64;
+}
+
+.mobile-link.admin-link:hover {
+    color: #c2185b;
+}
+
+.mobile-link.admin-link.activeLink {
+    font-weight: 700;
 }
 
 .mobile-menu-overlay {

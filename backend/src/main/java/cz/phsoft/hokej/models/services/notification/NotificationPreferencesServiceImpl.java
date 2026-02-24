@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
  * - nastavení hráče (PlayerSettingsEntity),
  * - nastavení uživatele (AppUserSettingsEntity),
  * - globální úroveň notifikací uživatele (GlobalNotificationLevel),
- * - kategorii a důležitost notifikace (NotificationCategory, NotificationType).
+ * - konkrétní typ notifikace (NotificationType).
  *
  * Výsledkem je NotificationDecision, které definuje,
  * komu a jakými kanály bude notifikace doručena.
@@ -80,13 +80,13 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
         boolean includePlayersWithOwnEmail =
                 userSettings != null && userSettings.isReceiveNotificationsForPlayersWithOwnEmail();
 
-        // Nastavení hráče – povolené kanály a kategorie
+        // Nastavení hráče – povolené kanály
 
         boolean emailChannelEnabled = (playerSettings == null) || playerSettings.isEmailEnabled();
         boolean smsChannelEnabled = (playerSettings != null) && playerSettings.isSmsEnabled();
 
-        // Zda je kategorie notifikace povolena pro hráče.
-        boolean categoryEnabledForPlayer = isCategoryEnabledForPlayer(type, playerSettings);
+        // Zda je typ notifikace povolen pro hráče.
+        boolean typeEnabledForPlayer = isTypeEnabledForPlayer(type, playerSettings);
 
         // Rozhodování podle kategorie notifikace
 
@@ -110,7 +110,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
 
                 // E-mail hráči.
                 if (emailChannelEnabled
-                        && categoryEnabledForPlayer
+                        && typeEnabledForPlayer
                         && StringUtils.hasText(playerEmail)) {
 
                     decision.setSendEmailToPlayer(true);
@@ -119,7 +119,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
 
                 // SMS hráči.
                 if (smsChannelEnabled
-                        && categoryEnabledForPlayer
+                        && typeEnabledForPlayer
                         && StringUtils.hasText(playerPhone)) {
 
                     decision.setSendSmsToPlayer(true);
@@ -170,31 +170,52 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     /**
-     * Zjistí, zda je kategorie notifikace povolena pro daného hráče.
-     *
-     * Pokud playerSettings == null, bere se výchozí chování:
-     * všechny kategorie jsou povoleny.
-     */
-    private boolean isCategoryEnabledForPlayer(NotificationType type,
-                                               PlayerSettingsEntity playerSettings) {
-
-        if (playerSettings == null) {
-            return true;
-        }
-
-        return switch (type.getCategory()) {
-            case REGISTRATION -> playerSettings.isRegistrationNotificationsEnabled();
-            case MATCH_INFO   -> playerSettings.isMatchInfoNotificationsEnabled();
-            case SYSTEM       -> playerSettings.isSystemNotificationsEnabled();
-        };
-    }
-
-    /**
      * Zjistí, zda má hráč vlastní e-mail v PlayerSettings (contactEmail).
      *
      * Používá se při rozhodování, zda posílat kopii na e-mail uživatele.
      */
     private boolean hasOwnPlayerEmail(PlayerSettingsEntity playerSettings) {
         return playerSettings != null && StringUtils.hasText(playerSettings.getContactEmail());
+    }
+
+    /**
+     * Zjistí, zda je konkrétní typ notifikace povolen pro daného hráče.
+     *
+     * Pokud playerSettings == null:
+     * - většina typů je povolena (zpětná kompatibilita),
+     * - MATCH_REMINDER je výchozím chováním vypnutý
+     *   (odpovídá defaultu notifyReminders = false).
+     */
+    private boolean isTypeEnabledForPlayer(NotificationType type,
+                                           PlayerSettingsEntity playerSettings) {
+
+        if (playerSettings == null) {
+            return switch (type) {
+                case MATCH_REMINDER -> false; // bez explicitního nastavení neposílat
+                default -> true;
+            };
+        }
+
+        return switch (type) {
+            // REGISTRATION
+            case MATCH_REGISTRATION_CREATED,
+                 MATCH_REGISTRATION_UPDATED,
+                 MATCH_REGISTRATION_CANCELED,
+                 MATCH_REGISTRATION_RESERVED,
+                 MATCH_REGISTRATION_SUBSTITUTE,
+                 MATCH_WAITING_LIST_MOVED_UP,
+                 MATCH_REGISTRATION_NO_RESPONSE,
+                 PLAYER_EXCUSED,
+                 PLAYER_NO_EXCUSED -> playerSettings.isRegistrationNotificationsEnabled();
+
+            // MATCH_INFO
+            case MATCH_REMINDER -> playerSettings.isNotifyReminders();
+            case MATCH_CANCELED -> playerSettings.isNotifyOnMatchCancel();
+            case MATCH_UNCANCELED,
+                 MATCH_TIME_CHANGED -> playerSettings.isNotifyOnMatchChange();
+
+            // SYSTEM (a ostatní, které nejsou výše výslovně vyjmenované)
+            default -> playerSettings.isSystemNotificationsEnabled();
+        };
     }
 }

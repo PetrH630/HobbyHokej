@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:39+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -94,7 +94,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:40+0100",
+    date = "2026-02-24T10:15:52+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -214,7 +214,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:39+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -299,7 +299,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:39+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -360,7 +360,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:39+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -451,7 +451,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:38+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -516,7 +516,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:39+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -626,7 +626,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:38+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -647,6 +647,8 @@ public class NotificationMapperImpl implements NotificationMapper {
         notificationDTO.setCreatedAt( entity.getCreatedAt() );
         notificationDTO.setReadAt( entity.getReadAt() );
         notificationDTO.setPlayer( playerEntityToPlayerDTO( entity.getPlayer() ) );
+        notificationDTO.setEmailTo( entity.getEmailTo() );
+        notificationDTO.setSmsTo( entity.getSmsTo() );
 
         notificationDTO.setCategory( entity.getType() != null ? entity.getType().getCategory() : null );
         notificationDTO.setImportant( entity.getType() != null && entity.getType().isImportant() );
@@ -704,7 +706,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:38+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -764,7 +766,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:38+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -845,7 +847,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:40+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -955,7 +957,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:39+0100",
+    date = "2026-02-24T10:15:52+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -1024,7 +1026,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:39+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -1079,7 +1081,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-23T19:11:39+0100",
+    date = "2026-02-24T10:15:53+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component

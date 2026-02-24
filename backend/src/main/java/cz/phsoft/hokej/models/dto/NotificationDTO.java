@@ -19,6 +19,14 @@ public class NotificationDTO {
     private PlayerDTO player;
 
     /**
+     * ID zápasu, ke kterému se notifikace vztahuje.
+     *
+     * Pokud notifikace nesouvisí s konkrétním zápasem,
+     * je hodnota null.
+     */
+    private Long matchId;
+
+    /**
      * Emailová adresa (nebo více adres oddělených čárkou),
      * na kterou byl e-mail skutečně odesílán.
      *
@@ -63,6 +71,9 @@ public class NotificationDTO {
 
     public PlayerDTO getPlayer() { return player; }
     public void setPlayer(PlayerDTO player) { this.player = player; }
+
+    public Long getMatchId() { return matchId; }
+    public void setMatchId(Long matchId) { this.matchId = matchId; }
 
     public String getEmailTo() { return emailTo; }
     public void setEmailTo(String emailTo) { this.emailTo = emailTo; }

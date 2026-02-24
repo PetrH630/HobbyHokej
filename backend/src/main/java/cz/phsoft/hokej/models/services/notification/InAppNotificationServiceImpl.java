@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.services.notification;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.NotificationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * Implementace služby pro ukládání aplikačních notifikací.
@@ -77,9 +79,47 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
                 ? content.message()
                 : type.name();
 
+        // Pokus o navázání notifikace na konkrétní zápas.
+        // Pokud je context instanceof MatchEntity, využije se pro deduplikaci.
+        MatchEntity match = resolveMatchFromContext(context);
+
+        if (match != null) {
+            // Deduplikace podle user + match + type.
+            Optional<NotificationEntity> existingOpt =
+                    notificationRepository.findByUserAndMatchAndType(owner, match, type);
+
+            if (existingOpt.isPresent()) {
+                NotificationEntity existing = existingOpt.get();
+
+                existing.setMessageShort(messageShort);
+                existing.setMessageFull(messageFull);
+                existing.setEmailTo(emailTo);
+                existing.setSmsTo(smsTo);
+                existing.setCreatedAt(Instant.now(clock));
+
+                notificationRepository.save(existing);
+
+                log.debug(
+                        "InAppNotificationService.storeForPlayer: aktualizována existující notifikace type={} userId={} playerId={} matchId={} emailTo={} smsTo={}",
+                        type,
+                        owner.getId(),
+                        player.getId(),
+                        match.getId(),
+                        emailTo,
+                        smsTo
+                );
+                return;
+            }
+        }
+
+        // Pokud není match, nebo neexistuje záznam pro kombinaci (user, match, type),
+        // vytvoří se nová notifikace.
         NotificationEntity entity = new NotificationEntity();
         entity.setUser(owner);
         entity.setPlayer(player);
+        if (match != null) {
+            entity.setMatch(match);
+        }
         entity.setType(type);
         entity.setMessageShort(messageShort);
         entity.setMessageFull(messageFull);
@@ -90,8 +130,15 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
 
         notificationRepository.save(entity);
 
-        log.debug("InAppNotificationService.storeForPlayer: uložena notifikace type={} userId={} playerId={} emailTo={} smsTo={}",
-                type, owner.getId(), player.getId(), emailTo, smsTo);
+        log.debug(
+                "InAppNotificationService.storeForPlayer: uložena notifikace type={} userId={} playerId={} matchId={} emailTo={} smsTo={}",
+                type,
+                owner.getId(),
+                player.getId(),
+                match != null ? match.getId() : null,
+                emailTo,
+                smsTo
+        );
     }
 
     @Override
@@ -130,6 +177,7 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
         entity.setMessageFull(messageFull);
         entity.setCreatedAt(Instant.now(clock));
 
+        // Uživatelské notifikace nejsou vázány na match – match se zde nenastavuje.
         entity.setEmailTo(emailTo);
         entity.setSmsTo(null);
 
@@ -178,6 +226,8 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
         entity.setMessageFull(fullText);
         entity.setCreatedAt(Instant.now(clock));
 
+        // Speciální zprávy nenvážeme na konkrétní zápas – jedná se
+        // o obecnou administrátorskou komunikaci.
         entity.setEmailTo(emailTo);
         entity.setSmsTo(smsTo);
 
@@ -209,5 +259,23 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
                     type, ex.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Pokusí se z contextu vyčíst zápas pro navázání notifikace.
+     *
+     * Aktuálně se podporuje varianta, kdy je context přímo instancí MatchEntity.
+     * Pokud context neobsahuje zápas, vrací se null.
+     *
+     * Do budoucna lze rozšířit o další typy kontextů (např. vlastní wrapper).
+     *
+     * @param context kontext předaný volajícím
+     * @return MatchEntity, pokud jej lze z contextu získat, jinak null
+     */
+    private MatchEntity resolveMatchFromContext(Object context) {
+        if (context instanceof MatchEntity) {
+            return (MatchEntity) context;
+        }
+        return null;
     }
 }

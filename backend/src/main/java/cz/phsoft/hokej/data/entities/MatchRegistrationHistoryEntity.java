@@ -99,6 +99,15 @@ public class MatchRegistrationHistoryEntity {
     @Column(name = "team")
     private Team team;
 
+    /**
+     * Příznak, že připomínka MATCH_REMINDER již byla
+     * pro danou registraci odeslána v okamžiku této změny.
+     *
+     * Slouží k auditování chování plánovače připomínek.
+     */
+    @Column(name = "reminder_already_sent", nullable = false)
+    private boolean reminderAlreadySent;
+
     public MatchRegistrationHistoryEntity() {
     }
 
@@ -153,4 +162,12 @@ public class MatchRegistrationHistoryEntity {
     public Team getTeam() { return team; }
 
     public void setTeam(Team team) { this.team = team; }
+
+    public boolean isReminderAlreadySent() {
+        return reminderAlreadySent;
+    }
+
+    public void setReminderAlreadySent(boolean reminderAlreadySent) {
+        this.reminderAlreadySent = reminderAlreadySent;
+    }
 }

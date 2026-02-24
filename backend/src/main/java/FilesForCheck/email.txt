@@ -477,9 +477,7 @@ public class EmailMessageBuilder {
 
         // Registrace z contextu â€“ mĹŻĹľe bĂ˝t null, proto safe pĹ™Ă­stup
         MatchRegistrationEntity registration = extractMatchRegistration(context);
-        String excuseReason = (registration != null && registration.getExcuseReason() != null)
-                ? registration.getExcuseReason().toString()
-                : "";
+        String excuseReason = assignExcuseReason(registration);
         String excuseNote = (registration != null)
                 ? safe(registration.getExcuseNote())
                 : "";
@@ -491,10 +489,7 @@ public class EmailMessageBuilder {
         long registeredCount = countRegisteredPlayers(match);
         int maxPlayers = match != null ? match.getMaxPlayers() : 0;
         long freeSlots = maxPlayers > 0 ? (maxPlayers - registeredCount) : 0;
-        String matchCancelReason =
-                (match != null && match.getCancelReason() != null)
-                        ? match.getCancelReason().toString()
-                        : "";
+        String matchCancelReason = assignMatchCancelReason(match);
 
         String safeEmail = (playerEmail != null && !playerEmail.isBlank())
                 ? playerEmail
@@ -1019,6 +1014,109 @@ public class EmailMessageBuilder {
         }
         return null;
     }
+
+    // v EmailMessageBuilder.java â€“ nÄ›kam ke konci tĹ™Ă­dy
+
+    /**
+     * Sestavuje e-mail pro speciĂˇlnĂ­ zprĂˇvu od administrĂˇtora.
+     *
+     * PouĹľĂ­vĂˇ stejnou HTML Ĺˇablonu jako ostatnĂ­ e-mailovĂ© notifikace.
+     * JmĂ©no v pozdravu se odvozuje z AppUserEntity (pokud je k dispozici),
+     * jinak z PlayerEntity.
+     *
+     * @param user   cĂ­lovĂ˝ uĹľivatel (mĹŻĹľe bĂ˝t null)
+     * @param player cĂ­lovĂ˝ hrĂˇÄŤ (mĹŻĹľe bĂ˝t null)
+     * @param title  titulek speciĂˇlnĂ­ zprĂˇvy (z administraÄŤnĂ­ho formulĂˇĹ™e)
+     * @param message vlastnĂ­ text zprĂˇvy
+     * @return pĹ™ipravenĂ˝ EmailContent
+     */
+    public EmailContent buildSpecialMessage(AppUserEntity user,
+                                            PlayerEntity player,
+                                            String title,
+                                            String message) {
+
+        String recipientName = null;
+        if (user != null) {
+            recipientName = fullUserName(user);
+        } else if (player != null) {
+            recipientName = fullPlayerName(player);
+        }
+
+        if (recipientName == null || recipientName.isBlank()) {
+            recipientName = "uĹľivateli";
+        }
+
+        String greeting = "DobrĂ˝ den " + escape(recipientName) + ",";
+
+        String playerInfo = "";
+        if (player != null && player.getFullName() != null && !player.getFullName().isBlank()) {
+            playerInfo = """
+                    <p>HrĂˇÄŤ: <strong>%s</strong></p>
+                    """.formatted(escape(player.getFullName()));
+        }
+
+        String safeMessage =
+                message != null
+                        ? escape(message).replace("\n", "<br/>")
+                        : "";
+
+        String main = """
+                <p>sprĂˇvce systĂ©mu vĂˇm zasĂ­lĂˇ dĹŻleĹľitou zprĂˇvu:</p>
+                <p>%s</p>
+                %s
+                <p>Tato zprĂˇva byla doruÄŤena prostĹ™ednictvĂ­m systĂ©mu HobbyHokej
+                bez ohledu na vaĹˇe standardnĂ­ nastavenĂ­ notifikacĂ­.</p>
+                <p>S pozdravem<br/>App Hokej â€“ Hobby Hokej</p>
+                """.formatted(
+                safeMessage,
+                playerInfo
+        );
+
+        String footer = "Tento e-mail byl vygenerovĂˇn automaticky, neodpovĂ­dejte prosĂ­m na nÄ›j.";
+        String subject = "[HobbyHokej] " + (title != null ? title : "SpeciĂˇlnĂ­ zprĂˇva");
+
+        String html = buildSimpleHtml(subject, greeting, main, footer);
+        return new EmailContent(subject, html, true);
+    }
+
+    // pomocnĂ© metody
+    /**
+     * VracĂ­ ÄŤitelnĂ˝ popis dĹŻvodu zruĹˇenĂ­ zĂˇpasu.
+     * Pokud nenĂ­ dĹŻvod nastaven, vracĂ­ prĂˇzdnĂ˝ Ĺ™etÄ›zec.
+     */
+    private String assignMatchCancelReason(MatchEntity match) {
+        if (match == null || match.getCancelReason() == null) {
+            return "";
+        }
+
+        return switch (match.getCancelReason()) {
+            case NOT_ENOUGH_PLAYERS -> "nedostateÄŤnĂ˝ poÄŤet hrĂˇÄŤĹŻ";
+            case TECHNICAL_ISSUE -> "TechnickĂ© problĂ©my (led, halaâ€¦)";
+            case WEATHER -> "NepĹ™Ă­znivĂ© poÄŤasĂ­";
+            case ORGANIZER_DECISION -> "RozhodnutĂ­ organizĂˇtora";
+            case OTHER -> "JinĂ˝ dĹŻvod";
+            default -> "nezadanĂ˝ nebo neznĂˇmĂ˝ dĹŻvod";
+        };
+    }
+
+    /**
+     * VracĂ­ ÄŤitelnĂ˝ popis dĹŻvodu omluvy ze zĂˇpasu.
+     * Pokud nenĂ­ dĹŻvod nastaven, vracĂ­ prĂˇzdnĂ˝ Ĺ™etÄ›zec.
+     */
+    private String assignExcuseReason(MatchRegistrationEntity registration) {
+        if (registration == null || registration.getExcuseReason() == null) {
+            return "";
+        }
+
+        return switch (registration.getExcuseReason()) {
+            case NEMOC -> "nemoc";
+            case PRACE -> "pracovnĂ­ povinnosti";
+            case NECHE_SE_MI -> "nechce se mi";
+            case JINE -> "jinĂ˝ dĹŻvod";
+            default -> "neznĂˇmĂ˝ dĹŻvod";
+        };
+    }
+
 }
 
 -----

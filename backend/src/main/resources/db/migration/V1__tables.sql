@@ -97,7 +97,8 @@ CREATE TABLE `match_registrations` (
   `team` enum('DARK','LIGHT') DEFAULT NULL,
   `timestamp` datetime(6) NOT NULL,
   `match_id` bigint(20) NOT NULL,
-  `player_id` bigint(20) NOT NULL
+  `player_id` bigint(20) NOT NULL,
+  `reminder_already_sent` bit(1) NOT NULL DEFAULT b'0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `match_registration_history` (
@@ -113,7 +114,8 @@ CREATE TABLE `match_registration_history` (
   `original_timestamp` datetime(6) NOT NULL,
   `player_id` bigint(20) NOT NULL,
   `status` enum('REGISTERED','UNREGISTERED','EXCUSED','RESERVED','NO_RESPONSE','SUBSTITUTE','NO_EXCUSED') NOT NULL,
-  `team` enum('DARK','LIGHT') DEFAULT NULL
+  `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `reminder_already_sent` bit(1) NOT NULL DEFAULT b'0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `player_entity` (
