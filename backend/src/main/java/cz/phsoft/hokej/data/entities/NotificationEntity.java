@@ -5,17 +5,6 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
-/**
- * Entita reprezentující aplikační notifikaci.
- *
- * Notifikace vzniká při událostech definovaných v NotificationType.
- * Slouží pro:
- * - zobrazení badge (nepřečtené),
- * - přehled událostí,
- * - výpis notifikací od posledního přihlášení.
- *
- * Všechny časy jsou ukládány jako Instant (UTC).
- */
 @Entity
 @Table(
         name = "notifications",
@@ -27,69 +16,57 @@ import java.time.Instant;
 )
 public class NotificationEntity {
 
-    /**
-     * Primární klíč notifikace.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Uživatel, kterému je notifikace určena.
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private AppUserEntity user;
 
-    /**
-     * Volitelná vazba na hráče.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id")
     private PlayerEntity player;
 
-    /**
-     * Typ notifikace.
-     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
     private NotificationType type;
 
-    /**
-     * Stručný text notifikace pro zobrazení v dropdownu.
-     */
     @Column(name = "message_short", nullable = false, length = 255)
     private String messageShort;
 
-    /**
-     * Detailní text (volitelné).
-     */
     @Column(name = "message_full", length = 2000)
     private String messageFull;
 
-    /**
-     * Čas vytvoření notifikace.
-     */
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    /**
-     * Čas přečtení notifikace.
-     * Pokud je null → notifikace je nepřečtená.
-     */
     @Column(name = "read_at")
     private Instant readAt;
 
-    /**
-     * Uživatel, který akci způsobil (např. admin).
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
     private AppUserEntity createdBy;
 
     /**
-     * Automatické nastavení createdAt při persist.
+     * Emailová adresa (nebo více adres oddělených čárkou),
+     * na kterou byla notifikace skutečně odesílána
+     * e-mailem (podle nastavení a rozhodnutí NotificationDecision).
+     *
+     * Pokud se e-mail neposílal, je hodnota null.
      */
+    @Column(name = "email_to", length = 255)
+    private String emailTo;
+
+    /**
+     * Telefonní číslo, na které byla notifikace
+     * skutečně odesílána formou SMS.
+     *
+     * Pokud se SMS neposílala, je hodnota null.
+     */
+    @Column(name = "sms_to", length = 50)
+    private String smsTo;
+
     @PrePersist
     public void prePersist() {
         if (this.createdAt == null) {
@@ -97,18 +74,12 @@ public class NotificationEntity {
         }
     }
 
-    // ==================================================
-    // Business helper metody
-    // ==================================================
-
     @Transient
     public boolean isRead() {
         return readAt != null;
     }
 
-    // ==================================================
-    // Gettery / Settery
-    // ==================================================
+    // Gettery / settery
 
     public Long getId() { return id; }
 
@@ -135,4 +106,10 @@ public class NotificationEntity {
 
     public AppUserEntity getCreatedBy() { return createdBy; }
     public void setCreatedBy(AppUserEntity createdBy) { this.createdBy = createdBy; }
+
+    public String getEmailTo() { return emailTo; }
+    public void setEmailTo(String emailTo) { this.emailTo = emailTo; }
+
+    public String getSmsTo() { return smsTo; }
+    public void setSmsTo(String smsTo) { this.smsTo = smsTo; }
 }

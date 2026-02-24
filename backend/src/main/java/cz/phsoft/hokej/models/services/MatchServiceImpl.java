@@ -935,6 +935,13 @@ public class MatchServiceImpl implements MatchService {
                 : match.getPrice();
         dto.setPricePerRegisteredPlayer(pricePerPlayer);
 
+        // doplnění stavu zápasu a sezóny pro přehled
+        dto.setMatchStatus(match.getMatchStatus());
+        dto.setCancelReason(match.getCancelReason());
+        if (match.getSeason() != null && match.getSeason().getId() != null) {
+            dto.setSeasonId(match.getSeason().getId());
+        }
+
         return dto;
     }
 

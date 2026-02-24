@@ -26,6 +26,11 @@ public interface InAppNotificationService {
      */
     void storeForPlayer(PlayerEntity player, NotificationType type, Object context);
 
+    void storeForPlayer(PlayerEntity player,
+                        NotificationType type,
+                        Object context,
+                        String emailTo,
+                        String smsTo);
     /**
      * Uloží notifikaci související s uživatelem.
      *
@@ -38,6 +43,10 @@ public interface InAppNotificationService {
      */
     void storeForUser(AppUserEntity user, NotificationType type, Object context);
 
+    void storeForUser(AppUserEntity user,
+                      NotificationType type,
+                      Object context,
+                      String emailTo);
     /**
      * Ukládá speciální zprávu typu SPECIAL_MESSAGE
      * pro zadaného uživatele a (volitelně) hráče.
@@ -54,4 +63,11 @@ public interface InAppNotificationService {
                              PlayerEntity player,
                              String messageShort,
                              String messageFull);
+
+    void storeSpecialMessage(AppUserEntity user,
+                             PlayerEntity player,
+                             String messageShort,
+                             String messageFull,
+                             String emailTo,
+                             String smsTo);
 }

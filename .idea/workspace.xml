@@ -7,45 +7,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Doplněny třídy a funkcionalita pro zaslání notifikace vybraným uživatelům/hráčům na FE, bez ohledu na settings">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/controllers/AdminNotificationController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/SpecialNotificationTargetDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/requests/SpecialNotificationRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/SpecialNotificationService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/SpecialNotificationServiceImpl.java" afterDir="false" />
+    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Na fe upraveno zobrazení notifikací. Budu přidávat email a telefon do NotificationDTO, pro notifikace">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/logs/application.log" beforeDir="false" afterPath="$PROJECT_DIR$/backend/logs/application.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/logs/audit.log" beforeDir="false" afterPath="$PROJECT_DIR$/backend/logs/audit.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/config.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/config.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/controllers.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/controllers.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/dto.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/dto.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/entities.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/entities.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/enums.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/enums.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/mappers.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/mappers.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/notification.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/notification.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/requests.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/requests.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/services.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/services.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/DataInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/DataInitializer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/enums/NotificationType.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/enums/NotificationType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/repositories/AppUserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/repositories/AppUserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/repositories/PlayerRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/repositories/PlayerRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/email/EmailMessageBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/email/EmailMessageBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/InAppNotificationBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/InAppNotificationBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/NotificationEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/NotificationEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/NotificationDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/NotificationDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/InAppNotificationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/InAppNotificationService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/InAppNotificationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/InAppNotificationServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/NotificationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/NotificationServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/sms/SmsMessageBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/sms/SmsMessageBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V7__notifications_type_enum.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V7__notifications_type_enum.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/userSettingsApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/userSettingsApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Footer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/usePostLoginRedirect.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/usePostLoginRedirect.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminHomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminHomePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/LoginPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/PlayerHomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/PlayerHomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/SpecialNotificationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/notification/SpecialNotificationServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V6__notifications.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V6__notifications.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -442,7 +415,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771845274178</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="Na fe upraveno zobrazení notifikací. Budu přidávat email a telefon do NotificationDTO, pro notifikace">
+      <option name="closed" value="true" />
+      <created>1771923608493</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1771923608493</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -459,7 +440,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="upraven DEMO mod a notifikace v DEMO modu - jdou do DTO pro frontend (modal)" />
     <MESSAGE value="Doplněny komentáře u Controllers" />
     <MESSAGE value="Doplněny komentáře u Entit" />
     <MESSAGE value="Doplněny komentáře u Repository" />
@@ -484,6 +464,7 @@
     <MESSAGE value="Doplněna změna týmu pro přihlášeného uživatele (jen budoucí) a admin a manager vše" />
     <MESSAGE value="Přidány třídy k notifikacím - ukládání notifikaci do tabulky a mazání notifikací dle počtu na uživatele a po určitém datu. + Nová flyway migrace." />
     <MESSAGE value="Přidán enum k defaultLandingPage pro zobrazení úvodní stránky dle settings. Na FE vyřešeny notifikace v app." />
-    <option name="LAST_COMMIT_MESSAGE" value="Přidán enum k defaultLandingPage pro zobrazení úvodní stránky dle settings. Na FE vyřešeny notifikace v app." />
+    <MESSAGE value="Na fe upraveno zobrazení notifikací. Budu přidávat email a telefon do NotificationDTO, pro notifikace" />
+    <option name="LAST_COMMIT_MESSAGE" value="Na fe upraveno zobrazení notifikací. Budu přidávat email a telefon do NotificationDTO, pro notifikace" />
   </component>
 </project>

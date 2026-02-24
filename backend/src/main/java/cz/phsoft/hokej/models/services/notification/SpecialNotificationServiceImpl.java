@@ -104,41 +104,48 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
                         .orElse(null);
             }
 
-            // 1) IN-APP notifikace
-            inAppNotificationService.storeSpecialMessage(
-                    user,
-                    player,
-                    request.getTitle(),
-                    request.getMessage()
-            );
+            String emailTo = null;
+            String smsTo = null;
 
-            // 2) EMAIL (pokud je povoleno a existuje nějaký email podle pravidel resolveEmail)
+            // EMAIL
             if (request.isSendEmail()) {
-                String to = resolveEmail(user, playerSettings);
-                if (to != null && !to.isBlank()) {
-                    sendSpecialEmail(to, user, player, request);
+                emailTo = resolveEmail(user, playerSettings);
+                if (emailTo != null && !emailTo.isBlank()) {
+                    sendSpecialEmail(emailTo, user, player, request);
                 } else {
                     log.debug(
                             "SpecialNotificationService.sendSpecialNotification: není k dispozici email pro playerId={} (userId={})",
                             player != null ? player.getId() : null,
                             user.getId()
                     );
+                    emailTo = null;
                 }
             }
 
-            // 3) SMS (pokud je povoleno a máme telefon v PlayerSettings)
+            // SMS
             if (request.isSendSms() && playerSettings != null) {
-                String phone = resolvePhoneNumber(playerSettings);
-                if (phone != null && !phone.isBlank()) {
-                    sendSpecialSms(phone, player, request);
+                smsTo = resolvePhoneNumber(playerSettings);
+                if (smsTo != null && !smsTo.isBlank()) {
+                    sendSpecialSms(smsTo, player, request);
                 } else {
                     log.debug(
                             "SpecialNotificationService.sendSpecialNotification: chybí telefonní číslo pro playerId={} (userId={})",
                             player != null ? player.getId() : null,
                             user.getId()
                     );
+                    smsTo = null;
                 }
             }
+
+            // IN-APP – SPECIAL_MESSAGE + audit kanálů
+            inAppNotificationService.storeSpecialMessage(
+                    user,
+                    player,
+                    request.getTitle(),
+                    request.getMessage(),
+                    emailTo,
+                    smsTo
+            );
         });
     }
 

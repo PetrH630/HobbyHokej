@@ -5,6 +5,8 @@ CREATE TABLE `notifications` (
   `type` varchar(100) NOT NULL,
   `message_short` varchar(255) NOT NULL,
   `message_full` varchar(2000) DEFAULT NULL,
+  `email_to` varchar(255) DEFAULT NULL,
+  `sms_to` varchar(50) DEFAULT NULL,
   `created_at` datetime(6) NOT NULL,
   `read_at` datetime(6) DEFAULT NULL,
   `created_by_user_id` bigint(20) DEFAULT NULL,

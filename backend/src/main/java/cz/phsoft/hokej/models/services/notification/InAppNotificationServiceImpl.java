@@ -42,6 +42,15 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
     public void storeForPlayer(PlayerEntity player,
                                NotificationType type,
                                Object context) {
+        storeForPlayer(player, type, context, null, null);
+    }
+
+    @Override
+    public void storeForPlayer(PlayerEntity player,
+                               NotificationType type,
+                               Object context,
+                               String emailTo,
+                               String smsTo) {
 
         if (player == null) {
             log.debug("InAppNotificationService.storeForPlayer: player is null, nic se neukládá");
@@ -76,16 +85,27 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
         entity.setMessageFull(messageFull);
         entity.setCreatedAt(Instant.now(clock));
 
+        entity.setEmailTo(emailTo);
+        entity.setSmsTo(smsTo);
+
         notificationRepository.save(entity);
 
-        log.debug("InAppNotificationService.storeForPlayer: uložena notifikace type={} userId={} playerId={}",
-                type, owner.getId(), player.getId());
+        log.debug("InAppNotificationService.storeForPlayer: uložena notifikace type={} userId={} playerId={} emailTo={} smsTo={}",
+                type, owner.getId(), player.getId(), emailTo, smsTo);
     }
 
     @Override
     public void storeForUser(AppUserEntity user,
                              NotificationType type,
                              Object context) {
+        storeForUser(user, type, context, null);
+    }
+
+    @Override
+    public void storeForUser(AppUserEntity user,
+                             NotificationType type,
+                             Object context,
+                             String emailTo) {
 
         if (user == null) {
             log.debug("InAppNotificationService.storeForUser: user is null, nic se neukládá");
@@ -110,10 +130,13 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
         entity.setMessageFull(messageFull);
         entity.setCreatedAt(Instant.now(clock));
 
+        entity.setEmailTo(emailTo);
+        entity.setSmsTo(null);
+
         notificationRepository.save(entity);
 
-        log.debug("InAppNotificationService.storeForUser: uložena notifikace type={} userId={}",
-                type, user.getId());
+        log.debug("InAppNotificationService.storeForUser: uložena notifikace type={} userId={} emailTo={}",
+                type, user.getId(), emailTo);
     }
 
     @Override
@@ -121,6 +144,16 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
                                     PlayerEntity player,
                                     String messageShort,
                                     String messageFull) {
+        storeSpecialMessage(user, player, messageShort, messageFull, null, null);
+    }
+
+    @Override
+    public void storeSpecialMessage(AppUserEntity user,
+                                    PlayerEntity player,
+                                    String messageShort,
+                                    String messageFull,
+                                    String emailTo,
+                                    String smsTo) {
 
         if (user == null) {
             log.debug("InAppNotificationService.storeSpecialMessage: user is null, nic se neukládá");
@@ -145,12 +178,17 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
         entity.setMessageFull(fullText);
         entity.setCreatedAt(Instant.now(clock));
 
+        entity.setEmailTo(emailTo);
+        entity.setSmsTo(smsTo);
+
         notificationRepository.save(entity);
 
         log.debug(
-                "InAppNotificationService.storeSpecialMessage: uložena SPECIAL_MESSAGE userId={} playerId={}",
+                "InAppNotificationService.storeSpecialMessage: uložena SPECIAL_MESSAGE userId={} playerId={} emailTo={} smsTo={}",
                 user.getId(),
-                player != null ? player.getId() : null
+                player != null ? player.getId() : null,
+                emailTo,
+                smsTo
         );
     }
 
