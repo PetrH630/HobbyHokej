@@ -158,7 +158,14 @@ public enum NotificationType {
     /**
      * Bezpečnostní upozornění (podezřelá aktivita a podobně).
      */
-    SECURITY_ALERT(NotificationCategory.SYSTEM, true);
+    SECURITY_ALERT(NotificationCategory.SYSTEM, true),
+
+    /**
+     * Ručně vytvořená speciální zpráva od správce systému.
+     * Notifikace obchází standardní nastavení notifikací
+     * a vytváří se vždy pro všechny vybrané příjemce.
+     */
+    SPECIAL_MESSAGE(NotificationCategory.SYSTEM, true);
 
     /**
      * Kategorie notifikace (registrace, informace o zápase, systém).
@@ -172,6 +179,7 @@ public enum NotificationType {
      * GlobalNotificationLevel.
      */
     private final boolean important;
+
 
     NotificationType(NotificationCategory category, boolean important) {
         this.category = category;

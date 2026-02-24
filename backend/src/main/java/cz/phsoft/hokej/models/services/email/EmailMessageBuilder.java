@@ -1006,4 +1006,68 @@ public class EmailMessageBuilder {
         }
         return null;
     }
+
+    // v EmailMessageBuilder.java – někam ke konci třídy
+
+    /**
+     * Sestavuje e-mail pro speciální zprávu od administrátora.
+     *
+     * Používá stejnou HTML šablonu jako ostatní e-mailové notifikace.
+     * Jméno v pozdravu se odvozuje z AppUserEntity (pokud je k dispozici),
+     * jinak z PlayerEntity.
+     *
+     * @param user   cílový uživatel (může být null)
+     * @param player cílový hráč (může být null)
+     * @param title  titulek speciální zprávy (z administračního formuláře)
+     * @param message vlastní text zprávy
+     * @return připravený EmailContent
+     */
+    public EmailContent buildSpecialMessage(AppUserEntity user,
+                                            PlayerEntity player,
+                                            String title,
+                                            String message) {
+
+        String recipientName = null;
+        if (user != null) {
+            recipientName = fullUserName(user);
+        } else if (player != null) {
+            recipientName = fullPlayerName(player);
+        }
+
+        if (recipientName == null || recipientName.isBlank()) {
+            recipientName = "uživateli";
+        }
+
+        String greeting = "Dobrý den " + escape(recipientName) + ",";
+
+        String playerInfo = "";
+        if (player != null && player.getFullName() != null && !player.getFullName().isBlank()) {
+            playerInfo = """
+                    <p>Hráč: <strong>%s</strong></p>
+                    """.formatted(escape(player.getFullName()));
+        }
+
+        String safeMessage =
+                message != null
+                        ? escape(message).replace("\n", "<br/>")
+                        : "";
+
+        String main = """
+                <p>správce systému vám zasílá důležitou zprávu:</p>
+                <p>%s</p>
+                %s
+                <p>Tato zpráva byla doručena prostřednictvím systému HobbyHokej
+                bez ohledu na vaše standardní nastavení notifikací.</p>
+                <p>S pozdravem<br/>App Hokej – Hobby Hokej</p>
+                """.formatted(
+                safeMessage,
+                playerInfo
+        );
+
+        String footer = "Tento e-mail byl vygenerován automaticky, neodpovídejte prosím na něj.";
+        String subject = "[HobbyHokej] " + (title != null ? title : "Speciální zpráva");
+
+        String html = buildSimpleHtml(subject, greeting, main, footer);
+        return new EmailContent(subject, html, true);
+    }
 }

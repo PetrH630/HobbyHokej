@@ -1,3 +1,4 @@
+// src/pages/AdminHomePage.jsx
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 
@@ -6,6 +7,8 @@ import { useAllMatchesAdmin } from "../hooks/useAllMatchesAdmin";
 import { useAllSeasonsAdmin } from "../hooks/useAllSeasonsAdmin";
 import { useAllUsersAdmin } from "../hooks/useAllUsersAdmin";
 import { useAuth } from "../hooks/useAuth";
+import { useNotifications } from "../hooks/useNotifications";
+import AdminSpecialNotificationModal from "../components/notifications/AdminSpecialNotificationModal";
 
 const AdminHomePage = () => {
     const navigate = useNavigate();
@@ -18,6 +21,9 @@ const AdminHomePage = () => {
         (user?.roles?.includes("MANAGER") || user?.role === "MANAGER");
 
     const [showManagerInfo, setShowManagerInfo] = useState(isManager);
+
+    // 👇 nový state pro modal speciálních zpráv
+    const [showSpecialModal, setShowSpecialModal] = useState(false);
 
     const {
         players,
@@ -47,6 +53,13 @@ const AdminHomePage = () => {
         reload: reloadUsers,
     } = useAllUsersAdmin();
 
+    // Notifikace pro admin/manager přehled
+    const {
+        notifications,
+        loading: notificationsLoading,
+        error: notificationsError,
+    } = useNotifications({ mode: "adminAll", limit: 200 });
+
     const playersCount = players?.length ?? 0;
     const matchesCount = matches?.length ?? 0;
     const seasonsCount = seasons?.length ?? 0;
@@ -57,10 +70,16 @@ const AdminHomePage = () => {
         reloadMatches?.();
         reloadSeasons?.();
         reloadUsers?.();
+        // případné refetch notifikací řeší useNotifications přes změnu klíčů / externí volání
     };
 
     const combinedError =
-        playersError || matchesError || seasonsError || usersError || "";
+        playersError ||
+        matchesError ||
+        seasonsError ||
+        usersError ||
+        notificationsError ||
+        "";
 
     const renderValue = (loading, value) => (loading ? "…" : value);
 
@@ -89,6 +108,37 @@ const AdminHomePage = () => {
             hour: "2-digit",
             minute: "2-digit",
         });
+    };
+
+    // --- status badge pro zápasy ---
+    const getMatchStatusBadge = (statusRaw) => {
+        const status = String(statusRaw || "").toUpperCase();
+
+        const map = {
+            UPDATED: {
+                label: "Změněný",
+                className: "text-bg-warning",
+            },
+            CANCELED: {
+                label: "Zrušený",
+                className: "text-bg-danger",
+            },
+            UNCANCELED: {
+                label: "Obnovený",
+                className: "text-bg-success",
+            },
+        };
+
+        const resolved = map[status] || {
+            label: "Plánovaný",
+            className: "text-bg-secondary",
+        };
+
+        return (
+            <span className={`badge ${resolved.className}`}>
+                {resolved.label}
+            </span>
+        );
     };
 
     const upcomingMatches = useMemo(() => {
@@ -140,11 +190,108 @@ const AdminHomePage = () => {
         ]
     );
 
-    const lastActivities = [
-        { time: "Dnes 12:41", text: "Změněn čas zápasu (ukázka).", type: "change" },
-        { time: "Dnes 10:05", text: "Schválen hráč (ukázka).", type: "approve" },
-        { time: "Včera 19:22", text: "Vytvořena sezóna (ukázka).", type: "create" },
-    ];
+    // --- helpers pro aktivity (notifikace) ---
+    const mapNotificationTypeToActivityType = (type) => {
+        if (!type) return "info";
+        const t = String(type).toLowerCase();
+
+        if (t.includes("time_changed") || t.includes("updated") || t.includes("changed")) {
+            return "change";
+        }
+        if (t.includes("approved") || t.includes("activated") || t.includes("uncanceled")) {
+            return "approve";
+        }
+        if (t.includes("created") || t.includes("new") || t.includes("registered")) {
+            return "create";
+        }
+        if (t.includes("canceled") || t.includes("rejected") || t.includes("deleted")) {
+            return "cancel";
+        }
+
+        return "info";
+    };
+
+    // časové okno pro sloučení duplicitních notifikací (stejný typ + text)
+    const ACTIVITY_TIME_WINDOW_MS = 1000; // 1 sekunda
+
+    const makeActivityKey = (n) => {
+        const type = String(n.type || "").toLowerCase();
+        const text = (n.messageShort || n.message || n.title || "")
+            .trim()
+            .toLowerCase();
+
+        // Záměrně jen typ + text, aby se nesledoval konkrétní příjemce
+        return [type, text].join("|");
+    };
+
+    const lastActivities = useMemo(() => {
+        if (!Array.isArray(notifications)) return [];
+
+        // Normalizace – připravíme key + dateObj
+        const normalized = notifications
+            .map((n) => {
+                if (!n) return null;
+
+                const dateObj = n.createdAt
+                    ? new Date(String(n.createdAt).replace(" ", "T"))
+                    : null;
+
+                if (!dateObj || Number.isNaN(dateObj.getTime())) {
+                    return null;
+                }
+
+                return {
+                    notif: n,
+                    dateObj,
+                    key: makeActivityKey(n),
+                };
+            })
+            .filter(Boolean);
+
+        // Nejprve seřadit od nejnovějších
+        normalized.sort(
+            (a, b) => b.dateObj.getTime() - a.dateObj.getTime()
+        );
+
+        const unique = [];
+
+        for (const item of normalized) {
+            const { notif, dateObj, key } = item;
+
+            // Zjistit, jestli už v unique existuje "stejná" aktivita
+            // (stejný key a časový rozdíl <= ACTIVITY_TIME_WINDOW_MS)
+            const alreadyExists = unique.some((u) => {
+                if (u.key !== key) return false;
+                const diff = Math.abs(
+                    u.dateObj.getTime() - dateObj.getTime()
+                );
+                return diff <= ACTIVITY_TIME_WINDOW_MS;
+            });
+
+            if (alreadyExists) {
+                // jen další exemplář stejné vlny notifikací (víc hráčů)
+                continue;
+            }
+
+            unique.push(item);
+
+            // stačí prvních 10 unikátních aktivit
+            if (unique.length >= 10) {
+                break;
+            }
+        }
+
+        return unique.map(({ notif, dateObj }) => ({
+            id: notif.id,
+            time: formatDateTime(dateObj),
+            text:
+                notif.messageShort ||
+                notif.message ||
+                notif.title ||
+                "Systémová notifikace",
+            type: mapNotificationTypeToActivityType(notif.type),
+        }));
+    }, [notifications]);
 
     const ActionCard = ({ title, desc, to, icon }) => (
         <div className="col-12 col-md-6 col-xl-3">
@@ -165,13 +312,15 @@ const AdminHomePage = () => {
         </div>
     );
 
-    const Badge = ({ text }) => (
-        <span className="badge text-bg-secondary">{text}</span>
-    );
-
     const ActivityIcon = ({ type }) => {
-        const map = { change: "✏️", approve: "✅", create: "➕" };
-        return <span className="me-2">{map[type] || "📝"}</span>;
+        const map = {
+            change: "✏️",
+            approve: "✅",
+            create: "➕",
+            cancel: "❌",
+            info: "📝",
+        };
+        return <span className="me-2">{map[type] || map.info}</span>;
     };
 
     const handleCloseManagerInfo = () => {
@@ -196,11 +345,24 @@ const AdminHomePage = () => {
                         type="button"
                         onClick={reloadAll}
                         disabled={
-                            playersLoading || matchesLoading || seasonsLoading || usersLoading
+                            playersLoading ||
+                            matchesLoading ||
+                            seasonsLoading ||
+                            usersLoading
                         }
                         title="Obnoví přehledové údaje z databáze"
                     >
                         Obnovit
+                    </button>
+
+                    {/* 👇 nové tlačítko vedle Obnovit */}
+                    <button
+                        className="btn btn-primary"
+                        type="button"
+                        onClick={() => setShowSpecialModal(true)}
+                        title="Odešle speciální zprávu vybraným uživatelům / hráčům"
+                    >
+                        Poslat speciální zprávu
                     </button>
                 </div>
             </div>
@@ -289,7 +451,6 @@ const AdminHomePage = () => {
                     <div className="card shadow-sm h-100">
                         <div className="card-header bg-white">
                             <div className="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-2">
-
                                 <div className="fw-semibold">Nadcházející zápasy</div>
                                 <Link
                                     to="/app/admin/matches"
@@ -300,7 +461,6 @@ const AdminHomePage = () => {
                             </div>
                         </div>
 
-                        
                         <div className="card-body">
                             {matchesLoading ? (
                                 <div className="text-muted py-2">Načítám zápasy…</div>
@@ -335,24 +495,19 @@ const AdminHomePage = () => {
                                                 <div className="card-body">
                                                     <div className="d-flex flex-column flex-md-row justify-content-between gap-2">
                                                         <div>
-                                                            <div className="text-muted small">Datum</div>
                                                             <div className="fw-semibold">
-                                                                {formatDateTime(dateObj)}
+                                                                {formatDateTime(dateObj)}{" - "}
+                                                                {opponent}
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <div className="text-muted small">Místo</div>
                                                             <div className="text-nowrap">{place}</div>
                                                         </div>
 
                                                         <div className="ms-md-auto">
-                                                            <div className="text-muted small">Status</div>
-                                                            <div>
-                                                                <Badge text={status} />
-                                                            </div>
+                                                            {getMatchStatusBadge(status)}
                                                         </div>
                                                     </div>
-                                                   
                                                 </div>
                                             </div>
                                         );
@@ -375,35 +530,58 @@ const AdminHomePage = () => {
                         <div className="col-12">
                             <div className="card shadow-sm">
                                 <div className="card-header bg-white fw-semibold">
-                                    Poslední aktivity - zatím neimplementováno
+                                    <div className="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-2">
+                                        Poslední aktivity
+                                        <Link
+                                            to="/app/admin/notifications"
+                                            className="btn btn-sm btn-outline-primary"
+                                        >
+                                            Správa aktivit
+                                        </Link>
+                                    </div>
                                 </div>
                                 <div className="card-body">
-                                    <ul className="list-group list-group-flush">
-                                        {lastActivities.map((a, idx) => (
-                                            <li key={idx} className="list-group-item px-0">
-                                                <div className="d-flex justify-content-between">
-                                                    <div>
-                                                        <ActivityIcon type={a.type} />
-                                                        <span>{a.text}</span>
-                                                    </div>
-                                                    <div className="text-muted small text-nowrap ms-3">
-                                                        {a.time}
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                    {notificationsLoading ? (
+                                        <div className="text-muted py-2">
+                                            Načítám poslední aktivity…
+                                        </div>
+                                    ) : lastActivities.length === 0 ? (
+                                        <div className="text-muted py-2">
+                                            Žádné notifikace k zobrazení.
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <ul className="list-group list-group-flush">
+                                                {lastActivities.map((a) => (
+                                                    <li
+                                                        key={a.id ?? a.time}
+                                                        className="list-group-item px-0"
+                                                    >
+                                                        <div className="d-flex justify-content-between">
+                                                            <div>
+                                                                <ActivityIcon type={a.type} />
+                                                                <span>{a.text}</span>
+                                                            </div>
+                                                            <div className="text-muted small text-nowrap ms-3">
+                                                                {a.time}
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
 
-                                    <div className="mt-3">
-                                        <button
-                                            type="button"
-                                            className="btn btn-sm btn-outline-primary"
-                                            disabled
-                                            title="Audit log zatím není implementován"
-                                        >
-                                            Zobrazit audit log
-                                        </button>
-                                    </div>
+                                            <div className="mt-3">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-outline-primary"
+                                                    disabled
+                                                    title="Audit log zatím není implementován"
+                                                >
+                                                    Zobrazit audit log
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -414,7 +592,6 @@ const AdminHomePage = () => {
                                 <div className="card-body">
                                     <div className="d-flex justify-content-between mb-2">
                                         <span className="text-muted">Prostředí</span>
-                                        
                                         <span className="fw-semibold">
                                             Demo dle nastavení
                                         </span>
@@ -448,6 +625,16 @@ const AdminHomePage = () => {
             <div className="text-muted small mt-4">
                 Počty i nadcházející zápasy jsou načteny z databáze přes admin hooky.
             </div>
+
+            {/* 👇 modal pro speciální zprávu */}
+            <AdminSpecialNotificationModal
+                show={showSpecialModal}
+                onClose={() => setShowSpecialModal(false)}
+                onSent={() => {
+                    // pokud budeš chtít po odeslání něco refreshnout, můžeš doplnit
+                    // např. reload notifikací nebo jen toast
+                }}
+            />
         </div>
     );
 };

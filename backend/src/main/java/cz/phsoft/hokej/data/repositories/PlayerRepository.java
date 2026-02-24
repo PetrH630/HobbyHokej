@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.data.repositories;
 
 import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.PlayerStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -89,4 +90,16 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      * @return seznam hráčů uživatele
      */
     List<PlayerEntity> findByUser_EmailOrderByIdAsc(String email);
+
+    /**
+     * Vrací všechny hráče v daném stavu.
+     */
+    List<PlayerEntity> findByPlayerStatus(PlayerStatus playerStatus);
+
+    /**
+     * Pohodlná metoda pro všechny schválené hráče.
+     */
+    default List<PlayerEntity> findApprovedPlayers() {
+        return findByPlayerStatus(PlayerStatus.APPROVED);
+    }
 }

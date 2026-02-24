@@ -15,7 +15,6 @@ import cz.phsoft.hokej.models.services.sms.SmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import cz.phsoft.hokej.models.services.notification.InAppNotificationService;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -52,7 +51,6 @@ public class NotificationServiceImpl implements NotificationService {
     // demo režim a úložiště notifikací pro demo
     private final DemoModeService demoModeService;
     private final DemoNotificationStore demoNotificationStore;
-
 
     /**
      * Typy notifikací, pro které se nemá posílat kopie manažerům.
@@ -97,76 +95,93 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        NotificationDecision decision = notificationPreferencesService.evaluate(player, type);
-        log.info("notifyPlayer decision: type={}, playerId={}, sendUserEmail={}, sendPlayerEmail={}, sendSms={}",
-                type, player.getId(),
-                decision.isSendEmailToUser(),
-                decision.isSendEmailToPlayer(),
-                decision.isSendSmsToPlayer()
-        );
-
-        // E-mail pro uživatele (AppUser).
-        if (decision.isSendEmailToUser() && decision.getUserEmail() != null) {
-            sendEmailToUser(decision.getUserEmail(), player, type, context);
+        // 1) Nejprve vždy uložit in-app notifikaci (DB audit)
+        try {
+            inAppNotificationService.storeForPlayer(player, type, context);
+        } catch (Exception ex) {
+            // Uložení in-app by nemělo padat, ale nechceme kvůli tomu zabít celou metodu
+            log.error("notifyPlayer: chyba při ukládání in-app notifikace type={} playerId={}",
+                    type, player.getId(), ex);
         }
 
-        // E-mail pro hráče.
-        if (decision.isSendEmailToPlayer() && decision.getPlayerEmail() != null) {
-            sendEmailToPlayer(decision.getPlayerEmail(), player, type, context);
-        }
+        // 2) Teprve poté zkusit e-maily / SMS / kopie managerům
+        try {
+            NotificationDecision decision = notificationPreferencesService.evaluate(player, type);
+            log.info("notifyPlayer decision: type={}, playerId={}, sendUserEmail={}, sendPlayerEmail={}, sendSms={}",
+                    type, player.getId(),
+                    decision.isSendEmailToUser(),
+                    decision.isSendEmailToPlayer(),
+                    decision.isSendSmsToPlayer()
+            );
 
-        // SMS pro hráče.
-        if (decision.isSendSmsToPlayer() && decision.getPlayerPhone() != null) {
-            sendSmsToPhone(decision.getPlayerPhone(), player, type, context);
-        }
-
-        // E-mail pro manažery (kopie zpráv pro hráče), pokud typ není v blacklistu.
-        if (shouldSendManagerCopy(type)) {
-
-            List<AppUserEntity> managers = appUserRepository.findAll().stream()
-                    .filter(m -> m.getRole() == Role.ROLE_MANAGER)
-                    .toList();
-
-            AppUserEntity owner = player.getUser(); // uživatel, kterému hráč patří
-
-            for (AppUserEntity manager : managers) {
-                if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
-                    continue;
-                }
-
-                // Neposílat, pokud je manažer zároveň vlastníkem hráče.
-                if (owner != null && owner.getId() != null
-                        && Objects.equals(manager.getId(), owner.getId())) {
-                    log.debug("Manager {} je zároveň vlastníkem hráče {} – kopie se neposílá (notifyPlayer).",
-                            manager.getId(), player.getId());
-                    continue;
-                }
-
-                String managerEmail = manager.getEmail();
-
-                // Neposílat, pokud manažer už dostane e-mail jako USER nebo PLAYER (stejný e-mail).
-                if (Objects.equals(managerEmail, decision.getUserEmail())
-                        || Objects.equals(managerEmail, decision.getPlayerEmail())) {
-                    log.debug("Manager {} má stejný e-mail jako příjemce (USER/PLAYER) – kopie se neposílá (notifyPlayer).",
-                            manager.getId());
-                    continue;
-                }
-
-                // Filtrování podle manažerského nastavení notifikací.
-                if (!isManagerCopyAllowedForManager(type, manager)) {
-                    log.debug("Manager {} má nastavenou úroveň manažerských notifikací, pro typ {} se kopie neposílá (notifyPlayer).",
-                            manager.getId(), type);
-                    continue;
-                }
-
-                sendEmailToManager(manager, player, type, context);
+            // E-mail pro uživatele (AppUser).
+            if (decision.isSendEmailToUser() && decision.getUserEmail() != null) {
+                sendEmailToUser(decision.getUserEmail(), player, type, context);
             }
-        } else {
-            log.debug("Typ {} je v MANAGER_COPY_BLACKLIST – kopie manažerům se neposílá (notifyPlayer).", type);
-        }
 
-        System.out.println("typ notifikace: "  + type + " - " + context );
-        inAppNotificationService.storeForPlayer(player, type, context);
+            // E-mail pro hráče.
+            if (decision.isSendEmailToPlayer() && decision.getPlayerEmail() != null) {
+                sendEmailToPlayer(decision.getPlayerEmail(), player, type, context);
+            }
+
+            // SMS pro hráče.
+            if (decision.isSendSmsToPlayer() && decision.getPlayerPhone() != null) {
+                sendSmsToPhone(decision.getPlayerPhone(), player, type, context);
+            }
+
+            // E-mail pro manažery (kopie zpráv pro hráče), pokud typ není v blacklistu.
+            if (shouldSendManagerCopy(type)) {
+
+                List<AppUserEntity> managers = appUserRepository.findAll().stream()
+                        .filter(m -> m.getRole() == Role.ROLE_MANAGER)
+                        .toList();
+
+                AppUserEntity owner = player.getUser(); // uživatel, kterému hráč patří
+
+                for (AppUserEntity manager : managers) {
+                    if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
+                        continue;
+                    }
+
+                    // Neposílat, pokud je manažer zároveň vlastníkem hráče.
+                    if (owner != null && owner.getId() != null
+                            && Objects.equals(manager.getId(), owner.getId())) {
+                        log.debug("Manager {} je zároveň vlastníkem hráče {} – kopie se neposílá (notifyPlayer).",
+                                manager.getId(), player.getId());
+                        continue;
+                    }
+
+                    String managerEmail = manager.getEmail();
+
+                    // Neposílat, pokud manažer už dostane e-mail jako USER nebo PLAYER (stejný e-mail).
+                    if (Objects.equals(managerEmail, decision.getUserEmail())
+                            || Objects.equals(managerEmail, decision.getPlayerEmail())) {
+                        log.debug("Manager {} má stejný e-mail jako příjemce (USER/PLAYER) – kopie se neposílá (notifyPlayer).",
+                                manager.getId());
+                        continue;
+                    }
+
+                    // Filtrování podle manažerského nastavení notifikací.
+                    if (!isManagerCopyAllowedForManager(type, manager)) {
+                        log.debug("Manager {} má nastavenou úroveň manažerských notifikací, pro typ {} se kopie neposílá (notifyPlayer).",
+                                manager.getId(), type);
+                        continue;
+                    }
+
+                    sendEmailToManager(manager, player, type, context);
+                }
+            } else {
+                log.debug("Typ {} je v MANAGER_COPY_BLACKLIST – kopie manažerům se neposílá (notifyPlayer).", type);
+            }
+
+            log.debug("notifyPlayer: in-app + e-mail/SMS notifikace zpracována pro type={} playerId={}",
+                    type, player.getId());
+
+        } catch (Exception ex) {
+            // Chyba v rozhodování / email builderu / SMS nesmí zablokovat uložení in-app
+            log.error("notifyPlayer: chyba při zpracování e-mailů/SMS/kopií pro type={} playerId={}",
+                    type, player.getId(), ex);
+        }
     }
 
     @Override
@@ -179,114 +194,130 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        Object effectiveContext = (context != null) ? context : user;
+        // 1) Nejprve uložit in-app notifikaci pro uživatele
+        try {
+            inAppNotificationService.storeForUser(user, type, context);
+        } catch (Exception ex) {
+            log.error("notifyUser: chyba při ukládání in-app notifikace type={} userId={}",
+                    type, user.getId(), ex);
+        }
 
-        // E-mail pro uživatele.
-        String userEmail = user.getEmail();
+        // 2) Pak e-maily a kopie manažerům v try/catch
+        try {
+            Object effectiveContext = (context != null) ? context : user;
 
-        if (userEmail != null && !userEmail.isBlank()) {
+            // E-mail pro uživatele.
+            String userEmail = user.getEmail();
 
-            // Player je null, user se případně předá v kontextu.
-            EmailMessageBuilder.EmailContent content =
-                    emailMessageBuilder.buildForUser(type, null, userEmail, effectiveContext);
+            if (userEmail != null && !userEmail.isBlank()) {
 
-            if (content != null) {
-                // DEMO režim – místo odeslání uložíme do DemoNotificationStore
-                if (demoModeService.isDemoMode()) {
-                    // DEMO CHANGED: používáme novou signaturu addEmail(...)
-                    demoNotificationStore.addEmail(
-                            userEmail,
-                            content.subject(),
-                            content.body(),
-                            content.html(),
-                            type,
-                            "USER"
-                    );
-                    log.debug("DEMO MODE: notifyUser e-mail USER uložen do DemoNotificationStore, nic se neodesílá");
-                    // KONEC DEMO
-                } else {
-                    if (content.html()) {
-                        emailService.sendHtmlEmail(userEmail, content.subject(), content.body());
+                // Player je null, user se případně předá v kontextu.
+                EmailMessageBuilder.EmailContent content =
+                        emailMessageBuilder.buildForUser(type, null, userEmail, effectiveContext);
+
+                if (content != null) {
+                    // DEMO režim – místo odeslání uložíme do DemoNotificationStore
+                    if (demoModeService.isDemoMode()) {
+                        // DEMO CHANGED: používáme novou signaturu addEmail(...)
+                        demoNotificationStore.addEmail(
+                                userEmail,
+                                content.subject(),
+                                content.body(),
+                                content.html(),
+                                type,
+                                "USER"
+                        );
+                        log.debug("DEMO MODE: notifyUser e-mail USER uložen do DemoNotificationStore, nic se neodesílá");
+                        // KONEC DEMO
                     } else {
-                        emailService.sendSimpleEmail(userEmail, content.subject(), content.body());
+                        if (content.html()) {
+                            emailService.sendHtmlEmail(userEmail, content.subject(), content.body());
+                        } else {
+                            emailService.sendSimpleEmail(userEmail, content.subject(), content.body());
+                        }
                     }
-                }
 
+                } else {
+                    log.debug("Typ {} nemá definovanou e-mailovou šablonu pro uživatele (USER), nic se neposílá", type);
+                }
             } else {
-                log.debug("Typ {} nemá definovanou e-mailovou šablonu pro uživatele (USER), nic se neposílá", type);
+                log.debug("notifyUser: uživatel {} nemá e-mail, nic se neposílá", user.getId());
             }
-        } else {
-            log.debug("notifyUser: uživatel {} nemá e-mail, nic se neposílá", user.getId());
-        }
 
-        // E-mail pro manažery.
-        if (shouldSendManagerCopy(type)) {
+            // E-mail pro manažery.
+            if (shouldSendManagerCopy(type)) {
 
-            List<AppUserEntity> managers = appUserRepository.findAll().stream()
-                    .filter(m -> m.getRole() == Role.ROLE_MANAGER)
-                    .toList();
+                List<AppUserEntity> managers = appUserRepository.findAll().stream()
+                        .filter(m -> m.getRole() == Role.ROLE_MANAGER)
+                        .toList();
 
-            for (AppUserEntity manager : managers) {
-                if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
-                    continue;
-                }
-
-                // Neposílat, pokud je manažer zároveň tento uživatel.
-                if (user.getId() != null && Objects.equals(manager.getId(), user.getId())) {
-                    log.debug("Manager {} je zároveň adresátem (USER) – kopie se neposílá (notifyUser).",
-                            manager.getId());
-                    continue;
-                }
-
-                String managerEmail = manager.getEmail();
-
-                // Neposílat, pokud má manažer stejný e-mail jako uživatel.
-                if (Objects.equals(managerEmail, userEmail)) {
-                    log.debug("Manager {} má stejný e-mail jako uživatel – kopie se neposílá (notifyUser).",
-                            manager.getId());
-                    continue;
-                }
-
-                // Filtrování podle manažerského nastavení notifikací.
-                if (!isManagerCopyAllowedForManager(type, manager)) {
-                    log.debug("Manager {} má nastavenou úroveň manažerských notifikací, pro typ {} se kopie neposílá (notifyUser).",
-                            manager.getId(), type);
-                    continue;
-                }
-
-                EmailMessageBuilder.EmailContent managerContent =
-                        emailMessageBuilder.buildForManager(type, null, manager, effectiveContext);
-
-                if (managerContent == null) {
-                    log.debug("Typ {} nemá definovanou e-mailovou šablonu pro manažera (USER), nic se neposílá", type);
-                    continue;
-                }
-
-
-                if (demoModeService.isDemoMode()) {
-
-                    demoNotificationStore.addEmail(
-                            managerEmail,
-                            managerContent.subject(),
-                            managerContent.body(),
-                            managerContent.html(),
-                            type,
-                            "MANAGER"
-                    );
-                    log.debug("DEMO MODE: notifyUser e-mail MANAGER uložen do DemoNotificationStore, nic se neodesílá");
-                } else {
-                    if (managerContent.html()) {
-                        emailService.sendHtmlEmail(managerEmail, managerContent.subject(), managerContent.body());
-                    } else {
-                        emailService.sendSimpleEmail(managerEmail, managerContent.subject(), managerContent.body());
+                for (AppUserEntity manager : managers) {
+                    if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
+                        continue;
                     }
-                }
 
+                    // Neposílat, pokud je manažer zároveň tento uživatel.
+                    if (user.getId() != null && Objects.equals(manager.getId(), user.getId())) {
+                        log.debug("Manager {} je zároveň adresátem (USER) – kopie se neposílá (notifyUser).",
+                                manager.getId());
+                        continue;
+                    }
+
+                    String managerEmail = manager.getEmail();
+
+                    // Neposílat, pokud má manažer stejný e-mail jako uživatel.
+                    if (Objects.equals(managerEmail, userEmail)) {
+                        log.debug("Manager {} má stejný e-mail jako uživatel – kopie se neposílá (notifyUser).",
+                                manager.getId());
+                        continue;
+                    }
+
+                    // Filtrování podle manažerského nastavení notifikací.
+                    if (!isManagerCopyAllowedForManager(type, manager)) {
+                        log.debug("Manager {} má nastavenou úroveň manažerských notifikací, pro typ {} se kopie neposílá (notifyUser).",
+                                manager.getId(), type);
+                        continue;
+                    }
+
+                    EmailMessageBuilder.EmailContent managerContent =
+                            emailMessageBuilder.buildForManager(type, null, manager, effectiveContext);
+
+                    if (managerContent == null) {
+                        log.debug("Typ {} nemá definovanou e-mailovou šablonu pro manažera (USER), nic se neposílá", type);
+                        continue;
+                    }
+
+                    if (demoModeService.isDemoMode()) {
+
+                        demoNotificationStore.addEmail(
+                                managerEmail,
+                                managerContent.subject(),
+                                managerContent.body(),
+                                managerContent.html(),
+                                type,
+                                "MANAGER"
+                        );
+                        log.debug("DEMO MODE: notifyUser e-mail MANAGER uložen do DemoNotificationStore, nic se neodesílá");
+                    } else {
+                        if (managerContent.html()) {
+                            emailService.sendHtmlEmail(managerEmail, managerContent.subject(), managerContent.body());
+                        } else {
+                            emailService.sendSimpleEmail(managerEmail, managerContent.subject(), managerContent.body());
+                        }
+                    }
+
+                }
+            } else {
+                log.debug("Typ {} je v MANAGER_COPY_BLACKLIST – kopie manažerům se neposílá (notifyUser).", type);
             }
-        } else {
-            log.debug("Typ {} je v MANAGER_COPY_BLACKLIST – kopie manažerům se neposílá (notifyUser).", type);
+
+            log.debug("notifyUser: in-app + e-mail notifikace zpracována pro type={} userId={}",
+                    type, user.getId());
+
+        } catch (Exception ex) {
+            log.error("notifyUser: chyba při zpracování e-mailů/kopií pro type={} userId={}",
+                    type, user.getId(), ex);
         }
-        inAppNotificationService.storeForUser(user, type, context);
     }
 
     // Pomocné metody pro e-mail

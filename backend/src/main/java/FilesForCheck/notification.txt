@@ -18,6 +18,8 @@ NotificationQueryServiceImpl.java
 NotificationService.java
 NotificationServiceImpl.java
 package-info.java
+SpecialNotificationService.java
+SpecialNotificationServiceImpl.java
 UserActivationContext.java
 
 
@@ -520,7 +522,7 @@ public class InAppNotificationBuilder {
             }
 
             case MATCH_TIME_CHANGED -> {
-                String title = "ZmÄ›na ÄŤasu zĂˇpasu";
+                String title = "ZmÄ›na data/ÄŤasu zĂˇpasu";
 
                 LocalDateTime oldDateTime = null;
                 if (context instanceof MatchTimeChangeContext mtc) {
@@ -533,8 +535,8 @@ public class InAppNotificationBuilder {
                 }
 
                 String newPart = formattedDateTime.isBlank()
-                        ? "DoĹˇlo ke zmÄ›nÄ› ÄŤasu plĂˇnovanĂ©ho zĂˇpasu."
-                        : "DoĹˇlo ke zmÄ›nÄ› ÄŤasu zĂˇpasu na novĂ˝ termĂ­n %s."
+                        ? "DoĹˇlo ke zmÄ›nÄ› data/ÄŤasu plĂˇnovanĂ©ho zĂˇpasu."
+                        : "DoĹˇlo ke zmÄ›nÄ› data/ÄŤasu zĂˇpasu na novĂ˝ termĂ­n %s."
                         .formatted(formattedDateTime);
 
                 String oldPart = oldDateFormatted.isBlank()
@@ -644,6 +646,7 @@ package cz.phsoft.hokej.models.services.notification;
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
 
 /**
  * Servis pro uklĂˇdĂˇnĂ­ aplikaÄŤnĂ­ch (in-app) notifikacĂ­ do databĂˇze.
@@ -677,6 +680,23 @@ public interface InAppNotificationService {
      * @param context volitelnĂ˝ kontext pro sestavenĂ­ textu
      */
     void storeForUser(AppUserEntity user, NotificationType type, Object context);
+
+    /**
+     * UklĂˇdĂˇ speciĂˇlnĂ­ zprĂˇvu typu SPECIAL_MESSAGE
+     * pro zadanĂ©ho uĹľivatele a (volitelnÄ›) hrĂˇÄŤe.
+     *
+     * Text zprĂˇvy je pĹ™edĂˇvĂˇn pĹ™Ă­mo z volajĂ­cĂ­ vrstvy
+     * a nevyuĹľĂ­vĂˇ InAppNotificationBuilder.
+     *
+     * @param user uĹľivatel, ke kterĂ©mu je notifikace pĹ™iĹ™azena
+     * @param player hrĂˇÄŤ, kterĂ©ho se notifikace tĂ˝kĂˇ (mĹŻĹľe bĂ˝t null)
+     * @param messageShort struÄŤnĂ˝ text notifikace pro seznam
+     * @param messageFull plnĂ˝ text notifikace pro detail
+     */
+    void storeSpecialMessage(AppUserEntity user,
+                             PlayerEntity player,
+                             String messageShort,
+                             String messageFull);
 }
 
 -----
@@ -798,6 +818,44 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
 
         log.debug("InAppNotificationService.storeForUser: uloĹľena notifikace type={} userId={}",
                 type, user.getId());
+    }
+
+    @Override
+    public void storeSpecialMessage(AppUserEntity user,
+                                    PlayerEntity player,
+                                    String messageShort,
+                                    String messageFull) {
+
+        if (user == null) {
+            log.debug("InAppNotificationService.storeSpecialMessage: user is null, nic se neuklĂˇdĂˇ");
+            return;
+        }
+
+        String shortText = (messageShort != null && !messageShort.isBlank())
+                ? messageShort
+                : NotificationType.SPECIAL_MESSAGE.name();
+
+        String fullText = (messageFull != null && !messageFull.isBlank())
+                ? messageFull
+                : NotificationType.SPECIAL_MESSAGE.name();
+
+        NotificationEntity entity = new NotificationEntity();
+        entity.setUser(user);
+        if (player != null) {
+            entity.setPlayer(player);
+        }
+        entity.setType(NotificationType.SPECIAL_MESSAGE);
+        entity.setMessageShort(shortText);
+        entity.setMessageFull(fullText);
+        entity.setCreatedAt(Instant.now(clock));
+
+        notificationRepository.save(entity);
+
+        log.debug(
+                "InAppNotificationService.storeSpecialMessage: uloĹľena SPECIAL_MESSAGE userId={} playerId={}",
+                user.getId(),
+                player != null ? player.getId() : null
+        );
     }
 
     /**
@@ -1608,7 +1666,6 @@ import cz.phsoft.hokej.models.services.sms.SmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import cz.phsoft.hokej.models.services.notification.InAppNotificationService;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -1645,7 +1702,6 @@ public class NotificationServiceImpl implements NotificationService {
     // demo reĹľim a ĂşloĹľiĹˇtÄ› notifikacĂ­ pro demo
     private final DemoModeService demoModeService;
     private final DemoNotificationStore demoNotificationStore;
-
 
     /**
      * Typy notifikacĂ­, pro kterĂ© se nemĂˇ posĂ­lat kopie manaĹľerĹŻm.
@@ -1690,76 +1746,93 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        NotificationDecision decision = notificationPreferencesService.evaluate(player, type);
-        log.info("notifyPlayer decision: type={}, playerId={}, sendUserEmail={}, sendPlayerEmail={}, sendSms={}",
-                type, player.getId(),
-                decision.isSendEmailToUser(),
-                decision.isSendEmailToPlayer(),
-                decision.isSendSmsToPlayer()
-        );
-
-        // E-mail pro uĹľivatele (AppUser).
-        if (decision.isSendEmailToUser() && decision.getUserEmail() != null) {
-            sendEmailToUser(decision.getUserEmail(), player, type, context);
+        // 1) Nejprve vĹľdy uloĹľit in-app notifikaci (DB audit)
+        try {
+            inAppNotificationService.storeForPlayer(player, type, context);
+        } catch (Exception ex) {
+            // UloĹľenĂ­ in-app by nemÄ›lo padat, ale nechceme kvĹŻli tomu zabĂ­t celou metodu
+            log.error("notifyPlayer: chyba pĹ™i uklĂˇdĂˇnĂ­ in-app notifikace type={} playerId={}",
+                    type, player.getId(), ex);
         }
 
-        // E-mail pro hrĂˇÄŤe.
-        if (decision.isSendEmailToPlayer() && decision.getPlayerEmail() != null) {
-            sendEmailToPlayer(decision.getPlayerEmail(), player, type, context);
-        }
+        // 2) Teprve potĂ© zkusit e-maily / SMS / kopie managerĹŻm
+        try {
+            NotificationDecision decision = notificationPreferencesService.evaluate(player, type);
+            log.info("notifyPlayer decision: type={}, playerId={}, sendUserEmail={}, sendPlayerEmail={}, sendSms={}",
+                    type, player.getId(),
+                    decision.isSendEmailToUser(),
+                    decision.isSendEmailToPlayer(),
+                    decision.isSendSmsToPlayer()
+            );
 
-        // SMS pro hrĂˇÄŤe.
-        if (decision.isSendSmsToPlayer() && decision.getPlayerPhone() != null) {
-            sendSmsToPhone(decision.getPlayerPhone(), player, type, context);
-        }
-
-        // E-mail pro manaĹľery (kopie zprĂˇv pro hrĂˇÄŤe), pokud typ nenĂ­ v blacklistu.
-        if (shouldSendManagerCopy(type)) {
-
-            List<AppUserEntity> managers = appUserRepository.findAll().stream()
-                    .filter(m -> m.getRole() == Role.ROLE_MANAGER)
-                    .toList();
-
-            AppUserEntity owner = player.getUser(); // uĹľivatel, kterĂ©mu hrĂˇÄŤ patĹ™Ă­
-
-            for (AppUserEntity manager : managers) {
-                if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
-                    continue;
-                }
-
-                // NeposĂ­lat, pokud je manaĹľer zĂˇroveĹ vlastnĂ­kem hrĂˇÄŤe.
-                if (owner != null && owner.getId() != null
-                        && Objects.equals(manager.getId(), owner.getId())) {
-                    log.debug("Manager {} je zĂˇroveĹ vlastnĂ­kem hrĂˇÄŤe {} â€“ kopie se neposĂ­lĂˇ (notifyPlayer).",
-                            manager.getId(), player.getId());
-                    continue;
-                }
-
-                String managerEmail = manager.getEmail();
-
-                // NeposĂ­lat, pokud manaĹľer uĹľ dostane e-mail jako USER nebo PLAYER (stejnĂ˝ e-mail).
-                if (Objects.equals(managerEmail, decision.getUserEmail())
-                        || Objects.equals(managerEmail, decision.getPlayerEmail())) {
-                    log.debug("Manager {} mĂˇ stejnĂ˝ e-mail jako pĹ™Ă­jemce (USER/PLAYER) â€“ kopie se neposĂ­lĂˇ (notifyPlayer).",
-                            manager.getId());
-                    continue;
-                }
-
-                // FiltrovĂˇnĂ­ podle manaĹľerskĂ©ho nastavenĂ­ notifikacĂ­.
-                if (!isManagerCopyAllowedForManager(type, manager)) {
-                    log.debug("Manager {} mĂˇ nastavenou ĂşroveĹ manaĹľerskĂ˝ch notifikacĂ­, pro typ {} se kopie neposĂ­lĂˇ (notifyPlayer).",
-                            manager.getId(), type);
-                    continue;
-                }
-
-                sendEmailToManager(manager, player, type, context);
+            // E-mail pro uĹľivatele (AppUser).
+            if (decision.isSendEmailToUser() && decision.getUserEmail() != null) {
+                sendEmailToUser(decision.getUserEmail(), player, type, context);
             }
-        } else {
-            log.debug("Typ {} je v MANAGER_COPY_BLACKLIST â€“ kopie manaĹľerĹŻm se neposĂ­lĂˇ (notifyPlayer).", type);
-        }
 
-        System.out.println("typ notifikace: "  + type + " - " + context );
-        inAppNotificationService.storeForPlayer(player, type, context);
+            // E-mail pro hrĂˇÄŤe.
+            if (decision.isSendEmailToPlayer() && decision.getPlayerEmail() != null) {
+                sendEmailToPlayer(decision.getPlayerEmail(), player, type, context);
+            }
+
+            // SMS pro hrĂˇÄŤe.
+            if (decision.isSendSmsToPlayer() && decision.getPlayerPhone() != null) {
+                sendSmsToPhone(decision.getPlayerPhone(), player, type, context);
+            }
+
+            // E-mail pro manaĹľery (kopie zprĂˇv pro hrĂˇÄŤe), pokud typ nenĂ­ v blacklistu.
+            if (shouldSendManagerCopy(type)) {
+
+                List<AppUserEntity> managers = appUserRepository.findAll().stream()
+                        .filter(m -> m.getRole() == Role.ROLE_MANAGER)
+                        .toList();
+
+                AppUserEntity owner = player.getUser(); // uĹľivatel, kterĂ©mu hrĂˇÄŤ patĹ™Ă­
+
+                for (AppUserEntity manager : managers) {
+                    if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
+                        continue;
+                    }
+
+                    // NeposĂ­lat, pokud je manaĹľer zĂˇroveĹ vlastnĂ­kem hrĂˇÄŤe.
+                    if (owner != null && owner.getId() != null
+                            && Objects.equals(manager.getId(), owner.getId())) {
+                        log.debug("Manager {} je zĂˇroveĹ vlastnĂ­kem hrĂˇÄŤe {} â€“ kopie se neposĂ­lĂˇ (notifyPlayer).",
+                                manager.getId(), player.getId());
+                        continue;
+                    }
+
+                    String managerEmail = manager.getEmail();
+
+                    // NeposĂ­lat, pokud manaĹľer uĹľ dostane e-mail jako USER nebo PLAYER (stejnĂ˝ e-mail).
+                    if (Objects.equals(managerEmail, decision.getUserEmail())
+                            || Objects.equals(managerEmail, decision.getPlayerEmail())) {
+                        log.debug("Manager {} mĂˇ stejnĂ˝ e-mail jako pĹ™Ă­jemce (USER/PLAYER) â€“ kopie se neposĂ­lĂˇ (notifyPlayer).",
+                                manager.getId());
+                        continue;
+                    }
+
+                    // FiltrovĂˇnĂ­ podle manaĹľerskĂ©ho nastavenĂ­ notifikacĂ­.
+                    if (!isManagerCopyAllowedForManager(type, manager)) {
+                        log.debug("Manager {} mĂˇ nastavenou ĂşroveĹ manaĹľerskĂ˝ch notifikacĂ­, pro typ {} se kopie neposĂ­lĂˇ (notifyPlayer).",
+                                manager.getId(), type);
+                        continue;
+                    }
+
+                    sendEmailToManager(manager, player, type, context);
+                }
+            } else {
+                log.debug("Typ {} je v MANAGER_COPY_BLACKLIST â€“ kopie manaĹľerĹŻm se neposĂ­lĂˇ (notifyPlayer).", type);
+            }
+
+            log.debug("notifyPlayer: in-app + e-mail/SMS notifikace zpracovĂˇna pro type={} playerId={}",
+                    type, player.getId());
+
+        } catch (Exception ex) {
+            // Chyba v rozhodovĂˇnĂ­ / email builderu / SMS nesmĂ­ zablokovat uloĹľenĂ­ in-app
+            log.error("notifyPlayer: chyba pĹ™i zpracovĂˇnĂ­ e-mailĹŻ/SMS/kopiĂ­ pro type={} playerId={}",
+                    type, player.getId(), ex);
+        }
     }
 
     @Override
@@ -1772,114 +1845,130 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        Object effectiveContext = (context != null) ? context : user;
+        // 1) Nejprve uloĹľit in-app notifikaci pro uĹľivatele
+        try {
+            inAppNotificationService.storeForUser(user, type, context);
+        } catch (Exception ex) {
+            log.error("notifyUser: chyba pĹ™i uklĂˇdĂˇnĂ­ in-app notifikace type={} userId={}",
+                    type, user.getId(), ex);
+        }
 
-        // E-mail pro uĹľivatele.
-        String userEmail = user.getEmail();
+        // 2) Pak e-maily a kopie manaĹľerĹŻm v try/catch
+        try {
+            Object effectiveContext = (context != null) ? context : user;
 
-        if (userEmail != null && !userEmail.isBlank()) {
+            // E-mail pro uĹľivatele.
+            String userEmail = user.getEmail();
 
-            // Player je null, user se pĹ™Ă­padnÄ› pĹ™edĂˇ v kontextu.
-            EmailMessageBuilder.EmailContent content =
-                    emailMessageBuilder.buildForUser(type, null, userEmail, effectiveContext);
+            if (userEmail != null && !userEmail.isBlank()) {
 
-            if (content != null) {
-                // DEMO reĹľim â€“ mĂ­sto odeslĂˇnĂ­ uloĹľĂ­me do DemoNotificationStore
-                if (demoModeService.isDemoMode()) {
-                    // DEMO CHANGED: pouĹľĂ­vĂˇme novou signaturu addEmail(...)
-                    demoNotificationStore.addEmail(
-                            userEmail,
-                            content.subject(),
-                            content.body(),
-                            content.html(),
-                            type,
-                            "USER"
-                    );
-                    log.debug("DEMO MODE: notifyUser e-mail USER uloĹľen do DemoNotificationStore, nic se neodesĂ­lĂˇ");
-                    // KONEC DEMO
-                } else {
-                    if (content.html()) {
-                        emailService.sendHtmlEmail(userEmail, content.subject(), content.body());
+                // Player je null, user se pĹ™Ă­padnÄ› pĹ™edĂˇ v kontextu.
+                EmailMessageBuilder.EmailContent content =
+                        emailMessageBuilder.buildForUser(type, null, userEmail, effectiveContext);
+
+                if (content != null) {
+                    // DEMO reĹľim â€“ mĂ­sto odeslĂˇnĂ­ uloĹľĂ­me do DemoNotificationStore
+                    if (demoModeService.isDemoMode()) {
+                        // DEMO CHANGED: pouĹľĂ­vĂˇme novou signaturu addEmail(...)
+                        demoNotificationStore.addEmail(
+                                userEmail,
+                                content.subject(),
+                                content.body(),
+                                content.html(),
+                                type,
+                                "USER"
+                        );
+                        log.debug("DEMO MODE: notifyUser e-mail USER uloĹľen do DemoNotificationStore, nic se neodesĂ­lĂˇ");
+                        // KONEC DEMO
                     } else {
-                        emailService.sendSimpleEmail(userEmail, content.subject(), content.body());
+                        if (content.html()) {
+                            emailService.sendHtmlEmail(userEmail, content.subject(), content.body());
+                        } else {
+                            emailService.sendSimpleEmail(userEmail, content.subject(), content.body());
+                        }
                     }
-                }
 
+                } else {
+                    log.debug("Typ {} nemĂˇ definovanou e-mailovou Ĺˇablonu pro uĹľivatele (USER), nic se neposĂ­lĂˇ", type);
+                }
             } else {
-                log.debug("Typ {} nemĂˇ definovanou e-mailovou Ĺˇablonu pro uĹľivatele (USER), nic se neposĂ­lĂˇ", type);
+                log.debug("notifyUser: uĹľivatel {} nemĂˇ e-mail, nic se neposĂ­lĂˇ", user.getId());
             }
-        } else {
-            log.debug("notifyUser: uĹľivatel {} nemĂˇ e-mail, nic se neposĂ­lĂˇ", user.getId());
-        }
 
-        // E-mail pro manaĹľery.
-        if (shouldSendManagerCopy(type)) {
+            // E-mail pro manaĹľery.
+            if (shouldSendManagerCopy(type)) {
 
-            List<AppUserEntity> managers = appUserRepository.findAll().stream()
-                    .filter(m -> m.getRole() == Role.ROLE_MANAGER)
-                    .toList();
+                List<AppUserEntity> managers = appUserRepository.findAll().stream()
+                        .filter(m -> m.getRole() == Role.ROLE_MANAGER)
+                        .toList();
 
-            for (AppUserEntity manager : managers) {
-                if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
-                    continue;
-                }
-
-                // NeposĂ­lat, pokud je manaĹľer zĂˇroveĹ tento uĹľivatel.
-                if (user.getId() != null && Objects.equals(manager.getId(), user.getId())) {
-                    log.debug("Manager {} je zĂˇroveĹ adresĂˇtem (USER) â€“ kopie se neposĂ­lĂˇ (notifyUser).",
-                            manager.getId());
-                    continue;
-                }
-
-                String managerEmail = manager.getEmail();
-
-                // NeposĂ­lat, pokud mĂˇ manaĹľer stejnĂ˝ e-mail jako uĹľivatel.
-                if (Objects.equals(managerEmail, userEmail)) {
-                    log.debug("Manager {} mĂˇ stejnĂ˝ e-mail jako uĹľivatel â€“ kopie se neposĂ­lĂˇ (notifyUser).",
-                            manager.getId());
-                    continue;
-                }
-
-                // FiltrovĂˇnĂ­ podle manaĹľerskĂ©ho nastavenĂ­ notifikacĂ­.
-                if (!isManagerCopyAllowedForManager(type, manager)) {
-                    log.debug("Manager {} mĂˇ nastavenou ĂşroveĹ manaĹľerskĂ˝ch notifikacĂ­, pro typ {} se kopie neposĂ­lĂˇ (notifyUser).",
-                            manager.getId(), type);
-                    continue;
-                }
-
-                EmailMessageBuilder.EmailContent managerContent =
-                        emailMessageBuilder.buildForManager(type, null, manager, effectiveContext);
-
-                if (managerContent == null) {
-                    log.debug("Typ {} nemĂˇ definovanou e-mailovou Ĺˇablonu pro manaĹľera (USER), nic se neposĂ­lĂˇ", type);
-                    continue;
-                }
-
-
-                if (demoModeService.isDemoMode()) {
-
-                    demoNotificationStore.addEmail(
-                            managerEmail,
-                            managerContent.subject(),
-                            managerContent.body(),
-                            managerContent.html(),
-                            type,
-                            "MANAGER"
-                    );
-                    log.debug("DEMO MODE: notifyUser e-mail MANAGER uloĹľen do DemoNotificationStore, nic se neodesĂ­lĂˇ");
-                } else {
-                    if (managerContent.html()) {
-                        emailService.sendHtmlEmail(managerEmail, managerContent.subject(), managerContent.body());
-                    } else {
-                        emailService.sendSimpleEmail(managerEmail, managerContent.subject(), managerContent.body());
+                for (AppUserEntity manager : managers) {
+                    if (manager == null || manager.getEmail() == null || manager.getEmail().isBlank()) {
+                        continue;
                     }
-                }
 
+                    // NeposĂ­lat, pokud je manaĹľer zĂˇroveĹ tento uĹľivatel.
+                    if (user.getId() != null && Objects.equals(manager.getId(), user.getId())) {
+                        log.debug("Manager {} je zĂˇroveĹ adresĂˇtem (USER) â€“ kopie se neposĂ­lĂˇ (notifyUser).",
+                                manager.getId());
+                        continue;
+                    }
+
+                    String managerEmail = manager.getEmail();
+
+                    // NeposĂ­lat, pokud mĂˇ manaĹľer stejnĂ˝ e-mail jako uĹľivatel.
+                    if (Objects.equals(managerEmail, userEmail)) {
+                        log.debug("Manager {} mĂˇ stejnĂ˝ e-mail jako uĹľivatel â€“ kopie se neposĂ­lĂˇ (notifyUser).",
+                                manager.getId());
+                        continue;
+                    }
+
+                    // FiltrovĂˇnĂ­ podle manaĹľerskĂ©ho nastavenĂ­ notifikacĂ­.
+                    if (!isManagerCopyAllowedForManager(type, manager)) {
+                        log.debug("Manager {} mĂˇ nastavenou ĂşroveĹ manaĹľerskĂ˝ch notifikacĂ­, pro typ {} se kopie neposĂ­lĂˇ (notifyUser).",
+                                manager.getId(), type);
+                        continue;
+                    }
+
+                    EmailMessageBuilder.EmailContent managerContent =
+                            emailMessageBuilder.buildForManager(type, null, manager, effectiveContext);
+
+                    if (managerContent == null) {
+                        log.debug("Typ {} nemĂˇ definovanou e-mailovou Ĺˇablonu pro manaĹľera (USER), nic se neposĂ­lĂˇ", type);
+                        continue;
+                    }
+
+                    if (demoModeService.isDemoMode()) {
+
+                        demoNotificationStore.addEmail(
+                                managerEmail,
+                                managerContent.subject(),
+                                managerContent.body(),
+                                managerContent.html(),
+                                type,
+                                "MANAGER"
+                        );
+                        log.debug("DEMO MODE: notifyUser e-mail MANAGER uloĹľen do DemoNotificationStore, nic se neodesĂ­lĂˇ");
+                    } else {
+                        if (managerContent.html()) {
+                            emailService.sendHtmlEmail(managerEmail, managerContent.subject(), managerContent.body());
+                        } else {
+                            emailService.sendSimpleEmail(managerEmail, managerContent.subject(), managerContent.body());
+                        }
+                    }
+
+                }
+            } else {
+                log.debug("Typ {} je v MANAGER_COPY_BLACKLIST â€“ kopie manaĹľerĹŻm se neposĂ­lĂˇ (notifyUser).", type);
             }
-        } else {
-            log.debug("Typ {} je v MANAGER_COPY_BLACKLIST â€“ kopie manaĹľerĹŻm se neposĂ­lĂˇ (notifyUser).", type);
+
+            log.debug("notifyUser: in-app + e-mail notifikace zpracovĂˇna pro type={} userId={}",
+                    type, user.getId());
+
+        } catch (Exception ex) {
+            log.error("notifyUser: chyba pĹ™i zpracovĂˇnĂ­ e-mailĹŻ/kopiĂ­ pro type={} userId={}",
+                    type, user.getId(), ex);
         }
-        inAppNotificationService.storeForUser(user, type, context);
     }
 
     // PomocnĂ© metody pro e-mail
@@ -2116,6 +2205,322 @@ public class NotificationServiceImpl implements NotificationService {
  * NeĹ™eĹˇĂ­ samotnĂ© odesĂ­lĂˇnĂ­ zprĂˇv.
  */
 package cz.phsoft.hokej.models.services.notification;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\SpecialNotificationService.java
+-----
+package cz.phsoft.hokej.models.services.notification;
+
+import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
+
+/**
+ * SluĹľba pro odesĂ­lĂˇnĂ­ speciĂˇlnĂ­ch zprĂˇv administrĂˇtorem.
+ *
+ * ZajiĹˇĹĄuje vytvoĹ™enĂ­ in-app notifikacĂ­ a podle nastavenĂ­
+ * takĂ© odeslĂˇnĂ­ emailĹŻ a SMS zprĂˇv, bez ohledu na
+ * individuĂˇlnĂ­ uĹľivatelskĂˇ notifikaÄŤnĂ­ nastavenĂ­.
+ */
+public interface SpecialNotificationService {
+
+    /**
+     * OdesĂ­lĂˇ speciĂˇlnĂ­ zprĂˇvu na zĂˇkladÄ› vstupnĂ­ho DTO.
+     *
+     * Pro kaĹľdĂ˝ uvedenĂ˝ cĂ­l se:
+     * - uloĹľĂ­ in-app notifikace typu SPECIAL_MESSAGE,
+     * - volitelnÄ› odeĹˇle email,
+     * - volitelnÄ› odeĹˇle SMS.
+     *
+     * @param request definice zprĂˇvy a seznam pĹ™Ă­jemcĹŻ
+     */
+    void sendSpecialNotification(SpecialNotificationRequestDTO request);
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\SpecialNotificationServiceImpl.java
+-----
+package cz.phsoft.hokej.models.services.notification;
+
+import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
+import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.data.repositories.AppUserRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.data.repositories.PlayerSettingsRepository;
+import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
+import cz.phsoft.hokej.models.services.email.EmailService;
+import cz.phsoft.hokej.models.services.sms.SmsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+
+/**
+ * Implementace sluĹľby pro odesĂ­lĂˇnĂ­ speciĂˇlnĂ­ch zprĂˇv.
+ *
+ * SluĹľba kombinuje:
+ * - uloĹľenĂ­ in-app notifikacĂ­ (InAppNotificationService),
+ * - odeslĂˇnĂ­ emailĹŻ (EmailService),
+ * - odeslĂˇnĂ­ SMS (SmsService).
+ *
+ * VĹˇechny akce se provĂˇdÄ›jĂ­ bez ohledu na uĹľivatelskĂˇ
+ * notifikaÄŤnĂ­ nastavenĂ­. SelhĂˇnĂ­ emailu nebo SMS
+ * neblokuje uloĹľenĂ­ in-app notifikace.
+ *
+ * V DEMO reĹľimu se e-maily a SMS fyzicky neodesĂ­lajĂ­.
+ * MĂ­sto toho se uklĂˇdajĂ­ do DemoNotificationStore a
+ * vracĂ­ se na frontend pĹ™es demo endpoint.
+ */
+@Service
+public class SpecialNotificationServiceImpl implements SpecialNotificationService {
+
+    private static final Logger log = LoggerFactory.getLogger(SpecialNotificationServiceImpl.class);
+
+    private final AppUserRepository appUserRepository;
+    private final PlayerRepository playerRepository;
+    private final PlayerSettingsRepository playerSettingsRepository;
+    private final InAppNotificationService inAppNotificationService;
+    private final EmailService emailService;
+    private final SmsService smsService;
+
+    // DEMO reĹľim
+    private final DemoModeService demoModeService;
+    private final DemoNotificationStore demoNotificationStore;
+
+    public SpecialNotificationServiceImpl(AppUserRepository appUserRepository,
+                                          PlayerRepository playerRepository,
+                                          PlayerSettingsRepository playerSettingsRepository,
+                                          InAppNotificationService inAppNotificationService,
+                                          EmailService emailService,
+                                          SmsService smsService,
+                                          DemoModeService demoModeService,
+                                          DemoNotificationStore demoNotificationStore) {
+        this.appUserRepository = appUserRepository;
+        this.playerRepository = playerRepository;
+        this.playerSettingsRepository = playerSettingsRepository;
+        this.inAppNotificationService = inAppNotificationService;
+        this.emailService = emailService;
+        this.smsService = smsService;
+        this.demoModeService = demoModeService;
+        this.demoNotificationStore = demoNotificationStore;
+    }
+
+    @Override
+    public void sendSpecialNotification(SpecialNotificationRequestDTO request) {
+        Objects.requireNonNull(request, "request must not be null");
+
+        if (request.getTargets() == null || request.getTargets().isEmpty()) {
+            log.debug("SpecialNotificationService.sendSpecialNotification: prĂˇzdnĂ˝ seznam pĹ™Ă­jemcĹŻ, nic se neprovĂˇdĂ­");
+            return;
+        }
+
+        request.getTargets().forEach(target -> {
+            AppUserEntity user = appUserRepository.findById(target.getUserId())
+                    .orElseThrow(() -> new UserNotFoundException(target.getUserId()));
+
+            PlayerEntity player = null;
+            PlayerSettingsEntity playerSettings = null;
+
+            if (target.getPlayerId() != null) {
+                player = playerRepository.findById(target.getPlayerId())
+                        .orElseThrow(() -> new PlayerNotFoundException(target.getPlayerId()));
+
+                playerSettings = playerSettingsRepository.findByPlayer(player)
+                        .orElse(null);
+            }
+
+            // 1) IN-APP notifikace
+            inAppNotificationService.storeSpecialMessage(
+                    user,
+                    player,
+                    request.getTitle(),
+                    request.getMessage()
+            );
+
+            // 2) EMAIL (pokud je povoleno a existuje nÄ›jakĂ˝ email podle pravidel resolveEmail)
+            if (request.isSendEmail()) {
+                String to = resolveEmail(user, playerSettings);
+                if (to != null && !to.isBlank()) {
+                    sendSpecialEmail(to, player, request);
+                } else {
+                    log.debug(
+                            "SpecialNotificationService.sendSpecialNotification: nenĂ­ k dispozici email pro playerId={} (userId={})",
+                            player != null ? player.getId() : null,
+                            user.getId()
+                    );
+                }
+            }
+
+            // 3) SMS (pokud je povoleno a mĂˇme telefon v PlayerSettings)
+            if (request.isSendSms() && playerSettings != null) {
+                String phone = resolvePhoneNumber(playerSettings);
+                if (phone != null && !phone.isBlank()) {
+                    sendSpecialSms(phone, request);
+                } else {
+                    log.debug(
+                            "SpecialNotificationService.sendSpecialNotification: chybĂ­ telefonnĂ­ ÄŤĂ­slo pro playerId={} (userId={})",
+                            player != null ? player.getId() : null,
+                            user.getId()
+                    );
+                }
+            }
+        });
+    }
+
+    /**
+     * OdesĂ­lĂˇ email se speciĂˇlnĂ­ zprĂˇvou.
+     *
+     * Implementace pouĹľĂ­vĂˇ EmailService bez ohledu
+     * na uĹľivatelskĂˇ nastavenĂ­ notifikacĂ­.
+     *
+     * Email se odesĂ­lĂˇ na jiĹľ vybranou adresu (resolveEmail).
+     *
+     * V DEMO reĹľimu se email neodesĂ­lĂˇ, ale uklĂˇdĂˇ se
+     * do DemoNotificationStore.
+     */
+    private void sendSpecialEmail(String to,
+                                  PlayerEntity player,
+                                  SpecialNotificationRequestDTO request) {
+
+        if (to == null || to.isBlank()) {
+            return;
+        }
+
+        String subject = "[HobbyHokej] " + request.getTitle();
+
+        String playerInfo = "";
+        if (player != null) {
+            // TODO: uprav podle PlayerEntity (napĹ™. getFullName())
+            playerInfo = "\nHrĂˇÄŤ: " + player.getFullName() + "\n";
+        }
+
+        String text = """
+                DobrĂ˝ den,
+
+                sprĂˇvce systĂ©mu VĂˇm zasĂ­lĂˇ dĹŻleĹľitou zprĂˇvu:
+
+                %s
+
+                %sTato zprĂˇva byla doruÄŤena prostĹ™ednictvĂ­m systĂ©mu HobbyHokej
+                bez ohledu na VaĹˇe standardnĂ­ nastavenĂ­ notifikacĂ­.
+
+                S pozdravem
+                HobbyHokej
+                """.formatted(
+                request.getMessage(),
+                playerInfo
+        );
+
+        // DEMO reĹľim â€“ uloĹľit do demo ĂşloĹľiĹˇtÄ› a nevolat SMTP
+        if (demoModeService.isDemoMode()) {
+            demoNotificationStore.addEmail(
+                    to,
+                    subject,
+                    text,
+                    false, // prostĂ˝ text
+                    NotificationType.SPECIAL_MESSAGE,
+                    "SPECIAL"
+            );
+            log.debug("DEMO MODE: speciĂˇlnĂ­ e-mail uloĹľen do DemoNotificationStore, nic se neodesĂ­lĂˇ (to={})", to);
+            return;
+        }
+
+        try {
+            emailService.sendSimpleEmail(to, subject, text);
+        } catch (Exception ex) {
+            log.warn("NepodaĹ™ilo se odeslat speciĂˇlnĂ­ email na {}: {}", to, ex.getMessage());
+        }
+    }
+
+    /**
+     * VracĂ­ telefonnĂ­ ÄŤĂ­slo pro odeslĂˇnĂ­ SMS.
+     *
+     * TelefonnĂ­ ÄŤĂ­slo je uloĹľeno v PlayerSettingsEntity.contactPhone.
+     * NastavenĂ­ smsEnabled se u speciĂˇlnĂ­ch zprĂˇv ignoruje.
+     */
+    private String resolvePhoneNumber(PlayerSettingsEntity playerSettings) {
+        if (playerSettings == null) {
+            return null;
+        }
+
+        String phone = playerSettings.getContactPhone();
+        if (phone != null && !phone.isBlank()) {
+            return phone;
+        }
+        return null;
+    }
+
+    /**
+     * OdesĂ­lĂˇ SMS se speciĂˇlnĂ­ zprĂˇvou.
+     *
+     * V DEMO reĹľimu se SMS neodesĂ­lĂˇ, ale uklĂˇdĂˇ se
+     * do DemoNotificationStore.
+     */
+    private void sendSpecialSms(String phoneNumber,
+                                SpecialNotificationRequestDTO request) {
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            return;
+        }
+
+        String text = request.getMessage();
+        // pĹ™Ă­padnÄ› zkrĂˇtit na max. dĂ©lku SMS, podle providera
+
+        // DEMO reĹľim â€“ uloĹľit do demo ĂşloĹľiĹˇtÄ›
+        if (demoModeService.isDemoMode()) {
+            demoNotificationStore.addSms(
+                    phoneNumber,
+                    text,
+                    NotificationType.SPECIAL_MESSAGE
+            );
+            log.debug("DEMO MODE: speciĂˇlnĂ­ SMS uloĹľena do DemoNotificationStore, nic se neodesĂ­lĂˇ (phone={})", phoneNumber);
+            return;
+        }
+
+        try {
+            smsService.sendSms(phoneNumber, text);
+        } catch (Exception ex) {
+            log.warn("NepodaĹ™ilo se odeslat speciĂˇlnĂ­ SMS na {}: {}", phoneNumber, ex.getMessage());
+        }
+    }
+
+    /**
+     * VracĂ­ preferovanĂ˝ email pro speciĂˇlnĂ­ zprĂˇvu.
+     *
+     * Pravidla:
+     * - pokud playerSettings.contactEmail je prĂˇzdnĂ˝ â†’ pouĹľije se email uĹľivatele,
+     * - pokud contactEmail je stejnĂ˝ jako email uĹľivatele (case-insensitive) â†’ pouĹľije se email uĹľivatele,
+     * - pokud contactEmail je rĹŻznĂ˝ â†’ pouĹľije se contactEmail (hrĂˇÄŤskĂ˝).
+     *
+     * Pokud ĹľĂˇdnĂ˝ email nenĂ­ k dispozici, vracĂ­ null.
+     */
+    private String resolveEmail(AppUserEntity user, PlayerSettingsEntity playerSettings) {
+        String userEmail = (user != null && user.getEmail() != null && !user.getEmail().isBlank())
+                ? user.getEmail()
+                : null;
+
+        String playerEmail = (playerSettings != null
+                && playerSettings.getContactEmail() != null
+                && !playerSettings.getContactEmail().isBlank())
+                ? playerSettings.getContactEmail()
+                : null;
+
+        // HrĂˇÄŤ nemĂˇ vlastnĂ­ email â†’ pouĹľijeme email uĹľivatele
+        if (playerEmail == null) {
+            return userEmail;
+        }
+
+        // HrĂˇÄŤ mĂˇ email, ale je stejnĂ˝ jako uĹľivatel â†’ stejnÄ› pouĹľijeme email uĹľivatele
+        if (userEmail != null && userEmail.equalsIgnoreCase(playerEmail)) {
+            return userEmail;
+        }
+
+        // HrĂˇÄŤ mĂˇ vlastnĂ­ odliĹˇnĂ˝ email â†’ pouĹľijeme hrĂˇÄŤskĂ˝ email
+        return playerEmail;
+    }
+}
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\UserActivationContext.java

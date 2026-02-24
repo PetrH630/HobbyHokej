@@ -2,6 +2,7 @@
 Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers
 
 Seznam souborů:
+AdminNotificationController.java
 AppModeController.java
 AppUserController.java
 AppUserSettingsController.java
@@ -23,6 +24,81 @@ TestController.java
 TestEmailController.java
 TestSmsController.java
 
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\AdminNotificationController.java
+-----
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.DemoNotificationsDTO;
+import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
+import cz.phsoft.hokej.models.services.notification.DemoModeService;
+import cz.phsoft.hokej.models.services.notification.DemoNotificationStore;
+import cz.phsoft.hokej.models.services.notification.SpecialNotificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * Controller pro administrĂˇtorskĂ© notifikace.
+ */
+@RestController
+@RequestMapping("/api/notifications/admin")
+public class AdminNotificationController {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminNotificationController.class);
+
+    private final SpecialNotificationService specialNotificationService;
+    private final DemoModeService demoModeService;
+    private final DemoNotificationStore demoNotificationStore;
+
+    public AdminNotificationController(SpecialNotificationService specialNotificationService,
+                                       DemoModeService demoModeService,
+                                       DemoNotificationStore demoNotificationStore) {
+        this.specialNotificationService = specialNotificationService;
+        this.demoModeService = demoModeService;
+        this.demoNotificationStore = demoNotificationStore;
+    }
+
+    /**
+     * VytvoĹ™Ă­ speciĂˇlnĂ­ zprĂˇvu pro vybranĂ© uĹľivatele a hrĂˇÄŤe.
+     *
+     * ZprĂˇva se uloĹľĂ­ jako in-app notifikace typu SPECIAL_MESSAGE
+     * a podle pĹ™Ă­znakĹŻ v requestu se odeĹˇle takĂ© e-mailem a SMS.
+     *
+     * V DEMO reĹľimu se e-maily a SMS fyzicky neodesĂ­lajĂ­.
+     * MĂ­sto toho se vracĂ­ jako DemoNotificationsDTO.
+     *
+     * @param request definice zprĂˇvy a seznam pĹ™Ă­jemcĹŻ
+     * @return
+     *   - DemoNotificationsDTO v demo reĹľimu
+     *   - HTTP 204 v produkÄŤnĂ­m reĹľimu
+     */
+    @PostMapping("/special")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<?> createSpecialNotification(
+            @RequestBody SpecialNotificationRequestDTO request) {
+
+        log.info("Admin vytvĂˇĹ™Ă­ speciĂˇlnĂ­ zprĂˇvu pro {} cĂ­lĹŻ",
+                request.getTargets() != null ? request.getTargets().size() : 0);
+
+        specialNotificationService.sendSpecialNotification(request);
+
+        // DEMO reĹľim â€“ vrĂˇtĂ­me zachycenĂ© e-maily a SMS
+        if (demoModeService.isDemoMode()) {
+            DemoNotificationsDTO demoData = demoNotificationStore.getAndClear();
+            log.debug("DEMO MODE: vrĂˇceno {} e-mailĹŻ a {} SMS",
+                    demoData.getEmails().size(),
+                    demoData.getSms().size());
+            return ResponseEntity.ok(demoData);
+        }
+
+        // PRODUKCE â€“ beze zmÄ›ny
+        return ResponseEntity.noContent().build();
+    }
+}
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\AppModeController.java

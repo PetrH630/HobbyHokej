@@ -332,8 +332,12 @@ public class AppUserSettingsDTO {
     /**
      * VĂ˝chozĂ­ obrazovka po pĹ™ihlĂˇĹˇenĂ­.
      *
-     * Typicky odpovĂ­dĂˇ nĂˇzvu sekce na frontendu,
-     * napĹ™Ă­klad "DASHBOARD", "MATCHES" nebo "PLAYERS".
+     * Hodnota odpovĂ­dĂˇ enumu LandingPage na backendu.
+     * Je pĹ™enĂˇĹˇena jako Ĺ™etÄ›zec, napĹ™Ă­klad "DASHBOARD",
+     * "MATCHES" nebo "PLAYERS".
+     *
+     * Na backendu je hodnota pĹ™evĂˇdÄ›na na enum a uklĂˇdĂˇna
+     * jako typ LandingPage.
      */
     private String defaultLandingPage;
 

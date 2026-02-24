@@ -3,6 +3,7 @@ package cz.phsoft.hokej.models.services.notification;
 import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
 
 /**
  * Servis pro ukládání aplikačních (in-app) notifikací do databáze.
@@ -36,4 +37,21 @@ public interface InAppNotificationService {
      * @param context volitelný kontext pro sestavení textu
      */
     void storeForUser(AppUserEntity user, NotificationType type, Object context);
+
+    /**
+     * Ukládá speciální zprávu typu SPECIAL_MESSAGE
+     * pro zadaného uživatele a (volitelně) hráče.
+     *
+     * Text zprávy je předáván přímo z volající vrstvy
+     * a nevyužívá InAppNotificationBuilder.
+     *
+     * @param user uživatel, ke kterému je notifikace přiřazena
+     * @param player hráč, kterého se notifikace týká (může být null)
+     * @param messageShort stručný text notifikace pro seznam
+     * @param messageFull plný text notifikace pro detail
+     */
+    void storeSpecialMessage(AppUserEntity user,
+                             PlayerEntity player,
+                             String messageShort,
+                             String messageFull);
 }

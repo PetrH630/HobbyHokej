@@ -3,7 +3,7 @@ import "./Footer.css"
 
 const Footer = () => {
   return (
-      <div className="footer">© 2025 Petr Hlista. Všechna práva vyhrazena.</div>
+      <div className="footer">© 2026 Petr Hlista. Všechna práva vyhrazena.</div>
   )
 }
 

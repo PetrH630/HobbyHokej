@@ -723,7 +723,7 @@ public class DataInitializer {
         SeasonEntity season2025_2026 = new SeasonEntity();
         season2025_2026.setName("2025/2026");
         season2025_2026.setStartDate(LocalDate.of(2025, 11, 1));
-        season2025_2026.setEndDate(LocalDate.of(2026, 3, 31));
+        season2025_2026.setEndDate(LocalDate.of(2026, 5, 31));
         season2025_2026.setActive(true);
         season2025_2026.setCreatedByUserId(2L);
 
@@ -1295,6 +1295,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers("/api/notifications/admin/**").hasAnyRole("ADMIN", "MANAGER");
 
                     /*
                      * Zbytek API pouze pro pĹ™ihlĂˇĹˇenĂ©.

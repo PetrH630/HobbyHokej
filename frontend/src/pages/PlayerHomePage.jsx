@@ -40,6 +40,28 @@ const PlayerHomePage = () => {
         return name;
     }, [currentPlayer, playerLoading]);
 
+    const formatDateTime = (value) => {
+        if (!value) return "—";
+        const d =
+            value instanceof Date
+                ? value
+                : new Date(String(value).replace(" ", "T"));
+        if (Number.isNaN(d.getTime())) return "—";
+        return d.toLocaleString("cs-CZ", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
+
+    // Poslední úspěšné přihlášení (před aktuálním)
+    // Předpoklad: backend posílá user.lastLoginAt jako "minulé" přihlášení.
+    const lastLoginLabel = useMemo(() => {
+        return formatDateTime(user?.lastLoginAt);
+    }, [user]);
+
     const ActionCard = ({ title, desc, to, icon }) => (
         <div className="col-12 col-md-6 col-xl-3">
             <div className="card h-100 shadow-sm">
@@ -66,13 +88,21 @@ const PlayerHomePage = () => {
                 <div>
                     <h1 className="h3 mb-1">Můj přehled</h1>
                     <p className="text-muted mb-0">
-                        Přihlášen: <span className="fw-semibold">{displayName}</span> •
-                        Hráč: <span className="fw-semibold">{playerLabel}</span>
+                        Přihlášen:{" "}
+                        <span className="fw-semibold">{displayName}</span>{" "}
+                        <div>
+                        Hráč:{" "}
+                        <span className="fw-semibold">{playerLabel}</span>
+                        </div>
+                    </p>
+                    <p className="text-muted mb-0">
+                        Poslední přihlášení:{" "}
+                        <span className="fw-semibold">
+                            {lastLoginLabel}
+                        </span>
                     </p>
                 </div>
 
-
-               
                 <div className="d-flex gap-2">
                     <button
                         type="button"
@@ -83,7 +113,6 @@ const PlayerHomePage = () => {
                     >
                         Obnovit
                     </button>
-                  
                 </div>
             </div>
 
@@ -123,9 +152,7 @@ const PlayerHomePage = () => {
                 onReload={reloadStats}
             />
 
-            <div className="text-muted small mt-4">
-                
-            </div>
+            <div className="text-muted small mt-4"></div>
         </div>
     );
 };

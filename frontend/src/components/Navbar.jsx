@@ -8,11 +8,14 @@ import { PlayerIcon, UserIcon, AdminIcon } from "../icons";
 import { useCurrentPlayer } from "../hooks/useCurrentPlayer";
 import RoleGuard from "./RoleGuard";
 import NotificationBell from "./notifications/NotificationBell";
+import AdminNotificationBell from "./notifications/AdminNotificationBell";
 
 import "./Navbar.css";
 
 const Navbar = () => {
     const [showMenu, setShowMenu] = useState(false);
+    const [mobileShowAdmin, setMobileShowAdmin] = useState(false); // false = hráč, true = správa
+
     const { user, logout } = useAuth();
     const {
         currentPlayer,
@@ -37,9 +40,9 @@ const Navbar = () => {
     const handleLogout = async () => {
         try {
             await logout();
+            navigate("/login", { replace: true });
         } finally {
             closeMenu();
-            window.location.replace("/login");
         }
     };
 
@@ -60,7 +63,11 @@ const Navbar = () => {
         navigate("/app/admin");
     };
 
-    // odkazy pro hráče
+    const toggleMobileMode = () => {
+        setMobileShowAdmin((prev) => !prev);
+    };
+
+    // odkazy pro hráče (desktop)
     const PlayerLinksInline = () => (
         <ul className="navbar-nav flex-row gap-3 mb-0">
             <RoleGuard roles={["ROLE_PLAYER", "ROLE_MANAGER"]}>
@@ -127,7 +134,7 @@ const Navbar = () => {
         </ul>
     );
 
-    // odkazy pro Admin/Manager
+    // odkazy pro Admin/Manager (desktop)
     const AdminLinksInline = () => (
         <ul className="navbar-nav flex-row gap-3 mb-0">
             <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
@@ -209,24 +216,11 @@ const Navbar = () => {
         </ul>
     );
 
-    // Mobilní
+    // odkazy pro hráče – MOBIL (bez Notifikací)
     const PlayerLinksMobile = () => (
         <RoleGuard roles={["ROLE_PLAYER", "ROLE_MANAGER"]}>
             <nav className="mb-3">
                 <ul className="list-unstyled mb-2">
-                    {/* Notifikace jako první položka pro hráče na mobilu */}
-                    <li>
-                        <NavLink
-                            to="/app/notifications"
-                            className={({ isActive }) =>
-                                "mobile-link" + (isActive ? " activeLink" : "")
-                            }
-                            onClick={closeMenu}
-                        >
-                            Notifikace
-                        </NavLink>
-                    </li>
-
                     <li>
                         <NavLink
                             to="/app/player"
@@ -289,9 +283,9 @@ const Navbar = () => {
         </RoleGuard>
     );
 
+    // odkazy pro Admin/Manager – MOBIL
     const AdminLinksMobile = () => (
         <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
-            <div className="mb-2 fw-semibold">Správa:</div>
             <nav className="mb-3">
                 <ul className="list-unstyled mb-2">
                     <li>
@@ -390,17 +384,17 @@ const Navbar = () => {
                         </NavLink>
                     </div>
 
-                    {/* STŘED – odkazy uprostřed */}
+                    {/* STŘED – odkazy uprostřed (desktop) */}
                     <div className="d-none d-lg-flex flex-grow-1 justify-content-center">
                         <div className="d-flex align-items-center gap-3">
-                            {/* Tlačítko Správa / Zavři správu – jen ADMIN / MANAGER */}
+                            {/* Tlačítko Správa / Zavřít správu – jen ADMIN / MANAGER */}
                             <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
                                 <button
                                     type="button"
                                     className="btn btn-outline-secondary btn-sm me-2"
                                     onClick={handleAdminToggle}
                                 >
-                                    {isAdminSection ? "Zavřít správu" : "Správa"}
+                                    {isAdminSection ? "Zavřít správce" : "Správce"}
                                 </button>
                             </RoleGuard>
 
@@ -519,7 +513,11 @@ const Navbar = () => {
                                 </div>
 
                                 {/* Zvoneček s notifikacemi – jen desktop */}
-                                <NotificationBell />
+                                {isAdminSection ? (
+                                    <AdminNotificationBell />
+                                ) : (
+                                    <NotificationBell />
+                                )}
 
                                 {/* Vpravo: tlačítko Odhlásit */}
                                 <button
@@ -534,7 +532,11 @@ const Navbar = () => {
                         {/* Malá zařízení – zvoneček nad hamburgerem */}
                         {user && (
                             <div className="d-inline-flex d-lg-none mb-1">
-                                <NotificationBell />
+                                {isAdminSection ? (
+                                    <AdminNotificationBell />
+                                ) : (
+                                    <NotificationBell />
+                                )}
                             </div>
                         )}
 
@@ -561,19 +563,19 @@ const Navbar = () => {
             {/* MOBILNÍ MENU – vyjíždí zleva */}
             <div className={"mobile-menu" + (showMenu ? " open" : "")}>
                 <div className="mobile-menu-inner">
-                    <PlayerLinksMobile />
-                    <AdminLinksMobile />
-
-                    {/* Mobilní  */}
+                    {/* Toggle Správce / Hráč – jen pro MANAGER */}
                     <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
                         <button
                             type="button"
-                            className="btn btn-outline-secondary w-100 mt-2"
-                            onClick={handleAdminToggle}
+                            className="btn btn-outline-secondary w-100 mb-3"
+                            onClick={toggleMobileMode}
                         >
-                            {isAdminSection ? "Zavřít správu" : "Správa"}
+                            {mobileShowAdmin ? "Správce" : "Hráč"}
                         </button>
                     </RoleGuard>
+
+                    {/* Podle režimu zobrazíme linky */}
+                    {mobileShowAdmin ? <AdminLinksMobile /> : <PlayerLinksMobile />}
 
                     {user && (
                         <button

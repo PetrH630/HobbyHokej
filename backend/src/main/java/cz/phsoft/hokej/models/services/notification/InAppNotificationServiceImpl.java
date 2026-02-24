@@ -116,6 +116,44 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
                 type, user.getId());
     }
 
+    @Override
+    public void storeSpecialMessage(AppUserEntity user,
+                                    PlayerEntity player,
+                                    String messageShort,
+                                    String messageFull) {
+
+        if (user == null) {
+            log.debug("InAppNotificationService.storeSpecialMessage: user is null, nic se neukládá");
+            return;
+        }
+
+        String shortText = (messageShort != null && !messageShort.isBlank())
+                ? messageShort
+                : NotificationType.SPECIAL_MESSAGE.name();
+
+        String fullText = (messageFull != null && !messageFull.isBlank())
+                ? messageFull
+                : NotificationType.SPECIAL_MESSAGE.name();
+
+        NotificationEntity entity = new NotificationEntity();
+        entity.setUser(user);
+        if (player != null) {
+            entity.setPlayer(player);
+        }
+        entity.setType(NotificationType.SPECIAL_MESSAGE);
+        entity.setMessageShort(shortText);
+        entity.setMessageFull(fullText);
+        entity.setCreatedAt(Instant.now(clock));
+
+        notificationRepository.save(entity);
+
+        log.debug(
+                "InAppNotificationService.storeSpecialMessage: uložena SPECIAL_MESSAGE userId={} playerId={}",
+                user.getId(),
+                player != null ? player.getId() : null
+        );
+    }
+
     /**
      * Sestavuje obsah in-app notifikace pomocí InAppNotificationBuilder.
      *

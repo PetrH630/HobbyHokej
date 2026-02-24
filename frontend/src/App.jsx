@@ -19,6 +19,7 @@ import MyInactivityPage from "./pages/MyInactivityPage";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import PlayerHomePage from "./pages/PlayerHomePage";
+import AdminNotificationPage from "./pages/AdminNotificationPage";
 import "./App.css";
 
 // ADMIN PAGES
@@ -147,6 +148,15 @@ const App = () => (
                 <AdminPlayersInactivityPage />
               </RoleGuard>
             }
+          />
+          {/* ADMIN/MANAGER – NOTIFIKACE */}
+          <Route
+            path="/app/admin/notifications"
+            element={
+            <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
+            <AdminNotificationPage />
+              </RoleGuard>
+              }
           />
 
           {/* ADMIN – SPRÁVA UŽIVATELŮ */}

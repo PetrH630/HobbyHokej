@@ -399,7 +399,14 @@ public enum NotificationType {
     /**
      * BezpeÄŤnostnĂ­ upozornÄ›nĂ­ (podezĹ™elĂˇ aktivita a podobnÄ›).
      */
-    SECURITY_ALERT(NotificationCategory.SYSTEM, true);
+    SECURITY_ALERT(NotificationCategory.SYSTEM, true),
+
+    /**
+     * RuÄŤnÄ› vytvoĹ™enĂˇ speciĂˇlnĂ­ zprĂˇva od sprĂˇvce systĂ©mu.
+     * Notifikace obchĂˇzĂ­ standardnĂ­ nastavenĂ­ notifikacĂ­
+     * a vytvĂˇĹ™Ă­ se vĹľdy pro vĹˇechny vybranĂ© pĹ™Ă­jemce.
+     */
+    SPECIAL_MESSAGE(NotificationCategory.SYSTEM, true);
 
     /**
      * Kategorie notifikace (registrace, informace o zĂˇpase, systĂ©m).
@@ -413,6 +420,7 @@ public enum NotificationType {
      * GlobalNotificationLevel.
      */
     private final boolean important;
+
 
     NotificationType(NotificationCategory category, boolean important) {
         this.category = category;

@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:39+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -94,7 +94,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:40+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -204,6 +204,7 @@ package cz.phsoft.hokej.models.mappers;
 
 import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
 import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.data.enums.LandingPage;
 import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
 import cz.phsoft.hokej.models.dto.AppUserSettingsDTO;
 import java.time.LocalTime;
@@ -213,7 +214,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:51+0100",
+    date = "2026-02-23T19:11:39+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -244,7 +245,9 @@ public class AppUserSettingsMapperImpl implements AppUserSettingsMapper {
         }
         appUserSettingsDTO.setUiLanguage( entity.getUiLanguage() );
         appUserSettingsDTO.setTimezone( entity.getTimezone() );
-        appUserSettingsDTO.setDefaultLandingPage( entity.getDefaultLandingPage() );
+        if ( entity.getDefaultLandingPage() != null ) {
+            appUserSettingsDTO.setDefaultLandingPage( entity.getDefaultLandingPage().name() );
+        }
 
         return appUserSettingsDTO;
     }
@@ -277,7 +280,7 @@ public class AppUserSettingsMapperImpl implements AppUserSettingsMapper {
             entity.setTimezone( dto.getTimezone() );
         }
         if ( dto.getDefaultLandingPage() != null ) {
-            entity.setDefaultLandingPage( dto.getDefaultLandingPage() );
+            entity.setDefaultLandingPage( Enum.valueOf( LandingPage.class, dto.getDefaultLandingPage() ) );
         }
     }
 }
@@ -296,7 +299,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:39+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -357,7 +360,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:51+0100",
+    date = "2026-02-23T19:11:39+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -448,7 +451,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:38+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -513,7 +516,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:39+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -623,7 +626,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:38+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -701,7 +704,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:38+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -761,7 +764,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:38+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -842,7 +845,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:40+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -952,7 +955,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:51+0100",
+    date = "2026-02-23T19:11:39+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -1021,7 +1024,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:51+0100",
+    date = "2026-02-23T19:11:39+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -1076,7 +1079,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-21T09:45:52+0100",
+    date = "2026-02-23T19:11:39+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component

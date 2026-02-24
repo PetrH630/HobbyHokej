@@ -346,7 +346,7 @@ public class InAppNotificationBuilder {
             }
 
             case MATCH_TIME_CHANGED -> {
-                String title = "Změna času zápasu";
+                String title = "Změna data/času zápasu";
 
                 LocalDateTime oldDateTime = null;
                 if (context instanceof MatchTimeChangeContext mtc) {
@@ -359,8 +359,8 @@ public class InAppNotificationBuilder {
                 }
 
                 String newPart = formattedDateTime.isBlank()
-                        ? "Došlo ke změně času plánovaného zápasu."
-                        : "Došlo ke změně času zápasu na nový termín %s."
+                        ? "Došlo ke změně data/času plánovaného zápasu."
+                        : "Došlo ke změně data/času zápasu na nový termín %s."
                         .formatted(formattedDateTime);
 
                 String oldPart = oldDateFormatted.isBlank()

@@ -360,4 +360,40 @@ public class SmsMessageBuilder {
 
         return sb.toString();
     }
+
+    // v SmsMessageBuilder.java – ke konci třídy
+
+    /**
+     * Sestaví SMS pro speciální zprávu od administrátora.
+     *
+     * Používá konzistentní prefix a jednoduchý formát.
+     *
+     * @param title   titulek zprávy (např. "Změna času tréninku")
+     * @param message text zprávy
+     * @param player  hráč, kterého se zpráva týká (volitelně pro doplnění jména)
+     * @return text SMS
+     */
+    public String buildSpecialMessage(String title,
+                                      String message,
+                                      PlayerEntity player) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("HobbyHokej – ");
+
+        if (title != null && !title.isBlank()) {
+            sb.append(title.trim());
+        } else {
+            sb.append("zpráva od správce");
+        }
+
+        if (player != null && player.getFullName() != null && !player.getFullName().isBlank()) {
+            sb.append(" (hráč: ").append(player.getFullName()).append(")");
+        }
+
+        if (message != null && !message.isBlank()) {
+            sb.append(": ").append(message.replaceAll("\\s+", " ").trim());
+        }
+
+        return sb.toString();
+    }
 }

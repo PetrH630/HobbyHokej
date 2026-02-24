@@ -23,12 +23,10 @@ const LoginPage = () => {
 
         try {
             await loginUser(email, password);
-            await updateUser();               // načte usera do AuthContextu
-
-            // zachováme tvoji logiku přesměrování
+            await updateUser();
             await postLoginRedirect();
 
-            // a pak shodíme celou SPA, aby se všechny contexty načetly znovu
+            // shodíme celou SPA, aby se všechny contexty načetly znovu
             window.location.reload();
         } catch (err) {
             setError(err?.response?.data?.message || "Neplatné přihlášení");

@@ -5,6 +5,7 @@ Seznam souborů:
 ChangePlayerUserRequest.java
 MatchRegistrationRequest.java
 package-info.java
+SpecialNotificationRequestDTO.java
 
 
 -----
@@ -205,3 +206,107 @@ public class MatchRegistrationRequest {
  * - pouĹľĂ­vajĂ­ se v controllerech jako vstupnĂ­ parametry.
  */
 package cz.phsoft.hokej.models.dto.requests;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\requests\SpecialNotificationRequestDTO.java
+-----
+package cz.phsoft.hokej.models.dto.requests;
+
+import java.util.List;
+
+/**
+ * DTO pro vytvoĹ™enĂ­ speciĂˇlnĂ­ zprĂˇvy administrĂˇtorem.
+ *
+ * Obsahuje text zprĂˇvy, seznam cĂ­lovĂ˝ch pĹ™Ă­jemcĹŻ
+ * a volbu komunikaÄŤnĂ­ch kanĂˇlĹŻ.
+ */
+public class SpecialNotificationRequestDTO {
+
+    /**
+     * Nadpis notifikace, kterĂ˝ se pouĹľĂ­vĂˇ v UI a v e-mailech.
+     */
+    private String title;
+
+    /**
+     * Text zprĂˇvy, kterĂ˝ se pouĹľĂ­vĂˇ v UI, e-mailech a SMS.
+     */
+    private String message;
+
+    /**
+     * PĹ™Ă­znak, zda se mĂˇ zprĂˇva odeslat takĂ© e-mailem.
+     */
+    private boolean sendEmail;
+
+    /**
+     * PĹ™Ă­znak, zda se mĂˇ zprĂˇva odeslat takĂ© SMS.
+     */
+    private boolean sendSms;
+
+    /**
+     * CĂ­lovĂ© kombinace uĹľivatele a hrĂˇÄŤe.
+     */
+    private List<Target> targets;
+
+    public static class Target {
+        private Long userId;
+        private Long playerId;
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public void setUserId(Long userId) {
+            this.userId = userId;
+        }
+
+        public Long getPlayerId() {
+            return playerId;
+        }
+
+        public void setPlayerId(Long playerId) {
+            this.playerId = playerId;
+        }
+    }
+
+    // gettery/settery
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public boolean isSendEmail() {
+        return sendEmail;
+    }
+
+    public void setSendEmail(boolean sendEmail) {
+        this.sendEmail = sendEmail;
+    }
+
+    public boolean isSendSms() {
+        return sendSms;
+    }
+
+    public void setSendSms(boolean sendSms) {
+        this.sendSms = sendSms;
+    }
+
+    public List<Target> getTargets() {
+        return targets;
+    }
+
+    public void setTargets(List<Target> targets) {
+        this.targets = targets;
+    }
+}

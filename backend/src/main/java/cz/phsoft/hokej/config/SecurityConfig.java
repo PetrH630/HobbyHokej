@@ -140,6 +140,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers("/api/notifications/admin/**").hasAnyRole("ADMIN", "MANAGER");
 
                     /*
                      * Zbytek API pouze pro přihlášené.

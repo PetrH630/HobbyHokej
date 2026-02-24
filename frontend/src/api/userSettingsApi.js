@@ -22,3 +22,4 @@ export const updateUserSettings = async (settings) => {
     });
     return res.data; // AppUserSettingsDTO
 };
+ 

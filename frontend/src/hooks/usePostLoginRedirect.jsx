@@ -5,6 +5,7 @@ import {
     getCurrentPlayer,
 } from "../api/playerApi";
 import { fetchCurrentUser } from "../api/authApi";
+import { getUserSettings } from "../api/userSettingsApi";
 
 // malý helper na vytažení roli z různých tvarů objektu
 const extractRoles = (user) => {
@@ -15,10 +16,12 @@ const extractRoles = (user) => {
     // 1) user.roles – může být string, pole stringů, nebo pole objektů
     if (Array.isArray(user.roles)) {
         roles = roles.concat(
-            user.roles.map((r) => {
-                if (typeof r === "string") return r;
-                return r.name || r.role || r.authority || null;
-            }).filter(Boolean)
+            user.roles
+                .map((r) => {
+                    if (typeof r === "string") return r;
+                    return r.name || r.role || r.authority || null;
+                })
+                .filter(Boolean)
         );
     } else if (typeof user.roles === "string") {
         roles.push(user.roles);
@@ -27,9 +30,13 @@ const extractRoles = (user) => {
     // 2) user.role – fallback (string nebo pole)
     if (Array.isArray(user.role)) {
         roles = roles.concat(
-            user.role.map((r) =>
-                typeof r === "string" ? r : r.name || r.role || r.authority || null
-            ).filter(Boolean)
+            user.role
+                .map((r) =>
+                    typeof r === "string"
+                        ? r
+                        : r.name || r.role || r.authority || null
+                )
+                .filter(Boolean)
         );
     } else if (typeof user.role === "string") {
         roles.push(user.role);
@@ -48,11 +55,29 @@ const extractRoles = (user) => {
     return Array.from(new Set(roles));
 };
 
+// rozhodne cílovou URL pro neadmina na základě defaultLandingPage + existence hráče
+const resolveTargetPathForNonAdmin = (defaultLandingPage, hasPlayer) => {
+    switch (defaultLandingPage) {
+        case "DASHBOARD":
+            // dashboard /app/player dává smysl jen pokud nějaký aktuální hráč existuje
+            return hasPlayer ? "/app/player" : "/app/players";
+
+        case "PLAYERS":
+            return "/app/players";
+
+        case "MATCHES":
+        default:
+            // fallback = původní chování:
+            // pokud má hráče, jdi na zápasy, jinak na hráče
+            return hasPlayer ? "/app/matches" : "/app/players";
+    }
+};
+
 const usePostLoginRedirect = () => {
     const navigate = useNavigate();
 
     const run = async () => {
-        // 1) načíst usera z backendu
+        // 1) načíst usera z backendu kvůli rolím
         let user = null;
         try {
             const res = await fetchCurrentUser();
@@ -66,34 +91,58 @@ const usePostLoginRedirect = () => {
         console.log("Detekované role po loginu:", roles);
 
         const isAdmin = roles.includes("ROLE_ADMIN");
-        // manažera na admin home:
-        // const isManager = roles.includes("ROLE_MANAGER");
+        // ROLE_MANAGER se chová jako "běžný" uživatel – rozhoduje defaultLandingPage.
 
-        // 2) Admin na "/"tam běží HomeDecider a vrátí AdminHomePage
-        if (isAdmin /* || isManager */) {
+        // 2) Admin na "/app" – tam běží HomeDecider a vrátí AdminHomePage
+        if (isAdmin) {
             navigate("/app");
             return;
         }
 
-        // 3) Ostatní – zachovat původní logiku s hráčem
+        // 3) Ostatní – nejdřív zkusíme autovýběr hráče dle UserSettings (playerSelectionMode)
         try {
             await autoSelectCurrentPlayer();
         } catch (err) {
             console.error("Auto-select aktuálního hráče selhal", err);
         }
 
+        // 4) zjistíme, jestli máme aktuálního hráče
+        let hasPlayer = false;
         try {
             const player = await getCurrentPlayer(); // PlayerDTO nebo null
-
-            if (player) {
-                navigate("/app/matches");
-            } else {
-                navigate("/app/players");
-            }
+            hasPlayer = !!player;
         } catch (err) {
             console.error("Nepodařilo se zjistit aktuálního hráče", err);
-            navigate("/app/players");
         }
+
+        // 5) načteme UserSettings a vytáhneme defaultLandingPage
+        let defaultLandingPage = null;
+        try {
+            const settings = await getUserSettings();
+            defaultLandingPage = settings?.defaultLandingPage || null;
+            console.log("UserSettings:", settings);
+        } catch (err) {
+            console.error(
+                "Nepodařilo se načíst uživatelská nastavení (UserSettings)",
+                err
+            );
+        }
+
+        // validace hodnoty – kdyby někdo do DB nacpal nesmysl, spadneme na fallback
+        const allowed = ["MATCHES", "PLAYERS", "DASHBOARD"];
+        if (!allowed.includes(defaultLandingPage)) {
+            defaultLandingPage = null;
+        }
+
+        console.log("defaultLandingPage z /api/user/settings:", defaultLandingPage);
+
+        // 6) určime cílovou stránku pro neadmina
+        const targetPath = resolveTargetPathForNonAdmin(
+            defaultLandingPage,
+            hasPlayer
+        );
+
+        navigate(targetPath);
     };
 
     return run;

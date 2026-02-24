@@ -496,11 +496,13 @@ public class AppUserSettingsEntity {
 
     /**
      * VĂ˝chozĂ­ obrazovka po pĹ™ihlĂˇĹˇenĂ­.
-     * Z praktickĂ˝ch dĹŻvodĹŻ je uloĹľena jako Ĺ™etÄ›zec.
+     *
+     * V databĂˇzi je uloĹľena jako Ĺ™etÄ›zcovĂˇ hodnota ENUM (VARCHAR),
+     * v aplikaÄŤnĂ­ logice se pouĹľĂ­vĂˇ enum LandingPage.
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "default_landing_page", nullable=false, length = 50)
-    private LandingPage landingPage = LandingPage.DASHBOARD;
+    @Column(name = "default_landing_page", nullable = false, length = 50)
+    private LandingPage defaultLandingPage = LandingPage.DASHBOARD;
 
     public Long getId() {
         return id;
@@ -586,12 +588,18 @@ public class AppUserSettingsEntity {
         this.timezone = timezone;
     }
 
-    public LandingPage getLandingPage() {
-        return landingPage;
+    /**
+     * VracĂ­ vĂ˝chozĂ­ landing page jako String (pro DTO / MapStruct).
+     */
+    public LandingPage getDefaultLandingPage() {
+        return defaultLandingPage;
     }
 
-    public void setLandingPage(LandingPage landingPage) {
-        this.landingPage = landingPage;
+    /**
+     * Nastavuje vĂ˝chozĂ­ landing page ze Stringu (pro DTO / MapStruct).
+     */
+    public void setDefaultLandingPage(LandingPage defaultLandingPage) {
+        this.defaultLandingPage = defaultLandingPage;
     }
 }
 
