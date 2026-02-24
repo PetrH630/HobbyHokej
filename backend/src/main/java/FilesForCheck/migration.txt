@@ -1,0 +1,705 @@
+﻿Balíček (složka): migration
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration
+
+Seznam souborů:
+V1__tables.sql
+V2__primary_keys_and_autoincrement.sql
+V3__unique_and_indexes.sql
+V4__foreign_keys.sql
+V5_01__trg_app_user_insert.sql
+V5_02__trg_app_user_update.sql
+V5_03__trg_app_user_delete.sql
+V5_05__trg_match_update.sql
+V5_06__trg_match_delete.sql
+V5_07__trg_match_reg_insert.sql
+V5_08__trg_match_reg_update.sql
+V5_09__trg_match_reg_delete.sql
+V5_10__trg_player_insert.sql
+V5_11__trg_player_update.sql
+V5_12__trg_player_delete.sql
+V5_13__trg_season_insert.sql
+V5_14__trg_season_update.sql
+V5_15__trg_season_delete.sql
+V6__notifications.sql
+V7__notifications_type_enum.sql
+
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V1__tables.sql
+-----
+CREATE TABLE `app_users` (
+  `id` bigint(20) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `enabled` bit(1) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('ROLE_PLAYER','ROLE_MANAGER','ROLE_ADMIN') NOT NULL,
+  `surname` varchar(255) NOT NULL,
+  `timestamp` datetime(6) NOT NULL,
+  `last_login_at` datetime(6) DEFAULT NULL,
+  `current_login_at` datetime(6) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `app_users_history` (
+  `id` bigint(20) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `changed_at` datetime(6) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `enabled` bit(1) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `original_timestamp` datetime(6) NOT NULL,
+  `role` enum('ROLE_PLAYER','ROLE_MANAGER','ROLE_ADMIN') NOT NULL,
+  `surname` varchar(255) NOT NULL,
+  `user_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `app_user_settings` (
+  `id` bigint(20) NOT NULL,
+  `copy_all_player_notifications_to_user_email` bit(1) NOT NULL,
+   `default_landing_page` enum('DASHBOARD','MATCHES','PLAYERS') NOT NULL DEFAULT 'DASHBOARD',
+  `email_digest_enabled` bit(1) NOT NULL,
+  `email_digest_time` time(6) DEFAULT NULL,
+  `global_notification_level` enum('ALL','IMPORTANT_ONLY','NONE') NOT NULL,
+  `manager_notification_level` enum('ALL','IMPORTANT_ONLY','NONE') DEFAULT NULL,
+  `player_selection_mode` enum('FIRST_PLAYER','ALWAYS_CHOOSE') NOT NULL,
+  `receive_notifications_for_players_with_own_email` bit(1) NOT NULL,
+  `timezone` varchar(50) DEFAULT NULL,
+  `ui_language` varchar(10) DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `email_verification_tokens` (
+  `id` bigint(20) NOT NULL,
+  `expires_at` datetime(6) NOT NULL,
+  `token` varchar(64) NOT NULL,
+  `user_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `forgotten_password_reset_token_entity` (
+  `id` bigint(20) NOT NULL,
+  `expires_at` datetime(6) NOT NULL,
+  `token` varchar(128) NOT NULL,
+  `used_at` datetime(6) DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `matches` (
+  `id` bigint(20) NOT NULL,
+  `cancel_reason` enum('NOT_ENOUGH_PLAYERS','TECHNICAL_ISSUE','WEATHER','ORGANIZER_DECISION','OTHER') DEFAULT NULL,
+  `created_by_user_id` bigint(20) DEFAULT NULL,
+  `date_time` datetime(6) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `last_modified_by_user_id` bigint(20) DEFAULT NULL,
+  `location` varchar(255) NOT NULL,
+  `match_status` enum('UNCANCELED','CANCELED','UPDATED') DEFAULT NULL,
+  `max_players` int(11) NOT NULL,
+  `price` int(11) NOT NULL,
+  `timestamp` datetime(6) NOT NULL,
+  `season_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `matches_history` (
+  `id` bigint(20) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `cancel_reason` enum('NOT_ENOUGH_PLAYERS','TECHNICAL_ISSUE','WEATHER','ORGANIZER_DECISION','OTHER') DEFAULT NULL,
+  `changed_at` datetime(6) NOT NULL,
+  `created_by_user_id` bigint(20) DEFAULT NULL,
+  `date_time` datetime(6) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `last_modified_by_user_id` bigint(20) DEFAULT NULL,
+  `location` varchar(255) NOT NULL,
+  `match_id` bigint(20) NOT NULL,
+  `match_status` enum('UNCANCELED','CANCELED','UPDATED') DEFAULT NULL,
+  `max_players` int(11) NOT NULL,
+  `original_timestamp` datetime(6) NOT NULL,
+  `price` int(11) NOT NULL,
+  `season_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `match_registrations` (
+  `id` bigint(20) NOT NULL,
+  `admin_note` varchar(255) DEFAULT NULL,
+  `created_by` varchar(255) NOT NULL,
+  `excuse_note` varchar(255) DEFAULT NULL,
+  `excuse_reason` enum('NEMOC','PRACE','NECHE_SE_MI','JINE') DEFAULT NULL,
+  `status` enum('REGISTERED','UNREGISTERED','EXCUSED','RESERVED','NO_RESPONSE','SUBSTITUTE','NO_EXCUSED') NOT NULL,
+  `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `timestamp` datetime(6) NOT NULL,
+  `match_id` bigint(20) NOT NULL,
+  `player_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `match_registration_history` (
+  `id` bigint(20) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `admin_note` varchar(255) DEFAULT NULL,
+  `changed_at` datetime(6) NOT NULL,
+  `created_by` varchar(255) NOT NULL,
+  `excuse_note` varchar(255) DEFAULT NULL,
+  `excuse_reason` enum('NEMOC','PRACE','NECHE_SE_MI','JINE') DEFAULT NULL,
+  `match_id` bigint(20) NOT NULL,
+  `match_registration_id` bigint(20) NOT NULL,
+  `original_timestamp` datetime(6) NOT NULL,
+  `player_id` bigint(20) NOT NULL,
+  `status` enum('REGISTERED','UNREGISTERED','EXCUSED','RESERVED','NO_RESPONSE','SUBSTITUTE','NO_EXCUSED') NOT NULL,
+  `team` enum('DARK','LIGHT') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `player_entity` (
+  `id` bigint(20) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
+  `player_status` enum('PENDING','APPROVED','REJECTED') NOT NULL,
+  `surname` varchar(255) NOT NULL,
+  `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `timestamp` datetime(6) NOT NULL,
+  `type` enum('VIP','STANDARD','BASIC') NOT NULL,
+  `user_id` bigint(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `player_entity_history` (
+  `id` bigint(20) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `changed_at` datetime(6) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `original_timestamp` datetime(6) NOT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
+  `player_id` bigint(20) NOT NULL,
+  `player_status` enum('PENDING','APPROVED','REJECTED') NOT NULL,
+  `surname` varchar(255) NOT NULL,
+  `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `type` enum('VIP','STANDARD','BASIC') NOT NULL,
+  `user_id` bigint(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `player_inactivity_period` (
+  `id` bigint(20) NOT NULL,
+  `inactive_from` datetime(6) NOT NULL,
+  `inactive_to` datetime(6) NOT NULL,
+  `inactivity_reason` varchar(255) NOT NULL,
+  `player_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `player_settings` (
+  `id` bigint(20) NOT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `contact_phone` varchar(50) DEFAULT NULL,
+  `email_enabled` bit(1) NOT NULL,
+  `notify_on_excuse` bit(1) NOT NULL,
+  `notify_on_match_cancel` bit(1) NOT NULL,
+  `notify_on_match_change` bit(1) NOT NULL,
+  `notify_on_payment` bit(1) NOT NULL,
+  `notify_on_registration` bit(1) NOT NULL,
+  `notify_reminders` bit(1) NOT NULL,
+  `reminder_hours_before` int(11) DEFAULT NULL,
+  `sms_enabled` bit(1) NOT NULL,
+  `player_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `season` (
+  `id` bigint(20) NOT NULL,
+  `active` bit(1) NOT NULL,
+  `created_by_user_id` bigint(20) DEFAULT NULL,
+  `end_date` date NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `start_date` date NOT NULL,
+  `timestamp` datetime(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `season_history` (
+  `id` bigint(20) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `active` bit(1) NOT NULL,
+  `changed_at` datetime(6) NOT NULL,
+  `created_by_user_id` bigint(20) DEFAULT NULL,
+  `end_date` date NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `original_timestamp` datetime(6) NOT NULL,
+  `season_id` bigint(20) NOT NULL,
+  `start_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V2__primary_keys_and_autoincrement.sql
+-----
+ALTER TABLE `app_users`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `app_users_history`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `app_user_settings`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `email_verification_tokens`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `forgotten_password_reset_token_entity`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `matches`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `matches_history`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `match_registrations`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `match_registration_history`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `player_entity`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `player_entity_history`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `player_inactivity_period`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `player_settings`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `season`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `season_history`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `app_users`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `app_users_history`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `app_user_settings`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `email_verification_tokens`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `forgotten_password_reset_token_entity`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `matches`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `matches_history`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `match_registrations`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `match_registration_history`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `player_entity`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `player_entity_history`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `player_inactivity_period`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `player_settings`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `season`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `season_history`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V3__unique_and_indexes.sql
+-----
+ALTER TABLE `app_users`
+  ADD UNIQUE KEY `UK_4vj92ux8a2eehds1mdvmks473` (`email`);
+
+ALTER TABLE `app_user_settings`
+  ADD UNIQUE KEY `UK_3t96bi6n25bfd4r8lslntdp9w` (`user_id`);
+
+ALTER TABLE `email_verification_tokens`
+  ADD UNIQUE KEY `UK_ewmvysc7e9y6uy7og2c21axa9` (`token`),
+  ADD UNIQUE KEY `UK_s3mje1c85ftmp2uld6dt1bffs` (`user_id`);
+
+ALTER TABLE `forgotten_password_reset_token_entity`
+  ADD UNIQUE KEY `UK_bxs8l2j2yqakm3mfjnu6c2g7p` (`token`),
+  ADD KEY `FKef2aoyyhsebwhnpo566jq8w05` (`user_id`);
+
+ALTER TABLE `matches`
+  ADD KEY `FKt32wb9qvxjjj8rtbciiwurdyv` (`season_id`);
+
+ALTER TABLE `match_registrations`
+  ADD KEY `FKd7lcwyhhhjy7u4ppp869sa5pv` (`match_id`),
+  ADD KEY `FKqbhngy9958kbv067yvhiqsiav` (`player_id`);
+
+ALTER TABLE `player_entity`
+  ADD KEY `FKj2ej4242t8hsfhexwr1k3iybk` (`user_id`);
+
+ALTER TABLE `player_inactivity_period`
+  ADD KEY `FKlliyj59kukydf1eubv8ab5bob` (`player_id`);
+
+ALTER TABLE `player_settings`
+  ADD UNIQUE KEY `UK_f097cc1eamfljp30kp8ithf0t` (`player_id`);
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V4__foreign_keys.sql
+-----
+ALTER TABLE `app_user_settings`
+  ADD CONSTRAINT `FKe1p8ht9pl78l26s3x7rd92ycs`
+  FOREIGN KEY (`user_id`) REFERENCES `app_users` (`id`);
+
+ALTER TABLE `email_verification_tokens`
+  ADD CONSTRAINT `FK3p1m42k50qhjbo815nl38nfby`
+  FOREIGN KEY (`user_id`) REFERENCES `app_users` (`id`);
+
+ALTER TABLE `forgotten_password_reset_token_entity`
+  ADD CONSTRAINT `FKef2aoyyhsebwhnpo566jq8w05`
+  FOREIGN KEY (`user_id`) REFERENCES `app_users` (`id`);
+
+ALTER TABLE `matches`
+  ADD CONSTRAINT `FKt32wb9qvxjjj8rtbciiwurdyv`
+  FOREIGN KEY (`season_id`) REFERENCES `season` (`id`);
+
+ALTER TABLE `match_registrations`
+  ADD CONSTRAINT `FKd7lcwyhhhjy7u4ppp869sa5pv`
+  FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`),
+  ADD CONSTRAINT `FKqbhngy9958kbv067yvhiqsiav`
+  FOREIGN KEY (`player_id`) REFERENCES `player_entity` (`id`);
+
+ALTER TABLE `player_entity`
+  ADD CONSTRAINT `FKj2ej4242t8hsfhexwr1k3iybk`
+  FOREIGN KEY (`user_id`) REFERENCES `app_users` (`id`);
+
+ALTER TABLE `player_inactivity_period`
+  ADD CONSTRAINT `FKlliyj59kukydf1eubv8ab5bob`
+  FOREIGN KEY (`player_id`) REFERENCES `player_entity` (`id`);
+
+ALTER TABLE `player_settings`
+  ADD CONSTRAINT `FKg331s5addqswg72a9dlldy2qc`
+  FOREIGN KEY (`player_id`) REFERENCES `player_entity` (`id`);
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_01__trg_app_user_insert.sql
+-----
+CREATE TRIGGER trg_app_user_insert
+AFTER INSERT ON app_users
+FOR EACH ROW
+BEGIN
+    INSERT INTO app_users_history
+        (user_id, name, surname, email, role, enabled,
+         original_timestamp, action, changed_at)
+    VALUES
+        (NEW.id, NEW.name, NEW.surname, NEW.email, NEW.role, NEW.enabled,
+         NEW.timestamp, 'INSERT', NOW());
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_02__trg_app_user_update.sql
+-----
+CREATE TRIGGER trg_app_user_update
+AFTER UPDATE ON app_users
+FOR EACH ROW
+BEGIN
+    INSERT INTO app_users_history
+        (user_id, name, surname, email, role, enabled,
+         original_timestamp, action, changed_at)
+    VALUES
+        (NEW.id, NEW.name, NEW.surname, NEW.email, NEW.role, NEW.enabled,
+         NEW.timestamp, 'UPDATE', NOW());
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_03__trg_app_user_delete.sql
+-----
+CREATE TRIGGER trg_app_user_delete
+AFTER DELETE ON app_users
+FOR EACH ROW
+BEGIN
+    INSERT INTO app_users_history
+        (user_id, name, surname, email, role, enabled,
+         original_timestamp, action, changed_at)
+    VALUES
+        (OLD.id, OLD.name, OLD.surname, OLD.email, OLD.role, OLD.enabled,
+         OLD.timestamp, 'DELETE', NOW());
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_05__trg_match_update.sql
+-----
+CREATE TRIGGER trg_match_update
+AFTER UPDATE ON matches
+FOR EACH ROW
+BEGIN
+    INSERT INTO matches_history
+        (match_id,
+         original_timestamp,
+         action,
+         changed_at,
+         date_time,
+         location,
+         description,
+         max_players,
+         price,
+         match_status,
+         cancel_reason,
+         season_id,
+         created_by_user_id,
+         last_modified_by_user_id)
+    VALUES
+        (NEW.id,
+         NEW.timestamp,
+         'UPDATE',
+         NOW(),
+         NEW.date_time,
+         NEW.location,
+         NEW.description,
+         NEW.max_players,
+         NEW.price,
+         NEW.match_status,
+         NEW.cancel_reason,
+         NEW.season_id,
+         NEW.created_by_user_id,
+         NEW.last_modified_by_user_id);
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_06__trg_match_delete.sql
+-----
+CREATE TRIGGER trg_match_delete
+AFTER DELETE ON matches
+FOR EACH ROW
+BEGIN
+    INSERT INTO matches_history
+        (match_id, original_timestamp, action, changed_at, date_time,
+         location, description, max_players, price, match_status, cancel_reason,
+         season_id, created_by_user_id, last_modified_by_user_id)
+    VALUES
+        (OLD.id,
+         OLD.timestamp,
+         'DELETE',
+         NOW(),
+         OLD.date_time,
+         OLD.location,
+         OLD.description,
+         OLD.max_players,
+         OLD.price,
+         OLD.match_status,
+         OLD.cancel_reason,
+         OLD.season_id,
+         OLD.created_by_user_id,
+         OLD.last_modified_by_user_id);
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_07__trg_match_reg_insert.sql
+-----
+CREATE TRIGGER trg_match_reg_insert
+AFTER INSERT ON match_registrations
+FOR EACH ROW
+BEGIN
+    INSERT INTO match_registration_history
+    (match_registration_id, match_id, player_id, status, excuse_reason,
+     excuse_note, admin_note, team, original_timestamp, created_by,
+     action, changed_at)
+    VALUES
+    (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
+     NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
+     'INSERT', NOW());
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_08__trg_match_reg_update.sql
+-----
+CREATE TRIGGER trg_match_reg_update
+AFTER UPDATE ON match_registrations
+FOR EACH ROW
+BEGIN
+    INSERT INTO match_registration_history
+    (match_registration_id, match_id, player_id, status, excuse_reason,
+     excuse_note, admin_note, team, original_timestamp, created_by,
+     action, changed_at)
+    VALUES
+    (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
+     NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
+     'UPDATE', NOW());
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_09__trg_match_reg_delete.sql
+-----
+CREATE TRIGGER trg_match_reg_delete
+AFTER DELETE ON match_registrations
+FOR EACH ROW
+BEGIN
+    INSERT INTO match_registration_history
+    (match_registration_id, match_id, player_id, status, excuse_reason,
+     excuse_note, admin_note, team, original_timestamp, created_by,
+     action, changed_at)
+    VALUES
+    (OLD.id, OLD.match_id, OLD.player_id, OLD.status, OLD.excuse_reason,
+     OLD.excuse_note, OLD.admin_note, OLD.team, OLD.timestamp, OLD.created_by,
+     'DELETE', NOW());
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_10__trg_player_insert.sql
+-----
+CREATE TRIGGER trg_player_insert
+AFTER INSERT ON player_entity
+FOR EACH ROW
+BEGIN
+    INSERT INTO player_entity_history
+        (player_id, name, surname, nickname, type, full_name, phone_number,
+         team, player_status, user_id, original_timestamp, action, changed_at)
+    VALUES
+        (NEW.id, NEW.name, NEW.surname, NEW.nickname, NEW.type, NEW.full_name, NEW.phone_number,
+         NEW.team, NEW.player_status, NEW.user_id, NEW.timestamp, 'INSERT', NOW());
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_11__trg_player_update.sql
+-----
+CREATE TRIGGER trg_player_update
+AFTER UPDATE ON player_entity
+FOR EACH ROW
+BEGIN
+    INSERT INTO player_entity_history
+        (player_id, name, surname, nickname, type, full_name, phone_number,
+         team, player_status, user_id, original_timestamp, action, changed_at)
+    VALUES
+        (NEW.id, NEW.name, NEW.surname, NEW.nickname, NEW.type, NEW.full_name, NEW.phone_number,
+         NEW.team, NEW.player_status, NEW.user_id, NEW.timestamp, 'UPDATE', NOW());
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_12__trg_player_delete.sql
+-----
+CREATE TRIGGER trg_player_delete
+AFTER DELETE ON player_entity
+FOR EACH ROW
+BEGIN
+    INSERT INTO player_entity_history
+        (player_id, name, surname, nickname, type, full_name, phone_number,
+         team, player_status, user_id, original_timestamp, action, changed_at)
+    VALUES
+        (OLD.id, OLD.name, OLD.surname, OLD.nickname, OLD.type, OLD.full_name, OLD.phone_number,
+         OLD.team, OLD.player_status, OLD.user_id, OLD.timestamp, 'DELETE', NOW());
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_13__trg_season_insert.sql
+-----
+CREATE TRIGGER trg_season_insert
+AFTER INSERT ON season
+FOR EACH ROW
+BEGIN
+    INSERT INTO season_history
+        (season_id, original_timestamp, action, changed_at,
+         name, start_date, end_date, active, created_by_user_id)
+    VALUES
+        (NEW.id, NEW.timestamp, 'INSERT', NOW(),
+         NEW.name, NEW.start_date, NEW.end_date, NEW.active, NEW.created_by_user_id);
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_14__trg_season_update.sql
+-----
+CREATE TRIGGER trg_season_update
+AFTER UPDATE ON season
+FOR EACH ROW
+BEGIN
+    INSERT INTO season_history
+        (season_id, original_timestamp, action, changed_at,
+         name, start_date, end_date, active, created_by_user_id)
+    VALUES
+        (NEW.id, NEW.timestamp, 'UPDATE', NOW(),
+         NEW.name, NEW.start_date, NEW.end_date, NEW.active, NEW.created_by_user_id);
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_15__trg_season_delete.sql
+-----
+CREATE TRIGGER trg_season_delete
+AFTER DELETE ON season
+FOR EACH ROW
+BEGIN
+    INSERT INTO season_history
+        (season_id, original_timestamp, action, changed_at,
+         name, start_date, end_date, active, created_by_user_id)
+    VALUES
+        (OLD.id, OLD.timestamp, 'DELETE', NOW(),
+         OLD.name, OLD.start_date, OLD.end_date, OLD.active, OLD.created_by_user_id);
+END;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V6__notifications.sql
+-----
+CREATE TABLE `notifications` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `player_id` bigint(20) DEFAULT NULL,
+  `type` varchar(100) NOT NULL,
+  `message_short` varchar(255) NOT NULL,
+  `message_full` varchar(2000) DEFAULT NULL,
+  `email_to` varchar(255) DEFAULT NULL,
+  `sms_to` varchar(50) DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `read_at` datetime(6) DEFAULT NULL,
+  `created_by_user_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_notification_user` (`user_id`),
+  KEY `idx_notification_created_at` (`created_at`),
+  KEY `idx_notification_read_at` (`read_at`),
+  CONSTRAINT `FK_notification_user`
+    FOREIGN KEY (`user_id`) REFERENCES `app_users` (`id`),
+  CONSTRAINT `FK_notification_player`
+    FOREIGN KEY (`player_id`) REFERENCES `player_entity` (`id`),
+  CONSTRAINT `FK_notification_created_by`
+    FOREIGN KEY (`created_by_user_id`) REFERENCES `app_users` (`id`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_general_ci;
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V7__notifications_type_enum.sql
+-----
+ALTER TABLE `notifications`
+    MODIFY COLUMN `type` enum(
+        'MATCH_REGISTRATION_CREATED',
+        'MATCH_REGISTRATION_UPDATED',
+        'MATCH_REGISTRATION_CANCELED',
+        'MATCH_REGISTRATION_RESERVED',
+        'MATCH_REGISTRATION_SUBSTITUTE',
+        'MATCH_WAITING_LIST_MOVED_UP',
+        'MATCH_REGISTRATION_NO_RESPONSE',
+        'PLAYER_EXCUSED',
+        'PLAYER_NO_EXCUSED',
+        'MATCH_REMINDER',
+        'MATCH_CANCELED',
+        'MATCH_UNCANCELED',
+        'MATCH_TIME_CHANGED',
+        'PLAYER_CREATED',
+        'PLAYER_UPDATED',
+        'PLAYER_APPROVED',
+        'PLAYER_REJECTED',
+        'PLAYER_DELETED',
+        'PLAYER_CHANGE_USER',
+        'USER_CREATED',
+        'USER_ACTIVATED',
+        'USER_DEACTIVATED',
+        'USER_UPDATED',
+        'PASSWORD_RESET',
+        'USER_CHANGE_PASSWORD',
+        'FORGOTTEN_PASSWORD_RESET_REQUEST',
+        'FORGOTTEN_PASSWORD_RESET_COMPLETED',
+        'SECURITY_ALERT',
+        'SPECIAL_MESSAGE'
+    ) NOT NULL;

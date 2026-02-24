@@ -78,12 +78,12 @@ public class NoResponseReminderScheduler {
     /**
      * Hlavní plánovací metoda – spouštěná CRONem.
      *
-     * Typicky 1× denně (např. 12:30 Europe/Prague).
+     * Typicky 1× denně (např. 17:00 Europe/Prague).
      * Pro zápasy, které se konají za daysBeforeMatch dní, najde hráče ve stavu NO_RESPONSE
      * (dopočítaném – hráč nemá žádnou registraci k zápasu) a pošle jim notifikaci
      * MATCH_REGISTRATION_NO_RESPONSE.
      */
-    @Scheduled(cron = "${app.notifications.no-response.cron:0 30 12 * * *}",
+    @Scheduled(cron = "${app.notifications.no-response.cron:0 00 17 * * *}",
             zone = "${app.notifications.no-response.zone:Europe/Prague}")
     @Transactional
     public void processNoResponseReminders() {
