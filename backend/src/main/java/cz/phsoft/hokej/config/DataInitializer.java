@@ -168,6 +168,8 @@ public class DataInitializer {
 
             player.setPhoneNumber("");
             player.setTeam(i < 5 ? Team.DARK : Team.LIGHT);
+            // TODO Otestovat přidalším spuštění
+            player.setPrimaryPosition((i % 2 == 0) ? PlayerPosition.FORWARD : PlayerPosition.DEFENSE);
             player.setPlayerStatus(i < 8 ? PlayerStatus.APPROVED : PlayerStatus.PENDING);
 
             user.setRole(i == 0 ? Role.ROLE_MANAGER : Role.ROLE_PLAYER);
@@ -308,7 +310,7 @@ public class DataInitializer {
                 match.setDateTime(firstMatchDate.plusWeeks(i));
                 match.setLocation("NĚJAKÁ HALA");
                 match.setDescription("");
-                match.setMaxPlayers(MatchMode.THREE_ON_THREE_NO_GOALIE.getPlayersPerTeam()*4);
+                match.setMaxPlayers(MatchMode.THREE_ON_THREE_NO_GOALIE.getPlayersPerTeam()*2);
                 match.setPrice(2200);
                 match.setMatchStatus(null);
                 match.setCancelReason(null);
@@ -391,7 +393,13 @@ public class DataInitializer {
                 reg.setTeam(player.getTeam());
                 reg.setTimestamp(LocalDateTime.now());
                 reg.setCreatedBy("initializer");
-                reg.setPositionInMatch(PlayerPosition.ANY);
+
+                int idOfMatch = match.getId().intValue();
+                if (idOfMatch % 2 == 0){
+                    reg.setPositionInMatch(PlayerPosition.DEFENSE);
+                }else{
+                    reg.setPositionInMatch(PlayerPosition.FORWARD);
+                }
 
                 matchRegistrationRepository.save(reg);
             }

@@ -19,6 +19,10 @@ const emptySettings = {
     notifyOnPayment: false,
     notifyReminders: true,
     reminderHoursBefore: 24,
+
+    // 🔹 nové položky z PlayerSettingsDTO
+    possibleMoveToAnotherTeam: false,
+    possibleChangePlayerPosition: false,
 };
 
 export const usePlayerSettings = (playerId = null) => {
@@ -42,12 +46,20 @@ export const usePlayerSettings = (playerId = null) => {
                     : await getCurrentPlayerSettings();
 
                 if (!isMounted) return;
-                setSettings(data || emptySettings);
+
+                // 🔹 zajistí, že pokud backend některou hodnotu neposlal,
+                // doplní se z emptySettings
+                setSettings({
+                    ...emptySettings,
+                    ...(data || {}),
+                });
             } catch (err) {
                 if (!isMounted) return;
 
-                // 🔹 pro debug: vypiš chybu do konzole
-                console.error("load player settings error:", err?.response || err);
+                console.error(
+                    "load player settings error:",
+                    err?.response || err
+                );
 
                 const msg =
                     err?.response?.data?.message ||
@@ -82,11 +94,13 @@ export const usePlayerSettings = (playerId = null) => {
                     ? await updatePlayerSettings(playerId, payload)
                     : await updateCurrentPlayerSettings(payload);
 
-                setSettings(updated);
+                setSettings({
+                    ...emptySettings,
+                    ...(updated || {}),
+                });
                 setSuccess("Nastavení bylo úspěšně uloženo.");
                 return updated;
             } catch (err) {
-                // 🔹 tady si vytáhneš konkrétní status a body
                 console.error(
                     "save player settings error:",
                     err?.response?.status,

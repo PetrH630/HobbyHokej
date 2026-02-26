@@ -3,6 +3,7 @@ package cz.phsoft.hokej.models.services;
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.data.enums.PlayerPosition;
+import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
@@ -152,5 +153,9 @@ public interface MatchRegistrationService {
                                                     Long matchId,
                                                     PlayerPosition positionInMatch);
 
+    void promoteReservedCandidatesForCapacityIncrease(Long matchId,
+                                                      Team freedTeam,
+                                                      PlayerPosition freedPosition,
+                                                      int slotsCount);
 
 }

@@ -479,8 +479,8 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      * Změna je povolena pouze u aktivních registrací, tedy pro stavy
      * REGISTERED, RESERVED nebo SUBSTITUTE.
      *
-     * @param playerId       Identifikátor hráče, jehož registrace má být upravena.
-     * @param matchId        Identifikátor zápasu, u kterého má být pozice změněna.
+     * @param playerId        Identifikátor hráče, jehož registrace má být upravena.
+     * @param matchId         Identifikátor zápasu, u kterého má být pozice změněna.
      * @param positionInMatch Cílová pozice hráče v daném zápase.
      * @return Aktualizovaná registrace převedená do DTO.
      */
@@ -578,11 +578,23 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     /**
      * Přepočítává stavy REGISTERED a RESERVED pro daný zápas podle kapacity zápasu.
      *
-     * Registrace se seřadí podle času vytvoření a prvním hráčům do výše kapacity zápasu
-     * se nastaví stav REGISTERED. Ostatním hráčům se nastaví stav RESERVED.
-     * Registrace ve stavu SUBSTITUTE se do přepočtu nezahrnují.
+     * Logika vychází z celkové kapacity maxPlayers, která zahrnuje jak hráče v poli,
+     * tak brankáře. Pro režimy s brankáři se z kapacity rezervuje pevný počet
+     * slotů pro gólmany (getGoalieSlotsForMatch). Zbytek kapacity je k dispozici
+     * pro hráče v poli.
      *
-     * Metoda se používá zejména při změně kapacity zápasu v MatchService.
+     * Postup:
+     * - z registrací ve stavu REGISTERED se oddělí brankáři a hráči v poli,
+     * - brankářům se ponechá status REGISTERED až do výše vyhrazených slotů,
+     *   případní další brankáři se převedou do RESERVED,
+     * - pro hráče v poli se spočítá kapacita jako maxPlayers - goalieSlots
+     *   a maximálně tolik hráčů se ponechá REGISTERED,
+     * - při výběru hráčů v poli se zachovává původní pořadí podle času registrace
+     *   a snaží se co nejvíce vyrovnat počty v týmech DARK / LIGHT,
+     *   přičemž se respektuje nastavení possibleMoveToAnotherTeam.
+     *
+     * Registrace ve stavu SUBSTITUTE se do přepočtu nezahrnují.
+     * Metoda se používá zejména při snížení kapacity zápasu v MatchService.
      *
      * @param matchId Identifikátor zápasu, pro který se stavy přepočítávají.
      */
@@ -590,23 +602,179 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     @Transactional
     public void recalcStatusesForMatch(Long matchId) {
         MatchEntity match = getMatchOrThrow(matchId);
-        int maxPlayers = match.getMaxPlayers();
+        Integer maxPlayersObj = match.getMaxPlayers();
+        if (maxPlayersObj == null || maxPlayersObj <= 0) {
+            return;
+        }
 
-        List<MatchRegistrationEntity> regs = registrationRepository.findByMatchId(matchId).stream()
-                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED
-                        || r.getStatus() == PlayerMatchStatus.RESERVED)
+        int maxPlayers = maxPlayersObj;
+
+        // Kolik slotů chceme "držet" pro brankáře v rámci maxPlayers
+        int goalieSlots = getGoalieSlotsForMatch(match);
+        if (goalieSlots < 0) {
+            goalieSlots = 0;
+        }
+        if (goalieSlots > maxPlayers) {
+            goalieSlots = maxPlayers;
+        }
+
+        int skaterCapacity = maxPlayers - goalieSlots;
+
+        // Všichni aktuálně REGISTERED, seřazení podle času registrace
+        List<MatchRegistrationEntity> allRegistered = registrationRepository.findByMatchId(matchId).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
                 .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
                 .toList();
 
-        for (int i = 0; i < regs.size(); i++) {
-            MatchRegistrationEntity reg = regs.get(i);
-            PlayerMatchStatus newStatus =
-                    (i < maxPlayers) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+        // Rozdělení na brankáře a hráče v poli
+        List<MatchRegistrationEntity> goalies = allRegistered.stream()
+                .filter(this::isGoalieRegistration)
+                .toList();
 
-            if (reg.getStatus() != newStatus) {
-                updateRegistrationStatus(reg, newStatus, "system", false);
+        List<MatchRegistrationEntity> skaters = allRegistered.stream()
+                .filter(r -> !isGoalieRegistration(r))
+                .toList();
+
+        int registeredGoalies = goalies.size();
+        int registeredSkaters = skaters.size();
+
+        // Pokud celkový počet hráčů nepřesahuje kapacitu a počet hráčů v poli
+        // nepřesahuje skaterCapacity, není třeba nic měnit.
+        if (registeredGoalies + registeredSkaters <= maxPlayers
+                && registeredSkaters <= skaterCapacity) {
+            return;
+        }
+
+        // 1) Brankáři – ponecháme REGISTERED pouze do výše goalieSlots,
+        //    případné "přebývající" brankáře přesuneme do RESERVED.
+        int allowedGoalies = Math.min(goalieSlots, maxPlayers);
+        int keptGoalies = 0;
+
+        for (MatchRegistrationEntity goalieReg : goalies) {
+            if (keptGoalies < allowedGoalies) {
+                // Gólman se vejde do vyhrazených slotů → zůstává REGISTERED
+                updateRegistrationStatus(goalieReg, PlayerMatchStatus.REGISTERED, "system", false);
+                keptGoalies++;
+            } else {
+                // Nad rámec slotů pro gólmany → RESERVED
+                updateRegistrationStatus(goalieReg, PlayerMatchStatus.RESERVED, "system", false);
             }
         }
+
+        // 2) Hráči v poli – přepočet jen nad skaters s kapacitou skaterCapacity.
+        //    Pokud registeredSkaters <= skaterCapacity, nic není třeba.
+        if (registeredSkaters <= skaterCapacity) {
+            return;
+        }
+
+        int desiredTotal = skaterCapacity;
+
+        // Aktuální rozložení hráčů v poli – použije se pro rozhodnutí,
+        // který tým dostane případné "liché" extra místo.
+        long currentDark = skaters.stream()
+                .filter(r -> r.getTeam() == Team.DARK)
+                .count();
+        long currentLight = skaters.stream()
+                .filter(r -> r.getTeam() == Team.LIGHT)
+                .count();
+
+        int targetDark;
+        int targetLight;
+
+        if (desiredTotal % 2 == 0) {
+            // rovnoměrně – např. 4 → 2/2, 6 → 3/3
+            targetDark = desiredTotal / 2;
+            targetLight = desiredTotal / 2;
+        } else {
+            // lichý počet – jeden tým bude mít o 1 víc,
+            // upřednostní se ten, který má aktuálně víc hráčů v poli
+            if (currentDark >= currentLight) {
+                targetDark = desiredTotal / 2 + 1;
+                targetLight = desiredTotal - targetDark;
+            } else {
+                targetLight = desiredTotal / 2 + 1;
+                targetDark = desiredTotal - targetLight;
+            }
+        }
+
+        int dark = 0;
+        int light = 0;
+
+        for (MatchRegistrationEntity reg : skaters) {
+            Team team = reg.getTeam();
+            boolean movable = canAutoMoveTeam(reg); // používá PlayerSettings.isPossibleMoveToAnotherTeam()
+
+            // Hráč bez týmu – zkusí se přiřadit tam, kde je ještě místo
+            if (team == null) {
+                if (dark < targetDark) {
+                    reg.setTeam(Team.DARK);
+                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                    dark++;
+                } else if (light < targetLight) {
+                    reg.setTeam(Team.LIGHT);
+                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                    light++;
+                } else {
+                    // nikde už není místo → spadne do RESERVED
+                    updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                }
+                continue;
+            }
+
+            if (team == Team.DARK) {
+                if (!movable) {
+                    // Nemůže měnit tým – buď zůstane v DARK, nebo jde do RESERVED
+                    if (dark < targetDark) {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        dark++;
+                    } else {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                    }
+                } else {
+                    // Může měnit tým
+                    if (dark < targetDark) {
+                        // DARK má ještě místo → necháme ho
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        dark++;
+                    } else if (light < targetLight) {
+                        // DARK je plný, LIGHT má ještě místo → přehodí se
+                        reg.setTeam(Team.LIGHT);
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        light++;
+                    } else {
+                        // nikde už není místo → RESERVED
+                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                    }
+                }
+            } else if (team == Team.LIGHT) {
+                if (!movable) {
+                    if (light < targetLight) {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        light++;
+                    } else {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                    }
+                } else {
+                    if (light < targetLight) {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        light++;
+                    } else if (dark < targetDark) {
+                        reg.setTeam(Team.DARK);
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        dark++;
+                    } else {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                    }
+                }
+            } else {
+                // Neznámý tým – raději do RESERVED
+                updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+            }
+        }
+
+        // Brankáři, kteří se vešli do vyhrazených slotů, zůstali REGISTERED.
+        // Volná kapacita pro případné budoucí gólmany vzniká tím,
+        // že hráči v poli jsou omezeni na skaterCapacity = maxPlayers - goalieSlots.
     }
 
     // =========================
@@ -691,7 +859,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      * Metoda aktualizuje maximálně jednu registraci a používá se pouze v kontextu
      * odhlášení ze stavu REGISTERED.
      *
-     * @param match               Zápas, ve kterém došlo k uvolnění místa.
+     * @param match                Zápas, ve kterém došlo k uvolnění místa.
      * @param canceledRegistration Registrace hráče, který se odhlásil.
      */
     private void promoteReservedCandidateAfterUnregister(MatchEntity match,
@@ -817,9 +985,85 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return true;
     }
 
+    /**
+     * Při navýšení kapacity zápasu nebo uvolnění míst povyšuje kandidáty
+     * ze stavu RESERVED do stavu REGISTERED.
+     *
+     * Metoda pracuje s omezeným počtem nově dostupných slotů a postupně
+     * zkouší povyšovat kandidáty podle času registrace. Pro vyhodnocení
+     * vhodnosti kandidáta se používá stejná logika jako při povyšování
+     * po odhlášení hráče, včetně kontroly:
+     * - nastavení possibleMoveToAnotherTeam,
+     * - nastavení possibleChangePlayerPosition,
+     * - speciálního pravidla pro pozici GOALIE,
+     * - pozice ANY.
+     *
+     * Při povyšování se bere v úvahu případně specifikovaný tým a pozice,
+     * pro kterou se nové místo uvolnilo.
+     *
+     * @param matchId      Identifikátor zápasu, jehož kapacita byla navýšena nebo se v něm uvolnila místa.
+     * @param freedTeam    Tým, ve kterém se místo uvolnilo, nebo null pro libovolný tým.
+     * @param freedPosition Pozice, která se uvolnila, nebo null pokud se má použít stávající pozice kandidáta.
+     * @param slotsCount   Počet nových slotů, které se mají obsadit z rezervovaných hráčů.
+     */
+    @Override
+    @Transactional
+    public void promoteReservedCandidatesForCapacityIncrease(Long matchId,
+                                                             Team freedTeam,
+                                                             PlayerPosition freedPosition,
+                                                             int slotsCount) {
+
+        if (slotsCount <= 0) {
+            return;
+        }
+
+        MatchEntity match = getMatchOrThrow(matchId);
+
+        long registeredCount = registrationRepository
+                .countByMatchIdAndStatus(matchId, PlayerMatchStatus.REGISTERED);
+
+        int maxPlayers = match.getMaxPlayers();
+
+        // opakujeme, dokud:
+        // - máme méně registrovaných než kapacitu
+        // - máme volné "nové" sloty k obsazení
+        int remainingSlotsToFill = Math.min(slotsCount, maxPlayers - (int) registeredCount);
+        if (remainingSlotsToFill <= 0) {
+            return;
+        }
+
+        List<MatchRegistrationEntity> reserved = registrationRepository
+                .findByMatchIdAndStatus(matchId, PlayerMatchStatus.RESERVED)
+                .stream()
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .toList();
+
+        for (MatchRegistrationEntity candidate : reserved) {
+            if (remainingSlotsToFill <= 0) {
+                break;
+            }
+
+            // ZDE se použije tvoje chytrá logika:
+            // - possibleMoveToAnotherTeam
+            // - possibleChangePlayerPosition
+            // - GOALIE
+            // - ANY
+            boolean promoted = tryPromoteCandidateToFreedSlot(
+                    candidate,
+                    freedTeam,
+                    freedPosition
+            );
+
+            if (promoted) {
+                remainingSlotsToFill--;
+            }
+        }
+    }
+
     // ====================================================
     // PRIVÁTNÍ HELPERY – NAČÍTÁNÍ ENTIT A ZÁKLADNÍ LOGIKA
     // ====================================================
+
     /**
      * Určuje cílovou pozici kandidáta pro obsazení uvolněného místa.
      *
@@ -833,13 +1077,13 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
      *   - pokud jsou aktuální a cílová pozice obě v obraně nebo obě v útoku,
      *     je změna povolena bez ohledu na possibleChangePlayerPosition,
      *   - přechod mezi obranou a útokem je povolen pouze pokud je
-     *     possibleChangePlayerPosition = true.
+     *     possibleChangePlayerPosition rovno true.
      *
      * Pokud není možné cílovou pozici korektně určit, vrací se null.
      *
-     * @param currentPosition    Efektivní aktuální pozice kandidáta.
-     * @param freedPosition      Uvolněná pozice v zápase.
-     * @param canChangePosition  Příznak, zda může kandidát přecházet mezi obranou a útokem.
+     * @param currentPosition   Efektivní aktuální pozice kandidáta.
+     * @param freedPosition     Uvolněná pozice v zápase.
+     * @param canChangePosition Příznak, zda může kandidát přecházet mezi obranou a útokem.
      * @return Cílová pozice kandidáta nebo null, pokud ji nelze nastavit.
      */
     private PlayerPosition resolveTargetPosition(PlayerPosition currentPosition,
@@ -897,9 +1141,53 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         return null;
     }
     /**
+     * Vyhodnocuje, zda registrace reprezentuje brankáře.
+     *
+     * Primárně se používá pozice v zápase (positionInMatch). Pokud není nastavena,
+     * použije se primární pozice hráče (primaryPosition).
+     *
+     * @param registration Registrace, která se vyhodnocuje.
+     * @return True, pokud jde o brankáře, jinak false.
+     */
+    private boolean isGoalieRegistration(MatchRegistrationEntity registration) {
+        if (registration == null || registration.getPlayer() == null) {
+            return false;
+        }
+
+        PlayerPosition position = registration.getPositionInMatch();
+        if (position == null) {
+            position = registration.getPlayer().getPrimaryPosition();
+        }
+
+        return position == PlayerPosition.GOALIE;
+    }
+    /**
+     * Určuje počet slotů pro brankáře, které se mají rezervovat v rámci kapacity zápasu.
+     *
+     * Sloty pro brankáře se započítávají do maxPlayers. Pro režimy bez brankářů
+     * se vrací nula. Pro běžný zápas dvou týmů s brankáři se typicky rezervují
+     * dva sloty (jeden gólman na tým).
+     *
+     * @param match Zápas, pro který se počet slotů vyhodnocuje.
+     * @return Počet slotů pro brankáře, které se mají v kapacitě rezervovat.
+     */
+    private int getGoalieSlotsForMatch(MatchEntity match) {
+        MatchMode mode = match.getMatchMode();
+        if (mode == null) {
+            return 0;
+        }
+        return switch (mode) {
+            case THREE_ON_THREE_WITH_GOALIE -> 2;
+            case FOUR_ON_FOUR_WITH_GOALIE -> 2;
+            case FIVE_ON_FIVE_WITH_GOALIE -> 2;
+            default -> 0;
+        };
+    }
+
+    /**
      * Určuje, zda daná pozice patří do obrany.
      *
-     * Obranné pozice: DEFENSE, DEFENSE_LEFT, DEFENSE_RIGHT.
+     * Obranné pozice jsou DEFENSE, DEFENSE_LEFT a DEFENSE_RIGHT.
      *
      * @param position Pozice, která se vyhodnocuje.
      * @return True, pokud jde o obrannou pozici, jinak false.
@@ -916,7 +1204,7 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
     /**
      * Určuje, zda daná pozice patří do útoku.
      *
-     * Útočné pozice: FORWARD, CENTER, WING_LEFT, WING_RIGHT.
+     * Útočné pozice jsou FORWARD, CENTER, WING_LEFT a WING_RIGHT.
      *
      * @param position Pozice, která se vyhodnocuje.
      * @return True, pokud jde o útočnou pozici, jinak false.
@@ -930,6 +1218,35 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
                 || position == PlayerPosition.WING_LEFT
                 || position == PlayerPosition.WING_RIGHT;
     }
+
+    /**
+     * Vyhodnocuje, zda lze hráče automaticky přesunout do druhého týmu
+     * při dorovnávání týmů po snížení kapacity.
+     *
+     * Využívá se nastavení v PlayerSettings:
+     * possibleMoveToAnotherTeam = true.
+     *
+     * Pozice v zápase se při tomto dorovnávání nemění, zůstává stejná
+     * (logika změny pozice DEFENSE/FORWARD se používá jinde při obsazování
+     * uvolněných slotů).
+     *
+     * @param registration Registrace hráče, který je kandidátem na přesun.
+     * @return True, pokud nastavení hráče umožňuje automatický přesun týmu.
+     */
+    private boolean canAutoMoveTeam(MatchRegistrationEntity registration) {
+        if (registration == null || registration.getPlayer() == null) {
+            return false;
+        }
+
+        PlayerEntity player = registration.getPlayer();
+        var settings = player.getSettings();
+        if (settings == null) {
+            return false;
+        }
+
+        return settings.isPossibleMoveToAnotherTeam();
+    }
+
     /**
      * Deleguje odeslání notifikace hráči do NotificationService.
      *

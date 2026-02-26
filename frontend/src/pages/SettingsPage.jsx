@@ -628,6 +628,7 @@ const SettingsPage = () => {
                                         values={playerProfileValues}
                                         onChange={handlePlayerProfileChange}
                                         errors={profileFieldErrors}
+                                        playerSettings={playerSettingsValues}
                                     />
                                     <div className="d-flex justify-content-end">
                                         <button

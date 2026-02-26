@@ -2,23 +2,34 @@
 import RoleGuard from "../RoleGuard";
 import { PLAYER_POSITION_OPTIONS } from "../../constants/playerPosition";
 
-const PlayerProfileForm = ({ values, onChange, errors = {} }) => {
+const PlayerProfileForm = ({
+    values,
+    onChange,
+    errors = {},
+    playerSettings, // 🔹 nové: herní / notifikační nastavení hráče (PlayerSettingsDTO)
+}) => {
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        onChange({ [name]: value });
+        const { name, type, value, checked } = e.target;
+        onChange({
+            [name]: type === "checkbox" ? checked : value,
+        });
     };
 
-    const nameClass =
-        "form-control" + (errors.name ? " is-invalid" : "");
+    const nameClass = "form-control" + (errors.name ? " is-invalid" : "");
     const surnameClass =
         "form-control" + (errors.surname ? " is-invalid" : "");
     const phoneClass =
         "form-control" + (errors.phoneNumber ? " is-invalid" : "");
 
+    // 🔹 hodnoty bereme z playerSettings, NE z values
+    const canMoveTeam = !!playerSettings?.possibleMoveToAnotherTeam;
+    const canChangePosition = !!playerSettings?.possibleChangePlayerPosition;
+
     return (
         <div>
             <h2 className="h5 mb-3">Profil hráče</h2>
 
+            {/* JMÉNO */}
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label" htmlFor="name">
@@ -59,6 +70,7 @@ const PlayerProfileForm = ({ values, onChange, errors = {} }) => {
                 </div>
             </div>
 
+            {/* PŘEZDÍVKA + TELEFON */}
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label" htmlFor="nickname">
@@ -101,7 +113,7 @@ const PlayerProfileForm = ({ values, onChange, errors = {} }) => {
                 </div>
             </div>
 
-            {/* TEAM – výběr týmu hráče */}
+            {/* TEAM */}
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label" htmlFor="team">
@@ -124,12 +136,10 @@ const PlayerProfileForm = ({ values, onChange, errors = {} }) => {
                 </div>
             </div>
 
-            {/* Post – primární / sekundární pozice */}
+            {/* POST */}
             <div className="row">
                 <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                        Post
-                    </label>
+                    <label className="form-label">Post</label>
                     <div className="row g-2">
                         <div className="col-12 col-sm-6">
                             <select
@@ -174,17 +184,56 @@ const PlayerProfileForm = ({ values, onChange, errors = {} }) => {
                             </select>
                         </div>
                     </div>
-                    <div className="form-text">
-                        Primární a sekundární post hráče (odpovídá enumu
-                        PlayerPosition).
-                    </div>
+                </div>
+            </div>
+
+            {/* Herní preference – zobrazení pomocí ikon z playerSettings */}
+            <div className="row">
+                <div className="col-md-6 mb-3">
+                    <label className="form-label">
+                        Herní preference (automatické přesuny z náhradníka)
+                    </label>
+
+                    {playerSettings ? (
+                        <>
+                            <div className="mb-2 d-flex align-items-center">
+                                <span className="me-2 fs-5">
+                                    {canMoveTeam ? "✅" : "❌"}
+                                </span>
+                                <span>
+                                    {canMoveTeam
+                                        ? "Můžeš být automaticky přesunut do druhého týmu při uvolnění místa."
+                                        : "Nemůžeš být automaticky přesunut do druhého týmu při uvolnění místa."}
+                                </span>
+                            </div>
+
+                            <div className="d-flex align-items-center">
+                                <span className="me-2 fs-5">
+                                    {canChangePosition ? "✅" : "❌"}
+                                </span>
+                                <span>
+                                    {canChangePosition
+                                        ? "Můžeš mít automaticky změněný post mezi obranou a útokem."
+                                        : "Nemůžeš mít automaticky změněný post mezi obranou a útokem."}
+                                </span>
+                            </div>
+
+                            <div className="form-text mt-2">
+                                Nastavení se mění v sekci „Nastavení
+                                notifikací“.
+                            </div>
+                        </>
+                    ) : (
+                        <div className="form-text">
+                            Herní preference zatím nejsou načteny.
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* TYP – pouze pro admin/manager */}
             <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
                 <div className="row">
-                    {/* Typ hráče */}
                     <div className="col-md-6 mb-3">
                         <label className="form-label" htmlFor="type">
                             Typ

@@ -275,8 +275,67 @@ public class MatchServiceImpl implements MatchService {
 
         MatchEntity saved = matchRepository.save(entity);
 
-        if (maxPlayersChanged) {
+        Integer newMaxPlayers = saved.getMaxPlayers();
+        int diffMaxPlayers = (newMaxPlayers != null && oldMaxPlayers != null)
+                ? newMaxPlayers - oldMaxPlayers
+                : 0;
+
+        // SNÍŽENÍ kapacity – přebytečné hráče shodíme na RESERVED
+        if (diffMaxPlayers < 0) {
             registrationService.recalcStatusesForMatch(saved.getId());
+        }
+
+        // ZVÝŠENÍ kapacity – navýšená místa se rozdělí mezi týmy
+        if (diffMaxPlayers > 0) {
+            int totalNewSlots = diffMaxPlayers;
+
+            // Registrace v daném zápase – stačí DTO
+            List<MatchRegistrationDTO> regsForSlots =
+                    registrationService.getRegistrationsForMatch(saved.getId());
+
+            int registeredDark = (int) regsForSlots.stream()
+                    .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                    .filter(r -> r.getTeam() == Team.DARK)
+                    .count();
+
+            int registeredLight = (int) regsForSlots.stream()
+                    .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                    .filter(r -> r.getTeam() == Team.LIGHT)
+                    .count();
+
+            // Základ – polovina nových míst na každý tým
+            int baseSlotsPerTeam = totalNewSlots / 2;
+            int extraSlot = totalNewSlots % 2;
+
+            int darkSlots = baseSlotsPerTeam;
+            int lightSlots = baseSlotsPerTeam;
+
+            // Liché extra místo dostane tým, který má aktuálně méně registrovaných hráčů
+            if (extraSlot > 0) {
+                if (registeredDark <= registeredLight) {
+                    darkSlots += 1;
+                } else {
+                    lightSlots += 1;
+                }
+            }
+
+            if (darkSlots > 0) {
+                registrationService.promoteReservedCandidatesForCapacityIncrease(
+                        saved.getId(),
+                        Team.DARK,   // preferovaný tým pro nová místa
+                        null,        // pozici zatím neomezujeme – řeší se v logice kandidáta
+                        darkSlots
+                );
+            }
+
+            if (lightSlots > 0) {
+                registrationService.promoteReservedCandidatesForCapacityIncrease(
+                        saved.getId(),
+                        Team.LIGHT,
+                        null,
+                        lightSlots
+                );
+            }
         }
 
         if (dateTimeChanged) {

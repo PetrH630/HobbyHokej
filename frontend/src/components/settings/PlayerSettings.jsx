@@ -6,7 +6,7 @@ const PlayerSettings = ({
     saving,
     error,
     success,
-    errors = {}, // 🔹 field-level chyby z SettingsPage
+    errors = {}, // field-level chyby z SettingsPage
 }) => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -34,7 +34,8 @@ const PlayerSettings = ({
             {/* Kontaktní e-mail */}
             <div className="mb-3">
                 <label className="form-label" htmlFor="contactEmail">
-                    Kontaktní e-mail - pokud chceš používat tento, dej jen "uložit nastavení notifikaci" 
+                    Kontaktní e-mail - pokud chceš používat tento, dej jen
+                    &nbsp;"uložit nastavení notifikaci"
                 </label>
                 <input
                     type="email"
@@ -183,7 +184,6 @@ const PlayerSettings = ({
                     Informovat při zrušení zápasu
                 </label>
             </div>
-          
 
             <hr />
 
@@ -228,15 +228,63 @@ const PlayerSettings = ({
                     disabled={!values.notifyReminders}
                 />
             </div>
-            <div className="d-flex justify-content-end">         
-            <div className="mt-4">
-                <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={saving}
+
+            <hr />
+
+            {/* 🔹 Herní preference z PlayerSettingsDTO */}
+            <h2 className="h5 mb-3">Herní preference (automatické přesuny)</h2>
+
+            <div className="form-check mb-2">
+                <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="possibleMoveToAnotherTeam"
+                    name="possibleMoveToAnotherTeam"
+                    checked={values.possibleMoveToAnotherTeam || false}
+                    onChange={handleCheckboxChange}
+                />
+                <label
+                    className="form-check-label"
+                    htmlFor="possibleMoveToAnotherTeam"
                 >
-                    {saving ? "Ukládám…" : "Uložit nastavení notifikaci"}
-                </button>
+                    Můžu být automaticky přesunut do druhého týmu při
+                    uvolnění místa.
+                </label>
+            </div>
+
+            <div className="form-check mb-3">
+                <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="possibleChangePlayerPosition"
+                    name="possibleChangePlayerPosition"
+                    checked={values.possibleChangePlayerPosition || false}
+                    onChange={handleCheckboxChange}
+                />
+                <label
+                    className="form-check-label"
+                    htmlFor="possibleChangePlayerPosition"
+                >
+                    Může mi být automaticky změněn post mezi obranou a útokem.
+                </label>
+            </div>
+
+            <div className="form-text mb-3">
+                Nastavení se používá při automatickém přesunu z náhradníků
+                (RESERVED) na hráče (REGISTERED), pokud se uvolní místo.
+            </div>
+
+            <div className="d-flex justify-content-end">
+                <div className="mt-4">
+                    <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={saving}
+                    >
+                        {saving
+                            ? "Ukládám…"
+                            : "Uložit nastavení notifikaci"}
+                    </button>
                 </div>
             </div>
         </form>

@@ -102,20 +102,31 @@ const AdminMatchModal = ({
     }, [match]);
 
     /*
-     * Automatické přepočítání maxPlayers při změně matchMode
-     * pouze při vytváření nového zápasu
+     * Automatické přepočítání maxPlayers při změně matchMode.
+     *
+     * - u nového zápasu vždy, jakmile se změní matchMode,
+     * - u existujícího zápasu pouze tehdy, když uživatel opravdu změní
+     *   matchMode na jinou hodnotu než byla původně v match.matchMode.
      */
     useEffect(() => {
-        if (!isNew) return;
         if (!values.matchMode) return;
 
         const calculated = calculateMaxPlayers(values.matchMode);
 
-        setValues((prev) => ({
-            ...prev,
-            maxPlayers: calculated,
-        }));
-    }, [values.matchMode, isNew]);
+        if (isNew) {
+            // nový zápas – vždy přepočítat
+            setValues((prev) => ({
+                ...prev,
+                maxPlayers: calculated,
+            }));
+        } else if (values.matchMode !== match?.matchMode) {
+            // editace – přepočítat jen při změně režimu
+            setValues((prev) => ({
+                ...prev,
+                maxPlayers: calculated,
+            }));
+        }
+    }, [values.matchMode, isNew, match]);
 
     const handleChange = (patch) => {
         setValues((prev) => ({ ...prev, ...patch }));
