@@ -82,7 +82,7 @@ const PublicLandingPage = () => {
                                 </div>
 
                                 <h1 className="fw-bold mb-3">
-                                    Správa hobby hokejového týmu jednoduše a přehledně
+                                    Správa hobby (rybníkového) hokejového týmu jednoduše a přehledně
                                 </h1>
 
                                 <p className="lead text-muted mb-4">

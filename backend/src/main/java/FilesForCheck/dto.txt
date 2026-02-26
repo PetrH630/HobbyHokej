@@ -16,6 +16,7 @@ MatchHistoryDTO.java
 MatchOverviewDTO.java
 MatchRegistrationDTO.java
 MatchRegistrationHistoryDTO.java
+NoResponseReminderPreviewDTO.java
 NotificationBadgeDTO.java
 NotificationDTO.java
 NumberedMatchDTO.java
@@ -1657,6 +1658,85 @@ public class MatchRegistrationHistoryDTO {
 }
 
 -----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\NoResponseReminderPreviewDTO.java
+-----
+package cz.phsoft.hokej.models.dto;
+
+import java.time.LocalDateTime;
+
+/**
+ * DTO pro nĂˇhled pĹ™ipomĂ­nek NO_RESPONSE.
+ *
+ * SlouĹľĂ­ pouze pro admin/test endpoint, aby bylo vidÄ›t,
+ * kterĂ˝m hrĂˇÄŤĹŻm by se pĹ™ipomĂ­nka poslala, aniĹľ by se reĂˇlnÄ›
+ * odeslaly notifikace.
+ */
+public class NoResponseReminderPreviewDTO {
+
+    private Long matchId;
+    private LocalDateTime matchDateTime;
+
+    private Long playerId;
+    private String playerFullName;
+    private String playerPhoneNumber;
+
+    public NoResponseReminderPreviewDTO() {
+    }
+
+    public NoResponseReminderPreviewDTO(Long matchId,
+                                        LocalDateTime matchDateTime,
+                                        Long playerId,
+                                        String playerFullName,
+                                        String playerPhoneNumber) {
+        this.matchId = matchId;
+        this.matchDateTime = matchDateTime;
+        this.playerId = playerId;
+        this.playerFullName = playerFullName;
+        this.playerPhoneNumber = playerPhoneNumber;
+    }
+
+    public Long getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
+    }
+
+    public LocalDateTime getMatchDateTime() {
+        return matchDateTime;
+    }
+
+    public void setMatchDateTime(LocalDateTime matchDateTime) {
+        this.matchDateTime = matchDateTime;
+    }
+
+    public Long getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
+    public String getPlayerFullName() {
+        return playerFullName;
+    }
+
+    public void setPlayerFullName(String playerFullName) {
+        this.playerFullName = playerFullName;
+    }
+
+    public String getPlayerPhoneNumber() {
+        return playerPhoneNumber;
+    }
+
+    public void setPlayerPhoneNumber(String playerPhoneNumber) {
+        this.playerPhoneNumber = playerPhoneNumber;
+    }
+}
+
+-----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\dto\NotificationBadgeDTO.java
 -----
 package cz.phsoft.hokej.models.dto;
@@ -1736,6 +1816,14 @@ public class NotificationDTO {
     private PlayerDTO player;
 
     /**
+     * ID zĂˇpasu, ke kterĂ©mu se notifikace vztahuje.
+     *
+     * Pokud notifikace nesouvisĂ­ s konkrĂ©tnĂ­m zĂˇpasem,
+     * je hodnota null.
+     */
+    private Long matchId;
+
+    /**
      * EmailovĂˇ adresa (nebo vĂ­ce adres oddÄ›lenĂ˝ch ÄŤĂˇrkou),
      * na kterou byl e-mail skuteÄŤnÄ› odesĂ­lĂˇn.
      *
@@ -1780,6 +1868,9 @@ public class NotificationDTO {
 
     public PlayerDTO getPlayer() { return player; }
     public void setPlayer(PlayerDTO player) { this.player = player; }
+
+    public Long getMatchId() { return matchId; }
+    public void setMatchId(Long matchId) { this.matchId = matchId; }
 
     public String getEmailTo() { return emailTo; }
     public void setEmailTo(String emailTo) { this.emailTo = emailTo; }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
+import cz.phsoft.hokej.data.enums.MatchMode;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 
 import java.time.LocalDateTime;
@@ -38,6 +39,11 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private String location;
     private String description;
     private Integer price;
+
+    /**
+     * Režim zápasu (počet hráčů na ledě, s brankářem / bez brankáře).
+     */
+    private MatchMode matchMode;
 
     /**
      * Kapacitní a agregační údaje zápasu.
@@ -103,7 +109,15 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private List<PlayerDTO> substitutedPlayers;
     private List<PlayerDTO> noExcusedPlayers;
     private List<PlayerDTO> noResponsePlayers;
-
+    // plný seznam registrací pro FE
+    /**
+     * Seznam všech registrací k zápasu včetně týmu, stavu a pozice v zápase.
+     *
+     * Slouží zejména pro frontendovou logiku, která potřebuje znát obsazení
+     * jednotlivých pozic v rámci týmů (například pro blokaci dalších registrací
+     * na již plně obsazenou pozici).
+     */
+    private List<MatchRegistrationDTO> registrations;
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -118,6 +132,9 @@ public class MatchDetailDTO implements NumberedMatchDTO {
 
     public Integer getPrice() { return price; }
     public void setPrice(Integer price) { this.price = price; }
+
+    public MatchMode getMatchMode() { return matchMode; }
+    public void setMatchMode(MatchMode matchMode) { this.matchMode = matchMode; }
 
     public int getMaxPlayers() { return maxPlayers; }
     public void setMaxPlayers(int maxPlayers) { this.maxPlayers = maxPlayers; }
@@ -236,4 +253,12 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     public Integer getMatchNumber() {
         return matchNumber;
     }
+    public List<MatchRegistrationDTO> getRegistrations() {
+        return registrations;
+    }
+
+    public void setRegistrations(List<MatchRegistrationDTO> registrations) {
+        this.registrations = registrations;
+    }
+
 }

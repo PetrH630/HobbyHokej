@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.models.dto;
 
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.enums.Team;
@@ -33,118 +34,56 @@ public class PlayerHistoryDTO {
     private String phoneNumber;
     private PlayerType type;
     private Team team;
+    private PlayerPosition primaryPosition;
+    private PlayerPosition secondaryPosition;
     private PlayerStatus playerStatus;
     private LocalDateTime originalTimestamp;
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public Long getUserId() {
-        return userId;
-    }
+    public Long getPlayerId() { return playerId; }
+    public void setPlayerId(Long playerId) { this.playerId = playerId; }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    public String getAction() { return action; }
+    public void setAction(String action) { this.action = action; }
 
-    public Long getPlayerId() {
-        return playerId;
-    }
+    public LocalDateTime getChangedAt() { return changedAt; }
+    public void setChangedAt(LocalDateTime changedAt) { this.changedAt = changedAt; }
 
-    public void setPlayerId(Long playerId) {
-        this.playerId = playerId;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getAction() {
-        return action;
-    }
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; }
 
-    public void setAction(String action) {
-        this.action = action;
-    }
+    public String getNickname() { return nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
 
-    public LocalDateTime getChangedAt() {
-        return changedAt;
-    }
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
 
-    public void setChangedAt(LocalDateTime changedAt) {
-        this.changedAt = changedAt;
-    }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public String getName() {
-        return name;
-    }
+    public PlayerType getType() { return type; }
+    public void setType(PlayerType type) { this.type = type; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
 
-    public String getSurname() {
-        return surname;
-    }
+    public PlayerPosition getPrimaryPosition() { return primaryPosition; }
+    public void setPrimaryPosition(PlayerPosition primaryPosition) { this.primaryPosition = primaryPosition; }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
+    public PlayerPosition getSecondaryPosition() { return secondaryPosition; }
+    public void setSecondaryPosition(PlayerPosition secondaryPosition) { this.secondaryPosition = secondaryPosition; }
 
-    public String getNickname() {
-        return nickname;
-    }
+    public PlayerStatus getPlayerStatus() { return playerStatus; }
+    public void setPlayerStatus(PlayerStatus playerStatus) { this.playerStatus = playerStatus; }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public PlayerType getType() {
-        return type;
-    }
-
-    public void setType(PlayerType type) {
-        this.type = type;
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public void setTeam(Team team) {
-        this.team = team;
-    }
-
-    public PlayerStatus getPlayerStatus() {
-        return playerStatus;
-    }
-
-    public void setPlayerStatus(PlayerStatus playerStatus) {
-        this.playerStatus = playerStatus;
-    }
-
-    public LocalDateTime getOriginalTimestamp() {
-        return originalTimestamp;
-    }
-
-    public void setOriginalTimestamp(LocalDateTime originalTimestamp) {
-        this.originalTimestamp = originalTimestamp;
-    }
+    public LocalDateTime getOriginalTimestamp() { return originalTimestamp; }
+    public void setOriginalTimestamp(LocalDateTime originalTimestamp) { this.originalTimestamp = originalTimestamp; }
 }

@@ -146,7 +146,11 @@ const AdminNotificationCard = ({ group }) => {
                     </div>
                     <ul className="list-unstyled small mb-0">
                         {recipients.map((r) => (
-                            <li key={r.id} className="mb-2">
+                            <li
+                                key={r.id}
+                                className={`mb-2 p-2 rounded ${r.isRead ? "bg-success bg-opacity-10 border border-success" : ""
+                                    }`}
+                            >
                                 <div className="me-2">
                                     <div>
                                         <span className="fw-semibold">
@@ -167,10 +171,10 @@ const AdminNotificationCard = ({ group }) => {
                                         {r.smsTo || "—"}
                                     </div>
 
-                                    {/* Stav (přečteno / nepřečtená) POD informacemi o hráči/emailu/tel. */}
+                                    {/* Stav */}
                                     <div className="mt-1">
                                         {r.isRead ? (
-                                            <span className="text-muted">
+                                            <span className="text-success fw-semibold">
                                                 {r.readRelative
                                                     ? `Přečteno ${r.readRelative}`
                                                     : r.readAt

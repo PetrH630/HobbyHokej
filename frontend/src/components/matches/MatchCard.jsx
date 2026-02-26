@@ -10,6 +10,7 @@ import {
     MoneyIcon,
 } from "../../icons";
 import CapacityRing from "./CapacityRing";
+import { MATCH_MODE_CONFIG } from "../../constants/matchModeConfig";
 import "./MatchCard.css";
 
 const statusClassMap = {
@@ -158,6 +159,13 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
         }
     }
 
+    // 🔹 herní systém (MatchMode) – label z konfigurace
+    const matchModeKey = match.matchMode || null;
+    const matchModeConfig = matchModeKey
+        ? MATCH_MODE_CONFIG[matchModeKey]
+        : null;
+    const matchModeLabel = matchModeConfig?.label || null;
+
     // 🔹 obsah overlay tooltipu
     let overlayTooltipContent = null;
 
@@ -171,8 +179,10 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
                 <div className="match-card-tooltip-title">ZRUŠENÝ</div>
                 {label && (
                     <div className="match-card-tooltip-reason">
-                        Důvod: 
-                        <p><strong>{label}</strong></p>
+                        Důvod:
+                        <p>
+                            <strong>{label}</strong>
+                        </p>
                     </div>
                 )}
             </div>
@@ -235,6 +245,13 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
                 {/* 3. sloupec (v condensed): místo zápasu */}
                 <p className="card-text text-center">{match.location}</p>
 
+                {/* Herní systém – zobrazujeme pod místem */}
+                {matchModeLabel && (
+                    <p className="card-text text-center match-mode">
+                        <strong>{matchModeLabel}</strong>
+                    </p>
+                )}
+
                 {/* popis – jen ve velkém layoutu karty, ne v condensed řádku */}
                 {!condensed && match.description && (
                     <p className="card-text">
@@ -266,7 +283,7 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
                         <MoneyIcon className="money-icon" />
                         <strong>
                             {match.pricePerRegisteredPlayer.toFixed(0)} Kč /{" "}
-                            <UserIcon className="player-price-icon" /> Kč
+                            <UserIcon className="player-price-icon" />
                         </strong>
                     </p>
                 )}

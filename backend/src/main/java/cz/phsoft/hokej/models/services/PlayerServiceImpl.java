@@ -19,34 +19,36 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 
-import static cz.phsoft.hokej.data.enums.PlayerStatus.APPROVED;
-import static cz.phsoft.hokej.data.enums.PlayerStatus.REJECTED;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static cz.phsoft.hokej.data.enums.PlayerStatus.APPROVED;
+import static cz.phsoft.hokej.data.enums.PlayerStatus.REJECTED;
+
 /**
  * Service vrstva pro práci s hráči ({@link PlayerEntity}).
  *
- * Tato třída zodpovídá za:
+ * Odpovědnosti:
  * - provádění CRUD operací nad hráči,
- * - kontrolu duplicity jména a příjmení,
- * - správu vazby hráče na uživatele ({@link AppUserEntity}),
- * - změnu statusu hráče (APPROVED, REJECTED) včetně spuštění notifikací,
- * - nastavení aktuálního hráče v {@link CurrentPlayerService}
- *   pro přihlášeného uživatele.
+ * - kontrola duplicity jména a příjmení,
+ * - správa vazby hráče na uživatele ({@link AppUserEntity}),
+ * - změna statusu hráče (APPROVED, REJECTED) včetně spuštění notifikací,
+ * - nastavení aktuálního hráče v {@link CurrentPlayerService} pro přihlášeného uživatele.
  *
  * Tato třída neřeší:
  * - HTTP vrstvu, session a mapování requestů a response (řeší controllery),
  * - autentizaci a autorizaci (řeší Spring Security a controller vrstva),
  * - detailní logiku zápasů (řeší {@link MatchServiceImpl} a navazující služby).
+ *
+ * Notifikace se delegují do {@link NotificationService}.
  */
 @Service
 public class PlayerServiceImpl implements PlayerService {
 
     @Value("${app.demo-mode:false}")
     private boolean isDemoMode;
+
     private static final Logger logger = LoggerFactory.getLogger(PlayerServiceImpl.class);
 
     private final PlayerRepository playerRepository;
@@ -80,13 +82,19 @@ public class PlayerServiceImpl implements PlayerService {
     // ======================
 
     /**
-     * Vytvoří nového hráče bez vazby na uživatele.
+     * Vytváří nového hráče bez vazby na uživatele.
      *
-     * Před uložením se kontroluje duplicita kombinace jména a příjmení.
-     * Po vytvoření se notifikace neodesílá, aby bylo zachováno původní chování.
+     * Postup:
+     * - ověří se unikátnost kombinace jméno + příjmení,
+     * - převede se {@link PlayerDTO} na {@link PlayerEntity} pomocí {@link PlayerMapper},
+     * - entita se uloží do databáze přes {@link PlayerRepository},
+     * - výsledek se namapuje zpět do {@link PlayerDTO}.
      *
-     * @param dto data nového hráče
-     * @return vytvořený hráč ve formě {@link PlayerDTO}
+     * Notifikace se po vytvoření neodesílají, aby bylo zachováno původní chování.
+     *
+     * @param dto Data nového hráče.
+     * @return Vytvořený hráč ve formě {@link PlayerDTO}.
+     * @throws DuplicateNameSurnameException Pokud již existuje hráč se stejným jménem a příjmením.
      */
     @Override
     @Transactional
@@ -100,20 +108,21 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Vytvoří nového hráče a přiřadí jej k uživateli podle emailu.
+     * Vytváří nového hráče a přiřazuje jej k uživateli podle e-mailu.
      *
      * Postup:
-     * - vyhledá se uživatel podle emailu,
-     * - ověří se, že neexistuje jiný hráč se stejným jménem a příjmením,
+     * - vyhledá se uživatel podle e-mailu,
+     * - ověří se unikátnost kombinace jméno + příjmení,
      * - namapuje se {@link PlayerDTO} na {@link PlayerEntity},
-     * - nastaví se vazba na uživatele a hráč se uloží,
+     * - nastaví se vazba na uživatele,
+     * - entita se uloží do databáze,
      * - odešle se notifikace {@link NotificationType#PLAYER_CREATED}.
      *
-     * @param dto       data nového hráče
-     * @param userEmail email uživatele, ke kterému má být hráč přiřazen
-     * @return vytvořený hráč ve formě {@link PlayerDTO}
-     * @throws UserNotFoundException         pokud uživatel neexistuje
-     * @throws DuplicateNameSurnameException pokud existuje hráč se stejným jménem a příjmením
+     * @param dto       Data nového hráče.
+     * @param userEmail E-mail uživatele, ke kterému má být hráč přiřazen.
+     * @return Vytvořený hráč ve formě {@link PlayerDTO}.
+     * @throws UserNotFoundException         Pokud uživatel s daným e-mailem neexistuje.
+     * @throws DuplicateNameSurnameException Pokud již existuje jiný hráč se stejným jménem a příjmením.
      */
     @Override
     @Transactional
@@ -135,16 +144,19 @@ public class PlayerServiceImpl implements PlayerService {
     /**
      * Aktualizuje existujícího hráče.
      *
-     * Při změně jména nebo příjmení se kontroluje duplicita kombinace jméno + příjmení.
-     * Poté se přepíší základní údaje hráče a odešle se notifikace
-     * {@link NotificationType#PLAYER_UPDATED}.
+     * Postup:
+     * - načte se hráč podle ID,
+     * - pokud se mění jméno nebo příjmení, ověří se unikátnost kombinace jméno + příjmení,
+     * - přepíšou se základní údaje (jméno, příjmení, přezdívka, telefon, typ, tým, pozice),
+     * - status hráče se změní pouze v případě, že je v DTO explicitně uveden,
+     * - entita se uloží do databáze,
+     * - odešle se notifikace {@link NotificationType#PLAYER_UPDATED}.
      *
-     * @param id  ID hráče
-     * @param dto nové hodnoty hráče
-     * @return aktualizovaný hráč ve formě {@link PlayerDTO}
-     * @throws PlayerNotFoundException       pokud hráč neexistuje
-     * @throws DuplicateNameSurnameException pokud nová kombinace jméno + příjmení koliduje
-     *                                       s jiným hráčem
+     * @param id  ID hráče.
+     * @param dto Nové hodnoty hráče.
+     * @return Aktualizovaný hráč ve formě {@link PlayerDTO}.
+     * @throws PlayerNotFoundException       Pokud hráč neexistuje.
+     * @throws DuplicateNameSurnameException Pokud nová kombinace jméno + příjmení koliduje s jiným hráčem.
      */
     @Override
     @Transactional
@@ -165,6 +177,9 @@ public class PlayerServiceImpl implements PlayerService {
         existing.setPhoneNumber(dto.getPhoneNumber());
         existing.setType(dto.getType());
         existing.setTeam(dto.getTeam());
+        existing.setPrimaryPosition(dto.getPrimaryPosition());
+        existing.setSecondaryPosition(dto.getSecondaryPosition());
+
         if (dto.getPlayerStatus() != null) {
             existing.setPlayerStatus(dto.getPlayerStatus());
         }
@@ -174,15 +189,20 @@ public class PlayerServiceImpl implements PlayerService {
 
         return playerMapper.toDTO(saved);
     }
+
     // TODO - Nebude probíhat mazání hráče - bude nastaven statut ARCHIVED
     /**
-     * Smaže hráče podle ID.
+     * Maže hráče podle ID.
      *
-     * Po smazání je odeslána notifikace {@link NotificationType#PLAYER_DELETED}.
+     * Před smazáním se ověřuje demo režim. V demo režimu se operace zablokuje
+     * vyhozením {@link DemoModeOperationNotAllowedException}. Při úspěšném smazání
+     * se odešle notifikace {@link NotificationType#PLAYER_DELETED} a vrací se
+     * standardizovaná odpověď {@link SuccessResponseDTO}.
      *
-     * @param id ID hráče
-     * @return {@link SuccessResponseDTO} s potvrzující zprávou
-     * @throws PlayerNotFoundException pokud hráč neexistuje
+     * @param id ID hráče.
+     * @return Odpověď s potvrzující zprávou.
+     * @throws PlayerNotFoundException             Pokud hráč neexistuje.
+     * @throws DemoModeOperationNotAllowedException Pokud aplikace běží v demo režimu.
      */
     @Override
     @Transactional
@@ -203,16 +223,23 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, id);
     }
 
-   // STATUS – APPROVE / REJECT
+    // ======================
+    // STATUS – APPROVE / REJECT
+    // ======================
+
     /**
-     * Schválí hráče a nastaví mu status {@link PlayerStatus#APPROVED}.
+     * Schvaluje hráče a nastavuje mu status {@link PlayerStatus#APPROVED}.
      *
-     * Pokud je hráč již schválen, vyhodí se výjimka
-     * {@link InvalidPlayerStatusException}. Po schválení se odešle
-     * notifikace {@link NotificationType#PLAYER_APPROVED}.
+     * Provedení:
+     * - ověří se, že hráč již není ve stavu APPROVED,
+     * - nastaví se status APPROVED,
+     * - pokud hráč ještě nemá nastavení, vytvoří se výchozí nastavení přes
+     *   {@link PlayerSettingsService#createDefaultSettingsForPlayer(PlayerEntity)},
+     * - hráč se uloží a odešle se notifikace {@link NotificationType#PLAYER_APPROVED}.
      *
-     * @param id ID hráče
-     * @return odpověď s výsledkem operace
+     * @param id ID hráče.
+     * @return Odpověď s výsledkem operace.
+     * @throws InvalidPlayerStatusException Pokud je hráč již ve stavu APPROVED.
      */
     @Override
     @Transactional
@@ -226,15 +253,16 @@ public class PlayerServiceImpl implements PlayerService {
                 "Hráč %s byl úspěšně aktivován"
         );
     }
+
     /**
-     * Zamítne hráče a nastaví mu status {@link PlayerStatus#REJECTED}.
+     * Zamítá hráče a nastavuje mu status {@link PlayerStatus#REJECTED}.
      *
-     * Pokud je hráč již zamítnut, vyhodí se výjimka
-     * {@link InvalidPlayerStatusException}. Po zamítnutí se odešle
-     * notifikace {@link NotificationType#PLAYER_REJECTED}.
+     * Po úspěšné změně stavu se odešle notifikace
+     * {@link NotificationType#PLAYER_REJECTED}.
      *
-     * @param id ID hráče
-     * @return odpověď s výsledkem operace
+     * @param id ID hráče.
+     * @return Odpověď s výsledkem operace.
+     * @throws InvalidPlayerStatusException Pokud je hráč již ve stavu REJECTED.
      */
     @Override
     @Transactional
@@ -250,14 +278,20 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Změní přiřazeného uživatele k hráči a odešle notifikace
+     * Mění přiřazeného uživatele k hráči a odesílá notifikace
      * o změně vazby hráče a uživatele.
      *
-     * Při pokusu převést hráče na stejného uživatele se vyhodí
-     * {@link InvalidChangePlayerUserException}.
+     * Postup:
+     * - načte se hráč a nový uživatel,
+     * - ověří se, že se nepokouší převést hráče na stejného uživatele,
+     * - nastaví se nový uživatel do entitiy hráče a entita se uloží,
+     * - odešle se notifikace hráči i uživateli typu {@link NotificationType#PLAYER_CHANGE_USER}.
      *
-     * @param id        ID hráče
-     * @param newUserId ID nového uživatele
+     * @param id        ID hráče.
+     * @param newUserId ID nového uživatele.
+     * @throws InvalidChangePlayerUserException Pokud je nový uživatel shodný s původním.
+     * @throws PlayerNotFoundException          Pokud hráč neexistuje.
+     * @throws UserNotFoundException            Pokud uživatel neexistuje.
      */
     @Transactional
     public void changePlayerUser(Long id, Long newUserId) {
@@ -268,17 +302,25 @@ public class PlayerServiceImpl implements PlayerService {
         if (oldUser != null && oldUser.getId().equals(newUserId)) {
             throw new InvalidChangePlayerUserException();
         }
+
         player.setUser(newUser);
         PlayerEntity saved = playerRepository.save(player);
 
         notifyPlayer(saved, NotificationType.PLAYER_CHANGE_USER, newUser);
         notifyUser(newUser, NotificationType.PLAYER_CHANGE_USER, player);
     }
+
+    // ======================
     // READ
-   /**
-     * Vrátí všechny hráče v systému.
+    // ======================
+
+    /**
+     * Vrací všechny hráče v systému.
      *
-     * @return seznam hráčů ve formě {@link PlayerDTO}
+     * Data se načítají z {@link PlayerRepository} a převádí se do {@link PlayerDTO}
+     * pomocí {@link PlayerMapper}.
+     *
+     * @return Seznam hráčů ve formě {@link PlayerDTO}.
      */
     @Override
     public List<PlayerDTO> getAllPlayers() {
@@ -288,11 +330,11 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Vrátí hráče podle ID.
+     * Vrací hráče podle ID.
      *
-     * @param id ID hráče
-     * @return {@link PlayerDTO} odpovídající hráči
-     * @throws PlayerNotFoundException pokud hráč s daným ID neexistuje
+     * @param id ID hráče.
+     * @return {@link PlayerDTO} odpovídající hráči.
+     * @throws PlayerNotFoundException Pokud hráč s daným ID neexistuje.
      */
     @Override
     public PlayerDTO getPlayerById(Long id) {
@@ -301,12 +343,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Vrátí všechny hráče přiřazené uživateli s daným emailem.
+     * Vrací všechny hráče přiřazené uživateli s daným e-mailem.
      *
      * Hráči jsou vráceni v pořadí podle ID vzestupně.
      *
-     * @param email email uživatele
-     * @return seznam hráčů ve formě {@link PlayerDTO}
+     * @param email E-mail uživatele.
+     * @return Seznam hráčů ve formě {@link PlayerDTO}.
      */
     @Override
     public List<PlayerDTO> getPlayersByUser(String email) {
@@ -315,20 +357,23 @@ public class PlayerServiceImpl implements PlayerService {
                 .toList();
     }
 
+    // ======================
     // CURRENT PLAYER – SESSION
+    // ======================
 
     /**
-     * Nastaví aktuálního hráče pro daného uživatele.
+     * Nastavuje aktuálního hráče pro daného uživatele.
      *
-     * Nejprve se ověří, že hráč existuje a patří danému uživateli
-     * (podle emailu). Poté se jeho ID předá do
-     * {@link CurrentPlayerService#setCurrentPlayerId(Long)}.
+     * Postup:
+     * - načte se hráč podle ID,
+     * - ověří se, že hráč patří danému uživateli (podle e-mailu),
+     * - ID hráče se předá do {@link CurrentPlayerService#setCurrentPlayerId(Long)}.
      *
-     * @param userEmail email přihlášeného uživatele
-     * @param playerId  ID hráče, který má být nastaven jako aktuální
-     * @return odpověď s výsledkem operace
-     * @throws PlayerNotFoundException        pokud hráč neexistuje
-     * @throws ForbiddenPlayerAccessException pokud hráč nepatří danému uživateli
+     * @param userEmail E-mail přihlášeného uživatele.
+     * @param playerId  ID hráče, který má být nastaven jako aktuální.
+     * @return Odpověď s výsledkem operace.
+     * @throws PlayerNotFoundException        Pokud hráč neexistuje.
+     * @throws ForbiddenPlayerAccessException Pokud hráč nepatří danému uživateli.
      */
     @Override
     public SuccessResponseDTO setCurrentPlayerForUser(String userEmail, Long playerId) {
@@ -343,7 +388,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Automaticky vybere aktuálního hráče pro uživatele podle
+     * Automaticky vybírá aktuálního hráče pro uživatele podle
      * nastavení v AppUserSettings (playerSelectionMode).
      *
      * Režimy:
@@ -351,8 +396,9 @@ public class PlayerServiceImpl implements PlayerService {
      * - ALWAYS_CHOOSE: automaticky se vybere pouze v případě,
      *   že má uživatel právě jednoho schváleného hráče.
      *
-     * @param userEmail email uživatele
-     * @return odpověď s výsledkem operace
+     * @param userEmail E-mail uživatele.
+     * @return Odpověď s výsledkem operace.
+     * @throws PlayerNotFoundException Pokud uživatel nemá žádného relevantního hráče.
      */
     @Override
     public SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail) {
@@ -382,8 +428,10 @@ public class PlayerServiceImpl implements PlayerService {
      * Pokud uživatel nemá žádného hráče nebo hráč není schválen,
      * vyhodí se výjimka.
      *
-     * @param userEmail email uživatele
-     * @return odpověď s výsledkem operace
+     * @param userEmail E-mail uživatele.
+     * @return Odpověď s výsledkem operace.
+     * @throws PlayerNotFoundException     Pokud uživatel nemá žádného hráče.
+     * @throws InvalidPlayerStatusException Pokud první hráč není ve stavu APPROVED.
      */
     private SuccessResponseDTO autoSelectFirstPlayer(String userEmail) {
         List<PlayerEntity> players = playerRepository.findByUser_EmailOrderByIdAsc(userEmail);
@@ -415,8 +463,9 @@ public class PlayerServiceImpl implements PlayerService {
      * se nastaví jako aktuální. V ostatních případech se current player
      * vyčistí a očekává se ruční výběr na frontendu.
      *
-     * @param userEmail email uživatele
-     * @return odpověď s výsledkem operace
+     * @param userEmail E-mail uživatele.
+     * @return Odpověď s výsledkem operace.
+     * @throws PlayerNotFoundException Pokud uživatel nemá žádného schváleného hráče.
      */
     private SuccessResponseDTO autoSelectIfSinglePlayer(String userEmail) {
         List<PlayerEntity> players = playerRepository
@@ -454,13 +503,15 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, 0L);
     }
 
+    // ======================
     // PRIVATE HELPERY – ENTITY / DUPLICITY
+    // ======================
 
     /**
-     * Najde hráče podle ID nebo vyhodí {@link PlayerNotFoundException}.
+     * Načítá hráče podle ID nebo vyhazuje {@link PlayerNotFoundException}.
      *
-     * @param id ID hráče
-     * @return entita hráče
+     * @param id ID hráče.
+     * @return Entita hráče.
      */
     private PlayerEntity findPlayerOrThrow(Long id) {
         return playerRepository.findById(id)
@@ -468,10 +519,10 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Najde uživatele podle ID nebo vyhodí {@link UserNotFoundException}.
+     * Načítá uživatele podle ID nebo vyhazuje {@link UserNotFoundException}.
      *
-     * @param id ID uživatele
-     * @return entita uživatele
+     * @param id ID uživatele.
+     * @return Entita uživatele.
      */
     private AppUserEntity findUserOrThrow(Long id) {
         return appUserRepository.findById(id)
@@ -479,15 +530,15 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Zajistí unikátnost kombinace jméno + příjmení.
+     * Zajišťuje unikátnost kombinace jméno + příjmení.
      *
      * Při vytváření nového hráče se očekává ignoreId null.
      * Při aktualizaci se ignoruje hráč se stejným ID, aby nebyl
      * považován za duplicitního sám se sebou.
      *
-     * @param name     jméno hráče
-     * @param surname  příjmení hráče
-     * @param ignoreId ID hráče, který má být ignorován, nebo null
+     * @param name     Jméno hráče.
+     * @param surname  Příjmení hráče.
+     * @param ignoreId ID hráče, který má být ignorován, nebo null.
      */
     private void ensureUniqueNameSurname(String name, String surname, Long ignoreId) {
         Optional<PlayerEntity> duplicateOpt = playerRepository.findByNameAndSurname(name, surname);
@@ -502,12 +553,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Ověří, že hráč patří danému uživateli (podle emailu).
+     * Ověřuje, že hráč patří danému uživateli (podle e-mailu).
      *
      * Pokud hráč uživateli nepatří, vyhodí se {@link ForbiddenPlayerAccessException}.
      *
-     * @param player    hráč
-     * @param userEmail email uživatele
+     * @param player    Hráč.
+     * @param userEmail E-mail uživatele.
      */
     private void assertPlayerBelongsToUser(PlayerEntity player, String userEmail) {
         if (player.getUser() == null ||
@@ -519,12 +570,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Vytvoří standardizovanou úspěšnou odpověď {@link SuccessResponseDTO}
+     * Vytváří standardizovanou úspěšnou odpověď {@link SuccessResponseDTO}
      * s danou zprávou a ID.
      *
-     * @param message textová zpráva
-     * @param id      ID entity, které se operace týkala
-     * @return úspěšná odpověď
+     * @param message Textová zpráva.
+     * @param id      ID entity, které se operace týkala.
+     * @return Úspěšná odpověď.
      */
     private SuccessResponseDTO buildSuccessResponse(String message, Long id) {
         return new SuccessResponseDTO(
@@ -537,17 +588,20 @@ public class PlayerServiceImpl implements PlayerService {
     /**
      * Obecná pomocná metoda pro změnu statusu hráče (approve/reject).
      *
-     * Ověří se, že hráč již není v cílovém stavu, případně se nastaví
-     * výchozí nastavení pro hráče při schválení. Po uložení se odešle
-     * notifikace podle nového statusu.
+     * Postup:
+     * - ověří se, že hráč již není v cílovém stavu,
+     * - nastaví se nový status,
+     * - v případě schválení se zajistí výchozí nastavení hráče,
+     * - uloží se entita a vyhodnotí se typ notifikace podle nového statusu,
+     * - odešle se notifikace hráči, pokud je typ notifikace definován.
      *
-     * @param id                     ID hráče
-     * @param targetStatus           cílový status
-     * @param alreadyStatus          status, který znamená „už je v tomto stavu“
-     * @param notificationType       typ notifikace (případně přepsaný podle statusu)
-     * @param alreadyMessage         zpráva pro případ, že je hráč již v cílovém stavu
-     * @param successMessageTemplate šablona úspěšné zprávy
-     * @return odpověď s výsledkem operace
+     * @param id                     ID hráče.
+     * @param targetStatus           Cílový status.
+     * @param alreadyStatus          Status, který znamená „už je v tomto stavu“.
+     * @param notificationType       Výchozí typ notifikace (případně přepsaný podle statusu).
+     * @param alreadyMessage         Zpráva pro případ, že je hráč již v cílovém stavu.
+     * @param successMessageTemplate Šablona úspěšné zprávy.
+     * @return Odpověď s výsledkem operace.
      */
     private SuccessResponseDTO changePlayerStatus(Long id,
                                                   PlayerStatus targetStatus,
@@ -580,7 +634,9 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, id);
     }
 
+    // ======================
     // PRIVÁTNÍ HELPERY – NOTIFIKACE
+    // ======================
 
     private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {
         notificationService.notifyPlayer(player, type, context);
@@ -591,14 +647,14 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Převede status hráče na typ notifikace.
+     * Převádí status hráče na typ notifikace.
      *
      * Pokud se pro zadaný status notifikace neposílá,
      * vrací se null. Status PENDING se zde nevyužívá,
      * protože notifikace při vytvoření hráče jsou řešeny jinde.
      *
-     * @param newStatus nový status hráče
-     * @return odpovídající {@link NotificationType} nebo null
+     * @param newStatus Nový status hráče.
+     * @return Odpovídající {@link NotificationType} nebo null.
      */
     private NotificationType resolveNotificationType(PlayerStatus newStatus) {
         return switch (newStatus) {

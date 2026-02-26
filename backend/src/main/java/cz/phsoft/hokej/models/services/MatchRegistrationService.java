@@ -2,6 +2,7 @@ package cz.phsoft.hokej.models.services;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
 import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
@@ -146,4 +147,10 @@ public interface MatchRegistrationService {
 
     MatchRegistrationDTO changeRegistrationTeam(Long matchId,
                                                 Long playerId);
+
+    MatchRegistrationDTO changeRegistrationPosition(Long playerId,
+                                                    Long matchId,
+                                                    PlayerPosition positionInMatch);
+
+
 }

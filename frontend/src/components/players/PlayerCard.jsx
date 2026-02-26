@@ -3,6 +3,7 @@ import RoleGuard from "../RoleGuard";
 import { PhoneIcon, TeamDarkIcon, TeamLightIcon, PlayerIcon } from "../../icons";
 import { formatPhoneNumber } from "../../utils/formatPhoneNumber";
 import "./PlayerCard.css";
+import { getPlayerPositionLabel } from "../../constants/playerPosition";
 
 const statusClassMap = {
     APPROVED: "player-approved",
@@ -29,6 +30,11 @@ const PlayerCard = ({ player, onSelect, isActive, disabledTooltip }) => {
     const isDisabled = !isApproved && hasDisabledTooltip;
 
     const isClickable = isApproved && !!onSelect && !isDisabled;
+
+    // Primární pozice hráče – mapování přes konstantu
+    const primaryPositionLabel = getPlayerPositionLabel(
+        player.primaryPosition
+    );
 
     return (
         <div
@@ -71,19 +77,27 @@ const PlayerCard = ({ player, onSelect, isActive, disabledTooltip }) => {
                     </div>
                 </div>
 
-                <RoleGuard roles={["ROLE_ADMIN"]}>
+                {/* Primární pozice hráče – viditelná všem */}
+                {player.primaryPosition && (
+                    <p className="card-text text-center mb-2">
+                        <strong>Post:</strong>{" "}
+                        {primaryPositionLabel}
+                    </p>
+                )}
+
+                <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
                     <p className="card-text text-center mb-2">
                         <strong>Typ:</strong> {player.type}
                     </p>
                 </RoleGuard>
 
                 <p className="card-text text-center mb-2">
-                    <strong>Status:</strong> {statusText}
+                    <strong>Status:</strong> {player.statusText ?? statusText}
                 </p>
 
                 <p className="card-text text-center mb-2">
-                    <PhoneIcon className="phone-icon" />+
-                    {formatPhoneNumber(player.phoneNumber)}
+                    <PhoneIcon className="phone-icon" />
+                    +{formatPhoneNumber(player.phoneNumber)}
                 </p>
             </div>
 

@@ -34,7 +34,7 @@ const PlayerSettings = ({
             {/* Kontaktní e-mail */}
             <div className="mb-3">
                 <label className="form-label" htmlFor="contactEmail">
-                    Kontaktní e-mail
+                    Kontaktní e-mail - pokud chceš používat tento, dej jen "uložit nastavení notifikaci" 
                 </label>
                 <input
                     type="email"
@@ -183,20 +183,7 @@ const PlayerSettings = ({
                     Informovat při zrušení zápasu
                 </label>
             </div>
-
-            <div className="form-check mb-3">
-                <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="notifyOnPayment"
-                    name="notifyOnPayment"
-                    checked={values.notifyOnPayment || false}
-                    onChange={handleCheckboxChange}
-                />
-                <label className="form-check-label" htmlFor="notifyOnPayment">
-                    Informovat o platbách (např. potvrzení úhrady)
-                </label>
-            </div>
+          
 
             <hr />
 

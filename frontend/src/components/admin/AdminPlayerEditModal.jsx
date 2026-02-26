@@ -3,10 +3,7 @@ import { useEffect, useState } from "react";
 import PlayerProfileForm from "../settings/PlayerProfileForm";
 import { validatePlayerProfile } from "../../validation/playerValidation";
 
-
 const AdminPlayerEditModal = ({ player, show, onClose, onSave, saving }) => {
-    
-
     if (!show || !player) {
         return null;
     }
@@ -17,7 +14,7 @@ const AdminPlayerEditModal = ({ player, show, onClose, onSave, saving }) => {
         surname: player.surname || "",
         nickname: player.nickname || "",
         phoneNumber: player.phoneNumber || "",
-        team: player.team || "",   
+        team: player.team || "",
         type: player.type || "",
     });
 
@@ -70,7 +67,7 @@ const AdminPlayerEditModal = ({ player, show, onClose, onSave, saving }) => {
                     ? values.phoneNumber.trim()
                     : null,
             team: values.team || null,
-            type: values.type || null, 
+            type: values.type || null,
         };
 
         onSave(payload);
@@ -103,12 +100,12 @@ const AdminPlayerEditModal = ({ player, show, onClose, onSave, saving }) => {
                                     aria-label="Close"
                                     onClick={handleClose}
                                     disabled={saving}
-                                ></button>
+                                />
                             </div>
 
                             <div className="modal-body">
                                 <PlayerProfileForm
-                                    values={values}      // 👈 values už obsahuje team
+                                    values={values}
                                     onChange={handleChange}
                                     errors={errors}
                                 />
@@ -137,6 +134,7 @@ const AdminPlayerEditModal = ({ player, show, onClose, onSave, saving }) => {
                     </div>
                 </div>
             </div>
+
             <div className="modal-backdrop fade show"></div>
         </>
     );

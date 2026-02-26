@@ -5,7 +5,6 @@ Seznam souborů:
 package-info.java
 SmsMessageBuilder.java
 SmsService.java
-SmsSchedulerService.java
 SmsTextBeeService.java
 
 
@@ -139,9 +138,14 @@ public class SmsMessageBuilder {
                 yield buildMessageRegistration(reg);
             }
 
-            // ObecnĂ© info / zmÄ›ny zĂˇpasu
-            case MATCH_REMINDER,
-                 MATCH_CANCELED,
+            case MATCH_REMINDER -> {
+                MatchEntity match = castContext(context, MatchEntity.class);
+                if (match == null) {
+                    yield null;
+                }
+                yield buildMessageReminder(match);
+            }
+            case MATCH_CANCELED,
                  MATCH_TIME_CHANGED -> {
                 MatchEntity match = castContext(context, MatchEntity.class);
                 if (match == null) {
@@ -153,6 +157,25 @@ public class SmsMessageBuilder {
             // ostatnĂ­ typy se pĹ™es SMS neposĂ­lajĂ­
             default -> null;
         };
+    }
+
+    public String buildMessageReminder(MatchEntity match) {
+
+        Long registeredCount = matchRegistrationRepository
+                .countByMatchIdAndStatus(
+                        match.getId(),
+                        PlayerMatchStatus.REGISTERED
+                );
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_hokej - pĹ™ipomĂ­nka zĂˇpasu ")
+                .append(match.getDateTime().format(dateFormatter))
+                .append(", pĹ™ihlĂˇĹˇeno: ")
+                .append(registeredCount)
+                .append("/")
+                .append(match.getMaxPlayers());
+
+        return sb.toString();
     }
 
     /**
@@ -467,199 +490,6 @@ public interface SmsService {
      * @param message text SMS zprĂˇvy
      */
     void sendSms(String phoneNumber, String message);
-}
-
------
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsSchedulerService.java
------
-package cz.phsoft.hokej.models.services.sms;
-
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
-import cz.phsoft.hokej.data.repositories.MatchRepository;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.services.MatchRegistrationService;
-import jakarta.transaction.Transactional;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.List;
-
-/**
- * Scheduler sluĹľba, kterĂˇ zajiĹˇĹĄuje plĂˇnovanĂ© odesĂ­lĂˇnĂ­ SMS notifikacĂ­ hrĂˇÄŤĹŻm.
- *
- * OdpovÄ›dnost tĹ™Ă­dy je:
- * - vyhledĂˇvĂˇnĂ­ zĂˇpasĹŻ podle data konĂˇnĂ­,
- * - urÄŤenĂ­ cĂ­lovĂ˝ch hrĂˇÄŤĹŻ pro danĂ˝ typ SMS,
- * - pĹ™edĂˇnĂ­ textu zprĂˇv sluĹľbÄ› SmsService k odeslĂˇnĂ­.
- *
- * TĹ™Ă­da se pouĹľĂ­vĂˇ ve vrstvÄ› sluĹľeb a navazuje na MatchRepository,
- * MatchRegistrationRepository, MatchRegistrationService a SmsMessageBuilder.
- */
-@Service
-public class SmsSchedulerService {
-
-    /**
-     * RepozitĂˇĹ™ zĂˇpasĹŻ, kterĂ˝ se pouĹľĂ­vĂˇ pro vyhledĂˇvĂˇnĂ­ zĂˇpasĹŻ podle data konĂˇnĂ­.
-     */
-    private final MatchRepository matchRepository;
-
-    /**
-     * RepozitĂˇĹ™ registracĂ­ hrĂˇÄŤĹŻ na zĂˇpasy, kterĂ˝ se pouĹľĂ­vĂˇ pro zĂ­skĂˇnĂ­ registracĂ­
-     * ke konkrĂ©tnĂ­mu zĂˇpasu.
-     */
-    private final MatchRegistrationRepository registrationRepository;
-
-    /**
-     * SluĹľba pro odesĂ­lĂˇnĂ­ SMS zprĂˇv, kterĂˇ pĹ™edstavuje technickĂ˝ vstupnĂ­ bod
-     * pro komunikaci s externĂ­m SMS providerem.
-     */
-    private final SmsService smsService;
-
-    /**
-     * Builder pro tvorbu textĹŻ SMS zprĂˇv, kterĂ˝ zajiĹˇĹĄuje jednotnĂ˝ formĂˇt
-     * a obsah SMS napĹ™Ă­ÄŤ aplikacĂ­.
-     */
-    private final SmsMessageBuilder smsMessageBuilder;
-
-    /**
-     * SluĹľba s business logikou registracĂ­ hrĂˇÄŤĹŻ na zĂˇpasy, kterĂˇ se pouĹľĂ­vĂˇ
-     * zejmĂ©na pro zjiĹˇtÄ›nĂ­ hrĂˇÄŤĹŻ bez reakce na pozvĂˇnku.
-     */
-    private final MatchRegistrationService matchRegistrationService;
-
-    /**
-     * VytvĂˇĹ™Ă­ instanci scheduler sluĹľby a injektuje zĂˇvislosti ze Spring kontextu.
-     */
-    public SmsSchedulerService(
-            MatchRepository matchRepository,
-            MatchRegistrationRepository registrationRepository,
-            SmsService smsService,
-            SmsMessageBuilder smsMessageBuilder,
-            MatchRegistrationService matchRegistrationService) {
-
-        this.matchRepository = matchRepository;
-        this.registrationRepository = registrationRepository;
-        this.smsService = smsService;
-        this.smsMessageBuilder = smsMessageBuilder;
-        this.matchRegistrationService = matchRegistrationService;
-    }
-
-    /**
-     * Metoda odesĂ­lĂˇ finĂˇlnĂ­ SMS vĹˇem hrĂˇÄŤĹŻm registrovanĂ˝m na zĂˇpasy,
-     * kterĂ© se konajĂ­ v aktuĂˇlnĂ­ den.
-     *
-     * Metoda se plĂˇnuje pomocĂ­ Spring scheduleru a spouĹˇtĂ­ se kaĹľdĂ˝ den ve 12:30
-     * v ÄŤasovĂ© zĂłnÄ› Europe/Prague. V rĂˇmci zpracovĂˇnĂ­ se vyhledajĂ­ vĹˇechny dneĹˇnĂ­ zĂˇpasy,
-     * naÄŤtou se registrace hrĂˇÄŤĹŻ k tÄ›mto zĂˇpasĹŻm a pro kaĹľdou registraci se vygeneruje
-     * text finĂˇlnĂ­ SMS a pĹ™edĂˇ se sluĹľbÄ› SmsService k odeslĂˇnĂ­.
-     *
-     * Metoda pracuje pouze s existujĂ­cĂ­mi daty a nemÄ›nĂ­ stav databĂˇze, transakce
-     * se pouĹľĂ­vĂˇ pro zajiĹˇtÄ›nĂ­ konzistence pĹ™i ÄŤtenĂ­.
-     */
-    @Scheduled(cron = "0 30 12 * * *", zone = "Europe/Prague")
-    @Transactional
-    public void sendFinalSmsForTodayMatches() {
-
-        LocalDate today = LocalDate.now();
-
-        // ZĂˇpasy, kterĂ© se konajĂ­ v aktuĂˇlnĂ­ den.
-        List<MatchEntity> todaysMatches = matchRepository.findAll().stream()
-                .filter(m -> m.getDateTime().toLocalDate().isEqual(today))
-                .toList();
-
-        for (MatchEntity match : todaysMatches) {
-
-            // Registrace hrĂˇÄŤĹŻ k danĂ©mu zĂˇpasu.
-            List<MatchRegistrationEntity> registrations =
-                    registrationRepository.findByMatchId(match.getId());
-
-            for (MatchRegistrationEntity reg : registrations) {
-
-                String smsMsg = smsMessageBuilder.buildMessageFinal(reg);
-
-                try {
-                    smsService.sendSms(
-                            reg.getPlayer().getPhoneNumber(),
-                            smsMsg
-                    );
-
-                    System.out.println(
-                            "FinĂˇlnĂ­ SMS poslĂˇna hrĂˇÄŤi " +
-                                    reg.getPlayer().getFullName()
-                    );
-
-                } catch (Exception e) {
-                    // Chyba pĹ™i odesĂ­lĂˇnĂ­ jednomu hrĂˇÄŤi nesmĂ­ zastavit bÄ›h celĂ© naplĂˇnovanĂ© Ăşlohy.
-                    System.err.println(
-                            "Chyba SMS pro hrĂˇÄŤe " +
-                                    reg.getPlayer().getFullName() +
-                                    ": " + e.getMessage()
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * Metoda odesĂ­lĂˇ pĹ™ipomĂ­nkovou SMS hrĂˇÄŤĹŻm, kteĹ™Ă­ majĂ­ zĂˇpas naplĂˇnovanĂ˝
-     * za tĹ™i dny a dosud na zĂˇpas nijak nereagovali (stav NO_RESPONSE).
-     *
-     * Metoda se plĂˇnuje pomocĂ­ Spring scheduleru a spouĹˇtĂ­ se kaĹľdĂ˝ den ve 12:30
-     * v ÄŤasovĂ© zĂłnÄ› Europe/Prague. V rĂˇmci zpracovĂˇnĂ­ se vyhledajĂ­ zĂˇpasy,
-     * kterĂ© se konajĂ­ pĹ™esnÄ› za tĹ™i dny od aktuĂˇlnĂ­ho data. Pro kaĹľdĂ˝ takovĂ˝ zĂˇpas
-     * se vyuĹľije logika sluĹľby MatchRegistrationService k zĂ­skĂˇnĂ­ hrĂˇÄŤĹŻ bez reakce
-     * a tÄ›mto hrĂˇÄŤĹŻm se odeĹˇle pĹ™ipomĂ­nkovĂˇ SMS prostĹ™ednictvĂ­m SmsService.
-     *
-     * Metoda slouĹľĂ­ k podpoĹ™e vÄŤasnĂ©ho plĂˇnovĂˇnĂ­ sestavy a k omezenĂ­ situacĂ­,
-     * kdy hrĂˇÄŤi zapomenou na blĂ­ĹľĂ­cĂ­ se zĂˇpas.
-     */
-    @Scheduled(cron = "0 30 12 * * *", zone = "Europe/Prague")
-    @Transactional
-    public void sendNoResponseSmsForMatchesIn3Days() {
-
-        LocalDate targetDate = LocalDate.now().plusDays(3);
-
-        // ZĂˇpasy, kterĂ© se konajĂ­ za tĹ™i dny.
-        List<MatchEntity> matchesInThreeDays = matchRepository.findAll().stream()
-                .filter(m -> m.getDateTime().toLocalDate().isEqual(targetDate))
-                .toList();
-
-        for (MatchEntity match : matchesInThreeDays) {
-
-            // HrĂˇÄŤi bez reakce se zĂ­skĂˇvajĂ­ pomocĂ­ MatchRegistrationService.
-            List<PlayerDTO> noResponsePlayers =
-                    matchRegistrationService.getNoResponsePlayers(match.getId());
-
-            for (PlayerDTO player : noResponsePlayers) {
-
-                String smsMsg =
-                        smsMessageBuilder.buildMessageNoResponse(player, match);
-
-                try {
-                    smsService.sendSms(
-                            player.getPhoneNumber(),
-                            smsMsg
-                    );
-
-                    System.out.println(
-                            "NO_RESPONSE SMS poslĂˇna hrĂˇÄŤi " +
-                                    player.getFullName()
-                    );
-
-                } catch (Exception e) {
-                    // Chyba pĹ™i odesĂ­lĂˇnĂ­ jednomu hrĂˇÄŤi nesmĂ­ zastavit bÄ›h celĂ© naplĂˇnovanĂ© Ăşlohy.
-                    System.err.println(
-                            "Chyba NO_RESPONSE SMS pro hrĂˇÄŤe " +
-                                    player.getFullName() +
-                                    ": " + e.getMessage()
-                    );
-                }
-            }
-        }
-    }
 }
 
 -----

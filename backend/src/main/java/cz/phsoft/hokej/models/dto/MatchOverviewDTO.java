@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
+import cz.phsoft.hokej.data.enums.MatchMode;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -57,6 +58,12 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     private PlayerMatchStatus playerMatchStatus;
 
     /**
+     * Režim zápasu (počet hráčů na ledě, s brankářem / bez brankáře).
+     */
+    @Enumerated(EnumType.STRING)
+    private MatchMode matchMode;
+
+    /**
      * Stav zápasu a případný důvod jeho zrušení.
      */
     @Enumerated(EnumType.STRING)
@@ -102,6 +109,9 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     public void setPlayerMatchStatus(PlayerMatchStatus playerMatchStatus) {
         this.playerMatchStatus = playerMatchStatus;
     }
+
+    public MatchMode getMatchMode() { return matchMode; }
+    public void setMatchMode(MatchMode matchMode) { this.matchMode = matchMode; }
 
     public MatchStatus getMatchStatus() { return matchStatus; }
     public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }

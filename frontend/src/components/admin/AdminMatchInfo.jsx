@@ -114,6 +114,7 @@ const AdminMatchInfo = ({ match, onRefresh }) => {
             setSaving(false);
         }
     };
+    
 
     return (
         <div className="card">

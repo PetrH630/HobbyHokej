@@ -5900,7 +5900,7 @@ public class PlayerServiceImpl implements PlayerService {
     private NotificationType resolveNotificationType(PlayerStatus newStatus) {
         return switch (newStatus) {
             case APPROVED -> NotificationType.PLAYER_APPROVED;
-            case REJECTED -> NotificationType.MATCH_REGISTRATION_CANCELED;
+            case REJECTED -> NotificationType.PLAYER_REJECTED;
             default -> null;
         };
     }

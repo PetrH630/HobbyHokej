@@ -328,7 +328,7 @@ public interface MatchRegistrationRepository
 
     /**
      * OvÄ›Ĺ™Ă­, zda existuje registrace hrĂˇÄŤe k danĂ©mu zĂˇpasu.
-     *
+     * <p>
      * PouĹľĂ­vĂˇ se zejmĂ©na k rychlĂ© kontrole existence
      * registrace bez nutnosti naÄŤĂ­tat celou entitu.
      *
@@ -365,7 +365,7 @@ public interface MatchRegistrationRepository
 
     /**
      * SpoÄŤĂ­tĂˇ poÄŤet registracĂ­ danĂ©ho zĂˇpasu podle stavu.
-     *
+     * <p>
      * Typicky se pouĹľĂ­vĂˇ pro zjiĹˇtÄ›nĂ­ aktuĂˇlnĂ­
      * obsazenosti zĂˇpasu.
      *
@@ -377,7 +377,7 @@ public interface MatchRegistrationRepository
 
     /**
      * VrĂˇtĂ­ registrace pro vĂ­ce zĂˇpasĹŻ najednou.
-     *
+     * <p>
      * PouĹľĂ­vĂˇ se napĹ™Ă­klad pĹ™i hromadnĂ©m naÄŤĂ­tĂˇnĂ­
      * registracĂ­ pro pĹ™ehledy a statistiky.
      *
@@ -385,6 +385,31 @@ public interface MatchRegistrationRepository
      * @return seznam registracĂ­
      */
     List<MatchRegistrationEntity> findByMatchIdIn(List<Long> matchIds);
+
+    /**
+     * Najde vĹˇechny registrace pro danĂ˝ zĂˇpas a danĂ˝ stav hrĂˇÄŤe.
+     *
+     * @param matchId ID zĂˇpasu
+     * @param status  stav registrace hrĂˇÄŤe
+     * @return seznam registracĂ­
+     */
+    List<MatchRegistrationEntity> findByMatchIdAndStatus(Long matchId, PlayerMatchStatus status);
+
+    /**
+     * Najde vĹˇechny registrace pro danĂ˝ zĂˇpas a danĂ˝ stav hrĂˇÄŤe,
+     * u kterĂ˝ch jeĹˇtÄ› nebyla odeslĂˇna pĹ™ipomĂ­nka MATCH_REMINDER.
+     * <p>
+     * PĹ™Ă­znak reminderAlreadySent slouĹľĂ­ k tomu, aby plĂˇnovaÄŤ
+     * neposĂ­lal pĹ™ipomĂ­nku vĂ­cekrĂˇt pro stejnou registraci.
+     *
+     * @param matchId ID zĂˇpasu
+     * @param status  stav registrace hrĂˇÄŤe
+     * @return seznam registracĂ­ bez odeslanĂ©ho reminderu
+     */
+    List<MatchRegistrationEntity> findByMatchIdAndStatusAndReminderAlreadySentFalse(
+            Long matchId,
+            PlayerMatchStatus status
+    );
 }
 
 -----
@@ -483,6 +508,8 @@ public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
             Long seasonId,
             LocalDateTime to
     );
+
+    List<MatchEntity> findByDateTimeBetween(LocalDateTime from, LocalDateTime to);
 }
 
 -----
@@ -491,7 +518,9 @@ public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
 package cz.phsoft.hokej.data.repositories;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.NotificationEntity;
+import cz.phsoft.hokej.data.enums.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
@@ -520,7 +549,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
      * k nejstarĹˇĂ­m. Metoda se pouĹľĂ­vĂˇ pro vĂ˝pis notifikacĂ­
      * od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
      *
-     * @param user        uĹľivatel, pro kterĂ©ho se notifikace hledajĂ­
+     * @param user         uĹľivatel, pro kterĂ©ho se notifikace hledajĂ­
      * @param createdAfter ÄŤasovĂˇ hranice (notifikace vytvoĹ™enĂ© po tomto ÄŤase)
      * @return seznam notifikacĂ­
      */
@@ -536,7 +565,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
      * Metoda se pouĹľĂ­vĂˇ pro zobrazenĂ­ poÄŤtu novĂ˝ch notifikacĂ­ (badge)
      * od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
      *
-     * @param user        uĹľivatel, pro kterĂ©ho se notifikace poÄŤĂ­tajĂ­
+     * @param user         uĹľivatel, pro kterĂ©ho se notifikace poÄŤĂ­tajĂ­
      * @param createdAfter ÄŤasovĂˇ hranice (notifikace vytvoĹ™enĂ© po tomto ÄŤase)
      * @return poÄŤet nepĹ™eÄŤtenĂ˝ch notifikacĂ­
      */
@@ -631,6 +660,25 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
      * @return seznam vĹˇech notifikacĂ­ seĹ™azenĂ˝ch podle ÄŤasu vytvoĹ™enĂ­
      */
     List<NotificationEntity> findAllByOrderByCreatedAtDesc();
+
+    /**
+     * VyhledĂˇvĂˇ notifikaci podle kombinace uĹľivatel â€“ zĂˇpas â€“ typ.
+     *
+     * Metoda se pouĹľĂ­vĂˇ pro deduplikaci udĂˇlostnĂ­ch notifikacĂ­
+     * (napĹ™. MATCH_CANCELED, MATCH_TIME_CHANGED), aby se
+     * pro stejnĂ©ho uĹľivatele a stejnĂ˝ zĂˇpas danĂ˝ typ
+     * notifikace nevytvĂˇĹ™el vĂ­cekrĂˇt.
+     *
+     * @param user  uĹľivatel, pro kterĂ©ho se notifikace hledĂˇ
+     * @param match zĂˇpas, ke kterĂ©mu se notifikace vztahuje
+     * @param type  typ notifikace
+     * @return existujĂ­cĂ­ notifikace, pokud byla jiĹľ vytvoĹ™ena
+     */
+    Optional<NotificationEntity> findByUserAndMatchAndType(
+            AppUserEntity user,
+            MatchEntity match,
+            NotificationType type
+    );
 }
 
 -----

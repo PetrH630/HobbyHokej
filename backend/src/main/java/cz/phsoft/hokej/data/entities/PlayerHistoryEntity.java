@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.data.entities;
 
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import cz.phsoft.hokej.data.enums.PlayerStatus;
 import cz.phsoft.hokej.data.enums.PlayerType;
 import cz.phsoft.hokej.data.enums.Team;
@@ -107,6 +108,20 @@ public class PlayerHistoryEntity {
     private Team team;
 
     /**
+     * Primární pozice hráče v okamžiku změny.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "primary_position")
+    private PlayerPosition primaryPosition;
+
+    /**
+     * Sekundární pozice hráče v okamžiku změny.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "secondary_position")
+    private PlayerPosition secondaryPosition;
+
+    /**
      * Stav hráče v okamžiku změny.
      */
     @Enumerated(EnumType.STRING)
@@ -155,6 +170,12 @@ public class PlayerHistoryEntity {
 
     public Team getTeam() { return team; }
     public void setTeam(Team team) { this.team = team; }
+
+    public PlayerPosition getPrimaryPosition() { return primaryPosition; }
+    public void setPrimaryPosition(PlayerPosition primaryPosition) { this.primaryPosition = primaryPosition; }
+
+    public PlayerPosition getSecondaryPosition() { return secondaryPosition; }
+    public void setSecondaryPosition(PlayerPosition secondaryPosition) { this.secondaryPosition = secondaryPosition; }
 
     public PlayerStatus getPlayerStatus() { return playerStatus; }
     public void setPlayerStatus(PlayerStatus playerStatus) { this.playerStatus = playerStatus; }

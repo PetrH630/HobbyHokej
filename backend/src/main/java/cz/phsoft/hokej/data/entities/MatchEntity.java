@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchMode;
 import cz.phsoft.hokej.data.enums.MatchStatus;
 import jakarta.persistence.*;
 
@@ -72,6 +73,14 @@ public class MatchEntity {
     private MatchStatus matchStatus;
 
     /**
+     * Režim zápasu (počet hráčů na ledě, s brankářem / bez brankáře).
+     * Ukládá se jako textová hodnota enumu.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "match_mode", nullable = false, length = 50)
+    private MatchMode matchMode;
+
+    /**
      * Důvod zrušení zápasu.
      *
      * Vyplňuje se pouze v případě, že je zápas zrušen.
@@ -112,6 +121,8 @@ public class MatchEntity {
      */
     @Column(name = "last_modified_by_user_id")
     private Long lastModifiedByUserId;
+
+
 
     /**
      * Bezparametrický konstruktor požadovaný JPA.
@@ -166,4 +177,12 @@ public class MatchEntity {
     public Long getLastModifiedByUserId() { return lastModifiedByUserId; }
 
     public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
+
+    public MatchMode getMatchMode() {
+        return matchMode;
+    }
+
+    public void setMatchMode(MatchMode matchMode) {
+        this.matchMode = matchMode;
+    }
 }

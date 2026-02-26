@@ -20,13 +20,23 @@ import java.util.stream.Collectors;
 /**
  * Service vrstva pro výpočet statistik hráče v rámci aktuální sezóny.
  *
- * Zajišťuje výběr odehraných zápasů aktuální sezóny a jejich zúžení podle
- * data vytvoření hráče a jeho aktivity v daném termínu. Následně agreguje
- * registrace hráče do souhrnných počtů podle statusu.
+ * Odpovědnosti:
+ * - načítání hráče a odehraných zápasů aktuální sezóny,
+ * - filtrování zápasů podle data vytvoření hráče a jeho aktivity v daném termínu,
+ * - agregace registrací hráče do souhrnných počtů podle {@link PlayerMatchStatus},
+ * - sestavení {@link PlayerStatsDTO} včetně domovského týmu, pozic a registrací podle týmů.
  *
- * Třída koordinuje načtení dat přes repository a deleguje dílčí logiku
- * na související služby (aktuální sezóna, aktivní sezóna, období neaktivity,
- * registrace zápasů).
+ * Tato třída neřeší:
+ * - HTTP vrstvu a mapování requestů na DTO (řeší controllery),
+ * - správu sezón obecně (řeší {@link SeasonService} a {@link CurrentSeasonService}),
+ * - ukládání nebo měnění registrací (řeší {@link MatchRegistrationService}).
+ *
+ * Spolupracuje s:
+ * - {@link PlayerRepository} pro načtení hráče,
+ * - {@link MatchRepository} pro načtení zápasů aktuální sezóny,
+ * - {@link CurrentSeasonService} a {@link SeasonService} pro určení sezóny,
+ * - {@link PlayerInactivityPeriodService} pro vyhodnocení aktivity hráče v termínu zápasu,
+ * - {@link MatchRegistrationService} pro načtení registrací na zápasy.
  */
 @Service
 public class PlayerStatsServiceImpl implements PlayerStatsService {
@@ -39,11 +49,7 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
     private final MatchRegistrationService matchRegistrationService;
 
     /**
-     * Vytváří service pro výpočet statistik hráče.
-     *
-     * Používá se napojení na repository pro načítání hráčů a zápasů a
-     * na služby, které poskytují identifikátor aktuální sezóny, aktivní sezónu,
-     * vyhodnocení aktivity hráče v čase a registrace zápasů.
+     * Vytváří službu pro výpočet statistik hráče.
      *
      * @param playerRepository Repository pro práci s hráči.
      * @param matchRepository Repository pro práci se zápasy.
@@ -69,20 +75,32 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
     /**
      * Vrací statistiky hráče pro odehrané zápasy aktuální sezóny.
      *
-     * Nejprve se načte hráč a datum jeho vytvoření. Následně se načtou
-     * všechny odehrané zápasy aktuální sezóny a spočítá se jejich celkový počet.
-     * Zápasy se dále filtrují tak, aby byly zahrnuty pouze zápasy po vytvoření hráče
-     * a pouze ty, ve kterých byl hráč v daném čase aktivní.
+     * Postup:
+     * - načte se hráč podle ID a získá se jeho časové razítko vytvoření,
+     * - načtou se všechny odehrané zápasy aktuální sezóny a spočítá se jejich celkový počet,
+     * - zápasy se filtrují tak, aby byly zahrnuty pouze:
+     *   - zápasy po datu vytvoření hráče,
+     *   - zápasy v období, kdy je hráč aktivní (delegováno do {@link PlayerInactivityPeriodService}),
+     * - pokud pro hráče nejsou žádné relevantní zápasy, sestaví se DTO
+     *   s počtem zápasů v sezóně, počtem zápasů dostupných pro hráče,
+     *   domovským týmem, pozicemi a prázdnou statistikou,
+     * - pro relevantní zápasy se načtou registrace přes {@link MatchRegistrationService},
+     *   vytvoří se mapování matchId → status a matchId → tým hráče,
+     * - pro každý zápas se určí status hráče, pro zápasy bez registrace
+     *   se použije status {@link PlayerMatchStatus#NO_RESPONSE},
+     * - agregované počty podle statusu a počty registrací podle týmů se přenesou do DTO.
      *
-     * Pokud pro hráče nejsou žádné relevantní zápasy, vrací se DTO s vyplněným
-     * identifikátorem hráče a počtem zápasů v sezóně a ostatní hodnoty zůstávají nulové.
-     *
-     * Pro relevantní zápasy se načtou registrace a vytvoří se mapování matchId na status
-     * pouze pro daného hráče. Pro zápasy bez registrace se použije výchozí status NO_RESPONSE.
-     * Nakonec se agregované počty přenesou do návratového DTO.
+     * DTO vždy obsahuje:
+     * - celkový počet zápasů v sezóně,
+     * - počet zápasů, které byly pro hráče relevantní,
+     * - domovský tým hráče,
+     * - primární a sekundární pozici,
+     * - počty registrací podle statusů,
+     * - mapu {@code registeredByTeam} obsahující všechny hodnoty {@link Team}
+     *   (i s nulovými počty), aby měl frontend stabilní strukturu.
      *
      * @param playerId Identifikátor hráče, pro kterého se statistiky počítají.
-     * @return DTO obsahující souhrnné počty zápasů podle statusů a počet zápasů v sezóně.
+     * @return DTO obsahující souhrnné počty zápasů podle statusů a doplňkové údaje.
      * @throws PlayerNotFoundException Pokud hráč se zadaným identifikátorem neexistuje.
      */
     @Override
@@ -106,6 +124,8 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
         statsDTO.setAllMatchesInSeason(allMatchesInCurrentSeason);
         statsDTO.setAllMatchesInSeasonForPlayer(allMatchesInSeasonForPlayer);
         statsDTO.setHomeTeam(player.getTeam());
+        statsDTO.setPrimaryPosition(player.getPrimaryPosition());
+        statsDTO.setSecondaryPosition(player.getSecondaryPosition());
 
         // vždy připravíme mapu se všemi týmy (ať je výstup stabilní pro FE)
         EnumMap<Team, Integer> registeredByTeam = new EnumMap<>(Team.class);
@@ -125,6 +145,7 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
         List<MatchRegistrationDTO> allRegistrations =
                 matchRegistrationService.getRegistrationsForMatches(matchIds);
 
+        // matchId -> status hráče v daném zápase
         Map<Long, PlayerMatchStatus> playerStatusByMatchId = allRegistrations.stream()
                 .filter(r -> playerId.equals(r.getPlayerId()))
                 .collect(Collectors.toMap(
@@ -133,6 +154,7 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
                         (a, b) -> a
                 ));
 
+        // matchId -> tým hráče v daném zápase (podle registrace)
         Map<Long, Team> playerTeamByMatchId = allRegistrations.stream()
                 .filter(r -> playerId.equals(r.getPlayerId()))
                 .collect(Collectors.toMap(
@@ -204,8 +226,9 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
     /**
      * Určuje identifikátor sezóny, pro kterou se mají počítat statistiky.
      *
-     * Primárně se používá identifikátor aktuální sezóny poskytnutý službou.
-     * Pokud není dostupný, použije se identifikátor aktivní sezóny.
+     * Primárně se používá identifikátor aktuální sezóny poskytnutý službou
+     * {@link CurrentSeasonService}. Pokud není dostupný, použije se
+     * identifikátor aktivní sezóny z {@link SeasonService}.
      *
      * @return Identifikátor sezóny použitý pro výběr zápasů.
      */
@@ -229,7 +252,8 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
     /**
      * Vyhodnocuje, zda byl hráč aktivní v době konání zápasu.
      *
-     * Výsledek se deleguje na službu spravující období neaktivity hráče.
+     * Logika je delegována do {@link PlayerInactivityPeriodService},
+     * která zohledňuje období neaktivity hráče.
      *
      * @param player Hráč, pro kterého se aktivita vyhodnocuje.
      * @param dateTime Termín zápasu.

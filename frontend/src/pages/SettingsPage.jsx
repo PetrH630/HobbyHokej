@@ -80,10 +80,11 @@ const validatePlayerSettingsContact = (values) => {
 
     // 4) pokud je telefon vyplněný, musí být E.164
     if (phone) {
-        const phoneRegex = /^\+[1-9]\d{1,14}$/;
+        const phoneRegex = /^\+[1-9]\d{11}$/;
+
         if (!phoneRegex.test(phone)) {
             errors.contactPhone =
-                "Kontaktní telefon musí být v mezinárodním formátu, např. +420123456789.";
+                "Kontaktní telefon musí být v mezinárodním formátu a dostatečně dlouhý, např. +420123456789.";
         }
     }
 
@@ -128,7 +129,7 @@ const validateChangePassword = (values) => {
 const SettingsPage = () => {
     const [activeTab, setActiveTab] = useState("player"); // "player" | "user"
 
-    // ✅ MODAL – stav + open/close
+    // MODAL – stav + open/close
     const [successModal, setSuccessModal] = useState({
         show: false,
         title: "Hotovo",
@@ -161,6 +162,8 @@ const SettingsPage = () => {
         nickname: "",
         phoneNumber: "",
         team: "",
+        primaryPosition: "",
+        secondaryPosition: "",
     };
 
     const [playerProfileValues, setPlayerProfileValues] = useState(
@@ -180,6 +183,9 @@ const SettingsPage = () => {
                 nickname: currentPlayer.nickname || "",
                 phoneNumber: currentPlayer.phoneNumber || "",
                 team: currentPlayer.team || "",
+                primaryPosition: currentPlayer.primaryPosition || "",
+                secondaryPosition: currentPlayer.secondaryPosition || "",
+
             });
         } else {
             setPlayerProfileValues(emptyPlayerProfile);
@@ -228,6 +234,8 @@ const SettingsPage = () => {
                         ? playerProfileValues.phoneNumber.trim()
                         : null,
                 team: playerProfileValues.team || null,
+                primaryPosition: playerProfileValues.primaryPosition || null,
+                secondaryPosition: playerProfileValues.secondaryPosition || null,
             };
 
             await updateMyCurrentPlayer(payload);
@@ -473,6 +481,28 @@ const SettingsPage = () => {
         );
     };
 
+    // Jednorázové doplnění kontaktního e-mailu z profilu uživatele,
+    // pokud hráč žádný kontaktní e-mail ještě nemá
+    useEffect(() => {
+        if (!playerSettingsValues || !userProfile) return;
+
+        const emailFromUser = (userProfile.email || "").trim();
+
+        // pokud už něco v contactEmail je, nic nepřepisujeme
+        if (
+            playerSettingsValues.contactEmail &&
+            playerSettingsValues.contactEmail.trim() !== ""
+        ) {
+            return;
+        }
+
+        if (emailFromUser) {
+            setPlayerSettingsValues((prev) => ({
+                ...prev,
+                contactEmail: emailFromUser,
+            }));
+        }
+    }, [playerSettingsValues, userProfile]);
 
     const isLoading =
         loadingCurrentPlayer ||
@@ -482,7 +512,7 @@ const SettingsPage = () => {
 
     return (
         <div className="container mt-0">
-            {/* ✅ MODAL – render (nic to nemaže, jen přidává) */}
+            {/* MODAL – render */}
             <SuccessInfoModal
                 show={successModal.show}
                 title={successModal.title}

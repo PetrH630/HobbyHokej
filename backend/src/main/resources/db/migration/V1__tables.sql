@@ -27,7 +27,7 @@ CREATE TABLE `app_users_history` (
 CREATE TABLE `app_user_settings` (
   `id` bigint(20) NOT NULL,
   `copy_all_player_notifications_to_user_email` bit(1) NOT NULL,
-   `default_landing_page` enum('DASHBOARD','MATCHES','PLAYERS') NOT NULL DEFAULT 'DASHBOARD',
+  `default_landing_page` enum('DASHBOARD','MATCHES','PLAYERS') NOT NULL DEFAULT 'DASHBOARD',
   `email_digest_enabled` bit(1) NOT NULL,
   `email_digest_time` time(6) DEFAULT NULL,
   `global_notification_level` enum('ALL','IMPORTANT_ONLY','NONE') NOT NULL,
@@ -63,6 +63,15 @@ CREATE TABLE `matches` (
   `last_modified_by_user_id` bigint(20) DEFAULT NULL,
   `location` varchar(255) NOT NULL,
   `match_status` enum('UNCANCELED','CANCELED','UPDATED') DEFAULT NULL,
+  `match_mode` enum(
+    'THREE_ON_THREE_NO_GOALIE',
+    'THREE_ON_THREE_WITH_GOALIE',
+    'FOUR_ON_FOUR_NO_GOALIE',
+    'FOUR_ON_FOUR_WITH_GOALIE',
+    'FIVE_ON_FIVE_NO_GOALIE',
+    'FIVE_ON_FIVE_WITH_GOALIE',
+    'SIX_ON_SIX_NO_GOALIE'
+  ) NOT NULL,
   `max_players` int(11) NOT NULL,
   `price` int(11) NOT NULL,
   `timestamp` datetime(6) NOT NULL,
@@ -81,6 +90,15 @@ CREATE TABLE `matches_history` (
   `location` varchar(255) NOT NULL,
   `match_id` bigint(20) NOT NULL,
   `match_status` enum('UNCANCELED','CANCELED','UPDATED') DEFAULT NULL,
+  `match_mode` enum(
+    'THREE_ON_THREE_NO_GOALIE',
+    'THREE_ON_THREE_WITH_GOALIE',
+    'FOUR_ON_FOUR_NO_GOALIE',
+    'FOUR_ON_FOUR_WITH_GOALIE',
+    'FIVE_ON_FIVE_NO_GOALIE',
+    'FIVE_ON_FIVE_WITH_GOALIE',
+    'SIX_ON_SIX_NO_GOALIE'
+  ) NOT NULL,
   `max_players` int(11) NOT NULL,
   `original_timestamp` datetime(6) NOT NULL,
   `price` int(11) NOT NULL,
@@ -95,6 +113,17 @@ CREATE TABLE `match_registrations` (
   `excuse_reason` enum('NEMOC','PRACE','NECHE_SE_MI','JINE') DEFAULT NULL,
   `status` enum('REGISTERED','UNREGISTERED','EXCUSED','RESERVED','NO_RESPONSE','SUBSTITUTE','NO_EXCUSED') NOT NULL,
   `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `position_in_match` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
   `timestamp` datetime(6) NOT NULL,
   `match_id` bigint(20) NOT NULL,
   `player_id` bigint(20) NOT NULL,
@@ -115,6 +144,17 @@ CREATE TABLE `match_registration_history` (
   `player_id` bigint(20) NOT NULL,
   `status` enum('REGISTERED','UNREGISTERED','EXCUSED','RESERVED','NO_RESPONSE','SUBSTITUTE','NO_EXCUSED') NOT NULL,
   `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `position_in_match` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
   `reminder_already_sent` bit(1) NOT NULL DEFAULT b'0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -127,6 +167,28 @@ CREATE TABLE `player_entity` (
   `player_status` enum('PENDING','APPROVED','REJECTED') NOT NULL,
   `surname` varchar(255) NOT NULL,
   `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `primary_position` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
+  `secondary_position` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
   `timestamp` datetime(6) NOT NULL,
   `type` enum('VIP','STANDARD','BASIC') NOT NULL,
   `user_id` bigint(20) DEFAULT NULL
@@ -145,6 +207,28 @@ CREATE TABLE `player_entity_history` (
   `player_status` enum('PENDING','APPROVED','REJECTED') NOT NULL,
   `surname` varchar(255) NOT NULL,
   `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `primary_position` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
+  `secondary_position` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
   `type` enum('VIP','STANDARD','BASIC') NOT NULL,
   `user_id` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -169,6 +253,8 @@ CREATE TABLE `player_settings` (
   `notify_on_registration` bit(1) NOT NULL,
   `notify_reminders` bit(1) NOT NULL,
   `reminder_hours_before` int(11) DEFAULT NULL,
+  `possible_move_to_another_team` bit(1) NOT NULL DEFAULT b'0',
+  `possible_change_player_position` bit(1) NOT NULL DEFAULT b'0',
   `sms_enabled` bit(1) NOT NULL,
   `player_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

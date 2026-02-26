@@ -6,12 +6,14 @@ ExcuseReason.java
 GlobalNotificationLevel.java
 LandingPage.java
 MatchCancelReason.java
+MatchMode.java
 MatchStatus.java
 NotificationCategory.java
 NotificationChannel.java
 NotificationType.java
 package-info.java
 PlayerMatchStatus.java
+PlayerPosition.java
 PlayerSelectionMode.java
 PlayerStatus.java
 PlayerType.java
@@ -142,6 +144,40 @@ public enum MatchCancelReason {
      * JinĂ˝ dĹŻvod zruĹˇenĂ­, blĂ­Ĺľe nespecifikovanĂ˝.
      */
     OTHER                   // jinĂ˝ dĹŻvod
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\MatchMode.java
+-----
+package cz.phsoft.hokej.data.enums;
+
+public enum MatchMode {
+    THREE_ON_THREE_NO_GOALIE(3, false),  //  3 na 3 bez brankĂˇĹ™e - 6
+    THREE_ON_THREE_WITH_GOALIE(3, true),  //  3 na 3 s brankĂˇĹ™em - 8
+    FOUR_ON_FOUR_NO_GOALIE(4, false), // 4 na 4 bez brankĂˇĹ™e - 8
+    FOUR_ON_FOUR_WITH_GOALIE(4, true),  // 4 na 4 s brankĂˇĹ™em - 10
+    FIVE_ON_FIVE_NO_GOALIE(5, false), // 5 na 5 bez brankĂˇĹ™e - 10
+    FIVE_ON_FIVE_WITH_GOALIE(5, true); // 5 na 5 s brankĂˇĹ™em - 12
+
+    private final int skatersPerTeam;
+    private final boolean goalieIncluded;
+
+    MatchMode(int skatersPerTeam, boolean goalieIncluded) {
+        this.skatersPerTeam = skatersPerTeam;
+        this.goalieIncluded = goalieIncluded;
+    }
+
+    public int getSkatersPerTeam() {
+        return skatersPerTeam;
+    }
+
+    public boolean isGoalieIncluded() {
+        return goalieIncluded;
+    }
+
+    public int getPlayersPerTeam() {
+        return skatersPerTeam + (goalieIncluded ? 1 : 0);
+    }
 }
 
 -----
@@ -470,6 +506,24 @@ public enum PlayerMatchStatus {
     NO_RESPONSE,  // bez odpovÄ›di
     SUBSTITUTE,   // nĂˇhradnĂ­k-moĹľnĂˇ
     NO_EXCUSED,   // neomluven - byl registrovĂˇn a nepĹ™iĹˇel
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\data\enums\PlayerPosition.java
+-----
+package cz.phsoft.hokej.data.enums;
+
+public enum PlayerPosition {
+    GOALIE, // brankĂˇĹ™
+    DEFENSE_LEFT,  // levĂ˝ obrĂˇnce
+    DEFENSE_RIGHT, // pravĂ˝ obrĂˇnce
+    CENTER, // centr
+    WING_LEFT, // levĂ© kĹ™Ă­dlo
+    WING_RIGHT, // pravĂ© kĹ™Ă­dlo
+    DEFENSE, // obrĂˇnce
+    FORWARD, // ĂştoÄŤnĂ­k
+    ANY, // nezĂˇleĹľĂ­
+
 }
 
 -----

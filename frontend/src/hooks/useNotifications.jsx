@@ -25,7 +25,7 @@ export const useNotifications = ({ mode = "sinceLastLogin", limit } = {}) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // 🔽 pomocná funkce – z pole nebo Page udělá vždy pole notifikací
+    
     const normalizeData = (data) => {
         if (!data) return [];
         if (Array.isArray(data)) return data;

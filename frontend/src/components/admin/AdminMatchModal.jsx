@@ -3,58 +3,63 @@ import { useEffect, useState } from "react";
 import MatchForm from "../matches/MatchForm";
 import { validateMatch } from "../../validation/matchValidation";
 import { tryClearDemoNotifications } from "../../api/demoApi";
+import {
+    MATCH_MODE_OPTIONS,
+    calculateMaxPlayers,
+} from "../../constants/matchModeConfig";
 
-// backend "yyyy-MM-dd HH:mm:ss" -> picker "YYYY-MM-DDTHH:mm"
+// backend "yyyy-MM-dd HH:mm:ss" -> picker
 const toPickerValue = (value) => {
     if (!value) return "";
-
     const s = String(value);
-
-    // ISO
-    if (s.includes("T")) {
-        return s.slice(0, 16);
-    }
-
-    // backend "yyyy-MM-dd HH:mm:ss"
+    if (s.includes("T")) return s.slice(0, 16);
     return s.replace(" ", "T").slice(0, 16);
 };
 
-// picker "YYYY-MM-DDTHH:mm" -> backend "yyyy-MM-dd HH:mm:ss"
+// picker -> backend
 const toBackendDateTime = (valueString) => {
     if (!valueString) return null;
-
-    // očekáváme "YYYY-MM-DDTHH:mm"
-    if (String(valueString).includes("T")) {
-        const [date, time] = String(valueString).split("T");
-        const [hh = "00", mm = "00"] = String(time).split(":");
+    if (valueString.includes("T")) {
+        const [date, time] = valueString.split("T");
+        const [hh = "00", mm = "00"] = time.split(":");
         return `${date} ${hh}:${mm}:00`;
     }
-
-    // fallback
-    return String(valueString);
+    return valueString;
 };
 
-const AdminMatchModal = ({ match, show, onClose, onSave, saving, serverError }) => {
+const AdminMatchModal = ({
+    match,
+    show,
+    onClose,
+    onSave,
+    saving,
+    serverError,
+}) => {
     if (!show) return null;
+
+    const isNew = !match?.id;
 
     const [values, setValues] = useState({
         id: match?.id ?? null,
-        dateTime: match?.dateTime ? toPickerValue(match.dateTime) : "", // ✅ string
+        dateTime: match?.dateTime ? toPickerValue(match.dateTime) : "",
         location: match?.location || "",
         description: match?.description || "",
         maxPlayers:
             match?.maxPlayers !== undefined && match?.maxPlayers !== null
                 ? match.maxPlayers
                 : "",
-        price: match?.price !== undefined && match?.price !== null ? match.price : "",
+        price:
+            match?.price !== undefined && match?.price !== null
+                ? match.price
+                : "",
         matchStatus: match?.matchStatus || null,
         cancelReason: match?.cancelReason || null,
         matchNumber: match?.matchNumber || null,
         seasonId: match?.seasonId || null,
+        matchMode: match?.matchMode || null,
     });
 
     const [errors, setErrors] = useState({});
-    const isNew = !values.id;
 
     useEffect(() => {
         if (match) {
@@ -64,14 +69,19 @@ const AdminMatchModal = ({ match, show, onClose, onSave, saving, serverError }) 
                 location: match.location || "",
                 description: match.description || "",
                 maxPlayers:
-                    match.maxPlayers !== undefined && match.maxPlayers !== null
+                    match.maxPlayers !== undefined &&
+                        match.maxPlayers !== null
                         ? match.maxPlayers
                         : "",
-                price: match.price !== undefined && match.price !== null ? match.price : "",
+                price:
+                    match.price !== undefined && match.price !== null
+                        ? match.price
+                        : "",
                 matchStatus: match.matchStatus || null,
                 cancelReason: match.cancelReason || null,
                 matchNumber: match.matchNumber || null,
                 seasonId: match.seasonId || null,
+                matchMode: match.matchMode || null,
             });
         } else {
             setValues({
@@ -85,10 +95,27 @@ const AdminMatchModal = ({ match, show, onClose, onSave, saving, serverError }) 
                 cancelReason: null,
                 matchNumber: null,
                 seasonId: null,
+                matchMode: null,
             });
         }
         setErrors({});
     }, [match]);
+
+    /*
+     * Automatické přepočítání maxPlayers při změně matchMode
+     * pouze při vytváření nového zápasu
+     */
+    useEffect(() => {
+        if (!isNew) return;
+        if (!values.matchMode) return;
+
+        const calculated = calculateMaxPlayers(values.matchMode);
+
+        setValues((prev) => ({
+            ...prev,
+            maxPlayers: calculated,
+        }));
+    }, [values.matchMode, isNew]);
 
     const handleChange = (patch) => {
         setValues((prev) => ({ ...prev, ...patch }));
@@ -106,25 +133,22 @@ const AdminMatchModal = ({ match, show, onClose, onSave, saving, serverError }) 
 
         const validationErrors = validateMatch(values);
         setErrors(validationErrors);
-
         if (Object.keys(validationErrors).length > 0) return;
 
         await tryClearDemoNotifications();
 
         const payload = {
             id: values.id,
-            dateTime: toBackendDateTime(values.dateTime), // ✅ string -> backend string
+            dateTime: toBackendDateTime(values.dateTime),
             location: values.location?.trim(),
             description:
-                values.description && values.description.trim() !== ""
+                values.description?.trim() !== ""
                     ? values.description.trim()
                     : null,
             maxPlayers:
-                values.maxPlayers === "" || values.maxPlayers === null
-                    ? null
-                    : Number(values.maxPlayers),
-            price:
-                values.price === "" || values.price === null ? null : Number(values.price),
+                values.maxPlayers === "" ? null : Number(values.maxPlayers),
+            price: values.price === "" ? null : Number(values.price),
+            matchMode: values.matchMode || null,
         };
 
         onSave(payload);
@@ -136,43 +160,74 @@ const AdminMatchModal = ({ match, show, onClose, onSave, saving, serverError }) 
 
     return (
         <>
-            <div className="modal fade show d-block" tabIndex="-1" role="dialog" aria-modal="true">
-                <div className="modal-dialog modal-lg" role="document">
+            <div className="modal fade show d-block">
+                <div className="modal-dialog modal-lg">
                     <div className="modal-content">
                         <form onSubmit={handleSubmit} noValidate>
                             <div className="modal-header">
-                                <div>
-                                    <h5 className="modal-title">
-                                        {isNew
-                                            ? "Vytvořit nový zápas"
-                                            : `Upravit zápas #${values.id}${values.matchNumber ? ` (č. ${values.matchNumber} v sezóně)` : ""
-                                            }`}
-                                    </h5>
-                                    {!isNew && values.seasonId && (
-                                        <small className="text-muted">Sezóna ID: {values.seasonId}</small>
-                                    )}
-                                </div>
-
+                                <h5 className="modal-title">
+                                    {isNew
+                                        ? "Vytvořit nový zápas"
+                                        : `Upravit zápas #${values.id}`}
+                                </h5>
                                 <button
                                     type="button"
                                     className="btn-close"
-                                    aria-label="Close"
                                     onClick={handleClose}
                                     disabled={saving}
                                 />
                             </div>
 
                             <div className="modal-body">
-                                {serverError && <div className="alert alert-danger">{serverError}</div>}
+                                {serverError && (
+                                    <div className="alert alert-danger">
+                                        {serverError}
+                                    </div>
+                                )}
 
-                                <MatchForm values={values} onChange={handleChange} errors={errors} />
+                                <MatchForm
+                                    values={values}
+                                    onChange={handleChange}
+                                    errors={errors}
+                                />
+
+                                {/* MATCH MODE SELECT */}
+                                <div className="mb-3 mt-3">
+                                    <label className="form-label">
+                                        Herní systém
+                                    </label>
+                                    <select
+                                        className="form-select"
+                                        value={values.matchMode || ""}
+                                        onChange={(e) =>
+                                            handleChange({
+                                                matchMode:
+                                                    e.target.value || null,
+                                            })
+                                        }
+                                        disabled={saving}
+                                    >
+                                        <option value="">
+                                            -- Vyber herní systém --
+                                        </option>
+
+                                        {MATCH_MODE_OPTIONS.map((option) => (
+                                            <option
+                                                key={option.value}
+                                                value={option.value}
+                                            >
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
                                 {!isNew && (
                                     <div className="mt-3">
                                         <small className="text-muted">
-                                            Stav zápasu: {values.matchStatus || "NENASTAVEN"}
-                                            {values.cancelReason &&
-                                                ` (důvod zrušení: ${values.cancelReason})`}
+                                            Stav zápasu:{" "}
+                                            {values.matchStatus ||
+                                                "NENASTAVEN"}
                                         </small>
                                     </div>
                                 )}
@@ -188,14 +243,16 @@ const AdminMatchModal = ({ match, show, onClose, onSave, saving, serverError }) 
                                     Zavřít
                                 </button>
 
-                                <button type="submit" className="btn btn-primary" disabled={saving}>
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={saving}
+                                >
                                     {saving
-                                        ? isNew
-                                            ? "Vytvářím zápas…"
-                                            : "Ukládám změny…"
+                                        ? "Ukládám…"
                                         : isNew
                                             ? "Vytvořit zápas"
-                                            : "Uložit změny zápasu"}
+                                            : "Uložit změny"}
                                 </button>
                             </div>
                         </form>

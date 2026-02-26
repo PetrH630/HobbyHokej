@@ -176,7 +176,7 @@ const AdminPlayerRegistrationHistoryModal = ({
                                                 />
                                                 <button
                                                     type="button"
-                                                    className="btn btn-sm btn-primary mt-2 mt-md-0"
+                                                    className="btn btn-sm btn-primary mt-2 mt-md-0 text-nowrap"
                                                     disabled={saving}
                                                     onClick={
                                                         handleConfirmCancel

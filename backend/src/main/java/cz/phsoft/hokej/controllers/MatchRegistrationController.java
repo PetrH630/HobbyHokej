@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.controllers;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import cz.phsoft.hokej.exceptions.CurrentPlayerNotSelectedException;
 import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.models.dto.PlayerDTO;
@@ -203,9 +204,23 @@ public class MatchRegistrationController {
         return matchRegistrationService.changeRegistrationTeam(playerId, matchId);
     }
 
-
-
-
+    /**
+     * Mění pozici u hráče dle jeho id v konkrétním zápase.
+     *
+     * @param playerId  ID hráče
+     * @param matchId   ID zápasu
+     * @param positionInMatch   pozice hráče
+     * @return mění pozici hráče v aktuálním zápasu
+     */
+    @PatchMapping("/{matchId}/players/{playerId}/position")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO changePosition(
+            @PathVariable Long matchId,
+            @PathVariable Long playerId,
+            @RequestParam("position") PlayerPosition positionInMatch
+    ) {
+        return matchRegistrationService.changeRegistrationPosition(playerId, matchId, positionInMatch);
+    }
 
     // Uživatelská správa registrací pro aktuálního hráče
 

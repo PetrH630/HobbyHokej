@@ -181,7 +181,7 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
                         <div className="col-md-8">
                             <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
                                 <div className="d-flex justify-content-end">
-                                    {/* ✅ jen styling + ikony, žádné nové položky */}
+                                    {/* jen styling + ikony, žádné nové položky */}
                                     <div className="btn-group btn-group-sm flex-wrap gap-2">
                                         {/* DETAIL */}
                                         <button

@@ -308,12 +308,14 @@ public class DataInitializer {
                 match.setDateTime(firstMatchDate.plusWeeks(i));
                 match.setLocation("NĚJAKÁ HALA");
                 match.setDescription("");
-                match.setMaxPlayers(12);
+                match.setMaxPlayers(MatchMode.THREE_ON_THREE_NO_GOALIE.getPlayersPerTeam()*4);
                 match.setPrice(2200);
                 match.setMatchStatus(null);
                 match.setCancelReason(null);
                 match.setSeason(actualSeason);
                 match.setCreatedByUserId(2L);
+                match.setMatchMode(MatchMode.THREE_ON_THREE_NO_GOALIE);
+
 
                 matchRepository.save(match);
             }
@@ -389,6 +391,7 @@ public class DataInitializer {
                 reg.setTeam(player.getTeam());
                 reg.setTimestamp(LocalDateTime.now());
                 reg.setCreatedBy("initializer");
+                reg.setPositionInMatch(PlayerPosition.ANY);
 
                 matchRegistrationRepository.save(reg);
             }

@@ -1,15 +1,18 @@
+// src/components/matches/MatchDetail.jsx
 import { useState } from "react";
 import MatchHeader from "./MatchHeader";
 import PlayerMatchStatus from "../players/PlayerMatchStatus";
 import MatchActions from "./MatchActions";
 import MatchInfo from "./MatchInfo";
 import TeamSelectModal from "../matchRegistration/TeamSelectModal";
+import PlayerPositionModal from "../matchRegistration/PlayerPositionModal";
+import { PlayerPosition } from "../../constants/playerPosition";
 import BackButton from "../BackButton";
 import MatchRegistrationHistory from "../MatchRegistration/MatchRegistrationHistory";
+import { computeTeamPositionAvailability } from "../../utils/matchPositionUtils";
 
 const isMatchUpcoming = (match) => {
     if (!match || !match.dateTime) {
-        // radši tlačítka zobrazit, než je vždy schovat
         return true;
     }
 
@@ -19,17 +22,13 @@ const isMatchUpcoming = (match) => {
     if (raw instanceof Date) {
         matchDate = raw;
     } else if (typeof raw === "string") {
-        // backend posílá "2026-01-23 18:45:00"
-        // → uděláme z toho "2026-01-23T18:45:00"
         const normalized = raw.includes("T") ? raw : raw.replace(" ", "T");
         matchDate = new Date(normalized);
     } else {
-        // neznámý formát – radši povolit tlačítka
         return true;
     }
 
     if (Number.isNaN(matchDate.getTime())) {
-        // špatné datum – radši povolit tlačítka
         return true;
     }
 
@@ -53,8 +52,38 @@ const MatchDetail = ({
     defaultTeam,
     onRefresh,
 }) => {
+    console.log("MatchDetail RENDER", {
+        matchId: match?.id,
+        hasRegistrationsDTO: !!match?.registrations,
+        registrationsLen: match?.registrations?.length,
+        hasRegistrationsDarkDTO: !!match?.registeredDarkPlayers,
+        darkLenDTO: match?.registeredDarkPlayers?.length,
+        hasRegistrationsLightDTO: !!match?.registeredLightPlayers,
+        lightLenDTO: match?.registeredLightPlayers?.length,
+    });
+
     const [showTeamModal, setShowTeamModal] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
+
+    // dvoukrokový výběr: tým → pozice
+    const [showPositionModal, setShowPositionModal] = useState(false);
+    const [pendingTeam, setPendingTeam] = useState(null);
+
+    const defaultPlayerPosition = PlayerPosition.ANY;
+
+    // Výpočet obsazenosti a plných pozic pro zvolený tým pomocí utilu
+    let positionCountsForPendingTeam = {};
+    let occupiedPositionsForPendingTeam = [];
+    let onlyGoalieLeftForPendingTeam = false;
+
+    if (pendingTeam && match) {
+        const { occupiedCounts, fullPositions, onlyGoalieLeft } =
+            computeTeamPositionAvailability(match, pendingTeam);
+
+        positionCountsForPendingTeam = occupiedCounts;
+        occupiedPositionsForPendingTeam = fullPositions;
+        onlyGoalieLeftForPendingTeam = !!onlyGoalieLeft;
+    }
 
     if (loading) {
         return (
@@ -83,24 +112,38 @@ const MatchDetail = ({
     const isUpcoming = isMatchUpcoming(match);
 
     const handleRegisterClick = () => {
-        // tady už nesaháme na API – jen otevřeme modal
-        console.log("MatchDetail: klik na Přijdu → otevírám modal");
+        console.log("MatchDetail: klik na Přijdu → otevírám TeamSelectModal");
         setShowTeamModal(true);
     };
 
-    const handleSelectTeam = async (team) => {
+    const handleSelectTeam = (team) => {
         console.log("MatchDetail: vybraný tým z modalu:", team);
-        if (onRegister) {
-            // do rodiče (MatchDetailPage) posíláme tým
-            await onRegister(team);
-        }
+        setPendingTeam(team);
         setShowTeamModal(false);
+        setShowPositionModal(true);
     };
+
+    const handleSelectPosition = async (position) => {
+        if (onRegister && pendingTeam) {
+            await onRegister(pendingTeam, position);
+        }
+
+        setPendingTeam(null);
+        setShowPositionModal(false);
+    };
+
+    const handleClosePositionModal = () => {
+        setShowPositionModal(false);
+        setPendingTeam(null);
+    };
+
+    const maxPlayers = match?.maxPlayers ?? 0;
+    const inGamePlayers = match?.inGamePlayers ?? 0;
+    const isCapacityFull = maxPlayers > 0 && inGamePlayers >= maxPlayers;
 
     return (
         <div className="container mt-3">
             <MatchHeader match={match} />
-
 
             <PlayerMatchStatus
                 playerMatchStatus={match.playerMatchStatus}
@@ -114,7 +157,7 @@ const MatchDetail = ({
             {!isPast && isUpcoming && (
                 <MatchActions
                     playerMatchStatus={playerMatchStatus}
-                    onRegister={handleRegisterClick}  
+                    onRegister={handleRegisterClick}
                     onUnregister={onUnregister}
                     onExcuse={onExcuse}
                     onSubstitute={onSubstitute}
@@ -123,7 +166,7 @@ const MatchDetail = ({
             )}
 
             <BackButton />
-            <br></br>
+            <br />
             <MatchInfo match={match} onRefresh={onRefresh} />
 
             <div className="d-flex justify-content-center mt-3 mb-3">
@@ -138,18 +181,26 @@ const MatchDetail = ({
                 </button>
             </div>
 
-            {/* tabulka se vykreslí jen když je showHistory = true */}
-            {showHistory && (
-                <MatchRegistrationHistory matchId={match.id} />
-            )}
+            {showHistory && <MatchRegistrationHistory matchId={match.id} />}
 
-            {/* Modal s výběrem týmu */}
             <TeamSelectModal
                 isOpen={showTeamModal}
                 onClose={() => setShowTeamModal(false)}
                 match={match}
                 defaultTeam={defaultTeam || "LIGHT"}
                 onSelectTeam={handleSelectTeam}
+            />
+
+            <PlayerPositionModal
+                isOpen={showPositionModal}
+                onClose={handleClosePositionModal}
+                defaultPosition={defaultPlayerPosition}
+                onSelectPosition={handleSelectPosition}
+                matchModeKey={match.matchMode}
+                occupiedPositions={occupiedPositionsForPendingTeam}
+                positionCounts={positionCountsForPendingTeam}
+                isCapacityFull={isCapacityFull}
+                onlyGoalieLeft={onlyGoalieLeftForPendingTeam}
             />
         </div>
     );

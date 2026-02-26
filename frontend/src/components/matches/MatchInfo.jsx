@@ -155,48 +155,15 @@ const MatchInfo = ({ match, onRefresh }) => {
                         )}
 
                         {match.pricePerRegisteredPlayer != null && (
-                            <p className="card-text mb-2">
+                            <p className="card-text mb-1">
                                 <strong>Cena / hráč: </strong>
                                 {match.pricePerRegisteredPlayer.toFixed(0)} Kč
                             </p>
                         )}
                     </div>
-
-                    {/* PRAVÝ HORNÍ ROH – jen pro ADMIN/MANAGER a jen u uplynulého zápasu */}
-                    <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER"]}>
-                        {isPastMatch && (
-                            <div className="d-flex flex-column gap-2 text-end">
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-outline-danger"
-                                    disabled={
-                                        registeredPlayers.length === 0 ||
-                                        saving
-                                    }
-                                    onClick={() => setShowNoExcuseModal(true)}
-                                >
-                                    Neomluvit hráče
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-outline-secondary"
-                                    disabled={
-                                        noExcusedPlayers.length === 0 ||
-                                        saving
-                                    }
-                                    onClick={() =>
-                                        setShowCancelNoExcuseModal(true)
-                                    }
-                                >
-                                    Zrušit neomluvení
-                                </button>
-                            </div>
-                        )}
-                    </RoleGuard>
                 </div>
 
-                <h4 className="mt-4">Sestava:</h4>
+                <h5 className="mt-1">Sestava:</h5>
                 <MatchRegistrationInfo
                     match={match}
                     currentPlayer={currentPlayer}

@@ -94,6 +94,28 @@ public class PlayerSettingsEntity {
     private Integer reminderHoursBefore = 24;
 
     /**
+     * Příznak, zda může být hráč automaticky přesunut
+     * do druhého týmu při uvolnění místa.
+     *
+     * Používá se při výběru náhradníka z RESERVED
+     * pro obsazení volného slotu v opačném týmu.
+     */
+    @Column(name = "possible_move_to_another_team", nullable = false)
+    private boolean possibleMoveToAnotherTeam = false;
+
+    /**
+     * Příznak, zda může být hráči automaticky změněna
+     * herní pozice mezi obranou a útokem.
+     *
+     * Používá se při výběru náhradníka z RESERVED
+     * pro obsazení volného slotu na jiné než preferované
+     * pozici. Na pozici brankáře se tímto příznakem
+     * přesun nepovoluje.
+     */
+    @Column(name = "possible_change_player_position", nullable = false)
+    private boolean possibleChangePlayerPosition = false;
+
+    /**
      * Určuje, zda jsou povoleny notifikace týkající se registrací.
      */
     @Transient
@@ -227,5 +249,21 @@ public class PlayerSettingsEntity {
 
     public void setReminderHoursBefore(Integer reminderHoursBefore) {
         this.reminderHoursBefore = reminderHoursBefore;
+    }
+
+    public boolean isPossibleMoveToAnotherTeam() {
+        return possibleMoveToAnotherTeam;
+    }
+
+    public void setPossibleMoveToAnotherTeam(boolean possibleMoveToAnotherTeam) {
+        this.possibleMoveToAnotherTeam = possibleMoveToAnotherTeam;
+    }
+
+    public boolean isPossibleChangePlayerPosition() {
+        return possibleChangePlayerPosition;
+    }
+
+    public void setPossibleChangePlayerPosition(boolean possibleChangePlayerPosition) {
+        this.possibleChangePlayerPosition = possibleChangePlayerPosition;
     }
 }

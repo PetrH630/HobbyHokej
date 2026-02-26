@@ -1,0 +1,8 @@
+.team-card-disabled {
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.team-card-disabled .team-icon-wrapper {
+    filter: grayscale(0.6);
+}

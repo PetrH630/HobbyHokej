@@ -1,5 +1,6 @@
 package cz.phsoft.hokej.models.services;
 
+import cz.phsoft.hokej.data.entities.AppUserEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
 import cz.phsoft.hokej.data.repositories.PlayerRepository;
@@ -13,20 +14,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 /**
- * Implementace služby pro práci s nastavením hráče ({@link PlayerSettingsEntity}).
+ * Implementace služby pro práci s nastavením hráče (PlayerSettingsEntity).
  *
  * Odpovědnosti:
  * - načítání nastavení hráče podle jeho ID,
  * - vytváření výchozího nastavení pro hráče, pokud ještě neexistuje,
- * - aktualizace existujícího nastavení podle {@link PlayerSettingsDTO}.
+ * - aktualizace existujícího nastavení podle PlayerSettingsDTO.
  *
  * Tato třída:
  * - neřeší autorizaci ani ověřování vlastnictví hráče (řeší controller),
  * - neodesílá notifikace, pouze spravuje data v databázi,
  * - spolupracuje s:
- *   - {@link PlayerRepository} pro ověření existence hráče,
- *   - {@link PlayerSettingsRepository} pro práci s nastavením,
- *   - {@link PlayerSettingsMapper} pro mapování mezi entitou a DTO.
+ *   - PlayerRepository pro ověření existence hráče,
+ *   - PlayerSettingsRepository pro práci s nastavením,
+ *   - PlayerSettingsMapper pro mapování mezi entitou a DTO.
  */
 @Service
 @Transactional
@@ -44,20 +45,6 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
         this.mapper = mapper;
     }
 
-    /**
-     * Vrátí nastavení pro hráče podle jeho ID.
-     *
-     * Postup:
-     * - ověří se existence hráče,
-     * - pokusí se načíst existující nastavení hráče,
-     * - pokud neexistuje žádný záznam, vytvoří se výchozí nastavení
-     *   pomocí {@link #createDefaultSettingsForPlayer(PlayerEntity)} a uloží se,
-     * - výsledek se namapuje na {@link PlayerSettingsDTO}.
-     *
-     * @param playerId ID hráče
-     * @return nastavení hráče ve formě {@link PlayerSettingsDTO}
-     * @throws PlayerNotFoundException pokud hráč neexistuje
-     */
     @Override
     public PlayerSettingsDTO getSettingsForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
@@ -73,21 +60,6 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
         return mapper.toDTO(settings);
     }
 
-    /**
-     * Aktualizuje nastavení hráče podle jeho ID.
-     *
-     * Postup:
-     * - ověří se existence hráče,
-     * - načte se existující nastavení hráče, nebo se vytvoří nové výchozí,
-     * - na entitu se aplikují hodnoty z {@link PlayerSettingsDTO},
-     * - zajišťuje se navázání na hráče (settings.setPlayer),
-     * - entita se uloží a navrátí se ve formě DTO.
-     *
-     * @param playerId ID hráče
-     * @param dto      nové hodnoty nastavení
-     * @return aktualizované nastavení ve formě {@link PlayerSettingsDTO}
-     * @throws PlayerNotFoundException pokud hráč neexistuje
-     */
     @Override
     public PlayerSettingsDTO updateSettingsForPlayer(Long playerId, PlayerSettingsDTO dto) {
         PlayerEntity player = findPlayerOrThrow(playerId);
@@ -109,16 +81,6 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
     // HELPER METODY
     // =========================
 
-    /**
-     * Najde hráče podle ID nebo vyhodí {@link PlayerNotFoundException}.
-     *
-     * Metoda centralizuje práci s {@link PlayerRepository} a
-     * zjednodušuje obsluhu chyb při neexistujícím hráči.
-     *
-     * @param playerId ID hráče
-     * @return entita hráče
-     * @throws PlayerNotFoundException pokud hráč s daným ID neexistuje
-     */
     private PlayerEntity findPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
@@ -137,39 +99,39 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
      *   - notifyOnPayment = false,
      * - připomínky:
      *   - notifyReminders = true,
-     *   - reminderHoursBefore = 24.
-     *
-     * Default hodnoty odpovídají původní logice, která byla dříve
-     * uložena přímo v entitě {@link PlayerEntity} (emailEnabled, smsEnabled)
-     * a nyní je přesunuta do dedikované entity {@link PlayerSettingsEntity}.
-     *
-     * Metoda pouze vrací neinicializovanou entitu, uložení do databáze
-     * provádí volající kód.
-     *
-     * @param player hráč, pro kterého se výchozí nastavení vytváří
-     * @return nová instance {@link PlayerSettingsEntity} s výchozím nastavením
+     *   - reminderHoursBefore = 24,
+     * - herní preference pro automatické přesuny:
+     *   - possibleMoveToAnotherTeam = false,
+     *   - possibleChangePlayerPosition = false.
      */
     @Override
     public PlayerSettingsEntity createDefaultSettingsForPlayer(PlayerEntity player) {
         PlayerSettingsEntity settings = new PlayerSettingsEntity();
+
         settings.setPlayer(player);
 
-        // explicitně nastavené default hodnoty
-
+        // kontakty
         settings.setContactEmail(null);
         settings.setContactPhone(null);
 
-        // původní logika z PlayerEntity.emailEnabled / smsEnabled přesunuta do nastavení hráče
+        // kanály
         settings.setEmailEnabled(true);
-        settings.setSmsEnabled(true);
+        settings.setSmsEnabled(false);
+
+        // typy notifikací
         settings.setNotifyOnRegistration(true);
         settings.setNotifyOnExcuse(true);
         settings.setNotifyOnMatchChange(true);
         settings.setNotifyOnMatchCancel(true);
         settings.setNotifyOnPayment(false);
 
+        // připomínky
         settings.setNotifyReminders(false);
         settings.setReminderHoursBefore(24);
+
+        // herní preference – výchozí: žádné automatické přesuny
+        settings.setPossibleMoveToAnotherTeam(false);
+        settings.setPossibleChangePlayerPosition(false);
 
         return settings;
     }

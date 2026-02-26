@@ -2,6 +2,7 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import cz.phsoft.hokej.data.enums.Team;
 import jakarta.persistence.*;
 
@@ -100,6 +101,15 @@ public class MatchRegistrationHistoryEntity {
     private Team team;
 
     /**
+     * Pozice hráče v tomto konkrétním zápase v okamžiku změny.
+     *
+     * Slouží k auditování přiřazení hráče na konkrétní pozice.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "position_in_match", length = 30)
+    private PlayerPosition positionInMatch;
+
+    /**
      * Příznak, že připomínka MATCH_REMINDER již byla
      * pro danou registraci odeslána v okamžiku této změny.
      *
@@ -162,6 +172,14 @@ public class MatchRegistrationHistoryEntity {
     public Team getTeam() { return team; }
 
     public void setTeam(Team team) { this.team = team; }
+
+    public PlayerPosition getPositionInMatch() {
+        return positionInMatch;
+    }
+
+    public void setPositionInMatch(PlayerPosition positionInMatch) {
+        this.positionInMatch = positionInMatch;
+    }
 
     public boolean isReminderAlreadySent() {
         return reminderAlreadySent;

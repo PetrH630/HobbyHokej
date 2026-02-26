@@ -736,6 +736,7 @@ public class ForgottenPasswordResetTokenEntity {
 package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.data.enums.MatchMode;
 import cz.phsoft.hokej.data.enums.MatchStatus;
 import jakarta.persistence.*;
 
@@ -807,6 +808,14 @@ public class MatchEntity {
     private MatchStatus matchStatus;
 
     /**
+     * ReĹľim zĂˇpasu (poÄŤet hrĂˇÄŤĹŻ na ledÄ›, s brankĂˇĹ™em / bez brankĂˇĹ™e).
+     * UklĂˇdĂˇ se jako textovĂˇ hodnota enumu.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "match_mode", nullable = false, length = 50)
+    private MatchMode matchMode;
+
+    /**
      * DĹŻvod zruĹˇenĂ­ zĂˇpasu.
      *
      * VyplĹuje se pouze v pĹ™Ă­padÄ›, Ĺľe je zĂˇpas zruĹˇen.
@@ -847,6 +856,8 @@ public class MatchEntity {
      */
     @Column(name = "last_modified_by_user_id")
     private Long lastModifiedByUserId;
+
+
 
     /**
      * BezparametrickĂ˝ konstruktor poĹľadovanĂ˝ JPA.
@@ -901,6 +912,14 @@ public class MatchEntity {
     public Long getLastModifiedByUserId() { return lastModifiedByUserId; }
 
     public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
+
+    public MatchMode getMatchMode() {
+        return matchMode;
+    }
+
+    public void setMatchMode(MatchMode matchMode) {
+        this.matchMode = matchMode;
+    }
 }
 
 -----
@@ -1090,6 +1109,7 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import cz.phsoft.hokej.data.enums.Team;
 import jakarta.persistence.*;
 
@@ -1169,6 +1189,23 @@ public class MatchRegistrationEntity {
     @Column(nullable = false, updatable = true)
     private String createdBy;
 
+    /**
+     * Pozice hrĂˇÄŤe v tomto konkrĂ©tnĂ­m zĂˇpase.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "position_in_match", length = 30)
+    private PlayerPosition positionInMatch;
+
+    /**
+     * PĹ™Ă­znak, Ĺľe pĹ™ipomĂ­nka MATCH_REMINDER uĹľ byla
+     * pro tuto registraci odeslĂˇna.
+     *
+     * SlouĹľĂ­ k tomu, aby plĂˇnovaÄŤ neposĂ­lal pĹ™ipomĂ­nku
+     * stejnĂ©mu hrĂˇÄŤi pro stejnĂ˝ zĂˇpas vĂ­cekrĂˇt.
+     */
+    @Column(name = "reminder_already_sent", nullable = false)
+    private boolean reminderAlreadySent = false;
+
     public MatchRegistrationEntity() {
     }
 
@@ -1211,6 +1248,22 @@ public class MatchRegistrationEntity {
     public String getCreatedBy() { return createdBy; }
 
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public boolean isReminderAlreadySent() {
+        return reminderAlreadySent;
+    }
+
+    public void setReminderAlreadySent(boolean reminderAlreadySent) {
+        this.reminderAlreadySent = reminderAlreadySent;
+    }
+
+    public PlayerPosition getPositionInMatch() {
+        return positionInMatch;
+    }
+
+    public void setPositionInMatch(PlayerPosition positionInMatch) {
+        this.positionInMatch = positionInMatch;
+    }
 }
 
 -----
@@ -1317,6 +1370,15 @@ public class MatchRegistrationHistoryEntity {
     @Column(name = "team")
     private Team team;
 
+    /**
+     * PĹ™Ă­znak, Ĺľe pĹ™ipomĂ­nka MATCH_REMINDER jiĹľ byla
+     * pro danou registraci odeslĂˇna v okamĹľiku tĂ©to zmÄ›ny.
+     *
+     * SlouĹľĂ­ k auditovĂˇnĂ­ chovĂˇnĂ­ plĂˇnovaÄŤe pĹ™ipomĂ­nek.
+     */
+    @Column(name = "reminder_already_sent", nullable = false)
+    private boolean reminderAlreadySent;
+
     public MatchRegistrationHistoryEntity() {
     }
 
@@ -1371,6 +1433,14 @@ public class MatchRegistrationHistoryEntity {
     public Team getTeam() { return team; }
 
     public void setTeam(Team team) { this.team = team; }
+
+    public boolean isReminderAlreadySent() {
+        return reminderAlreadySent;
+    }
+
+    public void setReminderAlreadySent(boolean reminderAlreadySent) {
+        this.reminderAlreadySent = reminderAlreadySent;
+    }
 }
 
 -----
@@ -1390,6 +1460,12 @@ import java.time.Instant;
                 @Index(name = "idx_notification_user", columnList = "user_id"),
                 @Index(name = "idx_notification_created_at", columnList = "created_at"),
                 @Index(name = "idx_notification_read_at", columnList = "read_at")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_notification_user_match_type",
+                        columnNames = {"user_id", "match_id", "type"}
+                )
         }
 )
 public class NotificationEntity {
@@ -1405,6 +1481,15 @@ public class NotificationEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id")
     private PlayerEntity player;
+
+    /**
+     * ZĂˇpas, ke kterĂ©mu se notifikace vztahuje.
+     *
+     * Pro obecnĂ© systĂ©movĂ© notifikace mĹŻĹľe bĂ˝t hodnota null.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "match_id")
+    private MatchEntity match;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
@@ -1459,37 +1544,97 @@ public class NotificationEntity {
 
     // Gettery / settery
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public AppUserEntity getUser() { return user; }
-    public void setUser(AppUserEntity user) { this.user = user; }
+    public AppUserEntity getUser() {
+        return user;
+    }
 
-    public PlayerEntity getPlayer() { return player; }
-    public void setPlayer(PlayerEntity player) { this.player = player; }
+    public void setUser(AppUserEntity user) {
+        this.user = user;
+    }
 
-    public NotificationType getType() { return type; }
-    public void setType(NotificationType type) { this.type = type; }
+    public PlayerEntity getPlayer() {
+        return player;
+    }
 
-    public String getMessageShort() { return messageShort; }
-    public void setMessageShort(String messageShort) { this.messageShort = messageShort; }
+    public void setPlayer(PlayerEntity player) {
+        this.player = player;
+    }
 
-    public String getMessageFull() { return messageFull; }
-    public void setMessageFull(String messageFull) { this.messageFull = messageFull; }
+    public MatchEntity getMatch() {
+        return match;
+    }
 
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public void setMatch(MatchEntity match) {
+        this.match = match;
+    }
 
-    public Instant getReadAt() { return readAt; }
-    public void setReadAt(Instant readAt) { this.readAt = readAt; }
+    public NotificationType getType() {
+        return type;
+    }
 
-    public AppUserEntity getCreatedBy() { return createdBy; }
-    public void setCreatedBy(AppUserEntity createdBy) { this.createdBy = createdBy; }
+    public void setType(NotificationType type) {
+        this.type = type;
+    }
 
-    public String getEmailTo() { return emailTo; }
-    public void setEmailTo(String emailTo) { this.emailTo = emailTo; }
+    public String getMessageShort() {
+        return messageShort;
+    }
 
-    public String getSmsTo() { return smsTo; }
-    public void setSmsTo(String smsTo) { this.smsTo = smsTo; }
+    public void setMessageShort(String messageShort) {
+        this.messageShort = messageShort;
+    }
+
+    public String getMessageFull() {
+        return messageFull;
+    }
+
+    public void setMessageFull(String messageFull) {
+        this.messageFull = messageFull;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(Instant readAt) {
+        this.readAt = readAt;
+    }
+
+    public AppUserEntity getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(AppUserEntity createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getEmailTo() {
+        return emailTo;
+    }
+
+    public void setEmailTo(String emailTo) {
+        this.emailTo = emailTo;
+    }
+
+    public String getSmsTo() {
+        return smsTo;
+    }
+
+    public void setSmsTo(String smsTo) {
+        this.smsTo = smsTo;
+    }
 }
 
 -----

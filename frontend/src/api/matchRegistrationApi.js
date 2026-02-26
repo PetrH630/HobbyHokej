@@ -8,6 +8,8 @@ import api from "./axios";
  * - excuseReason: důvod omluvy
  * - excuseNote: text omluvy nebo null
  * - unregister: true → odhlásit, false → registrovat / omluvit
+ * - substitute: true → náhradník
+ * - positionInMatch: enum pozice hráče v zápase (např. "WING_LEFT")
  */
 export const upsertMyRegistration = async ({
     matchId,
@@ -16,23 +18,25 @@ export const upsertMyRegistration = async ({
     excuseNote = null,
     unregister = false,
     substitute = false,
+    positionInMatch = null,   // 🔹 NOVÝ PARAMETR
 }) => {
     const res = await api.post(
         "/registrations/me/upsert",
         {
             matchId,
             team,
-            adminNote: null,      
+            adminNote: null,
             excuseReason,
             excuseNote,
             unregister,
             substitute,
+            positionInMatch,    // 🔹 POSÍLÁME DO BACKENDU
         },
         { withCredentials: true }
     );
     return res.data;
 };
-
+ 
 /**
  * ADMIN/MANAGER: označí hráče jako NO_EXCUSED
  * PATCH /api/matches/match/{matchId}/players/{playerId}/no-excused

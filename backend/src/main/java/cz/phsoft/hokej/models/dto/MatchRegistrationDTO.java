@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
 import jakarta.validation.constraints.NotNull;
@@ -66,6 +67,14 @@ public class MatchRegistrationDTO {
     private String createdBy;
 
     /**
+     * Pozice hráče v tomto konkrétním zápase.
+     *
+     * Slouží pro prezentaci rozložení hráčů na ledě
+     * a pro statistiky podle postů.
+     */
+    private PlayerPosition positionInMatch;
+
+    /**
      * Detail hráče. Používá se pro prezentační účely v přehledech
      * registrací, aby nebylo nutné dělat další dotazy na hráče.
      */
@@ -89,8 +98,6 @@ public class MatchRegistrationDTO {
         this.adminNote = adminNote;
         this.team = team;
     }
-
-
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -118,6 +125,14 @@ public class MatchRegistrationDTO {
 
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public PlayerPosition getPositionInMatch() {
+        return positionInMatch;
+    }
+
+    public void setPositionInMatch(PlayerPosition positionInMatch) {
+        this.positionInMatch = positionInMatch;
+    }
 
     public PlayerDTO getPlayerDTO() { return playerDTO; }
     public void setPlayerDTO(PlayerDTO playerDTO) { this.playerDTO = playerDTO; }

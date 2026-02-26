@@ -8,7 +8,9 @@ ForgottenPasswordResetContext.java
 InAppNotificationBuilder.java
 InAppNotificationService.java
 InAppNotificationServiceImpl.java
+MatchReminderScheduler.java
 MatchTimeChangeContext.java
+NoResponseReminderScheduler.java
 NotificationCleanupService.java
 NotificationContext.java
 NotificationPreferencesService.java
@@ -433,10 +435,10 @@ public class InAppNotificationBuilder {
             }
 
             case MATCH_REGISTRATION_NO_RESPONSE -> {
-                String title = "NereagovanĂˇ pozvĂˇnka";
+                String title = "Bez reakce na zĂˇpas";
                 String base = formattedDateTime.isBlank()
-                        ? "Dosud jste nereagoval na pozvĂˇnku k zĂˇpasu."
-                        : "Dosud jste nereagoval na pozvĂˇnku k zĂˇpasu %s."
+                        ? "Dosud jste nereagoval na zĂˇpas."
+                        : "Dosud jste nereagoval na zĂˇpas %s."
                         .formatted(formattedDateTime);
 
                 String countPart = (maxPlayers > 0)
@@ -753,6 +755,7 @@ public interface InAppNotificationService {
 package cz.phsoft.hokej.models.services.notification;
 
 import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.data.entities.MatchEntity;
 import cz.phsoft.hokej.data.entities.NotificationEntity;
 import cz.phsoft.hokej.data.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.NotificationType;
@@ -763,6 +766,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * Implementace sluĹľby pro uklĂˇdĂˇnĂ­ aplikaÄŤnĂ­ch notifikacĂ­.
@@ -829,9 +833,47 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
                 ? content.message()
                 : type.name();
 
+        // Pokus o navĂˇzĂˇnĂ­ notifikace na konkrĂ©tnĂ­ zĂˇpas.
+        // Pokud je context instanceof MatchEntity, vyuĹľije se pro deduplikaci.
+        MatchEntity match = resolveMatchFromContext(context);
+
+        if (match != null) {
+            // Deduplikace podle user + match + type.
+            Optional<NotificationEntity> existingOpt =
+                    notificationRepository.findByUserAndMatchAndType(owner, match, type);
+
+            if (existingOpt.isPresent()) {
+                NotificationEntity existing = existingOpt.get();
+
+                existing.setMessageShort(messageShort);
+                existing.setMessageFull(messageFull);
+                existing.setEmailTo(emailTo);
+                existing.setSmsTo(smsTo);
+                existing.setCreatedAt(Instant.now(clock));
+
+                notificationRepository.save(existing);
+
+                log.debug(
+                        "InAppNotificationService.storeForPlayer: aktualizovĂˇna existujĂ­cĂ­ notifikace type={} userId={} playerId={} matchId={} emailTo={} smsTo={}",
+                        type,
+                        owner.getId(),
+                        player.getId(),
+                        match.getId(),
+                        emailTo,
+                        smsTo
+                );
+                return;
+            }
+        }
+
+        // Pokud nenĂ­ match, nebo neexistuje zĂˇznam pro kombinaci (user, match, type),
+        // vytvoĹ™Ă­ se novĂˇ notifikace.
         NotificationEntity entity = new NotificationEntity();
         entity.setUser(owner);
         entity.setPlayer(player);
+        if (match != null) {
+            entity.setMatch(match);
+        }
         entity.setType(type);
         entity.setMessageShort(messageShort);
         entity.setMessageFull(messageFull);
@@ -842,8 +884,15 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
 
         notificationRepository.save(entity);
 
-        log.debug("InAppNotificationService.storeForPlayer: uloĹľena notifikace type={} userId={} playerId={} emailTo={} smsTo={}",
-                type, owner.getId(), player.getId(), emailTo, smsTo);
+        log.debug(
+                "InAppNotificationService.storeForPlayer: uloĹľena notifikace type={} userId={} playerId={} matchId={} emailTo={} smsTo={}",
+                type,
+                owner.getId(),
+                player.getId(),
+                match != null ? match.getId() : null,
+                emailTo,
+                smsTo
+        );
     }
 
     @Override
@@ -882,6 +931,7 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
         entity.setMessageFull(messageFull);
         entity.setCreatedAt(Instant.now(clock));
 
+        // UĹľivatelskĂ© notifikace nejsou vĂˇzĂˇny na match â€“ match se zde nenastavuje.
         entity.setEmailTo(emailTo);
         entity.setSmsTo(null);
 
@@ -930,6 +980,8 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
         entity.setMessageFull(fullText);
         entity.setCreatedAt(Instant.now(clock));
 
+        // SpeciĂˇlnĂ­ zprĂˇvy nenvĂˇĹľeme na konkrĂ©tnĂ­ zĂˇpas â€“ jednĂˇ se
+        // o obecnou administrĂˇtorskou komunikaci.
         entity.setEmailTo(emailTo);
         entity.setSmsTo(smsTo);
 
@@ -962,6 +1014,298 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
             return null;
         }
     }
+
+    /**
+     * PokusĂ­ se z contextu vyÄŤĂ­st zĂˇpas pro navĂˇzĂˇnĂ­ notifikace.
+     *
+     * AktuĂˇlnÄ› se podporuje varianta, kdy je context pĹ™Ă­mo instancĂ­ MatchEntity.
+     * Pokud context neobsahuje zĂˇpas, vracĂ­ se null.
+     *
+     * Do budoucna lze rozĹˇĂ­Ĺ™it o dalĹˇĂ­ typy kontextĹŻ (napĹ™. vlastnĂ­ wrapper).
+     *
+     * @param context kontext pĹ™edanĂ˝ volajĂ­cĂ­m
+     * @return MatchEntity, pokud jej lze z contextu zĂ­skat, jinak null
+     */
+    private MatchEntity resolveMatchFromContext(Object context) {
+        if (context instanceof MatchEntity) {
+            return (MatchEntity) context;
+        }
+        return null;
+    }
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\MatchReminderScheduler.java
+-----
+package cz.phsoft.hokej.models.services.notification;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.MatchStatus;
+import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * PlĂˇnovaÄŤ pro odesĂ­lĂˇnĂ­ pĹ™ipomĂ­nek zĂˇpasĹŻ (MATCH_REMINDER).
+ *
+ * OdpovÄ›dnosti:
+ * - periodicky prochĂˇzet budoucĂ­ zĂˇpasy v definovanĂ©m ÄŤasovĂ©m oknÄ›,
+ * - pro kaĹľdĂ˝ zĂˇpas najĂ­t pĹ™ihlĂˇĹˇenĂ© hrĂˇÄŤe (REGISTERED),
+ * - v okamĹľiku, kdy se zĂˇpas blĂ­ĹľĂ­ na definovanĂ˝ poÄŤet hodin, zavolat
+ *   NotificationService.notifyPlayer(..., MATCH_REMINDER, match).
+ *
+ * TĹ™Ă­da NEĹEĹ ĂŤ:
+ * - uĹľivatelskĂˇ nastavenĂ­ (notifyReminders, kanĂˇly, globĂˇlnĂ­ ĂşrovnÄ›),
+ *   to je plnÄ› v reĹľii NotificationPreferencesService,
+ * - sestavenĂ­ textĹŻ e-mailĹŻ / SMS (Ĺ™eĹˇĂ­ EmailMessageBuilder / SmsMessageBuilder).
+ *
+ * Deduplikace pĹ™ipomĂ­nek se Ĺ™eĹˇĂ­ pĹ™Ă­znakem reminderAlreadySent v
+ * MatchRegistrationEntity a navazujĂ­cĂ­ historii.
+ *
+ * PlĂˇnovaÄŤ pĹ™edpoklĂˇdĂˇ, Ĺľe je v aplikaci povoleno plĂˇnovĂˇnĂ­ pomocĂ­
+ * anotace @EnableScheduling v konfiguraÄŤnĂ­ tĹ™Ă­dÄ›.
+ */
+@Service
+public class MatchReminderScheduler {
+
+    private static final Logger log = LoggerFactory.getLogger(MatchReminderScheduler.class);
+
+    private final MatchRepository matchRepository;
+    private final MatchRegistrationRepository matchRegistrationRepository;
+    private final NotificationService notificationService;
+    private final Clock clock;
+
+    /**
+     * MaximĂˇlnĂ­ horizont, ve kterĂ©m se hledajĂ­ zĂˇpasy pro pĹ™ipomĂ­nky.
+     * Hodnota udĂˇvĂˇ poÄŤet hodin od aktuĂˇlnĂ­ho ÄŤasu smÄ›rem do budoucnosti.
+     *
+     * PĹ™Ă­klad: 48 znamenĂˇ, Ĺľe plĂˇnovaÄŤ zpracuje vĹˇechny zĂˇpasy v
+     * nĂˇsledujĂ­cĂ­ch 48 hodinĂˇch.
+     */
+    private final int horizonHours;
+
+    /**
+     * GlobĂˇlnĂ­ hodnota, kolik hodin pĹ™ed zaÄŤĂˇtkem zĂˇpasu
+     * se mĂˇ pĹ™ipomĂ­nka posĂ­lat.
+     *
+     * KonkrĂ©tnĂ­ kanĂˇly a to, zda hrĂˇÄŤ pĹ™ipomĂ­nky chce (notifyReminders),
+     * rozhoduje NotificationPreferencesService.
+     */
+    private final int reminderHoursBefore;
+
+    /**
+     * Velikost ÄŤasovĂ©ho okna (v minutĂˇch), ve kterĂ©m se pĹ™ipomĂ­nka
+     * povaĹľuje za â€žaktuĂˇlnĂ­â€ś.
+     *
+     * PĹ™Ă­klad: pokud je reminderHoursBefore = 24 a toleranceMinutes = 5,
+     * pak se pĹ™ipomĂ­nka odeĹˇle v intervalu
+     * <24 h - 5 min, 24 h> pĹ™ed zaÄŤĂˇtkem zĂˇpasu.
+     *
+     * Tato tolerance slouĹľĂ­ k tomu, aby plĂˇnovaÄŤ bÄ›ĹľĂ­cĂ­ napĹ™. kaĹľdĂ˝ch 5 minut
+     * nepĹ™eskoÄŤil pĹ™esnĂ˝ ÄŤas.
+     */
+    private final int toleranceMinutes;
+
+    public MatchReminderScheduler(MatchRepository matchRepository,
+                                  MatchRegistrationRepository matchRegistrationRepository,
+                                  NotificationService notificationService,
+                                  Clock clock,
+                                  @Value("${app.notifications.reminder.horizon-hours:48}")
+                                  int horizonHours,
+                                  @Value("${app.notifications.reminder.hours-before:24}")
+                                  int reminderHoursBefore,
+                                  @Value("${app.notifications.reminder.tolerance-minutes:5}")
+                                  int toleranceMinutes) {
+        this.matchRepository = matchRepository;
+        this.matchRegistrationRepository = matchRegistrationRepository;
+        this.notificationService = notificationService;
+        this.clock = clock;
+        this.horizonHours = horizonHours;
+        this.reminderHoursBefore = reminderHoursBefore;
+        this.toleranceMinutes = toleranceMinutes;
+    }
+
+    /**
+     * HlavnĂ­ plĂˇnovacĂ­ metoda.
+     *
+     * Metoda se spouĹˇtĂ­ periodicky podle cron vĂ˝razu nebo fixedDelay.
+     * ÄŚetnost spouĹˇtÄ›nĂ­ by mÄ›la odpovĂ­dat hodnotÄ› toleranceMinutes tak,
+     * aby nedochĂˇzelo k opakovanĂ©mu odesĂ­lĂˇnĂ­ pĹ™ipomĂ­nek.
+     *
+     * V implementaci se:
+     * - naÄŤtou vĹˇechny budoucĂ­ zĂˇpasy v horizontu horizonHours,
+     * - odfiltrujĂ­ se zruĹˇenĂ© zĂˇpasy,
+     * - pro kaĹľdĂ˝ zĂˇpas se najdou registrace se statusem REGISTERED,
+     *   u kterĂ˝ch jeĹˇtÄ› nebyl odeslĂˇn reminder,
+     * - pro kaĹľdĂ©ho pĹ™ihlĂˇĹˇenĂ©ho hrĂˇÄŤe se vyhodnotĂ­, zda nastal ÄŤas pĹ™ipomĂ­nky,
+     *   a pĹ™Ă­padnÄ› se odeĹˇle notifikace MATCH_REMINDER.
+     *
+     * KonkrĂ©tnĂ­ to, zda a jak se notifikace doruÄŤĂ­ (email/SMS),
+     * urÄŤuje NotificationPreferencesService.
+     */
+    @Scheduled(fixedDelayString = "${app.notifications.reminder.fixed-delay-ms:300000}")
+    @Transactional // musĂ­ bĂ˝t R/W kvĹŻli nastavenĂ­ reminderAlreadySent = true
+    public void processMatchReminders() {
+
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDateTime windowEnd = now.plusHours(horizonHours);
+
+        log.debug("MatchReminderScheduler: start, now={}, windowEnd={}", now, windowEnd);
+
+        // PĹ™edpoklĂˇdĂˇ se existence metody v MatchRepository:
+        //   List<MatchEntity> findByDateTimeBetween(LocalDateTime from, LocalDateTime to);
+        List<MatchEntity> upcomingMatches =
+                matchRepository.findByDateTimeBetween(now, windowEnd);
+
+        if (upcomingMatches.isEmpty()) {
+            log.debug("MatchReminderScheduler: ĹľĂˇdnĂ© budoucĂ­ zĂˇpasy v horizontu {} h", horizonHours);
+            return;
+        }
+
+        for (MatchEntity match : upcomingMatches) {
+
+            // ZruĹˇenĂ© zĂˇpasy se pro pĹ™ipomĂ­nky ignorujĂ­.
+            if (match.getMatchStatus() == MatchStatus.CANCELED) {
+                log.debug("MatchReminderScheduler: zĂˇpas {} je zruĹˇen, pĹ™eskoÄŤeno", match.getId());
+                continue;
+            }
+
+            processMatch(match, now);
+        }
+    }
+
+    /**
+     * Zpracuje jeden konkrĂ©tnĂ­ zĂˇpas.
+     *
+     * Provede:
+     * - ovÄ›Ĺ™enĂ­, zda je zĂˇpas v reminder oknÄ›,
+     * - naÄŤtenĂ­ registracĂ­ se statusem REGISTERED, u kterĂ˝ch jeĹˇtÄ›
+     *   nebyl odeslĂˇn reminder,
+     * - pro kaĹľdou registraci odeslĂˇnĂ­ notifikace MATCH_REMINDER
+     *   a nastavenĂ­ pĹ™Ă­znaku reminderAlreadySent = true.
+     *
+     * NastavenĂ­ hrĂˇÄŤe (notifyReminders, kanĂˇly) neĹ™eĹˇĂ­ â€“ rozhoduje
+     * o nich NotificationPreferencesService uvnitĹ™ NotificationService.
+     *
+     * @param match zpracovĂˇvanĂ˝ zĂˇpas
+     * @param now   aktuĂˇlnĂ­ ÄŤas v okamĹľiku bÄ›hu plĂˇnovaÄŤe
+     */
+    private void processMatch(MatchEntity match, LocalDateTime now) {
+
+        LocalDateTime matchDateTime = match.getDateTime();
+        if (matchDateTime == null) {
+            log.debug("MatchReminderScheduler: zĂˇpas {} nemĂˇ nastavenĂ© datum/ÄŤas, pĹ™eskoÄŤeno", match.getId());
+            return;
+        }
+
+        // Pokud zĂˇpas nenĂ­ v oknÄ› pro pĹ™ipomĂ­nku, nemĂˇ smysl cokoliv dĂˇl Ĺ™eĹˇit.
+        if (!shouldSendReminder(now, matchDateTime)) {
+            return;
+        }
+
+        // Najdou se pouze registrace REGISTERED, u kterĂ˝ch jeĹˇtÄ› reminder neodeĹˇel.
+        List<MatchRegistrationEntity> registrations =
+                matchRegistrationRepository.findByMatchIdAndStatusAndReminderAlreadySentFalse(
+                        match.getId(),
+                        PlayerMatchStatus.REGISTERED
+                );
+
+        if (registrations.isEmpty()) {
+            log.debug("MatchReminderScheduler: zĂˇpas {} nemĂˇ ĹľĂˇdnĂ© REGISTERED hrĂˇÄŤe bez odeslanĂ©ho reminderu, pĹ™eskoÄŤeno",
+                    match.getId());
+            return;
+        }
+
+        for (MatchRegistrationEntity registration : registrations) {
+
+            PlayerEntity player = registration.getPlayer();
+            if (player == null) {
+                continue;
+            }
+
+            log.info(
+                    "MatchReminderScheduler: volĂˇ se MATCH_REMINDER pro playerId={} matchId={} ({} h pĹ™ed zaÄŤĂˇtkem)",
+                    player.getId(), match.getId(), reminderHoursBefore
+            );
+
+            // OdeslĂˇnĂ­ notifikace â€“ NotificationService se postarĂˇ o kanĂˇly (email/SMS)
+            // podle NotificationPreferencesService a nastavenĂ­ uĹľivatele/hrĂˇÄŤe.
+            notificationService.notifyPlayer(player, NotificationType.MATCH_REMINDER, match);
+
+            // Deduplikace: oznaÄŤĂ­me, Ĺľe pro tuto registraci jiĹľ reminder odeĹˇel.
+            registration.setReminderAlreadySent(true);
+            // ExplicitnĂ­ save nenĂ­ nutnĂ˝, entita je spravovanĂˇ v rĂˇmci @Transactional
+            // a pĹ™i commit se zmÄ›ny propĂ­ĹˇĂ­ pĹ™es JPA dirty checking.
+        }
+    }
+
+    /**
+     * Rozhodne, zda mĂˇ bĂ˝t v danĂ©m okamĹľiku odeslĂˇna pĹ™ipomĂ­nka pro zĂˇpas.
+     *
+     * PĹ™ipomĂ­nka se odeĹˇle, pokud:
+     * - rozdĂ­l mezi aktuĂˇlnĂ­m ÄŤasem a ÄŤasem zĂˇpasu je kladnĂ˝
+     *   (zĂˇpas je v budoucnosti),
+     * - ÄŤas do zaÄŤĂˇtku zĂˇpasu je menĹˇĂ­ nebo rovnĂ˝ reminderHoursBefore,
+     * - zĂˇroveĹ je vÄ›tĹˇĂ­ neĹľ reminderHoursBefore mĂ­nus toleranceMinutes.
+     *
+     * TĂ­m se vytvoĹ™Ă­ ĂşzkĂ© okno, ve kterĂ©m je pĹ™ipomĂ­nka aktivnĂ­. Pokud
+     * plĂˇnovaÄŤ bÄ›ĹľĂ­ napĹ™. kaĹľdĂ˝ch 5 minut a toleranceMinutes = 5,
+     * pĹ™ipomĂ­nka se odeĹˇle maximĂˇlnÄ› jednou.
+     *
+     * @param now           aktuĂˇlnĂ­ ÄŤas
+     * @param matchDateTime datum a ÄŤas zĂˇpasu
+     * @return true, pokud mĂˇ bĂ˝t pĹ™ipomĂ­nka odeslĂˇna
+     */
+    private boolean shouldSendReminder(LocalDateTime now,
+                                       LocalDateTime matchDateTime) {
+
+        if (matchDateTime.isBefore(now)) {
+            // ZĂˇpas je v minulosti â€“ nemĂˇ smysl odesĂ­lat.
+            return false;
+        }
+
+        Duration diff = Duration.between(now, matchDateTime);
+        long diffMinutes = diff.toMinutes();
+        long reminderMinutes = reminderHoursBefore * 60L;
+
+        long lowerBound = reminderMinutes - toleranceMinutes;
+        long upperBound = reminderMinutes;
+
+        // ochrana proti zĂˇpornĂ˝m dolnĂ­m mezĂ­m
+        if (lowerBound < 0) {
+            lowerBound = 0;
+        }
+
+        boolean inWindow = diffMinutes <= upperBound && diffMinutes > lowerBound;
+
+        if (inWindow) {
+            log.debug(
+                    "MatchReminderScheduler: zĂˇpas za {} minut, okno ({}, {}] minut â€“ pĹ™ipomĂ­nka ANO",
+                    diffMinutes, lowerBound, upperBound
+            );
+        } else {
+            log.trace(
+                    "MatchReminderScheduler: zĂˇpas za {} minut, mimo okno ({}, {}] minut â€“ pĹ™ipomĂ­nka NE",
+                    diffMinutes, lowerBound, upperBound
+            );
+        }
+
+        return inWindow;
+    }
 }
 
 -----
@@ -993,6 +1337,257 @@ public record MatchTimeChangeContext(
         MatchEntity match,
         LocalDateTime oldDateTime
 ) {
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\notification\NoResponseReminderScheduler.java
+-----
+package cz.phsoft.hokej.models.services.notification;
+
+import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.MatchStatus;
+import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.PlayerStatus;
+import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.models.dto.NoResponseReminderPreviewDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * PlĂˇnovaÄŤ pro pĹ™ipomĂ­nky hrĂˇÄŤĹŻm, kteĹ™Ă­ dosud nereagovali (NO_RESPONSE).
+ *
+ * OdpovÄ›dnosti:
+ * - najĂ­t zĂˇpasy, kterĂ© se konajĂ­ za N dnĂ­ (typicky 3 dny),
+ * - pro tyto zĂˇpasy najĂ­t "pozvanĂ©" hrĂˇÄŤe, kteĹ™Ă­ nemajĂ­ ĹľĂˇdnou registraci,
+ * - zavolat NotificationService.notifyPlayer(..., MATCH_REGISTRATION_NO_RESPONSE, match).
+ *
+ * TĹ™Ă­da neĹ™eĹˇĂ­:
+ * - preferenÄŤnĂ­ logiku (kanĂˇly, globĂˇlnĂ­ ĂşrovnÄ›) â€“ to Ĺ™eĹˇĂ­ NotificationPreferencesService,
+ * - dalĹˇĂ­ business logiku okolo zmÄ›ny stavu registracĂ­.
+ *
+ * Stav NO_RESPONSE se zde **dopoÄŤĂ­tĂˇvĂˇ** â€“ neexistuje jako samostatnĂˇ registrace
+ * v databĂˇzi. HrĂˇÄŤ je povaĹľovĂˇn za NO_RESPONSE, pokud:
+ * - je v mnoĹľinÄ› "pozvanĂ˝ch" hrĂˇÄŤĹŻ pro danĂ˝ zĂˇpas,
+ * - ale nemĂˇ k tomuto zĂˇpasu ĹľĂˇdnou registraci (ĹľĂˇdnĂ˝ z PlayerMatchStatus).
+ */
+@Service
+public class NoResponseReminderScheduler {
+
+    private static final Logger log = LoggerFactory.getLogger(NoResponseReminderScheduler.class);
+
+    private final MatchRepository matchRepository;
+    private final MatchRegistrationRepository matchRegistrationRepository;
+    private final PlayerRepository playerRepository;
+    private final NotificationService notificationService;
+    private final Clock clock;
+
+    /**
+     * PoÄŤet dnĂ­ pĹ™ed zĂˇpasem, kdy se mĂˇ pĹ™ipomĂ­nka NO_RESPONSE posĂ­lat.
+     * Default: 3 â€“ tedy "tĹ™i dny pĹ™ed zĂˇpasem".
+     */
+    private final int daysBeforeMatch;
+
+    public NoResponseReminderScheduler(MatchRepository matchRepository,
+                                       MatchRegistrationRepository matchRegistrationRepository,
+                                       PlayerRepository playerRepository,
+                                       NotificationService notificationService,
+                                       Clock clock,
+                                       @Value("${app.notifications.no-response.days-before:3}")
+                                       int daysBeforeMatch) {
+        this.matchRepository = matchRepository;
+        this.matchRegistrationRepository = matchRegistrationRepository;
+        this.playerRepository = playerRepository;
+        this.notificationService = notificationService;
+        this.clock = clock;
+        this.daysBeforeMatch = daysBeforeMatch;
+    }
+
+    /**
+     * HlavnĂ­ plĂˇnovacĂ­ metoda â€“ spouĹˇtÄ›nĂˇ CRONem.
+     *
+     * Typicky 1Ă— dennÄ› (napĹ™. 17:00 Europe/Prague).
+     * Pro zĂˇpasy, kterĂ© se konajĂ­ za daysBeforeMatch dnĂ­, najde hrĂˇÄŤe ve stavu NO_RESPONSE
+     * (dopoÄŤĂ­tanĂ©m â€“ hrĂˇÄŤ nemĂˇ ĹľĂˇdnou registraci k zĂˇpasu) a poĹˇle jim notifikaci
+     * MATCH_REGISTRATION_NO_RESPONSE.
+     */
+    @Scheduled(cron = "${app.notifications.no-response.cron:0 00 17 * * *}",
+            zone = "${app.notifications.no-response.zone:Europe/Prague}")
+    @Transactional
+    public void processNoResponseReminders() {
+
+        log.debug("NoResponseReminderScheduler: start processNoResponseReminders(), daysBefore={}", daysBeforeMatch);
+
+        List<Target> targets = findTargets();
+
+        if (targets.isEmpty()) {
+            log.debug("NoResponseReminderScheduler: ĹľĂˇdnĂ© NO_RESPONSE cĂ­le pro pĹ™ipomenutĂ­.");
+            return;
+        }
+
+        for (Target target : targets) {
+            PlayerEntity player = target.player();
+            MatchEntity match = target.match();
+
+            log.info(
+                    "NoResponseReminderScheduler: posĂ­lĂˇ se MATCH_REGISTRATION_NO_RESPONSE " +
+                            "playerId={} matchId={} ({} dnĂ­ pĹ™ed zĂˇpasem)",
+                    player.getId(), match.getId(), daysBeforeMatch
+            );
+
+            // NotificationService + NotificationPreferencesService rozhodnou,
+            // jakĂ© kanĂˇly se reĂˇlnÄ› pouĹľijĂ­ (email/SMS/in-app).
+            notificationService.notifyPlayer(player, NotificationType.MATCH_REGISTRATION_NO_RESPONSE, match);
+        }
+    }
+
+    /**
+     * NĂˇhled cĂ­lovĂ˝ch hrĂˇÄŤĹŻ pro NO_RESPONSE pĹ™ipomĂ­nky.
+     *
+     * Metoda nic neodesĂ­lĂˇ, pouze vrĂˇtĂ­ seznam hrĂˇÄŤĹŻ a zĂˇpasĹŻ,
+     * kteĹ™Ă­/Ă© by byli v aktuĂˇlnĂ­m okamĹľiku zasaĹľeni plĂˇnovaÄŤem.
+     *
+     * PouĹľĂ­vĂˇ se v admin endpointu /preview.
+     */
+    @Transactional(readOnly = true)
+    public List<NoResponseReminderPreviewDTO> previewNoResponseReminders() {
+
+        log.debug("NoResponseReminderScheduler: previewNoResponseReminders() â€“ generuje se nĂˇhled.");
+
+        List<Target> targets = findTargets();
+        List<NoResponseReminderPreviewDTO> result = new ArrayList<>();
+
+        for (Target t : targets) {
+            PlayerEntity player = t.player();
+            MatchEntity match = t.match();
+
+            String fullName = player.getFullName() != null
+                    ? player.getFullName()
+                    : (player.getName() + " " + player.getSurname());
+
+            String phone = player.getPhoneNumber();
+
+            result.add(new NoResponseReminderPreviewDTO(
+                    match.getId(),
+                    match.getDateTime(),
+                    player.getId(),
+                    fullName,
+                    phone
+            ));
+        }
+
+        return result;
+    }
+
+    /**
+     * Najde vĹˇechny kombinace (hrĂˇÄŤ, zĂˇpas), pro kterĂ© mĂˇ bĂ˝t
+     * v aktuĂˇlnĂ­m okamĹľiku poslĂˇna NO_RESPONSE pĹ™ipomĂ­nka.
+     *
+     * Logika NO_RESPONSE:
+     * - "PozvanĂ­" hrĂˇÄŤi jsou schvĂˇlenĂ­ hrĂˇÄŤi (PlayerStatus.APPROVED).
+     * - Z registracĂ­ k zĂˇpasu se vezmou vĹˇichni hrĂˇÄŤi, kteĹ™Ă­ jiĹľ reagovali
+     *   (jakĂ˝mkoliv PlayerMatchStatus).
+     * - NO_RESPONSE = pozvanĂ­ hrĂˇÄŤi, kteĹ™Ă­ nejsou mezi reagujĂ­cĂ­mi.
+     */
+    private List<Target> findTargets() {
+
+        LocalDate today = LocalDate.now(clock);
+        LocalDate targetDate = today.plusDays(daysBeforeMatch);
+
+        log.debug("NoResponseReminderScheduler: hledĂˇm zĂˇpasy na datum {}", targetDate);
+
+        // JednoduĹˇĹˇĂ­ varianta â€“ filtr pĹ™es findAll().
+        // Pokud bude zĂˇpasĹŻ hodnÄ›, lze doplnit do MatchRepository speciĂˇlnĂ­ dotaz
+        // findByDateTimeBetween(startOfDay, endOfDay).
+        List<MatchEntity> matchesOnTargetDate = matchRepository.findAll().stream()
+                .filter(m -> m.getDateTime() != null
+                        && m.getDateTime().toLocalDate().isEqual(targetDate))
+                .filter(m -> m.getMatchStatus() != MatchStatus.CANCELED)
+                .toList();
+
+        List<Target> result = new ArrayList<>();
+
+        if (matchesOnTargetDate.isEmpty()) {
+            log.debug("NoResponseReminderScheduler: na datum {} nejsou ĹľĂˇdnĂ© aktivnĂ­ zĂˇpasy.", targetDate);
+            return result;
+        }
+
+        // 1) UrÄŤenĂ­ "pozvanĂ˝ch" hrĂˇÄŤĹŻ.
+        // ZatĂ­m: vĹˇichni schvĂˇlenĂ­ hrĂˇÄŤi. Pokud se v budoucnu bude pouĹľĂ­vat
+        // jinĂ˝ model (napĹ™. skupiny / tĂ˝my podle zĂˇpasu), lze logiku zapouzdĹ™it
+        // do samostatnĂ© metody / sluĹľby.
+        List<PlayerEntity> invitedPlayers = playerRepository.findAll().stream()
+                .filter(p -> p.getPlayerStatus() == PlayerStatus.APPROVED)
+                .toList();
+
+        if (invitedPlayers.isEmpty()) {
+            log.debug("NoResponseReminderScheduler: ĹľĂˇdnĂ­ schvĂˇlenĂ­ hrĂˇÄŤi, nenĂ­ komu posĂ­lat NO_RESPONSE.");
+            return result;
+        }
+
+        for (MatchEntity match : matchesOnTargetDate) {
+
+            LocalDateTime dt = match.getDateTime();
+            log.debug("NoResponseReminderScheduler: zpracovĂˇvĂˇ se zĂˇpas id={} dateTime={}",
+                    match.getId(), dt);
+
+            // 2) VĹˇechny registrace k danĂ©mu zĂˇpasu â€“ jakĂ˝koliv PlayerMatchStatus.
+            // POZOR: je nutnĂ© mĂ­t v MatchRegistrationRepository metodu
+            // List<MatchRegistrationEntity> findByMatchId(Long matchId);
+            List<MatchRegistrationEntity> registrations =
+                    matchRegistrationRepository.findByMatchId(match.getId());
+
+            // MnoĹľina hrĂˇÄŤĹŻ, kteĹ™Ă­ jiĹľ reagovali (majĂ­ nÄ›jakou registraci).
+            Set<Long> respondedPlayerIds = new HashSet<>();
+            for (MatchRegistrationEntity reg : registrations) {
+                PlayerEntity p = reg.getPlayer();
+                if (p != null && p.getId() != null) {
+                    respondedPlayerIds.add(p.getId());
+                }
+            }
+
+            int beforeCount = result.size();
+
+            // 3) NO_RESPONSE = pozvanĂ­ hrĂˇÄŤi, kteĹ™Ă­ nejsou v respondedPlayerIds.
+            for (PlayerEntity invited : invitedPlayers) {
+                if (invited.getId() == null) {
+                    continue;
+                }
+                if (!respondedPlayerIds.contains(invited.getId())) {
+                    result.add(new Target(invited, match));
+                }
+            }
+
+            int added = result.size() - beforeCount;
+            log.debug("NoResponseReminderScheduler: zĂˇpas {} â€“ nalezeno {} hrĂˇÄŤĹŻ s NO_RESPONSE.",
+                    match.getId(), added);
+        }
+
+        log.debug("NoResponseReminderScheduler: findTargets() naĹˇel {} cĂ­lĹŻ.", result.size());
+        return result;
+    }
+
+    /**
+     * InternĂ­ struktura, kterĂˇ drĹľĂ­ dvojici (hrĂˇÄŤ, zĂˇpas).
+     */
+    private record Target(PlayerEntity player, MatchEntity match) {
+    }
 }
 
 -----
@@ -1231,7 +1826,7 @@ import org.springframework.util.StringUtils;
  * - nastavenĂ­ hrĂˇÄŤe (PlayerSettingsEntity),
  * - nastavenĂ­ uĹľivatele (AppUserSettingsEntity),
  * - globĂˇlnĂ­ ĂşroveĹ notifikacĂ­ uĹľivatele (GlobalNotificationLevel),
- * - kategorii a dĹŻleĹľitost notifikace (NotificationCategory, NotificationType).
+ * - konkrĂ©tnĂ­ typ notifikace (NotificationType).
  *
  * VĂ˝sledkem je NotificationDecision, kterĂ© definuje,
  * komu a jakĂ˝mi kanĂˇly bude notifikace doruÄŤena.
@@ -1293,13 +1888,13 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
         boolean includePlayersWithOwnEmail =
                 userSettings != null && userSettings.isReceiveNotificationsForPlayersWithOwnEmail();
 
-        // NastavenĂ­ hrĂˇÄŤe â€“ povolenĂ© kanĂˇly a kategorie
+        // NastavenĂ­ hrĂˇÄŤe â€“ povolenĂ© kanĂˇly
 
         boolean emailChannelEnabled = (playerSettings == null) || playerSettings.isEmailEnabled();
         boolean smsChannelEnabled = (playerSettings != null) && playerSettings.isSmsEnabled();
 
-        // Zda je kategorie notifikace povolena pro hrĂˇÄŤe.
-        boolean categoryEnabledForPlayer = isCategoryEnabledForPlayer(type, playerSettings);
+        // Zda je typ notifikace povolen pro hrĂˇÄŤe.
+        boolean typeEnabledForPlayer = isTypeEnabledForPlayer(type, playerSettings);
 
         // RozhodovĂˇnĂ­ podle kategorie notifikace
 
@@ -1323,7 +1918,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
 
                 // E-mail hrĂˇÄŤi.
                 if (emailChannelEnabled
-                        && categoryEnabledForPlayer
+                        && typeEnabledForPlayer
                         && StringUtils.hasText(playerEmail)) {
 
                     decision.setSendEmailToPlayer(true);
@@ -1332,7 +1927,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
 
                 // SMS hrĂˇÄŤi.
                 if (smsChannelEnabled
-                        && categoryEnabledForPlayer
+                        && typeEnabledForPlayer
                         && StringUtils.hasText(playerPhone)) {
 
                     decision.setSendSmsToPlayer(true);
@@ -1383,32 +1978,53 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     /**
-     * ZjistĂ­, zda je kategorie notifikace povolena pro danĂ©ho hrĂˇÄŤe.
-     *
-     * Pokud playerSettings == null, bere se vĂ˝chozĂ­ chovĂˇnĂ­:
-     * vĹˇechny kategorie jsou povoleny.
-     */
-    private boolean isCategoryEnabledForPlayer(NotificationType type,
-                                               PlayerSettingsEntity playerSettings) {
-
-        if (playerSettings == null) {
-            return true;
-        }
-
-        return switch (type.getCategory()) {
-            case REGISTRATION -> playerSettings.isRegistrationNotificationsEnabled();
-            case MATCH_INFO   -> playerSettings.isMatchInfoNotificationsEnabled();
-            case SYSTEM       -> playerSettings.isSystemNotificationsEnabled();
-        };
-    }
-
-    /**
      * ZjistĂ­, zda mĂˇ hrĂˇÄŤ vlastnĂ­ e-mail v PlayerSettings (contactEmail).
      *
      * PouĹľĂ­vĂˇ se pĹ™i rozhodovĂˇnĂ­, zda posĂ­lat kopii na e-mail uĹľivatele.
      */
     private boolean hasOwnPlayerEmail(PlayerSettingsEntity playerSettings) {
         return playerSettings != null && StringUtils.hasText(playerSettings.getContactEmail());
+    }
+
+    /**
+     * ZjistĂ­, zda je konkrĂ©tnĂ­ typ notifikace povolen pro danĂ©ho hrĂˇÄŤe.
+     *
+     * Pokud playerSettings == null:
+     * - vÄ›tĹˇina typĹŻ je povolena (zpÄ›tnĂˇ kompatibilita),
+     * - MATCH_REMINDER je vĂ˝chozĂ­m chovĂˇnĂ­m vypnutĂ˝
+     *   (odpovĂ­dĂˇ defaultu notifyReminders = false).
+     */
+    private boolean isTypeEnabledForPlayer(NotificationType type,
+                                           PlayerSettingsEntity playerSettings) {
+
+        if (playerSettings == null) {
+            return switch (type) {
+                case MATCH_REMINDER -> false; // bez explicitnĂ­ho nastavenĂ­ neposĂ­lat
+                default -> true;
+            };
+        }
+
+        return switch (type) {
+            // REGISTRATION
+            case MATCH_REGISTRATION_CREATED,
+                 MATCH_REGISTRATION_UPDATED,
+                 MATCH_REGISTRATION_CANCELED,
+                 MATCH_REGISTRATION_RESERVED,
+                 MATCH_REGISTRATION_SUBSTITUTE,
+                 MATCH_WAITING_LIST_MOVED_UP,
+                 MATCH_REGISTRATION_NO_RESPONSE,
+                 PLAYER_EXCUSED,
+                 PLAYER_NO_EXCUSED -> playerSettings.isRegistrationNotificationsEnabled();
+
+            // MATCH_INFO
+            case MATCH_REMINDER -> playerSettings.isNotifyReminders();
+            case MATCH_CANCELED -> playerSettings.isNotifyOnMatchCancel();
+            case MATCH_UNCANCELED,
+                 MATCH_TIME_CHANGED -> playerSettings.isNotifyOnMatchChange();
+
+            // SYSTEM (a ostatnĂ­, kterĂ© nejsou vĂ˝Ĺˇe vĂ˝slovnÄ› vyjmenovanĂ©)
+            default -> playerSettings.isSystemNotificationsEnabled();
+        };
     }
 }
 

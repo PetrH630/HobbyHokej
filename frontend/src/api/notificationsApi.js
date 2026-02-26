@@ -121,3 +121,40 @@ export const sendSpecialNotification = async (payload) => {
     // DEMO mód: 200 OK + DemoNotificationsDTO v body
     return response.data ?? null;
 };
+
+/**
+ * Ruční spuštění standardních připomínek MATCH_REMINDER
+ * pro hráče se statusem REGISTERED.
+ *
+ * Používá endpoint GET /api/admin/match-reminders/run.
+ *
+ * @returns {Promise<string>} Textová zpráva z backendu.
+ */
+export const runMatchReminders = async () => {
+    const response = await api.get("/admin/match-reminders/run");
+    return response.data;
+};
+
+/**
+ * Ruční spuštění připomínek pro hráče, kteří dosud nereagovali (NO_RESPONSE).
+ *
+ * Používá endpoint GET /api/admin/match-reminders/no-response/run.
+ *
+ * @returns {Promise<string>} Textová zpráva z backendu.
+ */
+export const runNoResponseReminders = async () => {
+    const response = await api.get("/admin/match-reminders/no-response/run");
+    return response.data;
+};
+
+/**
+ * Náhled připomínek pro NO_RESPONSE hráče – nic se neodesílá.
+ *
+ * Používá endpoint GET /api/admin/match-reminders/no-response/preview.
+ *
+ * @returns {Promise<Array>} Pole NoResponseReminderPreviewDTO
+ */
+export const previewNoResponseReminders = async () => {
+    const response = await api.get("/admin/match-reminders/no-response/preview");
+    return response.data;
+};

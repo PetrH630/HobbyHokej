@@ -2,6 +2,7 @@ package cz.phsoft.hokej.data.entities;
 
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
+import cz.phsoft.hokej.data.enums.MatchMode;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -105,6 +106,13 @@ public class MatchHistoryEntity {
     private MatchCancelReason cancelReason;
 
     /**
+     * Režim zápasu v okamžiku změny.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "match_mode", nullable = false)
+    private MatchMode matchMode;
+
+    /**
      * ID sezóny, do které zápas patřil v okamžiku změny.
      */
     @Column(name = "season_id", nullable = false)
@@ -164,6 +172,9 @@ public class MatchHistoryEntity {
 
     public MatchCancelReason getCancelReason() { return cancelReason; }
     public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
+
+    public MatchMode getMatchMode() { return matchMode; }
+    public void setMatchMode(MatchMode matchMode) { this.matchMode = matchMode; }
 
     public Long getSeasonId() { return seasonId; }
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }

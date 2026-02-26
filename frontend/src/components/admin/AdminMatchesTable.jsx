@@ -3,12 +3,14 @@ import { useState } from "react";
 import AdminMatchCard from "./AdminMatchCard";
 
 const FILTERS = {
+    FIRST_UPCOMING: "FIRST_UPCOMING",
     ALL: "ALL",
     FUTURE: "FUTURE",
     PAST: "PAST",
     CANCELED: "CANCELED",
     UNCANCELED: "UNCANCELED",
     UPDATED: "UPDATED",
+    
 };
 
 const parseDateTime = (dt) => {
@@ -27,7 +29,32 @@ const isPastMatch = (match) => {
 };
 
 /**
- * Vrátí true, pokud zápas odpovídá zvolenému filtru.
+ * Najde první nadcházející nezrušený zápas.
+ */
+const getFirstUpcomingMatch = (matches) => {
+    if (!Array.isArray(matches) || matches.length === 0) return null;
+
+    const now = new Date();
+
+    const futureMatches = matches
+        .map((m) => {
+            const d = m.dateTime ? parseDateTime(m.dateTime) : null;
+            return { match: m, dateObj: d };
+        })
+        .filter(
+            (x) =>
+                x.dateObj &&
+                x.dateObj.getTime() > now.getTime() &&
+                x.match.matchStatus !== "CANCELED"
+        )
+        .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+
+    return futureMatches.length > 0 ? futureMatches[0].match : null;
+};
+
+/**
+ * Vrátí true, pokud zápas odpovídá zvolenému filtru (mimo FIRST_UPCOMING,
+ * ten řešíme zvlášť).
  */
 const matchPassesFilter = (match, filter) => {
     const status = match.matchStatus;
@@ -95,28 +122,42 @@ const AdminMatchesTable = ({
         return new Date(safeB) - new Date(safeA);
     });
 
+    // první nadcházející zápas (nezrušený)
+    const firstUpcomingMatch = getFirstUpcomingMatch(sortedMatches);
+
     // počty pro badge u jednotlivých filtrů
     const counts = {
+        firstUpcoming: firstUpcomingMatch ? 1 : 0,
         all: sortedMatches.length,
-        future: sortedMatches.filter((m) => matchPassesFilter(m, FILTERS.FUTURE))
-            .length,
-        past: sortedMatches.filter((m) => matchPassesFilter(m, FILTERS.PAST))
-            .length,
-        canceled: sortedMatches.filter((m) => matchPassesFilter(m, FILTERS.CANCELED))
-            .length,
+        future: sortedMatches.filter((m) =>
+            matchPassesFilter(m, FILTERS.FUTURE)
+        ).length,
+        past: sortedMatches.filter((m) =>
+            matchPassesFilter(m, FILTERS.PAST)
+        ).length,
+        canceled: sortedMatches.filter((m) =>
+            matchPassesFilter(m, FILTERS.CANCELED)
+        ).length,
         uncanceled: sortedMatches.filter((m) =>
             matchPassesFilter(m, FILTERS.UNCANCELED)
         ).length,
-        updated: sortedMatches.filter((m) => matchPassesFilter(m, FILTERS.UPDATED))
-            .length,
+        updated: sortedMatches.filter((m) =>
+            matchPassesFilter(m, FILTERS.UPDATED)
+        ).length,
+        
     };
 
-    const filteredMatches = sortedMatches.filter((m) =>
-        matchPassesFilter(m, filter)
-    );
+    const filteredMatches =
+        filter === FILTERS.FIRST_UPCOMING
+            ? firstUpcomingMatch
+                ? [firstUpcomingMatch]
+                : []
+            : sortedMatches.filter((m) => matchPassesFilter(m, filter));
 
     const getFilterLabel = (f) => {
         switch (f) {
+            case FILTERS.FIRST_UPCOMING:
+                return "Nejbližší";
             case FILTERS.FUTURE:
                 return "Budoucí";
             case FILTERS.PAST:
@@ -127,6 +168,7 @@ const AdminMatchesTable = ({
                 return "Obnovené";
             case FILTERS.UPDATED:
                 return "Změněné";
+            
             case FILTERS.ALL:
             default:
                 return "Vše";
@@ -135,6 +177,8 @@ const AdminMatchesTable = ({
 
     const getFilterCount = (f) => {
         switch (f) {
+            case FILTERS.FIRST_UPCOMING:
+                return counts.firstUpcoming;
             case FILTERS.FUTURE:
                 return counts.future;
             case FILTERS.PAST:
@@ -145,6 +189,7 @@ const AdminMatchesTable = ({
                 return counts.uncanceled;
             case FILTERS.UPDATED:
                 return counts.updated;
+            
             case FILTERS.ALL:
             default:
                 return counts.all;
@@ -172,6 +217,14 @@ const AdminMatchesTable = ({
 
                         <ul className="dropdown-menu w-100">
                             <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() =>
+                                        setFilter(FILTERS.FIRST_UPCOMING)
+                                    }
+                                >
+                                    Nejbližší ({counts.firstUpcoming})
+                                </button>
                                 <button
                                     className="dropdown-item"
                                     onClick={() => setFilter(FILTERS.ALL)}
@@ -219,6 +272,9 @@ const AdminMatchesTable = ({
                                     Změněné ({counts.updated})
                                 </button>
                             </li>
+                            <li>
+                          
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -226,6 +282,21 @@ const AdminMatchesTable = ({
                 {/* 💻 DESKTOP – Button group */}
                 <div className="d-none d-sm-flex justify-content-center">
                     <div className="btn-group" role="group" aria-label="Filtr zápasů">
+                        <button
+                            type="button"
+                            className={
+                                filter === FILTERS.FIRST_UPCOMING
+                                    ? "btn btn-primary"
+                                    : "btn btn-outline-primary"
+                            }
+                            onClick={() => setFilter(FILTERS.FIRST_UPCOMING)}
+                        >
+                            Nejbližší{" "}
+                            <span className="badge bg-light text-dark ms-1">
+                                {counts.firstUpcoming}
+                            </span>
+                        </button>
+                        
                         <button
                             type="button"
                             className={
@@ -315,6 +386,8 @@ const AdminMatchesTable = ({
                                 {counts.updated}
                             </span>
                         </button>
+
+                   
                     </div>
                 </div>
             </div>

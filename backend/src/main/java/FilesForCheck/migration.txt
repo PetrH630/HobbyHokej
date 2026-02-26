@@ -126,7 +126,8 @@ CREATE TABLE `match_registrations` (
   `team` enum('DARK','LIGHT') DEFAULT NULL,
   `timestamp` datetime(6) NOT NULL,
   `match_id` bigint(20) NOT NULL,
-  `player_id` bigint(20) NOT NULL
+  `player_id` bigint(20) NOT NULL,
+  `reminder_already_sent` bit(1) NOT NULL DEFAULT b'0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `match_registration_history` (
@@ -142,7 +143,8 @@ CREATE TABLE `match_registration_history` (
   `original_timestamp` datetime(6) NOT NULL,
   `player_id` bigint(20) NOT NULL,
   `status` enum('REGISTERED','UNREGISTERED','EXCUSED','RESERVED','NO_RESPONSE','SUBSTITUTE','NO_EXCUSED') NOT NULL,
-  `team` enum('DARK','LIGHT') DEFAULT NULL
+  `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `reminder_already_sent` bit(1) NOT NULL DEFAULT b'0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `player_entity` (
@@ -506,13 +508,33 @@ AFTER INSERT ON match_registrations
 FOR EACH ROW
 BEGIN
     INSERT INTO match_registration_history
-    (match_registration_id, match_id, player_id, status, excuse_reason,
-     excuse_note, admin_note, team, original_timestamp, created_by,
-     action, changed_at)
+    (match_registration_id,
+     match_id,
+     player_id,
+     status,
+     excuse_reason,
+     excuse_note,
+     admin_note,
+     team,
+     original_timestamp,
+     created_by,
+     reminder_already_sent,
+     action,
+     changed_at)
     VALUES
-    (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
-     NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
-     'INSERT', NOW());
+    (NEW.id,
+     NEW.match_id,
+     NEW.player_id,
+     NEW.status,
+     NEW.excuse_reason,
+     NEW.excuse_note,
+     NEW.admin_note,
+     NEW.team,
+     NEW.timestamp,
+     NEW.created_by,
+     NEW.reminder_already_sent,
+     'INSERT',
+     NOW());
 END;
 
 -----
@@ -523,13 +545,33 @@ AFTER UPDATE ON match_registrations
 FOR EACH ROW
 BEGIN
     INSERT INTO match_registration_history
-    (match_registration_id, match_id, player_id, status, excuse_reason,
-     excuse_note, admin_note, team, original_timestamp, created_by,
-     action, changed_at)
+    (match_registration_id,
+     match_id,
+     player_id,
+     status,
+     excuse_reason,
+     excuse_note,
+     admin_note,
+     team,
+     original_timestamp,
+     created_by,
+     reminder_already_sent,
+     action,
+     changed_at)
     VALUES
-    (NEW.id, NEW.match_id, NEW.player_id, NEW.status, NEW.excuse_reason,
-     NEW.excuse_note, NEW.admin_note, NEW.team, NEW.timestamp, NEW.created_by,
-     'UPDATE', NOW());
+    (NEW.id,
+     NEW.match_id,
+     NEW.player_id,
+     NEW.status,
+     NEW.excuse_reason,
+     NEW.excuse_note,
+     NEW.admin_note,
+     NEW.team,
+     NEW.timestamp,
+     NEW.created_by,
+     NEW.reminder_already_sent,
+     'UPDATE',
+     NOW());
 END;
 
 -----
@@ -540,13 +582,33 @@ AFTER DELETE ON match_registrations
 FOR EACH ROW
 BEGIN
     INSERT INTO match_registration_history
-    (match_registration_id, match_id, player_id, status, excuse_reason,
-     excuse_note, admin_note, team, original_timestamp, created_by,
-     action, changed_at)
+    (match_registration_id,
+     match_id,
+     player_id,
+     status,
+     excuse_reason,
+     excuse_note,
+     admin_note,
+     team,
+     original_timestamp,
+     created_by,
+     reminder_already_sent,
+     action,
+     changed_at)
     VALUES
-    (OLD.id, OLD.match_id, OLD.player_id, OLD.status, OLD.excuse_reason,
-     OLD.excuse_note, OLD.admin_note, OLD.team, OLD.timestamp, OLD.created_by,
-     'DELETE', NOW());
+    (OLD.id,
+     OLD.match_id,
+     OLD.player_id,
+     OLD.status,
+     OLD.excuse_reason,
+     OLD.excuse_note,
+     OLD.admin_note,
+     OLD.team,
+     OLD.timestamp,
+     OLD.created_by,
+     OLD.reminder_already_sent,
+     'DELETE',
+     NOW());
 END;
 
 -----
@@ -646,6 +708,7 @@ CREATE TABLE `notifications` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `player_id` bigint(20) DEFAULT NULL,
+  `match_id` bigint(20) DEFAULT NULL,
   `type` varchar(100) NOT NULL,
   `message_short` varchar(255) NOT NULL,
   `message_full` varchar(2000) DEFAULT NULL,
@@ -656,12 +719,16 @@ CREATE TABLE `notifications` (
   `created_by_user_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_notification_user` (`user_id`),
+  KEY `idx_notification_match` (`match_id`),
   KEY `idx_notification_created_at` (`created_at`),
   KEY `idx_notification_read_at` (`read_at`),
+  UNIQUE KEY `uk_notification_user_match_type` (`user_id`, `match_id`, `type`),
   CONSTRAINT `FK_notification_user`
     FOREIGN KEY (`user_id`) REFERENCES `app_users` (`id`),
   CONSTRAINT `FK_notification_player`
     FOREIGN KEY (`player_id`) REFERENCES `player_entity` (`id`),
+  CONSTRAINT `FK_notification_match`
+    FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`),
   CONSTRAINT `FK_notification_created_by`
     FOREIGN KEY (`created_by_user_id`) REFERENCES `app_users` (`id`)
 ) ENGINE=InnoDB

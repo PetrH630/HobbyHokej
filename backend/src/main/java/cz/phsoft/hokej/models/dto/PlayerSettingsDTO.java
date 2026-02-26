@@ -39,6 +39,20 @@ public class PlayerSettingsDTO {
     private boolean notifyReminders;
     private Integer reminderHoursBefore;
 
+    // herní preference pro automatické přesuny
+
+    /**
+     * Určuje, zda může být hráč automaticky přesunut
+     * do druhého týmu při uvolnění místa.
+     */
+    private boolean possibleMoveToAnotherTeam;
+
+    /**
+     * Určuje, zda může být hráči automaticky změněna
+     * herní pozice mezi obranou a útokem.
+     */
+    private boolean possibleChangePlayerPosition;
+
     public String getContactEmail() {
         return contactEmail;
     }
@@ -53,9 +67,9 @@ public class PlayerSettingsDTO {
 
     public void setContactPhone(String contactPhone) {
         this.contactPhone = (contactPhone == null || contactPhone.isBlank())
-            ? null
-            : contactPhone;
-}
+                ? null
+                : contactPhone;
+    }
 
     public boolean isEmailEnabled() {
         return emailEnabled;
@@ -127,5 +141,21 @@ public class PlayerSettingsDTO {
 
     public void setReminderHoursBefore(Integer reminderHoursBefore) {
         this.reminderHoursBefore = reminderHoursBefore;
+    }
+
+    public boolean isPossibleMoveToAnotherTeam() {
+        return possibleMoveToAnotherTeam;
+    }
+
+    public void setPossibleMoveToAnotherTeam(boolean possibleMoveToAnotherTeam) {
+        this.possibleMoveToAnotherTeam = possibleMoveToAnotherTeam;
+    }
+
+    public boolean isPossibleChangePlayerPosition() {
+        return possibleChangePlayerPosition;
+    }
+
+    public void setPossibleChangePlayerPosition(boolean possibleChangePlayerPosition) {
+        this.possibleChangePlayerPosition = possibleChangePlayerPosition;
     }
 }

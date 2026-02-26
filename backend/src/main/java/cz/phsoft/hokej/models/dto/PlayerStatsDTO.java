@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 
 import java.util.Map;
 
@@ -10,12 +11,6 @@ import java.util.Map;
  *
  * Objekt slouží pro přenos agregovaných dat z service vrstvy
  * do controlleru a následně do klientské aplikace.
- * Obsahuje celkový počet zápasů v sezóně a počty zápasů
- * rozdělené podle jednotlivých registračních statusů.
- *
- * Instance tohoto objektu je vytvářena a naplňována
- * ve service vrstvě na základě vyhodnocení zápasů
- * a registrací hráče.
  */
 public class PlayerStatsDTO {
 
@@ -33,7 +28,6 @@ public class PlayerStatsDTO {
      * Celkový počet odehraných zápasů dostupných pro hráče v aktuální sezóně.
      */
     private int allMatchesInSeasonForPlayer;
-
 
     /**
      * Počet zápasů, na které byl hráč registrován.
@@ -76,105 +70,61 @@ public class PlayerStatsDTO {
     private Team homeTeam;
 
     /**
+     * Primární pozice hráče.
+     */
+    private PlayerPosition primaryPosition;
+
+    /**
+     * Sekundární pozice hráče.
+     */
+    private PlayerPosition secondaryPosition;
+
+    /**
      * Počty registrací hráče podle týmu pro status REGISTERED.
      */
     private Map<Team, Integer> registeredByTeam;
 
+    public Long getPlayerId() { return playerId; }
+    public void setPlayerId(Long playerId) { this.playerId = playerId; }
 
+    public int getAllMatchesInSeason() { return allMatchesInSeason; }
+    public void setAllMatchesInSeason(int allMatchesInSeason) { this.allMatchesInSeason = allMatchesInSeason; }
 
-    public Long getPlayerId() {
-        return playerId;
-    }
-
-    public void setPlayerId(Long playerId) {
-        this.playerId = playerId;
-    }
-
-    public int getAllMatchesInSeason() {
-        return allMatchesInSeason;
-    }
-
-    public void setAllMatchesInSeason(int allMatchesInSeason) {
-        this.allMatchesInSeason = allMatchesInSeason;
-    }
-
-    public int getAllMatchesInSeasonForPlayer() {
-        return allMatchesInSeasonForPlayer;
-    }
-
+    public int getAllMatchesInSeasonForPlayer() { return allMatchesInSeasonForPlayer; }
     public void setAllMatchesInSeasonForPlayer(int allMatchesInSeasonForPlayer) {
         this.allMatchesInSeasonForPlayer = allMatchesInSeasonForPlayer;
     }
 
-    public int getRegistered() {
-        return registered;
-    }
+    public int getRegistered() { return registered; }
+    public void setRegistered(int registered) { this.registered = registered; }
 
-    public void setRegistered(int registered) {
-        this.registered = registered;
-    }
+    public int getUnregistered() { return unregistered; }
+    public void setUnregistered(int unregistered) { this.unregistered = unregistered; }
 
-    public int getUnregistered() {
-        return unregistered;
-    }
+    public int getExcused() { return excused; }
+    public void setExcused(int excused) { this.excused = excused; }
 
-    public void setUnregistered(int unregistered) {
-        this.unregistered = unregistered;
-    }
+    public int getSubstituted() { return substituted; }
+    public void setSubstituted(int substituted) { this.substituted = substituted; }
 
-    public int getExcused() {
-        return excused;
-    }
+    public int getReserved() { return reserved; }
+    public void setReserved(int reserved) { this.reserved = reserved; }
 
-    public void setExcused(int excused) {
-        this.excused = excused;
-    }
+    public int getNoResponse() { return noResponse; }
+    public void setNoResponse(int noResponse) { this.noResponse = noResponse; }
 
-    public int getSubstituted() {
-        return substituted;
-    }
+    public int getNoExcused() { return noExcused; }
+    public void setNoExcused(int noExcused) { this.noExcused = noExcused; }
 
-    public void setSubstituted(int substituted) {
-        this.substituted = substituted;
-    }
+    public Team getHomeTeam() { return homeTeam; }
+    public void setHomeTeam(Team homeTeam) { this.homeTeam = homeTeam; }
 
-    public int getReserved() {
-        return reserved;
-    }
+    public PlayerPosition getPrimaryPosition() { return primaryPosition; }
+    public void setPrimaryPosition(PlayerPosition primaryPosition) { this.primaryPosition = primaryPosition; }
 
-    public void setReserved(int reserved) {
-        this.reserved = reserved;
-    }
+    public PlayerPosition getSecondaryPosition() { return secondaryPosition; }
+    public void setSecondaryPosition(PlayerPosition secondaryPosition) { this.secondaryPosition = secondaryPosition; }
 
-    public int getNoResponse() {
-        return noResponse;
-    }
-
-    public void setNoResponse(int noResponse) {
-        this.noResponse = noResponse;
-    }
-
-    public int getNoExcused() {
-        return noExcused;
-    }
-
-    public void setNoExcused(int noExcused) {
-        this.noExcused = noExcused;
-    }
-
-    public Team getHomeTeam() {
-        return homeTeam;
-    }
-
-    public void setHomeTeam(Team homeTeam) {
-        this.homeTeam = homeTeam;
-    }
-
-    public Map<Team, Integer> getRegisteredByTeam() {
-        return registeredByTeam;
-    }
-
-    public void setRegisteredByTeam(Map<Team, Integer> registeredByTeam) {
-        this.registeredByTeam = registeredByTeam;
-    }
+    public Map<Team, Integer> getRegisteredByTeam() { return registeredByTeam; }
+    public void setRegisteredByTeam(Map<Team, Integer> registeredByTeam) { this.registeredByTeam = registeredByTeam; }
 }

@@ -1,9 +1,9 @@
 package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.PlayerStatus;
-import cz.phsoft.hokej.data.enums.Team;
 import cz.phsoft.hokej.data.enums.PlayerType;
-import jakarta.persistence.Column;
+import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -52,7 +52,6 @@ public class PlayerDTO {
     )
     private String phoneNumber;
 
-
     /**
      * Typ hráče, například BASIC, STANDARD nebo VIP.
      *
@@ -63,6 +62,20 @@ public class PlayerDTO {
     private Team team;
 
     /**
+     * Primární pozice hráče na ledě.
+     *
+     * Pokud není nastavena, používá se výchozí hodnota ANY.
+     */
+    private PlayerPosition primaryPosition;
+
+    /**
+     * Sekundární (alternativní) pozice hráče.
+     *
+     * Může být null, pokud hráč žádnou preferovanou sekundární pozici nemá.
+     */
+    private PlayerPosition secondaryPosition;
+
+    /**
      * Stav hráče v systému, například PENDING nebo APPROVED.
      *
      * Pokud není explicitně nastaven, používá se výchozí stav PENDING.
@@ -71,12 +84,13 @@ public class PlayerDTO {
 
     /**
      * Časové razítko hráče.
-     * Používá se pro určení data a času u vytvoření, a změn uživatele.
+     * Používá se pro určení data a času u vytvoření a změn uživatele.
      */
     private LocalDateTime timestamp;
 
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
+        this.primaryPosition = PlayerPosition.ANY;
     }
 
     public PlayerDTO(Long id,
@@ -86,7 +100,9 @@ public class PlayerDTO {
                      PlayerType type,
                      String phoneNumber,
                      Team team,
-                     PlayerStatus playerStatus
+                     PlayerStatus playerStatus,
+                     PlayerPosition primaryPosition,
+                     PlayerPosition secondaryPosition
     ) {
 
         this.id = id;
@@ -97,6 +113,8 @@ public class PlayerDTO {
         this.phoneNumber = phoneNumber;
         this.team = team;
         this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
+        this.primaryPosition = primaryPosition != null ? primaryPosition : PlayerPosition.ANY;
+        this.secondaryPosition = secondaryPosition;
 
         updateFullName();
     }
@@ -123,6 +141,22 @@ public class PlayerDTO {
     public Team getTeam() { return team; }
     public void setTeam(Team team) { this.team = team; }
 
+    public PlayerPosition getPrimaryPosition() {
+        return primaryPosition;
+    }
+
+    public void setPrimaryPosition(PlayerPosition primaryPosition) {
+        this.primaryPosition = primaryPosition != null ? primaryPosition : PlayerPosition.ANY;
+    }
+
+    public PlayerPosition getSecondaryPosition() {
+        return secondaryPosition;
+    }
+
+    public void setSecondaryPosition(PlayerPosition secondaryPosition) {
+        this.secondaryPosition = secondaryPosition;
+    }
+
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = (phoneNumber == null || phoneNumber.isBlank())
@@ -134,8 +168,6 @@ public class PlayerDTO {
     public void setPlayerStatus(PlayerStatus playerStatus) {
         this.playerStatus = playerStatus != null ? playerStatus : PlayerStatus.PENDING;
     }
-
-    // interní logika
 
     /**
      * Aktualizuje odvozené pole fullName při změně jména nebo příjmení.

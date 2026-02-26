@@ -339,7 +339,8 @@ const AdminHomePage = () => {
                     </p>
                 </div>
 
-                <div className="d-flex gap-2">
+                {/* 👇 upraveno: na malém zařízení pod sebou, od md vedle sebe */}
+                <div className="d-flex flex-column flex-md-row gap-2">
                     <button
                         className="btn btn-outline-secondary"
                         type="button"

@@ -96,7 +96,9 @@ const MatchDetailPage = () => {
         }
     }, [loadAndShowDemoNotifications, navigate]);
 
-    const handleRegister = async (teamFromModal) => {
+    // src/pages/MatchDetailPage.jsx
+
+    const handleRegister = async (teamFromModal, playerPosition) => {
         if (!match) return;
 
         try {
@@ -110,10 +112,12 @@ const MatchDetailPage = () => {
             await upsertMyRegistration({
                 matchId: match.id,
                 team,
+                adminNote: null,
                 excuseReason: null,
                 excuseNote: null,
                 unregister: false,
                 substitute: false,
+                positionInMatch: playerPosition || null,
             });
 
             showNotification(
@@ -249,7 +253,7 @@ const MatchDetailPage = () => {
         setShowExcuseModal(false);
         setIsUnregisterFlow(false);
     };
-
+ 
     return (
         <>
             <MatchDetail

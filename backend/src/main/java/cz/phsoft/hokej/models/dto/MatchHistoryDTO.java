@@ -2,6 +2,7 @@ package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.MatchCancelReason;
 import cz.phsoft.hokej.data.enums.MatchStatus;
+import cz.phsoft.hokej.data.enums.MatchMode;
 
 import java.time.LocalDateTime;
 
@@ -32,6 +33,7 @@ public class MatchHistoryDTO {
     private Integer price;
     private MatchStatus matchStatus;
     private MatchCancelReason cancelReason;
+    private MatchMode matchMode;
     private Long seasonId;
     private Long createdByUserId;
     private Long lastModifiedByUserId;
@@ -130,6 +132,14 @@ public class MatchHistoryDTO {
 
     public void setCancelReason(MatchCancelReason cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public MatchMode getMatchMode() {
+        return matchMode;
+    }
+
+    public void setMatchMode(MatchMode matchMode) {
+        this.matchMode = matchMode;
     }
 
     public Long getSeasonId() {

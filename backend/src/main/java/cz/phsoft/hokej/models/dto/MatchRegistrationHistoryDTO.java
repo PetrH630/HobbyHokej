@@ -2,6 +2,7 @@ package cz.phsoft.hokej.models.dto;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
 import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import cz.phsoft.hokej.data.enums.Team;
 
 import java.time.LocalDateTime;
@@ -31,7 +32,10 @@ public class MatchRegistrationHistoryDTO {
     private PlayerMatchStatus status;
     private Team team;
 
-
+    /**
+     * Pozice hráče v tomto konkrétním zápase v okamžiku změny.
+     */
+    private PlayerPosition positionInMatch;
 
     public Long getId() { return id; }
 
@@ -84,4 +88,12 @@ public class MatchRegistrationHistoryDTO {
     public Team getTeam() { return team; }
 
     public void setTeam(Team team) { this.team = team; }
+
+    public PlayerPosition getPositionInMatch() {
+        return positionInMatch;
+    }
+
+    public void setPositionInMatch(PlayerPosition positionInMatch) {
+        this.positionInMatch = positionInMatch;
+    }
 }

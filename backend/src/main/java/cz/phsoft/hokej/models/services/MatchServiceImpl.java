@@ -238,6 +238,7 @@ public class MatchServiceImpl implements MatchService {
         LocalDateTime oldDateTime = entity.getDateTime();
         String oldLocation = entity.getLocation();
         Integer oldPrice = entity.getPrice();
+        MatchMode oldMatchMode = entity.getMatchMode();   // sledujeme změnu režimu
 
         matchMapper.updateEntity(dto, entity);
 
@@ -265,7 +266,10 @@ public class MatchServiceImpl implements MatchService {
         boolean priceChanged =
                 !java.util.Objects.equals(entity.getPrice(), oldPrice);
 
-        if (maxPlayersChanged || dateTimeChanged || locationChanged || priceChanged) {
+        boolean matchModeChanged =
+                !java.util.Objects.equals(entity.getMatchMode(), oldMatchMode);
+
+        if (maxPlayersChanged || dateTimeChanged || locationChanged || priceChanged || matchModeChanged) {
             entity.setMatchStatus(MatchStatus.UPDATED);
         }
 
@@ -434,12 +438,14 @@ public class MatchServiceImpl implements MatchService {
 
         dto.setMatchStatus(match.getMatchStatus());
         dto.setCancelReason(match.getCancelReason());
+        dto.setMatchMode(match.getMatchMode());   // doplnění režimu zápasu do detailu
 
         if (match.getSeason() != null && match.getSeason().getId() != null) {
             Long seasonId = match.getSeason().getId();
             Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);
             Integer number = matchNumberMap.get(match.getId());
             dto.setMatchNumber(number);
+            dto.setSeasonId(seasonId);           // doplnění ID sezóny do detailu
         }
 
         return dto;
@@ -624,6 +630,7 @@ public class MatchServiceImpl implements MatchService {
         dto.setNoResponsePlayers(isAdminOrManager ? noResponsePlayers : null);
         dto.setRegisteredDarkPlayers(registeredDarkPlayers);
         dto.setRegisteredLightPlayers(registeredLightPlayers);
+        dto.setRegistrations(registrations);
 
         return dto;
     }
@@ -935,9 +942,11 @@ public class MatchServiceImpl implements MatchService {
                 : match.getPrice();
         dto.setPricePerRegisteredPlayer(pricePerPlayer);
 
-        // doplnění stavu zápasu a sezóny pro přehled
+        // doplnění stavu zápasu, režimu a sezóny pro přehled
         dto.setMatchStatus(match.getMatchStatus());
         dto.setCancelReason(match.getCancelReason());
+        dto.setMatchMode(match.getMatchMode());
+
         if (match.getSeason() != null && match.getSeason().getId() != null) {
             dto.setSeasonId(match.getSeason().getId());
         }

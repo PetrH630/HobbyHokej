@@ -576,7 +576,7 @@ const Navbar = () => {
                             className="btn btn-outline-secondary w-100 mb-3"
                             onClick={toggleMobileMode}
                         >
-                            {mobileShowAdmin ? "Správce" : "Hráč"}
+                            {mobileShowAdmin ? "na Hráče" : "na Správce"}
                         </button>
                     </RoleGuard>
 

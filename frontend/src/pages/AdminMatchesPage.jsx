@@ -280,7 +280,7 @@ const AdminMatchesPage = () => {
 
                 </div>
 
-
+ 
             <p className="text-muted mb-3">
                 Zde může administrátor a manažer spravovat zápasy v systému –
                 vytvářet je, upravovat, rušit, obnovovat a mazat. Zápasy se

@@ -13,6 +13,7 @@ DemoNotificationController.java
 MatchController.java
 MatchRegistrationController.java
 MatchRegistrationHistoryController.java
+MatchReminderAdminController.java
 MeController.java
 NotificationController.java
 package-info.java
@@ -1460,6 +1461,91 @@ public class MatchRegistrationHistoryController {
                 historyService.getHistoryForPlayerAndMatch(matchId, playerId);
 
         return ResponseEntity.ok(history);
+    }
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\controllers\MatchReminderAdminController.java
+-----
+package cz.phsoft.hokej.controllers;
+
+import cz.phsoft.hokej.models.dto.NoResponseReminderPreviewDTO;
+import cz.phsoft.hokej.models.services.notification.MatchReminderScheduler;
+import cz.phsoft.hokej.models.services.notification.NoResponseReminderScheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+/**
+ * Admin controller pro ruÄŤnĂ­ spuĹˇtÄ›nĂ­ plĂˇnovaÄŤĹŻ pĹ™ipomĂ­nek zĂˇpasĹŻ.
+ *
+ * UmoĹľĹuje:
+ * - ruÄŤnÄ› spustit MatchReminderScheduler (MATCH_REMINDER pro REGISTERED hrĂˇÄŤe),
+ * - ruÄŤnÄ› spustit NoResponseReminderScheduler (MATCH_REGISTRATION_NO_RESPONSE pro NO_RESPONSE hrĂˇÄŤe),
+ * - zobrazit nĂˇhled, komu by se NO_RESPONSE pĹ™ipomĂ­nky poslaly, bez reĂˇlnĂ©ho odeslĂˇnĂ­.
+ *
+ * Endpoints jsou urÄŤeny pro adminy / manaĹľery k testovĂˇnĂ­ a ladÄ›nĂ­.
+ */
+@RestController
+@RequestMapping("/api/admin/match-reminders")
+@PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+public class MatchReminderAdminController {
+
+    private static final Logger log = LoggerFactory.getLogger(MatchReminderAdminController.class);
+
+    private final MatchReminderScheduler matchReminderScheduler;
+    private final NoResponseReminderScheduler noResponseReminderScheduler;
+
+    public MatchReminderAdminController(MatchReminderScheduler matchReminderScheduler,
+                                        NoResponseReminderScheduler noResponseReminderScheduler) {
+        this.matchReminderScheduler = matchReminderScheduler;
+        this.noResponseReminderScheduler = noResponseReminderScheduler;
+    }
+
+    /**
+     * RuÄŤnĂ­ spuĹˇtÄ›nĂ­ standardnĂ­ch pĹ™ipomĂ­nek MATCH_REMINDER
+     * pro hrĂˇÄŤe se statusem REGISTERED.
+     *
+     * GET /api/admin/match-reminders/run
+     */
+    @GetMapping("/run")
+    public ResponseEntity<String> runMatchReminders() {
+        log.info("ManuĂˇlnĂ­ spuĹˇtÄ›nĂ­ MatchReminderScheduler pĹ™es GET /api/admin/match-reminders/run");
+        matchReminderScheduler.processMatchReminders();
+        return ResponseEntity.ok("MatchReminderScheduler spuĹˇtÄ›n.");
+    }
+
+    /**
+     * RuÄŤnĂ­ spuĹˇtÄ›nĂ­ pĹ™ipomĂ­nek pro hrĂˇÄŤe, kteĹ™Ă­ dosud nereagovali (NO_RESPONSE).
+     *
+     * GET /api/admin/match-reminders/no-response/run
+     */
+    @GetMapping("/no-response/run")
+    public ResponseEntity<String> runNoResponseReminders() {
+        log.info("ManuĂˇlnĂ­ spuĹˇtÄ›nĂ­ NoResponseReminderScheduler pĹ™es GET /api/admin/match-reminders/no-response/run");
+        noResponseReminderScheduler.processNoResponseReminders();
+        return ResponseEntity.ok("NoResponseReminderScheduler spuĹˇtÄ›n.");
+    }
+
+    /**
+     * NĂˇhled pĹ™ipomĂ­nek pro NO_RESPONSE hrĂˇÄŤe â€“ nic se neodesĂ­lĂˇ.
+     *
+     * GET /api/admin/match-reminders/no-response/preview
+     *
+     * VracĂ­ seznam hrĂˇÄŤĹŻ a zĂˇpasĹŻ, kterĂ˝m by se v aktuĂˇlnĂ­m okamĹľiku
+     * poslala NO_RESPONSE pĹ™ipomĂ­nka.
+     */
+    @GetMapping("/no-response/preview")
+    public ResponseEntity<List<NoResponseReminderPreviewDTO>> previewNoResponseReminders() {
+        log.info("ManuĂˇlnĂ­ nĂˇhled NoResponseReminderScheduler pĹ™es GET /api/admin/match-reminders/no-response/preview");
+        List<NoResponseReminderPreviewDTO> preview = noResponseReminderScheduler.previewNoResponseReminders();
+        return ResponseEntity.ok(preview);
     }
 }
 

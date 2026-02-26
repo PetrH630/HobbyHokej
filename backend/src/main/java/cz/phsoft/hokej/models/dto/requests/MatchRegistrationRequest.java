@@ -1,6 +1,7 @@
 package cz.phsoft.hokej.models.dto.requests;
 
 import cz.phsoft.hokej.data.enums.ExcuseReason;
+import cz.phsoft.hokej.data.enums.PlayerPosition;
 import cz.phsoft.hokej.data.enums.Team;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -24,25 +25,10 @@ import jakarta.validation.constraints.Positive;
  */
 public class MatchRegistrationRequest {
 
-    /**
-     * ID zápasu, ke kterému se registrace vztahuje.
-     *
-     * Hodnota je povinná a musí být kladná.
-     * Slouží k jednoznačnému určení zápasu,
-     * u kterého se registrace mění.
-     */
     @NotNull
     @Positive
     private Long matchId;
 
-    /**
-     * ID hráče, kterého se operace týká.
-     *
-     * Typické použití:
-     * - u endpointů typu "/me" může být null a hráč
-     *   se určuje podle přihlášeného uživatele,
-     * - u administrátorských operací se hodnota vyplňuje explicitně.
-     */
     private Long playerId;
 
     /**
@@ -93,7 +79,13 @@ public class MatchRegistrationRequest {
      */
     private boolean substitute;
 
-
+    /**
+     * Pozice hráče v tomto konkrétním zápase.
+     *
+     * Umožňuje specifikovat, na jaké pozici má hráč v zápase nastoupit,
+     * pokud to logika zápasu a rozdělení týmů podporuje.
+     */
+    private PlayerPosition positionInMatch;
 
     public Long getPlayerId() {
         return playerId;
@@ -129,5 +121,13 @@ public class MatchRegistrationRequest {
 
     public void setSubstitute(boolean substitute) {
         this.substitute = substitute;
+    }
+
+    public PlayerPosition getPositionInMatch() {
+        return positionInMatch;
+    }
+
+    public void setPositionInMatch(PlayerPosition positionInMatch) {
+        this.positionInMatch = positionInMatch;
     }
 }
