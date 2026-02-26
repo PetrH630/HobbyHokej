@@ -7,7 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Otestovány notifikace - před zápasem pro registrované a no_response - funkční">
+    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Přidáno do playerSettings bollean pro přesun do druhého týmu, a přesun na jakoukoliv pozici v poli. V MatchRegistrationServiceImpl uprave upsert pro automatický přechod z RESERVED na REGISTERED s vyhodnocováním podmínek pro tým a post hráče">
       <change afterPath="$PROJECT_DIR$/backend/docker-compose.yml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-19.log" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-20.log" afterDir="false" />
@@ -73,22 +73,36 @@
       <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_10__trg_player_insert.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_10__trg_player_insert.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_11__trg_player_update.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_11__trg_player_update.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_12__trg_player_delete.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_12__trg_player_delete.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/matchRegistrationApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/matchRegistrationApi.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/api/notificationsApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/notificationsApi.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchCard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchInfo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchModal.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchesTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchesTable.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerEditModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerEditModal.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRegistrationHistoryModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRegistrationHistoryModal.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchDetail.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchInfo.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/PlayerCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/settings/PlayerProfileForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/settings/PlayerProfileForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/settings/PlayerSettings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/settings/PlayerSettings.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useMatchDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useMatchDetail.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useNotifications.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useNotifications.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminHomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminHomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminMatchesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminMatchesPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/MatchDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MatchDetailPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/MatchesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MatchesPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/PublicLandingPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/PublicLandingPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/SettingsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SettingsPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -542,7 +556,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Doplněny komentáře u Exceptions" />
     <MESSAGE value="Doplněny komentáře u DTO" />
     <MESSAGE value="Doplněny komentáře u mapper" />
     <MESSAGE value="Vytvořen DemoModeGuard a DemoModePolicy pro kontrolu DemoMod a userId &lt;=10 - nepůjde změnit heslo ani deaktivovat uživatel. jdu testovat" />
@@ -567,6 +580,7 @@
     <MESSAGE value="Doplněn email a telefon do notifikaci pro admin a upravena metoda u zápasu upcomingOverviev aby vracela matchStatus" />
     <MESSAGE value="Úprava notifikací - scheduler - pro Registrované dle settings a pro noresponse (třeba doimplementovat)" />
     <MESSAGE value="Otestovány notifikace - před zápasem pro registrované a no_response - funkční" />
-    <option name="LAST_COMMIT_MESSAGE" value="Otestovány notifikace - před zápasem pro registrované a no_response - funkční" />
+    <MESSAGE value="Přidáno do playerSettings bollean pro přesun do druhého týmu, a přesun na jakoukoliv pozici v poli. V MatchRegistrationServiceImpl uprave upsert pro automatický přechod z RESERVED na REGISTERED s vyhodnocováním podmínek pro tým a post hráče" />
+    <option name="LAST_COMMIT_MESSAGE" value="Přidáno do playerSettings bollean pro přesun do druhého týmu, a přesun na jakoukoliv pozici v poli. V MatchRegistrationServiceImpl uprave upsert pro automatický přechod z RESERVED na REGISTERED s vyhodnocováním podmínek pro tým a post hráče" />
   </component>
 </project>
