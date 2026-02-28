@@ -1,0 +1,19 @@
+package cz.phsoft.hokej.player.exceptions;
+
+import cz.phsoft.hokej.shared.exceptions.BusinessException;
+import org.springframework.http.HttpStatus;
+
+/**
+ * Výjimka signalizující neplatný nebo nepovolený stav hráče.
+ *
+ * Používá se při změně nebo vyhodnocování stavu hráče, pokud
+ * požadovaná operace není v daném stavu povolena.
+ *
+ * Typicky mapováno na HTTP 400 (Bad Request).
+ */
+public class InvalidPlayerStatusException extends BusinessException {
+
+    public InvalidPlayerStatusException(String message) {
+        super(message, HttpStatus.BAD_REQUEST);
+    }
+}

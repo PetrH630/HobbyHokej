@@ -1,7 +1,6 @@
 package cz.phsoft.hokej.security;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;

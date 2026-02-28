@@ -1,7 +1,7 @@
 package cz.phsoft.hokej.config;
 
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;

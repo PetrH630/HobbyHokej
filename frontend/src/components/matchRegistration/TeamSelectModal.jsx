@@ -41,33 +41,21 @@ const TeamSelectModal = ({
     const isTotalFull =
         totalMaxPlayers > 0 && totalInGamePlayers >= totalMaxPlayers;
 
-    // logika povolení/zakázání karet:
-    // - standardně vypneme kartu, když je tým plný
-    // - pokud je plný i druhý tým a současně je dosažen maxPlayers,
-    //   tak se karty opět povolí (výběr týmu pro náhradníka)
-    let isLightDisabled = false;
-    let isDarkDisabled = false;
-
-    if (!isTotalFull) {
-        isLightDisabled = isLightFull;
-        isDarkDisabled = isDarkFull;
-    } else {
-        isLightDisabled = false;
-        isDarkDisabled = false;
-    }
-
     const isLightDefault = defaultTeam === "LIGHT";
     const isDarkDefault = defaultTeam === "DARK";
 
-    // 🔹 NOVĚ: zjistíme, zda je v týmu volno už jen pro brankáře
+    // NOVĚ: zjistíme, zda je v týmu volno už jen pro brankáře
     const lightAvailability = computeTeamPositionAvailability(match, "LIGHT");
     const darkAvailability = computeTeamPositionAvailability(match, "DARK");
 
     const onlyGoalieLeftLight = lightAvailability.onlyGoalieLeft;
     const onlyGoalieLeftDark = darkAvailability.onlyGoalieLeft;
 
-    const handleSelect = async (team, disabled) => {
-        if (disabled) return;
+    // helper: kdy ukázat info o registraci jako náhradník pro daný tým
+    const showReserveNoteDark = isDarkFull || isTotalFull;
+    const showReserveNoteLight = isLightFull || isTotalFull;
+
+    const handleSelect = async (team) => {
         if (!onSelectTeam) return;
 
         if (onBeforeSelectTeam) {
@@ -95,7 +83,7 @@ const TeamSelectModal = ({
                     <div className="modal-body">
                         <p className="mb-3 text-center">
                             Po kliknutí na tým si ještě vybereš{" "}
-                            <strong>pozici pro tento zápas</strong>. 
+                            <strong>pozici pro tento zápas</strong>.
                         </p>
 
                         <div className="team-cards-row">
@@ -103,12 +91,10 @@ const TeamSelectModal = ({
                             <div
                                 className={
                                     "card team-card text-center " +
-                                    (isDarkDefault ? "border-primary " : "") +
-                                    (isDarkDisabled ? " team-card-disabled" : "")
+                                    (isDarkDefault ? "border-primary " : "")
                                 }
-                                style={{ cursor: isDarkDisabled ? "not-allowed" : "pointer" }}
-                                onClick={() => handleSelect("DARK", isDarkDisabled)}
-                                aria-disabled={isDarkDisabled}
+                                style={{ cursor: "pointer" }}
+                                onClick={() => handleSelect("DARK")}
                             >
                                 <div className="card-body">
                                     <div className="team-icon-wrapper">
@@ -123,15 +109,21 @@ const TeamSelectModal = ({
                                     </p>
                                     <small className="text-muted d-block mb-1">
                                         Tmavé dresy
-                                        {isDarkDisabled && !isTotalFull
-                                            ? " • kapacita plná"
-                                            : ""}
                                     </small>
 
-                                    {onlyGoalieLeftDark && (
+                                    {showReserveNoteDark && (
                                         <small className="text-danger d-block">
+                                            Kapacita týmu je plná. K tomuto týmu se
+                                            budeš registrovat jako{" "}
+                                            <strong>náhradník</strong>.
+                                        </small>
+                                    )}
+
+                                    {onlyGoalieLeftDark && (
+                                        <small className="text-danger d-block mt-1">
                                             V tomto týmu už je volné místo jen pro{" "}
-                                            <strong>brankáře</strong>. Pokud nechceš chytat můžeš se v dalším kroku přihlásit jako{" "}
+                                            <strong>brankáře</strong>. Pokud nechceš chytat,
+                                            můžeš se v dalším kroku přihlásit jako{" "}
                                             <strong>náhradník (obránce/útočník)</strong>.
                                         </small>
                                     )}
@@ -142,12 +134,10 @@ const TeamSelectModal = ({
                             <div
                                 className={
                                     "card team-card text-center " +
-                                    (isLightDefault ? "border-primary " : "") +
-                                    (isLightDisabled ? " team-card-disabled" : "")
+                                    (isLightDefault ? "border-primary " : "")
                                 }
-                                style={{ cursor: isLightDisabled ? "not-allowed" : "pointer" }}
-                                onClick={() => handleSelect("LIGHT", isLightDisabled)}
-                                aria-disabled={isLightDisabled}
+                                style={{ cursor: "pointer" }}
+                                onClick={() => handleSelect("LIGHT")}
                             >
                                 <div className="card-body">
                                     <div className="team-icon-wrapper">
@@ -162,15 +152,21 @@ const TeamSelectModal = ({
                                     </p>
                                     <small className="text-muted d-block mb-1">
                                         Světlé dresy
-                                        {isLightDisabled && !isTotalFull
-                                            ? " • kapacita plná"
-                                            : ""}
                                     </small>
- 
-                                    {onlyGoalieLeftLight && (
+
+                                    {showReserveNoteLight && (
                                         <small className="text-danger d-block">
+                                            Kapacita týmu je plná. K tomuto týmu se
+                                            budeš registrovat jako{" "}
+                                            <strong>náhradník</strong>.
+                                        </small>
+                                    )}
+
+                                    {onlyGoalieLeftLight && (
+                                        <small className="text-danger d-block mt-1">
                                             V tomto týmu už je volné místo jen pro{" "}
-                                            <strong>brankáře</strong>. Pokud nechceš chytat můžeš se v dalším kroku přihlásit jako{" "}
+                                            <strong>brankáře</strong>. Pokud nechceš chytat,
+                                            můžeš se v dalším kroku přihlásit jako{" "}
                                             <strong>náhradník (obránce/útočník)</strong>.
                                         </small>
                                     )}

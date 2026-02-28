@@ -1,7 +1,8 @@
 package cz.phsoft.hokej.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.phsoft.hokej.models.services.AppUserService;
+import cz.phsoft.hokej.user.services.AppUserService;
+import cz.phsoft.hokej.user.exceptions.AccountNotActivatedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -188,7 +189,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         Map<String, Object> result = new HashMap<>();
         result.put("status", "error");
 
-        if (failed.getCause() instanceof cz.phsoft.hokej.exceptions.AccountNotActivatedException) {
+        if (failed.getCause() instanceof AccountNotActivatedException) {
             result.put("message", failed.getCause().getMessage());
         } else if (failed instanceof BadCredentialsException) {
             result.put("message", "BE - Neplatné přihlašovací údaje");

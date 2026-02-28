@@ -13,16 +13,16 @@ package-info.java
 -----
 package cz.phsoft.hokej.models.services.email;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
-import cz.phsoft.hokej.models.services.notification.ForgottenPasswordResetContext;
-import cz.phsoft.hokej.models.services.notification.MatchTimeChangeContext;
-import cz.phsoft.hokej.models.services.notification.UserActivationContext;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.notifications.services.ForgottenPasswordResetContext;
+import cz.phsoft.hokej.notifications.services.MatchTimeChangeContext;
+import cz.phsoft.hokej.notifications.services.UserActivationContext;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;

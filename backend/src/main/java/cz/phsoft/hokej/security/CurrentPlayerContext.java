@@ -1,6 +1,6 @@
 package cz.phsoft.hokej.security;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
 
 /**
  * Thread-local kontext pro uchování aktuálně zvoleného hráče.

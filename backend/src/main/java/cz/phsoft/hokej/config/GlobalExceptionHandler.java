@@ -1,7 +1,7 @@
 package cz.phsoft.hokej.config;
 
-import cz.phsoft.hokej.exceptions.ApiError;
-import cz.phsoft.hokej.exceptions.BusinessException;
+import cz.phsoft.hokej.shared.exceptions.ApiError;
+import cz.phsoft.hokej.shared.exceptions.BusinessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

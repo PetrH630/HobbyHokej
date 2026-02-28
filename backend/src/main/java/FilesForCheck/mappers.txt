@@ -23,8 +23,8 @@ SeasonMapperImpl.java
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.AppUserHistoryEntity;
-import cz.phsoft.hokej.models.dto.AppUserHistoryDTO;
+import cz.phsoft.hokej.user.entities.AppUserHistoryEntity;
+import cz.phsoft.hokej.user.dto.AppUserHistoryDTO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:13+0100",
+    date = "2026-02-26T12:28:04+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -80,11 +80,11 @@ public class AppUserHistoryMapperImpl implements AppUserHistoryMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.models.dto.AppUserDTO;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.RegisterUserDTO;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.user.dto.AppUserDTO;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
+import cz.phsoft.hokej.user.dto.RegisterUserDTO;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -94,7 +94,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:13+0100",
+    date = "2026-02-26T12:28:05+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -150,6 +150,8 @@ public class AppUserMapperImpl implements AppUserMapper {
         playerDTO.setNickname( entity.getNickname() );
         playerDTO.setType( entity.getType() );
         playerDTO.setTeam( entity.getTeam() );
+        playerDTO.setPrimaryPosition( entity.getPrimaryPosition() );
+        playerDTO.setSecondaryPosition( entity.getSecondaryPosition() );
         playerDTO.setPhoneNumber( entity.getPhoneNumber() );
         playerDTO.setPlayerStatus( entity.getPlayerStatus() );
         playerDTO.setTimestamp( entity.getTimestamp() );
@@ -202,11 +204,11 @@ public class AppUserMapperImpl implements AppUserMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
-import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
-import cz.phsoft.hokej.data.enums.LandingPage;
-import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
-import cz.phsoft.hokej.models.dto.AppUserSettingsDTO;
+import cz.phsoft.hokej.user.entities.AppUserSettingsEntity;
+import cz.phsoft.hokej.notifications.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.user.enums.LandingPage;
+import cz.phsoft.hokej.user.enums.PlayerSelectionMode;
+import cz.phsoft.hokej.user.dto.AppUserSettingsDTO;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import javax.annotation.processing.Generated;
@@ -214,7 +216,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:14+0100",
+    date = "2026-02-26T12:28:04+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -290,8 +292,8 @@ public class AppUserSettingsMapperImpl implements AppUserSettingsMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.MatchHistoryEntity;
-import cz.phsoft.hokej.models.dto.MatchHistoryDTO;
+import cz.phsoft.hokej.match.entities.MatchHistoryEntity;
+import cz.phsoft.hokej.match.dto.MatchHistoryDTO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -299,7 +301,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:13+0100",
+    date = "2026-02-26T12:28:04+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -325,6 +327,7 @@ public class MatchHistoryMapperImpl implements MatchHistoryMapper {
         matchHistoryDTO.setPrice( entity.getPrice() );
         matchHistoryDTO.setMatchStatus( entity.getMatchStatus() );
         matchHistoryDTO.setCancelReason( entity.getCancelReason() );
+        matchHistoryDTO.setMatchMode( entity.getMatchMode() );
         matchHistoryDTO.setSeasonId( entity.getSeasonId() );
         matchHistoryDTO.setCreatedByUserId( entity.getCreatedByUserId() );
         matchHistoryDTO.setLastModifiedByUserId( entity.getLastModifiedByUserId() );
@@ -352,15 +355,17 @@ public class MatchHistoryMapperImpl implements MatchHistoryMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.SeasonEntity;
-import cz.phsoft.hokej.models.dto.MatchDTO;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.season.entities.SeasonEntity;
+import cz.phsoft.hokej.match.dto.MatchDTO;
 import javax.annotation.processing.Generated;
+
+import cz.phsoft.hokej.match.mappers.MatchMapper;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:14+0100",
+    date = "2026-02-26T12:28:04+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -381,6 +386,7 @@ public class MatchMapperImpl implements MatchMapper {
         matchDTO.setDescription( entity.getDescription() );
         matchDTO.setMaxPlayers( entity.getMaxPlayers() );
         matchDTO.setPrice( entity.getPrice() );
+        matchDTO.setMatchMode( entity.getMatchMode() );
         matchDTO.setMatchStatus( entity.getMatchStatus() );
         matchDTO.setCancelReason( entity.getCancelReason() );
 
@@ -402,6 +408,7 @@ public class MatchMapperImpl implements MatchMapper {
         matchEntity.setPrice( dto.getPrice() );
         matchEntity.setMatchStatus( dto.getMatchStatus() );
         matchEntity.setCancelReason( dto.getCancelReason() );
+        matchEntity.setMatchMode( dto.getMatchMode() );
 
         return matchEntity;
     }
@@ -419,6 +426,7 @@ public class MatchMapperImpl implements MatchMapper {
         entity.setPrice( dto.getPrice() );
         entity.setMatchStatus( dto.getMatchStatus() );
         entity.setCancelReason( dto.getCancelReason() );
+        entity.setMatchMode( dto.getMatchMode() );
     }
 
     private Long entitySeasonId(MatchEntity matchEntity) {
@@ -442,8 +450,9 @@ public class MatchMapperImpl implements MatchMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.MatchRegistrationHistoryEntity;
-import cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationHistoryEntity;
+import cz.phsoft.hokej.registration.mappers.MatchRegistrationHistoryMapper;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationHistoryDTO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -451,7 +460,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:12+0100",
+    date = "2026-02-26T12:28:05+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -478,6 +487,7 @@ public class MatchRegistrationHistoryMapperImpl implements MatchRegistrationHist
         matchRegistrationHistoryDTO.setPlayerId( entity.getPlayerId() );
         matchRegistrationHistoryDTO.setStatus( entity.getStatus() );
         matchRegistrationHistoryDTO.setTeam( entity.getTeam() );
+        matchRegistrationHistoryDTO.setPositionInMatch( entity.getPositionInMatch() );
 
         return matchRegistrationHistoryDTO;
     }
@@ -502,13 +512,13 @@ public class MatchRegistrationHistoryMapperImpl implements MatchRegistrationHist
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.enums.Team;
-import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.registration.enums.ExcuseReason;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -516,7 +526,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:14+0100",
+    date = "2026-02-26T12:28:03+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -561,6 +571,7 @@ public class MatchRegistrationMapperImpl implements MatchRegistrationMapper {
         matchRegistrationDTO.setAdminNote( entity.getAdminNote() );
         matchRegistrationDTO.setTeam( entity.getTeam() );
         matchRegistrationDTO.setCreatedBy( entity.getCreatedBy() );
+        matchRegistrationDTO.setPositionInMatch( entity.getPositionInMatch() );
 
         return matchRegistrationDTO;
     }
@@ -615,10 +626,10 @@ public class MatchRegistrationMapperImpl implements MatchRegistrationMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.NotificationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.models.dto.NotificationDTO;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.notifications.entities.NotificationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.notifications.dto.NotificationDTO;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -626,7 +637,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:14+0100",
+    date = "2026-02-26T12:28:04+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -685,6 +696,8 @@ public class NotificationMapperImpl implements NotificationMapper {
         playerDTO.setNickname( playerEntity.getNickname() );
         playerDTO.setType( playerEntity.getType() );
         playerDTO.setTeam( playerEntity.getTeam() );
+        playerDTO.setPrimaryPosition( playerEntity.getPrimaryPosition() );
+        playerDTO.setSecondaryPosition( playerEntity.getSecondaryPosition() );
         playerDTO.setPhoneNumber( playerEntity.getPhoneNumber() );
         playerDTO.setPlayerStatus( playerEntity.getPlayerStatus() );
         playerDTO.setTimestamp( playerEntity.getTimestamp() );
@@ -698,8 +711,8 @@ public class NotificationMapperImpl implements NotificationMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.PlayerHistoryEntity;
-import cz.phsoft.hokej.models.dto.PlayerHistoryDTO;
+import cz.phsoft.hokej.player.entities.PlayerHistoryEntity;
+import cz.phsoft.hokej.player.dto.PlayerHistoryDTO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -707,7 +720,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:13+0100",
+    date = "2026-02-26T12:28:05+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -733,6 +746,8 @@ public class PlayerHistoryMapperImpl implements PlayerHistoryMapper {
         playerHistoryDTO.setPhoneNumber( entity.getPhoneNumber() );
         playerHistoryDTO.setType( entity.getType() );
         playerHistoryDTO.setTeam( entity.getTeam() );
+        playerHistoryDTO.setPrimaryPosition( entity.getPrimaryPosition() );
+        playerHistoryDTO.setSecondaryPosition( entity.getSecondaryPosition() );
         playerHistoryDTO.setPlayerStatus( entity.getPlayerStatus() );
         playerHistoryDTO.setOriginalTimestamp( entity.getOriginalTimestamp() );
 
@@ -759,15 +774,15 @@ public class PlayerHistoryMapperImpl implements PlayerHistoryMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
-import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerInactivityPeriodEntity;
+import cz.phsoft.hokej.player.dto.PlayerInactivityPeriodDTO;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:12+0100",
+    date = "2026-02-26T12:28:04+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -838,9 +853,9 @@ public class PlayerInactivityPeriodMapperImpl implements PlayerInactivityPeriodM
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.PlayerStatus;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.enums.PlayerStatus;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -848,7 +863,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:14+0100",
+    date = "2026-02-26T12:28:04+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -868,6 +883,8 @@ public class PlayerMapperImpl implements PlayerMapper {
         playerDTO.setNickname( entity.getNickname() );
         playerDTO.setType( entity.getType() );
         playerDTO.setTeam( entity.getTeam() );
+        playerDTO.setPrimaryPosition( entity.getPrimaryPosition() );
+        playerDTO.setSecondaryPosition( entity.getSecondaryPosition() );
         playerDTO.setPhoneNumber( entity.getPhoneNumber() );
         playerDTO.setPlayerStatus( entity.getPlayerStatus() );
         playerDTO.setTimestamp( entity.getTimestamp() );
@@ -896,6 +913,8 @@ public class PlayerMapperImpl implements PlayerMapper {
         playerEntity.setType( dto.getType() );
         playerEntity.setPhoneNumber( dto.getPhoneNumber() );
         playerEntity.setTeam( dto.getTeam() );
+        playerEntity.setPrimaryPosition( dto.getPrimaryPosition() );
+        playerEntity.setSecondaryPosition( dto.getSecondaryPosition() );
 
         return playerEntity;
     }
@@ -911,6 +930,8 @@ public class PlayerMapperImpl implements PlayerMapper {
         target.setNickname( source.getNickname() );
         target.setType( source.getType() );
         target.setTeam( source.getTeam() );
+        target.setPrimaryPosition( source.getPrimaryPosition() );
+        target.setSecondaryPosition( source.getSecondaryPosition() );
         target.setPhoneNumber( source.getPhoneNumber() );
         target.setPlayerStatus( source.getPlayerStatus() );
     }
@@ -928,6 +949,8 @@ public class PlayerMapperImpl implements PlayerMapper {
         target.setType( source.getType() );
         target.setPhoneNumber( source.getPhoneNumber() );
         target.setTeam( source.getTeam() );
+        target.setPrimaryPosition( source.getPrimaryPosition() );
+        target.setSecondaryPosition( source.getSecondaryPosition() );
         target.setPlayerStatus( source.getPlayerStatus() );
     }
 
@@ -951,14 +974,14 @@ public class PlayerMapperImpl implements PlayerMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
-import cz.phsoft.hokej.models.dto.PlayerSettingsDTO;
+import cz.phsoft.hokej.player.entities.PlayerSettingsEntity;
+import cz.phsoft.hokej.player.dto.PlayerSettingsDTO;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:13+0100",
+    date = "2026-02-26T12:28:04+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -983,6 +1006,8 @@ public class PlayerSettingsMapperImpl implements PlayerSettingsMapper {
         playerSettingsDTO.setNotifyOnPayment( entity.isNotifyOnPayment() );
         playerSettingsDTO.setNotifyReminders( entity.isNotifyReminders() );
         playerSettingsDTO.setReminderHoursBefore( entity.getReminderHoursBefore() );
+        playerSettingsDTO.setPossibleMoveToAnotherTeam( entity.isPossibleMoveToAnotherTeam() );
+        playerSettingsDTO.setPossibleChangePlayerPosition( entity.isPossibleChangePlayerPosition() );
 
         return playerSettingsDTO;
     }
@@ -1010,6 +1035,8 @@ public class PlayerSettingsMapperImpl implements PlayerSettingsMapper {
         if ( dto.getReminderHoursBefore() != null ) {
             entity.setReminderHoursBefore( dto.getReminderHoursBefore() );
         }
+        entity.setPossibleMoveToAnotherTeam( dto.isPossibleMoveToAnotherTeam() );
+        entity.setPossibleChangePlayerPosition( dto.isPossibleChangePlayerPosition() );
     }
 }
 
@@ -1018,8 +1045,8 @@ public class PlayerSettingsMapperImpl implements PlayerSettingsMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.SeasonHistoryEntity;
-import cz.phsoft.hokej.models.dto.SeasonHistoryDTO;
+import cz.phsoft.hokej.season.entities.SeasonHistoryEntity;
+import cz.phsoft.hokej.season.dto.SeasonHistoryDTO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
@@ -1027,7 +1054,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:13+0100",
+    date = "2026-02-26T12:28:04+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component
@@ -1075,14 +1102,14 @@ public class SeasonHistoryMapperImpl implements SeasonHistoryMapper {
 -----
 package cz.phsoft.hokej.models.mappers;
 
-import cz.phsoft.hokej.data.entities.SeasonEntity;
-import cz.phsoft.hokej.models.dto.SeasonDTO;
+import cz.phsoft.hokej.season.entities.SeasonEntity;
+import cz.phsoft.hokej.season.dto.SeasonDTO;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-02-24T21:09:14+0100",
+    date = "2026-02-26T12:28:05+0100",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Eclipse Adoptium)"
 )
 @Component

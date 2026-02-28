@@ -1,8 +1,8 @@
 package cz.phsoft.hokej.config;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.exceptions.AccountNotActivatedException;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.user.exceptions.AccountNotActivatedException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

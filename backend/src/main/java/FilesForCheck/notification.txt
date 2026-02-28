@@ -65,10 +65,10 @@ public class DemoModeService {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.models.dto.DemoNotificationsDTO;
-import cz.phsoft.hokej.models.dto.DemoNotificationsDTO.DemoEmailDTO;
-import cz.phsoft.hokej.models.dto.DemoNotificationsDTO.DemoSmsDTO;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.notifications.dto.DemoNotificationsDTO;
+import cz.phsoft.hokej.notifications.dto.DemoNotificationsDTO.DemoEmailDTO;
+import cz.phsoft.hokej.notifications.dto.DemoNotificationsDTO.DemoSmsDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -153,7 +153,7 @@ public class DemoNotificationStore {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
 
 /**
  * Kontext pro notifikace souvisejĂ­cĂ­ se zapomenutĂ˝m heslem.
@@ -178,14 +178,13 @@ public record ForgottenPasswordResetContext(
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
-import cz.phsoft.hokej.models.services.notification.MatchTimeChangeContext;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -677,10 +676,10 @@ public class InAppNotificationBuilder {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.notifications.dto.SpecialNotificationRequestDTO;
 
 /**
  * Servis pro uklĂˇdĂˇnĂ­ aplikaÄŤnĂ­ch (in-app) notifikacĂ­ do databĂˇze.
@@ -754,12 +753,12 @@ public interface InAppNotificationService {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.NotificationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.repositories.NotificationRepository;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.notifications.entities.NotificationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.notifications.repositories.NotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -1039,14 +1038,14 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.MatchStatus;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
-import cz.phsoft.hokej.data.repositories.MatchRepository;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.match.enums.MatchStatus;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.match.repositories.MatchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -1313,7 +1312,7 @@ public class MatchReminderScheduler {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
+import cz.phsoft.hokej.match.entities.MatchEntity;
 
 import java.time.LocalDateTime;
 
@@ -1344,17 +1343,16 @@ public record MatchTimeChangeContext(
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.MatchStatus;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.enums.PlayerStatus;
-import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
-import cz.phsoft.hokej.data.repositories.MatchRepository;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.models.dto.NoResponseReminderPreviewDTO;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.match.enums.MatchStatus;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.player.enums.PlayerStatus;
+import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.match.repositories.MatchRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.registration.dto.NoResponseReminderPreviewDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -1595,8 +1593,8 @@ public class NoResponseReminderScheduler {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.NotificationEntity;
-import cz.phsoft.hokej.data.repositories.NotificationRepository;
+import cz.phsoft.hokej.notifications.entities.NotificationEntity;
+import cz.phsoft.hokej.notifications.repositories.NotificationRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -1675,10 +1673,10 @@ public class NotificationCleanupService {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
 
 /**
  * TypovĂ˝ kontejner pro notifikaÄŤnĂ­ data.
@@ -1769,9 +1767,9 @@ public class NotificationContext {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.models.services.NotificationDecision;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.notifications.services.NotificationDecision;
 
 /**
  * SluĹľba pro vyhodnocenĂ­ notifikaÄŤnĂ­ch preferencĂ­.
@@ -1808,14 +1806,14 @@ public interface NotificationPreferencesService {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
-import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
-import cz.phsoft.hokej.data.enums.NotificationCategory;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.models.services.NotificationDecision;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.AppUserSettingsEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerSettingsEntity;
+import cz.phsoft.hokej.notifications.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.notifications.enums.NotificationCategory;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.notifications.services.NotificationDecision;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -2033,8 +2031,8 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.models.dto.NotificationBadgeDTO;
-import cz.phsoft.hokej.models.dto.NotificationDTO;
+import cz.phsoft.hokej.notifications.dto.NotificationBadgeDTO;
+import cz.phsoft.hokej.notifications.dto.NotificationDTO;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -2117,15 +2115,15 @@ public interface NotificationQueryService {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.controllers.NotificationController;
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.NotificationEntity;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.data.repositories.NotificationRepository;
-import cz.phsoft.hokej.exceptions.UserNotFoundException;
-import cz.phsoft.hokej.models.dto.NotificationBadgeDTO;
-import cz.phsoft.hokej.models.dto.NotificationDTO;
-import cz.phsoft.hokej.models.mappers.NotificationMapper;
+import cz.phsoft.hokej.notifications.controllers.NotificationController;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.notifications.entities.NotificationEntity;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.notifications.repositories.NotificationRepository;
+import cz.phsoft.hokej.user.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.notifications.dto.NotificationBadgeDTO;
+import cz.phsoft.hokej.notifications.dto.NotificationDTO;
+import cz.phsoft.hokej.notifications.mappers.NotificationMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -2293,9 +2291,9 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.NotificationType;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
 
 /**
  * RozhranĂ­ pro odesĂ­lĂˇnĂ­ notifikacĂ­ hrĂˇÄŤĹŻm a uĹľivatelĹŻm.
@@ -2353,14 +2351,14 @@ public interface NotificationService {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.enums.Role;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.models.services.NotificationDecision;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.AppUserSettingsEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.notifications.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.user.enums.Role;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.notifications.services.NotificationDecision;
 import cz.phsoft.hokej.models.services.email.EmailMessageBuilder;
 import cz.phsoft.hokej.models.services.email.EmailService;
 import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
@@ -2823,8 +2821,8 @@ package cz.phsoft.hokej.models.services.notification;
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
-import cz.phsoft.hokej.models.dto.SpecialNotificationTargetDTO;
+import cz.phsoft.hokej.notifications.dto.SpecialNotificationRequestDTO;
+import cz.phsoft.hokej.notifications.dto.SpecialNotificationTargetDTO;
 import java.util.List;
 
 /**
@@ -2866,17 +2864,17 @@ public interface SpecialNotificationService {
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.data.repositories.PlayerSettingsRepository;
-import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.exceptions.UserNotFoundException;
-import cz.phsoft.hokej.models.dto.SpecialNotificationTargetDTO;
-import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerSettingsEntity;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.repositories.PlayerSettingsRepository;
+import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.user.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.notifications.dto.SpecialNotificationTargetDTO;
+import cz.phsoft.hokej.notifications.dto.SpecialNotificationRequestDTO;
 import cz.phsoft.hokej.models.services.email.EmailMessageBuilder;
 import cz.phsoft.hokej.models.services.email.EmailService;
 import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
@@ -3260,7 +3258,7 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
 -----
 package cz.phsoft.hokej.models.services.notification;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
 
 /**
  * Kontext pro notifikace souvisejĂ­cĂ­ s aktivacĂ­ uĹľivatelskĂ©ho ĂşÄŤtu.

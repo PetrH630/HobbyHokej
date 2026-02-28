@@ -64,8 +64,8 @@ public class AppConfig {
 -----
 package cz.phsoft.hokej.config;
 
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -187,7 +187,7 @@ public class AuditAspect {
 package cz.phsoft.hokej.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.phsoft.hokej.models.services.AppUserService;
+import cz.phsoft.hokej.user.services.AppUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -374,7 +374,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         Map<String, Object> result = new HashMap<>();
         result.put("status", "error");
 
-        if (failed.getCause() instanceof cz.phsoft.hokej.exceptions.AccountNotActivatedException) {
+        if (failed.getCause() instanceof cz.phsoft.hokej.user.exceptions.AccountNotActivatedException) {
             result.put("message", failed.getCause().getMessage());
         } else if (failed instanceof BadCredentialsException) {
             result.put("message", "BE - NeplatnĂ© pĹ™ihlaĹˇovacĂ­ Ăşdaje");
@@ -391,9 +391,9 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
 -----
 package cz.phsoft.hokej.config;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.exceptions.AccountNotActivatedException;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.user.exceptions.AccountNotActivatedException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -470,8 +470,11 @@ package cz.phsoft.hokej.config;
 import cz.phsoft.hokej.data.entities.*;
 import cz.phsoft.hokej.data.enums.*;
 import cz.phsoft.hokej.data.repositories.*;
-import cz.phsoft.hokej.models.services.AppUserSettingsService;
-import cz.phsoft.hokej.models.services.PlayerSettingsService;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.match.enums.MatchMode;
+import cz.phsoft.hokej.match.repositories.MatchRepository;
+import cz.phsoft.hokej.user.services.AppUserSettingsService;
+import cz.phsoft.hokej.player.services.PlayerSettingsService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -635,6 +638,8 @@ public class DataInitializer {
 
             player.setPhoneNumber("");
             player.setTeam(i < 5 ? Team.DARK : Team.LIGHT);
+            // TODO Otestovat pĹ™idalĹˇĂ­m spuĹˇtÄ›nĂ­
+            player.setPrimaryPosition((i % 2 == 0) ? PlayerPosition.FORWARD : PlayerPosition.DEFENSE);
             player.setPlayerStatus(i < 8 ? PlayerStatus.APPROVED : PlayerStatus.PENDING);
 
             user.setRole(i == 0 ? Role.ROLE_MANAGER : Role.ROLE_PLAYER);
@@ -775,12 +780,14 @@ public class DataInitializer {
                 match.setDateTime(firstMatchDate.plusWeeks(i));
                 match.setLocation("NÄšJAKĂ HALA");
                 match.setDescription("");
-                match.setMaxPlayers(12);
+                match.setMaxPlayers(MatchMode.THREE_ON_THREE_NO_GOALIE.getPlayersPerTeam()*2);
                 match.setPrice(2200);
                 match.setMatchStatus(null);
                 match.setCancelReason(null);
                 match.setSeason(actualSeason);
                 match.setCreatedByUserId(2L);
+                match.setMatchMode(MatchMode.THREE_ON_THREE_NO_GOALIE);
+
 
                 matchRepository.save(match);
             }
@@ -857,6 +864,13 @@ public class DataInitializer {
                 reg.setTimestamp(LocalDateTime.now());
                 reg.setCreatedBy("initializer");
 
+                int idOfMatch = match.getId().intValue();
+                if (idOfMatch % 2 == 0){
+                    reg.setPositionInMatch(PlayerPosition.DEFENSE);
+                }else{
+                    reg.setPositionInMatch(PlayerPosition.FORWARD);
+                }
+
                 matchRegistrationRepository.save(reg);
             }
         }
@@ -910,8 +924,8 @@ public class DataInitializer {
 -----
 package cz.phsoft.hokej.config;
 
-import cz.phsoft.hokej.exceptions.ApiError;
-import cz.phsoft.hokej.exceptions.BusinessException;
+import cz.phsoft.hokej.shared.exceptions.ApiError;
+import cz.phsoft.hokej.shared.exceptions.BusinessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -1155,7 +1169,7 @@ package cz.phsoft.hokej.config;
 -----
 package cz.phsoft.hokej.config;
 
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import cz.phsoft.hokej.security.impersonation.ImpersonationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -1175,7 +1189,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import cz.phsoft.hokej.models.services.AppUserService;
+import cz.phsoft.hokej.user.services.AppUserService;
 
 import java.util.List;
 

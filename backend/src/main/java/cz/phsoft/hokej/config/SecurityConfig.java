@@ -1,7 +1,7 @@
 package cz.phsoft.hokej.config;
 
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.security.impersonation.ImpersonationFilter;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import cz.phsoft.hokej.models.services.AppUserService;
+import cz.phsoft.hokej.user.services.AppUserService;
 
 import java.util.List;
 
@@ -158,10 +158,6 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
 
-                .addFilterAfter(
-                        new ImpersonationFilter(playerRepository),
-                        UsernamePasswordAuthenticationFilter.class
-                )
 
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")

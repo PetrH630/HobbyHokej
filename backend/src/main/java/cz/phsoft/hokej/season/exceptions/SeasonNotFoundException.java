@@ -1,0 +1,36 @@
+package cz.phsoft.hokej.season.exceptions;
+
+import cz.phsoft.hokej.shared.exceptions.BusinessException;
+import org.springframework.http.HttpStatus;
+
+/**
+ * Výjimka signalizující, že požadovaná sezóna nebyla nalezena.
+ *
+ * Používá se jak při hledání sezóny podle ID, tak v situaci,
+ * kdy není nastavena žádná aktivní sezóna.
+ *
+ * Typicky mapováno na HTTP 404 (Not Found).
+ */
+public class SeasonNotFoundException extends BusinessException {
+
+    /**
+     * Sezóna s konkrétním ID nebyla nalezena.
+     *
+     * @param id ID sezóny
+     */
+    public SeasonNotFoundException(Long id) {
+        super("BE - Sezóna s ID " + id + " nebyla nalezena.", HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Obecnější varianta s vlastní chybovou zprávou.
+     *
+     * Typické použití je situace, kdy není nastavena žádná
+     * aktivní sezóna.
+     *
+     * @param message chybová zpráva
+     */
+    public SeasonNotFoundException(String message) {
+        super(message, HttpStatus.NOT_FOUND);
+    }
+}

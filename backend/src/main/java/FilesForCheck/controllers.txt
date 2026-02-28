@@ -31,12 +31,12 @@ TestSmsController.java
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.DemoNotificationsDTO;
-import cz.phsoft.hokej.models.dto.SpecialNotificationTargetDTO;
-import cz.phsoft.hokej.models.dto.requests.SpecialNotificationRequestDTO;
-import cz.phsoft.hokej.models.services.notification.DemoModeService;
-import cz.phsoft.hokej.models.services.notification.DemoNotificationStore;
-import cz.phsoft.hokej.models.services.notification.SpecialNotificationService;
+import cz.phsoft.hokej.notifications.dto.DemoNotificationsDTO;
+import cz.phsoft.hokej.notifications.dto.SpecialNotificationTargetDTO;
+import cz.phsoft.hokej.notifications.dto.SpecialNotificationRequestDTO;
+import cz.phsoft.hokej.notifications.services.DemoModeService;
+import cz.phsoft.hokej.notifications.services.DemoNotificationStore;
+import cz.phsoft.hokej.notifications.services.SpecialNotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -115,7 +115,7 @@ public class AdminNotificationController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.services.notification.DemoModeService;
+import cz.phsoft.hokej.notifications.services.DemoModeService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -163,11 +163,11 @@ public class AppModeController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.AppUserDTO;
-import cz.phsoft.hokej.models.dto.AppUserHistoryDTO;
-import cz.phsoft.hokej.models.dto.ChangePasswordDTO;
-import cz.phsoft.hokej.models.services.AppUserHistoryService;
-import cz.phsoft.hokej.models.services.AppUserService;
+import cz.phsoft.hokej.user.dto.AppUserDTO;
+import cz.phsoft.hokej.user.dto.AppUserHistoryDTO;
+import cz.phsoft.hokej.user.dto.ChangePasswordDTO;
+import cz.phsoft.hokej.user.services.AppUserHistoryService;
+import cz.phsoft.hokej.user.services.AppUserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -371,8 +371,8 @@ public class AppUserController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.AppUserSettingsDTO;
-import cz.phsoft.hokej.models.services.AppUserSettingsService;
+import cz.phsoft.hokej.user.dto.AppUserSettingsDTO;
+import cz.phsoft.hokej.user.services.AppUserSettingsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -442,11 +442,11 @@ public class AppUserSettingsController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.AppUserDTO;
-import cz.phsoft.hokej.models.dto.EmailDTO;
-import cz.phsoft.hokej.models.dto.ForgottenPasswordResetDTO;
-import cz.phsoft.hokej.models.dto.RegisterUserDTO;
-import cz.phsoft.hokej.models.services.AppUserService;
+import cz.phsoft.hokej.user.dto.AppUserDTO;
+import cz.phsoft.hokej.notifications.dto.EmailDTO;
+import cz.phsoft.hokej.user.dto.ForgottenPasswordResetDTO;
+import cz.phsoft.hokej.user.dto.RegisterUserDTO;
+import cz.phsoft.hokej.user.services.AppUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -613,10 +613,10 @@ public class AuthController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.services.PlayerService;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
+import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.player.services.PlayerService;
+import cz.phsoft.hokej.player.services.CurrentPlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -751,8 +751,8 @@ public class DebugController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.DemoNotificationsDTO;
-import cz.phsoft.hokej.models.services.notification.DemoNotificationStore;
+import cz.phsoft.hokej.notifications.dto.DemoNotificationsDTO;
+import cz.phsoft.hokej.notifications.services.DemoNotificationStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -810,11 +810,14 @@ public class DemoNotificationController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.match.dto.*;
+import cz.phsoft.hokej.match.enums.MatchCancelReason;
+import cz.phsoft.hokej.player.enums.Team;
 import cz.phsoft.hokej.models.dto.*;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import cz.phsoft.hokej.models.services.MatchHistoryService;
-import cz.phsoft.hokej.models.services.MatchService;
+import cz.phsoft.hokej.player.services.CurrentPlayerService;
+import cz.phsoft.hokej.match.services.MatchHistoryService;
+import cz.phsoft.hokej.match.services.MatchPositionService;
+import cz.phsoft.hokej.match.services.MatchService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -842,13 +845,16 @@ public class MatchController {
     private final MatchService matchService;
     private final CurrentPlayerService currentPlayerService;
     private final MatchHistoryService matchHistoryService;
+    private final MatchPositionService matchPositionService;
 
     public MatchController(MatchService matchService,
                            CurrentPlayerService currentPlayerService,
-                           MatchHistoryService matchHistoryService) {
+                           MatchHistoryService matchHistoryService,
+                           MatchPositionService matchPositionService) {
         this.matchService = matchService;
         this.currentPlayerService = currentPlayerService;
         this.matchHistoryService = matchHistoryService;
+        this.matchPositionService = matchPositionService;
     }
 
     // ADMIN / MANAGER â€“ globĂˇlnĂ­ sprĂˇva zĂˇpasĹŻ
@@ -1120,6 +1126,46 @@ public class MatchController {
         Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
         return matchService.getAllPassedMatchesForPlayer(currentPlayerId);
     }
+
+
+/**
+ * VracĂ­ pĹ™ehled pozic a kapacity pro danĂ˝ zĂˇpas pro oba tĂ˝my.
+ *
+ * Metoda se pouĹľĂ­vĂˇ napĹ™Ă­klad pro administrĂˇtorskĂ© zobrazenĂ­
+ * nebo detail zĂˇpasu, kde je potĹ™eba vidÄ›t obsazenost DARK i LIGHT
+ * souÄŤasnÄ›.
+ *
+ * @param matchId IdentifikĂˇtor zĂˇpasu.
+ * @return PĹ™ehled pozic a jejich obsazenosti pro oba tĂ˝my.
+ */
+    @GetMapping("/{matchId}/positions")
+    @PreAuthorize("isAuthenticated()")
+    public MatchPositionOverviewDTO getPositionOverview(
+            @PathVariable Long matchId
+    ) {
+        return matchPositionService.getPositionOverviewForMatch(matchId);
+    }
+    /**
+     * VracĂ­ pĹ™ehled pozic a kapacity pro konkrĂ©tnĂ­ tĂ˝m v danĂ©m zĂˇpase.
+     *
+     * Metoda se pouĹľĂ­vĂˇ pro zobrazenĂ­ obsazenĂ˝ch a volnĂ˝ch pozic na ledÄ›
+     * v rĂˇmci jednoho zĂˇpasu a jednoho tĂ˝mu. VĂ˝poÄŤet kapacity pozic se
+     * deleguje do MatchModeLayoutUtil, naÄŤtenĂ­ registracĂ­ a vĂ˝poÄŤet
+     * obsazenosti se deleguje do MatchPositionService.
+     *
+     * @param matchId IdentifikĂˇtor zĂˇpasu.
+     * @param team    TĂ˝m, pro kterĂ˝ se pĹ™ehled pozic zĂ­skĂˇvĂˇ.
+     * @return PĹ™ehled pozic a jejich obsazenosti pro danĂ˝ tĂ˝m.
+     */
+    @GetMapping("/{matchId}/positions/{team}")
+    @PreAuthorize("isAuthenticated()")
+    public MatchTeamPositionOverviewDTO getTeamPositionOverview(
+            @PathVariable Long matchId,
+            @PathVariable Team team
+    ) {
+        return matchPositionService.getPositionOverviewForMatchAndTeam(matchId, team);
+    }
+
 }
 
 -----
@@ -1127,14 +1173,15 @@ public class MatchController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.exceptions.CurrentPlayerNotSelectedException;
-import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import cz.phsoft.hokej.models.services.MatchRegistrationService;
-import cz.phsoft.hokej.models.services.MatchService;
+import cz.phsoft.hokej.registration.enums.ExcuseReason;
+import cz.phsoft.hokej.player.enums.PlayerPosition;
+import cz.phsoft.hokej.player.exceptions.CurrentPlayerNotSelectedException;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationRequest;
+import cz.phsoft.hokej.player.services.CurrentPlayerService;
+import cz.phsoft.hokej.registration.services.MatchRegistrationService;
+import cz.phsoft.hokej.match.services.MatchService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -1330,9 +1377,23 @@ public class MatchRegistrationController {
         return matchRegistrationService.changeRegistrationTeam(playerId, matchId);
     }
 
-
-
-
+    /**
+     * MÄ›nĂ­ pozici u hrĂˇÄŤe dle jeho id v konkrĂ©tnĂ­m zĂˇpase.
+     *
+     * @param playerId  ID hrĂˇÄŤe
+     * @param matchId   ID zĂˇpasu
+     * @param positionInMatch   pozice hrĂˇÄŤe
+     * @return mÄ›nĂ­ pozici hrĂˇÄŤe v aktuĂˇlnĂ­m zĂˇpasu
+     */
+    @PatchMapping("/{matchId}/players/{playerId}/position")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchRegistrationDTO changePosition(
+            @PathVariable Long matchId,
+            @PathVariable Long playerId,
+            @RequestParam("position") PlayerPosition positionInMatch
+    ) {
+        return matchRegistrationService.changeRegistrationPosition(playerId, matchId, positionInMatch);
+    }
 
     // UĹľivatelskĂˇ sprĂˇva registracĂ­ pro aktuĂˇlnĂ­ho hrĂˇÄŤe
 
@@ -1385,8 +1446,8 @@ public class MatchRegistrationController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO;
-import cz.phsoft.hokej.models.services.MatchRegistrationHistoryService;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationHistoryDTO;
+import cz.phsoft.hokej.registration.services.MatchRegistrationHistoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -1469,9 +1530,9 @@ public class MatchRegistrationHistoryController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.NoResponseReminderPreviewDTO;
-import cz.phsoft.hokej.models.services.notification.MatchReminderScheduler;
-import cz.phsoft.hokej.models.services.notification.NoResponseReminderScheduler;
+import cz.phsoft.hokej.registration.dto.NoResponseReminderPreviewDTO;
+import cz.phsoft.hokej.notifications.services.MatchReminderScheduler;
+import cz.phsoft.hokej.notifications.services.NoResponseReminderScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -1554,8 +1615,8 @@ public class MatchReminderAdminController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import cz.phsoft.hokej.models.dto.ImpersonationInfoDTO;
 import cz.phsoft.hokej.security.impersonation.ImpersonationContext;
 import org.springframework.http.ResponseEntity;
@@ -1623,9 +1684,9 @@ public class MeController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.NotificationBadgeDTO;
-import cz.phsoft.hokej.models.dto.NotificationDTO;
-import cz.phsoft.hokej.models.services.notification.NotificationQueryService;
+import cz.phsoft.hokej.notifications.dto.NotificationBadgeDTO;
+import cz.phsoft.hokej.notifications.dto.NotificationDTO;
+import cz.phsoft.hokej.notifications.services.NotificationQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -1789,15 +1850,15 @@ package cz.phsoft.hokej.controllers;
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.PlayerHistoryDTO;
-import cz.phsoft.hokej.models.dto.PlayerStatsDTO;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.dto.requests.ChangePlayerUserRequest;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import cz.phsoft.hokej.models.services.PlayerHistoryService;
-import cz.phsoft.hokej.models.services.PlayerService;
-import cz.phsoft.hokej.models.services.PlayerStatsService;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
+import cz.phsoft.hokej.player.dto.PlayerHistoryDTO;
+import cz.phsoft.hokej.player.dto.PlayerStatsDTO;
+import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.user.dto.ChangePlayerUserRequest;
+import cz.phsoft.hokej.player.services.CurrentPlayerService;
+import cz.phsoft.hokej.player.services.PlayerHistoryService;
+import cz.phsoft.hokej.player.services.PlayerService;
+import cz.phsoft.hokej.player.services.PlayerStatsService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -2098,9 +2159,9 @@ public class PlayerController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
-import cz.phsoft.hokej.models.services.PlayerInactivityPeriodService;
+import cz.phsoft.hokej.player.dto.PlayerInactivityPeriodDTO;
+import cz.phsoft.hokej.player.services.CurrentPlayerService;
+import cz.phsoft.hokej.player.services.PlayerInactivityPeriodService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -2257,9 +2318,9 @@ public class PlayerInactivityPeriodController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.PlayerSettingsDTO;
-import cz.phsoft.hokej.models.services.PlayerSettingsService;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
+import cz.phsoft.hokej.player.dto.PlayerSettingsDTO;
+import cz.phsoft.hokej.player.services.PlayerSettingsService;
+import cz.phsoft.hokej.player.services.CurrentPlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -2387,12 +2448,12 @@ public class PlayerSettingsController {
 -----
 package cz.phsoft.hokej.controllers;
 
-import cz.phsoft.hokej.models.dto.SeasonDTO;
-import cz.phsoft.hokej.models.dto.SeasonHistoryDTO;
-import cz.phsoft.hokej.models.mappers.SeasonMapper;
-import cz.phsoft.hokej.models.services.CurrentSeasonService;
-import cz.phsoft.hokej.models.services.SeasonHistoryService;
-import cz.phsoft.hokej.models.services.SeasonService;
+import cz.phsoft.hokej.season.dto.SeasonDTO;
+import cz.phsoft.hokej.season.dto.SeasonHistoryDTO;
+import cz.phsoft.hokej.season.mappers.SeasonMapper;
+import cz.phsoft.hokej.season.services.CurrentSeasonService;
+import cz.phsoft.hokej.season.services.SeasonHistoryService;
+import cz.phsoft.hokej.season.services.SeasonService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

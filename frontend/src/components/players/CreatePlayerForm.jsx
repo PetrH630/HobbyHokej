@@ -1,5 +1,6 @@
 import { useState } from "react";
 import RoleGuard from "../RoleGuard";
+import { PLAYER_POSITION_OPTIONS } from "../../constants/playerPosition";
 
 const CreatePlayerForm = ({ onSubmit, onCancel, submitting }) => {
     const [name, setName] = useState("");
@@ -8,6 +9,8 @@ const CreatePlayerForm = ({ onSubmit, onCancel, submitting }) => {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [team, setTeam] = useState("DARK");
     const [type, setType] = useState("BASIC");
+    const [primaryPosition, setPrimaryPosition] = useState("");
+    const [secondaryPosition, setSecondaryPosition] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -19,6 +22,8 @@ const CreatePlayerForm = ({ onSubmit, onCancel, submitting }) => {
             phoneNumber: phoneNumber || null,
             team,
             type,
+            primaryPosition: primaryPosition || null,
+            secondaryPosition: secondaryPosition || null,
         });
     };
 
@@ -83,23 +88,68 @@ const CreatePlayerForm = ({ onSubmit, onCancel, submitting }) => {
                     <option value="LIGHT">LIGHT</option>
                 </select>
             </div>
+
+            {/* POST – stejné chování jako v PlayerProfileForm */}
+            <div className="mb-3">
+                <label className="form-label">Post</label>
+                <div className="row g-2">
+                    <div className="col-12 col-sm-6">
+                        <select
+                            className="form-select"
+                            value={primaryPosition}
+                            onChange={(e) =>
+                                setPrimaryPosition(e.target.value)
+                            }
+                        >
+                            <option value="">
+                                — Primární post —
+                            </option>
+                            {PLAYER_POSITION_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="col-12 col-sm-6">
+                        <select
+                            className="form-select"
+                            value={secondaryPosition}
+                            onChange={(e) =>
+                                setSecondaryPosition(e.target.value)
+                            }
+                        >
+                            <option value="">
+                                — Sekundární post —
+                            </option>
+                            {PLAYER_POSITION_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <RoleGuard roles={["ROLE_ADMIN", "ROLE_MANAGER", "ROLE_PLAYER"]}>
                 <div className="mb-3">
                     <label className="form-label">Typ</label>
-                        <select                            
-                            className="form-select"
-                            value={type}
+                    <select
+                        className="form-select"
+                        value={type}
                         onChange={(e) => setType(e.target.value)}
-                        >
-                            <option value="BASIC">základní</option>
-                            <option value="STANDARD">standardní</option>
-                            <option value="VIP">VIP</option>
-                        </select>
-                        <div className="form-text">
-                            Typ hráče - pro zobrazení nadcházejících zápasů (odpovídá enumu Typ).
-                                        </div>
+                    >
+                        <option value="BASIC">základní</option>
+                        <option value="STANDARD">standardní</option>
+                        <option value="VIP">VIP</option>
+                    </select>
+                    <div className="form-text">
+                        Typ hráče - pro zobrazení nadcházejících zápasů
+                        (odpovídá enumu Typ).
+                    </div>
                 </div>
-            </RoleGuard> 
+            </RoleGuard>
 
             <div className="d-flex justify-content-between mt-4">
                 <button

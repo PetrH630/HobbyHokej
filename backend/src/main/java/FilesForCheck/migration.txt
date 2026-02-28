@@ -56,7 +56,7 @@ CREATE TABLE `app_users_history` (
 CREATE TABLE `app_user_settings` (
   `id` bigint(20) NOT NULL,
   `copy_all_player_notifications_to_user_email` bit(1) NOT NULL,
-   `default_landing_page` enum('DASHBOARD','MATCHES','PLAYERS') NOT NULL DEFAULT 'DASHBOARD',
+  `default_landing_page` enum('DASHBOARD','MATCHES','PLAYERS') NOT NULL DEFAULT 'DASHBOARD',
   `email_digest_enabled` bit(1) NOT NULL,
   `email_digest_time` time(6) DEFAULT NULL,
   `global_notification_level` enum('ALL','IMPORTANT_ONLY','NONE') NOT NULL,
@@ -92,6 +92,15 @@ CREATE TABLE `matches` (
   `last_modified_by_user_id` bigint(20) DEFAULT NULL,
   `location` varchar(255) NOT NULL,
   `match_status` enum('UNCANCELED','CANCELED','UPDATED') DEFAULT NULL,
+  `match_mode` enum(
+    'THREE_ON_THREE_NO_GOALIE',
+    'THREE_ON_THREE_WITH_GOALIE',
+    'FOUR_ON_FOUR_NO_GOALIE',
+    'FOUR_ON_FOUR_WITH_GOALIE',
+    'FIVE_ON_FIVE_NO_GOALIE',
+    'FIVE_ON_FIVE_WITH_GOALIE',
+    'SIX_ON_SIX_NO_GOALIE'
+  ) NOT NULL,
   `max_players` int(11) NOT NULL,
   `price` int(11) NOT NULL,
   `timestamp` datetime(6) NOT NULL,
@@ -110,6 +119,15 @@ CREATE TABLE `matches_history` (
   `location` varchar(255) NOT NULL,
   `match_id` bigint(20) NOT NULL,
   `match_status` enum('UNCANCELED','CANCELED','UPDATED') DEFAULT NULL,
+  `match_mode` enum(
+    'THREE_ON_THREE_NO_GOALIE',
+    'THREE_ON_THREE_WITH_GOALIE',
+    'FOUR_ON_FOUR_NO_GOALIE',
+    'FOUR_ON_FOUR_WITH_GOALIE',
+    'FIVE_ON_FIVE_NO_GOALIE',
+    'FIVE_ON_FIVE_WITH_GOALIE',
+    'SIX_ON_SIX_NO_GOALIE'
+  ) NOT NULL,
   `max_players` int(11) NOT NULL,
   `original_timestamp` datetime(6) NOT NULL,
   `price` int(11) NOT NULL,
@@ -124,6 +142,17 @@ CREATE TABLE `match_registrations` (
   `excuse_reason` enum('NEMOC','PRACE','NECHE_SE_MI','JINE') DEFAULT NULL,
   `status` enum('REGISTERED','UNREGISTERED','EXCUSED','RESERVED','NO_RESPONSE','SUBSTITUTE','NO_EXCUSED') NOT NULL,
   `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `position_in_match` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
   `timestamp` datetime(6) NOT NULL,
   `match_id` bigint(20) NOT NULL,
   `player_id` bigint(20) NOT NULL,
@@ -144,6 +173,17 @@ CREATE TABLE `match_registration_history` (
   `player_id` bigint(20) NOT NULL,
   `status` enum('REGISTERED','UNREGISTERED','EXCUSED','RESERVED','NO_RESPONSE','SUBSTITUTE','NO_EXCUSED') NOT NULL,
   `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `position_in_match` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
   `reminder_already_sent` bit(1) NOT NULL DEFAULT b'0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -156,6 +196,28 @@ CREATE TABLE `player_entity` (
   `player_status` enum('PENDING','APPROVED','REJECTED') NOT NULL,
   `surname` varchar(255) NOT NULL,
   `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `primary_position` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
+  `secondary_position` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
   `timestamp` datetime(6) NOT NULL,
   `type` enum('VIP','STANDARD','BASIC') NOT NULL,
   `user_id` bigint(20) DEFAULT NULL
@@ -174,6 +236,28 @@ CREATE TABLE `player_entity_history` (
   `player_status` enum('PENDING','APPROVED','REJECTED') NOT NULL,
   `surname` varchar(255) NOT NULL,
   `team` enum('DARK','LIGHT') DEFAULT NULL,
+  `primary_position` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
+  `secondary_position` enum(
+    'GOALIE',
+    'DEFENSE_LEFT',
+    'DEFENSE_RIGHT',
+    'CENTER',
+    'WING_LEFT',
+    'WING_RIGHT',
+    'DEFENSE',
+    'FORWARD',
+    'ANY'
+  ) DEFAULT NULL,
   `type` enum('VIP','STANDARD','BASIC') NOT NULL,
   `user_id` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -198,6 +282,8 @@ CREATE TABLE `player_settings` (
   `notify_on_registration` bit(1) NOT NULL,
   `notify_reminders` bit(1) NOT NULL,
   `reminder_hours_before` int(11) DEFAULT NULL,
+  `possible_move_to_another_team` bit(1) NOT NULL DEFAULT b'0',
+  `possible_change_player_position` bit(1) NOT NULL DEFAULT b'0',
   `sms_enabled` bit(1) NOT NULL,
   `player_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -451,6 +537,7 @@ BEGIN
          max_players,
          price,
          match_status,
+         match_mode,
          cancel_reason,
          season_id,
          created_by_user_id,
@@ -466,6 +553,7 @@ BEGIN
          NEW.max_players,
          NEW.price,
          NEW.match_status,
+         NEW.match_mode,
          NEW.cancel_reason,
          NEW.season_id,
          NEW.created_by_user_id,
@@ -480,9 +568,21 @@ AFTER DELETE ON matches
 FOR EACH ROW
 BEGIN
     INSERT INTO matches_history
-        (match_id, original_timestamp, action, changed_at, date_time,
-         location, description, max_players, price, match_status, cancel_reason,
-         season_id, created_by_user_id, last_modified_by_user_id)
+        (match_id,
+         original_timestamp,
+         action,
+         changed_at,
+         date_time,
+         location,
+         description,
+         max_players,
+         price,
+         match_status,
+         match_mode,
+         cancel_reason,
+         season_id,
+         created_by_user_id,
+         last_modified_by_user_id)
     VALUES
         (OLD.id,
          OLD.timestamp,
@@ -494,6 +594,7 @@ BEGIN
          OLD.max_players,
          OLD.price,
          OLD.match_status,
+         OLD.match_mode,
          OLD.cancel_reason,
          OLD.season_id,
          OLD.created_by_user_id,
@@ -516,6 +617,7 @@ BEGIN
      excuse_note,
      admin_note,
      team,
+     position_in_match,
      original_timestamp,
      created_by,
      reminder_already_sent,
@@ -530,6 +632,7 @@ BEGIN
      NEW.excuse_note,
      NEW.admin_note,
      NEW.team,
+     NEW.position_in_match,
      NEW.timestamp,
      NEW.created_by,
      NEW.reminder_already_sent,
@@ -553,6 +656,7 @@ BEGIN
      excuse_note,
      admin_note,
      team,
+     position_in_match,
      original_timestamp,
      created_by,
      reminder_already_sent,
@@ -567,6 +671,7 @@ BEGIN
      NEW.excuse_note,
      NEW.admin_note,
      NEW.team,
+     NEW.position_in_match,
      NEW.timestamp,
      NEW.created_by,
      NEW.reminder_already_sent,
@@ -590,6 +695,7 @@ BEGIN
      excuse_note,
      admin_note,
      team,
+     position_in_match,
      original_timestamp,
      created_by,
      reminder_already_sent,
@@ -604,6 +710,7 @@ BEGIN
      OLD.excuse_note,
      OLD.admin_note,
      OLD.team,
+     OLD.position_in_match,
      OLD.timestamp,
      OLD.created_by,
      OLD.reminder_already_sent,
@@ -619,11 +726,37 @@ AFTER INSERT ON player_entity
 FOR EACH ROW
 BEGIN
     INSERT INTO player_entity_history
-        (player_id, name, surname, nickname, type, full_name, phone_number,
-         team, player_status, user_id, original_timestamp, action, changed_at)
+        (player_id,
+         name,
+         surname,
+         nickname,
+         type,
+         full_name,
+         phone_number,
+         team,
+         primary_position,
+         secondary_position,
+         player_status,
+         user_id,
+         original_timestamp,
+         action,
+         changed_at)
     VALUES
-        (NEW.id, NEW.name, NEW.surname, NEW.nickname, NEW.type, NEW.full_name, NEW.phone_number,
-         NEW.team, NEW.player_status, NEW.user_id, NEW.timestamp, 'INSERT', NOW());
+        (NEW.id,
+         NEW.name,
+         NEW.surname,
+         NEW.nickname,
+         NEW.type,
+         NEW.full_name,
+         NEW.phone_number,
+         NEW.team,
+         NEW.primary_position,
+         NEW.secondary_position,
+         NEW.player_status,
+         NEW.user_id,
+         NEW.timestamp,
+         'INSERT',
+         NOW());
 END;
 
 -----
@@ -634,11 +767,37 @@ AFTER UPDATE ON player_entity
 FOR EACH ROW
 BEGIN
     INSERT INTO player_entity_history
-        (player_id, name, surname, nickname, type, full_name, phone_number,
-         team, player_status, user_id, original_timestamp, action, changed_at)
+        (player_id,
+         name,
+         surname,
+         nickname,
+         type,
+         full_name,
+         phone_number,
+         team,
+         primary_position,
+         secondary_position,
+         player_status,
+         user_id,
+         original_timestamp,
+         action,
+         changed_at)
     VALUES
-        (NEW.id, NEW.name, NEW.surname, NEW.nickname, NEW.type, NEW.full_name, NEW.phone_number,
-         NEW.team, NEW.player_status, NEW.user_id, NEW.timestamp, 'UPDATE', NOW());
+        (NEW.id,
+         NEW.name,
+         NEW.surname,
+         NEW.nickname,
+         NEW.type,
+         NEW.full_name,
+         NEW.phone_number,
+         NEW.team,
+         NEW.primary_position,
+         NEW.secondary_position,
+         NEW.player_status,
+         NEW.user_id,
+         NEW.timestamp,
+         'UPDATE',
+         NOW());
 END;
 
 -----
@@ -649,11 +808,37 @@ AFTER DELETE ON player_entity
 FOR EACH ROW
 BEGIN
     INSERT INTO player_entity_history
-        (player_id, name, surname, nickname, type, full_name, phone_number,
-         team, player_status, user_id, original_timestamp, action, changed_at)
+        (player_id,
+         name,
+         surname,
+         nickname,
+         type,
+         full_name,
+         phone_number,
+         team,
+         primary_position,
+         secondary_position,
+         player_status,
+         user_id,
+         original_timestamp,
+         action,
+         changed_at)
     VALUES
-        (OLD.id, OLD.name, OLD.surname, OLD.nickname, OLD.type, OLD.full_name, OLD.phone_number,
-         OLD.team, OLD.player_status, OLD.user_id, OLD.timestamp, 'DELETE', NOW());
+        (OLD.id,
+         OLD.name,
+         OLD.surname,
+         OLD.nickname,
+         OLD.type,
+         OLD.full_name,
+         OLD.phone_number,
+         OLD.team,
+         OLD.primary_position,
+         OLD.secondary_position,
+         OLD.player_status,
+         OLD.user_id,
+         OLD.timestamp,
+         'DELETE',
+         NOW());
 END;
 
 -----

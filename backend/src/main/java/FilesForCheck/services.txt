@@ -12,10 +12,12 @@ CurrentPlayerService.java
 CurrentPlayerServiceImpl.java
 CurrentSeasonService.java
 CurrentSeasonServiceImpl.java
-MatchHistoryService.java
-MatchHistoryServiceImpl.java
+MatchRegistrationCommandService.java
+MatchRegistrationCommandServiceImpl.java
 MatchRegistrationHistoryService.java
 MatchRegistrationHistoryServiceImpl.java
+MatchRegistrationQueryService.java
+MatchRegistrationQueryServiceImpl.java
 MatchRegistrationService.java
 MatchRegistrationServiceImpl.java
 MatchService.java
@@ -43,7 +45,7 @@ SeasonServiceImpl.java
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.models.dto.AppUserHistoryDTO;
+import cz.phsoft.hokej.user.dto.AppUserHistoryDTO;
 
 import java.util.List;
 
@@ -83,9 +85,9 @@ public interface AppUserHistoryService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.repositories.AppUserHistoryRepository;
-import cz.phsoft.hokej.models.dto.AppUserHistoryDTO;
-import cz.phsoft.hokej.models.mappers.AppUserHistoryMapper;
+import cz.phsoft.hokej.user.repositories.AppUserHistoryRepository;
+import cz.phsoft.hokej.user.dto.AppUserHistoryDTO;
+import cz.phsoft.hokej.user.mappers.AppUserHistoryMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -159,9 +161,9 @@ public class AppUserHistoryServiceImpl implements AppUserHistoryService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.models.dto.AppUserDTO;
-import cz.phsoft.hokej.models.dto.ForgottenPasswordResetDTO;
-import cz.phsoft.hokej.models.dto.RegisterUserDTO;
+import cz.phsoft.hokej.user.dto.AppUserDTO;
+import cz.phsoft.hokej.user.dto.ForgottenPasswordResetDTO;
+import cz.phsoft.hokej.user.dto.RegisterUserDTO;
 
 import java.util.List;
 
@@ -332,23 +334,23 @@ public interface AppUserService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.EmailVerificationTokenEntity;
-import cz.phsoft.hokej.data.entities.ForgottenPasswordResetTokenEntity;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.enums.Role;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.data.repositories.EmailVerificationTokenRepository;
-import cz.phsoft.hokej.data.repositories.ForgottenPasswordResetTokenRepository;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.EmailVerificationTokenEntity;
+import cz.phsoft.hokej.user.entities.ForgottenPasswordResetTokenEntity;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.user.enums.Role;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.user.repositories.EmailVerificationTokenRepository;
+import cz.phsoft.hokej.user.repositories.ForgottenPasswordResetTokenRepository;
 import cz.phsoft.hokej.exceptions.*;
-import cz.phsoft.hokej.models.dto.AppUserDTO;
-import cz.phsoft.hokej.models.dto.ForgottenPasswordResetDTO;
-import cz.phsoft.hokej.models.dto.RegisterUserDTO;
-import cz.phsoft.hokej.models.mappers.AppUserMapper;
+import cz.phsoft.hokej.user.dto.AppUserDTO;
+import cz.phsoft.hokej.user.dto.ForgottenPasswordResetDTO;
+import cz.phsoft.hokej.user.dto.RegisterUserDTO;
+import cz.phsoft.hokej.user.mappers.AppUserMapper;
 import cz.phsoft.hokej.models.services.email.EmailService;
-import cz.phsoft.hokej.models.services.notification.ForgottenPasswordResetContext;
-import cz.phsoft.hokej.models.services.notification.NotificationService;
-import cz.phsoft.hokej.models.services.notification.UserActivationContext;
+import cz.phsoft.hokej.notifications.services.ForgottenPasswordResetContext;
+import cz.phsoft.hokej.notifications.services.NotificationService;
+import cz.phsoft.hokej.notifications.services.UserActivationContext;
 import cz.phsoft.hokej.models.services.demo.DemoModeGuard;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -1024,9 +1026,9 @@ public class AppUserServiceImpl implements AppUserService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
-import cz.phsoft.hokej.models.dto.AppUserSettingsDTO;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.AppUserSettingsEntity;
+import cz.phsoft.hokej.user.dto.AppUserSettingsDTO;
 
 /**
  * Service se pouĹľĂ­vĂˇ pro prĂˇci s uĹľivatelskĂ˝m nastavenĂ­m.
@@ -1085,16 +1087,16 @@ public interface AppUserSettingsService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.AppUserSettingsEntity;
-import cz.phsoft.hokej.data.enums.GlobalNotificationLevel;
-import cz.phsoft.hokej.data.enums.LandingPage;
-import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
-import cz.phsoft.hokej.data.repositories.AppUserSettingsRepository;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.exceptions.UserNotFoundException;
-import cz.phsoft.hokej.models.dto.AppUserSettingsDTO;
-import cz.phsoft.hokej.models.mappers.AppUserSettingsMapper;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.AppUserSettingsEntity;
+import cz.phsoft.hokej.notifications.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.user.enums.LandingPage;
+import cz.phsoft.hokej.user.enums.PlayerSelectionMode;
+import cz.phsoft.hokej.user.repositories.AppUserSettingsRepository;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.user.exceptions.UserNotFoundException;
+import cz.phsoft.hokej.user.dto.AppUserSettingsDTO;
+import cz.phsoft.hokej.user.mappers.AppUserSettingsMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -1304,12 +1306,12 @@ public interface CurrentPlayerService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.PlayerStatus;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.exceptions.CurrentPlayerNotSelectedException;
-import cz.phsoft.hokej.exceptions.InvalidPlayerStatusException;
-import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.enums.PlayerStatus;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.exceptions.CurrentPlayerNotSelectedException;
+import cz.phsoft.hokej.player.exceptions.InvalidPlayerStatusException;
+import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
 import cz.phsoft.hokej.security.SessionKeys;
 import cz.phsoft.hokej.security.impersonation.ImpersonationContext;
 import jakarta.servlet.http.HttpSession;
@@ -1520,7 +1522,7 @@ public interface CurrentSeasonService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.models.dto.SeasonDTO;
+import cz.phsoft.hokej.season.dto.SeasonDTO;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
@@ -1641,70 +1643,1166 @@ public class CurrentSeasonServiceImpl implements CurrentSeasonService {
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\MatchHistoryService.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationCommandService.java
 -----
 package cz.phsoft.hokej.models.services;
 
-
-import cz.phsoft.hokej.models.dto.MatchHistoryDTO;
-
-import java.util.List;
+import cz.phsoft.hokej.registration.enums.ExcuseReason;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.player.enums.PlayerPosition;
+import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationRequest;
 
 /**
-     * ServisnĂ­ rozhranĂ­ pro prĂˇci s historiĂ­ zĂˇpasĹŻ.
-     *
-     * SlouĹľĂ­ pouze pro ÄŤtenĂ­ auditnĂ­ch zĂˇznamĹŻ,
-     * zĂˇpis se provĂˇdĂ­ pĹ™es databĂˇzovĂ© triggery.
-     */
-    public interface MatchHistoryService {
+ * Service vrstva pro pĹ™Ă­kazovĂ© operace nad registracemi hrĂˇÄŤĹŻ na zĂˇpasy.
+ *
+ * RozhranĂ­ se pouĹľĂ­vĂˇ pro zmÄ›ny stavu registracĂ­, zmÄ›ny tĂ˝mu a pozic,
+ * pĹ™epoÄŤet kapacity pĹ™i zmÄ›nÄ› poÄŤtu hrĂˇÄŤĹŻ a pro hromadnĂ© odesĂ­lĂˇnĂ­ SMS.
+ *
+ * NeĹ™eĹˇĂ­ ÄŤtecĂ­ operace nad registracemi (ty zĹŻstĂˇvajĂ­ v {@link MatchRegistrationService}).
+ */
+public interface MatchRegistrationCommandService {
 
-        /**
-         * VrĂˇtĂ­ historii danĂ©ho zĂˇpasu podle jeho ID.
-         *
-         * @param matchId ID zĂˇpasu z hlavnĂ­ tabulky matches
-         * @return seznam historickĂ˝ch zĂˇznamĹŻ od nejnovÄ›jĹˇĂ­ho po nejstarĹˇĂ­
-         */
-        List<MatchHistoryDTO> getHistoryForMatch(Long matchId);
+    /**
+     * VytvĂˇĹ™Ă­ nebo aktualizuje registraci hrĂˇÄŤe na zĂˇpas.
+     *
+     * @param playerId IdentifikĂˇtor hrĂˇÄŤe.
+     * @param request  PoĹľadavek na zmÄ›nu registrace.
+     * @return UloĹľenĂˇ registrace pĹ™evedenĂˇ do DTO.
+     */
+    MatchRegistrationDTO upsertRegistration(Long playerId, MatchRegistrationRequest request);
+
+    /**
+     * Nastavuje registraci hrĂˇÄŤe do stavu NO_EXCUSED.
+     *
+     * @param matchId   IdentifikĂˇtor zĂˇpasu.
+     * @param playerId  IdentifikĂˇtor hrĂˇÄŤe.
+     * @param adminNote PoznĂˇmka administrĂˇtora.
+     * @return AktualizovanĂˇ registrace pĹ™evedenĂˇ do DTO.
+     */
+    MatchRegistrationDTO markNoExcused(Long matchId, Long playerId, String adminNote);
+
+    /**
+     * RuĹˇĂ­ stav NO_EXCUSED a nastavuje registraci do stavu EXCUSED.
+     *
+     * @param matchId      IdentifikĂˇtor zĂˇpasu.
+     * @param playerId     IdentifikĂˇtor hrĂˇÄŤe.
+     * @param excuseReason DĹŻvod omluvy.
+     * @param excuseNote   PoznĂˇmka omluvy.
+     * @return AktualizovanĂˇ registrace pĹ™evedenĂˇ do DTO.
+     */
+    MatchRegistrationDTO cancelNoExcused(Long matchId,
+                                         Long playerId,
+                                         ExcuseReason excuseReason,
+                                         String excuseNote);
+
+    /**
+     * MÄ›nĂ­ tĂ˝m hrĂˇÄŤe v rĂˇmci registrace na zĂˇpas.
+     *
+     * @param playerId IdentifikĂˇtor hrĂˇÄŤe.
+     * @param matchId  IdentifikĂˇtor zĂˇpasu.
+     * @return AktualizovanĂˇ registrace pĹ™evedenĂˇ do DTO.
+     */
+    MatchRegistrationDTO changeRegistrationTeam(Long playerId, Long matchId);
+
+    /**
+     * MÄ›nĂ­ pozici hrĂˇÄŤe v rĂˇmci konkrĂ©tnĂ­ho zĂˇpasu.
+     *
+     * @param playerId        IdentifikĂˇtor hrĂˇÄŤe.
+     * @param matchId         IdentifikĂˇtor zĂˇpasu.
+     * @param positionInMatch CĂ­lovĂˇ pozice v zĂˇpase.
+     * @return AktualizovanĂˇ registrace pĹ™evedenĂˇ do DTO.
+     */
+    MatchRegistrationDTO changeRegistrationPosition(Long playerId,
+                                                    Long matchId,
+                                                    PlayerPosition positionInMatch);
+
+    /**
+     * ProvĂˇdĂ­ administrĂˇtorskou zmÄ›nu stavu registrace.
+     *
+     * @param matchId  IdentifikĂˇtor zĂˇpasu.
+     * @param playerId IdentifikĂˇtor hrĂˇÄŤe.
+     * @param status   CĂ­lovĂ˝ stav registrace.
+     * @return AktualizovanĂˇ registrace pĹ™evedenĂˇ do DTO.
+     */
+    MatchRegistrationDTO updateStatus(Long matchId,
+                                      Long playerId,
+                                      PlayerMatchStatus status);
+
+    /**
+     * PĹ™epoÄŤĂ­tĂˇvĂˇ stavy REGISTERED a RESERVED podle aktuĂˇlnĂ­ kapacity zĂˇpasu.
+     *
+     * @param matchId IdentifikĂˇtor zĂˇpasu.
+     */
+    void recalcStatusesForMatch(Long matchId);
+
+    /**
+     * PovyĹˇuje kandidĂˇty ze stavu RESERVED do stavu REGISTERED
+     * pĹ™i navĂ˝ĹˇenĂ­ kapacity zĂˇpasu.
+     *
+     * @param matchId       IdentifikĂˇtor zĂˇpasu.
+     * @param freedTeam     TĂ˝m, ve kterĂ©m se mĂ­sto uvolnilo (nebo preferovanĂ˝ tĂ˝m).
+     * @param freedPosition Pozice, kterĂˇ se uvolnila (nebo null).
+     * @param slotsCount    PoÄŤet novĂ˝ch mĂ­st, kterĂˇ se majĂ­ obsadit.
+     */
+    void promoteReservedCandidatesForCapacityIncrease(Long matchId,
+                                                      Team freedTeam,
+                                                      PlayerPosition freedPosition,
+                                                      int slotsCount);
+
+    /**
+     * OdesĂ­lĂˇ SMS zprĂˇvu vĹˇem hrĂˇÄŤĹŻm ve stavu REGISTERED,
+     * kteĹ™Ă­ majĂ­ povolenĂ© SMS notifikace.
+     *
+     * @param matchId IdentifikĂˇtor zĂˇpasu.
+     */
+    void sendSmsToRegisteredPlayers(Long matchId);
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\MatchHistoryServiceImpl.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationCommandServiceImpl.java
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.repositories.MatchHistoryRepository;
-import cz.phsoft.hokej.models.dto.MatchHistoryDTO;
-import cz.phsoft.hokej.models.mappers.MatchHistoryMapper;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.data.enums.*;
+import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.match.repositories.MatchRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.exceptions.*;
+import cz.phsoft.hokej.match.enums.MatchMode;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationRequest;
+import cz.phsoft.hokej.registration.mappers.MatchRegistrationMapper;
+import cz.phsoft.hokej.notifications.services.NotificationService;
+import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
+import cz.phsoft.hokej.models.services.sms.SmsService;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Implementace servisnĂ­ vrstvy pro prĂˇci s historiĂ­ zĂˇpasĹŻ.
+ * Implementace pĹ™Ă­kazovĂ© service vrstvy pro sprĂˇvu registracĂ­ hrĂˇÄŤĹŻ na zĂˇpasy.
  *
- * ZajiĹˇĹĄuje pĹ™evod entit na DTO a volĂˇnĂ­ repozitĂˇĹ™e.
- * NemÄ›nĂ­ ani nevytvĂˇĹ™Ă­ historickĂ© zĂˇznamy â€“ o to se starajĂ­
- * databĂˇzovĂ© triggery.
+ * Tato tĹ™Ă­da zajiĹˇĹĄuje veĹˇkerĂ© zmÄ›ny stavĹŻ registracĂ­, zmÄ›ny tĂ˝mĹŻ a pozic,
+ * pĹ™epoÄŤet kapacity zĂˇpasu pĹ™i zmÄ›nÄ› poÄŤtu hrĂˇÄŤĹŻ a hromadnĂ© odesĂ­lĂˇnĂ­ SMS.
+ *
+ * TĹ™Ă­da obsahuje business logiku registracĂ­ a souvisejĂ­cĂ­ch pravidel.
+ * NeĹ™eĹˇĂ­ ÄŤtecĂ­ operace nad registracemi, kterĂ© zĹŻstĂˇvajĂ­ v {@link MatchRegistrationService}.
  */
 @Service
-public class MatchHistoryServiceImpl implements MatchHistoryService {
+public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCommandService {
 
-    private final MatchHistoryRepository repository;
-    private final MatchHistoryMapper mapper;
+    private static final Logger log = LoggerFactory.getLogger(MatchRegistrationCommandServiceImpl.class);
 
-    public MatchHistoryServiceImpl(
-            MatchHistoryRepository repository,
-            MatchHistoryMapper mapper
+    private final MatchRegistrationRepository registrationRepository;
+    private final MatchRepository matchRepository;
+    private final PlayerRepository playerRepository;
+    private final MatchRegistrationMapper matchRegistrationMapper;
+    private final SmsService smsService;
+    private final SmsMessageBuilder smsMessageBuilder;
+    private final NotificationService notificationService;
+
+    public MatchRegistrationCommandServiceImpl(
+            MatchRegistrationRepository registrationRepository,
+            MatchRepository matchRepository,
+            PlayerRepository playerRepository,
+            MatchRegistrationMapper matchRegistrationMapper,
+            SmsService smsService,
+            SmsMessageBuilder smsMessageBuilder,
+            NotificationService notificationService
     ) {
-        this.repository = repository;
-        this.mapper = mapper;
+        this.registrationRepository = registrationRepository;
+        this.matchRepository = matchRepository;
+        this.playerRepository = playerRepository;
+        this.matchRegistrationMapper = matchRegistrationMapper;
+        this.smsService = smsService;
+        this.smsMessageBuilder = smsMessageBuilder;
+        this.notificationService = notificationService;
     }
 
+    // ==========================================
+    // HLAVNĂŤ METODA â€“ UPSERT REGISTRACE HRĂÄŚE
+    // ==========================================
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<MatchHistoryDTO> getHistoryForMatch(Long matchId) {
-        return mapper.toDTOList(
-                repository.findByMatchIdOrderByChangedAtDesc(matchId)
+    @Transactional
+    public MatchRegistrationDTO upsertRegistration(Long playerId, MatchRegistrationRequest request) {
+
+        MatchEntity match = getMatchOrThrow(request.getMatchId());
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        // OvÄ›Ĺ™enĂ­, Ĺľe zĂˇpas patĹ™Ă­ do aktivnĂ­ sezĂłny.
+        assertMatchInActiveSeason(match);
+
+        // OvÄ›Ĺ™enĂ­ oprĂˇvnÄ›nĂ­ hrĂˇÄŤe mÄ›nit registraci v ÄŤase.
+        assertPlayerCanModifyMatch(match);
+
+        MatchRegistrationEntity registration =
+                getRegistrationOrNull(playerId, request.getMatchId());
+
+        if (registration == null && !request.isUnregister()) {
+            registration = new MatchRegistrationEntity();
+            registration.setMatch(match);
+            registration.setPlayer(player);
+        }
+
+        PlayerMatchStatus originalStatus =
+                (registration != null) ? registration.getStatus() : null;
+
+        PlayerMatchStatus newStatus;
+
+        if (request.isUnregister()) {
+            newStatus = handleUnregister(request, playerId, registration);
+        } else if (request.getExcuseReason() != null) {
+            newStatus = handleExcuse(request, match, player, registration);
+        } else {
+            newStatus = handleRegisterOrReserveOrSubstitute(request, match, player, registration);
+        }
+
+        applyRequestDetails(registration, request);
+
+        registration.setStatus(newStatus);
+        registration.setTimestamp(now());
+        registration.setCreatedBy("user");
+
+        registration = registrationRepository.save(registration);
+
+        // Po odhlĂˇĹˇenĂ­ ze stavu REGISTERED se provede pokus o povĂ˝ĹˇenĂ­
+        // nejvhodnÄ›jĹˇĂ­ho kandidĂˇta ze stavu RESERVED.
+        if (request.isUnregister() && originalStatus == PlayerMatchStatus.REGISTERED) {
+            promoteReservedCandidateAfterUnregister(match, registration);
+        }
+
+        NotificationType notificationType = resolveNotificationType(newStatus);
+        if (notificationType != null) {
+            notifyPlayer(player, notificationType, registration);
+        }
+
+        return matchRegistrationMapper.toDTO(registration);
+    }
+
+    // ==========================================
+    // OMLUVY A NO_EXCUSED
+    // ==========================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public MatchRegistrationDTO markNoExcused(Long matchId,
+                                              Long playerId,
+                                              String adminNote) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        if (match.getDateTime().isAfter(now())) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Status NO_EXCUSED lze nastavit pouze u jiĹľ probÄ›hlĂ©ho zĂˇpasu."
+            );
+        }
+
+        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
+
+        if (registration.getStatus() != PlayerMatchStatus.REGISTERED) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Status NO_EXCUSED lze nastavit pouze z registrace REGISTERED."
+            );
+        }
+
+        registration.setExcuseReason(null);
+        registration.setExcuseNote(null);
+
+        if (adminNote == null || adminNote.isBlank()) {
+            registration.setAdminNote("Nedostavil se bez omluvy");
+        } else {
+            registration.setAdminNote(adminNote);
+        }
+
+        MatchRegistrationEntity updated =
+                updateRegistrationStatus(
+                        registration,
+                        PlayerMatchStatus.NO_EXCUSED,
+                        "admin",
+                        true
+                );
+
+        PlayerMatchStatus newStatus = PlayerMatchStatus.NO_EXCUSED;
+
+        NotificationType notificationType = resolveNotificationType(newStatus);
+        if (notificationType != null) {
+            notifyPlayer(player, notificationType, updated);
+        }
+
+        return matchRegistrationMapper.toDTO(updated);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public MatchRegistrationDTO cancelNoExcused(Long matchId,
+                                                Long playerId,
+                                                ExcuseReason excuseReason,
+                                                String excuseNote) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        getPlayerOrThrow(playerId);
+
+        if (match.getDateTime().isAfter(now())) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Status EXCUSED po NO-EXCUSED lze nastavit pouze u jiĹľ probÄ›hlĂ©ho zĂˇpasu."
+            );
+        }
+
+        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
+
+        if (registration.getStatus() != PlayerMatchStatus.NO_EXCUSED) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Status EXCUSED (zruĹˇenĂ­ neomluvenĂ­) lze nastavit pouze u hrĂˇÄŤe se statutem NO_EXCUSED."
+            );
+        }
+
+        registration.setExcuseReason(excuseReason != null ? excuseReason : ExcuseReason.JINE);
+        registration.setAdminNote(null);
+        if (excuseNote == null || excuseNote.isBlank()) {
+            registration.setExcuseNote("Opravdu nemohl");
+        } else {
+            registration.setExcuseNote(excuseNote);
+        }
+
+        MatchRegistrationEntity updated =
+                updateRegistrationStatus(
+                        registration,
+                        PlayerMatchStatus.EXCUSED,
+                        "manager",
+                        true
+                );
+
+        return matchRegistrationMapper.toDTO(updated);
+    }
+
+    // ==========================================
+    // ZMÄšNY TĂťMU A POZICE
+    // ==========================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public MatchRegistrationDTO changeRegistrationTeam(Long playerId,
+                                                       Long matchId) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            log.debug("changeRegistrationTeam â€“ current user: {}", auth.getName());
+            log.debug("changeRegistrationTeam â€“ authorities: {}", auth.getAuthorities());
+        } else {
+            log.debug("changeRegistrationTeam â€“ no authenticated user");
+        }
+
+        if (match.getDateTime().isBefore(now()) && isCurrentUserPlayer()) {
+            throw new InvalidMatchDateTimeException(
+                    "BE - Team lze zmÄ›nit pouze u zĂˇpasĹŻ, kterĂ© teprve budou."
+            );
+        }
+
+        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
+        Team oldTeam = registration.getTeam();
+
+        if (registration.getStatus() != PlayerMatchStatus.REGISTERED) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Team lze zmÄ›nit pouze z registrace REGISTERED."
+            );
+        }
+
+        PlayerMatchStatus newStatus = PlayerMatchStatus.REGISTERED;
+        Team newTeam = oldTeam.opposite();
+
+        registration.setTeam(newTeam);
+
+        registration = registrationRepository.save(registration);
+        NotificationType notificationType = resolveNotificationType(newStatus);
+        if (notificationType != null) {
+            notifyPlayer(player, notificationType, registration);
+        }
+        return matchRegistrationMapper.toDTO(registration);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public MatchRegistrationDTO changeRegistrationPosition(Long playerId,
+                                                           Long matchId,
+                                                           PlayerPosition positionInMatch) {
+
+        MatchEntity match = getMatchOrThrow(matchId);
+        PlayerEntity player = getPlayerOrThrow(playerId);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            log.debug("changeRegistrationPosition â€“ current user: {}", auth.getName());
+            log.debug("changeRegistrationPosition â€“ authorities: {}", auth.getAuthorities());
+        } else {
+            log.debug("changeRegistrationPosition â€“ no authenticated user");
+        }
+
+        if (match.getDateTime().isBefore(now()) && isCurrentUserPlayer()) {
+            throw new InvalidMatchDateTimeException(
+                    "BE - Pozici lze zmÄ›nit pouze u zĂˇpasĹŻ, kterĂ© teprve budou."
+            );
+        }
+
+        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
+
+        if (registration.getStatus() == PlayerMatchStatus.UNREGISTERED
+                || registration.getStatus() == PlayerMatchStatus.NO_EXCUSED
+                || registration.getStatus() == PlayerMatchStatus.EXCUSED) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Pozici lze mÄ›nit pouze u aktivnĂ­ch registracĂ­ (REGISTERED, RESERVED, SUBSTITUTE)."
+            );
+        }
+
+        registration.setPositionInMatch(positionInMatch);
+
+        registration = registrationRepository.save(registration);
+
+        return matchRegistrationMapper.toDTO(registration);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public MatchRegistrationDTO updateStatus(Long matchId,
+                                             Long playerId,
+                                             PlayerMatchStatus status) {
+
+        getMatchOrThrow(matchId);
+        getPlayerOrThrow(playerId);
+
+        if (status == PlayerMatchStatus.NO_EXCUSED) {
+            throw new InvalidPlayerStatusException(
+                    "BE - Status NO_EXCUSED musĂ­ bĂ˝t nastaven pĹ™es speciĂˇlnĂ­ endpoint / logiku."
+            );
+        }
+
+        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
+
+        MatchRegistrationEntity updated =
+                updateRegistrationStatus(registration, status, "admin", true);
+
+        return matchRegistrationMapper.toDTO(updated);
+    }
+
+    // ==========================================
+    // PĹEPOÄŚET KAPACITY
+    // ==========================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void recalcStatusesForMatch(Long matchId) {
+        MatchEntity match = getMatchOrThrow(matchId);
+        Integer maxPlayersObj = match.getMaxPlayers();
+
+        if (maxPlayersObj == null || maxPlayersObj <= 0) {
+            return;
+        }
+
+        int maxPlayers = maxPlayersObj;
+
+        // Kolik slotĹŻ se rezervuje pro brankĂˇĹ™e v rĂˇmci maxPlayers.
+        int goalieSlots = getGoalieSlotsForMatch(match);
+        if (goalieSlots < 0) {
+            goalieSlots = 0;
+        }
+        if (goalieSlots > maxPlayers) {
+            goalieSlots = maxPlayers;
+        }
+
+        int skaterCapacity = maxPlayers - goalieSlots;
+
+        // VĹˇichni aktuĂˇlnÄ› REGISTERED, seĹ™azenĂ­ podle ÄŤasu registrace.
+        List<MatchRegistrationEntity> allRegistered = registrationRepository.findByMatchId(matchId).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .toList();
+
+        // RozdÄ›lenĂ­ na brankĂˇĹ™e a hrĂˇÄŤe v poli.
+        List<MatchRegistrationEntity> goalies = allRegistered.stream()
+                .filter(this::isGoalieRegistration)
+                .toList();
+
+        List<MatchRegistrationEntity> skaters = allRegistered.stream()
+                .filter(r -> !isGoalieRegistration(r))
+                .toList();
+
+        int registeredGoalies = goalies.size();
+        int registeredSkaters = skaters.size();
+
+        // Pokud celkovĂ˝ poÄŤet hrĂˇÄŤĹŻ nepĹ™esahuje kapacitu a poÄŤet hrĂˇÄŤĹŻ v poli
+        // nepĹ™esahuje skaterCapacity, nenĂ­ tĹ™eba nic mÄ›nit.
+        if (registeredGoalies + registeredSkaters <= maxPlayers
+                && registeredSkaters <= skaterCapacity) {
+            return;
+        }
+
+        // 1) BrankĂˇĹ™i â€“ ponechajĂ­ se REGISTERED pouze do vĂ˝Ĺˇe goalieSlots,
+        //    pĹ™Ă­padnĂ­ dalĹˇĂ­ brankĂˇĹ™i se pĹ™esunou do RESERVED.
+        int allowedGoalies = Math.min(goalieSlots, maxPlayers);
+        int keptGoalies = 0;
+
+        for (MatchRegistrationEntity goalieReg : goalies) {
+            if (keptGoalies < allowedGoalies) {
+                updateRegistrationStatus(goalieReg, PlayerMatchStatus.REGISTERED, "system", false);
+                keptGoalies++;
+            } else {
+                updateRegistrationStatus(goalieReg, PlayerMatchStatus.RESERVED, "system", false);
+            }
+        }
+
+        // 2) HrĂˇÄŤi v poli â€“ pĹ™epoÄŤet jen nad skaters s kapacitou skaterCapacity.
+        if (registeredSkaters <= skaterCapacity) {
+            return;
+        }
+
+        int desiredTotal = skaterCapacity;
+
+        // AktuĂˇlnĂ­ rozloĹľenĂ­ hrĂˇÄŤĹŻ v poli â€“ vyuĹľĂ­vĂˇ se pĹ™i rozhodovĂˇnĂ­,
+        // kterĂ˝ tĂ˝m dostane pĹ™Ă­padnĂ© "lichĂ©" extra mĂ­sto.
+        long currentDark = skaters.stream()
+                .filter(r -> r.getTeam() == Team.DARK)
+                .count();
+        long currentLight = skaters.stream()
+                .filter(r -> r.getTeam() == Team.LIGHT)
+                .count();
+
+        int targetDark;
+        int targetLight;
+
+        if (desiredTotal % 2 == 0) {
+            // RovnomÄ›rnĂ© rozdÄ›lenĂ­.
+            targetDark = desiredTotal / 2;
+            targetLight = desiredTotal / 2;
+        } else {
+            // LichĂ˝ poÄŤet â€“ jeden tĂ˝m mĂˇ o 1 vĂ­ce, upĹ™ednostnĂ­ se aktuĂˇlnÄ› vÄ›tĹˇĂ­ tĂ˝m.
+            if (currentDark >= currentLight) {
+                targetDark = desiredTotal / 2 + 1;
+                targetLight = desiredTotal - targetDark;
+            } else {
+                targetLight = desiredTotal / 2 + 1;
+                targetDark = desiredTotal - targetLight;
+            }
+        }
+
+        int dark = 0;
+        int light = 0;
+
+        for (MatchRegistrationEntity reg : skaters) {
+            Team team = reg.getTeam();
+            boolean movable = canAutoMoveTeam(reg); // VyuĹľitĂ­ PlayerSettings.isPossibleMoveToAnotherTeam().
+
+            // HrĂˇÄŤ bez pĹ™iĹ™azenĂ©ho tĂ˝mu â€“ pĹ™iĹ™adĂ­ se tam, kde je volno.
+            if (team == null) {
+                if (dark < targetDark) {
+                    reg.setTeam(Team.DARK);
+                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                    dark++;
+                } else if (light < targetLight) {
+                    reg.setTeam(Team.LIGHT);
+                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                    light++;
+                } else {
+                    updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                }
+                continue;
+            }
+
+            if (team == Team.DARK) {
+                if (!movable) {
+                    if (dark < targetDark) {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        dark++;
+                    } else {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                    }
+                } else {
+                    if (dark < targetDark) {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        dark++;
+                    } else if (light < targetLight) {
+                        reg.setTeam(Team.LIGHT);
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        light++;
+                    } else {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                    }
+                }
+            } else if (team == Team.LIGHT) {
+                if (!movable) {
+                    if (light < targetLight) {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        light++;
+                    } else {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                    }
+                } else {
+                    if (light < targetLight) {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        light++;
+                    } else if (dark < targetDark) {
+                        reg.setTeam(Team.DARK);
+                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
+                        dark++;
+                    } else {
+                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+                    }
+                }
+            } else {
+                // NeznĂˇmĂ˝ tĂ˝m â€“ konzervativnÄ› do RESERVED.
+                updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void promoteReservedCandidatesForCapacityIncrease(Long matchId,
+                                                             Team freedTeam,
+                                                             PlayerPosition freedPosition,
+                                                             int slotsCount) {
+
+        if (slotsCount <= 0) {
+            return;
+        }
+
+        MatchEntity match = getMatchOrThrow(matchId);
+
+        long registeredCount = registrationRepository
+                .countByMatchIdAndStatus(matchId, PlayerMatchStatus.REGISTERED);
+
+        int maxPlayers = match.getMaxPlayers();
+
+        int remainingSlotsToFill = Math.min(slotsCount, maxPlayers - (int) registeredCount);
+        if (remainingSlotsToFill <= 0) {
+            return;
+        }
+
+        List<MatchRegistrationEntity> reserved = registrationRepository
+                .findByMatchIdAndStatus(matchId, PlayerMatchStatus.RESERVED)
+                .stream()
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .toList();
+
+        for (MatchRegistrationEntity candidate : reserved) {
+            if (remainingSlotsToFill <= 0) {
+                break;
+            }
+
+            boolean promoted = tryPromoteCandidateToFreedSlot(
+                    candidate,
+                    freedTeam,
+                    freedPosition
+            );
+
+            if (promoted) {
+                remainingSlotsToFill--;
+            }
+        }
+    }
+
+    // SMS â€“ HROMADNĂ‰ ODESĂŤLĂNĂŤ
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void sendSmsToRegisteredPlayers(Long matchId) {
+        registrationRepository.findByMatchId(matchId).stream()
+                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
+                .forEach(r -> {
+                    PlayerEntity player = r.getPlayer();
+                    if (player == null) {
+                        return;
+                    }
+
+                    var settings = player.getSettings();
+                    if (settings == null || !settings.isSmsEnabled()) {
+                        return;
+                    }
+
+                    sendSms(r, smsMessageBuilder.buildMessageFinal(r));
+                });
+    }
+    // PRIVĂTNĂŤ METODY
+
+
+    private PlayerMatchStatus handleRegisterOrReserveOrSubstitute(
+            MatchRegistrationRequest request,
+            MatchEntity match,
+            PlayerEntity player,
+            MatchRegistrationEntity registration
+    ) {
+        PlayerMatchStatus currentStatus =
+                (registration != null) ? registration.getStatus() : null;
+
+        boolean isAlreadyRegistered = currentStatus == PlayerMatchStatus.REGISTERED;
+
+        if (isAlreadyRegistered) {
+            throw new DuplicateRegistrationException(request.getMatchId(), player.getId());
+        }
+
+        // Registrace jako nĂˇhradnĂ­k (SUBSTITUTE) â€“ hrĂˇÄŤ je oznaÄŤen jako â€žmoĹľnĂˇâ€ś
+        // a neblokuje kapacitu ani poĹ™adĂ­.
+        if (request.isSubstitute()) {
+            if (currentStatus == PlayerMatchStatus.SUBSTITUTE) {
+                throw new DuplicateRegistrationException(
+                        request.getMatchId(),
+                        player.getId(),
+                        "HrĂˇÄŤ jiĹľ mĂˇ zaregistrovĂˇno - moĹľnĂˇ"
+                );
+            }
+
+            clearExcuseIfNeeded(registration);
+            return PlayerMatchStatus.SUBSTITUTE;
+        }
+
+        PlayerMatchStatus newStatus =
+                isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
+
+        clearExcuseIfNeeded(registration);
+        return newStatus;
+    }
+
+    private PlayerMatchStatus handleUnregister(
+            MatchRegistrationRequest request,
+            Long playerId,
+            MatchRegistrationEntity registration
+    ) {
+        boolean isAllowedUnregisterStatus =
+                registration != null
+                        && (registration.getStatus() == PlayerMatchStatus.REGISTERED
+                        || registration.getStatus() == PlayerMatchStatus.RESERVED);
+
+        if (!isAllowedUnregisterStatus) {
+            throw new RegistrationNotFoundException(request.getMatchId(), playerId);
+        }
+
+        registration.setExcuseReason(request.getExcuseReason());
+        registration.setExcuseNote(request.getExcuseNote());
+
+        return PlayerMatchStatus.UNREGISTERED;
+    }
+
+    private PlayerMatchStatus handleExcuse(
+            MatchRegistrationRequest request,
+            MatchEntity match,
+            PlayerEntity player,
+            MatchRegistrationEntity registration
+    ) {
+        boolean isNoResponseOrSubstitute =
+                (registration == null
+                        || registration.getStatus() == null
+                        || registration.getStatus() == PlayerMatchStatus.SUBSTITUTE
+                        || registration.getStatus() == PlayerMatchStatus.NO_EXCUSED);
+
+        if (!isNoResponseOrSubstitute) {
+            throw new DuplicateRegistrationException(
+                    request.getMatchId(),
+                    player.getId(),
+                    "BE - Omluva je moĹľnĂˇ pouze pokud hrĂˇÄŤ dosud nereagoval na zĂˇpas, nebo byl nĂˇhradnĂ­k."
+            );
+        }
+
+        registration.setExcuseReason(request.getExcuseReason());
+        registration.setExcuseNote(request.getExcuseNote());
+
+        return PlayerMatchStatus.EXCUSED;
+    }
+
+    private void applyRequestDetails(MatchRegistrationEntity registration,
+                                     MatchRegistrationRequest request) {
+
+        if (request.getTeam() != null) {
+            registration.setTeam(request.getTeam());
+        }
+
+        if (request.getAdminNote() != null) {
+            registration.setAdminNote(request.getAdminNote());
+        }
+
+        if (request.getExcuseReason() != null) {
+            registration.setExcuseReason(request.getExcuseReason());
+        }
+
+        if (request.getExcuseNote() != null) {
+            registration.setExcuseNote(request.getExcuseNote());
+        }
+
+        if (request.getPositionInMatch() != null) {
+            registration.setPositionInMatch(request.getPositionInMatch());
+        }
+    }
+
+    private void clearExcuseIfNeeded(MatchRegistrationEntity registration) {
+        if (registration == null) {
+            return;
+        }
+        if (registration.getExcuseReason() != null || registration.getExcuseNote() != null) {
+            registration.setExcuseReason(null);
+            registration.setExcuseNote(null);
+        }
+    }
+
+    private void promoteReservedCandidateAfterUnregister(MatchEntity match,
+                                                         MatchRegistrationEntity canceledRegistration) {
+
+        if (match == null || canceledRegistration == null) {
+            return;
+        }
+
+        Team freedTeam = canceledRegistration.getTeam();
+        PlayerPosition freedPosition = canceledRegistration.getPositionInMatch();
+
+        List<MatchRegistrationEntity> reserved = registrationRepository
+                .findByMatchIdAndStatus(match.getId(), PlayerMatchStatus.RESERVED)
+                .stream()
+                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .toList();
+
+        for (MatchRegistrationEntity candidate : reserved) {
+            if (tryPromoteCandidateToFreedSlot(candidate, freedTeam, freedPosition)) {
+                log.debug(
+                        "promoteReservedCandidateAfterUnregister: matchId={}, candidateId={}, freedTeam={}, freedPosition={}",
+                        match.getId(),
+                        candidate.getId(),
+                        freedTeam,
+                        freedPosition
+                );
+                break;
+            }
+        }
+    }
+
+    private boolean tryPromoteCandidateToFreedSlot(MatchRegistrationEntity candidate,
+                                                   Team freedTeam,
+                                                   PlayerPosition freedPosition) {
+
+        if (candidate == null || candidate.getPlayer() == null) {
+            return false;
+        }
+
+        PlayerEntity player = candidate.getPlayer();
+        var settings = player.getSettings();
+
+        boolean canMoveTeam =
+                settings != null && settings.isPossibleMoveToAnotherTeam();
+        boolean canChangePosition =
+                settings != null && settings.isPossibleChangePlayerPosition();
+
+        Team currentTeam = candidate.getTeam();
+        PlayerPosition currentPositionInMatch = candidate.getPositionInMatch();
+        PlayerPosition primaryPosition = player.getPrimaryPosition();
+
+        PlayerPosition effectiveCurrentPosition =
+                (currentPositionInMatch != null) ? currentPositionInMatch : primaryPosition;
+
+        // 1) VyhodnocenĂ­ cĂ­lovĂ©ho tĂ˝mu.
+        Team targetTeam;
+        if (freedTeam == null || currentTeam == freedTeam) {
+            targetTeam = currentTeam;
+        } else {
+            if (!canMoveTeam) {
+                return false;
+            }
+            targetTeam = freedTeam;
+        }
+
+        // 2) VyhodnocenĂ­ cĂ­lovĂ© pozice s ohledem na GOALIE a zmÄ›nu Ĺ™ady.
+        PlayerPosition targetPosition = resolveTargetPosition(
+                effectiveCurrentPosition,
+                freedPosition,
+                canChangePosition
         );
+
+        if (targetPosition == null) {
+            return false;
+        }
+
+        candidate.setTeam(targetTeam);
+        candidate.setPositionInMatch(targetPosition);
+
+        MatchRegistrationEntity updated =
+                updateRegistrationStatus(candidate, PlayerMatchStatus.REGISTERED, "system", false);
+
+        NotificationType type = resolveNotificationType(PlayerMatchStatus.REGISTERED);
+        if (type != null) {
+            notifyPlayer(player, type, updated);
+        }
+
+        return true;
+    }
+
+    private PlayerPosition resolveTargetPosition(PlayerPosition currentPosition,
+                                                 PlayerPosition freedPosition,
+                                                 boolean canChangePosition) {
+
+        if (freedPosition == null) {
+            return currentPosition;
+        }
+
+        // GOALIE â€“ speciĂˇlnĂ­ pravidlo: pouze kandidĂˇt, kterĂ˝ je jiĹľ veden jako GOALIE.
+        if (freedPosition == PlayerPosition.GOALIE) {
+            if (currentPosition == PlayerPosition.GOALIE) {
+                return PlayerPosition.GOALIE;
+            }
+            return null;
+        }
+
+        // KandidĂˇt s ANY (nezĂˇleĹľĂ­) â€“ mĹŻĹľe obsadit libovolnou ne-brankĂˇĹ™skou pozici.
+        if (currentPosition == null || currentPosition == PlayerPosition.ANY) {
+            return freedPosition;
+        }
+
+        // StejnĂˇ pozice = vĹľdy povoleno.
+        if (currentPosition == freedPosition) {
+            return currentPosition;
+        }
+
+        boolean currentIsDefense = isDefensePosition(currentPosition);
+        boolean freedIsDefense = isDefensePosition(freedPosition);
+        boolean currentIsForward = isForwardPosition(currentPosition);
+        boolean freedIsForward = isForwardPosition(freedPosition);
+
+        boolean sameLine =
+                (currentIsDefense && freedIsDefense) ||
+                        (currentIsForward && freedIsForward);
+
+        if (sameLine) {
+            // ZmÄ›na v rĂˇmci obrany nebo Ăştoku je povolena vĹľdy.
+            return freedPosition;
+        }
+
+        boolean crossLine =
+                (currentIsDefense && freedIsForward) ||
+                        (currentIsForward && freedIsDefense);
+
+        if (crossLine) {
+            // PĹ™echod mezi obranou a Ăştokem pouze pokud to hrĂˇÄŤ povolil v nastavenĂ­.
+            if (!canChangePosition) {
+                return null;
+            }
+            return freedPosition;
+        }
+
+        return null;
+    }
+
+    private boolean isGoalieRegistration(MatchRegistrationEntity registration) {
+        if (registration == null || registration.getPlayer() == null) {
+            return false;
+        }
+
+        PlayerPosition position = registration.getPositionInMatch();
+        if (position == null) {
+            position = registration.getPlayer().getPrimaryPosition();
+        }
+
+        return position == PlayerPosition.GOALIE;
+    }
+
+    private int getGoalieSlotsForMatch(MatchEntity match) {
+        MatchMode mode = match.getMatchMode();
+        if (mode == null) {
+            return 0;
+        }
+        return switch (mode) {
+            case THREE_ON_THREE_WITH_GOALIE -> 2;
+            case FOUR_ON_FOUR_WITH_GOALIE -> 2;
+            case FIVE_ON_FIVE_WITH_GOALIE -> 2;
+            default -> 0;
+        };
+    }
+
+    private boolean isDefensePosition(PlayerPosition position) {
+        return position != null && position.isDefense();
+    }
+
+    private boolean isForwardPosition(PlayerPosition position) {
+        return position != null && position.isForward();
+    }
+
+    private boolean canAutoMoveTeam(MatchRegistrationEntity registration) {
+        if (registration == null || registration.getPlayer() == null) {
+            return false;
+        }
+
+        PlayerEntity player = registration.getPlayer();
+        var settings = player.getSettings();
+        if (settings == null) {
+            return false;
+        }
+
+        return settings.isPossibleMoveToAnotherTeam();
+    }
+
+    private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {
+        notificationService.notifyPlayer(player, type, context);
+    }
+
+    private MatchEntity getMatchOrThrow(Long matchId) {
+        return matchRepository.findById(matchId)
+                .orElseThrow(() -> new MatchNotFoundException(matchId));
+    }
+
+    private PlayerEntity getPlayerOrThrow(Long playerId) {
+        return playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+    }
+
+    private MatchRegistrationEntity getRegistrationOrNull(Long playerId, Long matchId) {
+        return registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElse(null);
+    }
+
+    private MatchRegistrationEntity getRegistrationOrThrow(Long playerId, Long matchId) {
+        return registrationRepository
+                .findByPlayerIdAndMatchId(playerId, matchId)
+                .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
+    }
+
+    private boolean isSlotAvailable(MatchEntity match) {
+        long registeredCount = registrationRepository
+                .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
+        return registeredCount < match.getMaxPlayers();
+    }
+
+    private void sendSms(MatchRegistrationEntity registration, String message) {
+        if (registration == null || registration.getPlayer() == null) {
+            return;
+        }
+
+        PlayerEntity player = registration.getPlayer();
+        var settings = player.getSettings();
+
+        String phone = null;
+        if (settings != null && settings.getContactPhone() != null && !settings.getContactPhone().isBlank()) {
+            phone = settings.getContactPhone();
+        } else if (player.getPhoneNumber() != null && !player.getPhoneNumber().isBlank()) {
+            phone = player.getPhoneNumber();
+        }
+
+        if (phone == null || phone.isBlank()) {
+            log.debug("sendSms: hrĂˇÄŤ {} nemĂˇ ĹľĂˇdnĂ© telefonnĂ­ ÄŤĂ­slo â€“ SMS se nepoĹˇle", player.getId());
+            return;
+        }
+
+        try {
+            smsService.sendSms(phone, message);
+        } catch (Exception e) {
+            log.error(
+                    "Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS pro registraci {}: {}",
+                    registration.getId(),
+                    e.getMessage(),
+                    e
+            );
+        }
+    }
+
+    private MatchRegistrationEntity updateRegistrationStatus(
+            MatchRegistrationEntity registration,
+            PlayerMatchStatus status,
+            String updatedBy,
+            boolean updateTimestamp
+    ) {
+        registration.setStatus(status);
+        registration.setCreatedBy(updatedBy);
+        if (updateTimestamp) {
+            registration.setTimestamp(LocalDateTime.now());
+        }
+        return registrationRepository.saveAndFlush(registration);
+    }
+
+    private NotificationType resolveNotificationType(PlayerMatchStatus newStatus) {
+        return switch (newStatus) {
+            case REGISTERED -> NotificationType.MATCH_REGISTRATION_CREATED;
+            case UNREGISTERED -> NotificationType.MATCH_REGISTRATION_CANCELED;
+            case EXCUSED -> NotificationType.PLAYER_EXCUSED;
+            case RESERVED -> NotificationType.MATCH_REGISTRATION_RESERVED;
+            case NO_RESPONSE -> NotificationType.MATCH_REGISTRATION_NO_RESPONSE;
+            case SUBSTITUTE -> NotificationType.MATCH_REGISTRATION_SUBSTITUTE;
+            case NO_EXCUSED -> NotificationType.PLAYER_NO_EXCUSED;
+            default -> null;
+        };
+    }
+
+    private LocalDateTime now() {
+        return LocalDateTime.now();
+    }
+
+    private void assertMatchInActiveSeason(MatchEntity match) {
+        if (match.getSeason() == null || !match.getSeason().isActive()) {
+            throw new InvalidSeasonStateException(
+                    "BE - Registrace lze mÄ›nit pouze u zĂˇpasĹŻ v aktivnĂ­ sezĂłnÄ›."
+            );
+        }
+    }
+
+    private void assertPlayerCanModifyMatch(MatchEntity match) {
+        if (!isCurrentUserPlayer()) {
+            return;
+        }
+
+        if (!isMatchEditableForPlayer(match)) {
+            throw new InvalidPlayerStatusException(
+                    "BE - HrĂˇÄŤ mĹŻĹľe mÄ›nit registraci pouze do 30 minut po zaÄŤĂˇtku zĂˇpasu."
+            );
+        }
+    }
+
+    private boolean isMatchEditableForPlayer(MatchEntity match) {
+        LocalDateTime editLimit = match.getDateTime().plusMinutes(30);
+        return now().isBefore(editLimit);
+    }
+
+    private boolean isCurrentUserPlayer() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            return false;
+        }
+
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_PLAYER".equals(a.getAuthority()));
     }
 }
 
@@ -1713,7 +2811,7 @@ public class MatchHistoryServiceImpl implements MatchHistoryService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationHistoryDTO;
 
 import java.util.List;
 
@@ -1766,12 +2864,12 @@ public interface MatchRegistrationHistoryService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.repositories.MatchRegistrationHistoryRepository;
-import cz.phsoft.hokej.data.repositories.MatchRepository;
-import cz.phsoft.hokej.exceptions.MatchNotFoundException;
-import cz.phsoft.hokej.models.dto.MatchRegistrationHistoryDTO;
-import cz.phsoft.hokej.models.mappers.MatchRegistrationHistoryMapper;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.repositories.MatchRegistrationHistoryRepository;
+import cz.phsoft.hokej.match.repositories.MatchRepository;
+import cz.phsoft.hokej.match.exceptions.MatchNotFoundException;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationHistoryDTO;
+import cz.phsoft.hokej.registration.mappers.MatchRegistrationHistoryMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -1878,15 +2976,261 @@ public class MatchRegistrationHistoryServiceImpl implements MatchRegistrationHis
 }
 
 -----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationQueryService.java
+-----
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
+
+import java.util.List;
+
+/**
+ * Service vrstva pro ÄŤtecĂ­ operace nad registracemi hrĂˇÄŤĹŻ.
+ *
+ * Poskytuje pĹ™ehledy registracĂ­ a hrĂˇÄŤĹŻ podle zĂˇpasĹŻ a sezĂłny.
+ */
+public interface MatchRegistrationQueryService {
+
+    List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId);
+
+    List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds);
+
+    List<MatchRegistrationDTO> getAllRegistrations();
+
+    List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId);
+
+    List<PlayerDTO> getNoResponsePlayers(Long matchId);
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationQueryServiceImpl.java
+-----
+package cz.phsoft.hokej.models.services;
+
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.match.repositories.MatchRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.match.exceptions.MatchNotFoundException;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
+import cz.phsoft.hokej.registration.mappers.MatchRegistrationMapper;
+import cz.phsoft.hokej.player.mappers.PlayerMapper;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class MatchRegistrationQueryServiceImpl implements MatchRegistrationQueryService{
+    private final MatchRegistrationRepository registrationRepository;
+    private final MatchRepository matchRepository;
+    private final PlayerRepository playerRepository;
+    private final MatchRegistrationMapper matchRegistrationMapper;
+    private final PlayerMapper playerMapper;
+    private final SeasonService seasonService;
+    private final CurrentSeasonService currentSeasonService;
+
+    public MatchRegistrationQueryServiceImpl(
+            MatchRegistrationRepository registrationRepository,
+            MatchRepository matchRepository,
+            PlayerRepository playerRepository,
+            MatchRegistrationMapper matchRegistrationMapper,
+            PlayerMapper playerMapper,
+            SeasonService seasonService,
+            CurrentSeasonService currentSeasonService
+    ) {
+        this.registrationRepository = registrationRepository;
+        this.matchRepository = matchRepository;
+        this.playerRepository = playerRepository;
+        this.matchRegistrationMapper = matchRegistrationMapper;
+        this.playerMapper = playerMapper;
+        this.seasonService = seasonService;
+        this.currentSeasonService = currentSeasonService;
+    }
+
+    /**
+     * VracĂ­ registrace pro danĂ˝ zĂˇpas omezenĂ© na aktuĂˇlnÄ› vybranou sezĂłnu.
+     *
+     * Pokud zĂˇpas nepatĹ™Ă­ do aktuĂˇlnÄ› vybranĂ© sezĂłny, vracĂ­ se prĂˇzdnĂ˝ seznam.
+     *
+     * @param matchId IdentifikĂˇtor zĂˇpasu, pro kterĂ˝ se registrace naÄŤĂ­tajĂ­.
+     * @return Seznam registracĂ­ pĹ™evedenĂ˝ch do DTO pro danĂ˝ zĂˇpas v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
+     */
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
+        MatchEntity match = getMatchOrThrow(matchId);
+
+        if (!isMatchInCurrentSeason(match)) {
+            return List.of();
+        }
+
+        return matchRegistrationMapper.toDTOList(
+                registrationRepository.findByMatchId(matchId)
+        );
+    }
+
+    /**
+     * VracĂ­ registrace pro zadanou sadu zĂˇpasĹŻ omezenĂ© na aktuĂˇlnÄ› vybranou sezĂłnu.
+     *
+     * Pokud je seznam identifikĂˇtorĹŻ zĂˇpasĹŻ null nebo prĂˇzdnĂ˝, vracĂ­ se prĂˇzdnĂ˝ seznam.
+     *
+     * @param matchIds Seznam identifikĂˇtorĹŻ zĂˇpasĹŻ.
+     * @return Seznam registracĂ­ pĹ™evedenĂ˝ch do DTO pro zadanĂ© zĂˇpasy
+     * v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
+     */
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds) {
+        if (matchIds == null || matchIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<MatchRegistrationEntity> regsInSeason = registrationRepository
+                .findByMatchIdIn(matchIds).stream()
+                .filter(this::isRegistrationInCurrentSeason)
+                .toList();
+
+        return matchRegistrationMapper.toDTOList(regsInSeason);
+    }
+
+    /**
+     * VracĂ­ vĹˇechny registrace v systĂ©mu omezenĂ© na aktuĂˇlnÄ› vybranou sezĂłnu.
+     *
+     * @return Seznam vĹˇech registracĂ­ pĹ™evedenĂ˝ch do DTO v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
+     */
+    @Override
+    public List<MatchRegistrationDTO> getAllRegistrations() {
+        List<MatchRegistrationEntity> regsInSeason = registrationRepository
+                .findAll().stream()
+                .filter(this::isRegistrationInCurrentSeason)
+                .toList();
+
+        return matchRegistrationMapper.toDTOList(regsInSeason);
+    }
+
+    /**
+     * VracĂ­ registrace zadanĂ©ho hrĂˇÄŤe omezenĂ© na aktuĂˇlnÄ› vybranou sezĂłnu.
+     *
+     * @param playerId IdentifikĂˇtor hrĂˇÄŤe.
+     * @return Seznam registracĂ­ hrĂˇÄŤe pĹ™evedenĂ˝ch do DTO v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
+     */
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId) {
+        List<MatchRegistrationEntity> regsInSeason = registrationRepository
+                .findByPlayerId(playerId).stream()
+                .filter(this::isRegistrationInCurrentSeason)
+                .toList();
+
+        return matchRegistrationMapper.toDTOList(regsInSeason);
+    }
+
+    /**
+     * VracĂ­ hrĂˇÄŤe, kteĹ™Ă­ na danĂ˝ zĂˇpas nijak nereagovali.
+     *
+     * Pokud zĂˇpas nepatĹ™Ă­ do aktuĂˇlnÄ› vybranĂ© sezĂłny, vracĂ­ se prĂˇzdnĂ˝ seznam.
+     *
+     * @param matchId IdentifikĂˇtor zĂˇpasu.
+     * @return Seznam hrĂˇÄŤĹŻ bez reakce pĹ™evedenĂ˝ch do DTO v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
+     */
+    @Override
+    public List<PlayerDTO> getNoResponsePlayers(Long matchId) {
+        MatchEntity match = getMatchOrThrow(matchId);
+
+        if (!isMatchInCurrentSeason(match)) {
+            return List.of();
+        }
+
+        Set<Long> respondedIds = getRespondedPlayerIds(matchId);
+
+        List<PlayerEntity> noResponsePlayers = playerRepository.findAll().stream()
+                .filter(p -> !respondedIds.contains(p.getId()))
+                .toList();
+
+        return noResponsePlayers.stream()
+                .map(playerMapper::toDTO)
+                .toList();
+    }
+
+    /**
+     * NaÄŤĂ­tĂˇ zĂˇpas podle identifikĂˇtoru nebo vyhazuje vĂ˝jimku pĹ™i neexistenci.
+     *
+     * @param matchId IdentifikĂˇtor zĂˇpasu.
+     * @return NaÄŤtenĂˇ entita zĂˇpasu.
+     */
+    private MatchEntity getMatchOrThrow(Long matchId) {
+        return matchRepository.findById(matchId)
+                .orElseThrow(() -> new MatchNotFoundException(matchId));
+    }
+
+    /**
+     * Vyhodnocuje, zda zĂˇpas patĹ™Ă­ do aktuĂˇlnÄ› vybranĂ© sezĂłny.
+     *
+     * @param match ZĂˇpas, kterĂ˝ se mĂˇ vyhodnotit.
+     * @return True, pokud zĂˇpas patĹ™Ă­ do aktuĂˇlnĂ­ sezĂłny, jinak false.
+     */
+    private boolean isMatchInCurrentSeason(MatchEntity match) {
+        if (match == null || match.getSeason() == null) {
+            return false;
+        }
+        Long seasonId = getCurrentSeasonIdOrActive();
+        return seasonId.equals(match.getSeason().getId());
+    }
+
+    /**
+     * Vyhodnocuje, zda registrace patĹ™Ă­ k zĂˇpasu v aktuĂˇlnÄ› vybranĂ© sezĂłnÄ›.
+     *
+     * @param registration Registrace, kterĂˇ se mĂˇ vyhodnotit.
+     * @return True, pokud registrace patĹ™Ă­ do aktuĂˇlnĂ­ sezĂłny, jinak false.
+     */
+    private boolean isRegistrationInCurrentSeason(MatchRegistrationEntity registration) {
+        if (registration == null) {
+            return false;
+        }
+        return isMatchInCurrentSeason(registration.getMatch());
+    }
+
+    /**
+     * VracĂ­ identifikĂˇtor sezĂłny pouĹľĂ­vanĂ© pro filtrovĂˇnĂ­ registracĂ­.
+     *
+     * @return IdentifikĂˇtor aktuĂˇlnĂ­ nebo aktivnĂ­ sezĂłny.
+     */
+    private Long getCurrentSeasonIdOrActive() {
+        Long id = currentSeasonService.getCurrentSeasonIdOrDefault();
+        if (id != null) {
+            return id;
+        }
+        return seasonService.getActiveSeason().getId();
+    }
+
+    /**
+     * VracĂ­ mnoĹľinu identifikĂˇtorĹŻ hrĂˇÄŤĹŻ, kteĹ™Ă­ majĂ­ k zĂˇpasu uloĹľenou
+     * registraci v jakĂ©mkoliv stavu.
+     *
+     * @param matchId IdentifikĂˇtor zĂˇpasu.
+     * @return MnoĹľina identifikĂˇtorĹŻ hrĂˇÄŤĹŻ, kteĹ™Ă­ na zĂˇpas reagovali.
+     */
+    private Set<Long> getRespondedPlayerIds(Long matchId) {
+        return registrationRepository.findByMatchId(matchId).stream()
+                .map(r -> r.getPlayer().getId())
+                .collect(Collectors.toSet());
+    }
+
+}
+
+-----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\MatchRegistrationService.java
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
+import cz.phsoft.hokej.registration.enums.ExcuseReason;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.player.enums.PlayerPosition;
+import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationRequest;
 
 import java.util.List;
 
@@ -2028,6 +3372,16 @@ public interface MatchRegistrationService {
 
     MatchRegistrationDTO changeRegistrationTeam(Long matchId,
                                                 Long playerId);
+
+    MatchRegistrationDTO changeRegistrationPosition(Long playerId,
+                                                    Long matchId,
+                                                    PlayerPosition positionInMatch);
+
+    void promoteReservedCandidatesForCapacityIncrease(Long matchId,
+                                                      Team freedTeam,
+                                                      PlayerPosition freedPosition,
+                                                      int slotsCount);
+
 }
 
 -----
@@ -2035,1012 +3389,144 @@ public interface MatchRegistrationService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.*;
-import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
-import cz.phsoft.hokej.data.repositories.MatchRepository;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.exceptions.*;
-import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.mappers.MatchRegistrationMapper;
-import cz.phsoft.hokej.models.mappers.PlayerMapper;
-import cz.phsoft.hokej.models.dto.requests.MatchRegistrationRequest;
-import cz.phsoft.hokej.models.services.notification.NotificationService;
-import cz.phsoft.hokej.models.services.sms.SmsMessageBuilder;
-import cz.phsoft.hokej.models.services.sms.SmsService;
+import cz.phsoft.hokej.registration.enums.ExcuseReason;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.player.enums.PlayerPosition;
+import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationRequest;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
- * Implementace service vrstvy, kterĂˇ se pouĹľĂ­vĂˇ pro sprĂˇvu registracĂ­ hrĂˇÄŤĹŻ na zĂˇpasy.
+ * Service vrstva pro orchestraci nad registracemi hrĂˇÄŤĹŻ na zĂˇpasy.
  *
- * V tĂ©to tĹ™Ă­dÄ› se zajiĹˇĹĄuje vytvĂˇĹ™enĂ­ a aktualizace registracĂ­, vyhodnocovĂˇnĂ­ stavovĂ˝ch pĹ™echodĹŻ
- * podle kapacity zĂˇpasu a poskytovĂˇnĂ­ pĹ™ehledĹŻ registracĂ­ pro zĂˇpas, hrĂˇÄŤe nebo sadu zĂˇpasĹŻ.
+ * PĹ™Ă­kazovĂ© (write) operace jsou delegovĂˇny do {@link MatchRegistrationCommandService}.
+ * ÄŚtecĂ­ operace jsou delegovĂˇny do {@link MatchRegistrationQueryService}.
  *
- * SouÄŤĂˇstĂ­ odpovÄ›dnosti je takĂ© spouĹˇtÄ›nĂ­ notifikacĂ­ hrĂˇÄŤĹŻm podle typu zmÄ›ny registrace a v pĹ™Ă­padÄ› potĹ™eby
- * takĂ© odesĂ­lĂˇnĂ­ SMS zprĂˇv registrovanĂ˝m hrĂˇÄŤĹŻm.
- *
- * TĹ™Ă­da obsahuje business logiku registracĂ­ a souvisejĂ­cĂ­ch pravidel. NeĹ™eĹˇĂ­ prezentaci, UI logiku ani vĂ˝bÄ›r
- * aktuĂˇlnĂ­ho hrĂˇÄŤe, kterĂ© nĂˇleĹľĂ­ jinĂ˝m vrstvĂˇm aplikace.
+ * SlouĹľĂ­ jako jednotnĂ© rozhranĂ­ pro kontrolery, kterĂ© tak nemusĂ­ znĂˇt
+ * rozdÄ›lenĂ­ na command/query sluĹľby.
  */
 @Service
 public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 
-    private static final Logger log = LoggerFactory.getLogger(MatchRegistrationServiceImpl.class);
-
-    private final MatchRegistrationRepository registrationRepository;
-    private final MatchRepository matchRepository;
-    private final PlayerRepository playerRepository;
-    private final MatchRegistrationMapper matchRegistrationMapper;
-    private final PlayerMapper playerMapper;
-    private final SmsService smsService;
-    private final SmsMessageBuilder smsMessageBuilder;
-    private final NotificationService notificationService;
-    private final SeasonService seasonService;
-    private final CurrentSeasonService currentSeasonService;
+    private final MatchRegistrationCommandService commandService;
+    private final MatchRegistrationQueryService matchRegistrationQueryService;
 
     public MatchRegistrationServiceImpl(
-            MatchRegistrationRepository registrationRepository,
-            MatchRepository matchRepository,
-            PlayerRepository playerRepository,
-            MatchRegistrationMapper matchRegistrationMapper,
-            PlayerMapper playerMapper,
-            SmsService smsService,
-            SmsMessageBuilder smsMessageBuilder,
-            NotificationService notificationService,
-            SeasonService seasonService,
-            CurrentSeasonService currentSeasonService
+            MatchRegistrationCommandService commandService,
+            MatchRegistrationQueryService matchRegistrationQueryService
     ) {
-        this.registrationRepository = registrationRepository;
-        this.matchRepository = matchRepository;
-        this.playerRepository = playerRepository;
-        this.matchRegistrationMapper = matchRegistrationMapper;
-        this.playerMapper = playerMapper;
-        this.smsService = smsService;
-        this.smsMessageBuilder = smsMessageBuilder;
-        this.notificationService = notificationService;
-        this.seasonService = seasonService;
-        this.currentSeasonService = currentSeasonService;
+        this.commandService = commandService;
+        this.matchRegistrationQueryService = matchRegistrationQueryService;
     }
 
     // ==========================================
-    // HLAVNĂŤ METODA â€“ UPSERT REGISTRACE HRĂÄŚE
+    // PĹĂŤKAZOVĂ‰ OPERACE â€“ DELEGACE DO COMMAND SERVICE
     // ==========================================
 
-    /**
-     * VytvĂˇĹ™Ă­ nebo aktualizuje registraci hrĂˇÄŤe na zĂˇpas.
-     *
-     * Nejprve se naÄŤte zĂˇpas a hrĂˇÄŤ a ovÄ›Ĺ™Ă­ se, Ĺľe zĂˇpas patĹ™Ă­ do aktivnĂ­ sezĂłny.
-     * NĂˇslednÄ› se vyhodnotĂ­, zda aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel mĹŻĹľe registraci upravovat s ohledem na roli
-     * a ÄŤas zĂˇpasu.
-     *
-     * Podle obsahu poĹľadavku se zvolĂ­ vÄ›tev pro odhlĂˇĹˇenĂ­, omluvu nebo registraci a urÄŤĂ­ se cĂ­lovĂ˝ stav registrace.
-     * SpoleÄŤnĂ© Ăşdaje se pĹ™evezmou z poĹľadavku, registrace se uloĹľĂ­ a pĹ™i odhlĂˇĹˇenĂ­ se pĹ™epoÄŤĂ­tajĂ­ stavy registracĂ­
-     * pro danĂ˝ zĂˇpas. Po uloĹľenĂ­ se podle vĂ˝slednĂ©ho stavu odeĹˇlou notifikace.
-     *
-     * @param playerId IdentifikĂˇtor hrĂˇÄŤe, jehoĹľ registrace se upravuje.
-     * @param request PoĹľadavek obsahujĂ­cĂ­ parametry zmÄ›ny registrace.
-     * @return DTO uloĹľenĂ© registrace se stavem odpovĂ­dajĂ­cĂ­m vyhodnocenĂ˝m pravidlĹŻm.
-     */
-    @Transactional
     @Override
+    @Transactional
     public MatchRegistrationDTO upsertRegistration(Long playerId, MatchRegistrationRequest request) {
-
-        MatchEntity match = getMatchOrThrow(request.getMatchId());
-        PlayerEntity player = getPlayerOrThrow(playerId);
-
-        // OvÄ›Ĺ™enĂ­, Ĺľe zĂˇpas patĹ™Ă­ do aktuĂˇlnÄ› aktivnĂ­ sezĂłny.
-        // ZĂˇpisy do neaktivnĂ­ sezĂłny nejsou povoleny.
-        assertMatchInActiveSeason(match);
-
-        // OvÄ›Ĺ™enĂ­, zda aktuĂˇlnĂ­ uĹľivatel smĂ­ mÄ›nit registraci
-        // s ohledem na svou roli a ÄŤas zĂˇpasu.
-        assertPlayerCanModifyMatch(match);
-
-        MatchRegistrationEntity registration =
-                getRegistrationOrNull(playerId, request.getMatchId());
-
-        if (registration == null && !request.isUnregister()) {
-            registration = new MatchRegistrationEntity();
-            registration.setMatch(match);
-            registration.setPlayer(player);
-        }
-
-        PlayerMatchStatus newStatus;
-
-        if (request.isUnregister()) {
-            newStatus = handleUnregister(request, playerId, registration);
-        } else if (request.getExcuseReason() != null) {
-            newStatus = handleExcuse(request, match, player, registration);
-        } else {
-            newStatus = handleRegisterOrReserveOrSubstitute(request, match, player, registration);
-        }
-
-        applyRequestDetails(registration, request);
-
-        registration.setStatus(newStatus);
-        registration.setTimestamp(now());
-        registration.setCreatedBy("user");
-
-        registration = registrationRepository.save(registration);
-
-        if (request.isUnregister()) {
-            recalcStatusesForMatch(request.getMatchId());
-        }
-
-        NotificationType notificationType = resolveNotificationType(newStatus);
-        if (notificationType != null) {
-            notifyPlayer(player, notificationType, registration);
-        }
-
-        return matchRegistrationMapper.toDTO(registration);
+        return commandService.upsertRegistration(playerId, request);
     }
 
-    /**
-     * Vyhodnocuje registraci typu REGISTERED, RESERVED nebo SUBSTITUTE a vracĂ­ cĂ­lovĂ˝ stav registrace.
-     *
-     * OpakovanĂˇ registrace hrĂˇÄŤe, kterĂ˝ je jiĹľ ve stavu REGISTERED, se neumoĹľĹuje.
-     * PĹ™i volbÄ› SUBSTITUTE se nastavĂ­ stav nĂˇhradnĂ­ka, kterĂ˝ neblokuje kapacitu zĂˇpasu.
-     * PĹ™i standardnĂ­ registraci se podle kapacity zĂˇpasu urÄŤĂ­ stav REGISTERED nebo RESERVED.
-     *
-     * PĹ™Ă­padnĂˇ omluva uloĹľenĂˇ na registraci se pĹ™ed nastavenĂ­m cĂ­lovĂ©ho stavu odstranĂ­.
-     *
-     * @param request PoĹľadavek obsahujĂ­cĂ­ parametry zmÄ›ny registrace.
-     * @param match ZĂˇpas, ke kterĂ©mu se registrace vztahuje.
-     * @param player HrĂˇÄŤ, jehoĹľ registrace se upravuje.
-     * @param registration ExistujĂ­cĂ­ registrace, nebo null v pĹ™Ă­padÄ› prvnĂ­ho zĂˇpisu.
-     * @return CĂ­lovĂ˝ stav registrace odpovĂ­dajĂ­cĂ­ vyhodnocenĂ˝m pravidlĹŻm.
-     */
-    private PlayerMatchStatus handleRegisterOrReserveOrSubstitute(
-            MatchRegistrationRequest request,
-            MatchEntity match,
-            PlayerEntity player,
-            MatchRegistrationEntity registration
-    ) {
-        PlayerMatchStatus currentStatus =
-                (registration != null) ? registration.getStatus() : null;
-
-        boolean isAlreadyRegistered = currentStatus == PlayerMatchStatus.REGISTERED;
-
-        if (isAlreadyRegistered) {
-            throw new DuplicateRegistrationException(request.getMatchId(), player.getId());
-        }
-
-        // Registrace jako nĂˇhradnĂ­k (SUBSTITUTE) â€“ hrĂˇÄŤ je oznaÄŤen jako â€žmoĹľnĂˇâ€ś
-        // a neblokuje kapacitu ani poĹ™adĂ­.
-        if (request.isSubstitute()) {
-            if (currentStatus == PlayerMatchStatus.SUBSTITUTE) {
-                throw new DuplicateRegistrationException(
-                        request.getMatchId(),
-                        player.getId(),
-                        "HrĂˇÄŤ jiĹľ mĂˇ zaregistrovĂˇno - moĹľnĂˇ"
-                );
-            }
-
-            clearExcuseIfNeeded(registration);
-            return PlayerMatchStatus.SUBSTITUTE;
-        }
-
-        PlayerMatchStatus newStatus =
-                isSlotAvailable(match) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
-
-        clearExcuseIfNeeded(registration);
-        return newStatus;
-    }
-
-    /**
-     * ZpracovĂˇvĂˇ odhlĂˇĹˇenĂ­ hrĂˇÄŤe ze zĂˇpasu a vracĂ­ cĂ­lovĂ˝ stav UNREGISTERED.
-     *
-     * OdhlĂˇĹˇenĂ­ se umoĹľĹuje pouze v pĹ™Ă­padÄ›, Ĺľe registrace existuje a nachĂˇzĂ­ se ve stavu REGISTERED nebo RESERVED.
-     * V opaÄŤnĂ©m pĹ™Ă­padÄ› se vyhodĂ­ vĂ˝jimka signalizujĂ­cĂ­ neexistujĂ­cĂ­ nebo nepovolenou registraci pro odhlĂˇĹˇenĂ­.
-     *
-     * PĹ™i ĂşspÄ›ĹˇnĂ©m odhlĂˇĹˇenĂ­ se uloĹľĂ­ informace o omluvÄ› z poĹľadavku.
-     *
-     * @param request PoĹľadavek obsahujĂ­cĂ­ parametry odhlĂˇĹˇenĂ­.
-     * @param playerId IdentifikĂˇtor hrĂˇÄŤe, jehoĹľ registrace se odhlaĹˇuje.
-     * @param registration ExistujĂ­cĂ­ registrace hrĂˇÄŤe na zĂˇpas.
-     * @return Stav UNREGISTERED, kterĂ˝ se mĂˇ na registraci uloĹľit.
-     */
-    private PlayerMatchStatus handleUnregister(
-            MatchRegistrationRequest request,
-            Long playerId,
-            MatchRegistrationEntity registration
-    ) {
-        boolean isAllowedUnregisterStatus =
-                registration != null &&
-                        (registration.getStatus() == PlayerMatchStatus.REGISTERED
-                                || registration.getStatus() == PlayerMatchStatus.RESERVED);
-
-        if (!isAllowedUnregisterStatus) {
-            throw new RegistrationNotFoundException(request.getMatchId(), playerId);
-        }
-
-        registration.setExcuseReason(request.getExcuseReason());
-        registration.setExcuseNote(request.getExcuseNote());
-
-        return PlayerMatchStatus.UNREGISTERED;
-    }
-
-    /**
-     * ZpracovĂˇvĂˇ omluvu hrĂˇÄŤe z ĂşÄŤasti na zĂˇpase a vracĂ­ cĂ­lovĂ˝ stav EXCUSED.
-     *
-     * Omluva se umoĹľĹuje pouze v pĹ™Ă­padÄ›, Ĺľe hrĂˇÄŤ dosud nereagoval na zĂˇpas, je veden jako nĂˇhradnĂ­k,
-     * nebo je ve stavu NO_EXCUSED. PĹ™i poruĹˇenĂ­ pravidel se vyhodĂ­ vĂ˝jimka signalizujĂ­cĂ­ nepovolenĂ˝ pĹ™echod.
-     *
-     * PĹ™i ĂşspÄ›ĹˇnĂ© omluvÄ› se uloĹľĂ­ dĹŻvod a poznĂˇmka omluvy z poĹľadavku.
-     *
-     * @param request PoĹľadavek obsahujĂ­cĂ­ parametry omluvy.
-     * @param match ZĂˇpas, ke kterĂ©mu se omluva vztahuje.
-     * @param player HrĂˇÄŤ, jehoĹľ omluva se zpracovĂˇvĂˇ.
-     * @param registration ExistujĂ­cĂ­ registrace, nebo null v pĹ™Ă­padÄ› prvnĂ­ho zĂˇpisu.
-     * @return Stav EXCUSED, kterĂ˝ se mĂˇ na registraci uloĹľit.
-     */
-    private PlayerMatchStatus handleExcuse(
-            MatchRegistrationRequest request,
-            MatchEntity match,
-            PlayerEntity player,
-            MatchRegistrationEntity registration
-    ) {
-        boolean isNoResponseOrSubstitute =
-                (registration == null
-                        || registration.getStatus() == null
-                        || registration.getStatus() == PlayerMatchStatus.SUBSTITUTE
-                        || registration.getStatus() == PlayerMatchStatus.NO_EXCUSED);
-
-        if (!isNoResponseOrSubstitute) {
-            throw new DuplicateRegistrationException(
-                    request.getMatchId(),
-                    player.getId(),
-                    "BE - Omluva je moĹľnĂˇ pouze pokud hrĂˇÄŤ dosud nereagoval na zĂˇpas, nebo byl nĂˇhradnĂ­k."
-            );
-        }
-
-        registration.setExcuseReason(request.getExcuseReason());
-        registration.setExcuseNote(request.getExcuseNote());
-
-        return PlayerMatchStatus.EXCUSED;
-    }
-
-    /**
-     * Nastavuje registraci do stavu NO_EXCUSED na zĂˇkladÄ› rozhodnutĂ­ administrĂˇtora.
-     *
-     * ZĂˇpas musĂ­ bĂ˝t jiĹľ odehranĂ˝ a pĹ™edchozĂ­ stav registrace musĂ­ bĂ˝t REGISTERED.
-     * PĹ™Ă­padnĂˇ omluva se odstranĂ­ a uloĹľĂ­ se poznĂˇmka administrĂˇtora. Po zmÄ›nÄ› se odeĹˇle notifikace
-     * odpovĂ­dajĂ­cĂ­ vĂ˝slednĂ©mu stavu.
-     *
-     * @param matchId IdentifikĂˇtor zĂˇpasu, pro kterĂ˝ se stav upravuje.
-     * @param playerId IdentifikĂˇtor hrĂˇÄŤe, jehoĹľ registrace se upravuje.
-     * @param adminNote PoznĂˇmka administrĂˇtora, kterĂˇ se uloĹľĂ­ k registraci.
-     * @return DTO aktualizovanĂ© registrace po zmÄ›nÄ› stavu.
-     */
     @Override
     @Transactional
     public MatchRegistrationDTO markNoExcused(Long matchId,
                                               Long playerId,
                                               String adminNote) {
-
-        MatchEntity match = getMatchOrThrow(matchId);
-        PlayerEntity player = getPlayerOrThrow(playerId);
-
-        if (match.getDateTime().isAfter(now())) {
-            throw new InvalidPlayerStatusException(
-                    "BE - Status NO_EXCUSED lze nastavit pouze u jiĹľ probÄ›hlĂ©ho zĂˇpasu."
-            );
-        }
-
-        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
-
-        if (registration.getStatus() != PlayerMatchStatus.REGISTERED) {
-            throw new InvalidPlayerStatusException(
-                    "BE - Status NO_EXCUSED lze nastavit pouze z registrace REGISTERED."
-            );
-        }
-
-        registration.setExcuseReason(null);
-        registration.setExcuseNote(null);
-
-        if (adminNote == null || adminNote.isBlank()) {
-            registration.setAdminNote("Nedostavil se bez omluvy");
-        } else {
-            registration.setAdminNote(adminNote);
-        }
-
-        MatchRegistrationEntity updated =
-                updateRegistrationStatus(
-                        registration,
-                        PlayerMatchStatus.NO_EXCUSED,
-                        "admin",
-                        true
-                );
-
-        PlayerMatchStatus newStatus = PlayerMatchStatus.NO_EXCUSED;
-
-        NotificationType notificationType = resolveNotificationType(newStatus);
-        if (notificationType != null) {
-            notifyPlayer(player, notificationType, updated);
-        }
-
-        return matchRegistrationMapper.toDTO(updated);
+        return commandService.markNoExcused(matchId, playerId, adminNote);
     }
 
-    /**
-     * Nastavuje registraci do stavu EXCUSED na zĂˇkladÄ› rozhodnutĂ­ administrĂˇtora nebo manaĹľera po pĹ™edchozĂ­m NO_EXCUSED.
-     *
-     * ZĂˇpas musĂ­ bĂ˝t jiĹľ odehranĂ˝ a pĹ™edchozĂ­ stav registrace musĂ­ bĂ˝t NO_EXCUSED.
-     * AdministrĂˇtorskĂˇ poznĂˇmka se odstranĂ­ a uloĹľĂ­ se dĹŻvod a poznĂˇmka omluvy.
-     * V tĂ©to operaci se notifikace neodesĂ­lajĂ­.
-     *
-     * @param matchId IdentifikĂˇtor zĂˇpasu, pro kterĂ˝ se stav upravuje.
-     * @param playerId IdentifikĂˇtor hrĂˇÄŤe, jehoĹľ registrace se upravuje.
-     * @param excuseReason DĹŻvod omluvy, kterĂ˝ se uloĹľĂ­ k registraci.
-     * @param excuseNote PoznĂˇmka omluvy, kterĂˇ se uloĹľĂ­ k registraci.
-     * @return DTO aktualizovanĂ© registrace po zmÄ›nÄ› stavu.
-     */
     @Override
     @Transactional
     public MatchRegistrationDTO cancelNoExcused(Long matchId,
                                                 Long playerId,
                                                 ExcuseReason excuseReason,
                                                 String excuseNote) {
-
-        MatchEntity match = getMatchOrThrow(matchId);
-        PlayerEntity player = getPlayerOrThrow(playerId);
-
-        if (match.getDateTime().isAfter(now())) {
-            throw new InvalidPlayerStatusException(
-                    "BE - Status EXCUSED po NO-EXCUSED lze nastavit pouze u jiĹľ probÄ›hlĂ©ho zĂˇpasu."
-            );
-        }
-
-        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
-
-        if (registration.getStatus() != PlayerMatchStatus.NO_EXCUSED) {
-            throw new InvalidPlayerStatusException(
-                    "BE - Status EXCUSED (zruĹˇenĂ­ neomluvenĂ­) lze nastavit pouze u hrĂˇÄŤe se statutem NO_EXCUSED."
-            );
-        }
-
-        registration.setExcuseReason(ExcuseReason.JINE);
-        registration.setAdminNote(null);
-        if (excuseNote == null || excuseNote.isBlank()) {
-            registration.setExcuseNote("Opravdu nemohl");
-        } else {
-            registration.setExcuseNote(excuseNote);
-        }
-
-        MatchRegistrationEntity updated =
-                updateRegistrationStatus(
-                        registration,
-                        PlayerMatchStatus.EXCUSED,
-                        "manager",
-                        true
-                );
-
-        return matchRegistrationMapper.toDTO(updated);
+        return commandService.cancelNoExcused(matchId, playerId, excuseReason, excuseNote);
     }
 
-    /**
-     * ZmÄ›nĂ­ tĂ˝m hrĂˇÄŤe u existujĂ­cĂ­ registrace na zĂˇpas.
-     *
-     * Metoda je pouĹľĂ­vĂˇna pro pĹ™epnutĂ­ hrĂˇÄŤe mezi tĂ˝mem LIGHT a DARK.
-     * Nejprve je ovÄ›Ĺ™ena existence zĂˇpasu a hrĂˇÄŤe. NĂˇslednÄ› je zkontrolovĂˇno, Ĺľe
-     * bÄ›ĹľnĂ˝ hrĂˇÄŤ (ROLE_PLAYER) nemÄ›nĂ­ tĂ˝m u jiĹľ probÄ›hlĂ©ho zĂˇpasu. AdministrĂˇtor
-     * nebo manaĹľer tuto operaci mohou provĂˇdÄ›t i zpÄ›tnÄ›.
-     *
-     * Pokud jsou splnÄ›ny validaÄŤnĂ­ podmĂ­nky, je provedena aktualizace registrace.
-     * Stav registrace zĹŻstĂˇvĂˇ REGISTERED, ale je pĹ™epnut tĂ˝m na opaÄŤnĂ˝.
-     *
-     * Po ĂşspÄ›ĹˇnĂ© zmÄ›nÄ› je vyhodnocen typ notifikace a v pĹ™Ă­padÄ› potĹ™eby
-     * je hrĂˇÄŤi odeslĂˇna odpovĂ­dajĂ­cĂ­ notifikace.
-     *
-     * Na zĂˇvÄ›r je aktualizovanĂˇ entita pĹ™evedena na DTO pomocĂ­ mapperu
-     * a vrĂˇcena volajĂ­cĂ­ vrstvÄ›.
-     *
-     * @param matchId identifikĂˇtor zĂˇpasu, u kterĂ©ho mĂˇ bĂ˝t tĂ˝m zmÄ›nÄ›n
-     * @param playerId identifikĂˇtor hrĂˇÄŤe, jehoĹľ registrace mĂˇ bĂ˝t upravena
-     * @return aktualizovanĂˇ registrace pĹ™evedenĂˇ do DTO
-     * @throws InvalidMatchDateTimeException pokud bÄ›ĹľnĂ˝ hrĂˇÄŤ mÄ›nĂ­ tĂ˝m u jiĹľ probÄ›hlĂ©ho zĂˇpasu
-     * @throws InvalidPlayerStatusException pokud registrace nenĂ­ ve stavu REGISTERED
-     */
+    @Override
+    @Transactional
     public MatchRegistrationDTO changeRegistrationTeam(Long playerId,
                                                        Long matchId) {
-
-        MatchEntity match = getMatchOrThrow(matchId);
-        PlayerEntity player = getPlayerOrThrow(playerId);
-
-        // Debug informativnÄ› â€“ aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel a jeho autority
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
-            log.debug("changeRegistrationTeam â€“ current user: {}", auth.getName());
-            log.debug("changeRegistrationTeam â€“ authorities: {}", auth.getAuthorities());
-        } else {
-            log.debug("changeRegistrationTeam â€“ no authenticated user");
-        }
-
-        // ÄŚasovĂ© omezenĂ­ platĂ­ pouze pro hrĂˇÄŤe (ROLE_PLAYER).
-        // Admin / Manager mohou mÄ›nit tĂ˝m i u minulĂ˝ch zĂˇpasĹŻ.
-        if (match.getDateTime().isBefore(now()) && isCurrentUserPlayer()) {
-            throw new InvalidMatchDateTimeException(
-                    "BE - Team lze zmÄ›nit pouze u zĂˇpasu, kterĂ© teprve budou."
-            );
-        }
-
-        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
-        Team oldTeam = registration.getTeam();
-
-        if (registration.getStatus() != PlayerMatchStatus.REGISTERED) {
-            throw new InvalidPlayerStatusException(
-                    "BE - Team lze zmÄ›nit pouze z registrace REGISTERED."
-            );
-        }
-
-        PlayerMatchStatus newStatus = PlayerMatchStatus.REGISTERED;
-        Team newTeam = oldTeam.opposite();
-
-        registration.setTeam(newTeam);
-
-        registration = registrationRepository.save(registration);
-        NotificationType notificationType = resolveNotificationType(newStatus);
-        if (notificationType != null) {
-            notifyPlayer(player, notificationType, registration);
-        }
-        return matchRegistrationMapper.toDTO(registration);
+        return commandService.changeRegistrationTeam(playerId, matchId);
     }
 
-    /**
-     * Nastavuje do registrace spoleÄŤnĂ© Ăşdaje pĹ™evzatĂ© z poĹľadavku.
-     *
-     * V rĂˇmci zĂˇpisu se upravuje tĂ˝m, administrĂˇtorskĂˇ poznĂˇmka a informace o omluvÄ›,
-     * pokud jsou v poĹľadavku uvedeny.
-     *
-     * @param registration Registrace, kterĂˇ se mĂˇ aktualizovat.
-     * @param request PoĹľadavek obsahujĂ­cĂ­ hodnoty, kterĂ© se majĂ­ zapsat do registrace.
-     */
-    private void applyRequestDetails(MatchRegistrationEntity registration,
-                                     MatchRegistrationRequest request) {
-
-        if (request.getTeam() != null) {
-            registration.setTeam(request.getTeam());
-        }
-
-        if (request.getAdminNote() != null) {
-            registration.setAdminNote(request.getAdminNote());
-        }
-
-        if (request.getExcuseReason() != null) {
-            registration.setExcuseReason(request.getExcuseReason());
-        }
-
-        if (request.getExcuseNote() != null) {
-            registration.setExcuseNote(request.getExcuseNote());
-        }
-    }
-
-    /*
-     SpoleÄŤnĂ˝ helper pro pĹ™echody, kde se nemĂˇ zachovat omluva.
-     */
-    private void clearExcuseIfNeeded(MatchRegistrationEntity registration) {
-        if (registration == null) {
-            return;
-        }
-        if (registration.getExcuseReason() != null || registration.getExcuseNote() != null) {
-            registration.setExcuseReason(null);
-            registration.setExcuseNote(null);
-        }
-    }
-
-    /**
-     * VracĂ­ registrace pro danĂ˝ zĂˇpas omezenĂ© na aktuĂˇlnÄ› vybranou sezĂłnu.
-     *
-     * Pokud zĂˇpas nepatĹ™Ă­ do aktuĂˇlnÄ› vybranĂ© sezĂłny, vracĂ­ se prĂˇzdnĂ˝ seznam.
-     *
-     * @param matchId IdentifikĂˇtor zĂˇpasu, pro kterĂ˝ se registrace naÄŤĂ­tajĂ­.
-     * @return Seznam registracĂ­ pĹ™evedenĂ˝ch do DTO pro danĂ˝ zĂˇpas v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
-     */
     @Override
-    public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
-        MatchEntity match = getMatchOrThrow(matchId);
-
-        if (!isMatchInCurrentSeason(match)) {
-            return List.of();
-        }
-
-        return matchRegistrationMapper.toDTOList(
-                registrationRepository.findByMatchId(matchId)
-        );
+    @Transactional
+    public MatchRegistrationDTO changeRegistrationPosition(Long playerId,
+                                                           Long matchId,
+                                                           PlayerPosition positionInMatch) {
+        return commandService.changeRegistrationPosition(playerId, matchId, positionInMatch);
     }
 
-    /**
-     * VracĂ­ registrace pro zadanou sadu zĂˇpasĹŻ omezenĂ© na aktuĂˇlnÄ› vybranou sezĂłnu.
-     *
-     * Pokud je seznam identifikĂˇtorĹŻ zĂˇpasĹŻ null nebo prĂˇzdnĂ˝, vracĂ­ se prĂˇzdnĂ˝ seznam.
-     *
-     * @param matchIds Seznam identifikĂˇtorĹŻ zĂˇpasĹŻ, pro kterĂ© se registrace naÄŤĂ­tajĂ­.
-     * @return Seznam registracĂ­ pĹ™evedenĂ˝ch do DTO pro zadanĂ© zĂˇpasy v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
-     */
     @Override
-    public List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds) {
-        if (matchIds == null || matchIds.isEmpty()) {
-            return List.of();
-        }
-
-        List<MatchRegistrationEntity> regsInSeason = registrationRepository
-                .findByMatchIdIn(matchIds).stream()
-                .filter(this::isRegistrationInCurrentSeason)
-                .toList();
-
-        return matchRegistrationMapper.toDTOList(regsInSeason);
+    @Transactional
+    public MatchRegistrationDTO updateStatus(Long matchId,
+                                             Long playerId,
+                                             PlayerMatchStatus status) {
+        return commandService.updateStatus(matchId, playerId, status);
     }
 
-    /**
-     * VracĂ­ vĹˇechny registrace v systĂ©mu omezenĂ© na aktuĂˇlnÄ› vybranou sezĂłnu.
-     *
-     * @return Seznam vĹˇech registracĂ­ pĹ™evedenĂ˝ch do DTO v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
-     */
-    @Override
-    public List<MatchRegistrationDTO> getAllRegistrations() {
-        List<MatchRegistrationEntity> regsInSeason = registrationRepository
-                .findAll().stream()
-                .filter(this::isRegistrationInCurrentSeason)
-                .toList();
-
-        return matchRegistrationMapper.toDTOList(regsInSeason);
-    }
-
-    /**
-     * VracĂ­ registrace zadanĂ©ho hrĂˇÄŤe omezenĂ© na aktuĂˇlnÄ› vybranou sezĂłnu.
-     *
-     * @param playerId IdentifikĂˇtor hrĂˇÄŤe, jehoĹľ registrace se naÄŤĂ­tajĂ­.
-     * @return Seznam registracĂ­ hrĂˇÄŤe pĹ™evedenĂ˝ch do DTO v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
-     */
-    @Override
-    public List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId) {
-        List<MatchRegistrationEntity> regsInSeason = registrationRepository
-                .findByPlayerId(playerId).stream()
-                .filter(this::isRegistrationInCurrentSeason)
-                .toList();
-
-        return matchRegistrationMapper.toDTOList(regsInSeason);
-    }
-
-    /**
-     * VracĂ­ hrĂˇÄŤe, kteĹ™Ă­ na danĂ˝ zĂˇpas nijak nereagovali.
-     *
-     * Pokud zĂˇpas nepatĹ™Ă­ do aktuĂˇlnÄ› vybranĂ© sezĂłny, vracĂ­ se prĂˇzdnĂ˝ seznam.
-     * PĹ™i vyhodnocovĂˇnĂ­ se pouĹľĂ­vĂˇ mnoĹľina hrĂˇÄŤĹŻ, kteĹ™Ă­ majĂ­ k zĂˇpasu uloĹľenou registraci v jakĂ©mkoliv stavu.
-     *
-     * @param matchId IdentifikĂˇtor zĂˇpasu, pro kterĂ˝ se hrĂˇÄŤi bez reakce vyhodnocujĂ­.
-     * @return Seznam hrĂˇÄŤĹŻ bez reakce pĹ™evedenĂ˝ch do DTO v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
-     */
-    @Override
-    public List<PlayerDTO> getNoResponsePlayers(Long matchId) {
-        MatchEntity match = getMatchOrThrow(matchId);
-
-        if (!isMatchInCurrentSeason(match)) {
-            return List.of();
-        }
-
-        Set<Long> respondedIds = getRespondedPlayerIds(matchId);
-
-        List<PlayerEntity> noResponsePlayers = playerRepository.findAll().stream()
-                .filter(p -> !respondedIds.contains(p.getId()))
-                .toList();
-
-        return noResponsePlayers.stream()
-                .map(playerMapper::toDTO)
-                .toList();
-    }
-
-    /**
-     * PĹ™epoÄŤĂ­tĂˇvĂˇ stavy REGISTERED a RESERVED pro danĂ˝ zĂˇpas podle kapacity zĂˇpasu.
-     *
-     * Registrace se seĹ™adĂ­ podle ÄŤasu vytvoĹ™enĂ­ a prvnĂ­m hrĂˇÄŤĹŻm do vĂ˝Ĺˇe kapacity zĂˇpasu se nastavĂ­ stav REGISTERED.
-     * OstatnĂ­m hrĂˇÄŤĹŻm se nastavĂ­ stav RESERVED. Registrace ve stavu SUBSTITUTE se do pĹ™epoÄŤtu nezahrnujĂ­.
-     *
-     * @param matchId IdentifikĂˇtor zĂˇpasu, pro kterĂ˝ se stavy pĹ™epoÄŤĂ­tĂˇvajĂ­.
-     */
     @Override
     @Transactional
     public void recalcStatusesForMatch(Long matchId) {
-        MatchEntity match = getMatchOrThrow(matchId);
-        int maxPlayers = match.getMaxPlayers();
-
-        List<MatchRegistrationEntity> regs = registrationRepository.findByMatchId(matchId).stream()
-                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED
-                        || r.getStatus() == PlayerMatchStatus.RESERVED)
-                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
-                .toList();
-
-        for (int i = 0; i < regs.size(); i++) {
-            MatchRegistrationEntity reg = regs.get(i);
-            PlayerMatchStatus newStatus =
-                    (i < maxPlayers) ? PlayerMatchStatus.REGISTERED : PlayerMatchStatus.RESERVED;
-
-            if (reg.getStatus() != newStatus) {
-                updateRegistrationStatus(reg, newStatus, "system", false);
-            }
-        }
+        commandService.recalcStatusesForMatch(matchId);
     }
 
-    // =========================
-    // SMS â€“ HROMADNĂ‰ ODESĂŤLĂNĂŤ
-    // =========================
-
-    /**
-     * OdesĂ­lĂˇ SMS vĹˇem hrĂˇÄŤĹŻm registrovanĂ˝m na danĂ˝ zĂˇpas ve stavu REGISTERED, kteĹ™Ă­ majĂ­ povolenĂ© SMS notifikace.
-     *
-     * Z registracĂ­ se naÄŤtou hrĂˇÄŤi a vyhodnotĂ­ se jejich nastavenĂ­ notifikacĂ­. Pokud je SMS notifikace povolena,
-     * sestavĂ­ se text zprĂˇvy a provede se odeslĂˇnĂ­ pĹ™es SmsService.
-     *
-     * @param matchId IdentifikĂˇtor zĂˇpasu, pro kterĂ˝ se SMS zprĂˇvy odesĂ­lajĂ­.
-     */
-    @Transactional
-    public void sendSmsToRegisteredPlayers(Long matchId) {
-        registrationRepository.findByMatchId(matchId).stream()
-                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
-                .forEach(r -> {
-                    PlayerEntity player = r.getPlayer();
-                    if (player == null) {
-                        return;
-                    }
-
-                    var settings = player.getSettings();
-                    if (settings == null || !settings.isSmsEnabled()) {
-                        return;
-                    }
-
-                    sendSms(r, smsMessageBuilder.buildMessageFinal(r));
-                });
-    }
-
-    /**
-     * ProvĂˇdĂ­ administrĂˇtorskou zmÄ›nu stavu registrace.
-     *
-     * PĹ™ed zmÄ›nou se ovÄ›Ĺ™Ă­ existence zĂˇpasu, hrĂˇÄŤe i registrace. Stav NO_EXCUSED se touto metodou nenastavuje,
-     * protoĹľe pro tento stav se pouĹľĂ­vĂˇ samostatnĂˇ operace s vlastnĂ­ business logikou.
-     *
-     * @param matchId IdentifikĂˇtor zĂˇpasu, pro kterĂ˝ se stav upravuje.
-     * @param playerId IdentifikĂˇtor hrĂˇÄŤe, jehoĹľ registrace se upravuje.
-     * @param status CĂ­lovĂ˝ stav registrace, kterĂ˝ se mĂˇ nastavit.
-     * @return DTO aktualizovanĂ© registrace po zmÄ›nÄ› stavu.
-     */
     @Override
     @Transactional
-    public MatchRegistrationDTO updateStatus(Long matchId, Long playerId, PlayerMatchStatus status) {
-
-        getMatchOrThrow(matchId);
-        getPlayerOrThrow(playerId);
-
-        if (status == PlayerMatchStatus.NO_EXCUSED) {
-            throw new InvalidPlayerStatusException(
-                    "BE - Status NO_EXCUSED musĂ­ bĂ˝t nastaven pĹ™es speciĂˇlnĂ­ endpoint / logiku."
-            );
-        }
-
-        MatchRegistrationEntity registration = getRegistrationOrThrow(playerId, matchId);
-
-        MatchRegistrationEntity updated =
-                updateRegistrationStatus(registration, status, "admin", true);
-
-        return matchRegistrationMapper.toDTO(updated);
+    public void promoteReservedCandidatesForCapacityIncrease(Long matchId,
+                                                             Team freedTeam,
+                                                             PlayerPosition freedPosition,
+                                                             int slotsCount) {
+        commandService.promoteReservedCandidatesForCapacityIncrease(
+                matchId,
+                freedTeam,
+                freedPosition,
+                slotsCount
+        );
     }
 
-    // ====================================================
-    // PRIVĂTNĂŤ HELPERY â€“ NAÄŚĂŤTĂNĂŤ ENTIT A ZĂKLADNĂŤ LOGIKA
-    // ====================================================
-
-    /**
-     * Deleguje odeslĂˇnĂ­ notifikace hrĂˇÄŤi do NotificationService.
-     *
-     * Metoda se pouĹľĂ­vĂˇ pro centralizaci volĂˇnĂ­ notifikaÄŤnĂ­ sluĹľby a pĹ™edĂˇnĂ­ kontextu,
-     * kterĂ˝ se pouĹľije pĹ™i sestavenĂ­ obsahu notifikace.
-     *
-     * @param player HrĂˇÄŤ, kterĂ©mu se notifikace odesĂ­lĂˇ.
-     * @param type Typ notifikace urÄŤujĂ­cĂ­ Ĺˇablonu a vĂ˝znam zprĂˇvy.
-     * @param context Kontext notifikace, kterĂ˝ se pĹ™edĂˇvĂˇ do notifikaÄŤnĂ­ vrstvy.
-     */
-    private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {
-        notificationService.notifyPlayer(player, type, context);
-    }
-
-    /**
-     * VracĂ­ mnoĹľinu identifikĂˇtorĹŻ hrĂˇÄŤĹŻ, kteĹ™Ă­ majĂ­ k zĂˇpasu uloĹľenou registraci v jakĂ©mkoliv stavu.
-     *
-     * @param matchId IdentifikĂˇtor zĂˇpasu, pro kterĂ˝ se ID hrĂˇÄŤĹŻ naÄŤĂ­tajĂ­.
-     * @return MnoĹľina identifikĂˇtorĹŻ hrĂˇÄŤĹŻ, kteĹ™Ă­ na zĂˇpas reagovali vytvoĹ™enĂ­m registrace.
-     */
-    private Set<Long> getRespondedPlayerIds(Long matchId) {
-        return registrationRepository.findByMatchId(matchId).stream()
-                .map(r -> r.getPlayer().getId())
-                .collect(Collectors.toSet());
-    }
-
-    /**
-     * NaÄŤĂ­tĂˇ zĂˇpas podle identifikĂˇtoru nebo vyhazuje vĂ˝jimku pĹ™i neexistenci.
-     *
-     * @param matchId IdentifikĂˇtor zĂˇpasu.
-     * @return NaÄŤtenĂˇ entita zĂˇpasu.
-     */
-    private MatchEntity getMatchOrThrow(Long matchId) {
-        return matchRepository.findById(matchId)
-                .orElseThrow(() -> new MatchNotFoundException(matchId));
-    }
-
-    /**
-     * NaÄŤĂ­tĂˇ hrĂˇÄŤe podle identifikĂˇtoru nebo vyhazuje vĂ˝jimku pĹ™i neexistenci.
-     *
-     * @param playerId IdentifikĂˇtor hrĂˇÄŤe.
-     * @return NaÄŤtenĂˇ entita hrĂˇÄŤe.
-     */
-    private PlayerEntity getPlayerOrThrow(Long playerId) {
-        return playerRepository.findById(playerId)
-                .orElseThrow(() -> new PlayerNotFoundException(playerId));
-    }
-
-    /**
-     * NaÄŤĂ­tĂˇ registraci hrĂˇÄŤe na zĂˇpas, pokud existuje.
-     *
-     * @param playerId IdentifikĂˇtor hrĂˇÄŤe.
-     * @param matchId IdentifikĂˇtor zĂˇpasu.
-     * @return Entita registrace, nebo null pokud registrace neexistuje.
-     */
-    private MatchRegistrationEntity getRegistrationOrNull(Long playerId, Long matchId) {
-        return registrationRepository
-                .findByPlayerIdAndMatchId(playerId, matchId)
-                .orElse(null);
-    }
-
-    /**
-     * NaÄŤĂ­tĂˇ registraci hrĂˇÄŤe na zĂˇpas nebo vyhazuje vĂ˝jimku pĹ™i neexistenci.
-     *
-     * @param playerId IdentifikĂˇtor hrĂˇÄŤe.
-     * @param matchId IdentifikĂˇtor zĂˇpasu.
-     * @return NaÄŤtenĂˇ entita registrace.
-     */
-    private MatchRegistrationEntity getRegistrationOrThrow(Long playerId, Long matchId) {
-        return registrationRepository
-                .findByPlayerIdAndMatchId(playerId, matchId)
-                .orElseThrow(() -> new RegistrationNotFoundException(matchId, playerId));
-    }
-
-    /**
-     * Vyhodnocuje, zda je v zĂˇpase dostupnĂ© mĂ­sto pro registraci ve stavu REGISTERED.
-     *
-     * @param match ZĂˇpas, pro kterĂ˝ se dostupnost mĂ­sta vyhodnocuje.
-     * @return True, pokud poÄŤet registrovanĂ˝ch hrĂˇÄŤĹŻ nedosahuje kapacity zĂˇpasu, jinak false.
-     */
-    private boolean isSlotAvailable(MatchEntity match) {
-        long registeredCount = registrationRepository
-                .countByMatchIdAndStatus(match.getId(), PlayerMatchStatus.REGISTERED);
-        return registeredCount < match.getMaxPlayers();
-    }
-
-    /**
-     * OdesĂ­lĂˇ SMS zprĂˇvu hrĂˇÄŤi navĂˇzanĂ©mu na registraci, pokud je k dispozici telefonnĂ­ ÄŤĂ­slo.
-     *
-     * Pokud registrace nebo hrĂˇÄŤ neexistujĂ­, metoda se ukonÄŤĂ­ bez provedenĂ­. TelefonnĂ­ ÄŤĂ­slo se vyhodnocuje
-     * primĂˇrnÄ› z nastavenĂ­ hrĂˇÄŤe a sekundĂˇrnÄ› z hodnoty uloĹľenĂ© na hrĂˇÄŤi. PĹ™Ă­padnĂ© chyby pĹ™i odesĂ­lĂˇnĂ­ se pouze zalogujĂ­.
-     *
-     * @param registration Registrace, pro kterou se zprĂˇva odesĂ­lĂˇ.
-     * @param message Text SMS zprĂˇvy.
-     */
-    private void sendSms(MatchRegistrationEntity registration, String message) {
-        if (registration == null || registration.getPlayer() == null) {
-            return;
-        }
-
-        PlayerEntity player = registration.getPlayer();
-        var settings = player.getSettings();
-
-        String phone = null;
-        if (settings != null && settings.getContactPhone() != null && !settings.getContactPhone().isBlank()) {
-            phone = settings.getContactPhone();
-        } else if (player.getPhoneNumber() != null && !player.getPhoneNumber().isBlank()) {
-            phone = player.getPhoneNumber();
-        }
-
-        if (phone == null || phone.isBlank()) {
-            log.debug("sendSms: hrĂˇÄŤ {} nemĂˇ ĹľĂˇdnĂ© telefonnĂ­ ÄŤĂ­slo â€“ SMS se nepoĹˇle", player.getId());
-            return;
-        }
-
-        try {
-            smsService.sendSms(phone, message);
-        } catch (Exception e) {
-            log.error(
-                    "Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS pro registraci {}: {}",
-                    registration.getId(),
-                    e.getMessage(),
-                    e
-            );
-        }
-    }
-
-    /**
-     * Aktualizuje stav registrace a uklĂˇdĂˇ zmÄ›nu do databĂˇze.
-     *
-     * V rĂˇmci zmÄ›ny se nastavĂ­ novĂ˝ stav, identifikace pĹŻvodce zmÄ›ny a volitelnÄ› se aktualizuje ÄŤas zmÄ›ny.
-     * ZĂˇpis se provĂˇdĂ­ pĹ™es repository vrstvu s okamĹľitĂ˝m flush pro zajiĹˇtÄ›nĂ­ konzistence nĂˇslednĂ˝ch operacĂ­.
-     *
-     * @param registration Registrace, kterĂˇ se mĂˇ aktualizovat.
-     * @param status CĂ­lovĂ˝ stav registrace.
-     * @param updatedBy Identifikace pĹŻvodce zmÄ›ny.
-     * @param updateTimestamp PĹ™Ă­znak urÄŤujĂ­cĂ­, zda se mĂˇ nastavit aktuĂˇlnĂ­ ÄŤas zmÄ›ny.
-     * @return UloĹľenĂˇ entita registrace po zmÄ›nÄ› stavu.
-     */
-    private MatchRegistrationEntity updateRegistrationStatus(
-            MatchRegistrationEntity registration,
-            PlayerMatchStatus status,
-            String updatedBy,
-            boolean updateTimestamp
-    ) {
-        registration.setStatus(status);
-        registration.setCreatedBy(updatedBy);
-        if (updateTimestamp) {
-            registration.setTimestamp(LocalDateTime.now());
-        }
-        return registrationRepository.saveAndFlush(registration);
-    }
-
-    /**
-     * Mapuje stav registrace na typ notifikace.
-     *
-     * Pokud se pro danĂ˝ stav notifikace neodesĂ­lĂˇ, vracĂ­ se null.
-     *
-     * @param newStatus Stav registrace, pro kterĂ˝ se typ notifikace vyhodnocuje.
-     * @return Typ notifikace odpovĂ­dajĂ­cĂ­ stavu, nebo null pokud se notifikace neposĂ­lĂˇ.
-     */
-    private NotificationType resolveNotificationType(PlayerMatchStatus newStatus) {
-        return switch (newStatus) {
-            case REGISTERED -> NotificationType.MATCH_REGISTRATION_CREATED;
-            case UNREGISTERED -> NotificationType.MATCH_REGISTRATION_CANCELED;
-            case EXCUSED -> NotificationType.PLAYER_EXCUSED;
-            case RESERVED -> NotificationType.MATCH_REGISTRATION_RESERVED;
-            case NO_RESPONSE -> NotificationType.MATCH_REGISTRATION_NO_RESPONSE;
-            case SUBSTITUTE -> NotificationType.MATCH_REGISTRATION_SUBSTITUTE;
-            case NO_EXCUSED -> NotificationType.PLAYER_NO_EXCUSED;
-            default -> null;
-        };
-    }
-
-    /**
-     * VracĂ­ aktuĂˇlnĂ­ ÄŤas.
-     *
-     * Metoda se pouĹľĂ­vĂˇ pro sjednocenĂ­ pĹ™Ă­stupu k ÄŤasu a pro usnadnÄ›nĂ­ testovĂˇnĂ­.
-     *
-     * @return AktuĂˇlnĂ­ ÄŤas jako LocalDateTime.
-     */
-    private LocalDateTime now() {
-        return LocalDateTime.now();
-    }
-
-    /**
-     * OvÄ›Ĺ™uje, Ĺľe zĂˇpas patĹ™Ă­ do aktivnĂ­ sezĂłny.
-     *
-     * Kontrola se pouĹľĂ­vĂˇ pĹ™ed zĂˇpisem registrace, aby se zabrĂˇnilo zmÄ›nĂˇm v neaktivnĂ­ch sezĂłnĂˇch.
-     *
-     * @param match ZĂˇpas, kterĂ˝ se mĂˇ ovÄ›Ĺ™it.
-     */
-    private void assertMatchInActiveSeason(MatchEntity match) {
-        if (match.getSeason() == null || !match.getSeason().isActive()) {
-            throw new InvalidSeasonStateException(
-                    "BE - Registrace lze mÄ›nit pouze u zĂˇpasĹŻ v aktivnĂ­ sezĂłnÄ›."
-            );
-        }
-    }
-
-    /**
-     * OvÄ›Ĺ™uje, zda aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel mĹŻĹľe mÄ›nit registraci na danĂ˝ zĂˇpas.
-     *
-     * UĹľivatel s rolĂ­ ADMIN nebo MANAGER nenĂ­ ÄŤasovÄ› omezen. UĹľivatel s rolĂ­ PLAYER mĹŻĹľe registraci mÄ›nit pouze
-     * v definovanĂ©m ÄŤasovĂ©m oknÄ› po zaÄŤĂˇtku zĂˇpasu. PĹ™i poruĹˇenĂ­ pravidel se vyhazuje vĂ˝jimka signalizujĂ­cĂ­
-     * nepovolenou zmÄ›nu.
-     *
-     * @param match ZĂˇpas, pro kterĂ˝ se oprĂˇvnÄ›nĂ­ vyhodnocuje.
-     */
-    private void assertPlayerCanModifyMatch(MatchEntity match) {
-        if (!isCurrentUserPlayer()) {
-            return;
-        }
-
-        if (!isMatchEditableForPlayer(match)) {
-            throw new InvalidPlayerStatusException(
-                    "BE - Jako hrĂˇÄŤ mĹŻĹľeĹˇ mÄ›nit registraci pouze do 30 minut po zaÄŤĂˇtku zĂˇpasu."
-            );
-        }
-    }
-
-    /**
-     * Vyhodnocuje, zda je zĂˇpas v ÄŤasovĂ©m oknÄ›, ve kterĂ©m mĹŻĹľe hrĂˇÄŤ mÄ›nit registraci.
-     *
-     * ZĂˇpas se povaĹľuje za editovatelnĂ˝ pro hrĂˇÄŤe do tĹ™iceti minut po zaÄŤĂˇtku zĂˇpasu.
-     *
-     * @param match ZĂˇpas, ke kterĂ©mu se editovatelnost vyhodnocuje.
-     * @return True, pokud je zmÄ›na registrace jeĹˇtÄ› povolena, jinak false.
-     */
-    private boolean isMatchEditableForPlayer(MatchEntity match) {
-        LocalDateTime editLimit = match.getDateTime().plusMinutes(30);
-        return now().isBefore(editLimit);
-    }
-
-    /**
-     * Vyhodnocuje, zda mĂˇ aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel roli ROLE_PLAYER.
-     *
-     * Metoda se pouĹľĂ­vĂˇ pro aplikaci ÄŤasovĂ©ho omezenĂ­, kterĂ© se vztahuje pouze na hrĂˇÄŤe.
-     *
-     * @return True, pokud mĂˇ uĹľivatel roli ROLE_PLAYER, jinak false.
-     */
-    private boolean isCurrentUserPlayer() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            return false;
-        }
-
-        return auth.getAuthorities().stream()
-                .anyMatch(a -> "ROLE_PLAYER".equals(a.getAuthority()));
+    @Transactional
+    public void sendSmsToRegisteredPlayers(Long matchId) {
+        commandService.sendSmsToRegisteredPlayers(matchId);
     }
 
     // ======================================
-    // SEASON â€“ POMOCNĂ‰ METODY PRO CURRENT SEASON
+    // ÄŚTECĂŤ OPERACE â€“ DELEGACE DO QUERY SERVICE
     // ======================================
 
-    /**
-     * Vyhodnocuje, zda zĂˇpas patĹ™Ă­ do aktuĂˇlnÄ› vybranĂ© sezĂłny.
-     *
-     * PorovnĂˇvĂˇ se identifikĂˇtor sezĂłny zĂˇpasu s identifikĂˇtorem sezĂłny vrĂˇcenĂ˝m metodou getCurrentSeasonIdOrActive.
-     *
-     * @param match ZĂˇpas, kterĂ˝ se mĂˇ vyhodnotit.
-     * @return True, pokud zĂˇpas patĹ™Ă­ do aktuĂˇlnĂ­ sezĂłny, jinak false.
-     */
-    private boolean isMatchInCurrentSeason(MatchEntity match) {
-        if (match == null || match.getSeason() == null) {
-            return false;
-        }
-        Long seasonId = getCurrentSeasonIdOrActive();
-        return seasonId.equals(match.getSeason().getId());
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
+        return matchRegistrationQueryService.getRegistrationsForMatch(matchId);
     }
 
-    /**
-     * Vyhodnocuje, zda registrace patĹ™Ă­ k zĂˇpasu v aktuĂˇlnÄ› vybranĂ© sezĂłnÄ›.
-     *
-     * @param registration Registrace, kterĂˇ se mĂˇ vyhodnotit.
-     * @return True, pokud registrace patĹ™Ă­ do aktuĂˇlnĂ­ sezĂłny, jinak false.
-     */
-    private boolean isRegistrationInCurrentSeason(MatchRegistrationEntity registration) {
-        if (registration == null) {
-            return false;
-        }
-        return isMatchInCurrentSeason(registration.getMatch());
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForMatches(List<Long> matchIds) {
+        return matchRegistrationQueryService.getRegistrationsForMatches(matchIds);
     }
 
-    /**
-     * VracĂ­ identifikĂˇtor sezĂłny pouĹľĂ­vanĂ© pro filtrovĂˇnĂ­ registracĂ­.
-     *
-     * PrimĂˇrnÄ› se pouĹľĂ­vĂˇ sezĂłna uloĹľenĂˇ v CurrentSeasonService. Pokud nenĂ­ k dispozici, pouĹľije se
-     * globĂˇlnÄ› aktivnĂ­ sezĂłna zĂ­skanĂˇ ze SeasonService.
-     *
-     * @return IdentifikĂˇtor aktuĂˇlnĂ­ nebo aktivnĂ­ sezĂłny.
-     */
-    private Long getCurrentSeasonIdOrActive() {
-        Long id = currentSeasonService.getCurrentSeasonIdOrDefault();
-        if (id != null) {
-            return id;
-        }
-        return seasonService.getActiveSeason().getId();
+    @Override
+    public List<MatchRegistrationDTO> getAllRegistrations() {
+        return matchRegistrationQueryService.getAllRegistrations();
     }
 
+    @Override
+    public List<MatchRegistrationDTO> getRegistrationsForPlayer(Long playerId) {
+        return matchRegistrationQueryService.getRegistrationsForPlayer(playerId);
+    }
+
+    @Override
+    public List<PlayerDTO> getNoResponsePlayers(Long matchId) {
+        return matchRegistrationQueryService.getNoResponsePlayers(matchId);
+    }
 }
 
 -----
@@ -3048,8 +3534,10 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.enums.MatchCancelReason;
+import cz.phsoft.hokej.match.dto.MatchDTO;
+import cz.phsoft.hokej.match.dto.MatchDetailDTO;
+import cz.phsoft.hokej.match.dto.MatchOverviewDTO;
+import cz.phsoft.hokej.match.enums.MatchCancelReason;
 import cz.phsoft.hokej.models.dto.*;
 
 import java.util.List;
@@ -3254,20 +3742,28 @@ public interface MatchService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
 import cz.phsoft.hokej.data.enums.*;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.data.repositories.MatchRegistrationRepository;
-import cz.phsoft.hokej.data.repositories.MatchRepository;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.match.repositories.MatchRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.*;
+import cz.phsoft.hokej.match.dto.MatchDTO;
+import cz.phsoft.hokej.match.dto.MatchDetailDTO;
+import cz.phsoft.hokej.match.dto.MatchOverviewDTO;
+import cz.phsoft.hokej.match.enums.MatchCancelReason;
+import cz.phsoft.hokej.match.enums.MatchMode;
+import cz.phsoft.hokej.match.enums.MatchStatus;
+import cz.phsoft.hokej.match.services.MatchCapacityService;
+import cz.phsoft.hokej.match.util.MatchModeLayoutUtil;
 import cz.phsoft.hokej.models.dto.*;
-import cz.phsoft.hokej.models.mappers.MatchMapper;
-import cz.phsoft.hokej.models.mappers.PlayerMapper;
-import cz.phsoft.hokej.models.services.notification.NotificationService;
-import cz.phsoft.hokej.models.services.notification.MatchTimeChangeContext;
+import cz.phsoft.hokej.match.mappers.MatchMapper;
+import cz.phsoft.hokej.player.mappers.PlayerMapper;
+import cz.phsoft.hokej.notifications.services.NotificationService;
+import cz.phsoft.hokej.notifications.services.MatchTimeChangeContext;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -3275,8 +3771,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.registration.enums.PlayerPositionCategory;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -3310,6 +3808,7 @@ public class MatchServiceImpl implements MatchService {
     private final MatchRegistrationRepository matchRegistrationRepository;
     private final MatchMapper matchMapper;
     private final MatchRegistrationService registrationService;
+    private final MatchRegistrationCommandService registrationCommandService;
     private final PlayerRepository playerRepository;
     private final PlayerInactivityPeriodService playerInactivityPeriodService;
     private final PlayerMapper playerMapper;
@@ -3318,23 +3817,31 @@ public class MatchServiceImpl implements MatchService {
     private final CurrentSeasonService currentSeasonService;
     private final NotificationService notificationService;
     private final AppUserRepository appUserRepository;
+    private final Clock clock;
+    private final MatchCapacityService matchCapacityService;
 
-    public MatchServiceImpl(MatchRepository matchRepository,
-                            MatchRegistrationRepository matchRegistrationRepository,
-                            MatchMapper matchMapper,
-                            MatchRegistrationService registrationService,
-                            PlayerRepository playerRepository,
-                            PlayerInactivityPeriodService playerInactivityPeriodService,
-                            PlayerMapper playerMapper,
-                            CurrentPlayerService currentPlayerService,
-                            SeasonService seasonService,
-                            CurrentSeasonService currentSeasonService,
-                            NotificationService notificationService,
-                            AppUserRepository appUserRepository) {
+    public MatchServiceImpl(
+            MatchRepository matchRepository,
+            MatchRegistrationRepository matchRegistrationRepository,
+            MatchMapper matchMapper,
+            MatchRegistrationService registrationService,
+            MatchRegistrationCommandService registrationCommandService,
+            PlayerRepository playerRepository,
+            PlayerInactivityPeriodService playerInactivityPeriodService,
+            PlayerMapper playerMapper,
+            CurrentPlayerService currentPlayerService,
+            SeasonService seasonService,
+            CurrentSeasonService currentSeasonService,
+            NotificationService notificationService,
+            AppUserRepository appUserRepository,
+            Clock clock,
+            MatchCapacityService matchCapacityService
+    ) {
         this.matchRepository = matchRepository;
         this.matchRegistrationRepository = matchRegistrationRepository;
         this.matchMapper = matchMapper;
         this.registrationService = registrationService;
+        this.registrationCommandService = registrationCommandService;
         this.playerRepository = playerRepository;
         this.playerInactivityPeriodService = playerInactivityPeriodService;
         this.playerMapper = playerMapper;
@@ -3343,6 +3850,8 @@ public class MatchServiceImpl implements MatchService {
         this.currentSeasonService = currentSeasonService;
         this.notificationService = notificationService;
         this.appUserRepository = appUserRepository;
+        this.clock = clock;
+        this.matchCapacityService = matchCapacityService;
     }
 
     // ======================
@@ -3462,15 +3971,15 @@ public class MatchServiceImpl implements MatchService {
      * nebo MANAGER mĹŻĹľe upravovat pouze zĂˇpasy patĹ™Ă­cĂ­ do aktivnĂ­ sezĂłny a souÄŤasnÄ› se ovÄ›Ĺ™uje, Ĺľe datum zĂˇpasu
      * zĹŻstĂˇvĂˇ v obdobĂ­ aktivnĂ­ sezĂłny. NĂˇslednÄ› se pĹ™enesou zmÄ›ny z DTO do entity a zĂˇpas se uloĹľĂ­.
      *
-     * Pokud se zmÄ›nĂ­ kapacita zĂˇpasu, pĹ™epoÄŤĂ­tajĂ­ se stavy registracĂ­ pĹ™es {@link MatchRegistrationService}.
+     * Pokud se zmÄ›nĂ­ kapacita zĂˇpasu, pĹ™epoÄŤĂ­tajĂ­ se stavy registracĂ­ pĹ™es {@link MatchCapacityService}.
      * Pokud se zmÄ›nĂ­ termĂ­n zĂˇpasu, odeĹˇlou se notifikace o zmÄ›nÄ› termĂ­nu pĹ™es {@link NotificationService}.
      * PĹ™i zmÄ›nÄ› vybranĂ˝ch vlastnostĂ­ se nastavĂ­ stav zĂˇpasu na UPDATED.
      *
-     * @param id IdentifikĂˇtor upravovanĂ©ho zĂˇpasu.
+     * @param id  IdentifikĂˇtor upravovanĂ©ho zĂˇpasu.
      * @param dto DTO obsahujĂ­cĂ­ novĂˇ data zĂˇpasu.
      * @return AktualizovanĂ˝ zĂˇpas pĹ™evedenĂ˝ do DTO.
-     * @throws InvalidMatchStatusException Pokud uĹľivatel bez role ADMIN nebo MANAGER upravuje zĂˇpas mimo aktivnĂ­ sezĂłnu.
-     * @throws InvalidMatchDateTimeException Pokud by po ĂşpravÄ› zĂˇpas spadl do minulosti.
+     * @throws InvalidMatchStatusException    Pokud uĹľivatel bez role ADMIN nebo MANAGER upravuje zĂˇpas mimo aktivnĂ­ sezĂłnu.
+     * @throws InvalidMatchDateTimeException  Pokud by po ĂşpravÄ› zĂˇpas spadl do minulosti.
      */
     @Override
     public MatchDTO updateMatch(Long id, MatchDTO dto) {
@@ -3492,8 +4001,11 @@ public class MatchServiceImpl implements MatchService {
         LocalDateTime oldDateTime = entity.getDateTime();
         String oldLocation = entity.getLocation();
         Integer oldPrice = entity.getPrice();
+        MatchMode oldMatchMode = entity.getMatchMode();   // sledujeme zmÄ›nu reĹľimu
 
         matchMapper.updateEntity(dto, entity);
+        logger.info("UPDATE matchId={}, oldMode={}, newModeAfterMap={}",
+                id, oldMatchMode, entity.getMatchMode());
 
         Long currentUserId = getCurrentUserIdOrNull();
         entity.setLastModifiedByUserId(currentUserId);
@@ -3519,16 +4031,26 @@ public class MatchServiceImpl implements MatchService {
         boolean priceChanged =
                 !java.util.Objects.equals(entity.getPrice(), oldPrice);
 
-        if (maxPlayersChanged || dateTimeChanged || locationChanged || priceChanged) {
+        boolean matchModeChanged =
+                !java.util.Objects.equals(entity.getMatchMode(), oldMatchMode);
+
+        if (maxPlayersChanged || dateTimeChanged || locationChanged || priceChanged || matchModeChanged) {
             entity.setMatchStatus(MatchStatus.UPDATED);
         }
 
         MatchEntity saved = matchRepository.save(entity);
 
-        if (maxPlayersChanged) {
-            registrationService.recalcStatusesForMatch(saved.getId());
+        // Pokud se zmÄ›nil hernĂ­ systĂ©m, upravĂ­ se pozice hrĂˇÄŤĹŻ v registracĂ­ch.
+        if (matchModeChanged) {
+            adjustPlayerPositionsForMatchModeChange(saved, oldMatchMode);
         }
 
+        // KapacitnĂ­ logika se deleguje do specializovanĂ© sluĹľby.
+        if (maxPlayersChanged) {
+            matchCapacityService.handleCapacityChange(saved, oldMaxPlayers);
+        }
+
+        // ZmÄ›na termĂ­nu â€“ notifikace hrĂˇÄŤĹŻm o zmÄ›nÄ› ÄŤasu zĂˇpasu.
         if (dateTimeChanged) {
             MatchTimeChangeContext ctx = new MatchTimeChangeContext(saved, oldDateTime);
             notifyPlayersAboutMatchChanges(ctx, MatchStatus.UPDATED);
@@ -3688,12 +4210,14 @@ public class MatchServiceImpl implements MatchService {
 
         dto.setMatchStatus(match.getMatchStatus());
         dto.setCancelReason(match.getCancelReason());
+        dto.setMatchMode(match.getMatchMode());   // doplnÄ›nĂ­ reĹľimu zĂˇpasu do detailu
 
         if (match.getSeason() != null && match.getSeason().getId() != null) {
             Long seasonId = match.getSeason().getId();
             Map<Long, Integer> matchNumberMap = buildMatchNumberMapForSeason(seasonId);
             Integer number = matchNumberMap.get(match.getId());
             dto.setMatchNumber(number);
+            dto.setSeasonId(seasonId);           // doplnÄ›nĂ­ ID sezĂłny do detailu
         }
 
         return dto;
@@ -3878,6 +4402,7 @@ public class MatchServiceImpl implements MatchService {
         dto.setNoResponsePlayers(isAdminOrManager ? noResponsePlayers : null);
         dto.setRegisteredDarkPlayers(registeredDarkPlayers);
         dto.setRegisteredLightPlayers(registeredLightPlayers);
+        dto.setRegistrations(registrations);
 
         return dto;
     }
@@ -4189,9 +4714,11 @@ public class MatchServiceImpl implements MatchService {
                 : match.getPrice();
         dto.setPricePerRegisteredPlayer(pricePerPlayer);
 
-        // doplnÄ›nĂ­ stavu zĂˇpasu a sezĂłny pro pĹ™ehled
+        // doplnÄ›nĂ­ stavu zĂˇpasu, reĹľimu a sezĂłny pro pĹ™ehled
         dto.setMatchStatus(match.getMatchStatus());
         dto.setCancelReason(match.getCancelReason());
+        dto.setMatchMode(match.getMatchMode());
+
         if (match.getSeason() != null && match.getSeason().getId() != null) {
             dto.setSeasonId(match.getSeason().getId());
         }
@@ -4495,6 +5022,235 @@ public class MatchServiceImpl implements MatchService {
                 .orElse(null);
     }
 
+    /**
+     * Upravuje pozice hrĂˇÄŤĹŻ v registracĂ­ch pĹ™i zmÄ›nÄ› hernĂ­ho systĂ©mu zĂˇpasu.
+     *
+     * VyuĹľĂ­vĂˇ preferovanĂ© pozice hrĂˇÄŤe (primary / secondary) a nastavenĂ­
+     * PlayerSettings (possibleChangePlayerPosition) pro rozhodnutĂ­, na jakĂ˝
+     * post mĹŻĹľe bĂ˝t hrĂˇÄŤ pĹ™esunut. PĹ™esun probĂ­hĂˇ pouze u registracĂ­ ve
+     * stavu REGISTERED nebo RESERVED.
+     *
+     * Pokud je pĹŻvodnĂ­ pozice platnĂˇ i v novĂ©m matchMode, ponechĂˇvĂˇ se beze zmÄ›ny.
+     * Pokud jiĹľ novĂ˝ matchMode danĂ˝ post neobsahuje, hledĂˇ se nejbliĹľĹˇĂ­ vhodnĂˇ
+     * pozice v rĂˇmci stejnĂ© kategorie (obrĂˇnce / ĂştoÄŤnĂ­k / brankĂˇĹ™). PĹ™echod
+     * mezi kategoriemi je povolen pouze pokud to hrĂˇÄŤ v nastavenĂ­ povolil.
+     *
+     * @param match        ZĂˇpas po uloĹľenĂ­ novĂ©ho nastavenĂ­.
+     * @param oldMatchMode PĹŻvodnĂ­ reĹľim zĂˇpasu pĹ™ed zmÄ›nou.
+     */
+    private void adjustPlayerPositionsForMatchModeChange(MatchEntity match, MatchMode oldMatchMode) {
+        MatchMode newMode = match.getMatchMode();
+        if (newMode == null || newMode == oldMatchMode) {
+            return;
+        }
+
+        // PovolenĂ© pozice v novĂ©m reĹľimu (stejnĂ© pro oba tĂ˝my)
+        List<PlayerPosition> icePositions = MatchModeLayoutUtil.getIcePositionsForMode(newMode);
+        if (icePositions == null || icePositions.isEmpty()) {
+            return;
+        }
+        Set<PlayerPosition> allowedPositions = new LinkedHashSet<>(icePositions);
+
+        // Registrace pro danĂ˝ zĂˇpas â€“ budeme upravovat jen REGISTERED / RESERVED
+        List<MatchRegistrationEntity> registrations =
+                matchRegistrationRepository.findByMatchId(match.getId());
+        if (registrations.isEmpty()) {
+            return;
+        }
+
+        boolean changed = false;
+
+        for (MatchRegistrationEntity reg : registrations) {
+            PlayerMatchStatus status = reg.getStatus();
+            if (status != PlayerMatchStatus.REGISTERED
+                    && status != PlayerMatchStatus.RESERVED) {
+                continue;
+            }
+
+            PlayerPosition currentPosition = reg.getPositionInMatch();
+            if (currentPosition == null || currentPosition == PlayerPosition.ANY) {
+                continue;
+            }
+
+            // Pokud je stĂˇvajĂ­cĂ­ pozice v novĂ©m reĹľimu platnĂˇ, nenĂ­ tĹ™eba nic mÄ›nit
+            if (allowedPositions.contains(currentPosition)) {
+                continue;
+            }
+
+            PlayerEntity player = reg.getPlayer();
+            if (player == null) {
+                continue;
+            }
+
+            var settings = player.getSettings();
+            boolean canCrossCategory = settings != null && settings.isPossibleChangePlayerPosition();
+
+            PlayerPosition primary = player.getPrimaryPosition();
+            PlayerPosition secondary = player.getSecondaryPosition();
+
+            PlayerPosition newPosition = resolvePositionForMatchModeChange(
+                    currentPosition,
+                    primary,
+                    secondary,
+                    allowedPositions,
+                    canCrossCategory
+            );
+
+            if (newPosition != null && newPosition != currentPosition) {
+                reg.setPositionInMatch(newPosition);
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            matchRegistrationRepository.saveAll(registrations);
+        }
+    }
+
+    /**
+     * Odvozuje novou pozici hrĂˇÄŤe pĹ™i zmÄ›nÄ› hernĂ­ho systĂ©mu.
+     *
+     * Pravidla:
+     * - pokud je souÄŤasnĂˇ pozice podporovĂˇna novĂ˝m reĹľimem, nic se nemÄ›nĂ­ (vracĂ­ se null),
+     * - pokud post v novĂ©m reĹľimu neexistuje, hledĂˇ se vhodnĂˇ alternativa:
+     *   1) pokud v novĂ©m reĹľimu existuje alespoĹ jedna pozice stejnĂ© kategorie:
+     *      - primĂˇrnĂ­ pozice hrĂˇÄŤe ve stejnĂ© kategorii,
+     *      - sekundĂˇrnĂ­ pozice ve stejnĂ© kategorii,
+     *      - libovolnĂˇ jinĂˇ pozice ve stejnĂ© kategorii,
+     *      - pĹ™echod do jinĂ© kategorie jen pokud to hrĂˇÄŤ povolil;
+     *   2) pokud v novĂ©m reĹľimu neexistuje ĹľĂˇdnĂˇ pozice stejnĂ© kategorie (napĹ™. GOALIE):
+     *      - primĂˇrnĂ­ pozice, pokud je v allowedPositions (bez ohledu na kategorii),
+     *      - sekundĂˇrnĂ­ pozice, pokud je v allowedPositions,
+     *      - libovolnĂˇ pozice z allowedPositions jako fallback.
+     */
+    private PlayerPosition resolvePositionForMatchModeChange(
+            PlayerPosition currentPosition,
+            PlayerPosition primary,
+            PlayerPosition secondary,
+            Set<PlayerPosition> allowedPositions,
+            boolean canCrossCategory
+    ) {
+        if (currentPosition == null || currentPosition == PlayerPosition.ANY) {
+            return null;
+        }
+
+        // StĂˇvajĂ­cĂ­ pozice je v novĂ©m reĹľimu podporovanĂˇ â€“ nenĂ­ dĹŻvod ji mÄ›nit
+        if (allowedPositions.contains(currentPosition)) {
+            return null;
+        }
+
+        PlayerPositionCategory currentCategory = getPositionCategory(currentPosition);
+        if (currentCategory == null) {
+            return null;
+        }
+
+        // ZjistĂ­me, jestli novĂˇ konfigurace vĹŻbec obsahuje nÄ›jakou pozici stejnĂ© kategorie
+        boolean hasSameCategory = allowedPositions.stream()
+                .anyMatch(p -> getPositionCategory(p) == currentCategory);
+
+        // ============================
+        // 1) KATEGORIE V NOVĂ‰M REĹ˝IMU EXISTUJE
+        // ============================
+        if (hasSameCategory) {
+            // 1a) PrimĂˇrnĂ­ pozice ve stejnĂ© kategorii
+            if (isCandidatePosition(primary, allowedPositions, currentCategory)) {
+                return primary;
+            }
+
+            // 1b) SekundĂˇrnĂ­ pozice ve stejnĂ© kategorii
+            if (isCandidatePosition(secondary, allowedPositions, currentCategory)) {
+                return secondary;
+            }
+
+            // 1c) JakĂˇkoli jinĂˇ pozice ve stejnĂ© kategorii
+            PlayerPosition sameCategoryTarget = allowedPositions.stream()
+                    .filter(p -> getPositionCategory(p) == currentCategory)
+                    .findFirst()
+                    .orElse(null);
+
+            if (sameCategoryTarget != null) {
+                return sameCategoryTarget;
+            }
+
+            // 1d) PĹ™echod do jinĂ© kategorie pouze pokud to hrĂˇÄŤ v nastavenĂ­ povolil
+            if (!canCrossCategory) {
+                return null;
+            }
+
+            return allowedPositions.stream().findFirst().orElse(null);
+        }
+
+        // ============================
+        // 2) KATEGORIE V NOVĂ‰M REĹ˝IMU VĹ®BEC NEEXISTUJE
+        //    (napĹ™. GOALIE u THREE_ON_THREE_NO_GOALIE)
+        // ============================
+
+        // 2a) ZkusĂ­me primĂˇrnĂ­ pozici, pokud je v allowedPositions (bez ohledu na kategorii)
+        if (primary != null && primary != PlayerPosition.ANY && allowedPositions.contains(primary)) {
+            return primary;
+        }
+
+        // 2b) ZkusĂ­me sekundĂˇrnĂ­ pozici
+        if (secondary != null && secondary != PlayerPosition.ANY && allowedPositions.contains(secondary)) {
+            return secondary;
+        }
+
+        // 2c) Fallback â€“ libovolnĂˇ povolenĂˇ pozice v novĂ©m reĹľimu
+        return allowedPositions.stream().findFirst().orElse(null);
+    }
+
+    /**
+     * Vyhodnocuje, zda je kandidĂˇtnĂ­ pozice vhodnĂˇ pro pĹ™esun hrĂˇÄŤe.
+     *
+     * @param candidate         KandidĂˇtnĂ­ pozice.
+     * @param allowedPositions  PovolenĂ© pozice v novĂ©m matchMode.
+     * @param requiredCategory  PoĹľadovanĂˇ kategorie pozice.
+     * @return True, pokud kandidĂˇt splĹuje podmĂ­nky, jinak false.
+     */
+    private boolean isCandidatePosition(
+            PlayerPosition candidate,
+            Set<PlayerPosition> allowedPositions,
+            PlayerPositionCategory requiredCategory
+    ) {
+        if (candidate == null || candidate == PlayerPosition.ANY) {
+            return false;
+        }
+        if (!allowedPositions.contains(candidate)) {
+            return false;
+        }
+        PlayerPositionCategory cat = getPositionCategory(candidate);
+        return cat == requiredCategory;
+    }
+
+    /**
+     * Mapuje konkrĂ©tnĂ­ pozici hrĂˇÄŤe na logickou kategorii (brankĂˇĹ™ / obrĂˇnce / ĂştoÄŤnĂ­k).
+     *
+     * MapovĂˇnĂ­ je drĹľeno zde, aby bylo moĹľnĂ© logiku pouĹľĂ­t nezĂˇvisle
+     * na internĂ­ implementaci enumu PlayerPosition.
+     *
+     * @param position Pozice hrĂˇÄŤe.
+     * @return Kategorie pozice, nebo null pro ANY / neznĂˇmou hodnotu.
+     */
+    private PlayerPositionCategory getPositionCategory(PlayerPosition position) {
+        if (position == null || position == PlayerPosition.ANY) {
+            return null;
+        }
+
+        return switch (position) {
+            case GOALIE -> PlayerPositionCategory.GOALIE;
+
+            case DEFENSE,
+                 DEFENSE_LEFT,
+                 DEFENSE_RIGHT -> PlayerPositionCategory.DEFENSE;
+
+            case CENTER,
+                 WING_LEFT,
+                 WING_RIGHT,
+                 FORWARD -> PlayerPositionCategory.FORWARD;
+            case ANY -> null;
+        };
+    }
+
 }
 
 -----
@@ -4672,7 +5428,7 @@ package cz.phsoft.hokej.models.services;
 package cz.phsoft.hokej.models.services;
 
 
-import cz.phsoft.hokej.models.dto.PlayerHistoryDTO;
+import cz.phsoft.hokej.player.dto.PlayerHistoryDTO;
 
 import java.util.List;
 
@@ -4697,9 +5453,9 @@ public interface PlayerHistoryService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.repositories.PlayerHistoryRepository;
-import cz.phsoft.hokej.models.dto.PlayerHistoryDTO;
-import cz.phsoft.hokej.models.mappers.PlayerHistoryMapper;
+import cz.phsoft.hokej.player.repositories.PlayerHistoryRepository;
+import cz.phsoft.hokej.player.dto.PlayerHistoryDTO;
+import cz.phsoft.hokej.player.mappers.PlayerHistoryMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -4738,8 +5494,8 @@ public class PlayerHistoryServiceImpl
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.dto.PlayerInactivityPeriodDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -4847,16 +5603,16 @@ public interface PlayerInactivityPeriodService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.entities.PlayerInactivityPeriodEntity;
-import cz.phsoft.hokej.data.repositories.PlayerInactivityPeriodRepository;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.exceptions.InactivityPeriodNotFoundException;
-import cz.phsoft.hokej.exceptions.InactivityPeriodOverlapException;
-import cz.phsoft.hokej.exceptions.InvalidInactivityPeriodDateException;
-import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.models.dto.PlayerInactivityPeriodDTO;
-import cz.phsoft.hokej.models.mappers.PlayerInactivityPeriodMapper;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerInactivityPeriodEntity;
+import cz.phsoft.hokej.player.repositories.PlayerInactivityPeriodRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.exceptions.InactivityPeriodNotFoundException;
+import cz.phsoft.hokej.player.exceptions.InactivityPeriodOverlapException;
+import cz.phsoft.hokej.player.exceptions.InvalidInactivityPeriodDateException;
+import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.player.dto.PlayerInactivityPeriodDTO;
+import cz.phsoft.hokej.player.mappers.PlayerInactivityPeriodMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -5132,8 +5888,8 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
+import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
 
 import java.util.List;
 
@@ -5297,53 +6053,55 @@ public interface PlayerService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
-import cz.phsoft.hokej.data.enums.PlayerSelectionMode;
-import cz.phsoft.hokej.data.enums.PlayerStatus;
-import cz.phsoft.hokej.data.enums.NotificationType;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerSettingsEntity;
+import cz.phsoft.hokej.user.enums.PlayerSelectionMode;
+import cz.phsoft.hokej.player.enums.PlayerStatus;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import cz.phsoft.hokej.exceptions.*;
-import cz.phsoft.hokej.models.dto.SuccessResponseDTO;
-import cz.phsoft.hokej.models.mappers.PlayerMapper;
-import cz.phsoft.hokej.models.services.notification.NotificationService;
+import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
+import cz.phsoft.hokej.player.mappers.PlayerMapper;
+import cz.phsoft.hokej.notifications.services.NotificationService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import cz.phsoft.hokej.models.dto.PlayerDTO;
-
-import static cz.phsoft.hokej.data.enums.PlayerStatus.APPROVED;
-import static cz.phsoft.hokej.data.enums.PlayerStatus.REJECTED;
+import cz.phsoft.hokej.player.dto.PlayerDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static cz.phsoft.hokej.player.enums.PlayerStatus.APPROVED;
+import static cz.phsoft.hokej.player.enums.PlayerStatus.REJECTED;
+
 /**
  * Service vrstva pro prĂˇci s hrĂˇÄŤi ({@link PlayerEntity}).
  *
- * Tato tĹ™Ă­da zodpovĂ­dĂˇ za:
+ * OdpovÄ›dnosti:
  * - provĂˇdÄ›nĂ­ CRUD operacĂ­ nad hrĂˇÄŤi,
- * - kontrolu duplicity jmĂ©na a pĹ™Ă­jmenĂ­,
- * - sprĂˇvu vazby hrĂˇÄŤe na uĹľivatele ({@link AppUserEntity}),
- * - zmÄ›nu statusu hrĂˇÄŤe (APPROVED, REJECTED) vÄŤetnÄ› spuĹˇtÄ›nĂ­ notifikacĂ­,
- * - nastavenĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe v {@link CurrentPlayerService}
- *   pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+ * - kontrola duplicity jmĂ©na a pĹ™Ă­jmenĂ­,
+ * - sprĂˇva vazby hrĂˇÄŤe na uĹľivatele ({@link AppUserEntity}),
+ * - zmÄ›na statusu hrĂˇÄŤe (APPROVED, REJECTED) vÄŤetnÄ› spuĹˇtÄ›nĂ­ notifikacĂ­,
+ * - nastavenĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe v {@link CurrentPlayerService} pro pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
  *
  * Tato tĹ™Ă­da neĹ™eĹˇĂ­:
  * - HTTP vrstvu, session a mapovĂˇnĂ­ requestĹŻ a response (Ĺ™eĹˇĂ­ controllery),
  * - autentizaci a autorizaci (Ĺ™eĹˇĂ­ Spring Security a controller vrstva),
  * - detailnĂ­ logiku zĂˇpasĹŻ (Ĺ™eĹˇĂ­ {@link MatchServiceImpl} a navazujĂ­cĂ­ sluĹľby).
+ *
+ * Notifikace se delegujĂ­ do {@link NotificationService}.
  */
 @Service
 public class PlayerServiceImpl implements PlayerService {
 
     @Value("${app.demo-mode:false}")
     private boolean isDemoMode;
+
     private static final Logger logger = LoggerFactory.getLogger(PlayerServiceImpl.class);
 
     private final PlayerRepository playerRepository;
@@ -5377,13 +6135,19 @@ public class PlayerServiceImpl implements PlayerService {
     // ======================
 
     /**
-     * VytvoĹ™Ă­ novĂ©ho hrĂˇÄŤe bez vazby na uĹľivatele.
+     * VytvĂˇĹ™Ă­ novĂ©ho hrĂˇÄŤe bez vazby na uĹľivatele.
      *
-     * PĹ™ed uloĹľenĂ­m se kontroluje duplicita kombinace jmĂ©na a pĹ™Ă­jmenĂ­.
-     * Po vytvoĹ™enĂ­ se notifikace neodesĂ­lĂˇ, aby bylo zachovĂˇno pĹŻvodnĂ­ chovĂˇnĂ­.
+     * Postup:
+     * - ovÄ›Ĺ™Ă­ se unikĂˇtnost kombinace jmĂ©no + pĹ™Ă­jmenĂ­,
+     * - pĹ™evede se {@link PlayerDTO} na {@link PlayerEntity} pomocĂ­ {@link PlayerMapper},
+     * - entita se uloĹľĂ­ do databĂˇze pĹ™es {@link PlayerRepository},
+     * - vĂ˝sledek se namapuje zpÄ›t do {@link PlayerDTO}.
      *
-     * @param dto data novĂ©ho hrĂˇÄŤe
-     * @return vytvoĹ™enĂ˝ hrĂˇÄŤ ve formÄ› {@link PlayerDTO}
+     * Notifikace se po vytvoĹ™enĂ­ neodesĂ­lajĂ­, aby bylo zachovĂˇno pĹŻvodnĂ­ chovĂˇnĂ­.
+     *
+     * @param dto Data novĂ©ho hrĂˇÄŤe.
+     * @return VytvoĹ™enĂ˝ hrĂˇÄŤ ve formÄ› {@link PlayerDTO}.
+     * @throws DuplicateNameSurnameException Pokud jiĹľ existuje hrĂˇÄŤ se stejnĂ˝m jmĂ©nem a pĹ™Ă­jmenĂ­m.
      */
     @Override
     @Transactional
@@ -5397,20 +6161,21 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * VytvoĹ™Ă­ novĂ©ho hrĂˇÄŤe a pĹ™iĹ™adĂ­ jej k uĹľivateli podle emailu.
+     * VytvĂˇĹ™Ă­ novĂ©ho hrĂˇÄŤe a pĹ™iĹ™azuje jej k uĹľivateli podle e-mailu.
      *
      * Postup:
-     * - vyhledĂˇ se uĹľivatel podle emailu,
-     * - ovÄ›Ĺ™Ă­ se, Ĺľe neexistuje jinĂ˝ hrĂˇÄŤ se stejnĂ˝m jmĂ©nem a pĹ™Ă­jmenĂ­m,
+     * - vyhledĂˇ se uĹľivatel podle e-mailu,
+     * - ovÄ›Ĺ™Ă­ se unikĂˇtnost kombinace jmĂ©no + pĹ™Ă­jmenĂ­,
      * - namapuje se {@link PlayerDTO} na {@link PlayerEntity},
-     * - nastavĂ­ se vazba na uĹľivatele a hrĂˇÄŤ se uloĹľĂ­,
+     * - nastavĂ­ se vazba na uĹľivatele,
+     * - entita se uloĹľĂ­ do databĂˇze,
      * - odeĹˇle se notifikace {@link NotificationType#PLAYER_CREATED}.
      *
-     * @param dto       data novĂ©ho hrĂˇÄŤe
-     * @param userEmail email uĹľivatele, ke kterĂ©mu mĂˇ bĂ˝t hrĂˇÄŤ pĹ™iĹ™azen
-     * @return vytvoĹ™enĂ˝ hrĂˇÄŤ ve formÄ› {@link PlayerDTO}
-     * @throws UserNotFoundException         pokud uĹľivatel neexistuje
-     * @throws DuplicateNameSurnameException pokud existuje hrĂˇÄŤ se stejnĂ˝m jmĂ©nem a pĹ™Ă­jmenĂ­m
+     * @param dto       Data novĂ©ho hrĂˇÄŤe.
+     * @param userEmail E-mail uĹľivatele, ke kterĂ©mu mĂˇ bĂ˝t hrĂˇÄŤ pĹ™iĹ™azen.
+     * @return VytvoĹ™enĂ˝ hrĂˇÄŤ ve formÄ› {@link PlayerDTO}.
+     * @throws UserNotFoundException         Pokud uĹľivatel s danĂ˝m e-mailem neexistuje.
+     * @throws DuplicateNameSurnameException Pokud jiĹľ existuje jinĂ˝ hrĂˇÄŤ se stejnĂ˝m jmĂ©nem a pĹ™Ă­jmenĂ­m.
      */
     @Override
     @Transactional
@@ -5432,16 +6197,19 @@ public class PlayerServiceImpl implements PlayerService {
     /**
      * Aktualizuje existujĂ­cĂ­ho hrĂˇÄŤe.
      *
-     * PĹ™i zmÄ›nÄ› jmĂ©na nebo pĹ™Ă­jmenĂ­ se kontroluje duplicita kombinace jmĂ©no + pĹ™Ă­jmenĂ­.
-     * PotĂ© se pĹ™epĂ­ĹˇĂ­ zĂˇkladnĂ­ Ăşdaje hrĂˇÄŤe a odeĹˇle se notifikace
-     * {@link NotificationType#PLAYER_UPDATED}.
+     * Postup:
+     * - naÄŤte se hrĂˇÄŤ podle ID,
+     * - pokud se mÄ›nĂ­ jmĂ©no nebo pĹ™Ă­jmenĂ­, ovÄ›Ĺ™Ă­ se unikĂˇtnost kombinace jmĂ©no + pĹ™Ă­jmenĂ­,
+     * - pĹ™epĂ­Ĺˇou se zĂˇkladnĂ­ Ăşdaje (jmĂ©no, pĹ™Ă­jmenĂ­, pĹ™ezdĂ­vka, telefon, typ, tĂ˝m, pozice),
+     * - status hrĂˇÄŤe se zmÄ›nĂ­ pouze v pĹ™Ă­padÄ›, Ĺľe je v DTO explicitnÄ› uveden,
+     * - entita se uloĹľĂ­ do databĂˇze,
+     * - odeĹˇle se notifikace {@link NotificationType#PLAYER_UPDATED}.
      *
-     * @param id  ID hrĂˇÄŤe
-     * @param dto novĂ© hodnoty hrĂˇÄŤe
-     * @return aktualizovanĂ˝ hrĂˇÄŤ ve formÄ› {@link PlayerDTO}
-     * @throws PlayerNotFoundException       pokud hrĂˇÄŤ neexistuje
-     * @throws DuplicateNameSurnameException pokud novĂˇ kombinace jmĂ©no + pĹ™Ă­jmenĂ­ koliduje
-     *                                       s jinĂ˝m hrĂˇÄŤem
+     * @param id  ID hrĂˇÄŤe.
+     * @param dto NovĂ© hodnoty hrĂˇÄŤe.
+     * @return AktualizovanĂ˝ hrĂˇÄŤ ve formÄ› {@link PlayerDTO}.
+     * @throws PlayerNotFoundException       Pokud hrĂˇÄŤ neexistuje.
+     * @throws DuplicateNameSurnameException Pokud novĂˇ kombinace jmĂ©no + pĹ™Ă­jmenĂ­ koliduje s jinĂ˝m hrĂˇÄŤem.
      */
     @Override
     @Transactional
@@ -5462,6 +6230,9 @@ public class PlayerServiceImpl implements PlayerService {
         existing.setPhoneNumber(dto.getPhoneNumber());
         existing.setType(dto.getType());
         existing.setTeam(dto.getTeam());
+        existing.setPrimaryPosition(dto.getPrimaryPosition());
+        existing.setSecondaryPosition(dto.getSecondaryPosition());
+
         if (dto.getPlayerStatus() != null) {
             existing.setPlayerStatus(dto.getPlayerStatus());
         }
@@ -5471,15 +6242,20 @@ public class PlayerServiceImpl implements PlayerService {
 
         return playerMapper.toDTO(saved);
     }
+
     // TODO - Nebude probĂ­hat mazĂˇnĂ­ hrĂˇÄŤe - bude nastaven statut ARCHIVED
     /**
-     * SmaĹľe hrĂˇÄŤe podle ID.
+     * MaĹľe hrĂˇÄŤe podle ID.
      *
-     * Po smazĂˇnĂ­ je odeslĂˇna notifikace {@link NotificationType#PLAYER_DELETED}.
+     * PĹ™ed smazĂˇnĂ­m se ovÄ›Ĺ™uje demo reĹľim. V demo reĹľimu se operace zablokuje
+     * vyhozenĂ­m {@link DemoModeOperationNotAllowedException}. PĹ™i ĂşspÄ›ĹˇnĂ©m smazĂˇnĂ­
+     * se odeĹˇle notifikace {@link NotificationType#PLAYER_DELETED} a vracĂ­ se
+     * standardizovanĂˇ odpovÄ›ÄŹ {@link SuccessResponseDTO}.
      *
-     * @param id ID hrĂˇÄŤe
-     * @return {@link SuccessResponseDTO} s potvrzujĂ­cĂ­ zprĂˇvou
-     * @throws PlayerNotFoundException pokud hrĂˇÄŤ neexistuje
+     * @param id ID hrĂˇÄŤe.
+     * @return OdpovÄ›ÄŹ s potvrzujĂ­cĂ­ zprĂˇvou.
+     * @throws PlayerNotFoundException             Pokud hrĂˇÄŤ neexistuje.
+     * @throws DemoModeOperationNotAllowedException Pokud aplikace bÄ›ĹľĂ­ v demo reĹľimu.
      */
     @Override
     @Transactional
@@ -5500,16 +6276,23 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, id);
     }
 
-   // STATUS â€“ APPROVE / REJECT
+    // ======================
+    // STATUS â€“ APPROVE / REJECT
+    // ======================
+
     /**
-     * SchvĂˇlĂ­ hrĂˇÄŤe a nastavĂ­ mu status {@link PlayerStatus#APPROVED}.
+     * Schvaluje hrĂˇÄŤe a nastavuje mu status {@link PlayerStatus#APPROVED}.
      *
-     * Pokud je hrĂˇÄŤ jiĹľ schvĂˇlen, vyhodĂ­ se vĂ˝jimka
-     * {@link InvalidPlayerStatusException}. Po schvĂˇlenĂ­ se odeĹˇle
-     * notifikace {@link NotificationType#PLAYER_APPROVED}.
+     * ProvedenĂ­:
+     * - ovÄ›Ĺ™Ă­ se, Ĺľe hrĂˇÄŤ jiĹľ nenĂ­ ve stavu APPROVED,
+     * - nastavĂ­ se status APPROVED,
+     * - pokud hrĂˇÄŤ jeĹˇtÄ› nemĂˇ nastavenĂ­, vytvoĹ™Ă­ se vĂ˝chozĂ­ nastavenĂ­ pĹ™es
+     *   {@link PlayerSettingsService#createDefaultSettingsForPlayer(PlayerEntity)},
+     * - hrĂˇÄŤ se uloĹľĂ­ a odeĹˇle se notifikace {@link NotificationType#PLAYER_APPROVED}.
      *
-     * @param id ID hrĂˇÄŤe
-     * @return odpovÄ›ÄŹ s vĂ˝sledkem operace
+     * @param id ID hrĂˇÄŤe.
+     * @return OdpovÄ›ÄŹ s vĂ˝sledkem operace.
+     * @throws InvalidPlayerStatusException Pokud je hrĂˇÄŤ jiĹľ ve stavu APPROVED.
      */
     @Override
     @Transactional
@@ -5523,15 +6306,16 @@ public class PlayerServiceImpl implements PlayerService {
                 "HrĂˇÄŤ %s byl ĂşspÄ›ĹˇnÄ› aktivovĂˇn"
         );
     }
+
     /**
-     * ZamĂ­tne hrĂˇÄŤe a nastavĂ­ mu status {@link PlayerStatus#REJECTED}.
+     * ZamĂ­tĂˇ hrĂˇÄŤe a nastavuje mu status {@link PlayerStatus#REJECTED}.
      *
-     * Pokud je hrĂˇÄŤ jiĹľ zamĂ­tnut, vyhodĂ­ se vĂ˝jimka
-     * {@link InvalidPlayerStatusException}. Po zamĂ­tnutĂ­ se odeĹˇle
-     * notifikace {@link NotificationType#PLAYER_REJECTED}.
+     * Po ĂşspÄ›ĹˇnĂ© zmÄ›nÄ› stavu se odeĹˇle notifikace
+     * {@link NotificationType#PLAYER_REJECTED}.
      *
-     * @param id ID hrĂˇÄŤe
-     * @return odpovÄ›ÄŹ s vĂ˝sledkem operace
+     * @param id ID hrĂˇÄŤe.
+     * @return OdpovÄ›ÄŹ s vĂ˝sledkem operace.
+     * @throws InvalidPlayerStatusException Pokud je hrĂˇÄŤ jiĹľ ve stavu REJECTED.
      */
     @Override
     @Transactional
@@ -5547,14 +6331,20 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * ZmÄ›nĂ­ pĹ™iĹ™azenĂ©ho uĹľivatele k hrĂˇÄŤi a odeĹˇle notifikace
+     * MÄ›nĂ­ pĹ™iĹ™azenĂ©ho uĹľivatele k hrĂˇÄŤi a odesĂ­lĂˇ notifikace
      * o zmÄ›nÄ› vazby hrĂˇÄŤe a uĹľivatele.
      *
-     * PĹ™i pokusu pĹ™evĂ©st hrĂˇÄŤe na stejnĂ©ho uĹľivatele se vyhodĂ­
-     * {@link InvalidChangePlayerUserException}.
+     * Postup:
+     * - naÄŤte se hrĂˇÄŤ a novĂ˝ uĹľivatel,
+     * - ovÄ›Ĺ™Ă­ se, Ĺľe se nepokouĹˇĂ­ pĹ™evĂ©st hrĂˇÄŤe na stejnĂ©ho uĹľivatele,
+     * - nastavĂ­ se novĂ˝ uĹľivatel do entitiy hrĂˇÄŤe a entita se uloĹľĂ­,
+     * - odeĹˇle se notifikace hrĂˇÄŤi i uĹľivateli typu {@link NotificationType#PLAYER_CHANGE_USER}.
      *
-     * @param id        ID hrĂˇÄŤe
-     * @param newUserId ID novĂ©ho uĹľivatele
+     * @param id        ID hrĂˇÄŤe.
+     * @param newUserId ID novĂ©ho uĹľivatele.
+     * @throws InvalidChangePlayerUserException Pokud je novĂ˝ uĹľivatel shodnĂ˝ s pĹŻvodnĂ­m.
+     * @throws PlayerNotFoundException          Pokud hrĂˇÄŤ neexistuje.
+     * @throws UserNotFoundException            Pokud uĹľivatel neexistuje.
      */
     @Transactional
     public void changePlayerUser(Long id, Long newUserId) {
@@ -5565,17 +6355,25 @@ public class PlayerServiceImpl implements PlayerService {
         if (oldUser != null && oldUser.getId().equals(newUserId)) {
             throw new InvalidChangePlayerUserException();
         }
+
         player.setUser(newUser);
         PlayerEntity saved = playerRepository.save(player);
 
         notifyPlayer(saved, NotificationType.PLAYER_CHANGE_USER, newUser);
         notifyUser(newUser, NotificationType.PLAYER_CHANGE_USER, player);
     }
+
+    // ======================
     // READ
-   /**
-     * VrĂˇtĂ­ vĹˇechny hrĂˇÄŤe v systĂ©mu.
+    // ======================
+
+    /**
+     * VracĂ­ vĹˇechny hrĂˇÄŤe v systĂ©mu.
      *
-     * @return seznam hrĂˇÄŤĹŻ ve formÄ› {@link PlayerDTO}
+     * Data se naÄŤĂ­tajĂ­ z {@link PlayerRepository} a pĹ™evĂˇdĂ­ se do {@link PlayerDTO}
+     * pomocĂ­ {@link PlayerMapper}.
+     *
+     * @return Seznam hrĂˇÄŤĹŻ ve formÄ› {@link PlayerDTO}.
      */
     @Override
     public List<PlayerDTO> getAllPlayers() {
@@ -5585,11 +6383,11 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * VrĂˇtĂ­ hrĂˇÄŤe podle ID.
+     * VracĂ­ hrĂˇÄŤe podle ID.
      *
-     * @param id ID hrĂˇÄŤe
-     * @return {@link PlayerDTO} odpovĂ­dajĂ­cĂ­ hrĂˇÄŤi
-     * @throws PlayerNotFoundException pokud hrĂˇÄŤ s danĂ˝m ID neexistuje
+     * @param id ID hrĂˇÄŤe.
+     * @return {@link PlayerDTO} odpovĂ­dajĂ­cĂ­ hrĂˇÄŤi.
+     * @throws PlayerNotFoundException Pokud hrĂˇÄŤ s danĂ˝m ID neexistuje.
      */
     @Override
     public PlayerDTO getPlayerById(Long id) {
@@ -5598,12 +6396,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * VrĂˇtĂ­ vĹˇechny hrĂˇÄŤe pĹ™iĹ™azenĂ© uĹľivateli s danĂ˝m emailem.
+     * VracĂ­ vĹˇechny hrĂˇÄŤe pĹ™iĹ™azenĂ© uĹľivateli s danĂ˝m e-mailem.
      *
      * HrĂˇÄŤi jsou vrĂˇceni v poĹ™adĂ­ podle ID vzestupnÄ›.
      *
-     * @param email email uĹľivatele
-     * @return seznam hrĂˇÄŤĹŻ ve formÄ› {@link PlayerDTO}
+     * @param email E-mail uĹľivatele.
+     * @return Seznam hrĂˇÄŤĹŻ ve formÄ› {@link PlayerDTO}.
      */
     @Override
     public List<PlayerDTO> getPlayersByUser(String email) {
@@ -5612,20 +6410,23 @@ public class PlayerServiceImpl implements PlayerService {
                 .toList();
     }
 
+    // ======================
     // CURRENT PLAYER â€“ SESSION
+    // ======================
 
     /**
-     * NastavĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe pro danĂ©ho uĹľivatele.
+     * Nastavuje aktuĂˇlnĂ­ho hrĂˇÄŤe pro danĂ©ho uĹľivatele.
      *
-     * Nejprve se ovÄ›Ĺ™Ă­, Ĺľe hrĂˇÄŤ existuje a patĹ™Ă­ danĂ©mu uĹľivateli
-     * (podle emailu). PotĂ© se jeho ID pĹ™edĂˇ do
-     * {@link CurrentPlayerService#setCurrentPlayerId(Long)}.
+     * Postup:
+     * - naÄŤte se hrĂˇÄŤ podle ID,
+     * - ovÄ›Ĺ™Ă­ se, Ĺľe hrĂˇÄŤ patĹ™Ă­ danĂ©mu uĹľivateli (podle e-mailu),
+     * - ID hrĂˇÄŤe se pĹ™edĂˇ do {@link CurrentPlayerService#setCurrentPlayerId(Long)}.
      *
-     * @param userEmail email pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
-     * @param playerId  ID hrĂˇÄŤe, kterĂ˝ mĂˇ bĂ˝t nastaven jako aktuĂˇlnĂ­
-     * @return odpovÄ›ÄŹ s vĂ˝sledkem operace
-     * @throws PlayerNotFoundException        pokud hrĂˇÄŤ neexistuje
-     * @throws ForbiddenPlayerAccessException pokud hrĂˇÄŤ nepatĹ™Ă­ danĂ©mu uĹľivateli
+     * @param userEmail E-mail pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+     * @param playerId  ID hrĂˇÄŤe, kterĂ˝ mĂˇ bĂ˝t nastaven jako aktuĂˇlnĂ­.
+     * @return OdpovÄ›ÄŹ s vĂ˝sledkem operace.
+     * @throws PlayerNotFoundException        Pokud hrĂˇÄŤ neexistuje.
+     * @throws ForbiddenPlayerAccessException Pokud hrĂˇÄŤ nepatĹ™Ă­ danĂ©mu uĹľivateli.
      */
     @Override
     public SuccessResponseDTO setCurrentPlayerForUser(String userEmail, Long playerId) {
@@ -5640,7 +6441,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Automaticky vybere aktuĂˇlnĂ­ho hrĂˇÄŤe pro uĹľivatele podle
+     * Automaticky vybĂ­rĂˇ aktuĂˇlnĂ­ho hrĂˇÄŤe pro uĹľivatele podle
      * nastavenĂ­ v AppUserSettings (playerSelectionMode).
      *
      * ReĹľimy:
@@ -5648,8 +6449,9 @@ public class PlayerServiceImpl implements PlayerService {
      * - ALWAYS_CHOOSE: automaticky se vybere pouze v pĹ™Ă­padÄ›,
      *   Ĺľe mĂˇ uĹľivatel prĂˇvÄ› jednoho schvĂˇlenĂ©ho hrĂˇÄŤe.
      *
-     * @param userEmail email uĹľivatele
-     * @return odpovÄ›ÄŹ s vĂ˝sledkem operace
+     * @param userEmail E-mail uĹľivatele.
+     * @return OdpovÄ›ÄŹ s vĂ˝sledkem operace.
+     * @throws PlayerNotFoundException Pokud uĹľivatel nemĂˇ ĹľĂˇdnĂ©ho relevantnĂ­ho hrĂˇÄŤe.
      */
     @Override
     public SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail) {
@@ -5679,8 +6481,10 @@ public class PlayerServiceImpl implements PlayerService {
      * Pokud uĹľivatel nemĂˇ ĹľĂˇdnĂ©ho hrĂˇÄŤe nebo hrĂˇÄŤ nenĂ­ schvĂˇlen,
      * vyhodĂ­ se vĂ˝jimka.
      *
-     * @param userEmail email uĹľivatele
-     * @return odpovÄ›ÄŹ s vĂ˝sledkem operace
+     * @param userEmail E-mail uĹľivatele.
+     * @return OdpovÄ›ÄŹ s vĂ˝sledkem operace.
+     * @throws PlayerNotFoundException     Pokud uĹľivatel nemĂˇ ĹľĂˇdnĂ©ho hrĂˇÄŤe.
+     * @throws InvalidPlayerStatusException Pokud prvnĂ­ hrĂˇÄŤ nenĂ­ ve stavu APPROVED.
      */
     private SuccessResponseDTO autoSelectFirstPlayer(String userEmail) {
         List<PlayerEntity> players = playerRepository.findByUser_EmailOrderByIdAsc(userEmail);
@@ -5712,8 +6516,9 @@ public class PlayerServiceImpl implements PlayerService {
      * se nastavĂ­ jako aktuĂˇlnĂ­. V ostatnĂ­ch pĹ™Ă­padech se current player
      * vyÄŤistĂ­ a oÄŤekĂˇvĂˇ se ruÄŤnĂ­ vĂ˝bÄ›r na frontendu.
      *
-     * @param userEmail email uĹľivatele
-     * @return odpovÄ›ÄŹ s vĂ˝sledkem operace
+     * @param userEmail E-mail uĹľivatele.
+     * @return OdpovÄ›ÄŹ s vĂ˝sledkem operace.
+     * @throws PlayerNotFoundException Pokud uĹľivatel nemĂˇ ĹľĂˇdnĂ©ho schvĂˇlenĂ©ho hrĂˇÄŤe.
      */
     private SuccessResponseDTO autoSelectIfSinglePlayer(String userEmail) {
         List<PlayerEntity> players = playerRepository
@@ -5751,13 +6556,15 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, 0L);
     }
 
+    // ======================
     // PRIVATE HELPERY â€“ ENTITY / DUPLICITY
+    // ======================
 
     /**
-     * Najde hrĂˇÄŤe podle ID nebo vyhodĂ­ {@link PlayerNotFoundException}.
+     * NaÄŤĂ­tĂˇ hrĂˇÄŤe podle ID nebo vyhazuje {@link PlayerNotFoundException}.
      *
-     * @param id ID hrĂˇÄŤe
-     * @return entita hrĂˇÄŤe
+     * @param id ID hrĂˇÄŤe.
+     * @return Entita hrĂˇÄŤe.
      */
     private PlayerEntity findPlayerOrThrow(Long id) {
         return playerRepository.findById(id)
@@ -5765,10 +6572,10 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * Najde uĹľivatele podle ID nebo vyhodĂ­ {@link UserNotFoundException}.
+     * NaÄŤĂ­tĂˇ uĹľivatele podle ID nebo vyhazuje {@link UserNotFoundException}.
      *
-     * @param id ID uĹľivatele
-     * @return entita uĹľivatele
+     * @param id ID uĹľivatele.
+     * @return Entita uĹľivatele.
      */
     private AppUserEntity findUserOrThrow(Long id) {
         return appUserRepository.findById(id)
@@ -5776,15 +6583,15 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * ZajistĂ­ unikĂˇtnost kombinace jmĂ©no + pĹ™Ă­jmenĂ­.
+     * ZajiĹˇĹĄuje unikĂˇtnost kombinace jmĂ©no + pĹ™Ă­jmenĂ­.
      *
      * PĹ™i vytvĂˇĹ™enĂ­ novĂ©ho hrĂˇÄŤe se oÄŤekĂˇvĂˇ ignoreId null.
      * PĹ™i aktualizaci se ignoruje hrĂˇÄŤ se stejnĂ˝m ID, aby nebyl
      * povaĹľovĂˇn za duplicitnĂ­ho sĂˇm se sebou.
      *
-     * @param name     jmĂ©no hrĂˇÄŤe
-     * @param surname  pĹ™Ă­jmenĂ­ hrĂˇÄŤe
-     * @param ignoreId ID hrĂˇÄŤe, kterĂ˝ mĂˇ bĂ˝t ignorovĂˇn, nebo null
+     * @param name     JmĂ©no hrĂˇÄŤe.
+     * @param surname  PĹ™Ă­jmenĂ­ hrĂˇÄŤe.
+     * @param ignoreId ID hrĂˇÄŤe, kterĂ˝ mĂˇ bĂ˝t ignorovĂˇn, nebo null.
      */
     private void ensureUniqueNameSurname(String name, String surname, Long ignoreId) {
         Optional<PlayerEntity> duplicateOpt = playerRepository.findByNameAndSurname(name, surname);
@@ -5799,12 +6606,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * OvÄ›Ĺ™Ă­, Ĺľe hrĂˇÄŤ patĹ™Ă­ danĂ©mu uĹľivateli (podle emailu).
+     * OvÄ›Ĺ™uje, Ĺľe hrĂˇÄŤ patĹ™Ă­ danĂ©mu uĹľivateli (podle e-mailu).
      *
      * Pokud hrĂˇÄŤ uĹľivateli nepatĹ™Ă­, vyhodĂ­ se {@link ForbiddenPlayerAccessException}.
      *
-     * @param player    hrĂˇÄŤ
-     * @param userEmail email uĹľivatele
+     * @param player    HrĂˇÄŤ.
+     * @param userEmail E-mail uĹľivatele.
      */
     private void assertPlayerBelongsToUser(PlayerEntity player, String userEmail) {
         if (player.getUser() == null ||
@@ -5816,12 +6623,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * VytvoĹ™Ă­ standardizovanou ĂşspÄ›Ĺˇnou odpovÄ›ÄŹ {@link SuccessResponseDTO}
+     * VytvĂˇĹ™Ă­ standardizovanou ĂşspÄ›Ĺˇnou odpovÄ›ÄŹ {@link SuccessResponseDTO}
      * s danou zprĂˇvou a ID.
      *
-     * @param message textovĂˇ zprĂˇva
-     * @param id      ID entity, kterĂ© se operace tĂ˝kala
-     * @return ĂşspÄ›ĹˇnĂˇ odpovÄ›ÄŹ
+     * @param message TextovĂˇ zprĂˇva.
+     * @param id      ID entity, kterĂ© se operace tĂ˝kala.
+     * @return ĂšspÄ›ĹˇnĂˇ odpovÄ›ÄŹ.
      */
     private SuccessResponseDTO buildSuccessResponse(String message, Long id) {
         return new SuccessResponseDTO(
@@ -5834,17 +6641,20 @@ public class PlayerServiceImpl implements PlayerService {
     /**
      * ObecnĂˇ pomocnĂˇ metoda pro zmÄ›nu statusu hrĂˇÄŤe (approve/reject).
      *
-     * OvÄ›Ĺ™Ă­ se, Ĺľe hrĂˇÄŤ jiĹľ nenĂ­ v cĂ­lovĂ©m stavu, pĹ™Ă­padnÄ› se nastavĂ­
-     * vĂ˝chozĂ­ nastavenĂ­ pro hrĂˇÄŤe pĹ™i schvĂˇlenĂ­. Po uloĹľenĂ­ se odeĹˇle
-     * notifikace podle novĂ©ho statusu.
+     * Postup:
+     * - ovÄ›Ĺ™Ă­ se, Ĺľe hrĂˇÄŤ jiĹľ nenĂ­ v cĂ­lovĂ©m stavu,
+     * - nastavĂ­ se novĂ˝ status,
+     * - v pĹ™Ă­padÄ› schvĂˇlenĂ­ se zajistĂ­ vĂ˝chozĂ­ nastavenĂ­ hrĂˇÄŤe,
+     * - uloĹľĂ­ se entita a vyhodnotĂ­ se typ notifikace podle novĂ©ho statusu,
+     * - odeĹˇle se notifikace hrĂˇÄŤi, pokud je typ notifikace definovĂˇn.
      *
-     * @param id                     ID hrĂˇÄŤe
-     * @param targetStatus           cĂ­lovĂ˝ status
-     * @param alreadyStatus          status, kterĂ˝ znamenĂˇ â€žuĹľ je v tomto stavuâ€ś
-     * @param notificationType       typ notifikace (pĹ™Ă­padnÄ› pĹ™epsanĂ˝ podle statusu)
-     * @param alreadyMessage         zprĂˇva pro pĹ™Ă­pad, Ĺľe je hrĂˇÄŤ jiĹľ v cĂ­lovĂ©m stavu
-     * @param successMessageTemplate Ĺˇablona ĂşspÄ›ĹˇnĂ© zprĂˇvy
-     * @return odpovÄ›ÄŹ s vĂ˝sledkem operace
+     * @param id                     ID hrĂˇÄŤe.
+     * @param targetStatus           CĂ­lovĂ˝ status.
+     * @param alreadyStatus          Status, kterĂ˝ znamenĂˇ â€žuĹľ je v tomto stavuâ€ś.
+     * @param notificationType       VĂ˝chozĂ­ typ notifikace (pĹ™Ă­padnÄ› pĹ™epsanĂ˝ podle statusu).
+     * @param alreadyMessage         ZprĂˇva pro pĹ™Ă­pad, Ĺľe je hrĂˇÄŤ jiĹľ v cĂ­lovĂ©m stavu.
+     * @param successMessageTemplate Ĺ ablona ĂşspÄ›ĹˇnĂ© zprĂˇvy.
+     * @return OdpovÄ›ÄŹ s vĂ˝sledkem operace.
      */
     private SuccessResponseDTO changePlayerStatus(Long id,
                                                   PlayerStatus targetStatus,
@@ -5877,7 +6687,9 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, id);
     }
 
+    // ======================
     // PRIVĂTNĂŤ HELPERY â€“ NOTIFIKACE
+    // ======================
 
     private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {
         notificationService.notifyPlayer(player, type, context);
@@ -5888,14 +6700,14 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     /**
-     * PĹ™evede status hrĂˇÄŤe na typ notifikace.
+     * PĹ™evĂˇdĂ­ status hrĂˇÄŤe na typ notifikace.
      *
      * Pokud se pro zadanĂ˝ status notifikace neposĂ­lĂˇ,
      * vracĂ­ se null. Status PENDING se zde nevyuĹľĂ­vĂˇ,
      * protoĹľe notifikace pĹ™i vytvoĹ™enĂ­ hrĂˇÄŤe jsou Ĺ™eĹˇeny jinde.
      *
-     * @param newStatus novĂ˝ status hrĂˇÄŤe
-     * @return odpovĂ­dajĂ­cĂ­ {@link NotificationType} nebo null
+     * @param newStatus NovĂ˝ status hrĂˇÄŤe.
+     * @return OdpovĂ­dajĂ­cĂ­ {@link NotificationType} nebo null.
      */
     private NotificationType resolveNotificationType(PlayerStatus newStatus) {
         return switch (newStatus) {
@@ -5912,9 +6724,9 @@ public class PlayerServiceImpl implements PlayerService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
-import cz.phsoft.hokej.models.dto.PlayerSettingsDTO;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerSettingsEntity;
+import cz.phsoft.hokej.player.dto.PlayerSettingsDTO;
 
 /**
  * Service rozhranĂ­ pro prĂˇci s nastavenĂ­m hrĂˇÄŤe ({@link PlayerSettingsEntity}).
@@ -5973,33 +6785,34 @@ public interface PlayerSettingsService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.entities.PlayerSettingsEntity;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.data.repositories.PlayerSettingsRepository;
-import cz.phsoft.hokej.models.dto.PlayerSettingsDTO;
-import cz.phsoft.hokej.models.mappers.PlayerSettingsMapper;
-import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerSettingsEntity;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.repositories.PlayerSettingsRepository;
+import cz.phsoft.hokej.player.dto.PlayerSettingsDTO;
+import cz.phsoft.hokej.player.mappers.PlayerSettingsMapper;
+import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 /**
- * Implementace sluĹľby pro prĂˇci s nastavenĂ­m hrĂˇÄŤe ({@link PlayerSettingsEntity}).
+ * Implementace sluĹľby pro prĂˇci s nastavenĂ­m hrĂˇÄŤe (PlayerSettingsEntity).
  *
  * OdpovÄ›dnosti:
  * - naÄŤĂ­tĂˇnĂ­ nastavenĂ­ hrĂˇÄŤe podle jeho ID,
  * - vytvĂˇĹ™enĂ­ vĂ˝chozĂ­ho nastavenĂ­ pro hrĂˇÄŤe, pokud jeĹˇtÄ› neexistuje,
- * - aktualizace existujĂ­cĂ­ho nastavenĂ­ podle {@link PlayerSettingsDTO}.
+ * - aktualizace existujĂ­cĂ­ho nastavenĂ­ podle PlayerSettingsDTO.
  *
  * Tato tĹ™Ă­da:
  * - neĹ™eĹˇĂ­ autorizaci ani ovÄ›Ĺ™ovĂˇnĂ­ vlastnictvĂ­ hrĂˇÄŤe (Ĺ™eĹˇĂ­ controller),
  * - neodesĂ­lĂˇ notifikace, pouze spravuje data v databĂˇzi,
  * - spolupracuje s:
- *   - {@link PlayerRepository} pro ovÄ›Ĺ™enĂ­ existence hrĂˇÄŤe,
- *   - {@link PlayerSettingsRepository} pro prĂˇci s nastavenĂ­m,
- *   - {@link PlayerSettingsMapper} pro mapovĂˇnĂ­ mezi entitou a DTO.
+ *   - PlayerRepository pro ovÄ›Ĺ™enĂ­ existence hrĂˇÄŤe,
+ *   - PlayerSettingsRepository pro prĂˇci s nastavenĂ­m,
+ *   - PlayerSettingsMapper pro mapovĂˇnĂ­ mezi entitou a DTO.
  */
 @Service
 @Transactional
@@ -6017,20 +6830,6 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
         this.mapper = mapper;
     }
 
-    /**
-     * VrĂˇtĂ­ nastavenĂ­ pro hrĂˇÄŤe podle jeho ID.
-     *
-     * Postup:
-     * - ovÄ›Ĺ™Ă­ se existence hrĂˇÄŤe,
-     * - pokusĂ­ se naÄŤĂ­st existujĂ­cĂ­ nastavenĂ­ hrĂˇÄŤe,
-     * - pokud neexistuje ĹľĂˇdnĂ˝ zĂˇznam, vytvoĹ™Ă­ se vĂ˝chozĂ­ nastavenĂ­
-     *   pomocĂ­ {@link #createDefaultSettingsForPlayer(PlayerEntity)} a uloĹľĂ­ se,
-     * - vĂ˝sledek se namapuje na {@link PlayerSettingsDTO}.
-     *
-     * @param playerId ID hrĂˇÄŤe
-     * @return nastavenĂ­ hrĂˇÄŤe ve formÄ› {@link PlayerSettingsDTO}
-     * @throws PlayerNotFoundException pokud hrĂˇÄŤ neexistuje
-     */
     @Override
     public PlayerSettingsDTO getSettingsForPlayer(Long playerId) {
         PlayerEntity player = findPlayerOrThrow(playerId);
@@ -6046,21 +6845,6 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
         return mapper.toDTO(settings);
     }
 
-    /**
-     * Aktualizuje nastavenĂ­ hrĂˇÄŤe podle jeho ID.
-     *
-     * Postup:
-     * - ovÄ›Ĺ™Ă­ se existence hrĂˇÄŤe,
-     * - naÄŤte se existujĂ­cĂ­ nastavenĂ­ hrĂˇÄŤe, nebo se vytvoĹ™Ă­ novĂ© vĂ˝chozĂ­,
-     * - na entitu se aplikujĂ­ hodnoty z {@link PlayerSettingsDTO},
-     * - zajiĹˇĹĄuje se navĂˇzĂˇnĂ­ na hrĂˇÄŤe (settings.setPlayer),
-     * - entita se uloĹľĂ­ a navrĂˇtĂ­ se ve formÄ› DTO.
-     *
-     * @param playerId ID hrĂˇÄŤe
-     * @param dto      novĂ© hodnoty nastavenĂ­
-     * @return aktualizovanĂ© nastavenĂ­ ve formÄ› {@link PlayerSettingsDTO}
-     * @throws PlayerNotFoundException pokud hrĂˇÄŤ neexistuje
-     */
     @Override
     public PlayerSettingsDTO updateSettingsForPlayer(Long playerId, PlayerSettingsDTO dto) {
         PlayerEntity player = findPlayerOrThrow(playerId);
@@ -6082,16 +6866,6 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
     // HELPER METODY
     // =========================
 
-    /**
-     * Najde hrĂˇÄŤe podle ID nebo vyhodĂ­ {@link PlayerNotFoundException}.
-     *
-     * Metoda centralizuje prĂˇci s {@link PlayerRepository} a
-     * zjednoduĹˇuje obsluhu chyb pĹ™i neexistujĂ­cĂ­m hrĂˇÄŤi.
-     *
-     * @param playerId ID hrĂˇÄŤe
-     * @return entita hrĂˇÄŤe
-     * @throws PlayerNotFoundException pokud hrĂˇÄŤ s danĂ˝m ID neexistuje
-     */
     private PlayerEntity findPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
@@ -6110,39 +6884,39 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
      *   - notifyOnPayment = false,
      * - pĹ™ipomĂ­nky:
      *   - notifyReminders = true,
-     *   - reminderHoursBefore = 24.
-     *
-     * Default hodnoty odpovĂ­dajĂ­ pĹŻvodnĂ­ logice, kterĂˇ byla dĹ™Ă­ve
-     * uloĹľena pĹ™Ă­mo v entitÄ› {@link PlayerEntity} (emailEnabled, smsEnabled)
-     * a nynĂ­ je pĹ™esunuta do dedikovanĂ© entity {@link PlayerSettingsEntity}.
-     *
-     * Metoda pouze vracĂ­ neinicializovanou entitu, uloĹľenĂ­ do databĂˇze
-     * provĂˇdĂ­ volajĂ­cĂ­ kĂłd.
-     *
-     * @param player hrĂˇÄŤ, pro kterĂ©ho se vĂ˝chozĂ­ nastavenĂ­ vytvĂˇĹ™Ă­
-     * @return novĂˇ instance {@link PlayerSettingsEntity} s vĂ˝chozĂ­m nastavenĂ­m
+     *   - reminderHoursBefore = 24,
+     * - hernĂ­ preference pro automatickĂ© pĹ™esuny:
+     *   - possibleMoveToAnotherTeam = false,
+     *   - possibleChangePlayerPosition = false.
      */
     @Override
     public PlayerSettingsEntity createDefaultSettingsForPlayer(PlayerEntity player) {
         PlayerSettingsEntity settings = new PlayerSettingsEntity();
+
         settings.setPlayer(player);
 
-        // explicitnÄ› nastavenĂ© default hodnoty
-
+        // kontakty
         settings.setContactEmail(null);
         settings.setContactPhone(null);
 
-        // pĹŻvodnĂ­ logika z PlayerEntity.emailEnabled / smsEnabled pĹ™esunuta do nastavenĂ­ hrĂˇÄŤe
+        // kanĂˇly
         settings.setEmailEnabled(true);
-        settings.setSmsEnabled(true);
+        settings.setSmsEnabled(false);
+
+        // typy notifikacĂ­
         settings.setNotifyOnRegistration(true);
         settings.setNotifyOnExcuse(true);
         settings.setNotifyOnMatchChange(true);
         settings.setNotifyOnMatchCancel(true);
         settings.setNotifyOnPayment(false);
 
+        // pĹ™ipomĂ­nky
         settings.setNotifyReminders(false);
         settings.setReminderHoursBefore(24);
+
+        // hernĂ­ preference â€“ vĂ˝chozĂ­: ĹľĂˇdnĂ© automatickĂ© pĹ™esuny
+        settings.setPossibleMoveToAnotherTeam(false);
+        settings.setPossibleChangePlayerPosition(false);
 
         return settings;
     }
@@ -6154,7 +6928,7 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.models.dto.PlayerStatsDTO;
+import cz.phsoft.hokej.player.dto.PlayerStatsDTO;
 
 /**
  * Service rozhranĂ­ pro poskytovĂˇnĂ­ statistik hrĂˇÄŤe.
@@ -6188,15 +6962,15 @@ public interface PlayerStatsService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.MatchEntity;
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.data.enums.Team;
-import cz.phsoft.hokej.data.repositories.MatchRepository;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.models.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.models.dto.PlayerStatsDTO;
+import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.match.repositories.MatchRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.player.dto.PlayerStatsDTO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -6208,13 +6982,23 @@ import java.util.stream.Collectors;
 /**
  * Service vrstva pro vĂ˝poÄŤet statistik hrĂˇÄŤe v rĂˇmci aktuĂˇlnĂ­ sezĂłny.
  *
- * ZajiĹˇĹĄuje vĂ˝bÄ›r odehranĂ˝ch zĂˇpasĹŻ aktuĂˇlnĂ­ sezĂłny a jejich zĂşĹľenĂ­ podle
- * data vytvoĹ™enĂ­ hrĂˇÄŤe a jeho aktivity v danĂ©m termĂ­nu. NĂˇslednÄ› agreguje
- * registrace hrĂˇÄŤe do souhrnnĂ˝ch poÄŤtĹŻ podle statusu.
+ * OdpovÄ›dnosti:
+ * - naÄŤĂ­tĂˇnĂ­ hrĂˇÄŤe a odehranĂ˝ch zĂˇpasĹŻ aktuĂˇlnĂ­ sezĂłny,
+ * - filtrovĂˇnĂ­ zĂˇpasĹŻ podle data vytvoĹ™enĂ­ hrĂˇÄŤe a jeho aktivity v danĂ©m termĂ­nu,
+ * - agregace registracĂ­ hrĂˇÄŤe do souhrnnĂ˝ch poÄŤtĹŻ podle {@link PlayerMatchStatus},
+ * - sestavenĂ­ {@link PlayerStatsDTO} vÄŤetnÄ› domovskĂ©ho tĂ˝mu, pozic a registracĂ­ podle tĂ˝mĹŻ.
  *
- * TĹ™Ă­da koordinuje naÄŤtenĂ­ dat pĹ™es repository a deleguje dĂ­lÄŤĂ­ logiku
- * na souvisejĂ­cĂ­ sluĹľby (aktuĂˇlnĂ­ sezĂłna, aktivnĂ­ sezĂłna, obdobĂ­ neaktivity,
- * registrace zĂˇpasĹŻ).
+ * Tato tĹ™Ă­da neĹ™eĹˇĂ­:
+ * - HTTP vrstvu a mapovĂˇnĂ­ requestĹŻ na DTO (Ĺ™eĹˇĂ­ controllery),
+ * - sprĂˇvu sezĂłn obecnÄ› (Ĺ™eĹˇĂ­ {@link SeasonService} a {@link CurrentSeasonService}),
+ * - uklĂˇdĂˇnĂ­ nebo mÄ›nÄ›nĂ­ registracĂ­ (Ĺ™eĹˇĂ­ {@link MatchRegistrationService}).
+ *
+ * Spolupracuje s:
+ * - {@link PlayerRepository} pro naÄŤtenĂ­ hrĂˇÄŤe,
+ * - {@link MatchRepository} pro naÄŤtenĂ­ zĂˇpasĹŻ aktuĂˇlnĂ­ sezĂłny,
+ * - {@link CurrentSeasonService} a {@link SeasonService} pro urÄŤenĂ­ sezĂłny,
+ * - {@link PlayerInactivityPeriodService} pro vyhodnocenĂ­ aktivity hrĂˇÄŤe v termĂ­nu zĂˇpasu,
+ * - {@link MatchRegistrationService} pro naÄŤtenĂ­ registracĂ­ na zĂˇpasy.
  */
 @Service
 public class PlayerStatsServiceImpl implements PlayerStatsService {
@@ -6227,11 +7011,7 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
     private final MatchRegistrationService matchRegistrationService;
 
     /**
-     * VytvĂˇĹ™Ă­ service pro vĂ˝poÄŤet statistik hrĂˇÄŤe.
-     *
-     * PouĹľĂ­vĂˇ se napojenĂ­ na repository pro naÄŤĂ­tĂˇnĂ­ hrĂˇÄŤĹŻ a zĂˇpasĹŻ a
-     * na sluĹľby, kterĂ© poskytujĂ­ identifikĂˇtor aktuĂˇlnĂ­ sezĂłny, aktivnĂ­ sezĂłnu,
-     * vyhodnocenĂ­ aktivity hrĂˇÄŤe v ÄŤase a registrace zĂˇpasĹŻ.
+     * VytvĂˇĹ™Ă­ sluĹľbu pro vĂ˝poÄŤet statistik hrĂˇÄŤe.
      *
      * @param playerRepository Repository pro prĂˇci s hrĂˇÄŤi.
      * @param matchRepository Repository pro prĂˇci se zĂˇpasy.
@@ -6257,20 +7037,32 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
     /**
      * VracĂ­ statistiky hrĂˇÄŤe pro odehranĂ© zĂˇpasy aktuĂˇlnĂ­ sezĂłny.
      *
-     * Nejprve se naÄŤte hrĂˇÄŤ a datum jeho vytvoĹ™enĂ­. NĂˇslednÄ› se naÄŤtou
-     * vĹˇechny odehranĂ© zĂˇpasy aktuĂˇlnĂ­ sezĂłny a spoÄŤĂ­tĂˇ se jejich celkovĂ˝ poÄŤet.
-     * ZĂˇpasy se dĂˇle filtrujĂ­ tak, aby byly zahrnuty pouze zĂˇpasy po vytvoĹ™enĂ­ hrĂˇÄŤe
-     * a pouze ty, ve kterĂ˝ch byl hrĂˇÄŤ v danĂ©m ÄŤase aktivnĂ­.
+     * Postup:
+     * - naÄŤte se hrĂˇÄŤ podle ID a zĂ­skĂˇ se jeho ÄŤasovĂ© razĂ­tko vytvoĹ™enĂ­,
+     * - naÄŤtou se vĹˇechny odehranĂ© zĂˇpasy aktuĂˇlnĂ­ sezĂłny a spoÄŤĂ­tĂˇ se jejich celkovĂ˝ poÄŤet,
+     * - zĂˇpasy se filtrujĂ­ tak, aby byly zahrnuty pouze:
+     *   - zĂˇpasy po datu vytvoĹ™enĂ­ hrĂˇÄŤe,
+     *   - zĂˇpasy v obdobĂ­, kdy je hrĂˇÄŤ aktivnĂ­ (delegovĂˇno do {@link PlayerInactivityPeriodService}),
+     * - pokud pro hrĂˇÄŤe nejsou ĹľĂˇdnĂ© relevantnĂ­ zĂˇpasy, sestavĂ­ se DTO
+     *   s poÄŤtem zĂˇpasĹŻ v sezĂłnÄ›, poÄŤtem zĂˇpasĹŻ dostupnĂ˝ch pro hrĂˇÄŤe,
+     *   domovskĂ˝m tĂ˝mem, pozicemi a prĂˇzdnou statistikou,
+     * - pro relevantnĂ­ zĂˇpasy se naÄŤtou registrace pĹ™es {@link MatchRegistrationService},
+     *   vytvoĹ™Ă­ se mapovĂˇnĂ­ matchId â†’ status a matchId â†’ tĂ˝m hrĂˇÄŤe,
+     * - pro kaĹľdĂ˝ zĂˇpas se urÄŤĂ­ status hrĂˇÄŤe, pro zĂˇpasy bez registrace
+     *   se pouĹľije status {@link PlayerMatchStatus#NO_RESPONSE},
+     * - agregovanĂ© poÄŤty podle statusu a poÄŤty registracĂ­ podle tĂ˝mĹŻ se pĹ™enesou do DTO.
      *
-     * Pokud pro hrĂˇÄŤe nejsou ĹľĂˇdnĂ© relevantnĂ­ zĂˇpasy, vracĂ­ se DTO s vyplnÄ›nĂ˝m
-     * identifikĂˇtorem hrĂˇÄŤe a poÄŤtem zĂˇpasĹŻ v sezĂłnÄ› a ostatnĂ­ hodnoty zĹŻstĂˇvajĂ­ nulovĂ©.
-     *
-     * Pro relevantnĂ­ zĂˇpasy se naÄŤtou registrace a vytvoĹ™Ă­ se mapovĂˇnĂ­ matchId na status
-     * pouze pro danĂ©ho hrĂˇÄŤe. Pro zĂˇpasy bez registrace se pouĹľije vĂ˝chozĂ­ status NO_RESPONSE.
-     * Nakonec se agregovanĂ© poÄŤty pĹ™enesou do nĂˇvratovĂ©ho DTO.
+     * DTO vĹľdy obsahuje:
+     * - celkovĂ˝ poÄŤet zĂˇpasĹŻ v sezĂłnÄ›,
+     * - poÄŤet zĂˇpasĹŻ, kterĂ© byly pro hrĂˇÄŤe relevantnĂ­,
+     * - domovskĂ˝ tĂ˝m hrĂˇÄŤe,
+     * - primĂˇrnĂ­ a sekundĂˇrnĂ­ pozici,
+     * - poÄŤty registracĂ­ podle statusĹŻ,
+     * - mapu {@code registeredByTeam} obsahujĂ­cĂ­ vĹˇechny hodnoty {@link Team}
+     *   (i s nulovĂ˝mi poÄŤty), aby mÄ›l frontend stabilnĂ­ strukturu.
      *
      * @param playerId IdentifikĂˇtor hrĂˇÄŤe, pro kterĂ©ho se statistiky poÄŤĂ­tajĂ­.
-     * @return DTO obsahujĂ­cĂ­ souhrnnĂ© poÄŤty zĂˇpasĹŻ podle statusĹŻ a poÄŤet zĂˇpasĹŻ v sezĂłnÄ›.
+     * @return DTO obsahujĂ­cĂ­ souhrnnĂ© poÄŤty zĂˇpasĹŻ podle statusĹŻ a doplĹkovĂ© Ăşdaje.
      * @throws PlayerNotFoundException Pokud hrĂˇÄŤ se zadanĂ˝m identifikĂˇtorem neexistuje.
      */
     @Override
@@ -6294,6 +7086,8 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
         statsDTO.setAllMatchesInSeason(allMatchesInCurrentSeason);
         statsDTO.setAllMatchesInSeasonForPlayer(allMatchesInSeasonForPlayer);
         statsDTO.setHomeTeam(player.getTeam());
+        statsDTO.setPrimaryPosition(player.getPrimaryPosition());
+        statsDTO.setSecondaryPosition(player.getSecondaryPosition());
 
         // vĹľdy pĹ™ipravĂ­me mapu se vĹˇemi tĂ˝my (aĹĄ je vĂ˝stup stabilnĂ­ pro FE)
         EnumMap<Team, Integer> registeredByTeam = new EnumMap<>(Team.class);
@@ -6313,6 +7107,7 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
         List<MatchRegistrationDTO> allRegistrations =
                 matchRegistrationService.getRegistrationsForMatches(matchIds);
 
+        // matchId -> status hrĂˇÄŤe v danĂ©m zĂˇpase
         Map<Long, PlayerMatchStatus> playerStatusByMatchId = allRegistrations.stream()
                 .filter(r -> playerId.equals(r.getPlayerId()))
                 .collect(Collectors.toMap(
@@ -6321,6 +7116,7 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
                         (a, b) -> a
                 ));
 
+        // matchId -> tĂ˝m hrĂˇÄŤe v danĂ©m zĂˇpase (podle registrace)
         Map<Long, Team> playerTeamByMatchId = allRegistrations.stream()
                 .filter(r -> playerId.equals(r.getPlayerId()))
                 .collect(Collectors.toMap(
@@ -6392,8 +7188,9 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
     /**
      * UrÄŤuje identifikĂˇtor sezĂłny, pro kterou se majĂ­ poÄŤĂ­tat statistiky.
      *
-     * PrimĂˇrnÄ› se pouĹľĂ­vĂˇ identifikĂˇtor aktuĂˇlnĂ­ sezĂłny poskytnutĂ˝ sluĹľbou.
-     * Pokud nenĂ­ dostupnĂ˝, pouĹľije se identifikĂˇtor aktivnĂ­ sezĂłny.
+     * PrimĂˇrnÄ› se pouĹľĂ­vĂˇ identifikĂˇtor aktuĂˇlnĂ­ sezĂłny poskytnutĂ˝ sluĹľbou
+     * {@link CurrentSeasonService}. Pokud nenĂ­ dostupnĂ˝, pouĹľije se
+     * identifikĂˇtor aktivnĂ­ sezĂłny z {@link SeasonService}.
      *
      * @return IdentifikĂˇtor sezĂłny pouĹľitĂ˝ pro vĂ˝bÄ›r zĂˇpasĹŻ.
      */
@@ -6417,7 +7214,8 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
     /**
      * Vyhodnocuje, zda byl hrĂˇÄŤ aktivnĂ­ v dobÄ› konĂˇnĂ­ zĂˇpasu.
      *
-     * VĂ˝sledek se deleguje na sluĹľbu spravujĂ­cĂ­ obdobĂ­ neaktivity hrĂˇÄŤe.
+     * Logika je delegovĂˇna do {@link PlayerInactivityPeriodService},
+     * kterĂˇ zohledĹuje obdobĂ­ neaktivity hrĂˇÄŤe.
      *
      * @param player HrĂˇÄŤ, pro kterĂ©ho se aktivita vyhodnocuje.
      * @param dateTime TermĂ­n zĂˇpasu.
@@ -6433,7 +7231,7 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.models.dto.SeasonHistoryDTO;
+import cz.phsoft.hokej.season.dto.SeasonHistoryDTO;
 
 import java.util.List;
 
@@ -6467,9 +7265,9 @@ public interface SeasonHistoryService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.repositories.SeasonHistoryRepository;
-import cz.phsoft.hokej.models.dto.SeasonHistoryDTO;
-import cz.phsoft.hokej.models.mappers.SeasonHistoryMapper;
+import cz.phsoft.hokej.season.repositories.SeasonHistoryRepository;
+import cz.phsoft.hokej.season.dto.SeasonHistoryDTO;
+import cz.phsoft.hokej.season.mappers.SeasonHistoryMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -6520,8 +7318,8 @@ public class SeasonHistoryServiceImpl implements SeasonHistoryService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.SeasonEntity;
-import cz.phsoft.hokej.models.dto.SeasonDTO;
+import cz.phsoft.hokej.season.entities.SeasonEntity;
+import cz.phsoft.hokej.season.dto.SeasonDTO;
 
 import java.util.List;
 
@@ -6625,16 +7423,16 @@ public interface SeasonService {
 -----
 package cz.phsoft.hokej.models.services;
 
-import cz.phsoft.hokej.data.entities.SeasonEntity;
-import cz.phsoft.hokej.data.repositories.AppUserRepository;
-import cz.phsoft.hokej.data.repositories.SeasonRepository;
+import cz.phsoft.hokej.season.entities.SeasonEntity;
+import cz.phsoft.hokej.user.repositories.AppUserRepository;
+import cz.phsoft.hokej.season.repositories.SeasonRepository;
 import cz.phsoft.hokej.exceptions.*;
-import cz.phsoft.hokej.models.dto.SeasonDTO;
-import cz.phsoft.hokej.models.mappers.SeasonMapper;
+import cz.phsoft.hokej.season.dto.SeasonDTO;
+import cz.phsoft.hokej.season.mappers.SeasonMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import cz.phsoft.hokej.data.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 

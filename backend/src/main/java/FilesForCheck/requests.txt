@@ -58,8 +58,9 @@ public class ChangePlayerUserRequest {
 -----
 package cz.phsoft.hokej.models.dto.requests;
 
-import cz.phsoft.hokej.data.enums.ExcuseReason;
-import cz.phsoft.hokej.data.enums.Team;
+import cz.phsoft.hokej.registration.enums.ExcuseReason;
+import cz.phsoft.hokej.player.enums.PlayerPosition;
+import cz.phsoft.hokej.player.enums.Team;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -82,25 +83,10 @@ import jakarta.validation.constraints.Positive;
  */
 public class MatchRegistrationRequest {
 
-    /**
-     * ID zĂˇpasu, ke kterĂ©mu se registrace vztahuje.
-     *
-     * Hodnota je povinnĂˇ a musĂ­ bĂ˝t kladnĂˇ.
-     * SlouĹľĂ­ k jednoznaÄŤnĂ©mu urÄŤenĂ­ zĂˇpasu,
-     * u kterĂ©ho se registrace mÄ›nĂ­.
-     */
     @NotNull
     @Positive
     private Long matchId;
 
-    /**
-     * ID hrĂˇÄŤe, kterĂ©ho se operace tĂ˝kĂˇ.
-     *
-     * TypickĂ© pouĹľitĂ­:
-     * - u endpointĹŻ typu "/me" mĹŻĹľe bĂ˝t null a hrĂˇÄŤ
-     *   se urÄŤuje podle pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele,
-     * - u administrĂˇtorskĂ˝ch operacĂ­ se hodnota vyplĹuje explicitnÄ›.
-     */
     private Long playerId;
 
     /**
@@ -151,7 +137,13 @@ public class MatchRegistrationRequest {
      */
     private boolean substitute;
 
-
+    /**
+     * Pozice hrĂˇÄŤe v tomto konkrĂ©tnĂ­m zĂˇpase.
+     *
+     * UmoĹľĹuje specifikovat, na jakĂ© pozici mĂˇ hrĂˇÄŤ v zĂˇpase nastoupit,
+     * pokud to logika zĂˇpasu a rozdÄ›lenĂ­ tĂ˝mĹŻ podporuje.
+     */
+    private PlayerPosition positionInMatch;
 
     public Long getPlayerId() {
         return playerId;
@@ -187,6 +179,14 @@ public class MatchRegistrationRequest {
 
     public void setSubstitute(boolean substitute) {
         this.substitute = substitute;
+    }
+
+    public PlayerPosition getPositionInMatch() {
+        return positionInMatch;
+    }
+
+    public void setPositionInMatch(PlayerPosition positionInMatch) {
+        this.positionInMatch = positionInMatch;
     }
 }
 

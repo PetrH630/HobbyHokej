@@ -14,7 +14,7 @@ SessionKeys.java
 -----
 package cz.phsoft.hokej.security;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
 
 /**
  * Thread-local kontext pro uchovĂˇnĂ­ aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
@@ -88,8 +88,8 @@ public final class CurrentPlayerContext {
 -----
 package cz.phsoft.hokej.security;
 
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
-import cz.phsoft.hokej.models.services.CurrentPlayerService;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.services.CurrentPlayerService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -178,8 +178,8 @@ package cz.phsoft.hokej.security;
 -----
 package cz.phsoft.hokej.security;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;

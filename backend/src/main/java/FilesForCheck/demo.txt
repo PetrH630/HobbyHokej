@@ -11,7 +11,7 @@ DemoModePolicy.java
 -----
 package cz.phsoft.hokej.models.services.demo;
 
-import cz.phsoft.hokej.exceptions.DemoModeOperationNotAllowedException;
+import cz.phsoft.hokej.demo.DemoModeOperationNotAllowedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

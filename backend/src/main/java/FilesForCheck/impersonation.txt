@@ -89,9 +89,9 @@ public final class ImpersonationContext {
 -----
 package cz.phsoft.hokej.security.impersonation;
 
-import cz.phsoft.hokej.data.entities.PlayerEntity;
-import cz.phsoft.hokej.data.enums.PlayerStatus;
-import cz.phsoft.hokej.data.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.enums.PlayerStatus;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
