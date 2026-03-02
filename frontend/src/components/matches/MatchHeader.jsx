@@ -1,5 +1,6 @@
 // src/components/MatchHeader.jsx
 //import "./MatchHeader.css";
+import { MATCH_MODE_CONFIG } from "../../constants/matchModeConfig";
 
 const formatDateTime = (dateTime) => {
     if (!dateTime) return null;
@@ -30,6 +31,9 @@ const formatDateTime = (dateTime) => {
 
 const MatchHeader = ({ match }) => {
     const formatted = formatDateTime(match?.dateTime);
+    const matchModeLabel =
+        match?.matchMode &&
+        MATCH_MODE_CONFIG[match.matchMode]?.label;
 
     if (!formatted) return null;
 
@@ -45,7 +49,13 @@ const MatchHeader = ({ match }) => {
 
             <p className="match-header-location">
                 {match.location}
-            </p>
+            </p>         
+            {matchModeLabel && (
+                <p className="match-header-mode mb-0">
+                    <strong>{matchModeLabel}</strong>
+                </p>
+            )}
+            
         </div>
     );
 };

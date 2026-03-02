@@ -59,9 +59,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         this.matchRegistrationQueryService = matchRegistrationQueryService;
     }
 
-    // ================================
-    // 1) SNÍŽENÍ / OBNOVENÍ – GLOBÁLNÍ PŘEPOČET
-    // ================================
+    // SNÍŽENÍ / OBNOVENÍ – GLOBÁLNÍ PŘEPOČET
 
     @Override
     @Transactional
@@ -114,8 +112,8 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         int registeredGoalies = goalies.size();
         int registeredSkaters = skaters.size();
 
-        // 1) Brankáři – ponechají se REGISTERED pouze do výše goalieSlots,
-        //    případní další brankáři se přesunou do RESERVED.
+        // Brankáři – ponechají se REGISTERED pouze do výše goalieSlots,
+        // případní další brankáři se přesunou do RESERVED.
         int allowedGoalies = Math.min(goalieSlots, maxPlayers);
         int keptGoalies = 0;
 
@@ -235,9 +233,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         rebalancePositionsForMatch(match);
     }
 
-    // ================================
-    // 2) NAVÝŠENÍ KAPACITY
-    // ================================
+    // NAVÝŠENÍ KAPACITY
 
     @Override
     @Transactional
@@ -287,9 +283,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         }
     }
 
-    // ================================
-    // 3) ZMĚNA HERNÍHO MÓDU – POZICE
-    // ================================
+    // ZMĚNA HERNÍHO MÓDU – POZICE
 
     @Override
     @Transactional
@@ -320,7 +314,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
 
         boolean changed = false;
 
-        // 1) Přemapování neplatných pozic na platné v novém módu
+        // Přemapování neplatných pozic na platné v novém módu
         for (MatchRegistrationEntity reg : registrations) {
             PlayerMatchStatus status = reg.getStatus();
             if (status != PlayerMatchStatus.REGISTERED
@@ -363,7 +357,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             }
         }
 
-        // 2) Rebalance pozic v rámci týmů podle kapacity postů
+        // Rebalance pozic v rámci týmů podle kapacity postů
         boolean rebalanced = rebalancePositionsWithinTeams(match, registrations);
         if (rebalanced) {
             changed = true;
@@ -374,9 +368,8 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         }
     }
 
-    // ================================
     // HELPER METODY
-    // ================================
+
 
     private void updateRegistrationStatus(MatchRegistrationEntity registration,
                                           PlayerMatchStatus status) {
@@ -537,7 +530,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             return false;
         }
 
-        // maxPlayers je celkem pro oba týmy → kapacita pro jeden tým
+        // maxPlayers je celkem pro oba týmy - kapacita pro jeden tým
         int slotsPerTeam = maxPlayersObj / 2;
         var perTeamCapacity =
                 MatchModeLayoutUtil.buildPositionCapacityForMode(mode, slotsPerTeam);
@@ -564,7 +557,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
                 continue;
             }
 
-            // 1) Rozdělení podle aktuální pozice
+            // Rozdělení podle aktuální pozice
             var regsByPosition = new EnumMap<PlayerPosition, List<MatchRegistrationEntity>>(PlayerPosition.class);
 
             for (MatchRegistrationEntity reg : teamRegs) {
@@ -577,7 +570,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
                         .add(reg);
             }
 
-            // 2) Zjistíme, kde je plno a kde je volno
+            // Zjistíme, kde je plno a kde je volno
             var freeSlots = new EnumMap<PlayerPosition, Integer>(PlayerPosition.class);
             var overload = new EnumMap<PlayerPosition, Integer>(PlayerPosition.class);
 
@@ -591,10 +584,10 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             });
 
             if (freeSlots.isEmpty() && overload.isEmpty()) {
-                continue; // nic k řešení v tomto týmu
+                continue;
             }
 
-            // 3) Nejdřív dosadíme hráče s ANY/null na volné posty
+            // dosadíme hráče s ANY/null na volné posty
             for (MatchRegistrationEntity reg : teamRegs) {
                 PlayerPosition pos = reg.getPositionInMatch();
                 if (pos != null && pos != PlayerPosition.ANY) {
@@ -625,7 +618,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
                 continue;
             }
 
-            // 4) Z přecpaných pozic přesuneme část hráčů na volné pozice
+            // Z přecpaných pozic přesuneme část hráčů na volné pozice
             for (var entry : overload.entrySet()) {
                 PlayerPosition fromPosition = entry.getKey();
                 int toMove = entry.getValue();
@@ -694,7 +687,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             return null;
         }
 
-        // Stará pozice je v novém módu platná → nic neměníme
+        // Stará pozice je v novém módu platná - nic neměníme
         if (allowedPositions.contains(currentPosition)) {
             return null;
         }
@@ -708,17 +701,17 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
                 .anyMatch(p -> getPositionCategory(p) == currentCategory);
 
         if (hasSameCategory) {
-            // 1) Preferovat primary ve stejné kategorii
+            // Preferovat primary ve stejné kategorii
             if (isCandidatePosition(primary, allowedPositions, currentCategory)) {
                 return primary;
             }
 
-            // 2) Pak secondary ve stejné kategorii
+            // Pak secondary ve stejné kategorii
             if (isCandidatePosition(secondary, allowedPositions, currentCategory)) {
                 return secondary;
             }
 
-            // 3) První pozice ve stejné kategorii
+            // První pozice ve stejné kategorii
             PlayerPosition sameCategoryTarget = allowedPositions.stream()
                     .filter(p -> getPositionCategory(p) == currentCategory)
                     .findFirst()
@@ -728,28 +721,28 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
                 return sameCategoryTarget;
             }
 
-            // 4) Pokud hráč nechce měnit kategorii, konec
+            // Pokud hráč nechce měnit kategorii, konec
             if (!canChangePosition) {
                 return null;
             }
 
-            // 5) Jinak libovolná první allowed pozice
+            // Jinak libovolná první allowed pozice
             return allowedPositions.stream().findFirst().orElse(null);
         }
 
         // V allowedPositions není žádná pozice stejné kategorie
 
-        // 1) Pokud primary je v allowedPositions, použít ho
+        // Pokud primary je v allowedPositions, použít ho
         if (primary != null && primary != PlayerPosition.ANY && allowedPositions.contains(primary)) {
             return primary;
         }
 
-        // 2) Secondary v allowedPositions
+        // Secondary v allowedPositions
         if (secondary != null && secondary != PlayerPosition.ANY && allowedPositions.contains(secondary)) {
             return secondary;
         }
 
-        // 3) První allowed pozice (fallback)
+        // První allowed pozice (fallback)
         return allowedPositions.stream().findFirst().orElse(null);
     }
 
@@ -816,7 +809,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
 
         var currentCategory = PlayerPositionUtil.getCategory(currentPosition);
 
-        // 1) Zkusíme najít volný slot ve stejné kategorii (obrana/útok)
+        // Zkusíme najít volný slot ve stejné kategorii (obrana/útok)
         if (currentCategory != null) {
             PlayerPosition sameCategoryTarget = freeSlots.keySet().stream()
                     .filter(pos -> currentCategory == PlayerPositionUtil.getCategory(pos))
@@ -828,12 +821,12 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             }
         }
 
-        // 2) Pokud hráč nechce přechod mezi kategoriemi, končíme
+        // Pokud hráč nechce přechod mezi kategoriemi, končíme
         if (!canChangePosition) {
             return null;
         }
 
-        // 3) Jinak může jít i do jiné kategorie – vezmeme první volnou
+        // Jinak může jít i do jiné kategorie – vezmeme první volnou
         return freeSlots.keySet().stream().findFirst().orElse(null);
     }
 
@@ -907,7 +900,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         PlayerPosition effectiveCurrentPosition =
                 (currentPositionInMatch != null) ? currentPositionInMatch : primaryPosition;
 
-        // 1) Cílový tým – buď zůstane, nebo se přesune, pokud to dovolí nastavení
+        // Cílový tým – buď zůstane, nebo se přesune, pokud to dovolí nastavení
         Team targetTeam;
         if (requestedTeam == null || currentTeam == requestedTeam) {
             targetTeam = currentTeam;
@@ -918,7 +911,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             targetTeam = requestedTeam;
         }
 
-        // 2) Cílová pozice – při navýšení kapacity ji neměníme
+        // Cílová pozice – při navýšení kapacity ji neměníme
         PlayerPosition targetPosition = effectiveCurrentPosition;
 
         // Kontrola kapacity pozice – pokud není volno, kandidát se NEpovýší.
@@ -926,7 +919,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             return false;
         }
 
-        // 3) Provést změnu týmu/pozice a statusu na REGISTERED
+        // Provést změnu týmu/pozice a statusu na REGISTERED
         candidate.setTeam(targetTeam);
         candidate.setPositionInMatch(targetPosition);
         updateRegistrationStatus(candidate, PlayerMatchStatus.REGISTERED);

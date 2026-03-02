@@ -7,107 +7,29 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Přidáno do playerSettings bollean pro přesun do druhého týmu, a přesun na jakoukoliv pozici v poli. V MatchRegistrationServiceImpl uprave upsert pro automatický přechod z RESERVED na REGISTERED s vyhodnocováním podmínek pro tým a post hráče">
-      <change afterPath="$PROJECT_DIR$/backend/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-19.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-20.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-21.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-22.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/application-2026-02-23.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/audit-2026-02-19.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/audit-2026-02-20.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/audit-2026-02-21.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/audit-2026-02-22.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/logs/audit-2026-02-23.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/enums/MatchMode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/enums/PlayerPosition.java" afterDir="false" />
+    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Refactoring Matches - přidán MatchAllocationEngine misto recalcStatuseForMatches, přidáno skóre zápasu">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/logs/application.log" beforeDir="false" afterPath="$PROJECT_DIR$/backend/logs/application.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/logs/audit.log" beforeDir="false" afterPath="$PROJECT_DIR$/backend/logs/audit.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/config.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/config.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/controllers.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/controllers.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/dto.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/dto.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/entities.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/entities.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/enums.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/enums.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/mappers.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/mappers.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/migration.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/migration.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/notification.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/notification.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/repositories.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/repositories.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/services.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/services.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/sms.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/sms.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/DataInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/DataInitializer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/controllers/MatchRegistrationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/controllers/MatchRegistrationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/MatchEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/MatchEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/MatchHistoryEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/MatchHistoryEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/MatchRegistrationEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/MatchRegistrationEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/MatchRegistrationHistoryEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/MatchRegistrationHistoryEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/PlayerEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/PlayerEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/PlayerHistoryEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/PlayerHistoryEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/PlayerSettingsEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/entities/PlayerSettingsEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/repositories/MatchRegistrationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/data/repositories/MatchRegistrationRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchDetailDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchDetailDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchHistoryDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchHistoryDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchOverviewDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchOverviewDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchRegistrationDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchRegistrationDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchRegistrationHistoryDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/MatchRegistrationHistoryDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/PlayerDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/PlayerDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/PlayerHistoryDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/PlayerHistoryDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/PlayerSettingsDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/PlayerSettingsDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/PlayerStatsDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/PlayerStatsDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/requests/MatchRegistrationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/dto/requests/MatchRegistrationRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/mappers/PlayerMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/mappers/PlayerMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchRegistrationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchRegistrationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchRegistrationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchRegistrationServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/MatchServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/PlayerServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/PlayerServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/PlayerSettingsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/PlayerSettingsServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/PlayerStatsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/models/services/PlayerStatsServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V1__tables.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V1__tables.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_04__trg_match_insert.sq" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_04__trg_match_insert.sq" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_05__trg_match_update.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_05__trg_match_update.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_06__trg_match_delete.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_06__trg_match_delete.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_07__trg_match_reg_insert.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_07__trg_match_reg_insert.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_08__trg_match_reg_update.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_08__trg_match_reg_update.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_09__trg_match_reg_delete.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_09__trg_match_reg_delete.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_10__trg_player_insert.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_10__trg_player_insert.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_11__trg_player_update.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_11__trg_player_update.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_12__trg_player_delete.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5_12__trg_player_delete.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/matchRegistrationApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/matchRegistrationApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/notificationsApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/notificationsApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchInfo.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchModal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchesTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchesTable.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerEditModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerEditModal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRegistrationHistoryModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRegistrationHistoryModal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchAllocationEngineImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchAllocationEngineImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchQueryServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchQueryServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/player/services/PlayerSettingsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/player/services/PlayerSettingsServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchHeader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchHeader.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchInfo.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/PlayerCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/settings/PlayerProfileForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/settings/PlayerProfileForm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/settings/PlayerSettings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/settings/PlayerSettings.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useMatchDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useMatchDetail.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useNotifications.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useNotifications.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminHomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminHomePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminMatchesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminMatchesPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/MatchDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MatchDetailPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/MatchesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MatchesPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/PublicLandingPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/PublicLandingPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/SettingsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SettingsPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="module" />
+    </option>
+  </component>
+  <component name="CodeInsightWorkspaceSettings">
+    <option name="optimizeImportsOnTheFly" value="true" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -167,20 +89,27 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/ProjektyPrace/HobbyHokej/backend/src/main/java/cz/phsoft/hokej&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/ProjektyPrace/HobbyHokej/backend/src/main/java&quot;,
     &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.project.maven.runner&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.import&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\ProjektyPrace\HobbyHokej\backend\src\main\java" />
       <recent name="C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\tech\controllers" />
+      <recent name="C:\ProjektyPrace\HobbyHokej\" />
+      <recent name="C:\ProjektyPrace\HobbyHokej\backend" />
       <recent name="C:\Projekty Práce\HobbyHokej\backend\src\main\resources\db\migration" />
       <recent name="C:\Projekty Práce\HobbyHokej" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="cz.phsoft.hokej.models.mappers" />
     </key>
   </component>
   <component name="RunManager">
@@ -539,7 +468,55 @@
       <option name="project" value="LOCAL" />
       <updated>1771960236480</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="Přidáno do playerSettings bollean pro přesun do druhého týmu, a přesun na jakoukoliv pozici v poli. V MatchRegistrationServiceImpl uprave upsert pro automatický přechod z RESERVED na REGISTERED s vyhodnocováním podmínek pro tým a post hráče">
+      <option name="closed" value="true" />
+      <created>1772094546276</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1772094546276</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Přidáno do playerSettings bollean pro přesun do druhého týmu, a přesun na jakoukoliv pozici v poli. V MatchRegistrationServiceImpl uprave upsert pro automatický přechod z RESERVED na REGISTERED s vyhodnocováním podmínek pro tým a post hráče">
+      <option name="closed" value="true" />
+      <created>1772094585670</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1772094585670</updated>
+    </task>
+    <task id="LOCAL-00045" summary="Předělána logika pro REGISTERED/RESERVED">
+      <option name="closed" value="true" />
+      <created>1772120871073</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1772120871073</updated>
+    </task>
+    <task id="LOCAL-00046" summary="Předělána logika pro REGISTERED/RESERVED">
+      <option name="closed" value="true" />
+      <created>1772295578280</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1772295578280</updated>
+    </task>
+    <task id="LOCAL-00047" summary="Kompletně předělán systém balíčku dle domén, rozděleny třídy service na Command Query, opravena logika Registered/reserved při změně kapacity, nebo herního systému.">
+      <option name="closed" value="true" />
+      <created>1772295718484</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1772295718484</updated>
+    </task>
+    <task id="LOCAL-00048" summary="Refactoring Matches - přidán MatchAllocationEngine misto recalcStatuseForMatches, přidáno skóre zápasu">
+      <option name="closed" value="true" />
+      <created>1772454030718</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1772454030718</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -556,9 +533,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Doplněny komentáře u DTO" />
-    <MESSAGE value="Doplněny komentáře u mapper" />
-    <MESSAGE value="Vytvořen DemoModeGuard a DemoModePolicy pro kontrolu DemoMod a userId &lt;=10 - nepůjde změnit heslo ani deaktivovat uživatel. jdu testovat" />
     <MESSAGE value="Doplňování metod pro notifikace v demo režimu + frontendBaseUrl" />
     <MESSAGE value="Úprava notifikaci" />
     <MESSAGE value="Přidán FE" />
@@ -581,6 +555,9 @@
     <MESSAGE value="Úprava notifikací - scheduler - pro Registrované dle settings a pro noresponse (třeba doimplementovat)" />
     <MESSAGE value="Otestovány notifikace - před zápasem pro registrované a no_response - funkční" />
     <MESSAGE value="Přidáno do playerSettings bollean pro přesun do druhého týmu, a přesun na jakoukoliv pozici v poli. V MatchRegistrationServiceImpl uprave upsert pro automatický přechod z RESERVED na REGISTERED s vyhodnocováním podmínek pro tým a post hráče" />
-    <option name="LAST_COMMIT_MESSAGE" value="Přidáno do playerSettings bollean pro přesun do druhého týmu, a přesun na jakoukoliv pozici v poli. V MatchRegistrationServiceImpl uprave upsert pro automatický přechod z RESERVED na REGISTERED s vyhodnocováním podmínek pro tým a post hráče" />
+    <MESSAGE value="Předělána logika pro REGISTERED/RESERVED" />
+    <MESSAGE value="Kompletně předělán systém balíčku dle domén, rozděleny třídy service na Command Query, opravena logika Registered/reserved při změně kapacity, nebo herního systému." />
+    <MESSAGE value="Refactoring Matches - přidán MatchAllocationEngine misto recalcStatuseForMatches, přidáno skóre zápasu" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactoring Matches - přidán MatchAllocationEngine misto recalcStatuseForMatches, přidáno skóre zápasu" />
   </component>
 </project>

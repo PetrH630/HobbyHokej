@@ -38,7 +38,7 @@ const statusTextPastMap = {
     NO_RESPONSE: "NEREAGOVAL",
     NO_EXCUSED: "NEPŘIŠEL",
     UNREGISTERED: "ODHLÁŠEN",
-    SUBSTITUTE: "ZADAL MOŽNÁ",
+    SUBSTITUTE: "MOŽNÁ",
     EXCUSED: "NEMOHL",
     RESERVED: "ČEKAL",
 };
@@ -65,6 +65,13 @@ const cancelReasonLabelMap = {
     WEATHER: "Nepříznivé počasí",
     ORGANIZER_DECISION: "Rozhodnutí organizátora",
     OTHER: "Jiný důvod",
+};
+
+// 🔹 textový popis výsledku zápasu
+const matchResultLabelMap = {
+    LIGHT_WIN: "LIGHT",
+    DARK_WIN: "DARK",
+    DRAW: "Remíza",
 };
 
 const formatDateTime = (dateTime) => {
@@ -166,6 +173,18 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
         : null;
     const matchModeLabel = matchModeConfig?.label || null;
 
+    // 🔹 výsledek zápasu
+    const hasScore =
+        match.scoreDark !== null &&
+        match.scoreDark !== undefined &&
+        match.scoreLight !== null &&
+        match.scoreLight !== undefined;
+
+    const resultKey = match.result || null;
+    const resultLabel = resultKey
+        ? matchResultLabelMap[resultKey] ?? resultKey
+        : null;
+
     // 🔹 obsah overlay tooltipu
     let overlayTooltipContent = null;
 
@@ -243,8 +262,24 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
                 )}
 
                 {/* 3. sloupec (v condensed): místo zápasu */}
-                <p className="card-text text-center">{match.location}</p>
+                <div className="text-center">
 
+                <p className="card-text text-center">{match.location}</p>
+                    {/* Skóre + výsledek – jen u odehraných zápasů se zadaným skóre */}
+                    {past && hasScore && (
+                        <p className="card-text text-center match-score">
+                            <strong>
+                                {match.scoreDark} : {match.scoreLight}
+                            </strong>
+                            {resultLabel && (
+                                <span className="match-score__result">
+                                    {" "}
+                                    – {resultLabel}
+                                </span>
+                            )}
+                        </p>
+                    )}
+                </div>
                 {/* Herní systém – zobrazujeme pod místem */}
                 {matchModeLabel && (
                     <p className="card-text text-center match-mode">
@@ -252,6 +287,8 @@ const MatchCard = ({ match, onClick, disabledTooltip, condensed = false }) => {
                     </p>
                 )}
 
+                
+                
                 {/* popis – jen ve velkém layoutu karty, ne v condensed řádku */}
                 {!condensed && match.description && (
                     <p className="card-text">

@@ -5,9 +5,11 @@ import RoleGuard from "../RoleGuard";
 import { useNotification } from "../../context/NotificationContext";
 import {
     markNoExcusedAdmin,
-    cancelNoExcusedAdmin,
+    cancelNoExcusedAdmin, 
 } from "../../api/matchRegistrationApi";
 import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
+import "./MatchInfo.css";
+
 
 const parseDateTime = (dt) => {
     if (!dt) return null;
@@ -15,7 +17,7 @@ const parseDateTime = (dt) => {
     const d = new Date(safe);
     return Number.isNaN(d.getTime()) ? null : d;
 };
-
+ 
 const MatchInfo = ({ match, onRefresh }) => {
     const { showNotification } = useNotification();
     const { currentPlayer } = useCurrentPlayer();
@@ -25,10 +27,31 @@ const MatchInfo = ({ match, onRefresh }) => {
         useState(false);
     const [saving, setSaving] = useState(false);
 
+
+
     const matchDate = parseDateTime(match?.dateTime);
     const now = new Date();
     const isPastMatch = matchDate ? matchDate < now : false;
 
+    const matchResultLabelMap = {
+        LIGHT_WIN: "výhra LIGHT",
+        DARK_WIN: "výhra DARK",
+        DRAW: "Remíza",
+    };
+
+    // skóre je považováno za zadané, pokud nejsou null/undefined
+    const hasScore =
+        match?.scoreDark !== null &&
+        match?.scoreDark !== undefined &&
+        match?.scoreLight !== null &&
+        match?.scoreLight !== undefined;
+
+    // volitelně – pokud ti backend posílá nějaký text výsledku
+    const resultKey = match.result || null;
+    const resultLabel = resultKey
+        ? matchResultLabelMap[resultKey] ?? resultKey
+        : null;
+    
     // seznamy hráčů pro výběr
     const registeredPlayers = match?.registeredPlayers ?? [];
     const noExcusedPlayers = match?.noExcusedPlayers ?? [];
@@ -125,7 +148,8 @@ const MatchInfo = ({ match, onRefresh }) => {
 
     return (
         <div className="card">
-            <div className="card-body">
+            {/* přidal jsem vlastní třídu match-info-body */}
+            <div className="card-body match-info-body">
                 {/* HLAVIČKA – vlevo info o zápase, vpravo admin tlačítka */}
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -142,24 +166,29 @@ const MatchInfo = ({ match, onRefresh }) => {
                         </p>
 
                         <p className="card-text mb-2">
-                            <strong>Rozdělení týmů: </strong>
+                            <strong>Dark: </strong>
                             {match.inGamePlayersDark} /{" "}
+                            <strong>Light: </strong>
                             {match.inGamePlayersLight}
                         </p>
-
-                        {match.price != null && (
+                        {isPastMatch && hasScore && (
                             <p className="card-text mb-2">
-                                <strong>Cena zápasu: </strong>
-                                {match.price} Kč
+                                <strong>Skóre: </strong>
+                                {match.scoreDark} : {match.scoreLight}
+                                {resultLabel && (
+                                    <span className="ms-1">– {resultLabel}</span>
+                                )}
                             </p>
                         )}
-
-                        {match.pricePerRegisteredPlayer != null && (
-                            <p className="card-text mb-1">
-                                <strong>Cena / hráč: </strong>
+                        {match.price != null && (
+                            <p className="card-text mb-2">
+                                <strong>Cena: </strong>
+                                {match.price} Kč / {" "}
+                                <strong> hráč: </strong>
                                 {match.pricePerRegisteredPlayer.toFixed(0)} Kč
                             </p>
                         )}
+                       
                     </div>
                 </div>
 

@@ -129,8 +129,8 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
         settings.setReminderHoursBefore(24);
 
         // herní preference – výchozí: žádné automatické přesuny
-        settings.setPossibleMoveToAnotherTeam(false);
-        settings.setPossibleChangePlayerPosition(false);
+        settings.setPossibleMoveToAnotherTeam(true);
+        settings.setPossibleChangePlayerPosition(true);
 
         return settings;
     }

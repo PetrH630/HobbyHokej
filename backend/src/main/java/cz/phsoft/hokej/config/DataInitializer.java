@@ -14,7 +14,6 @@ import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import cz.phsoft.hokej.player.repositories.PlayerSettingsRepository;
 import cz.phsoft.hokej.player.services.PlayerSettingsService;
 import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.registration.enums.ExcuseReason;
 import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.season.entities.SeasonEntity;
@@ -190,7 +189,7 @@ public class DataInitializer {
             player.setTeam(i < 5 ? Team.DARK : Team.LIGHT);
             // TODO Otestovat přidalším spuštění
             player.setPrimaryPosition((i % 2 == 0) ? PlayerPosition.FORWARD : PlayerPosition.DEFENSE);
-            player.setPlayerStatus(i < 8 ? PlayerStatus.APPROVED : PlayerStatus.PENDING);
+            player.setPlayerStatus(i < 10 ? PlayerStatus.APPROVED : PlayerStatus.PENDING);
 
             user.setRole(i == 0 ? Role.ROLE_MANAGER : Role.ROLE_PLAYER);
             user.setEnabled(true);
@@ -333,7 +332,7 @@ public class DataInitializer {
                 match.setDateTime(matchDateTime);
                 match.setLocation("NĚJAKÁ HALA");
                 match.setDescription("");
-                match.setMaxPlayers(MatchMode.THREE_ON_THREE_NO_GOALIE.getPlayersPerTeam()*2);
+                match.setMaxPlayers(MatchMode.THREE_ON_THREE_NO_GOALIE.getPlayersPerTeam() * 2);
                 match.setPrice(2200);
                 match.setMatchStatus(null);
                 match.setCancelReason(null);
@@ -366,6 +365,15 @@ public class DataInitializer {
      *
      * Registrace se vytvářejí pouze pro zápasy v blízké budoucnosti.
      * Pokud již registrace existují, inicializace se přeskočí.
+     *
+     * Zjednodušená logika pro THREE_ON_THREE_NO_GOALIE:
+     *  - pro každý zápas:
+     *      - DARK: 3× REGISTERED (DEFENSE, WING_LEFT, WING_RIGHT)
+     *      - LIGHT: 3× REGISTERED (DEFENSE, WING_LEFT, WING_RIGHT)
+     *      - z nevybraných hráčů v každém týmu (pokud jsou):
+     *          - 1× EXCUSED
+     *          - 1× SUBSTITUTE
+     *      - ostatní hráči v týmu bez registrace.
      */
     private void initRegistrations() {
         if (matchRegistrationRepository.count() > 0) {
@@ -389,54 +397,163 @@ public class DataInitializer {
             return;
         }
 
+        // rozpadneme si hráče podle týmů
+        List<PlayerEntity> darkPlayersAll = players.stream()
+                .filter(p -> p.getTeam() == Team.DARK)
+                .toList();
+        List<PlayerEntity> lightPlayersAll = players.stream()
+                .filter(p -> p.getTeam() == Team.LIGHT)
+                .toList();
+
+        // potřebujeme minimálně 3 hráče v každém týmu
+        if (darkPlayersAll.size() < 3 || lightPlayersAll.size() < 3) {
+            log.info("Not enough players per team for simple registration initialization (need at least 3 DARK and 3 LIGHT). Initialization is skipped.");
+            return;
+        }
+
+        // pevně dané pozice pro REGISTERED hráče v týmu (3 na 3 bez brankáře)
+        PlayerPosition[] positions = new PlayerPosition[]{
+                PlayerPosition.DEFENSE,
+                PlayerPosition.WING_LEFT,
+                PlayerPosition.WING_RIGHT
+        };
+
         for (MatchEntity match : matches) {
-            List<PlayerEntity> shuffledPlayers = new ArrayList<>(players);
-            Collections.shuffle(shuffledPlayers);
-            List<PlayerEntity> selectedPlayers = shuffledPlayers.subList(0, 8);
 
-            List<Integer> indexes = new ArrayList<>();
-            for (int i = 0; i < selectedPlayers.size(); i++) {
-                indexes.add(i);
-            }
-            Collections.shuffle(indexes);
+            // === DARK tým ===
+            List<PlayerEntity> darkCopy = new ArrayList<>(darkPlayersAll);
+            Collections.shuffle(darkCopy);
 
-            int excusedIndex = indexes.get(0);
-            int unregisteredIndex1 = indexes.get(1);
-            int unregisteredIndex2 = indexes.get(2);
+            // prvních 3 → REGISTERED na pozice DEFENSE, WING_LEFT, WING_RIGHT
+            List<PlayerEntity> darkRegistered = darkCopy.subList(0, Math.min(3, darkCopy.size()));
 
-            for (int i = 0; i < selectedPlayers.size(); i++) {
-                PlayerEntity player = selectedPlayers.get(i);
+            for (int i = 0; i < darkRegistered.size(); i++) {
+                PlayerEntity player = darkRegistered.get(i);
 
                 MatchRegistrationEntity reg = new MatchRegistrationEntity();
                 reg.setMatch(match);
                 reg.setPlayer(player);
-
-                if (i == excusedIndex) {
-                    reg.setStatus(PlayerMatchStatus.EXCUSED);
-                    reg.setExcuseReason(ExcuseReason.NEMOC);
-                    reg.setExcuseNote("chřipka");
-                } else if (i == unregisteredIndex1 || i == unregisteredIndex2) {
-                    reg.setStatus(PlayerMatchStatus.UNREGISTERED);
-                    reg.setExcuseReason(null);
-                    reg.setExcuseNote(null);
-                } else {
-                    reg.setStatus(PlayerMatchStatus.REGISTERED);
-                    reg.setExcuseReason(null);
-                    reg.setExcuseNote(null);
-                }
-
-                reg.setTeam(player.getTeam());
+                reg.setTeam(Team.DARK);
                 reg.setTimestamp(LocalDateTime.now());
                 reg.setCreatedBy("initializer");
 
-                int idOfMatch = match.getId().intValue();
-                if (idOfMatch % 2 == 0){
-                    reg.setPositionInMatch(PlayerPosition.DEFENSE);
-                }else{
-                    reg.setPositionInMatch(PlayerPosition.FORWARD);
-                }
+                reg.setStatus(PlayerMatchStatus.REGISTERED);
+                reg.setExcuseReason(null);
+                reg.setExcuseNote(null);
+
+                reg.setPositionInMatch(positions[i]); // DEFENSE, WING_LEFT, WING_RIGHT
 
                 matchRegistrationRepository.save(reg);
+            }
+
+            // zbylí DARK hráči pro EXCUSED a SUBSTITUTE
+            List<PlayerEntity> darkRemaining = new ArrayList<>(darkCopy.subList(darkRegistered.size(), darkCopy.size()));
+            Collections.shuffle(darkRemaining);
+
+            if (!darkRemaining.isEmpty()) {
+                // jeden DARK jako EXCUSED
+                PlayerEntity excusedDark = darkRemaining.get(0);
+
+                MatchRegistrationEntity regExcused = new MatchRegistrationEntity();
+                regExcused.setMatch(match);
+                regExcused.setPlayer(excusedDark);
+                regExcused.setTeam(Team.DARK);
+                regExcused.setTimestamp(LocalDateTime.now());
+                regExcused.setCreatedBy("initializer");
+
+                regExcused.setStatus(PlayerMatchStatus.EXCUSED);
+                regExcused.setExcuseReason(null);
+                regExcused.setExcuseNote(null);
+                regExcused.setPositionInMatch(null);
+
+                matchRegistrationRepository.save(regExcused);
+            }
+
+            if (darkRemaining.size() > 1) {
+                // jeden DARK jako SUBSTITUTE
+                PlayerEntity substituteDark = darkRemaining.get(1);
+
+                MatchRegistrationEntity regSubstitute = new MatchRegistrationEntity();
+                regSubstitute.setMatch(match);
+                regSubstitute.setPlayer(substituteDark);
+                regSubstitute.setTeam(Team.DARK);
+                regSubstitute.setTimestamp(LocalDateTime.now());
+                regSubstitute.setCreatedBy("initializer");
+
+                regSubstitute.setStatus(PlayerMatchStatus.SUBSTITUTE);
+                regSubstitute.setExcuseReason(null);
+                regSubstitute.setExcuseNote(null);
+                regSubstitute.setPositionInMatch(null); // čekací listina
+
+                matchRegistrationRepository.save(regSubstitute);
+            }
+
+            // === LIGHT tým ===
+            List<PlayerEntity> lightCopy = new ArrayList<>(lightPlayersAll);
+            Collections.shuffle(lightCopy);
+
+            // prvních 3 → REGISTERED na pozice DEFENSE, WING_LEFT, WING_RIGHT
+            List<PlayerEntity> lightRegistered = lightCopy.subList(0, Math.min(3, lightCopy.size()));
+
+            for (int i = 0; i < lightRegistered.size(); i++) {
+                PlayerEntity player = lightRegistered.get(i);
+
+                MatchRegistrationEntity reg = new MatchRegistrationEntity();
+                reg.setMatch(match);
+                reg.setPlayer(player);
+                reg.setTeam(Team.LIGHT);
+                reg.setTimestamp(LocalDateTime.now());
+                reg.setCreatedBy("initializer");
+
+                reg.setStatus(PlayerMatchStatus.REGISTERED);
+                reg.setExcuseReason(null);
+                reg.setExcuseNote(null);
+
+                reg.setPositionInMatch(positions[i]); // DEFENSE, WING_LEFT, WING_RIGHT
+
+                matchRegistrationRepository.save(reg);
+            }
+
+            // zbylí LIGHT hráči pro EXCUSED a SUBSTITUTE
+            List<PlayerEntity> lightRemaining = new ArrayList<>(lightCopy.subList(lightRegistered.size(), lightCopy.size()));
+            Collections.shuffle(lightRemaining);
+
+            if (!lightRemaining.isEmpty()) {
+                // jeden LIGHT jako EXCUSED
+                PlayerEntity excusedLight = lightRemaining.get(0);
+
+                MatchRegistrationEntity regExcused = new MatchRegistrationEntity();
+                regExcused.setMatch(match);
+                regExcused.setPlayer(excusedLight);
+                regExcused.setTeam(Team.LIGHT);
+                regExcused.setTimestamp(LocalDateTime.now());
+                regExcused.setCreatedBy("initializer");
+
+                regExcused.setStatus(PlayerMatchStatus.EXCUSED);
+                regExcused.setExcuseReason(null);
+                regExcused.setExcuseNote(null);
+                regExcused.setPositionInMatch(null);
+
+                matchRegistrationRepository.save(regExcused);
+            }
+
+            if (lightRemaining.size() > 1) {
+                // jeden LIGHT jako SUBSTITUTE
+                PlayerEntity substituteLight = lightRemaining.get(1);
+
+                MatchRegistrationEntity regSubstitute = new MatchRegistrationEntity();
+                regSubstitute.setMatch(match);
+                regSubstitute.setPlayer(substituteLight);
+                regSubstitute.setTeam(Team.LIGHT);
+                regSubstitute.setTimestamp(LocalDateTime.now());
+                regSubstitute.setCreatedBy("initializer");
+
+                regSubstitute.setStatus(PlayerMatchStatus.SUBSTITUTE);
+                regSubstitute.setExcuseReason(null);
+                regSubstitute.setExcuseNote(null);
+                regSubstitute.setPositionInMatch(null); // čekací listina
+
+                matchRegistrationRepository.save(regSubstitute);
             }
         }
 
@@ -447,7 +564,7 @@ public class DataInitializer {
      * Spočítá počet pátků v období včetně.
      *
      * @param from počáteční datum
-     * @param to koncové datum
+     * @param to   koncové datum
      * @return počet pátků v období
      */
     private int countFridays(LocalDate from, LocalDate to) {

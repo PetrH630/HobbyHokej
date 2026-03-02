@@ -544,7 +544,7 @@ public class MatchQueryServiceImpl implements MatchQueryService {
             dto.setSeasonId(match.getSeason().getId());
         }
 
-        // === NOVÉ: mapování skóre, výsledku a vítěze pro overview ===
+        // mapování skóre, výsledku a vítěze pro overview
         if (match.getScore() != null) {
             dto.setScoreLight(match.getScore().getLight());
             dto.setScoreDark(match.getScore().getDark());
@@ -554,7 +554,6 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         }
         dto.setResult(match.getResult());
         dto.setWinner(match.getWinner());
-        // === KONEC NOVÉHO KÓDU ===
 
         return dto;
     }
