@@ -38,9 +38,9 @@ public class MatchServiceImpl implements MatchService {
         this.matchCommandService = matchCommandService;
     }
 
-    // ======================
+    
     // ZÁKLADNÍ SEZNAMY ZÁPASŮ (READ)
-    // ======================
+    
 
     /**
      * {@inheritDoc}
@@ -92,9 +92,9 @@ public class MatchServiceImpl implements MatchService {
         return matchQueryService.getMatchById(id);
     }
 
-    // ======================
+    
     // COMMANDS – CREATE / UPDATE / DELETE / CANCEL / UN-CANCEL
-    // ======================
+    
 
     /**
      * {@inheritDoc}
@@ -148,9 +148,13 @@ public class MatchServiceImpl implements MatchService {
         return matchCommandService.unCancelMatch(matchId);
     }
 
-    // ======================
+    @Override
+    public MatchDTO updateMatchScore(Long matchId, Integer scoreLight, Integer scoreDark){
+        return matchCommandService.updateMatchScore(matchId, scoreLight, scoreDark);
+    }
+    
     // DETAIL ZÁPASU A PŘEHLEDY (READ)
-    // ======================
+    
 
     /**
      * {@inheritDoc}
@@ -212,4 +216,6 @@ public class MatchServiceImpl implements MatchService {
     public List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId) {
         return matchQueryService.getAllPassedMatchesForPlayer(playerId);
     }
+
+
 }

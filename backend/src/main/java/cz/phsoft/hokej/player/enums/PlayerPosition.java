@@ -1,7 +1,5 @@
 package cz.phsoft.hokej.player.enums;
 
-import cz.phsoft.hokej.registration.enums.PlayerPositionCategory;
-
 public enum PlayerPosition {
 
     // --- brankář ---

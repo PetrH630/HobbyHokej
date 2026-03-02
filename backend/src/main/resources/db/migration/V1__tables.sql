@@ -54,6 +54,7 @@ CREATE TABLE `forgotten_password_reset_token_entity` (
   `user_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- >>> UPRAVENO – přidáno score_light / score_dark <<<
 CREATE TABLE `matches` (
   `id` bigint(20) NOT NULL,
   `cancel_reason` enum('NOT_ENOUGH_PLAYERS','TECHNICAL_ISSUE','WEATHER','ORGANIZER_DECISION','OTHER') DEFAULT NULL,
@@ -74,10 +75,13 @@ CREATE TABLE `matches` (
   ) NOT NULL,
   `max_players` int(11) NOT NULL,
   `price` int(11) NOT NULL,
+  `score_light` int(11) DEFAULT NULL,
+  `score_dark` int(11) DEFAULT NULL,
   `timestamp` datetime(6) NOT NULL,
   `season_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- >>> UPRAVENO – přidáno score_light / score_dark <<<
 CREATE TABLE `matches_history` (
   `id` bigint(20) NOT NULL,
   `action` varchar(255) NOT NULL,
@@ -102,6 +106,8 @@ CREATE TABLE `matches_history` (
   `max_players` int(11) NOT NULL,
   `original_timestamp` datetime(6) NOT NULL,
   `price` int(11) NOT NULL,
+  `score_light` int(11) DEFAULT NULL,
+  `score_dark` int(11) DEFAULT NULL,
   `season_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

@@ -3,8 +3,10 @@ package cz.phsoft.hokej.match.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import cz.phsoft.hokej.match.enums.MatchCancelReason;
-import cz.phsoft.hokej.match.enums.MatchStatus;
 import cz.phsoft.hokej.match.enums.MatchMode;
+import cz.phsoft.hokej.match.enums.MatchResult;
+import cz.phsoft.hokej.match.enums.MatchStatus;
+import cz.phsoft.hokej.player.enums.Team;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
@@ -17,16 +19,16 @@ import java.time.LocalDateTime;
  * DTO, které reprezentuje základní informace o zápasu.
  *
  * Slouží k přenosu dat o zápasech mezi backendem a klientem,
- * například při vytváření a editaci zápasů nebo v administrativních
- * přehledech. DTO neobsahuje business logiku ani vazby na entity
+ * například při vytváření, editaci nebo zobrazování výsledků zápasu.
+ *
+ * DTO neobsahuje business logiku ani vazby na entity
  * a slouží pouze jako transportní objekt.
  */
 public class MatchDTO implements NumberedMatchDTO {
 
     /**
      * Pořadové číslo zápasu v sezóně počítané podle data v rámci dané sezóny.
-     * Hodnota se nastavuje pouze na serveru a na klienta se vrací jako
-     * read-only údaj.
+     * Hodnota se nastavuje pouze na serveru a na klienta se vrací jako read-only údaj.
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer matchNumber;
@@ -61,7 +63,7 @@ public class MatchDTO implements NumberedMatchDTO {
     private MatchMode matchMode;
 
     /**
-     * Aktuální stav zápasu, například plánovaný, zrušený nebo odehraný.
+     * Aktuální stav zápasu.
      */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
@@ -78,6 +80,31 @@ public class MatchDTO implements NumberedMatchDTO {
      */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
+
+    /**
+     * Počet branek týmu LIGHT.
+     *
+     * Hodnota může být null, pokud se zápas ještě neodehrál.
+     */
+    private Integer scoreLight;
+
+    /**
+     * Počet branek týmu DARK.
+     *
+     * Hodnota může být null, pokud se zápas ještě neodehrál.
+     */
+    private Integer scoreDark;
+
+    /**
+     * Výsledek zápasu odvozený ze skóre.
+     *
+     * Hodnota se nastavuje pouze na serveru.
+     */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private MatchResult result;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Team winner;
 
     public Long getId() { return id; }
 
@@ -118,6 +145,38 @@ public class MatchDTO implements NumberedMatchDTO {
     public Long getSeasonId() { return seasonId; }
 
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
+
+    public Integer getScoreLight() {
+        return scoreLight;
+    }
+
+    public void setScoreLight(Integer scoreLight) {
+        this.scoreLight = scoreLight;
+    }
+
+    public Integer getScoreDark() {
+        return scoreDark;
+    }
+
+    public void setScoreDark(Integer scoreDark) {
+        this.scoreDark = scoreDark;
+    }
+
+    public Team getWinner() {
+        return winner;
+    }
+
+    public void setWinner(Team winner) {
+        this.winner = winner;
+    }
+
+    public MatchResult getResult() {
+        return result;
+    }
+
+    public void setResult(MatchResult result) {
+        this.result = result;
+    }
 
     // NumberedMatchDTO
 

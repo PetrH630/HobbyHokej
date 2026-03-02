@@ -32,9 +32,9 @@ public class PlayerServiceImpl implements PlayerService {
         this.playerQueryService = playerQueryService;
     }
 
-    // ======================
+    
     // CREATE / UPDATE / DELETE
-    // ======================
+    
 
     @Override
     public PlayerDTO createPlayer(PlayerDTO dto) {
@@ -56,9 +56,9 @@ public class PlayerServiceImpl implements PlayerService {
         return playerCommandService.deletePlayer(id);
     }
 
-    // ======================
+    
     // STATUS – APPROVE / REJECT
-    // ======================
+    
 
     @Override
     public SuccessResponseDTO approvePlayer(Long id) {
@@ -75,9 +75,9 @@ public class PlayerServiceImpl implements PlayerService {
         playerCommandService.changePlayerUser(id, newUserId);
     }
 
-    // ======================
+    
     // READ
-    // ======================
+    
 
     @Override
     public List<PlayerDTO> getAllPlayers() {
@@ -94,9 +94,9 @@ public class PlayerServiceImpl implements PlayerService {
         return playerQueryService.getPlayersByUser(email);
     }
 
-    // ======================
+    
     // CURRENT PLAYER – SESSION
-    // ======================
+    
 
     @Override
     public SuccessResponseDTO setCurrentPlayerForUser(String userEmail, Long playerId) {

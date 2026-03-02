@@ -12,6 +12,8 @@ BEGIN
          description,
          max_players,
          price,
+         score_light,
+         score_dark,
          match_status,
          match_mode,
          cancel_reason,
@@ -28,10 +30,12 @@ BEGIN
          OLD.description,
          OLD.max_players,
          OLD.price,
+         OLD.score_light,
+         OLD.score_dark,
          OLD.match_status,
          OLD.match_mode,
          OLD.cancel_reason,
          OLD.season_id,
          OLD.created_by_user_id,
          OLD.last_modified_by_user_id);
-END;
+END

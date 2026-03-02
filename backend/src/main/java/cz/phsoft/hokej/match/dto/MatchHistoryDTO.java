@@ -1,8 +1,10 @@
 package cz.phsoft.hokej.match.dto;
 
 import cz.phsoft.hokej.match.enums.MatchCancelReason;
-import cz.phsoft.hokej.match.enums.MatchStatus;
 import cz.phsoft.hokej.match.enums.MatchMode;
+import cz.phsoft.hokej.match.enums.MatchResult;
+import cz.phsoft.hokej.match.enums.MatchStatus;
+import cz.phsoft.hokej.player.enums.Team;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +13,7 @@ import java.time.LocalDateTime;
  *
  * Slouží k přenosu dat o změnách zápasu z databázové vrstvy
  * do prezentační vrstvy. Obsahuje kompletní snapshot stavu
- * zápasu v okamžiku provedené změny včetně metadata o tom,
+ * zápasu v okamžiku provedené změny včetně metavadat o tom,
  * kdy byla změna provedena a jaký typ akce ji vyvolal.
  *
  * DTO je typicky naplňováno na základě historické entity,
@@ -37,6 +39,30 @@ public class MatchHistoryDTO {
     private Long seasonId;
     private Long createdByUserId;
     private Long lastModifiedByUserId;
+
+    /**
+     * Počet branek týmu LIGHT v okamžiku změny.
+     */
+    private Integer scoreLight;
+
+    /**
+     * Počet branek týmu DARK v okamžiku změny.
+     */
+    private Integer scoreDark;
+
+    /**
+     * Vítězný tým v okamžiku změny.
+     *
+     * Hodnota je odvozena ze skóre při mapování DTO.
+     */
+    private Team winner;
+
+    /**
+     * Výsledek zápasu v okamžiku změny.
+     *
+     * Hodnota je odvozena ze skóre při mapování DTO.
+     */
+    private MatchResult result;
 
     public Long getId() {
         return id;
@@ -164,5 +190,37 @@ public class MatchHistoryDTO {
 
     public void setLastModifiedByUserId(Long lastModifiedByUserId) {
         this.lastModifiedByUserId = lastModifiedByUserId;
+    }
+
+    public Integer getScoreLight() {
+        return scoreLight;
+    }
+
+    public void setScoreLight(Integer scoreLight) {
+        this.scoreLight = scoreLight;
+    }
+
+    public Integer getScoreDark() {
+        return scoreDark;
+    }
+
+    public void setScoreDark(Integer scoreDark) {
+        this.scoreDark = scoreDark;
+    }
+
+    public Team getWinner() {
+        return winner;
+    }
+
+    public void setWinner(Team winner) {
+        this.winner = winner;
+    }
+
+    public MatchResult getResult() {
+        return result;
+    }
+
+    public void setResult(MatchResult result) {
+        this.result = result;
     }
 }

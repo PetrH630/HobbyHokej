@@ -96,9 +96,9 @@ public class SmsMessageBuilder {
         this.playerRepository = playerRepository;
     }
 
-    // ====================================================
+
     // HLAVNĂŤ VSTUPNĂŤ METODA PRO NotificationServiceImpl
-    // ====================================================
+
 
     /**
      * SestavĂ­ SMS text pro hrĂˇÄŤe podle typu notifikace a kontextu.
@@ -199,9 +199,9 @@ public class SmsMessageBuilder {
         return (T) context;
     }
 
-    // ====================================================
+
     // REGISTRACE / ODHLĂĹ ENĂŤ / OMLUVA
-    // ====================================================
+
 
     /**
      * VytvoĹ™Ă­ SMS zprĂˇvu po zmÄ›nÄ› registrace hrĂˇÄŤe na zĂˇpas.
@@ -277,9 +277,9 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
-    // ====================================================
+
     // NO RESPONSE â€“ HRĂÄŚ JEĹ TÄš NEREAGOVAL
-    // ====================================================
+
 
     /**
      * VytvoĹ™Ă­ SMS zprĂˇvu pro hrĂˇÄŤe, kteĹ™Ă­ dosud nereagovali na zĂˇpas.
@@ -315,9 +315,9 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
-    // ====================================================
+
     // ZMÄšNY STAVU ZĂPASU
-    // ====================================================
+
 
     /**
      * VytvoĹ™Ă­ SMS zprĂˇvu s informacĂ­ o zmÄ›nÄ› stavu zĂˇpasu.
@@ -371,9 +371,9 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
-    // ====================================================
+
     // FINĂLNĂŤ SMS â€“ DEN ZĂPASU
-    // ====================================================
+
 
     /**
      * VytvoĹ™Ă­ finĂˇlnĂ­ SMS zprĂˇvu v den zĂˇpasu

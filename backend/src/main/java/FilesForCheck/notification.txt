@@ -261,9 +261,9 @@ public class InAppNotificationBuilder {
 
         return switch (type) {
 
-            // =====================================
+
             // PLAYER â€“ vazba hrĂˇÄŤe na uĹľivatele
-            // =====================================
+
 
             case PLAYER_CREATED -> {
                 String title = "HrĂˇÄŤ vytvoĹ™en";
@@ -300,9 +300,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            // =====================================
+
             // USER â€“ udĂˇlosti kolem uĹľivatelskĂ©ho ĂşÄŤtu
-            // =====================================
+
 
             case USER_CREATED -> {
                 String title = "UĹľivatel vytvoĹ™en";
@@ -347,9 +347,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            // =====================================
+
             // REGISTRACE NA ZĂPAS
-            // =====================================
+
 
             case MATCH_REGISTRATION_CREATED -> {
                 String title = "PĹ™ihlĂˇĹˇenĂ­ na zĂˇpas";
@@ -449,9 +449,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            // =====================================
+
             // EXCUSE â€“ omluvy a neomluvenĂ© absence
-            // =====================================
+
 
             case PLAYER_EXCUSED -> {
                 String title = "Omluva ze zĂˇpasu";
@@ -475,9 +475,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            // =====================================
+
             // MATCH_INFO â€“ informace o zĂˇpase
-            // =====================================
+
 
             case MATCH_REMINDER -> {
                 String title = "PĹ™ipomenutĂ­ zĂˇpasu";

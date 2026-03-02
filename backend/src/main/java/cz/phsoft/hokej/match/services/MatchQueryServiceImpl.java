@@ -5,11 +5,9 @@ import cz.phsoft.hokej.match.dto.MatchDetailDTO;
 import cz.phsoft.hokej.match.dto.MatchOverviewDTO;
 import cz.phsoft.hokej.match.dto.NumberedMatchDTO;
 import cz.phsoft.hokej.match.entities.MatchEntity;
-import cz.phsoft.hokej.match.enums.MatchStatus;
 import cz.phsoft.hokej.match.exceptions.MatchNotFoundException;
 import cz.phsoft.hokej.match.mappers.MatchMapper;
 import cz.phsoft.hokej.match.repositories.MatchRepository;
-import cz.phsoft.hokej.notifications.services.NotificationService;
 import cz.phsoft.hokej.player.dto.PlayerDTO;
 import cz.phsoft.hokej.player.entities.PlayerEntity;
 import cz.phsoft.hokej.player.enums.PlayerType;
@@ -23,11 +21,8 @@ import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
 import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.registration.services.MatchRegistrationService;
-import cz.phsoft.hokej.season.exceptions.InvalidSeasonPeriodDateException;
 import cz.phsoft.hokej.season.services.CurrentSeasonService;
 import cz.phsoft.hokej.season.services.SeasonService;
-import cz.phsoft.hokej.user.entities.AppUserEntity;
-import cz.phsoft.hokej.user.repositories.AppUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -98,9 +93,9 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         this.clock = clock;
     }
 
-    // ======================
+
     // ZÁKLADNÍ SEZNAMY ZÁPASŮ
-    // ======================
+
 
     @Override
     public List<MatchDTO> getAllMatches() {
@@ -144,9 +139,9 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         return matchMapper.toDTO(findMatchOrThrow(id));
     }
 
-    // ======================
+
     // DETAIL ZÁPASU
-    // ======================
+
 
     @Override
     public MatchDetailDTO getMatchDetail(Long id) {
@@ -195,9 +190,9 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         return dto;
     }
 
-    // ======================
+
     // DALŠÍ PUBLIC METODY (READ)
-    // ======================
+
 
     @Override
     public List<MatchDTO> getAvailableMatchesForPlayer(Long playerId) {
@@ -308,9 +303,9 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         return overviews;
     }
 
-    // ======================
+
     // PŘÍSTUP A DETAIL – PRIVÁTNÍ METODY
-    // ======================
+
 
     private void checkAccessForPlayer(MatchEntity match, Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
@@ -446,6 +441,18 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         dto.setPricePerRegisteredPlayer(pricePerRegistered);
         dto.setRemainingSlots(remainingSlots);
 
+        // === NOVÉ: mapování skóre, výsledku a vítěze pro detail ===
+        if (match.getScore() != null) {
+            dto.setScoreLight(match.getScore().getLight());
+            dto.setScoreDark(match.getScore().getDark());
+        } else {
+            dto.setScoreLight(null);
+            dto.setScoreDark(null);
+        }
+        dto.setResult(match.getResult());
+        dto.setWinner(match.getWinner());
+        // === KONEC NOVÉHO KÓDU ===
+
         dto.setRegisteredPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.REGISTERED, List.of()));
         dto.setReservedPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.RESERVED, List.of()));
         dto.setUnregisteredPlayers(statusToPlayersMap.getOrDefault(PlayerMatchStatus.UNREGISTERED, List.of()));
@@ -505,9 +512,9 @@ public class MatchQueryServiceImpl implements MatchQueryService {
                 && players.stream().anyMatch(p -> p.getId().equals(playerId));
     }
 
-    // ======================
+
     // DTO MAPOVÁNÍ A HELPERY
-    // ======================
+
 
     private MatchOverviewDTO toOverviewDTO(MatchEntity match) {
         MatchOverviewDTO dto = new MatchOverviewDTO();
@@ -536,6 +543,18 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         if (match.getSeason() != null && match.getSeason().getId() != null) {
             dto.setSeasonId(match.getSeason().getId());
         }
+
+        // === NOVÉ: mapování skóre, výsledku a vítěze pro overview ===
+        if (match.getScore() != null) {
+            dto.setScoreLight(match.getScore().getLight());
+            dto.setScoreDark(match.getScore().getDark());
+        } else {
+            dto.setScoreLight(null);
+            dto.setScoreDark(null);
+        }
+        dto.setResult(match.getResult());
+        dto.setWinner(match.getWinner());
+        // === KONEC NOVÉHO KÓDU ===
 
         return dto;
     }

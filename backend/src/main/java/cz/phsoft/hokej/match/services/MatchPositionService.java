@@ -3,7 +3,7 @@ package cz.phsoft.hokej.match.services;
 import cz.phsoft.hokej.match.util.MatchModeLayoutUtil;
 import cz.phsoft.hokej.player.enums.Team;
 import cz.phsoft.hokej.match.dto.MatchPositionOverviewDTO;
-import cz.phsoft.hokej.registration.dto.MatchTeamPositionOverviewDTO;
+import cz.phsoft.hokej.match.dto.MatchTeamPositionOverviewDTO;
 import cz.phsoft.hokej.registration.services.MatchRegistrationService;
 
 /**

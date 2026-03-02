@@ -115,9 +115,9 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
         session.removeAttribute(SessionKeys.CURRENT_PLAYER_ID);
     }
 
-    // ==================================================
+    
     // Helper metody
-    // ==================================================
+    
 
     /**
      * Najde hráče podle ID nebo vyhodí výjimku.

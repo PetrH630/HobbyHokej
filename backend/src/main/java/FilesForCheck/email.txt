@@ -176,9 +176,9 @@ public class EmailMessageBuilder {
 
         // logika switch zĹŻstĂˇvĂˇ beze zmÄ›ny
         return switch (type) {
-            // =====================================
+
             // PLAYER â€“ vazba hrĂˇÄŤe na uĹľivatele
-            // =====================================
+
             case PLAYER_CREATED -> {
                 String subject = "HrĂˇÄŤ vytvoĹ™en";
 
@@ -280,9 +280,9 @@ public class EmailMessageBuilder {
                 yield new EmailContent(subject, html, true);
             }
 
-            // =====================================
+
             // USER â€“ udĂˇlosti kolem uĹľivatelskĂ©ho ĂşÄŤtu
-            // =====================================
+
 
             case USER_CREATED -> {
                 String subject = "UĹľivatel vytvoĹ™en";
@@ -495,9 +495,9 @@ public class EmailMessageBuilder {
                 ? playerEmail
                 : "(neuvedeno)";
         return switch (type) {
-            // =====================================
+
             // REGISTRATION
-            // =====================================
+
             case PLAYER_CHANGE_USER -> {
                 String subject = "HrĂˇÄŤ pĹ™iĹ™azen novĂ©mu uĹľivateli";
 
@@ -705,9 +705,9 @@ public class EmailMessageBuilder {
                 yield new EmailContent(subject, html, true);
             }
 
-            // =====================================
+
             // EXCUSE
-            // =====================================
+
 
             case PLAYER_EXCUSED -> {
                 String subject = "Omluva ze zĂˇpasu potvrzena";
@@ -751,9 +751,9 @@ public class EmailMessageBuilder {
                 yield new EmailContent(subject, html, true);
             }
 
-            // =====================================
+
             // MATCH_INFO
-            // =====================================
+
 
             case MATCH_REMINDER -> {
                 String subject = "PĹ™ipomenutĂ­ zĂˇpasu";

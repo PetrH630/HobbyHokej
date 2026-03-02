@@ -2,13 +2,15 @@ package cz.phsoft.hokej.match.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import cz.phsoft.hokej.registration.enums.ExcuseReason;
 import cz.phsoft.hokej.match.enums.MatchCancelReason;
-import cz.phsoft.hokej.match.enums.MatchStatus;
 import cz.phsoft.hokej.match.enums.MatchMode;
-import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.match.enums.MatchResult;
+import cz.phsoft.hokej.match.enums.MatchStatus;
 import cz.phsoft.hokej.player.dto.PlayerDTO;
+import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.registration.enums.ExcuseReason;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -96,6 +98,35 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private Long seasonId;
 
     /**
+     * Počet branek týmu LIGHT.
+     *
+     * Hodnota může být null, pokud se zápas ještě neodehrál
+     * nebo skóre nebylo zadáno.
+     */
+    private Integer scoreLight;
+
+    /**
+     * Počet branek týmu DARK.
+     *
+     * Hodnota může být null, pokud se zápas ještě neodehrál
+     * nebo skóre nebylo zadáno.
+     */
+    private Integer scoreDark;
+
+    /**
+     * Vítězný tým zápasu.
+     *
+     * Hodnota se nastavuje na serveru na základě skóre.
+     * V případě remízy nebo chybějícího skóre je null.
+     */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private MatchResult result;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Team winner;
+
+
+    /**
      * Seznamy hráčů rozdělené podle stavu registrace.
      *
      * Seznamy se používají pro přehledné zobrazení v uživatelském rozhraní,
@@ -111,7 +142,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     private List<PlayerDTO> substitutedPlayers;
     private List<PlayerDTO> noExcusedPlayers;
     private List<PlayerDTO> noResponsePlayers;
-    // plný seznam registrací pro FE
+
     /**
      * Seznam všech registrací k zápasu včetně týmu, stavu a pozice v zápase.
      *
@@ -120,6 +151,7 @@ public class MatchDetailDTO implements NumberedMatchDTO {
      * na již plně obsazenou pozici).
      */
     private List<MatchRegistrationDTO> registrations;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -193,6 +225,38 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     public Long getSeasonId() { return seasonId; }
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
 
+    public Integer getScoreLight() {
+        return scoreLight;
+    }
+
+    public void setScoreLight(Integer scoreLight) {
+        this.scoreLight = scoreLight;
+    }
+
+    public Integer getScoreDark() {
+        return scoreDark;
+    }
+
+    public void setScoreDark(Integer scoreDark) {
+        this.scoreDark = scoreDark;
+    }
+
+    public Team getWinner() {
+        return winner;
+    }
+
+    public void setWinner(Team winner) {
+        this.winner = winner;
+    }
+
+    public MatchResult getResult() {
+        return result;
+    }
+
+    public void setResult(MatchResult result) {
+        this.result = result;
+    }
+
     public List<PlayerDTO> getRegisteredPlayers() { return registeredPlayers; }
     public void setRegisteredPlayers(List<PlayerDTO> registeredPlayers) {
         this.registeredPlayers = registeredPlayers;
@@ -244,6 +308,14 @@ public class MatchDetailDTO implements NumberedMatchDTO {
         this.noResponsePlayers = noResponsePlayers;
     }
 
+    public List<MatchRegistrationDTO> getRegistrations() {
+        return registrations;
+    }
+
+    public void setRegistrations(List<MatchRegistrationDTO> registrations) {
+        this.registrations = registrations;
+    }
+
     // NumberedMatchDTO
 
     @Override
@@ -255,12 +327,4 @@ public class MatchDetailDTO implements NumberedMatchDTO {
     public Integer getMatchNumber() {
         return matchNumber;
     }
-    public List<MatchRegistrationDTO> getRegistrations() {
-        return registrations;
-    }
-
-    public void setRegistrations(List<MatchRegistrationDTO> registrations) {
-        this.registrations = registrations;
-    }
-
 }

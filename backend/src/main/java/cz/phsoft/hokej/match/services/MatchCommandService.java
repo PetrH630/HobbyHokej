@@ -22,4 +22,6 @@ public interface MatchCommandService {
     SuccessResponseDTO cancelMatch(Long matchId, MatchCancelReason reason);
 
     SuccessResponseDTO unCancelMatch(Long matchId);
+
+    MatchDTO updateMatchScore(Long matchId, Integer scoreLight, Integer scoreDark);
 }

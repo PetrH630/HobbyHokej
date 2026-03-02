@@ -1,5 +1,5 @@
 package cz.phsoft.hokej.match.controllers;
-
+import cz.phsoft.hokej.match.dto.MatchScoreUpdateRequest;
 import cz.phsoft.hokej.match.dto.*;
 import cz.phsoft.hokej.match.enums.MatchCancelReason;
 import cz.phsoft.hokej.match.services.MatchAutoLineupService;
@@ -8,7 +8,7 @@ import cz.phsoft.hokej.match.services.MatchPositionService;
 import cz.phsoft.hokej.match.services.MatchService;
 import cz.phsoft.hokej.player.enums.Team;
 import cz.phsoft.hokej.player.services.CurrentPlayerService;
-import cz.phsoft.hokej.registration.dto.MatchTeamPositionOverviewDTO;
+import cz.phsoft.hokej.match.dto.MatchTeamPositionOverviewDTO;
 import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -323,7 +323,6 @@ public class MatchController {
         return matchService.getAllPassedMatchesForPlayer(currentPlayerId);
     }
 
-
 /**
  * Vrací přehled pozic a kapacity pro daný zápas pro oba týmy.
  *
@@ -374,4 +373,33 @@ public class MatchController {
                 )
         );
     }
+
+    /**
+     * Aktualizuje skóre zápasu.
+     *
+     * Endpoint slouží k zadání nebo úpravě výsledku zápasu.
+     * Skóre se zadává jako počet branek pro tým LIGHT a tým DARK.
+     * Operace je dostupná pro role ADMIN a MANAGER.
+     *
+     * Vlastní uložení skóre a validace stavu zápasu
+     * se deleguje do servisní vrstvy.
+     *
+     * @param matchId ID zápasu, jehož skóre se upravuje
+     * @param request DTO obsahující skóre pro oba týmy
+     * @return {@link MatchDTO} s aktualizovaným skóre a vítězem
+     */
+    @PatchMapping("/{matchId}/score")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public MatchDTO updateMatchScore(
+            @PathVariable Long matchId,
+            @Valid @RequestBody MatchScoreUpdateRequest request
+    ) {
+        return matchService.updateMatchScore(
+                matchId,
+                request.getScoreLight(),
+                request.getScoreDark()
+        );
+    }
+
+
 }

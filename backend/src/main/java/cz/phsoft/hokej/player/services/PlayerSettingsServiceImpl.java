@@ -76,9 +76,9 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
         return mapper.toDTO(saved);
     }
 
-    // =========================
+    
     // HELPER METODY
-    // =========================
+    
 
     private PlayerEntity findPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)

@@ -57,9 +57,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         this.mapper = mapper;
     }
 
-    // ======================
+    
     // READ OPERACE
-    // ======================
+    
 
     /**
      * Vrátí všechna období neaktivity všech hráčů.
@@ -109,9 +109,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
                 .toList();
     }
 
-    // ======================
+    
     // CREATE
-    // ======================
+    
 
     /**
      * Vytvoří nové období neaktivity hráče.
@@ -154,9 +154,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         return mapper.toDTO(saved);
     }
 
-    // ======================
+    
     // UPDATE
-    // ======================
+    
 
     /**
      * Aktualizuje existující období neaktivity.
@@ -203,9 +203,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         return mapper.toDTO(saved);
     }
 
-    // ======================
+    
     // DELETE
-    // ======================
+    
 
     /**
      * Smaže období neaktivity podle ID.
@@ -222,9 +222,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         inactivityRepository.delete(entity);
     }
 
-    // ======================
+    
     // AKTIVITA HRÁČE
-    // ======================
+    
 
     /**
      * Ověří, zda je hráč v daném čase aktivní.
@@ -252,9 +252,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
                 );
     }
 
-    // ======================
+    
     // PRIVÁTNÍ VALIDACE
-    // ======================
+    
 
     /**
      * Validuje časový rozsah období neaktivity.

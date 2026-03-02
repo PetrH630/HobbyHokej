@@ -1,4 +1,4 @@
-package cz.phsoft.hokej.registration.enums;
+package cz.phsoft.hokej.player.enums;
 
 /**
  * Kategorie hráčských pozic.

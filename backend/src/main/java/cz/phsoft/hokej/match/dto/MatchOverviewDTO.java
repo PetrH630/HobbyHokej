@@ -3,8 +3,10 @@ package cz.phsoft.hokej.match.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import cz.phsoft.hokej.match.enums.MatchCancelReason;
-import cz.phsoft.hokej.match.enums.MatchStatus;
 import cz.phsoft.hokej.match.enums.MatchMode;
+import cz.phsoft.hokej.match.enums.MatchResult;
+import cz.phsoft.hokej.match.enums.MatchStatus;
+import cz.phsoft.hokej.player.enums.Team;
 import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -79,6 +81,28 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long seasonId;
 
+    /**
+     * Počet branek týmu LIGHT.
+     */
+    private Integer scoreLight;
+
+    /**
+     * Počet branek týmu DARK.
+     */
+    private Integer scoreDark;
+
+    /**
+     * Vítězný tým zápasu.
+     *
+     * Hodnota se nastavuje na serveru na základě skóre.
+     */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Team winner;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private MatchResult result;
+
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -121,6 +145,38 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
 
     public Long getSeasonId() { return seasonId; }
     public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
+
+    public Integer getScoreLight() {
+        return scoreLight;
+    }
+
+    public void setScoreLight(Integer scoreLight) {
+        this.scoreLight = scoreLight;
+    }
+
+    public Integer getScoreDark() {
+        return scoreDark;
+    }
+
+    public void setScoreDark(Integer scoreDark) {
+        this.scoreDark = scoreDark;
+    }
+
+    public Team getWinner() {
+        return winner;
+    }
+
+    public void setWinner(Team winner) {
+        this.winner = winner;
+    }
+
+    public MatchResult getResult() {
+        return result;
+    }
+
+    public void setResult(MatchResult result) {
+        this.result = result;
+    }
 
     // NumberedMatchDTO
 

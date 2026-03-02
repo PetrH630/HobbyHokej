@@ -35,9 +35,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         this.matchRegistrationQueryService = matchRegistrationQueryService;
     }
 
-    // ==========================================
+    
     // PŘÍKAZOVÉ OPERACE – DELEGACE DO COMMAND SERVICE
-    // ==========================================
+    
 
     @Override
     @Transactional
@@ -110,9 +110,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         commandService.sendSmsToRegisteredPlayers(matchId);
     }
 
-    // ======================================
+    
     // ČTECÍ OPERACE – DELEGACE DO QUERY SERVICE
-    // ======================================
+    
 
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {

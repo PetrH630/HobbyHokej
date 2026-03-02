@@ -1,29 +1,31 @@
 package cz.phsoft.hokej.registration.services;
 
 import cz.phsoft.hokej.match.entities.MatchEntity;
-import cz.phsoft.hokej.notifications.enums.NotificationType;
-import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.player.entities.PlayerEntity;
-import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.match.enums.MatchMode;
 import cz.phsoft.hokej.match.exceptions.InvalidMatchDateTimeException;
 import cz.phsoft.hokej.match.exceptions.MatchNotFoundException;
 import cz.phsoft.hokej.match.repositories.MatchRepository;
-import cz.phsoft.hokej.player.exceptions.InvalidPlayerStatusException;
-import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.player.repositories.PlayerRepository;
-import cz.phsoft.hokej.match.enums.MatchMode;
-import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.registration.dto.MatchRegistrationRequest;
-import cz.phsoft.hokej.registration.exceptions.DuplicateRegistrationException;
-import cz.phsoft.hokej.registration.exceptions.RegistrationNotFoundException;
-import cz.phsoft.hokej.registration.mappers.MatchRegistrationMapper;
+import cz.phsoft.hokej.match.services.MatchAllocationEngine;
+import cz.phsoft.hokej.match.util.MatchModeLayoutUtil;
+import cz.phsoft.hokej.notifications.enums.NotificationType;
 import cz.phsoft.hokej.notifications.services.NotificationService;
 import cz.phsoft.hokej.notifications.sms.SmsMessageBuilder;
 import cz.phsoft.hokej.notifications.sms.SmsService;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
 import cz.phsoft.hokej.player.enums.PlayerPosition;
 import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.player.exceptions.InvalidPlayerStatusException;
+import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationRequest;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.registration.enums.ExcuseReason;
 import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.registration.exceptions.DuplicateRegistrationException;
+import cz.phsoft.hokej.registration.exceptions.RegistrationNotFoundException;
+import cz.phsoft.hokej.registration.mappers.MatchRegistrationMapper;
+import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.registration.util.PlayerPositionUtil;
 import cz.phsoft.hokej.season.exceptions.InvalidSeasonStateException;
 import jakarta.transaction.Transactional;
@@ -33,11 +35,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
-
-import cz.phsoft.hokej.match.util.MatchModeLayoutUtil;
 import java.util.Map;
 import java.util.Objects;
 
@@ -62,6 +61,7 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
     private final SmsService smsService;
     private final SmsMessageBuilder smsMessageBuilder;
     private final NotificationService notificationService;
+    private final MatchAllocationEngine matchAllocationEngine;
 
     public MatchRegistrationCommandServiceImpl(
             MatchRegistrationRepository registrationRepository,
@@ -70,7 +70,8 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
             MatchRegistrationMapper matchRegistrationMapper,
             SmsService smsService,
             SmsMessageBuilder smsMessageBuilder,
-            NotificationService notificationService
+            NotificationService notificationService,
+            MatchAllocationEngine matchAllocationEngine
     ) {
         this.registrationRepository = registrationRepository;
         this.matchRepository = matchRepository;
@@ -79,6 +80,7 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
         this.smsService = smsService;
         this.smsMessageBuilder = smsMessageBuilder;
         this.notificationService = notificationService;
+        this.matchAllocationEngine = matchAllocationEngine;
     }
 
     // ==========================================
@@ -374,179 +376,14 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
 
     /**
      * {@inheritDoc}
+     *
+     * Logika přepočtu je centralizovaná v {@link MatchAllocationEngine}.
+     * Tato metoda zůstává kvůli kompatibilitě rozhraní – deleguje na engine.
      */
     @Override
     @Transactional
     public void recalcStatusesForMatch(Long matchId) {
-        MatchEntity match = getMatchOrThrow(matchId);
-        Integer maxPlayersObj = match.getMaxPlayers();
-
-        if (maxPlayersObj == null || maxPlayersObj <= 0) {
-            return;
-        }
-
-        int maxPlayers = maxPlayersObj;
-
-        // Kolik slotů se rezervuje pro brankáře v rámci maxPlayers.
-        int goalieSlots = getGoalieSlotsForMatch(match);
-        if (goalieSlots < 0) {
-            goalieSlots = 0;
-        }
-        if (goalieSlots > maxPlayers) {
-            goalieSlots = maxPlayers;
-        }
-
-        int skaterCapacity = maxPlayers - goalieSlots;
-
-        // Všichni aktuálně REGISTERED, seřazení podle času registrace.
-        List<MatchRegistrationEntity> allRegistered = registrationRepository.findByMatchId(matchId).stream()
-                .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
-                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
-                .toList();
-
-        if (allRegistered.isEmpty()) {
-            return;
-        }
-
-        // Rozdělení na brankáře a hráče v poli.
-        List<MatchRegistrationEntity> goalies = allRegistered.stream()
-                .filter(this::isGoalieRegistration)
-                .toList();
-
-        List<MatchRegistrationEntity> skaters = allRegistered.stream()
-                .filter(r -> !isGoalieRegistration(r))
-                .toList();
-
-        int registeredGoalies = goalies.size();
-        int registeredSkaters = skaters.size();
-
-        //  PŮVODNÍ BRZDA – ODSTRANĚNO:
-        // if (registeredGoalies + registeredSkaters <= maxPlayers
-        //         && registeredSkaters <= skaterCapacity) {
-        //     return;
-        // }
-
-        // 1) Brankáři – ponechají se REGISTERED pouze do výše goalieSlots,
-        //    případní další brankáři se přesunou do RESERVED.
-        int allowedGoalies = Math.min(goalieSlots, maxPlayers);
-        int keptGoalies = 0;
-
-        for (MatchRegistrationEntity goalieReg : goalies) {
-            if (keptGoalies < allowedGoalies) {
-                updateRegistrationStatus(goalieReg, PlayerMatchStatus.REGISTERED, "system", false);
-                keptGoalies++;
-            } else {
-                updateRegistrationStatus(goalieReg, PlayerMatchStatus.RESERVED, "system", false);
-            }
-        }
-
-        // 2) Hráči v poli – přepočet jen nad skaters s kapacitou skaterCapacity.
-        //  PŮVODNÍ BRZDA – ODSTRANĚNO:
-        // if (registeredSkaters <= skaterCapacity) {
-        //     return;
-        // }
-
-        if (registeredSkaters <= 0) {
-            return;
-        }
-
-        int desiredTotal = skaterCapacity;
-
-        // Aktuální rozložení hráčů v poli – využívá se při rozhodování,
-        // který tým dostane případné "liché" extra místo.
-        long currentDark = skaters.stream()
-                .filter(r -> r.getTeam() == Team.DARK)
-                .count();
-        long currentLight = skaters.stream()
-                .filter(r -> r.getTeam() == Team.LIGHT)
-                .count();
-
-        int targetDark;
-        int targetLight;
-
-        if (desiredTotal % 2 == 0) {
-            // Rovnoměrné rozdělení.
-            targetDark = desiredTotal / 2;
-            targetLight = desiredTotal / 2;
-        } else {
-            // Lichý počet – jeden tým má o 1 více, upřednostní se aktuálně větší tým.
-            if (currentDark >= currentLight) {
-                targetDark = desiredTotal / 2 + 1;
-                targetLight = desiredTotal - targetDark;
-            } else {
-                targetLight = desiredTotal / 2 + 1;
-                targetDark = desiredTotal - targetLight;
-            }
-        }
-
-        int dark = 0;
-        int light = 0;
-
-        for (MatchRegistrationEntity reg : skaters) {
-            Team team = reg.getTeam();
-            boolean movable = canAutoMoveTeam(reg); // Využití PlayerSettings.isPossibleMoveToAnotherTeam().
-
-            // Hráč bez přiřazeného týmu – přiřadí se tam, kde je volno.
-            if (team == null) {
-                if (dark < targetDark) {
-                    reg.setTeam(Team.DARK);
-                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
-                    dark++;
-                } else if (light < targetLight) {
-                    reg.setTeam(Team.LIGHT);
-                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
-                    light++;
-                } else {
-                    updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
-                }
-                continue;
-            }
-
-            if (team == Team.DARK) {
-                if (!movable) {
-                    if (dark < targetDark) {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
-                        dark++;
-                    } else {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
-                    }
-                } else {
-                    if (dark < targetDark) {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
-                        dark++;
-                    } else if (light < targetLight) {
-                        reg.setTeam(Team.LIGHT);
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
-                        light++;
-                    } else {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
-                    }
-                }
-            } else if (team == Team.LIGHT) {
-                if (!movable) {
-                    if (light < targetLight) {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
-                        light++;
-                    } else {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
-                    }
-                } else {
-                    if (light < targetLight) {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
-                        light++;
-                    } else if (dark < targetDark) {
-                        reg.setTeam(Team.DARK);
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED, "system", false);
-                        dark++;
-                    } else {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
-                    }
-                }
-            } else {
-                // Neznámý tým – konzervativně do RESERVED.
-                updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED, "system", false);
-            }
-        }
+        matchAllocationEngine.recomputeForMatch(matchId);
     }
 
     /**
@@ -598,7 +435,9 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
         }
     }
 
+    // ==========================================
     // SMS – HROMADNÉ ODESÍLÁNÍ
+    // ==========================================
 
     /**
      * {@inheritDoc}
@@ -622,8 +461,10 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
                     sendSms(r, smsMessageBuilder.buildMessageFinal(r));
                 });
     }
-    // PRIVÁTNÍ METODY
 
+    // ==========================================
+    // PRIVÁTNÍ METODY
+    // ==========================================
 
     private PlayerMatchStatus handleRegisterOrReserveOrSubstitute(
             MatchRegistrationRequest request,
@@ -812,6 +653,11 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
             return false;
         }
 
+        MatchEntity match = candidate.getMatch();
+        if (match == null) {
+            return false;
+        }
+
         PlayerEntity player = candidate.getPlayer();
         var settings = player.getSettings();
 
@@ -849,6 +695,12 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
             return false;
         }
 
+        // Kontrola kapacity pozice – pokud není volno, kandidát se NEpovýší.
+        if (!isPositionSlotAvailableForTeam(match, targetTeam, targetPosition)) {
+            return false;
+        }
+
+        // 3) Provést změnu týmu/pozice a statusu na REGISTERED
         candidate.setTeam(targetTeam);
         candidate.setPositionInMatch(targetPosition);
 
@@ -918,52 +770,12 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
         return null;
     }
 
-    private boolean isGoalieRegistration(MatchRegistrationEntity registration) {
-        if (registration == null || registration.getPlayer() == null) {
-            return false;
-        }
-
-        PlayerPosition position = registration.getPositionInMatch();
-        if (position == null) {
-            position = registration.getPlayer().getPrimaryPosition();
-        }
-
-        return position == PlayerPosition.GOALIE;
-    }
-
-    private int getGoalieSlotsForMatch(MatchEntity match) {
-        MatchMode mode = match.getMatchMode();
-        if (mode == null) {
-            return 0;
-        }
-        return switch (mode) {
-            case THREE_ON_THREE_WITH_GOALIE -> 2;
-            case FOUR_ON_FOUR_WITH_GOALIE -> 2;
-            case FIVE_ON_FIVE_WITH_GOALIE -> 2;
-            default -> 0;
-        };
-    }
-
     private boolean isDefensePosition(PlayerPosition position) {
         return PlayerPositionUtil.isDefense(position);
     }
 
     private boolean isForwardPosition(PlayerPosition position) {
         return PlayerPositionUtil.isForward(position);
-    }
-
-    private boolean canAutoMoveTeam(MatchRegistrationEntity registration) {
-        if (registration == null || registration.getPlayer() == null) {
-            return false;
-        }
-
-        PlayerEntity player = registration.getPlayer();
-        var settings = player.getSettings();
-        if (settings == null) {
-            return false;
-        }
-
-        return settings.isPossibleMoveToAnotherTeam();
     }
 
     private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {

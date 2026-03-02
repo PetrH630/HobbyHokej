@@ -551,9 +551,9 @@ public class AppUserServiceImpl implements AppUserService {
                 email, user.getLastLoginAt(), user.getCurrentLoginAt());
     }
 
-    // ==================================================
+    
     // HELPER METODY
-    // ==================================================
+    
 
     private String buildActivationLink(EmailVerificationTokenEntity token) {
         return frontendBasUrl + "/verify?token=" + token.getToken();

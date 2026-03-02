@@ -1,29 +1,30 @@
 package cz.phsoft.hokej.config;
 
 import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.match.entities.MatchScore;
 import cz.phsoft.hokej.match.enums.MatchMode;
 import cz.phsoft.hokej.match.repositories.MatchRepository;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.entities.PlayerSettingsEntity;
+import cz.phsoft.hokej.player.enums.PlayerPosition;
+import cz.phsoft.hokej.player.enums.PlayerStatus;
+import cz.phsoft.hokej.player.enums.PlayerType;
+import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.player.repositories.PlayerSettingsRepository;
+import cz.phsoft.hokej.player.services.PlayerSettingsService;
 import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.registration.enums.ExcuseReason;
 import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.season.entities.SeasonEntity;
 import cz.phsoft.hokej.season.repositories.SeasonRepository;
-import cz.phsoft.hokej.user.services.AppUserSettingsService;
-import cz.phsoft.hokej.player.entities.PlayerSettingsEntity;
-import cz.phsoft.hokej.player.repositories.PlayerSettingsRepository;
-import cz.phsoft.hokej.player.services.PlayerSettingsService;
-import cz.phsoft.hokej.player.entities.PlayerEntity;
-import cz.phsoft.hokej.player.enums.PlayerPosition;
-import cz.phsoft.hokej.player.enums.PlayerStatus;
-import cz.phsoft.hokej.player.enums.PlayerType;
-import cz.phsoft.hokej.player.enums.Team;
-import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import cz.phsoft.hokej.user.entities.AppUserEntity;
 import cz.phsoft.hokej.user.entities.AppUserSettingsEntity;
 import cz.phsoft.hokej.user.enums.Role;
 import cz.phsoft.hokej.user.repositories.AppUserRepository;
 import cz.phsoft.hokej.user.repositories.AppUserSettingsRepository;
+import cz.phsoft.hokej.user.services.AppUserSettingsService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -325,8 +326,11 @@ public class DataInitializer {
             int fridaysCount = countFridays(startSeasonDate, endSeasonDate);
 
             for (int i = 0; i < fridaysCount; i++) {
+
+                LocalDateTime matchDateTime = firstMatchDate.plusWeeks(i);
+
                 MatchEntity match = new MatchEntity();
-                match.setDateTime(firstMatchDate.plusWeeks(i));
+                match.setDateTime(matchDateTime);
                 match.setLocation("NĚJAKÁ HALA");
                 match.setDescription("");
                 match.setMaxPlayers(MatchMode.THREE_ON_THREE_NO_GOALIE.getPlayersPerTeam()*2);
@@ -337,6 +341,18 @@ public class DataInitializer {
                 match.setCreatedByUserId(2L);
                 match.setMatchMode(MatchMode.THREE_ON_THREE_NO_GOALIE);
 
+                if (matchDateTime.isBefore(LocalDateTime.now())) {
+
+                    int lightGoals = ThreadLocalRandom.current().nextInt(0, 6);
+                    int darkGoals = ThreadLocalRandom.current().nextInt(0, 6);
+
+                    MatchScore score = new MatchScore();
+                    score.setLight(lightGoals);
+                    score.setDark(darkGoals);
+                    match.setScore(score);
+                } else {
+                    match.setScore(null);
+                }
 
                 matchRepository.save(match);
             }

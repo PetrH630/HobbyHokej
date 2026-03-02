@@ -69,9 +69,9 @@ public class SmsMessageBuilder {
         this.playerRepository = playerRepository;
     }
 
-    // ====================================================
+    
     // HLAVNÍ VSTUPNÍ METODA PRO NotificationServiceImpl
-    // ====================================================
+    
 
     /**
      * Sestaví SMS text pro hráče podle typu notifikace a kontextu.
@@ -172,9 +172,9 @@ public class SmsMessageBuilder {
         return (T) context;
     }
 
-    // ====================================================
+    
     // REGISTRACE / ODHLÁŠENÍ / OMLUVA
-    // ====================================================
+    
 
     /**
      * Vytvoří SMS zprávu po změně registrace hráče na zápas.
@@ -250,9 +250,9 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
-    // ====================================================
+    
     // NO RESPONSE – HRÁČ JEŠTĚ NEREAGOVAL
-    // ====================================================
+    
 
     /**
      * Vytvoří SMS zprávu pro hráče, kteří dosud nereagovali na zápas.
@@ -288,9 +288,9 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
-    // ====================================================
+    
     // ZMĚNY STAVU ZÁPASU
-    // ====================================================
+    
 
     /**
      * Vytvoří SMS zprávu s informací o změně stavu zápasu.
@@ -344,9 +344,9 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
-    // ====================================================
+    
     // FINÁLNÍ SMS – DEN ZÁPASU
-    // ====================================================
+    
 
     /**
      * Vytvoří finální SMS zprávu v den zápasu

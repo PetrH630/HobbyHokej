@@ -1,22 +1,23 @@
 package cz.phsoft.hokej.match.services;
 
+import cz.phsoft.hokej.match.dto.*;
 import cz.phsoft.hokej.match.entities.MatchEntity;
 import cz.phsoft.hokej.match.enums.MatchMode;
+import cz.phsoft.hokej.match.exceptions.MatchNotFoundException;
+import cz.phsoft.hokej.match.repositories.MatchRepository;
 import cz.phsoft.hokej.match.util.MatchModeLayoutUtil;
-import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
 import cz.phsoft.hokej.player.enums.PlayerPosition;
 import cz.phsoft.hokej.player.enums.Team;
-import cz.phsoft.hokej.match.repositories.MatchRepository;
-import cz.phsoft.hokej.match.exceptions.MatchNotFoundException;
-import cz.phsoft.hokej.match.dto.MatchPositionOverviewDTO;
-import cz.phsoft.hokej.match.dto.MatchPositionSlotDTO;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
-import cz.phsoft.hokej.registration.dto.MatchTeamPositionOverviewDTO;
-import cz.phsoft.hokej.registration.dto.MatchTeamPositionSlotDTO;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.registration.services.MatchRegistrationService;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,13 +37,16 @@ public class MatchPositionServiceImpl implements MatchPositionService {
 
     private final MatchRepository matchRepository;
     private final MatchRegistrationService registrationService;
+    private final PlayerRepository playerRepository;
 
     public MatchPositionServiceImpl(
             MatchRepository matchRepository,
-            MatchRegistrationService registrationService
+            MatchRegistrationService registrationService,
+            PlayerRepository playerRepository
     ) {
         this.matchRepository = matchRepository;
         this.registrationService = registrationService;
+        this.playerRepository = playerRepository;
     }
 
     /**
@@ -140,6 +144,14 @@ public class MatchPositionServiceImpl implements MatchPositionService {
         Map<PlayerPosition, Long> occupiedForTeam =
                 computeOccupancyByPosition(registrations, team);
 
+        // hráči na ledě
+        Map<PlayerPosition, List<MatchTeamPositionPlayerDTO>> registeredByPosition =
+                buildPlayersByPositionForTeamAndStatus(registrations, team, PlayerMatchStatus.REGISTERED);
+
+        // náhradníci
+        Map<PlayerPosition, List<MatchTeamPositionPlayerDTO>> reservedByPosition =
+                buildPlayersByPositionForTeamAndStatus(registrations, team, PlayerMatchStatus.RESERVED);
+
         List<MatchTeamPositionSlotDTO> slots = perTeamCapacity.entrySet().stream()
                 .map(entry -> {
                     PlayerPosition position = entry.getKey();
@@ -153,6 +165,12 @@ public class MatchPositionServiceImpl implements MatchPositionService {
                     slotDTO.setCapacity(capacity);
                     slotDTO.setOccupied(occupied);
                     slotDTO.setFree(free);
+                    slotDTO.setRegisteredPlayers(
+                            registeredByPosition.getOrDefault(position, List.of())
+                    );
+                    slotDTO.setReservedPlayers(
+                            reservedByPosition.getOrDefault(position, List.of())
+                    );
 
                     return slotDTO;
                 })
@@ -209,4 +227,69 @@ public class MatchPositionServiceImpl implements MatchPositionService {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
     }
+
+    /**
+     * Sestavuje mapu hráčů podle pozic pro daný tým.
+     *
+     * Zahrnují se pouze registrace ve stavu REGISTERED, s konkrétní pozicí
+     * (pozice ANY se ignoruje).
+     *
+     * Jméno hráče se dotahuje z PlayerEntity podle playerId z MatchRegistrationDTO.
+     *
+     * @param registrations Registrace hráčů k zápasu.
+     * @param team          Tým, pro který se přehled tvoří.
+     * @return Mapa pozice na seznam hráčů přiřazených na dané pozici.
+     */
+    private Map<PlayerPosition, List<MatchTeamPositionPlayerDTO>> buildPlayersByPositionForTeamAndStatus(
+            List<MatchRegistrationDTO> registrations,
+            Team team,
+            PlayerMatchStatus status
+    ) {
+        if (registrations == null || registrations.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Long> playerIds = registrations.stream()
+                .filter(r -> r.getStatus() == status)
+                .filter(r -> r.getTeam() == team)
+                .filter(r -> r.getPositionInMatch() != null)
+                .filter(r -> r.getPositionInMatch() != PlayerPosition.ANY)
+                .map(MatchRegistrationDTO::getPlayerId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (playerIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<Long, PlayerEntity> playersById = playerRepository.findAllById(playerIds).stream()
+                .collect(Collectors.toMap(PlayerEntity::getId, Function.identity()));
+
+        return registrations.stream()
+                .filter(r -> r.getStatus() == status)
+                .filter(r -> r.getTeam() == team)
+                .filter(r -> r.getPositionInMatch() != null)
+                .filter(r -> r.getPositionInMatch() != PlayerPosition.ANY)
+                .collect(Collectors.groupingBy(
+                        MatchRegistrationDTO::getPositionInMatch,
+                        Collectors.mapping(r -> {
+                            MatchTeamPositionPlayerDTO dto = new MatchTeamPositionPlayerDTO();
+                            Long playerId = r.getPlayerId();
+                            dto.setPlayerId(playerId);
+
+                            PlayerEntity player = playersById.get(playerId);
+                            if (player != null) {
+                                // Uprav dle své entity (fullName / firstName / lastName / nickname)
+                                String fullName = player.getFullName();
+                                dto.setPlayerName(fullName != null ? fullName.trim() : null);
+                            } else {
+                                dto.setPlayerName(null);
+                            }
+
+                            return dto;
+                        }, Collectors.toList())
+                ));
+    }
+
 }

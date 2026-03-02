@@ -1,4 +1,4 @@
-package cz.phsoft.hokej.registration.dto;
+package cz.phsoft.hokej.match.dto;
 
 import cz.phsoft.hokej.match.enums.MatchMode;
 import cz.phsoft.hokej.player.enums.Team;

@@ -23,9 +23,9 @@ package cz.phsoft.hokej.notifications.services;
  */
 public class NotificationDecision {
 
-    // ==================================================
+    
     // EMAIL – UŽIVATEL (AppUser)
-    // ==================================================
+    
 
     /**
      * Určuje, zda má být odeslán email uživateli (AppUser).
@@ -49,9 +49,9 @@ public class NotificationDecision {
      */
     private String fullname;
 
-    // ==================================================
+    
     // EMAIL – HRÁČ
-    // ==================================================
+    
 
     /**
      * Určuje, zda má být odeslán email přímo hráči.
@@ -70,9 +70,9 @@ public class NotificationDecision {
      */
     private String playerEmail;
 
-    // ==================================================
+    
     // SMS – HRÁČ
-    // ==================================================
+    
 
     /**
      * Určuje, zda má být odeslána SMS hráči.
@@ -90,9 +90,9 @@ public class NotificationDecision {
      */
     private String playerPhone;
 
-    // ==================================================
+    
     // GETTERY / SETTERY
-    // ==================================================
+    
 
     public boolean isSendEmailToUser() {
         return sendEmailToUser;

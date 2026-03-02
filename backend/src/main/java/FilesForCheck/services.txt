@@ -884,9 +884,9 @@ public class AppUserServiceImpl implements AppUserService {
                 email, user.getLastLoginAt(), user.getCurrentLoginAt());
     }
 
-    // ==================================================
+
     // HELPER METODY
-    // ==================================================
+
 
     private String buildActivationLink(EmailVerificationTokenEntity token) {
         return frontendBasUrl + "/verify?token=" + token.getToken();
@@ -1195,9 +1195,9 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
         return mapper.toDTO(saved);
     }
 
-    // =========================================
+
     // Helper metody
-    // =========================================
+
 
     /**
      * Najde uĹľivatele podle e-mailu nebo vyhodĂ­ vĂ˝jimku.
@@ -1428,9 +1428,9 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
         session.removeAttribute(SessionKeys.CURRENT_PLAYER_ID);
     }
 
-    // ==================================================
+
     // Helper metody
-    // ==================================================
+
 
     /**
      * Najde hrĂˇÄŤe podle ID nebo vyhodĂ­ vĂ˝jimku.
@@ -1830,9 +1830,9 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
         this.notificationService = notificationService;
     }
 
-    // ==========================================
+
     // HLAVNĂŤ METODA â€“ UPSERT REGISTRACE HRĂÄŚE
-    // ==========================================
+
 
     /**
      * {@inheritDoc}
@@ -1894,9 +1894,9 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
         return matchRegistrationMapper.toDTO(registration);
     }
 
-    // ==========================================
+
     // OMLUVY A NO_EXCUSED
-    // ==========================================
+
 
     /**
      * {@inheritDoc}
@@ -1997,9 +1997,9 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
         return matchRegistrationMapper.toDTO(updated);
     }
 
-    // ==========================================
+
     // ZMÄšNY TĂťMU A POZICE
-    // ==========================================
+
 
     /**
      * {@inheritDoc}
@@ -2117,9 +2117,9 @@ public class MatchRegistrationCommandServiceImpl implements MatchRegistrationCom
         return matchRegistrationMapper.toDTO(updated);
     }
 
-    // ==========================================
+
     // PĹEPOÄŚET KAPACITY
-    // ==========================================
+
 
     /**
      * {@inheritDoc}
@@ -3424,9 +3424,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         this.matchRegistrationQueryService = matchRegistrationQueryService;
     }
 
-    // ==========================================
+
     // PĹĂŤKAZOVĂ‰ OPERACE â€“ DELEGACE DO COMMAND SERVICE
-    // ==========================================
+
 
     @Override
     @Transactional
@@ -3499,9 +3499,9 @@ public class MatchRegistrationServiceImpl implements MatchRegistrationService {
         commandService.sendSmsToRegisteredPlayers(matchId);
     }
 
-    // ======================================
+
     // ÄŚTECĂŤ OPERACE â€“ DELEGACE DO QUERY SERVICE
-    // ======================================
+
 
     @Override
     public List<MatchRegistrationDTO> getRegistrationsForMatch(Long matchId) {
@@ -3772,7 +3772,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import cz.phsoft.hokej.user.entities.AppUserEntity;
-import cz.phsoft.hokej.registration.enums.PlayerPositionCategory;
+import cz.phsoft.hokej.player.enums.PlayerPositionCategory;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -3854,9 +3854,9 @@ public class MatchServiceImpl implements MatchService {
         this.matchCapacityService = matchCapacityService;
     }
 
-    // ======================
+
     // ZĂKLADNĂŤ SEZNAMY ZĂPASĹ®
-    // ======================
+
 
     /**
      * VracĂ­ vĹˇechny zĂˇpasy v rĂˇmci aktuĂˇlnÄ› pouĹľĂ­vanĂ© sezĂłny.
@@ -4161,9 +4161,9 @@ public class MatchServiceImpl implements MatchService {
         );
     }
 
-    // ======================
+
     // DETAIL ZĂPASU
-    // ======================
+
 
     /**
      * VracĂ­ detail zĂˇpasu ve formÄ› {@link MatchDetailDTO}.
@@ -4478,9 +4478,9 @@ public class MatchServiceImpl implements MatchService {
                 && players.stream().anyMatch(p -> p.getId().equals(playerId));
     }
 
-    // ======================
+
     // DALĹ ĂŤ PUBLIC METODY
-    // ======================
+
 
     /**
      * VracĂ­ zĂˇpasy, ve kterĂ˝ch mĹŻĹľe danĂ˝ hrĂˇÄŤ potenciĂˇlnÄ› hrĂˇt.
@@ -4681,9 +4681,9 @@ public class MatchServiceImpl implements MatchService {
         return LocalDateTime.now();
     }
 
-    // ======================
+
     // POMOCNĂ‰ METODY â€“ DTO MAPOVĂNĂŤ
-    // ======================
+
 
     /**
      * Sestavuje zĂˇkladnĂ­ {@link MatchOverviewDTO} pro danĂ˝ zĂˇpas.
@@ -4751,9 +4751,9 @@ public class MatchServiceImpl implements MatchService {
         return dto;
     }
 
-    // ======================
+
     // DALĹ ĂŤ POMOCNĂ‰ METODY
-    // ======================
+
 
     /**
      * Vyhodnocuje, zda mĂˇ uĹľivatel roli ADMIN nebo MANAGER.
@@ -5148,9 +5148,9 @@ public class MatchServiceImpl implements MatchService {
         boolean hasSameCategory = allowedPositions.stream()
                 .anyMatch(p -> getPositionCategory(p) == currentCategory);
 
-        // ============================
+
         // 1) KATEGORIE V NOVĂ‰M REĹ˝IMU EXISTUJE
-        // ============================
+
         if (hasSameCategory) {
             // 1a) PrimĂˇrnĂ­ pozice ve stejnĂ© kategorii
             if (isCandidatePosition(primary, allowedPositions, currentCategory)) {
@@ -5180,10 +5180,10 @@ public class MatchServiceImpl implements MatchService {
             return allowedPositions.stream().findFirst().orElse(null);
         }
 
-        // ============================
+
         // 2) KATEGORIE V NOVĂ‰M REĹ˝IMU VĹ®BEC NEEXISTUJE
         //    (napĹ™. GOALIE u THREE_ON_THREE_NO_GOALIE)
-        // ============================
+
 
         // 2a) ZkusĂ­me primĂˇrnĂ­ pozici, pokud je v allowedPositions (bez ohledu na kategorii)
         if (primary != null && primary != PlayerPosition.ANY && allowedPositions.contains(primary)) {
@@ -5281,9 +5281,9 @@ package cz.phsoft.hokej.models.services;
  */
 public class NotificationDecision {
 
-    // ==================================================
+
     // EMAIL â€“ UĹ˝IVATEL (AppUser)
-    // ==================================================
+
 
     /**
      * UrÄŤuje, zda mĂˇ bĂ˝t odeslĂˇn email uĹľivateli (AppUser).
@@ -5307,9 +5307,9 @@ public class NotificationDecision {
      */
     private String fullname;
 
-    // ==================================================
+
     // EMAIL â€“ HRĂÄŚ
-    // ==================================================
+
 
     /**
      * UrÄŤuje, zda mĂˇ bĂ˝t odeslĂˇn email pĹ™Ă­mo hrĂˇÄŤi.
@@ -5328,9 +5328,9 @@ public class NotificationDecision {
      */
     private String playerEmail;
 
-    // ==================================================
+
     // SMS â€“ HRĂÄŚ
-    // ==================================================
+
 
     /**
      * UrÄŤuje, zda mĂˇ bĂ˝t odeslĂˇna SMS hrĂˇÄŤi.
@@ -5348,9 +5348,9 @@ public class NotificationDecision {
      */
     private String playerPhone;
 
-    // ==================================================
+
     // GETTERY / SETTERY
-    // ==================================================
+
 
     public boolean isSendEmailToUser() {
         return sendEmailToUser;
@@ -5659,9 +5659,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         this.mapper = mapper;
     }
 
-    // ======================
+
     // READ OPERACE
-    // ======================
+
 
     /**
      * VrĂˇtĂ­ vĹˇechna obdobĂ­ neaktivity vĹˇech hrĂˇÄŤĹŻ.
@@ -5711,9 +5711,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
                 .toList();
     }
 
-    // ======================
+
     // CREATE
-    // ======================
+
 
     /**
      * VytvoĹ™Ă­ novĂ© obdobĂ­ neaktivity hrĂˇÄŤe.
@@ -5756,9 +5756,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         return mapper.toDTO(saved);
     }
 
-    // ======================
+
     // UPDATE
-    // ======================
+
 
     /**
      * Aktualizuje existujĂ­cĂ­ obdobĂ­ neaktivity.
@@ -5805,9 +5805,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         return mapper.toDTO(saved);
     }
 
-    // ======================
+
     // DELETE
-    // ======================
+
 
     /**
      * SmaĹľe obdobĂ­ neaktivity podle ID.
@@ -5824,9 +5824,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         inactivityRepository.delete(entity);
     }
 
-    // ======================
+
     // AKTIVITA HRĂÄŚE
-    // ======================
+
 
     /**
      * OvÄ›Ĺ™Ă­, zda je hrĂˇÄŤ v danĂ©m ÄŤase aktivnĂ­.
@@ -5854,9 +5854,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
                 );
     }
 
-    // ======================
+
     // PRIVĂTNĂŤ VALIDACE
-    // ======================
+
 
     /**
      * Validuje ÄŤasovĂ˝ rozsah obdobĂ­ neaktivity.
@@ -6130,9 +6130,9 @@ public class PlayerServiceImpl implements PlayerService {
         this.playerSettingsService = playerSettingsService;
     }
 
-    // ======================
+
     // CREATE / UPDATE / DELETE
-    // ======================
+
 
     /**
      * VytvĂˇĹ™Ă­ novĂ©ho hrĂˇÄŤe bez vazby na uĹľivatele.
@@ -6276,9 +6276,9 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, id);
     }
 
-    // ======================
+
     // STATUS â€“ APPROVE / REJECT
-    // ======================
+
 
     /**
      * Schvaluje hrĂˇÄŤe a nastavuje mu status {@link PlayerStatus#APPROVED}.
@@ -6363,9 +6363,9 @@ public class PlayerServiceImpl implements PlayerService {
         notifyUser(newUser, NotificationType.PLAYER_CHANGE_USER, player);
     }
 
-    // ======================
+
     // READ
-    // ======================
+
 
     /**
      * VracĂ­ vĹˇechny hrĂˇÄŤe v systĂ©mu.
@@ -6410,9 +6410,9 @@ public class PlayerServiceImpl implements PlayerService {
                 .toList();
     }
 
-    // ======================
+
     // CURRENT PLAYER â€“ SESSION
-    // ======================
+
 
     /**
      * Nastavuje aktuĂˇlnĂ­ho hrĂˇÄŤe pro danĂ©ho uĹľivatele.
@@ -6556,9 +6556,9 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, 0L);
     }
 
-    // ======================
+
     // PRIVATE HELPERY â€“ ENTITY / DUPLICITY
-    // ======================
+
 
     /**
      * NaÄŤĂ­tĂˇ hrĂˇÄŤe podle ID nebo vyhazuje {@link PlayerNotFoundException}.
@@ -6687,9 +6687,9 @@ public class PlayerServiceImpl implements PlayerService {
         return buildSuccessResponse(message, id);
     }
 
-    // ======================
+
     // PRIVĂTNĂŤ HELPERY â€“ NOTIFIKACE
-    // ======================
+
 
     private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {
         notificationService.notifyPlayer(player, type, context);
@@ -6862,9 +6862,9 @@ public class PlayerSettingsServiceImpl implements PlayerSettingsService {
         return mapper.toDTO(saved);
     }
 
-    // =========================
+
     // HELPER METODY
-    // =========================
+
 
     private PlayerEntity findPlayerOrThrow(Long playerId) {
         return playerRepository.findById(playerId)

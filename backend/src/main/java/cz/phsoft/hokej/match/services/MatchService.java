@@ -201,4 +201,5 @@ public interface MatchService {
      */
     SuccessResponseDTO unCancelMatch(Long matchId);
 
+    MatchDTO updateMatchScore(Long matchId, Integer scoreLight, Integer scoreDark);
 }

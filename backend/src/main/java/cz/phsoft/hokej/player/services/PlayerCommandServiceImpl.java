@@ -82,9 +82,9 @@ public class PlayerCommandServiceImpl implements PlayerCommandService {
         this.playerSettingsService = playerSettingsService;
     }
 
-    // ======================
+    
     // CREATE / UPDATE / DELETE
-    // ======================
+    
 
     @Override
     @Transactional
@@ -165,9 +165,9 @@ public class PlayerCommandServiceImpl implements PlayerCommandService {
         return buildSuccessResponse(message, id);
     }
 
-    // ======================
+    
     // STATUS – APPROVE / REJECT
-    // ======================
+    
 
     @Override
     @Transactional
@@ -213,9 +213,9 @@ public class PlayerCommandServiceImpl implements PlayerCommandService {
         notifyUser(newUser, NotificationType.PLAYER_CHANGE_USER, player);
     }
 
-    // ======================
+    
     // CURRENT PLAYER – SESSION
-    // ======================
+    
 
     @Override
     @Transactional
@@ -306,9 +306,9 @@ public class PlayerCommandServiceImpl implements PlayerCommandService {
         return buildSuccessResponse(message, 0L);
     }
 
-    // ======================
+    
     // PRIVATE HELPERY – ENTITY / DUPLICITY
-    // ======================
+    
 
     private PlayerEntity findPlayerOrThrow(Long id) {
         return playerRepository.findById(id)
@@ -380,9 +380,9 @@ public class PlayerCommandServiceImpl implements PlayerCommandService {
         return buildSuccessResponse(message, id);
     }
 
-    // ======================
+    
     // PRIVÁTNÍ HELPERY – NOTIFIKACE
-    // ======================
+    
 
     private void notifyPlayer(PlayerEntity player, NotificationType type, Object context) {
         notificationService.notifyPlayer(player, type, context);

@@ -163,9 +163,9 @@ public class EmailMessageBuilder {
 
         // logika switch zůstává beze změny
         return switch (type) {
-            // =====================================
+            
             // PLAYER – vazba hráče na uživatele
-            // =====================================
+            
             case PLAYER_CREATED -> {
                 String subject = "Hráč vytvořen";
 
@@ -267,9 +267,9 @@ public class EmailMessageBuilder {
                 yield new EmailContent(subject, html, true);
             }
 
-            // =====================================
+            
             // USER – události kolem uživatelského účtu
-            // =====================================
+            
 
             case USER_CREATED -> {
                 String subject = "Uživatel vytvořen";
@@ -482,9 +482,9 @@ public class EmailMessageBuilder {
                 ? playerEmail
                 : "(neuvedeno)";
         return switch (type) {
-            // =====================================
+            
             // REGISTRATION
-            // =====================================
+            
             case PLAYER_CHANGE_USER -> {
                 String subject = "Hráč přiřazen novému uživateli";
 
@@ -692,9 +692,9 @@ public class EmailMessageBuilder {
                 yield new EmailContent(subject, html, true);
             }
 
-            // =====================================
+            
             // EXCUSE
-            // =====================================
+            
 
             case PLAYER_EXCUSED -> {
                 String subject = "Omluva ze zápasu potvrzena";
@@ -738,9 +738,9 @@ public class EmailMessageBuilder {
                 yield new EmailContent(subject, html, true);
             }
 
-            // =====================================
+            
             // MATCH_INFO
-            // =====================================
+            
 
             case MATCH_REMINDER -> {
                 String subject = "Připomenutí zápasu";

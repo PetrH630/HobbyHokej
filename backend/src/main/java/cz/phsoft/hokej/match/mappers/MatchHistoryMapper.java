@@ -1,8 +1,9 @@
 package cz.phsoft.hokej.match.mappers;
 
-import cz.phsoft.hokej.match.entities.MatchHistoryEntity;
 import cz.phsoft.hokej.match.dto.MatchHistoryDTO;
+import cz.phsoft.hokej.match.entities.MatchHistoryEntity;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -24,9 +25,24 @@ public interface MatchHistoryMapper {
     /**
      * Převede entitu historického záznamu zápasu na DTO.
      *
+     * Skóre se mapuje z vloženého objektu MatchScore
+     * na pole scoreLight a scoreDark. Vítěz se odvozuje
+     * z doménové logiky MatchScore.
+     *
      * @param entity entita reprezentující historický záznam zápasu
      * @return DTO obsahující data historického záznamu
      */
+    @Mapping(source = "score.light", target = "scoreLight")
+    @Mapping(source = "score.dark", target = "scoreDark")
+    @Mapping(
+            target = "winner",
+            expression = "java(entity.getScore() != null ? entity.getScore().getWinner() : null)"
+    )
+    @Mapping(
+            target = "result",
+            expression = "java(entity.getScore() != null ? entity.getScore().getResult() : null)"
+    )
+
     MatchHistoryDTO toDTO(MatchHistoryEntity entity);
 
     /**

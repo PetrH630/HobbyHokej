@@ -1,7 +1,7 @@
 package cz.phsoft.hokej.registration.util;
 
 import cz.phsoft.hokej.player.enums.PlayerPosition;
-import cz.phsoft.hokej.registration.enums.PlayerPositionCategory;
+import cz.phsoft.hokej.player.enums.PlayerPositionCategory;
 
 /**
  * Pomocná utilita pro práci s herními pozicemi hráče.

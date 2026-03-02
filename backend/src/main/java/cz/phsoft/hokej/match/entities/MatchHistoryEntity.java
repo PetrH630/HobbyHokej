@@ -1,8 +1,8 @@
 package cz.phsoft.hokej.match.entities;
 
 import cz.phsoft.hokej.match.enums.MatchCancelReason;
-import cz.phsoft.hokej.match.enums.MatchStatus;
 import cz.phsoft.hokej.match.enums.MatchMode;
+import cz.phsoft.hokej.match.enums.MatchStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -132,6 +132,25 @@ public class MatchHistoryEntity {
     private Long lastModifiedByUserId;
 
     /**
+     * Skóre zápasu v okamžiku změny.
+     *
+     * Hodnoty mohou být null, pokud se zápas ještě neodehrál
+     * nebo pokud v době změny nebylo skóre zadáno.
+     */
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(
+                    name = "light",
+                    column = @Column(name = "score_light")
+            ),
+            @AttributeOverride(
+                    name = "dark",
+                    column = @Column(name = "score_dark")
+            )
+    })
+    private MatchScore score;
+
+    /**
      * Bezparametrický konstruktor požadovaný JPA.
      */
     public MatchHistoryEntity() {
@@ -184,4 +203,12 @@ public class MatchHistoryEntity {
 
     public Long getLastModifiedByUserId() { return lastModifiedByUserId; }
     public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
+
+    public MatchScore getScore() {
+        return score;
+    }
+
+    public void setScore(MatchScore score) {
+        this.score = score;
+    }
 }

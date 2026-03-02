@@ -83,9 +83,9 @@ public class InAppNotificationBuilder {
 
         return switch (type) {
 
-            // =====================================
+            
             // PLAYER – vazba hráče na uživatele
-            // =====================================
+            
 
             case PLAYER_CREATED -> {
                 String title = "Hráč vytvořen";
@@ -122,9 +122,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            // =====================================
+            
             // USER – události kolem uživatelského účtu
-            // =====================================
+            
 
             case USER_CREATED -> {
                 String title = "Uživatel vytvořen";
@@ -169,9 +169,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            // =====================================
+            
             // REGISTRACE NA ZÁPAS
-            // =====================================
+            
 
             case MATCH_REGISTRATION_CREATED -> {
                 String title = "Přihlášení na zápas";
@@ -271,9 +271,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            // =====================================
+            
             // EXCUSE – omluvy a neomluvené absence
-            // =====================================
+            
 
             case PLAYER_EXCUSED -> {
                 String title = "Omluva ze zápasu";
@@ -297,9 +297,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            // =====================================
+            
             // MATCH_INFO – informace o zápase
-            // =====================================
+            
 
             case MATCH_REMINDER -> {
                 String title = "Připomenutí zápasu";
