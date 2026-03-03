@@ -1,5 +1,5 @@
 /**
- * Kořenový balíček aplikace Hokej – Stará Garda.
+ * Kořenový balíček aplikace HobbyHokej.
  *
  * Obsahuje hlavní spouštěcí třídu aplikace a nadřazené balíčky
  * pro jednotlivé vrstvy systému, jako jsou konfigurační třídy,

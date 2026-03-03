@@ -7,9 +7,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Doplněny všechny komentáře a uprava zprávy - přidána pozice hráče">
+    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Opraven API.md dle aktuálních endpointu">
+      <change afterPath="$PROJECT_DIR$/backend/docs/ARCHITECTURE-OLD.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/docs/API.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/API.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/docs/ARCHITECTURE.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/ARCHITECTURE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/package-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/package-info.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,11 +100,11 @@
       <recent name="C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\ProjektyPrace\HobbyHokej\backend\docs" />
       <recent name="C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\tech\controllers" />
       <recent name="C:\ProjektyPrace\HobbyHokej\" />
       <recent name="C:\ProjektyPrace\HobbyHokej\backend" />
       <recent name="C:\Projekty Práce\HobbyHokej\backend\src\main\resources\db\migration" />
-      <recent name="C:\Projekty Práce\HobbyHokej" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="cz.phsoft.hokej.models.mappers" />
@@ -126,22 +129,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770146408763</updated>
-    </task>
-    <task id="LOCAL-00004" summary="Uprava - HobbyHokej, notifikace - nastavení pro manažera, a demo mod - zakázány některé fce">
-      <option name="closed" value="true" />
-      <created>1770545854143</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1770545854143</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Uprava - HobbyHokej, notifikace - nastavení pro manažera, a demo mod - zakázány některé fce">
-      <option name="closed" value="true" />
-      <created>1770546398367</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1770546398367</updated>
     </task>
     <task id="LOCAL-00006" summary="Doplněno - Historie hráče + triggery">
       <option name="closed" value="true" />
@@ -519,7 +506,23 @@
       <option name="project" value="LOCAL" />
       <updated>1772536579949</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="Opraven">
+      <option name="closed" value="true" />
+      <created>1772552882553</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1772552882553</updated>
+    </task>
+    <task id="LOCAL-00054" summary="Opraven API.md dle aktuálních endpointu">
+      <option name="closed" value="true" />
+      <created>1772552996957</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1772552996957</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -536,8 +539,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Doplněny komentáře" />
-    <MESSAGE value="Vytvořena migrace flyway a upraven DataInitializer, triggery jsou u flyway. Oprava application properties." />
     <MESSAGE value="Na FE - Doplněna stránka přehledu pro Administrátora a Managera" />
     <MESSAGE value="Doplněny statistiky hráče k zápasům v sezóně - PlayerStatsDTO, PlayerStatsService" />
     <MESSAGE value="Doplněn endpoint do PlayerController pro stats" />
@@ -561,6 +562,8 @@
     <MESSAGE value="Doplněny komentáře - Config,Match" />
     <MESSAGE value="Doplněny komentáře - Notifications" />
     <MESSAGE value="Doplněny všechny komentáře a uprava zprávy - přidána pozice hráče" />
-    <option name="LAST_COMMIT_MESSAGE" value="Doplněny všechny komentáře a uprava zprávy - přidána pozice hráče" />
+    <MESSAGE value="Opraven" />
+    <MESSAGE value="Opraven API.md dle aktuálních endpointu" />
+    <option name="LAST_COMMIT_MESSAGE" value="Opraven API.md dle aktuálních endpointu" />
   </component>
 </project>
