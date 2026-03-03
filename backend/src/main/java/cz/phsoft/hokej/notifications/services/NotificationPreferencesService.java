@@ -12,22 +12,33 @@ import cz.phsoft.hokej.notifications.enums.NotificationType;
  * - typu notifikace (NotificationType)
  *
  * rozhoduje, komu a jak má být notifikace doručena.
- * Nemá na starosti samotné odesílání e-mailů nebo SMS,
- * pouze dodává rozhodnutí pro další notifikační logiku.
+ * Tato služba neprovádí samotné odesílání e-mailů ani SMS,
+ * ale vrací rozhodnutí ve formě objektu NotificationDecision,
+ * které je následně použito v NotificationService.
+ *
+ * Implementace typicky:
+ * - načte relevantní nastavení uživatele a hráče,
+ * - vyhodnotí globální a kanálové preference,
+ * - sestaví výsledek obsahující cílové adresy a příznaky odeslání.
  */
 public interface NotificationPreferencesService {
 
     /**
      * Na základě hráče a typu notifikace rozhodne,
-     * kam má být zpráva poslána.
+     * kam má být zpráva doručena.
      *
-     * Výstupem je objekt NotificationDecision, který určuje,
-     * zda se má poslat e-mail hráči, e-mail uživateli,
-     * SMS hráči a jaké kontakty se mají použít.
+     * Metoda vyhodnotí preferenční nastavení a vrátí objekt
+     * NotificationDecision, který jednoznačně určuje:
+     * - zda se má poslat e-mail hráči,
+     * - zda se má poslat e-mail uživateli,
+     * - zda se má poslat SMS hráči,
+     * - jaké konkrétní kontaktní údaje se mají použít.
+     *
+     * Samotné odeslání zpráv není součástí této služby.
      *
      * @param player hráč, kterého se notifikace týká
      * @param type   typ notifikace
-     * @return rozhodnutí, komu a kam poslat
+     * @return rozhodnutí obsahující informace o cílových kanálech a kontaktech
      */
     NotificationDecision evaluate(PlayerEntity player,
                                   NotificationType type);

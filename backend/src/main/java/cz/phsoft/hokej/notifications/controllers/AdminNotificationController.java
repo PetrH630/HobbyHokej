@@ -15,7 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controller pro administrátorské notifikace.
+ * REST controller pro administrátorské odesílání speciálních notifikací.
+ *
+ * Controller umožňuje vytváření a odesílání speciálních zpráv
+ * vybraným uživatelům a hráčům. Veškerá aplikační logika je
+ * delegována do SpecialNotificationService.
+ *
+ * V případě aktivního demo režimu se fyzické odeslání e-mailů
+ * a SMS neprovádí a zachycené zprávy jsou vráceny klientovi.
  */
 @RestController
 @RequestMapping("/api/notifications/admin")
@@ -27,6 +34,13 @@ public class AdminNotificationController {
     private final DemoModeService demoModeService;
     private final DemoNotificationStore demoNotificationStore;
 
+    /**
+     * Vytváří instanci controlleru pro administrátorské notifikace.
+     *
+     * @param specialNotificationService služba pro odesílání speciálních notifikací
+     * @param demoModeService služba určující, zda je aktivní demo režim
+     * @param demoNotificationStore dočasné úložiště zachycených notifikací v demo režimu
+     */
     public AdminNotificationController(SpecialNotificationService specialNotificationService,
                                        DemoModeService demoModeService,
                                        DemoNotificationStore demoNotificationStore) {
@@ -36,18 +50,17 @@ public class AdminNotificationController {
     }
 
     /**
-     * Vytvoří speciální zprávu pro vybrané uživatele a hráče.
+     * Vytvoří a odešle speciální notifikaci vybraným příjemcům.
      *
-     * Zpráva se uloží jako in-app notifikace typu SPECIAL_MESSAGE
-     * a podle příznaků v requestu se odešle také e-mailem a SMS.
+     * Zpráva je uložena jako in-app notifikace typu SPECIAL_MESSAGE.
+     * Podle příznaků v requestu může být odeslána také e-mailem a SMS.
+     * Odeslání je delegováno do SpecialNotificationService.
      *
-     * V DEMO režimu se e-maily a SMS fyzicky neodesílají.
-     * Místo toho se vrací jako DemoNotificationsDTO.
+     * V demo režimu se fyzické odeslání neprovádí a vrací se
+     * zachycené e-maily a SMS zprávy.
      *
-     * @param request definice zprávy a seznam příjemců
-     * @return
-     *   - DemoNotificationsDTO v demo režimu
-     *   - HTTP 204 v produkčním režimu
+     * @param request DTO obsahující text zprávy a seznam cílových příjemců
+     * @return DemoNotificationsDTO v demo režimu nebo HTTP 204 v produkčním režimu
      */
     @PostMapping("/special")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -59,7 +72,6 @@ public class AdminNotificationController {
 
         specialNotificationService.sendSpecialNotification(request);
 
-        // DEMO režim – vrátíme zachycené e-maily a SMS
         if (demoModeService.isDemoMode()) {
             DemoNotificationsDTO demoData = demoNotificationStore.getAndClear();
             log.debug("DEMO MODE: vráceno {} e-mailů a {} SMS",
@@ -68,10 +80,16 @@ public class AdminNotificationController {
             return ResponseEntity.ok(demoData);
         }
 
-        // PRODUKCE – beze změny
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Vrací seznam dostupných příjemců pro speciální notifikaci.
+     *
+     * Data jsou získána ze SpecialNotificationService.
+     *
+     * @return seznam dostupných příjemců ve formě DTO
+     */
     @GetMapping("/special/targets")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<List<SpecialNotificationTargetDTO>> getSpecialNotificationTargets() {

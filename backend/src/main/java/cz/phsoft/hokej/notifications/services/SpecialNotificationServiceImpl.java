@@ -25,20 +25,20 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Implementace služby pro odesílání speciálních zpráv.
+ * Implementace služby pro odesílání speciálních zpráv administrátorem.
  *
- * Služba kombinuje:
- * - uložení in-app notifikací (InAppNotificationService),
- * - odeslání emailů (EmailService),
- * - odeslání SMS (SmsService).
+ * Odpovědnost třídy spočívá v orkestraci více komunikačních kanálů
+ * pro speciální administrátorské zprávy. Pro definované příjemce
+ * se vytvářejí in-app notifikace a podle požadavku se odesílají
+ * e-maily a SMS zprávy.
  *
- * Všechny akce se provádějí bez ohledu na uživatelská
- * notifikační nastavení. Selhání emailu nebo SMS
- * neblokuje uložení in-app notifikace.
+ * Všechny akce se provádějí bez ohledu na uživatelská notifikační
+ * nastavení, protože speciální zprávy představují nadřazenou,
+ * administrativní nebo systémovou komunikaci.
  *
- * V DEMO režimu se e-maily a SMS fyzicky neodesílají.
- * Místo toho se ukládají do DemoNotificationStore a
- * vrací se na frontend přes demo endpoint.
+ * V DEMO režimu se e-maily a SMS fyzicky neodesílají. Jsou ukládány
+ * do DemoNotificationStore a zpřístupňovány na frontendu přes
+ * speciální demo endpointy.
  */
 @Service
 public class SpecialNotificationServiceImpl implements SpecialNotificationService {
@@ -58,6 +58,25 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
     private final DemoModeService demoModeService;
     private final DemoNotificationStore demoNotificationStore;
 
+    /**
+     * Vytváří instanci služby pro speciální notifikace.
+     *
+     * Závislosti na repository, službách a message builder utilitách
+     * jsou předávány konstruktorem, aby bylo možné službu snadno
+     * testovat a spravovat v rámci Spring kontextu a konfigurovat
+     * chování DEMO režimu.
+     *
+     * @param appUserRepository repository pro práci s entitami uživatelů
+     * @param playerRepository repository pro práci s entitami hráčů
+     * @param playerSettingsRepository repository pro nastavení hráčů
+     * @param inAppNotificationService služba pro ukládání in-app notifikací
+     * @param emailService služba pro fyzické odeslání e-mailů
+     * @param smsService služba pro fyzické odeslání SMS zpráv
+     * @param emailMessageBuilder builder pro sestavení obsahu e-mailů
+     * @param smsMessageBuilder builder pro sestavení textu SMS zpráv
+     * @param demoModeService služba určující, zda je aplikace v DEMO režimu
+     * @param demoNotificationStore úložiště pro e-maily a SMS v DEMO režimu
+     */
     public SpecialNotificationServiceImpl(AppUserRepository appUserRepository,
                                           PlayerRepository playerRepository,
                                           PlayerSettingsRepository playerSettingsRepository,
@@ -80,6 +99,25 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
         this.demoNotificationStore = demoNotificationStore;
     }
 
+    /**
+     * Odesílá speciální zprávu všem definovaným příjemcům.
+     *
+     * Pro každý cíl definovaný ve vstupním DTO se provádí:
+     * vytvoření in-app notifikace typu SPECIAL_MESSAGE a podle
+     * nastavení také odeslání e-mailu a SMS zprávy. E-mail i SMS
+     * jsou získávány z preferencí uživatele a případných nastavení
+     * hráče, přičemž se ignorují běžná uživatelská notifikační
+     * nastavení.
+     *
+     * Selhání odeslání e-mailu nebo SMS neblokuje uložení in-app
+     * notifikace. V DEMO režimu se zprávy ukládají do
+     * DemoNotificationStore místo fyzického odeslání.
+     *
+     * @param request definice zprávy a seznam cílů pro speciální notifikaci
+     * @throws NullPointerException pokud je request null
+     * @throws UserNotFoundException pokud některý z cílových uživatelů neexistuje
+     * @throws PlayerNotFoundException pokud některý z cílových hráčů neexistuje
+     */
     @Override
     public void sendSpecialNotification(SpecialNotificationRequestDTO request) {
         Objects.requireNonNull(request, "request must not be null");
@@ -152,13 +190,17 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
     /**
      * Načítá možné cíle pro speciální notifikaci.
      *
-     * Zahrnuje:
-     * - (do budoucna) schválené hráče s přiřazeným aktivním uživatelem,
-     * - aktivní uživatele bez přiřazených hráčů.
+     * Zahrnuti jsou:
+     * hráči s přiřazeným aktivním uživatelem a dále aktivní
+     * uživatelé bez přiřazených hráčů. Seznam je složen do DTO
+     * určeného pro výběr v uživatelském rozhraní a následně
+     * setříděn podle zobrazovaného jména.
      *
-     * Aktuálně se neschvaluje podle PlayerStatus, pouze podle existence
-     * uživatele a příznaku enabled. Filtrování podle "APPROVED" můžeš
-     * doplnit v případě, že budeš mít na PlayerEntity vhodnou property.
+     * Aktuálně se neschvaluje podle statusu hráče. Filtrování
+     * podle stavu, například PlayerStatus.APPROVED, může být
+     * doplněno v budoucnu po doplnění vlastnosti do PlayerEntity.
+     *
+     * @return seznam cílů pro speciální notifikaci připravený pro UI
      */
     @Override
     public List<SpecialNotificationTargetDTO> getSpecialNotificationTargets() {
@@ -176,7 +218,7 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
                 continue;
             }
 
-            // TODO: pokud budeš mít na PlayerEntity něco jako getStatus() == PlayerStatus.APPROVED,
+            // Pokud budeš mít na PlayerEntity něco jako getStatus() == PlayerStatus.APPROVED,
             // můžeš tady přidat filtr:
             // if (player.getStatus() != PlayerStatus.APPROVED) continue;
 
@@ -223,15 +265,20 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
     }
 
     /**
-     * Odesílá email se speciální zprávou.
+     * Odesílá e-mail se speciální zprávou na zadanou adresu.
      *
-     * Implementace používá EmailMessageBuilder pro sestavení
-     * obsahu emailu v jednotném formátu. Email se odesílá
-     * prostřednictvím EmailService bez ohledu na uživatelská
-     * nastavení notifikací.
+     * Obsah e-mailu se sestavuje pomocí EmailMessageBuilder
+     * tak, aby byl v souladu s jednotným formátováním systému.
+     * Odeslání se provádí prostřednictvím EmailService, přičemž
+     * se ignorují individuální notifikační preference uživatelů.
      *
-     * V DEMO režimu se email neodesílá, ale ukládá se
-     * do DemoNotificationStore.
+     * V DEMO režimu není e-mail fyzicky odeslán, ale je uložen
+     * do DemoNotificationStore pro zobrazení v demo rozhraní.
+     *
+     * @param to cílová e-mailová adresa
+     * @param user uživatel, kterému je zpráva určena
+     * @param player hráč, pokud je zpráva vázána na konkrétního hráče; může být null
+     * @param request definice speciální zprávy včetně titulku a textu
      */
     private void sendSpecialEmail(String to,
                                   AppUserEntity user,
@@ -281,10 +328,15 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
     }
 
     /**
-     * Vrací telefonní číslo pro odeslání SMS.
+     * Určuje telefonní číslo použití pro odeslání SMS.
      *
-     * Telefonní číslo je uloženo v PlayerSettingsEntity.contactPhone.
-     * Nastavení smsEnabled se u speciálních zpráv ignoruje.
+     * Telefonní číslo se získává z PlayerSettingsEntity.contactPhone.
+     * Nastavení smsEnabled se pro speciální zprávy ignoruje, protože
+     * speciální komunikace má být doručena bez ohledu na běžné
+     * SMS preference.
+     *
+     * @param playerSettings nastavení hráče, ze kterého se telefonní číslo čte
+     * @return telefonní číslo připravené k použití nebo null, pokud není dostupné
      */
     private String resolvePhoneNumber(PlayerSettingsEntity playerSettings) {
         if (playerSettings == null) {
@@ -299,13 +351,19 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
     }
 
     /**
-     * Odesílá SMS se speciální zprávou.
+     * Odesílá SMS se speciální zprávou na zadané telefonní číslo.
      *
-     * Implementace používá SmsMessageBuilder pro sestavení
-     * textu SMS tak, aby byl v jednotném formátu se zbytkem systému.
+     * Text zprávy se sestavuje pomocí SmsMessageBuilder tak,
+     * aby odpovídal jednotnému formátu používanému v aplikaci.
+     * V případě prázdného nebo chybějícího textu se zpráva neodesílá.
      *
-     * V DEMO režimu se SMS neodesílá, ale ukládá se
-     * do DemoNotificationStore.
+     * V DEMO režimu není SMS fyzicky odeslána. Místo toho je
+     * uložena do DemoNotificationStore a dostupná v rámci
+     * demo funkčností.
+     *
+     * @param phoneNumber cílové telefonní číslo
+     * @param player hráč, kterého se zpráva týká; může být null
+     * @param request definice speciální zprávy včetně titulku a textu
      */
     private void sendSpecialSms(String phoneNumber,
                                 PlayerEntity player,
@@ -344,14 +402,19 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
     }
 
     /**
-     * Vrací preferovaný email pro speciální zprávu.
+     * Určuje preferovaný e-mail pro odeslání speciální zprávy.
      *
      * Pravidla:
-     * - pokud playerSettings.contactEmail je prázdný → použije se email uživatele,
-     * - pokud contactEmail je stejný jako email uživatele (case-insensitive) → použije se email uživatele,
-     * - pokud contactEmail je různý → použije se contactEmail (hráčský).
+     * pokud hráč nemá vlastní e-mail, použije se e-mail uživatele;
+     * pokud hráčův e-mail existuje a je shodný s e-mailem uživatele
+     * (bez ohledu na velikost písmen), použije se e-mail uživatele;
+     * pokud je hráčův e-mail odlišný, použije se hráčský e-mail.
      *
-     * Pokud žádný email není k dispozici, vrací null.
+     * Pokud není k dispozici žádný nepustý e-mail, vrací se null.
+     *
+     * @param user uživatel, ke kterému je hráč přiřazen
+     * @param playerSettings nastavení hráče, ze kterého se čte případný hráčský e-mail
+     * @return vybraný e-mail pro speciální notifikaci nebo null, pokud není k dispozici
      */
     private String resolveEmail(AppUserEntity user, PlayerSettingsEntity playerSettings) {
         String userEmail = (user != null && user.getEmail() != null && !user.getEmail().isBlank())
@@ -379,7 +442,14 @@ public class SpecialNotificationServiceImpl implements SpecialNotificationServic
     }
 
     /**
-     * Pomocná metoda pro sestavení celého jména uživatele.
+     * Sestavuje celé jméno uživatele pro zobrazovací účely.
+     *
+     * Jméno je vytvořeno spojením jména a příjmení, případně
+     * je použita pouze jedna z hodnot. Pokud jsou obě hodnoty
+     * prázdné, použije se e-mail uživatele jako zástupná hodnota.
+     *
+     * @param user uživatel, jehož zobrazované jméno se sestavuje
+     * @return celé jméno uživatele nebo jeho e-mail, pokud jméno není k dispozici
      */
     private String buildUserFullName(AppUserEntity user) {
         String name = user.getName() != null ? user.getName() : "";

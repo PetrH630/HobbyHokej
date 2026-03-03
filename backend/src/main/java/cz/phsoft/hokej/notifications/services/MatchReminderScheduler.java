@@ -45,9 +45,36 @@ public class MatchReminderScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(MatchReminderScheduler.class);
 
+    /**
+     * Repository pro práci se zápasy.
+     *
+     * Používá se pro načítání zápasů v definovaném časovém okně,
+     * nad nimiž se vyhodnocují připomínky.
+     */
     private final MatchRepository matchRepository;
+
+    /**
+     * Repository pro práci s registracemi hráčů na zápasy.
+     *
+     * Používá se pro vyhledání přihlášených hráčů, kterým ještě
+     * nebyla odeslána připomínka.
+     */
     private final MatchRegistrationRepository matchRegistrationRepository;
+
+    /**
+     * Služba pro odesílání notifikací hráčům.
+     *
+     * Zajišťuje vyhodnocení preferencí kanálů (email, SMS) a
+     * skutečné doručení notifikace.
+     */
     private final NotificationService notificationService;
+
+    /**
+     * Hodiny používané pro získání aktuálního času.
+     *
+     * Umožňují přesně definovat čas odeslání připomínek a usnadňují
+     * testování pomocí fixního času.
+     */
     private final Clock clock;
 
     /**
@@ -81,6 +108,21 @@ public class MatchReminderScheduler {
      */
     private final int toleranceMinutes;
 
+    /**
+     * Vytváří instanci plánovače připomínek zápasů.
+     *
+     * Všechny závislosti jsou injektovány konstruktorovou injekcí.
+     * Konfigurační hodnoty pro horizont, čas před zápasem a toleranci
+     * se načítají z application properties s uvedenými výchozími hodnotami.
+     *
+     * @param matchRepository              repository pro práci se zápasy
+     * @param matchRegistrationRepository  repository pro práci s registracemi na zápasy
+     * @param notificationService          služba pro odesílání notifikací hráčům
+     * @param clock                        hodiny používané pro získání aktuálního času
+     * @param horizonHours                 počet hodin do budoucna, ve kterém se zápasy zpracovávají
+     * @param reminderHoursBefore          počet hodin před začátkem zápasu, kdy se posílá připomínka
+     * @param toleranceMinutes             tolerance v minutách pro vyhodnocení připomínkového okna
+     */
     public MatchReminderScheduler(MatchRepository matchRepository,
                                   MatchRegistrationRepository matchRegistrationRepository,
                                   NotificationService notificationService,

@@ -3,10 +3,12 @@ package cz.phsoft.hokej.notifications.dto;
 import java.util.List;
 
 /**
- * DTO pro vytvoření speciální zprávy administrátorem.
+ * DTO pro vytvoření speciální notifikace administrátorem.
  *
- * Obsahuje text zprávy, seznam cílových příjemců
- * a volbu komunikačních kanálů.
+ * Obsahuje nadpis, text zprávy, volbu komunikačních kanálů
+ * a seznam cílových příjemců.
+ *
+ * Slouží jako vstupní objekt pro administrátorské API.
  */
 public class SpecialNotificationRequestDTO {
 
@@ -34,7 +36,10 @@ public class SpecialNotificationRequestDTO {
      * Cílové kombinace uživatele a hráče.
      */
     private List<Target> targets;
-
+    /**
+     * DTO reprezentující kombinaci uživatele a hráče,
+     * kterým má být zpráva doručena.
+     */
     public static class Target {
         private Long userId;
         private Long playerId;

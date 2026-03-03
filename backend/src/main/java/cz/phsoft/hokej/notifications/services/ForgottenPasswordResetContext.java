@@ -3,16 +3,19 @@ package cz.phsoft.hokej.notifications.services;
 import cz.phsoft.hokej.user.entities.AppUserEntity;
 
 /**
- * Kontext pro notifikace související se zapomenutým heslem.
+ * Kontextový objekt přenášející údaje potřebné pro odeslání notifikací
+ * souvisejících s procesem resetu zapomenutého hesla.
  *
- * Obsahuje:
- * - uživatele, kterého se reset týká,
- * - odkaz pro nastavení nového hesla.
+ * Obsahuje referenci na uživatele, kterého se reset týká,
+ * a jednorázový odkaz určený pro nastavení nového hesla.
  *
- * Slouží k přenesení potřebných údajů do builderu notifikací
- * (email, SMS) bez nutnosti pracovat přímo s entitami na vyšší úrovni.
- * @param user Uživatel, kterému je reset hesla určen.
- * @param resetLink Jednorázový odkaz pro změnu hesla.
+ * Tento objekt slouží jako transportní struktura mezi aplikační
+ * logikou a vrstvou pro sestavování notifikací. Umožňuje předání
+ * všech potřebných údajů bez nutnosti přímé manipulace s entitami
+ * ve vyšších vrstvách aplikace.
+ *
+ * @param user uživatel, kterému je reset hesla určen
+ * @param resetLink jednorázový odkaz pro změnu hesla
  */
 public record ForgottenPasswordResetContext(
         AppUserEntity user,

@@ -5,7 +5,15 @@ import cz.phsoft.hokej.notifications.enums.NotificationType;
 import cz.phsoft.hokej.player.dto.PlayerDTO;
 
 import java.time.Instant;
-
+/**
+ * DTO reprezentující jednu aplikační notifikaci.
+ *
+ * Obsahuje kompletní informace potřebné pro zobrazení notifikace
+ * v uživatelském rozhraní, včetně metadata o doručení e-mailu
+ * a SMS zprávy.
+ *
+ * Třída neobsahuje žádnou aplikační logiku.
+ */
 public class NotificationDTO {
 
     private Long id;

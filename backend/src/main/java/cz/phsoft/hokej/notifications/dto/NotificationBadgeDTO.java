@@ -3,27 +3,18 @@ package cz.phsoft.hokej.notifications.dto;
 import java.time.Instant;
 
 /**
- * DTO, které reprezentuje badge s počtem nepřečtených notifikací.
+ * DTO reprezentující badge s počtem nepřečtených notifikací.
  *
- * Používá se pro zobrazení indikátoru nových notifikací v UI.
- * Hodnota unreadCountSinceLastLogin udává počet nepřečtených
- * notifikací vytvořených po posledním přihlášení uživatele.
+ * Používá se pro zobrazení indikátoru nových notifikací v uživatelském rozhraní.
+ * Obsahuje počet nepřečtených notifikací od posledního přihlášení
+ * a časové údaje o přihlášeních uživatele.
+ *
+ * Třída slouží výhradně jako datový přenosový objekt.
  */
 public class NotificationBadgeDTO {
 
-    /**
-     * Počet nepřečtených notifikací vytvořených po posledním přihlášení.
-     */
     private long unreadCountSinceLastLogin;
-
-    /**
-     * Čas předposledního přihlášení uživatele.
-     */
     private Instant lastLoginAt;
-
-    /**
-     * Čas posledního (aktuálního) přihlášení uživatele.
-     */
     private Instant currentLoginAt;
 
     public long getUnreadCountSinceLastLogin() {

@@ -7,12 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * REST controller, který se používá pro práci s demo notifikacemi.
+ * REST controller pro práci se zachycenými notifikacemi v demo režimu.
  *
- * Controller je registrován pouze v demo režimu. Pokud demo režim není aktivní,
- * endpointy nejsou součástí aplikace a vrací se odpověď 404.
- *
- * Práce s dočasným úložištěm notifikací se deleguje na {@link DemoNotificationStore}.
+ * Controller je aktivní pouze pokud je nastavena vlastnost
+ * app.demo-mode=true. Veškerá práce s úložištěm je delegována
+ * do DemoNotificationStore.
  */
 @RestController
 @RequestMapping("/api/demo/notifications")
@@ -21,15 +20,17 @@ public class DemoNotificationController {
 
     private final DemoNotificationStore demoNotificationStore;
 
+    /**
+     * Vytváří instanci controlleru pro práci s demo notifikacemi.
+     *
+     * @param demoNotificationStore úložiště zachycených notifikací
+     */
     public DemoNotificationController(DemoNotificationStore demoNotificationStore) {
         this.demoNotificationStore = demoNotificationStore;
     }
 
     /**
-     * Vrací všechny zachycené demo notifikace a následně je vymaže z úložiště.
-     *
-     * Endpoint slouží zejména pro frontendovou část aplikace,
-     * která zobrazuje simulované odeslané e-maily a SMS zprávy v demo režimu.
+     * Vrací všechny zachycené demo notifikace a následně je vymaže.
      *
      * @return DTO obsahující seznam zachycených e-mailů a SMS zpráv
      */
@@ -40,12 +41,9 @@ public class DemoNotificationController {
     }
 
     /**
-     * Provede vyčištění zachycených demo notifikací bez jejich vrácení.
+     * Provede vyčištění zachycených demo notifikací.
      *
-     * Endpoint umožňuje explicitní smazání obsahu úložiště
-     * například při resetu demo prostředí.
-     *
-     * @return HTTP odpověď 204 No Content v případě úspěchu
+     * @return HTTP 204 No Content v případě úspěchu
      */
     @DeleteMapping
     public ResponseEntity<Void> clearDemoNotifications() {

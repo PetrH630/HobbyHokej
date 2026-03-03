@@ -1,12 +1,12 @@
 package cz.phsoft.hokej.notifications.services;
 
-import cz.phsoft.hokej.user.entities.AppUserEntity;
 import cz.phsoft.hokej.match.entities.MatchEntity;
-import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
-import cz.phsoft.hokej.player.entities.PlayerEntity;
 import cz.phsoft.hokej.notifications.enums.NotificationType;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -32,14 +32,31 @@ import java.util.Locale;
 @Component
 public class InAppNotificationBuilder {
 
+    /**
+     * Repository pro práci s registracemi hráčů na zápasy.
+     *
+     * Používá se pro zjišťování agregovaných informací, například
+     * počtu přihlášených hráčů na konkrétní zápas.
+     */
     private final MatchRegistrationRepository registrationRepository;
 
+    /**
+     * Vytváří instanci builderu in-app notifikací.
+     *
+     * Repository je předáváno z kontextu Springu a používá se
+     * pro dotazy nad registracemi k zápasům.
+     *
+     * @param registrationRepository repository pro práci s registracemi na zápasy
+     */
     public InAppNotificationBuilder(MatchRegistrationRepository registrationRepository) {
         this.registrationRepository = registrationRepository;
     }
 
     /**
      * Datový nosič pro obsah in-app notifikace.
+     *
+     * Slouží jako jednoduchá struktura pro předání titulku a textu
+     * zprávy do vrstvy, která notifikaci zobrazí uživateli.
      *
      * @param title   krátký titulek notifikace
      * @param message stručný text zprávy
@@ -49,16 +66,30 @@ public class InAppNotificationBuilder {
 
     /**
      * Formátovač data a času zápasu používaný v in-app notifikacích.
+     *
+     * Formátuje datum a čas v české lokalizaci včetně názvu dne
+     * a přesného času, aby byla notifikace pro uživatele srozumitelná.
      */
     private static final DateTimeFormatter MATCH_DATETIME_FORMATTER =
             DateTimeFormatter.ofPattern("EEEE dd.MM.yyyy HH:mm", new Locale("cs", "CZ"));
 
     /**
-     * Sestaví in-app notifikaci pro daný typ události.
+     * Sestaví obsah in-app notifikace pro daný typ události.
+     *
+     * Typ notifikace určuje strukturu a text zprávy. Uživatel a hráč
+     * slouží jako základní kontext pro zobrazení jmen, objekt context
+     * může obsahovat další relevantní údaje (například zápas, registraci
+     * nebo informaci o změně času).
      *
      * Předpokládá se, že cílový AppUserEntity (uživatel) je již
-     * vyřešen volající službou. Hráč a context se používají pro
-     * doplnění detailů (jméno hráče, zápas, změna času).
+     * určen volající službou. Metoda pouze provádí sestavení textu
+     * notifikace na základě dostupných údajů.
+     *
+     * @param type    typ notifikace určující formu a obsah zprávy
+     * @param user    uživatel, kterému je notifikace určena
+     * @param player  hráč, kterého se notifikace týká
+     * @param context doplňující kontext (zápas, registrace, změna času)
+     * @return sestavený obsah in-app notifikace nebo null, pokud se pro daný typ nevytváří
      */
     public InAppNotificationContent build(NotificationType type,
                                           AppUserEntity user,
@@ -80,12 +111,13 @@ public class InAppNotificationBuilder {
         String excuseNote = (registration != null)
                 ? safe(registration.getExcuseNote())
                 : "";
+        String playerPositionInMatch = assignPositionInMatch(registration);
 
         return switch (type) {
 
-            
+
             // PLAYER – vazba hráče na uživatele
-            
+
 
             case PLAYER_CREATED -> {
                 String title = "Hráč vytvořen";
@@ -122,9 +154,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            
+
             // USER – události kolem uživatelského účtu
-            
+
 
             case USER_CREATED -> {
                 String title = "Uživatel vytvořen";
@@ -169,17 +201,17 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            
+
             // REGISTRACE NA ZÁPAS
-            
+
 
             case MATCH_REGISTRATION_CREATED -> {
                 String title = "Přihlášení na zápas";
                 String message = formattedDateTime.isBlank()
-                        ? "Byl jste přihlášen na zápas. Hráč: %s."
-                        .formatted(playerName)
-                        : "Byl jste přihlášen na zápas %s. Hráč: %s."
-                        .formatted(formattedDateTime, playerName);
+                        ? "Byl jste přihlášen na zápas jako - %s. Hráč: %s."
+                        .formatted(playerPositionInMatch, playerName)
+                        : "Byl jste přihlášen na zápas %s jako - %s. Hráč: %s."
+                        .formatted(formattedDateTime, playerPositionInMatch, playerName);
                 yield new InAppNotificationContent(title, message);
             }
 
@@ -271,9 +303,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            
+
             // EXCUSE – omluvy a neomluvené absence
-            
+
 
             case PLAYER_EXCUSED -> {
                 String title = "Omluva ze zápasu";
@@ -297,9 +329,9 @@ public class InAppNotificationBuilder {
                 yield new InAppNotificationContent(title, message);
             }
 
-            
+
             // MATCH_INFO – informace o zápase
-            
+
 
             case MATCH_REMINDER -> {
                 String title = "Připomenutí zápasu";
@@ -374,6 +406,13 @@ public class InAppNotificationBuilder {
 
     /**
      * Sestaví zobrazitelné jméno uživatele.
+     *
+     * Upřednostňuje se kombinace jména a příjmení. Pokud jméno
+     * nebo příjmení není k dispozici, použije se e-mail. Pokud
+     * není k dispozici ani ten, vrací se zástupný text.
+     *
+     * @param user uživatel, pro kterého se jméno sestavuje
+     * @return zobrazitelné jméno uživatele nebo zástupný text
      */
     private String fullUserName(AppUserEntity user) {
         if (user == null) return "(neznámý uživatel)";
@@ -387,7 +426,13 @@ public class InAppNotificationBuilder {
     }
 
     /**
-     * Vrací zobrazitelné jméno hráče.
+     * Sestaví zobrazitelné jméno hráče.
+     *
+     * Použije se plné jméno hráče, pokud je k dispozici. V opačném
+     * případě se vrací zástupný text.
+     *
+     * @param player hráč, pro kterého se jméno sestavuje
+     * @return zobrazitelné jméno hráče nebo zástupný text
      */
     private String fullPlayerName(PlayerEntity player) {
         if (player == null) return "(neznámý hráč)";
@@ -397,10 +442,31 @@ public class InAppNotificationBuilder {
         return "(beze jména)";
     }
 
+    /**
+     * Vrátí neprázdný řetězec pro bezpečnou práci s texty.
+     *
+     * Pokud je předaný řetězec null, vrací se prázdný řetězec.
+     * Tato metoda zjednodušuje práci s volitelnými textovými poli.
+     *
+     * @param s vstupní řetězec
+     * @return původní řetězec nebo prázdný řetězec, pokud byl vstup null
+     */
     private String safe(String s) {
         return s == null ? "" : s;
     }
 
+    /**
+     * Bezpečně přetypuje kontext na očekávaný typ.
+     *
+     * Pokud kontext není instance očekávané třídy, vrací se null.
+     * Díky tomu se předchází ClassCastException a volání mohou
+     * s výsledkem pracovat bezpečně.
+     *
+     * @param context  objekt kontextu, který má být přetypován
+     * @param expected očekávaný typ kontextu
+     * @param <T>      typový parametr odpovídající očekávané třídě
+     * @return přetypovaný kontext nebo null, pokud typ neodpovídá
+     */
     @SuppressWarnings("unchecked")
     private <T> T castContext(Object context, Class<T> expected) {
         if (context == null) {
@@ -412,6 +478,15 @@ public class InAppNotificationBuilder {
         return (T) context;
     }
 
+    /**
+     * Zformátuje datum a čas zápasu pro potřeby notifikace.
+     *
+     * Použije se předdefinovaný formátovač s českou lokalizací.
+     * Pokud zápas nebo jeho datum není k dispozici, vrací se prázdný řetězec.
+     *
+     * @param match zápas, jehož datum a čas se mají formátovat
+     * @return naformátované datum a čas zápasu nebo prázdný řetězec
+     */
     private String formatMatchDateTime(MatchEntity match) {
         if (match == null || match.getDateTime() == null) {
             return "";
@@ -421,6 +496,13 @@ public class InAppNotificationBuilder {
 
     /**
      * Spočítá počet přihlášených hráčů k danému zápasu.
+     *
+     * Počet se zjišťuje voláním repository nad entitou registrace
+     * s filtrem na stav REGISTERED. Pokud není zápas nebo jeho identifikátor
+     * k dispozici, vrací se nula.
+     *
+     * @param match zápas, pro který se počet přihlášených hráčů zjišťuje
+     * @return počet hráčů s registací ve stavu REGISTERED
      */
     private long countRegisteredPlayers(MatchEntity match) {
         if (match == null || match.getId() == null) {
@@ -434,6 +516,13 @@ public class InAppNotificationBuilder {
 
     /**
      * Z kontextu určí zápas relevantní pro notifikaci.
+     *
+     * Kontext může být různých typů (registrace, zápas, informace o změně
+     * času zápasu). Metoda se pokusí z těchto objektů získat instanci
+     * MatchEntity. Pokud ji nelze získat, vrací se null.
+     *
+     * @param context kontext, ze kterého se má zápas odvodit
+     * @return entita zápasu nebo null, pokud nebude nalezena
      */
     private MatchEntity extractMatch(Object context) {
         if (context instanceof MatchRegistrationEntity reg) {
@@ -448,6 +537,14 @@ public class InAppNotificationBuilder {
         return null;
     }
 
+    /**
+     * Z kontextu získá entitu registrace na zápas.
+     *
+     * Pokud není kontext instancí MatchRegistrationEntity, vrací se null.
+     *
+     * @param context kontext, ze kterého se registrace získává
+     * @return entita registrace nebo null, pokud typ neodpovídá
+     */
     private MatchRegistrationEntity extractMatchRegistration(Object context) {
         if (context instanceof MatchRegistrationEntity reg) {
             return reg;
@@ -455,10 +552,12 @@ public class InAppNotificationBuilder {
         return null;
     }
 
-    // pomocná metoda pro důvod zrušení zápasu
     /**
      * Vrací čitelný popis důvodu zrušení zápasu.
      * Pokud není důvod nastaven, vrací prázdný řetězec.
+     *
+     * @param match zápas, ze kterého se důvod zrušení získává
+     * @return slovní popis důvodu zrušení nebo prázdný řetězec
      */
     private String assignMatchCancelReason(MatchEntity match) {
         if (match == null || match.getCancelReason() == null) {
@@ -474,9 +573,13 @@ public class InAppNotificationBuilder {
             default -> "neznámý důvod";
         };
     }
+
     /**
      * Vrací čitelný popis důvodu omluvy ze zápasu.
      * Pokud není důvod nastaven, vrací prázdný řetězec.
+     *
+     * @param registration registrace hráče na zápas s případným důvodem omluvy
+     * @return slovní popis důvodu omluvy nebo prázdný řetězec
      */
     private String assignExcuseReason(MatchRegistrationEntity registration) {
         if (registration == null || registration.getExcuseReason() == null) {
@@ -490,5 +593,32 @@ public class InAppNotificationBuilder {
             case JINE -> "jiný důvod";
             default -> "neznámý důvod";
         };
+    }
+
+    /**
+     * Vrací čitelný popis pozice hráče v zápase.
+     * Pokud není nastaven, vrací prázdný řetězec.
+     *
+     * @param registration registrace hráče na zápas s případnou pozici
+     * @return slovní popis pozice v zápase nebo prázdný řetězec
+     */
+    private String assignPositionInMatch(MatchRegistrationEntity registration) {
+        if (registration == null || registration.getPositionInMatch() == null) {
+            return "";
+        }
+
+        return switch (registration.getPositionInMatch()) {
+            case GOALIE -> "brankář";
+            case DEFENSE_LEFT -> "levý obránce";
+            case DEFENSE_RIGHT -> "pravý obránce";
+            case DEFENSE -> "obránce";
+            case CENTER -> "centr";
+            case WING_LEFT -> "levé křídlo";
+            case WING_RIGHT -> "pravé křídlo";
+            case FORWARD -> "utočník";
+            case ANY -> "hráč";
+            default -> "nezjištěno";
+        };
+
     }
 }

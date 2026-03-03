@@ -17,41 +17,47 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 /**
- * Builder pro sestavování obsahu emailových notifikací.
+ * Komponenta pro sestavování obsahu e-mailových notifikací.
  *
- * Třída slouží k centralizaci veškerých textů emailových zpráv
- * používaných v aplikaci. Na základě typu notifikace a kontextu
- * sestavuje předmět a tělo emailu, včetně rozhodnutí, zda se jedná
- * o HTML nebo plain text zprávu.
+ * Třída centralizuje texty a strukturu všech e-mailových zpráv
+ * používaných v aplikaci. Na základě NotificationType a kontextu
+ * sestavuje předmět a tělo zprávy a určuje, zda se jedná o HTML
+ * nebo textový obsah.
  *
  * Odpovědnost třídy:
- * - sestavení předmětu a těla emailu podle NotificationType,
- * - rozlišení cílového příjemce (uživatel, hráč, manažer),
- * - sjednocení formátu a struktury emailových zpráv.
+ * - sestavení předmětu a těla e-mailu,
+ * - rozlišení typu příjemce (uživatel, hráč, manažer),
+ * - sjednocení formátu všech e-mailových šablon.
  *
  * Třída neřeší:
- * - samotné odesílání emailů,
- * - rozhodování, komu má být notifikace doručena,
- * - oprávnění, validaci vstupů ani načítání entit.
+ * - samotné odesílání e-mailů,
+ * - výběr příjemců,
+ * - bezpečnostní oprávnění,
+ * - perzistenci dat.
  */
 @Component
 public class EmailMessageBuilder {
 
     private final MatchRegistrationRepository registrationRepository;
-
+    /**
+     * Vytváří instanci builderu pro e-mailové zprávy.
+     *
+     * @param registrationRepository repozitář registrací,
+     *                               používaný pro výpočet počtu přihlášených hráčů
+     */
     public EmailMessageBuilder(MatchRegistrationRepository registrationRepository) {
         this.registrationRepository = registrationRepository;
     }
 
     /**
-     * Datový nosič pro obsah emailové zprávy.
+     * Datový nosič sestaveného e-mailu.
      *
-     * Slouží jako návratová hodnota builderu a je následně
-     * předávána do EmailService k odeslání.
+     * Slouží jako návratová hodnota builderu
+     * a je následně předán do implementace EmailService.
      *
-     * @param subject předmět emailu
-     * @param body    tělo emailu
-     * @param html    příznak HTML obsahu
+     * @param subject předmět e-mailu
+     * @param body tělo e-mailu
+     * @param html příznak, zda je obsah ve formátu HTML
      */
     public record EmailContent(String subject, String body, boolean html) {
     }
@@ -856,7 +862,10 @@ public class EmailMessageBuilder {
     // Pomocné metody
 
     /**
-     * Sestaví celé jméno uživatele v bezpečné podobě.
+     * Vrací celé jméno uživatele v bezpečné podobě.
+     *
+     * Pokud není k dispozici jméno ani příjmení,
+     * použije se e-mail nebo výchozí text.
      */
     private String fullUserName(AppUserEntity user) {
         if (user == null) return "(neznámý uživatel)";
@@ -871,6 +880,9 @@ public class EmailMessageBuilder {
 
     /**
      * Vrací zobrazitelné jméno hráče.
+     *
+     * Pokud není jméno k dispozici,
+     * vrací se výchozí text.
      */
     private String fullPlayerName(PlayerEntity player) {
         if (player == null) return "(neznámý hráč)";
@@ -883,13 +895,24 @@ public class EmailMessageBuilder {
     private String safe(String s) {
         return s == null ? "" : s;
     }
-
+    /**
+     * Escapuje základní HTML znaky.
+     *
+     * Používá se pro ochranu proti vložení
+     * nechtěného HTML obsahu do zprávy.
+     */
     private String escape(String s) {
         if (s == null) return "";
         return s.replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
     }
+    /**
+     * Bezpečně přetypuje kontext na očekávaný typ.
+     *
+     * Pokud kontext neodpovídá očekávanému typu,
+     * vrací null.
+     */
     @SuppressWarnings("unchecked")
     private <T> T castContext(Object context, Class<T> expected) {
         if (context == null) {
@@ -900,7 +923,11 @@ public class EmailMessageBuilder {
         }
         return (T) context;
     }
-
+    /**
+     * Vrací formátovaný datum a čas zápasu.
+     *
+     * Pokud není datum dostupné, vrací prázdný řetězec.
+     */
     private String formatMatchDateTime(MatchEntity match) {
         if (match == null || match.getDateTime() == null) {
             return "";
@@ -909,7 +936,8 @@ public class EmailMessageBuilder {
     }
 
     /**
-     * Spočítá počet přihlášených hráčů k danému zápasu.
+     * Spočítá počet hráčů registrovaných na zápas
+     * se statusem REGISTERED.
      */
     private long countRegisteredPlayers(MatchEntity match) {
         if (match == null || match.getId() == null) {
@@ -920,6 +948,12 @@ public class EmailMessageBuilder {
                 PlayerMatchStatus.REGISTERED
         );
     }
+    /**
+     * Sestaví jednoduchou HTML šablonu e-mailu.
+     *
+     * Používá jednotnou strukturu obsahující pozdrav,
+     * hlavní obsah a patičku.
+     */
     private String buildSimpleHtml(String title,
                                    String greeting,
                                    String mainBody,
@@ -948,7 +982,10 @@ public class EmailMessageBuilder {
     }
 
     /**
-     * Z kontextu určí aplikačního uživatele relevantního pro notifikaci.
+     * Z kontextu extrahuje entitu zápasu.
+     *
+     * Podporuje kontext typu MatchRegistrationEntity,
+     * MatchEntity nebo MatchTimeChangeContext.
      */
     private MatchEntity extractMatch(Object context) {
         if (context instanceof MatchRegistrationEntity reg) {
@@ -962,7 +999,10 @@ public class EmailMessageBuilder {
         }
         return null;
     }
-
+    /**
+     * Z kontextu extrahuje registraci na zápas,
+     * pokud je dostupná.
+     */
     private MatchRegistrationEntity extractMatchRegistration(Object context) {
         if (context instanceof MatchRegistrationEntity reg) {
             return reg;
@@ -970,11 +1010,13 @@ public class EmailMessageBuilder {
         return null;
     }
     /**
-     * Zjistí AppUserEntity:
-     * 1) z UserActivationContext (USER_CREATED / USER_ACTIVATED),
-     * 2) z ForgottenPasswordResetContext (forgotten password reset),
-     * 3) přímo z AppUserEntity v contextu,
-     * 4) nebo z player.getUser().
+     * Z kontextu určí relevantního aplikačního uživatele.
+     *
+     * Priorita:
+     * 1) UserActivationContext,
+     * 2) ForgottenPasswordResetContext,
+     * 3) přímo AppUserEntity,
+     * 4) vazba přes hráče.
      */
     private AppUserEntity resolveUser(PlayerEntity player, Object context) {
         if (context instanceof UserActivationContext uac && uac.user() != null) {
@@ -1002,7 +1044,6 @@ public class EmailMessageBuilder {
         return null;
     }
 
-    // v EmailMessageBuilder.java – někam ke konci třídy
 
     /**
      * Sestavuje e-mail pro speciální zprávu od administrátora.
@@ -1069,7 +1110,9 @@ public class EmailMessageBuilder {
     // pomocné metody
     /**
      * Vrací čitelný popis důvodu zrušení zápasu.
-     * Pokud není důvod nastaven, vrací prázdný řetězec.
+     *
+     * Pokud důvod není nastaven,
+     * vrací prázdný řetězec.
      */
     private String assignMatchCancelReason(MatchEntity match) {
         if (match == null || match.getCancelReason() == null) {

@@ -3,10 +3,9 @@ package cz.phsoft.hokej.notifications.enums;
 /**
  * Konkrétní typy notifikací používaných v systému.
  *
- * Každý typ notifikace je zařazen do kategorie
- * NotificationCategory a má příznak důležitosti.
- * Tyto informace se používají při rozhodování,
- * komu a jak budou notifikace doručovány.
+ * Každý typ je přiřazen ke kategorii a má příznak důležitosti.
+ * Tyto informace se používají při rozhodování o doručování
+ * a filtrování notifikací.
  */
 public enum NotificationType {
 

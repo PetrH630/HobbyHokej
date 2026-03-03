@@ -16,20 +16,12 @@ import org.springframework.stereotype.Component;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Builder pro generování textů SMS zpráv.
+ * Komponenta pro generování textového obsahu SMS zpráv.
  *
- * Odpovědnosti:
- * - sestavení lidsky čitelného obsahu SMS pro různé typy notifikací,
- * - centralizace formátování SMS zpráv (princip DRY),
- * - oddělení textové logiky od business logiky a schedulingu.
+ * Třída centralizuje textovou logiku SMS notifikací
+ * a odděluje ji od business logiky notifikační služby.
  *
- * Tato třída se používá zejména v NotificationServiceImpl a SmsService
- * jako zdroj výsledného textu SMS zpráv.
- *
- * Třída neřeší:
- * - odesílání SMS (to zajišťuje SmsService),
- * - změny v databázi,
- * - oprávnění ani validace vstupů (předpokládá se, že vstupy jsou zvalidované dříve).
+ * Neprovádí odesílání SMS ani žádné změny v databázi.
  */
 @Component
 public class SmsMessageBuilder {

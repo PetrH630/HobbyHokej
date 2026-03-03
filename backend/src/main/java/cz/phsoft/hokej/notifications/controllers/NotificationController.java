@@ -33,6 +33,11 @@ public class NotificationController {
 
     private final NotificationQueryService notificationQueryService;
 
+    /**
+     * Vytváří instanci controlleru pro práci s notifikacemi.
+     *
+     * @param notificationQueryService služba pro čtení a změnu stavu notifikací
+     */
     public NotificationController(NotificationQueryService notificationQueryService) {
         this.notificationQueryService = notificationQueryService;
     }
@@ -139,4 +144,3 @@ public class NotificationController {
         return ResponseEntity.ok(dtos);
     }
 }
-

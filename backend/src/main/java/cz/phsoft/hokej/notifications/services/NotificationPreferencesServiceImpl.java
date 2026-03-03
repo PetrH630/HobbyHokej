@@ -25,6 +25,23 @@ import org.springframework.util.StringUtils;
 @Service
 public class NotificationPreferencesServiceImpl implements NotificationPreferencesService {
 
+    /**
+     * Na základě hráče a typu notifikace vyhodnotí preferenční nastavení
+     * a sestaví výsledek ve formě NotificationDecision.
+     *
+     * Metoda kombinuje:
+     * - globální úroveň notifikací uživatele,
+     * - nastavení hráče pro jednotlivé kategorie a kanály,
+     * - zdrojové kontaktní údaje z PlayerSettings a AppUser,
+     * - kategorii konkrétního NotificationType.
+     *
+     * Pokud hráč nebo typ notifikace nejsou zadány, vrací se
+     * prázdné rozhodnutí bez aktivních kanálů.
+     *
+     * @param player hráč, kterého se notifikace týká
+     * @param type   typ notifikace určující kategorii a důležitost
+     * @return rozhodnutí, komu a jak má být notifikace doručena
+     */
     @Override
     public NotificationDecision evaluate(PlayerEntity player,
                                          NotificationType type) {
@@ -157,6 +174,10 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
      * NONE           -> nepovoluje žádné notifikace
      * ALL            -> povoluje všechny notifikace
      * IMPORTANT_ONLY -> povoluje pouze typy označené jako důležité
+     *
+     * @param type  typ notifikace, který se vyhodnocuje
+     * @param level globální úroveň notifikací uživatele
+     * @return true, pokud daná globální úroveň typ povoluje, jinak false
      */
     private boolean isGloballyEnabledForType(NotificationType type,
                                              GlobalNotificationLevel level) {
@@ -171,7 +192,11 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     /**
      * Zjistí, zda má hráč vlastní e-mail v PlayerSettings (contactEmail).
      *
-     * Používá se při rozhodování, zda posílat kopii na e-mail uživatele.
+     * Výsledek se používá při rozhodování, zda posílat kopii notifikace
+     * také na e-mail uživatelského účtu.
+     *
+     * @param playerSettings nastavení hráče, ze kterého se kontakt čte
+     * @return true, pokud hráč má vlastní e-mail v nastavení, jinak false
      */
     private boolean hasOwnPlayerEmail(PlayerSettingsEntity playerSettings) {
         return playerSettings != null && StringUtils.hasText(playerSettings.getContactEmail());
@@ -184,6 +209,15 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
      * - většina typů je povolena (zpětná kompatibilita),
      * - MATCH_REMINDER je výchozím chováním vypnutý
      *   (odpovídá defaultu notifyReminders = false).
+     *
+     * Pokud playerSettings existuje, rozhoduje se podle kategorií:
+     * - REGISTRATION typy podle příznaku registrationNotificationsEnabled,
+     * - MATCH_INFO typy podle konkrétních příznaků (notifyReminders, notifyOnMatchCancel, notifyOnMatchChange),
+     * - ostatní typy podle systemNotificationsEnabled.
+     *
+     * @param type           typ notifikace
+     * @param playerSettings nastavení hráče, ze kterého se preference čtou
+     * @return true, pokud je typ pro hráče povolen, jinak false
      */
     private boolean isTypeEnabledForPlayer(NotificationType type,
                                            PlayerSettingsEntity playerSettings) {

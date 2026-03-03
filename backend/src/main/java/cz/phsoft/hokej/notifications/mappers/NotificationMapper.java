@@ -11,11 +11,17 @@ import java.util.List;
  * Mapper pro převod mezi NotificationEntity a NotificationDTO.
  *
  * Kategorie a příznak důležitosti se odvozují z NotificationType.
- * Příznak read se odvozuje podle hodnoty readAt.
+ * Příznak přečtení se odvozuje podle hodnoty readAt.
  */
 @Mapper(componentModel = "spring")
 public interface NotificationMapper {
 
+    /**
+     * Převádí entitu notifikace na DTO.
+     *
+     * @param entity entita notifikace
+     * @return DTO reprezentující notifikaci
+     */
     @Mapping(
             target = "category",
             expression = "java(entity.getType() != null ? entity.getType().getCategory() : null)"
@@ -34,5 +40,11 @@ public interface NotificationMapper {
     )
     NotificationDTO toDTO(NotificationEntity entity);
 
+    /**
+     * Převádí seznam entit na seznam DTO.
+     *
+     * @param entities seznam entit
+     * @return seznam DTO
+     */
     List<NotificationDTO> toDtoList(List<NotificationEntity> entities);
 }

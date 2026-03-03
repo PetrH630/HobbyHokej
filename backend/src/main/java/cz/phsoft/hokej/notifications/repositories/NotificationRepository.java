@@ -11,17 +11,17 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repozitář pro práci s notifikacemi.
+ * Repozitář pro práci s entitou NotificationEntity.
  *
- * Poskytuje metody pro načítání notifikací dle uživatele,
- * filtrování podle času vytvoření a příznaku přečtení
- * a pro mazání starších notifikací.
+ * Poskytuje metody pro:
+ * - načítání notifikací konkrétního uživatele,
+ * - výpočet počtu nepřečtených notifikací,
+ * - deduplikaci událostních notifikací,
+ * - mazání starých záznamů,
+ * - administrátorský přehled všech notifikací.
  *
- * Metody se používají zejména pro:
- * - výpis notifikací od posledního přihlášení,
- * - výpočet badge (nepřečtené notifikace),
- * - přehled posledních událostí,
- * - pravidelné mazání starých záznamů.
+ * Repozitář je používán zejména v servisní vrstvě
+ * (NotificationQueryService, NotificationService).
  */
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
 

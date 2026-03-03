@@ -1,10 +1,7 @@
 package cz.phsoft.hokej.notifications.enums;
 
 /**
- * Kanály, kterými mohou být doručovány notifikace.
- *
- * Enum se používá při rozhodování, zda se má notifikace poslat
- * e-mailem, SMS nebo více kanály.
+ * Komunikační kanály používané pro doručování notifikací.
  */
 public enum NotificationChannel {
 

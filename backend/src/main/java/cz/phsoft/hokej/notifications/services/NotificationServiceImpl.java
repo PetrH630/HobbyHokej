@@ -18,18 +18,21 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * Implementace NotificationService.
+ * Implementace služby NotificationService.
  *
  * Zajišťuje:
- * - použití NotificationPreferencesService pro rozhodnutí, komu notifikaci poslat,
- * - sestavení obsahu zpráv pomocí EmailMessageBuilder a SmsMessageBuilder,
+ * - využití NotificationPreferencesService pro rozhodnutí, komu má být notifikace doručena,
+ * - sestavení obsahu e-mailových zpráv pomocí EmailMessageBuilder,
+ * - sestavení obsahu SMS zpráv pomocí SmsMessageBuilder,
  * - odesílání e-mailů pomocí EmailService,
  * - odesílání SMS pomocí SmsService,
- * - rozesílání kopií vybraných notifikací manažerům.
+ * - uložení in-app notifikací pomocí InAppNotificationService,
+ * - rozesílání kopií vybraných notifikací manažerům (dle blacklistu).
  *
  * Třída neřeší:
- * - perzistenci notifikací,
- * - detailní business pravidla, kdy se má notifikace vyvolat.
+ * - samotné vyvolání notifikací (kdy se mají posílat),
+ * - perzistenci e-mailů a SMS mimo in-app notifikace,
+ * - detailní business pravidla registrací nebo zápasů.
  */
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -49,8 +52,10 @@ public class NotificationServiceImpl implements NotificationService {
     private final DemoNotificationStore demoNotificationStore;
 
     /**
-     * Typy notifikací, pro které se nemá posílat kopie manažerům.
-     * Platí jak pro notifyPlayer, tak pro notifyUser.
+     * Množina typů notifikací, pro které se nemá posílat kopie manažerům.
+     *
+     * Používá se v metodě shouldSendManagerCopy pro rozhodnutí,
+     * zda je vhodné posílat manažerské kopie daného typu.
      */
     private static final Set<NotificationType> MANAGER_COPY_BLACKLIST = EnumSet.of(
             NotificationType.MATCH_CANCELED,
@@ -59,6 +64,23 @@ public class NotificationServiceImpl implements NotificationService {
             NotificationType.MATCH_REMINDER
     );
 
+    /**
+     * Vytváří instanci implementace NotificationService.
+     *
+     * Všechny závislosti jsou injektovány konstruktorovou injekcí.
+     * Služba je připravena jak pro běžný provoz, tak pro DEMO režim,
+     * ve kterém se e-maily a SMS pouze ukládají do DemoNotificationStore.
+     *
+     * @param appUserRepository              repository pro práci s uživateli
+     * @param emailService                   služba pro odesílání e-mailů
+     * @param smsService                     služba pro odesílání SMS
+     * @param smsMessageBuilder              builder pro sestavení obsahu SMS
+     * @param emailMessageBuilder            builder pro sestavení obsahu e-mailů
+     * @param notificationPreferencesService služba pro vyhodnocení notifikačních preferencí
+     * @param demoModeService                služba určující, zda je aplikace v DEMO režimu
+     * @param demoNotificationStore          úložiště notifikací v DEMO režimu
+     * @param inAppNotificationService       služba pro ukládání in-app notifikací
+     */
     public NotificationServiceImpl(
             AppUserRepository appUserRepository,
             EmailService emailService,
@@ -81,6 +103,21 @@ public class NotificationServiceImpl implements NotificationService {
         this.inAppNotificationService = inAppNotificationService;
     }
 
+    /**
+     * Odesílá notifikaci konkrétnímu hráči.
+     *
+     * Metoda:
+     * - získá rozhodnutí o kanálech a kontaktech z NotificationPreferencesService,
+     * - vytvoří in-app notifikaci včetně informací o použitých kanálech (emailTo, smsTo),
+     * - podle rozhodnutí odešle e-mail uživateli, e-mail hráči a případně SMS hráči,
+     * - volitelně odešle kopii vybraných typů notifikací manažerům (pokud to typ dovoluje).
+     *
+     * V DEMO režimu se e-maily a SMS neodesílají, ale ukládají se do DemoNotificationStore.
+     *
+     * @param player  hráč, kterému je notifikace určena
+     * @param type    typ notifikace definující druh události
+     * @param context kontextová data související s notifikací (například zápas nebo registrace)
+     */
     @Override
     public void notifyPlayer(PlayerEntity player,
                              NotificationType type,
@@ -163,6 +200,22 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * Odesílá notifikaci konkrétnímu uživateli.
+     *
+     * Metoda:
+     * - připraví e-mailovou adresu příjemce z entity AppUserEntity,
+     * - uloží in-app notifikaci včetně informace o e-mailovém cíli,
+     * - pokud má uživatel e-mail, sestaví obsah pomocí EmailMessageBuilder
+     *   a odešle e-mail (nebo jej uloží do DemoNotificationStore v DEMO režimu),
+     * - případná logika pro manažery zůstává v další části metody
+     *   (zde ponechána bez změny).
+     *
+     * @param user    uživatel, kterému je notifikace určena
+     * @param type    typ notifikace definující druh události
+     * @param context kontextová data související s notifikací; pokud je null,
+     *                použije se jako kontext samotný uživatel
+     */
     @Override
     public void notifyUser(AppUserEntity user,
                            NotificationType type,
@@ -228,6 +281,18 @@ public class NotificationServiceImpl implements NotificationService {
 
     // Pomocné metody pro e-mail
 
+    /**
+     * Odesílá e-mail vybranému manažerovi.
+     *
+     * Metoda ověří, zda má manažer nastavený e-mail a zda existuje
+     * e-mailová šablona pro daný typ notifikace. V DEMO režimu
+     * se e-mail neodesílá, ale uloží se do DemoNotificationStore.
+     *
+     * @param manager manažer, kterému je e-mail určen
+     * @param player  hráč, kterého se notifikace týká
+     * @param type    typ notifikace
+     * @param context kontextová data (například zápas nebo registrace)
+     */
     private void sendEmailToManager(AppUserEntity manager,
                                     PlayerEntity player,
                                     NotificationType type,
@@ -271,6 +336,18 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * Odesílá e-mail na e-mailovou adresu uživatele.
+     *
+     * Metoda používá EmailMessageBuilder.buildForUser,
+     * přičemž hráč je volitelný (může být null) podle povahy notifikace.
+     * V DEMO režimu se e-mail ukládá do DemoNotificationStore.
+     *
+     * @param email  e-mailová adresa uživatele
+     * @param player hráč, kterého se notifikace týká (může být null)
+     * @param type   typ notifikace
+     * @param context kontextová data související s notifikací
+     */
     private void sendEmailToUser(String email,
                                  PlayerEntity player,
                                  NotificationType type,
@@ -312,6 +389,18 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * Odesílá e-mail na kontaktní e-mail hráče.
+     *
+     * Metoda používá EmailMessageBuilder.buildForPlayer. Pokud není
+     * k dispozici šablona pro daný typ, e-mail se neodesílá.
+     * V DEMO režimu se e-mail uloží do DemoNotificationStore.
+     *
+     * @param email   e-mailová adresa hráče
+     * @param player  hráč, kterému je e-mail určen
+     * @param type    typ notifikace
+     * @param context kontextová data související s notifikací
+     */
     private void sendEmailToPlayer(String email,
                                    PlayerEntity player,
                                    NotificationType type,
@@ -353,8 +442,22 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    // SMS pomocná metoda
-
+    /**
+     * Odesílá SMS na dané telefonní číslo.
+     *
+     * Metoda:
+     * - sestaví text zprávy pomocí SmsMessageBuilder,
+     * - v DEMO režimu uloží SMS do DemoNotificationStore,
+     * - v běžném režimu odešle SMS přes SmsService.
+     *
+     * Pokud není k dispozici šablona nebo je text prázdný,
+     * SMS se neodesílá.
+     *
+     * @param phone   telefonní číslo hráče
+     * @param player  hráč, kterého se notifikace týká (může být null)
+     * @param type    typ notifikace
+     * @param context kontextová data související s notifikací
+     */
     private void sendSmsToPhone(String phone,
                                 PlayerEntity player,
                                 NotificationType type,
@@ -391,7 +494,11 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * Určuje, zda se pro daný typ notifikace mají posílat kopie manažerům.
      *
-     * Pokud je typ uveden v MANAGER_COPY_BLACKLIST, kopie se neposílají.
+     * Pokud je daný typ uveden v množině MANAGER_COPY_BLACKLIST,
+     * manažerské kopie se neposílají.
+     *
+     * @param type typ notifikace
+     * @return true, pokud se manažerské kopie mají posílat, jinak false
      */
     private boolean shouldSendManagerCopy(NotificationType type) {
         return !MANAGER_COPY_BLACKLIST.contains(type);
@@ -400,9 +507,17 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * Určuje, zda má konkrétní manažer dostat kopii daného typu notifikace.
      *
-     * Vyhodnocuje nastavení managerNotificationLevel na AppUserSettingsEntity.
-     * Pokud není nastaveno, používá se globalNotificationLevel. Pokud není
-     * k dispozici ani globální úroveň, používá se výchozí ALL.
+     * Metoda:
+     * - načte nastavení AppUserSettingsEntity,
+     * - preferuje managerNotificationLevel, pokud je nastaven,
+     * - pokud není, použije globalNotificationLevel,
+     * - pokud ani ten není k dispozici, použije výchozí ALL.
+     *
+     * Poté využije isEnabledForType pro konečné rozhodnutí.
+     *
+     * @param type    typ notifikace
+     * @param manager uživatel reprezentující manažera
+     * @return true, pokud má manažer dostat kopii, jinak false
      */
     private boolean isManagerCopyAllowedForManager(NotificationType type,
                                                    AppUserEntity manager) {
@@ -427,11 +542,16 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     * Vyhodnotí, zda je daný typ notifikace povolen pro zvolenou úroveň.
+     * Vyhodnocuje, zda je daný typ notifikace povolen pro zvolenou úroveň.
      *
-     * NONE           znamená, že se notifikace neposílají.
-     * ALL            znamená, že se posílají všechny typy.
-     * IMPORTANT_ONLY znamená, že se posílají pouze důležité typy.
+     * Význam jednotlivých úrovní:
+     * - NONE           znamená, že se notifikace neposílají,
+     * - ALL            znamená, že se posílají všechny typy,
+     * - IMPORTANT_ONLY znamená, že se posílají pouze důležité typy.
+     *
+     * @param type  typ notifikace
+     * @param level globální nebo manažerská úroveň notifikací
+     * @return true, pokud je typ pro danou úroveň povolen, jinak false
      */
     private boolean isEnabledForType(NotificationType type,
                                      GlobalNotificationLevel level) {

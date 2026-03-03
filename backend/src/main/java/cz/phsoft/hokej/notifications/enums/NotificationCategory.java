@@ -1,35 +1,25 @@
 package cz.phsoft.hokej.notifications.enums;
 
 /**
- * Základní kategorizace notifikací v systému.
+ * Kategorie notifikací v systému.
  *
- * Kategorie umožňuje jednodušší filtrování a rozhodování
- * nad typy notifikací, například pro nastavení preferencí
- * nebo logování.
+ * Používá se pro filtrování, nastavení preferencí
+ * a rozhodování o způsobu doručení.
  */
 public enum NotificationCategory {
 
     /**
      * Notifikace související s registracemi hráčů.
-     *
-     * Jedná se například o přihlášení, odhlášení, omluvy
-     * nebo čekací listinu.
      */
-    REGISTRATION,   // přihlášení / odhlášení / omluvy / čekací listina
+    REGISTRATION,
 
     /**
-     * Notifikace informující o změnách kolem zápasu.
-     *
-     * Typicky jde o změny času, zrušení nebo důležité
-     * organizační informace.
+     * Notifikace týkající se informací o zápase.
      */
-    MATCH_INFO,     // změna času, zrušení, info k zápasu
+    MATCH_INFO,
 
     /**
      * Systémové nebo bezpečnostní notifikace.
-     *
-     * Patří sem například reset hesla, bezpečnostní upozornění
-     * a další události spojené s účtem.
      */
-    SYSTEM          // věci typu „reset hesla“, bezpečnost atd.
+    SYSTEM
 }

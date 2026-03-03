@@ -5,16 +5,14 @@ import cz.phsoft.hokej.notifications.enums.NotificationType;
 import java.util.List;
 
 /**
- * DTO pro přenos demo notifikací na frontend.
+ * DTO pro přenos zachycených notifikací v demo režimu.
  *
- * Slouží k předání zachycených e-mailových a SMS notifikací,
- * které byly v demo režimu uloženy místo reálného odeslání.
- * Používá se zejména pro simulaci notifikačního systému
- * a pro zobrazení obsahu zpráv v uživatelském rozhraní.
+ * Slouží k předání e-mailových a SMS zpráv, které byly
+ * v demo režimu zachyceny místo jejich reálného odeslání.
  *
- * DTO neobsahuje žádnou business logiku. Slouží výhradně
- * jako datový přenosový objekt mezi servisní vrstvou
- * a prezentační vrstvou.
+ * Třída neobsahuje žádnou aplikační logiku.
+ * Slouží výhradně jako datový přenosový objekt
+ * mezi servisní a prezentační vrstvou.
  */
 public class DemoNotificationsDTO {
 
@@ -22,7 +20,7 @@ public class DemoNotificationsDTO {
     private List<DemoSmsDTO> sms;
 
     /**
-     * Vytvoří přenosový objekt obsahující seznam
+     * Vytváří přenosový objekt obsahující seznam
      * demo e-mailů a SMS zpráv.
      *
      * @param emails seznam zachycených e-mailových zpráv
@@ -35,7 +33,7 @@ public class DemoNotificationsDTO {
     }
 
     /**
-     * Vrátí seznam zachycených e-mailových zpráv.
+     * Vrací seznam zachycených e-mailových zpráv.
      *
      * @return seznam demo e-mailů
      */
@@ -44,7 +42,7 @@ public class DemoNotificationsDTO {
     }
 
     /**
-     * Vrátí seznam zachycených SMS zpráv.
+     * Vrací seznam zachycených SMS zpráv.
      *
      * @return seznam demo SMS zpráv
      */
@@ -53,11 +51,9 @@ public class DemoNotificationsDTO {
     }
 
     /**
-     * DTO reprezentující jednu zachycenou e-mailovou zprávu
-     * v demo režimu.
+     * DTO reprezentující jednu zachycenou e-mailovou zprávu.
      *
-     * Obsahuje základní metadata e-mailu včetně příznaku,
-     * zda je tělo zprávy ve formátu HTML, a typu notifikace.
+     * Obsahuje metadata e-mailu a informaci o typu notifikace.
      */
     public static class DemoEmailDTO {
 
@@ -69,14 +65,14 @@ public class DemoNotificationsDTO {
         private String recipientKind;
 
         /**
-         * Vytvoří přenosový objekt reprezentující demo e-mail.
+         * Vytváří přenosový objekt reprezentující demo e-mail.
          *
          * @param to e-mailová adresa příjemce
          * @param subject předmět zprávy
          * @param body obsah zprávy
          * @param html příznak, zda je obsah ve formátu HTML
          * @param type typ notifikace
-         * @param recipientKind typ příjemce, například USER, PLAYER nebo MANAGER
+         * @param recipientKind typ příjemce
          */
         public DemoEmailDTO(String to,
                             String subject,
@@ -92,67 +88,16 @@ public class DemoNotificationsDTO {
             this.recipientKind = recipientKind;
         }
 
-        /**
-         * Vrátí e-mailovou adresu příjemce.
-         *
-         * @return e-mailová adresa
-         */
-        public String getTo() {
-            return to;
-        }
-
-        /**
-         * Vrátí předmět zprávy.
-         *
-         * @return předmět e-mailu
-         */
-        public String getSubject() {
-            return subject;
-        }
-
-        /**
-         * Vrátí obsah zprávy.
-         *
-         * @return text nebo HTML obsah e-mailu
-         */
-        public String getBody() {
-            return body;
-        }
-
-        /**
-         * Vrátí informaci, zda je obsah zprávy ve formátu HTML.
-         *
-         * @return true, pokud je obsah HTML
-         */
-        public boolean isHtml() {
-            return html;
-        }
-
-        /**
-         * Vrátí typ notifikace.
-         *
-         * @return typ notifikace
-         */
-        public NotificationType getType() {
-            return type;
-        }
-
-        /**
-         * Vrátí typ příjemce notifikace.
-         *
-         * @return typ příjemce
-         */
-        public String getRecipientKind() {
-            return recipientKind;
-        }
+        public String getTo() { return to; }
+        public String getSubject() { return subject; }
+        public String getBody() { return body; }
+        public boolean isHtml() { return html; }
+        public NotificationType getType() { return type; }
+        public String getRecipientKind() { return recipientKind; }
     }
 
     /**
-     * DTO reprezentující jednu zachycenou SMS zprávu
-     * v demo režimu.
-     *
-     * Obsahuje telefonní číslo příjemce,
-     * text zprávy a typ notifikace.
+     * DTO reprezentující jednu zachycenou SMS zprávu.
      */
     public static class DemoSmsDTO {
 
@@ -161,7 +106,7 @@ public class DemoNotificationsDTO {
         private NotificationType type;
 
         /**
-         * Vytvoří přenosový objekt reprezentující demo SMS zprávu.
+         * Vytváří přenosový objekt reprezentující demo SMS zprávu.
          *
          * @param to telefonní číslo příjemce
          * @param text text SMS zprávy
@@ -175,31 +120,8 @@ public class DemoNotificationsDTO {
             this.type = type;
         }
 
-        /**
-         * Vrátí telefonní číslo příjemce.
-         *
-         * @return telefonní číslo
-         */
-        public String getTo() {
-            return to;
-        }
-
-        /**
-         * Vrátí text SMS zprávy.
-         *
-         * @return text zprávy
-         */
-        public String getText() {
-            return text;
-        }
-
-        /**
-         * Vrátí typ notifikace.
-         *
-         * @return typ notifikace
-         */
-        public NotificationType getType() {
-            return type;
-        }
+        public String getTo() { return to; }
+        public String getText() { return text; }
+        public NotificationType getType() { return type; }
     }
 }

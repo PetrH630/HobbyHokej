@@ -12,13 +12,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementace EmailService pro odesílání emailů přes SMTP (WEDOS).
+ * Implementace EmailService pro odesílání e-mailů přes SMTP server (WEDOS).
  *
- * Třída zapouzdřuje práci s JavaMailSenderem a představuje
- * centrální místo pro veškerou emailovou komunikaci aplikace.
+ * Třída zapouzdřuje práci s JavaMailSender
+ * a představuje centrální místo pro technické odesílání e-mailů.
  *
- * Odesílání emailů probíhá asynchronně a je možné jej globálně
- * vypnout pomocí konfigurační vlastnosti.
+ * Odesílání probíhá asynchronně.
+ * Funkčnost lze globálně vypnout pomocí konfigurační vlastnosti email.enabled.
+ *
+ * Výjimky při odesílání nejsou propagovány do vyšších vrstev.
  */
 @Service
 public class EmailWedosService implements EmailService {
@@ -33,7 +35,11 @@ public class EmailWedosService implements EmailService {
 
     @Value("${email.enabled:true}")
     private boolean emailEnabled;
-
+    /**
+     * Vytváří instanci služby pro odesílání e-mailů.
+     *
+     * @param mailSender komponenta Spring pro práci s SMTP serverem
+     */
     public EmailWedosService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }

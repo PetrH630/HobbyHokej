@@ -29,36 +29,85 @@ import java.util.Set;
  * Plánovač pro připomínky hráčům, kteří dosud nereagovali (NO_RESPONSE).
  *
  * Odpovědnosti:
- * - najít zápasy, které se konají za N dní (typicky 3 dny),
- * - pro tyto zápasy najít "pozvané" hráče, kteří nemají žádnou registraci,
- * - zavolat NotificationService.notifyPlayer(..., MATCH_REGISTRATION_NO_RESPONSE, match).
+ * - najít zápasy, které se konají za definovaný počet dní,
+ * - pro tyto zápasy identifikovat schválené hráče bez registrace,
+ * - odeslat těmto hráčům notifikaci MATCH_REGISTRATION_NO_RESPONSE
+ *   prostřednictvím NotificationService.
  *
  * Třída neřeší:
- * - preferenční logiku (kanály, globální úrovně) – to řeší NotificationPreferencesService,
- * - další business logiku okolo změny stavu registrací.
+ * - preferenční logiku kanálů a globálních úrovní, která je v gesci
+ *   NotificationPreferencesService,
+ * - změny stavů registrací nebo další business logiku kolem registrací.
  *
- * Stav NO_RESPONSE se zde **dopočítává** – neexistuje jako samostatná registrace
- * v databázi. Hráč je považován za NO_RESPONSE, pokud:
- * - je v množině "pozvaných" hráčů pro daný zápas,
- * - ale nemá k tomuto zápasu žádnou registraci (žádný z PlayerMatchStatus).
+ * Stav NO_RESPONSE se zde dopočítává. Neexistuje jako samostatný
+ * PlayerMatchStatus v databázi. Hráč je považován za NO_RESPONSE, pokud:
+ * - je v množině "pozvaných" hráčů pro daný zápas (schválený hráč),
+ * - nemá k tomuto zápasu žádnou registraci v žádném ze stavů.
  */
 @Service
 public class NoResponseReminderScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(NoResponseReminderScheduler.class);
 
+    /**
+     * Repository pro práci se zápasy.
+     *
+     * Používá se k nalezení zápasů v cílovém datu, pro které se
+     * mají připomínky NO_RESPONSE vyhodnocovat.
+     */
     private final MatchRepository matchRepository;
+
+    /**
+     * Repository pro práci s registracemi hráčů na zápasy.
+     *
+     * Používá se pro zjištění, kteří hráči již na daný zápas reagovali
+     * jakýmkoliv stavem PlayerMatchStatus.
+     */
     private final MatchRegistrationRepository matchRegistrationRepository;
+
+    /**
+     * Repository pro práci s hráči.
+     *
+     * Používá se k určení množiny "pozvaných" hráčů. V aktuální implementaci
+     * jde o všechny schválené hráče (PlayerStatus.APPROVED).
+     */
     private final PlayerRepository playerRepository;
+
+    /**
+     * Služba pro odesílání notifikací hráčům.
+     *
+     * Zajišťuje volání notifikačních kanálů a respektování nastavení
+     * preferencí NotificationPreferencesService.
+     */
     private final NotificationService notificationService;
+
+    /**
+     * Hodiny poskytující aktuální datum a čas.
+     *
+     * Umožňují deterministické testování a přesné výpočty cílového
+     * data zápasů.
+     */
     private final Clock clock;
 
     /**
      * Počet dní před zápasem, kdy se má připomínka NO_RESPONSE posílat.
-     * Default: 3 – tedy "tři dny před zápasem".
+     * Defaultní hodnota je 3, což odpovídá scénáři "tři dny před zápasem".
      */
     private final int daysBeforeMatch;
 
+    /**
+     * Vytváří instanci plánovače připomínek pro hráče bez reakce.
+     *
+     * Konfigurační hodnota daysBeforeMatch se načítá z application properties,
+     * s výchozí hodnotou 3, pokud není explicitně nastavena.
+     *
+     * @param matchRepository             repository pro práci se zápasy
+     * @param matchRegistrationRepository repository pro práci s registracemi na zápasy
+     * @param playerRepository            repository pro práci s hráči
+     * @param notificationService         služba pro odesílání notifikací hráčům
+     * @param clock                       hodiny používané pro výpočet aktuálního data
+     * @param daysBeforeMatch             počet dní před zápasem, kdy se připomínky posílají
+     */
     public NoResponseReminderScheduler(MatchRepository matchRepository,
                                        MatchRegistrationRepository matchRegistrationRepository,
                                        PlayerRepository playerRepository,
@@ -75,12 +124,18 @@ public class NoResponseReminderScheduler {
     }
 
     /**
-     * Hlavní plánovací metoda – spouštěná CRONem.
+     * Hlavní plánovací metoda – spouštěná pomocí CRON výrazu.
      *
-     * Typicky 1× denně (např. 17:00 Europe/Prague).
-     * Pro zápasy, které se konají za daysBeforeMatch dní, najde hráče ve stavu NO_RESPONSE
-     * (dopočítaném – hráč nemá žádnou registraci k zápasu) a pošle jim notifikaci
-     * MATCH_REGISTRATION_NO_RESPONSE.
+     * Typicky je spouštěna jednou denně (například 17:00 Europe/Prague).
+     * Pro zápasy, které se konají za daysBeforeMatch dní, vyhodnotí
+     * množinu hráčů ve stavu NO_RESPONSE a těmto hráčům odešle
+     * notifikaci MATCH_REGISTRATION_NO_RESPONSE.
+     *
+     * Metoda:
+     * - zjistí aktuální cílové kombinace (hráč, zápas) voláním findTargets,
+     * - pro každou kombinaci zavolá NotificationService.notifyPlayer.
+     *
+     * Konkrétní kanály a reálné doručení jsou řízeny NotificationPreferencesService.
      */
     @Scheduled(cron = "${app.notifications.no-response.cron:0 00 17 * * *}",
             zone = "${app.notifications.no-response.zone:Europe/Prague}")
@@ -115,10 +170,14 @@ public class NoResponseReminderScheduler {
     /**
      * Náhled cílových hráčů pro NO_RESPONSE připomínky.
      *
-     * Metoda nic neodesílá, pouze vrátí seznam hráčů a zápasů,
-     * kteří/é by byli v aktuálním okamžiku zasaženi plánovačem.
+     * Metoda neodesílá žádné notifikace. Pouze vrací strukturovaný
+     * seznam hráčů a zápasů, kteří by byli v aktuálním okamžiku
+     * zasaženi plánovačem processNoResponseReminders.
      *
-     * Používá se v admin endpointu /preview.
+     * Výsledný seznam se používá v administračním endpointu
+     * pro kontrolu a audit.
+     *
+     * @return seznam DTO objektů popisujících plánované NO_RESPONSE připomínky
      */
     @Transactional(readOnly = true)
     public List<NoResponseReminderPreviewDTO> previewNoResponseReminders() {
@@ -155,10 +214,19 @@ public class NoResponseReminderScheduler {
      * v aktuálním okamžiku poslána NO_RESPONSE připomínka.
      *
      * Logika NO_RESPONSE:
-     * - "Pozvaní" hráči jsou schválení hráči (PlayerStatus.APPROVED).
-     * - Z registrací k zápasu se vezmou všichni hráči, kteří již reagovali
-     *   (jakýmkoliv PlayerMatchStatus).
-     * - NO_RESPONSE = pozvaní hráči, kteří nejsou mezi reagujícími.
+     * - pozvaní hráči jsou aktuálně všichni schválení hráči (PlayerStatus.APPROVED),
+     * - pro daný zápas se z registrací odečtou všichni hráči, kteří již reagovali,
+     * - za NO_RESPONSE jsou považováni hráči, kteří jsou mezi pozvanými,
+     *   ale nejsou mezi reagujícími.
+     *
+     * Metoda:
+     * - určí cílové datum zápasů (today + daysBeforeMatch),
+     * - vyfiltruje zápasy na cílové datum, které nejsou zrušené,
+     * - načte schválené hráče,
+     * - pro každý zápas zjistí reagující hráče z registrací
+     *   a dopočítá množinu NO_RESPONSE.
+     *
+     * @return seznam interních dvojic Target reprezentujících hráče a jejich zápasy
      */
     private List<Target> findTargets() {
 
@@ -239,7 +307,14 @@ public class NoResponseReminderScheduler {
     }
 
     /**
-     * Interní struktura, která drží dvojici (hráč, zápas).
+     * Interní struktura, která drží dvojici hráč a zápas.
+     *
+     * Slouží jako transportní objekt v rámci plánovače pro předání
+     * kombinací, pro které se mají odeslat NO_RESPONSE připomínky
+     * nebo které se zobrazují v náhledu.
+     *
+     * @param player hráč, jemuž má být připomínka odeslána
+     * @param match  zápas, ke kterému se stav NO_RESPONSE vztahuje
      */
     private record Target(PlayerEntity player, MatchEntity match) {
     }

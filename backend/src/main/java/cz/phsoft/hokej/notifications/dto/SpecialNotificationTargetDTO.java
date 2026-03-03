@@ -1,9 +1,12 @@
 package cz.phsoft.hokej.notifications.dto;
 
 /**
- * DTO reprezentující jednoho možného příjemce speciální zprávy.
+ * DTO reprezentující jednoho možného příjemce speciální notifikace.
  *
- * Používá se v admin UI pro výběr cílových uživatelů a hráčů.
+ * Používá se v administrátorském uživatelském rozhraní
+ * pro výběr cílových uživatelů nebo hráčů.
+ *
+ * Třída slouží pouze jako datový přenosový objekt.
  */
 public class SpecialNotificationTargetDTO {
 
@@ -27,10 +30,19 @@ public class SpecialNotificationTargetDTO {
      * Typ cíle ("PLAYER" nebo "USER").
      */
     private String type;
-
+    /**
+     * Vytváří prázdný přenosový objekt.
+     */
     public SpecialNotificationTargetDTO() {
     }
-
+    /**
+     * Vytváří přenosový objekt reprezentující cíl notifikace.
+     *
+     * @param userId identifikátor uživatele
+     * @param playerId identifikátor hráče
+     * @param displayName zobrazované jméno v uživatelském rozhraní
+     * @param type typ cíle
+     */
     public SpecialNotificationTargetDTO(Long userId, Long playerId, String displayName, String type) {
         this.userId = userId;
         this.playerId = playerId;

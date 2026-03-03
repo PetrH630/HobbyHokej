@@ -22,14 +22,14 @@ import java.util.List;
  * Implementace služby pro čtení a správu aplikačních notifikací
  * z pohledu aktuálně přihlášeného uživatele.
  *
- * Třída:
- * - načítá uživatele podle Authentication pomocí AppUserRepository,
- * - používá NotificationRepository pro práci s entitami,
- * - provádí mapování na DTO pomocí NotificationMapper,
- * - určuje časovou hranici podle lastLoginAt nebo výchozího okna.
+ * Odpovědnost třídy spočívá v poskytování dotazovacích operací nad notifikacemi,
+ * včetně výpočtu badge, získávání seznamů notifikací a označování notifikací
+ * jako přečtených. Třída pracuje vždy s uživatelem odvozeným z Authentication
+ * kontextu.
  *
- * Controller deleguje veškerou logiku do této služby
- * a nepracuje přímo s repository.
+ * Práce s perzistentní vrstvou je delegována do NotificationRepository
+ * a načítání uživatele je delegováno do AppUserRepository.
+ * Transformace entit na DTO je zajištěna NotificationMapper.
  */
 @Service
 public class NotificationQueryServiceImpl implements NotificationQueryService {
@@ -47,6 +47,17 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
     private final AppUserRepository appUserRepository;
     private final Clock clock;
 
+    /**
+     * Vytváří instanci služby pro práci s notifikacemi.
+     *
+     * Závislosti na repository, mapperu a hodinách jsou předány konstruktorem,
+     * aby mohla být služba jednoduše testována a konfigurována v rámci Spring kontextu.
+     *
+     * @param notificationRepository repository pro práci s entitami notifikací
+     * @param notificationMapper mapper pro převod entit na DTO
+     * @param appUserRepository repository pro práci s entitami uživatelů
+     * @param clock systémové hodiny používané pro práci s časem
+     */
     public NotificationQueryServiceImpl(NotificationRepository notificationRepository,
                                         NotificationMapper notificationMapper,
                                         AppUserRepository appUserRepository,
@@ -57,6 +68,18 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
         this.clock = clock;
     }
 
+    /**
+     * Vrací badge s počtem nepřečtených notifikací od časové hranice
+     * odvozené z posledního přihlášení uživatele.
+     *
+     * Uživatel je identifikován z Authentication kontextu. Časová hranice
+     * je určena metodou resolveBoundary a následně je v NotificationRepository
+     * spočítán počet nepřečtených notifikací. Výsledek je vrácen jako DTO
+     * doplněné o informace o časech přihlášení.
+     *
+     * @param authentication autentizační kontext aktuálně přihlášeného uživatele
+     * @return DTO s informacemi o počtu nepřečtených notifikací a časech přihlášení
+     */
     @Override
     public NotificationBadgeDTO getBadge(Authentication authentication) {
         AppUserEntity user = getCurrentUser(authentication);
@@ -73,6 +96,18 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
         return dto;
     }
 
+    /**
+     * Vrací seznam notifikací vytvořených po časové hranici
+     * odvozené z posledního přihlášení uživatele.
+     *
+     * Uživatel je identifikován z Authentication kontextu a časová hranice
+     * je určena metodou resolveBoundary. Notifikace jsou načteny z
+     * NotificationRepository v sestupném pořadí podle vytvoření a převedeny
+     * na DTO pomocí NotificationMapper.
+     *
+     * @param authentication autentizační kontext aktuálně přihlášeného uživatele
+     * @return seznam notifikací ve formě DTO
+     */
     @Override
     public List<NotificationDTO> getSinceLastLogin(Authentication authentication) {
         AppUserEntity user = getCurrentUser(authentication);
@@ -84,6 +119,19 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
         return notificationMapper.toDtoList(entities);
     }
 
+    /**
+     * Vrací omezený seznam posledních notifikací aktuálního uživatele.
+     *
+     * Uživatel je identifikován z Authentication kontextu. Nejvýše 50
+     * nejnovějších notifikací je načteno z NotificationRepository a následně
+     * je aplikováno dodatečné omezení pomocí parametru limit.
+     * Výsledek je převeden na DTO pomocí NotificationMapper.
+     *
+     * @param authentication autentizační kontext aktuálně přihlášeného uživatele
+     * @param limit maximální počet vrácených notifikací; pokud je hodnota menší nebo rovna nule,
+     *              použije se maximálně dostupný počet
+     * @return seznam posledních notifikací ve formě DTO
+     */
     @Override
     public List<NotificationDTO> getRecent(Authentication authentication, int limit) {
         AppUserEntity user = getCurrentUser(authentication);
@@ -98,6 +146,18 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
         return notificationMapper.toDtoList(entities);
     }
 
+    /**
+     * Označí konkrétní notifikaci aktuálního uživatele jako přečtenou.
+     *
+     * Uživatel je identifikován z Authentication kontextu a notifikace je
+     * vyhledána v NotificationRepository podle jejího identifikátoru a uživatele.
+     * Pokud je notifikace nalezena a ještě nemá nastaven readAt, je jí nastaven
+     * aktuální čas a změna je uložena. Operace je idempotentní a v případě,
+     * že je notifikace již přečtená, nedochází k žádným změnám.
+     *
+     * @param authentication autentizační kontext aktuálně přihlášeného uživatele
+     * @param id identifikátor notifikace
+     */
     @Override
     public void markAsRead(Authentication authentication, Long id) {
         AppUserEntity user = getCurrentUser(authentication);
@@ -112,6 +172,16 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
                 });
     }
 
+    /**
+     * Označí všechny nepřečtené notifikace aktuálního uživatele jako přečtené.
+     *
+     * Uživatel je identifikován z Authentication kontextu.
+     * Všechny notifikace bez hodnoty readAt jsou načteny z NotificationRepository,
+     * je jim hromadně nastaven aktuální čas a změny jsou uloženy pomocí saveAll.
+     * Operace je navržena tak, aby minimalizovala počet databázových operací.
+     *
+     * @param authentication autentizační kontext aktuálně přihlášeného uživatele
+     */
     @Override
     public void markAllAsRead(Authentication authentication) {
         AppUserEntity user = getCurrentUser(authentication);
@@ -129,6 +199,17 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
         }
     }
 
+    /**
+     * Vrací omezený seznam všech notifikací v systému pro administrativní přehled.
+     *
+     * Notifikace jsou načteny z NotificationRepository v sestupném pořadí podle
+     * času vytvoření. Výsledný seznam může být omezen parametrem limit.
+     * Výstup je vrácen ve formě DTO pro další zpracování nebo zobrazení.
+     *
+     * @param limit maximální počet vrácených notifikací; pokud je hodnota menší nebo rovna nule,
+     *              použije se maximálně dostupný počet
+     * @return seznam všech notifikací ve formě DTO
+     */
     @Override
     public List<NotificationDTO> getAllNotifications(int limit) {
         List<NotificationEntity> entities = notificationRepository.findAllByOrderByCreatedAtDesc();
@@ -141,10 +222,15 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
     }
 
     /**
-     * Určuje časovou hranici pro výběr notifikací.
+     * Určuje časovou hranici pro výběr notifikací aktuálního uživatele.
      *
-     * Pokud má uživatel nastaven lastLoginAt, použije se tato hodnota.
-     * Jinak se použije aktuální čas mínus DEFAULT_DAYS_IF_NO_LAST_LOGIN dní.
+     * Pokud má uživatel nastaven lastLoginAt, použije se tato hodnota jako
+     * dolní hranice pro výběr notifikací. V opačném případě je hranice
+     * odvozena od aktuálního času odečtením DEFAULT_DAYS_IF_NO_LAST_LOGIN dní.
+     *
+     * Metoda se používá v dotazovacích operacích nad notifikacemi, aby bylo
+     * možné filtrování podle posledního přihlášení nebo rozumného výchozího
+     * časového okna.
      *
      * @param user uživatel, pro kterého se časová hranice určuje
      * @return časová hranice pro výběr notifikací
@@ -157,11 +243,19 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
     }
 
     /**
-     * Načte entitu aktuálního uživatele podle e-mailu
+     * Načítá entitu aktuálního uživatele podle e-mailu získaného
      * z autentizačního kontextu.
      *
-     * @param authentication autentizační kontext
-     * @return entita uživatele
+     * E-mail je získán z Authentication.getName a následně je
+     * v AppUserRepository vyhledán odpovídající uživatel. Pokud
+     * uživatel neexistuje, je vyvolána výjimka UserNotFoundException.
+     *
+     * Metoda představuje centralizované místo pro získání entitního
+     * zástupce aktuálně přihlášeného uživatele v rámci této služby.
+     *
+     * @param authentication autentizační kontext aktuálně přihlášeného uživatele
+     * @return entita uživatele odpovídající autentizačnímu kontextu
+     * @throws UserNotFoundException pokud uživatel s daným e-mailem neexistuje
      */
     private AppUserEntity getCurrentUser(Authentication authentication) {
         String email = authentication.getName();
