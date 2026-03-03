@@ -29,7 +29,7 @@ public class DemoModePolicy {
      *
      * Metoda se používá zejména pro podmíněné chování ve service vrstvě.
      *
-     * @return True, pokud je demo režim aktivní, jinak false.
+     * @return true, pokud je demo režim aktivní, jinak false
      */
     public boolean isDemoMode() {
         return demoMode;
@@ -42,8 +42,8 @@ public class DemoModePolicy {
      * v demo režimu a jeho identifikátor spadá do definovaného rozsahu.
      * Tato metoda se používá pro blokování write operací nad demonstračními daty.
      *
-     * @param userId Identifikátor uživatele, který má být vyhodnocen.
-     * @return True, pokud je uživatel chráněný v demo režimu, jinak false.
+     * @param userId identifikátor uživatele, který má být vyhodnocen
+     * @return true, pokud je uživatel chráněný v demo režimu, jinak false
      */
     public boolean isProtectedDemoUser(Long userId) {
         return demoMode && userId != null && userId <= 10;

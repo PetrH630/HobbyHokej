@@ -6,9 +6,10 @@ import jakarta.validation.constraints.NotNull;
 /**
  * DTO pro aktualizaci skóre zápasu.
  *
- * Slouží k přenosu počtu vstřelených branek
- * pro tým LIGHT a tým DARK při zadávání nebo
- * úpravě výsledku zápasu.
+ * Slouží jako vstupní objekt při zadávání nebo úpravě výsledku zápasu.
+ * Obsahuje počet vstřelených branek pro tým LIGHT a tým DARK.
+ *
+ * Validace vstupních hodnot je zajištěna pomocí Bean Validation.
  */
 public class MatchScoreUpdateRequest {
 

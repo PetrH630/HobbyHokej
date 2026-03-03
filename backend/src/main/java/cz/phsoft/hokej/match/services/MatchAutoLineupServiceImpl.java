@@ -22,6 +22,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Implementace služby pro automatické přeskupení první lajny.
+ *
+ * Algoritmus:
+ * - pracuje pouze s hráči ve stavu REGISTERED,
+ * - nemění tým hráče,
+ * - respektuje kapacitu pozic dle MatchMode,
+ * - preferuje primary a secondary pozici hráče,
+ * - při konfliktu upřednostňuje nejpozději registrovaného hráče.
+ */
 @Service
 public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
 
@@ -39,9 +49,17 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
         this.registrationRepository = registrationRepository;
     }
 
+    /**
+     * Spustí automatické přeskupení první lajny pro oba týmy zápasu.
+     *
+     * Operace probíhá transakčně.
+     *
+     * @param matchId identifikátor zápasu
+     */
     @Override
     @Transactional
     public void autoArrangeStartingLineup(Long matchId) {
+
         MatchEntity match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
@@ -71,6 +89,14 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
         }
     }
 
+    /**
+     * Provede automatické přeskupení pro jeden konkrétní tým.
+     *
+     * @param match zápas
+     * @param team tým DARK nebo LIGHT
+     * @param allRegistered všichni REGISTERED hráči zápasu
+     * @return true pokud došlo ke změně
+     */
     private boolean autoArrangeForTeam(MatchEntity match,
                                        Team team,
                                        List<MatchRegistrationEntity> allRegistered) {
@@ -87,7 +113,6 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
         Map<PlayerPosition, Integer> perTeamCapacity =
                 MatchModeLayoutUtil.buildPositionCapacityForMode(mode, slotsPerTeam);
 
-        // Registrace pro daný tým
         List<MatchRegistrationEntity> teamRegs = allRegistered.stream()
                 .filter(r -> r.getTeam() == team)
                 .toList();
@@ -96,7 +121,6 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
             return false;
         }
 
-        // Aktuální obsazenost podle normalizePosition (positionInMatch / primary)
         Map<PlayerPosition, List<MatchRegistrationEntity>> regsByPosition =
                 teamRegs.stream()
                         .collect(Collectors.groupingBy(
@@ -105,7 +129,6 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
                                 Collectors.toList()
                         ));
 
-        // Target pozice: ty, kde je kapacita > 0 a aktuálně tam nikdo nesedí
         List<PlayerPosition> targetPositions = perTeamCapacity.entrySet().stream()
                 .filter(e -> e.getValue() != null && e.getValue() > 0)
                 .map(Map.Entry::getKey)
@@ -139,10 +162,14 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
         return changed;
     }
 
+    /**
+     * Pokusí se obsadit konkrétní cílovou pozici vhodným kandidátem.
+     */
     private boolean tryFillTargetPosition(PlayerPosition targetPosition,
                                           List<MatchRegistrationEntity> teamRegs,
                                           Map<PlayerPosition, List<MatchRegistrationEntity>> regsByPosition,
-                                          Map<PlayerPosition, Integer> perTeamCapacity, MatchEntity match,
+                                          Map<PlayerPosition, Integer> perTeamCapacity,
+                                          MatchEntity match,
                                           Team team) {
 
         MatchRegistrationEntity candidate = pickBestCandidateForTargetPosition(
@@ -159,12 +186,10 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
         PlayerPosition oldPos = normalizePosition(candidate);
 
         logger.info(
-                "AUTO_LINEUP matchId={}, team={}, playerId={}, playerName{}, playerSurname{}, from={}, to={}",
+                "AUTO_LINEUP matchId={}, team={}, playerId={}, from={}, to={}",
                 match.getId(),
                 team,
                 candidate.getPlayer().getId(),
-                candidate.getPlayer().getName(),
-                candidate.getPlayer().getSurname(),
                 oldPos,
                 targetPosition
         );
@@ -185,19 +210,13 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
     }
 
     /**
-     * Kandidát je:
-     *  - REGISTERED,
-     *  - stejný tým (řešeno dřív),
-     *  - stejná kategorie (FORWARD/DEFENSE/GOALIE),
-     *  - donor pozice je buď:
-     *      - bez definované kapacity (např. FORWARD v módu, kde se nepoužívá),
-     *      - nebo má obsazenost > 1 (tj. po přesunu tam pořád někdo zůstane).
+     * Vybere nejvhodnějšího kandidáta pro cílovou pozici.
      *
-     *  Preferuje se:
-     *  - primary == targetPosition (score 2),
-     *  - secondary == targetPosition (score 1),
-     *  - ostatní (0),
-     *  a pak nejpozději registrovaný (timestamp DESC).
+     * Kritéria:
+     * - stejná kategorie pozice,
+     * - donor pozice má přebytek,
+     * - preference primary/secondary,
+     * - nejpozději registrovaný hráč.
      */
     private MatchRegistrationEntity pickBestCandidateForTargetPosition(
             PlayerPosition targetPosition,
@@ -205,6 +224,7 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
             Map<PlayerPosition, List<MatchRegistrationEntity>> regsByPosition,
             Map<PlayerPosition, Integer> perTeamCapacity
     ) {
+
         if (targetPosition == null) {
             return null;
         }
@@ -222,36 +242,29 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
                         return false;
                     }
 
-                    // GOALIE jen na GOALIE
                     if (PlayerPositionUtil.isGoalie(current)
                             && !PlayerPositionUtil.isGoalie(targetPosition)) {
                         return false;
                     }
 
-                    // Stejná kategorie (FORWARD/DEFENSE/GOALIE)
                     var currentCat = PlayerPositionUtil.getCategory(current);
                     if (currentCat == null || currentCat != targetCategory) {
                         return false;
                     }
 
                     if (current == targetPosition) {
-                        // už sedí na targetu, nemáme koho přesouvat
                         return false;
                     }
 
-                    // Kolik lidí je na "source" pozici
                     List<MatchRegistrationEntity> list = regsByPosition.get(current);
                     int occupied = (list == null) ? 0 : list.size();
 
-                    // Jaká je kapacita source pozice (může být null, pokud v módu není post definován)
                     Integer sourceCapacity = perTeamCapacity.get(current);
 
-                    // Donor je povolen, pokud:
-                    //  - sourceCapacity == null → globální FORWARD / "bez slotu",
-                    //  - nebo má obsazenost > 1 → po přesunu tam pořád někdo zůstane.
                     if (sourceCapacity == null) {
                         return true;
                     }
+
                     return occupied > 1;
                 })
                 .sorted((a, b) -> {
@@ -259,10 +272,9 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
                     int scoreB = preferenceScore(b, targetPosition);
 
                     if (scoreA != scoreB) {
-                        return Integer.compare(scoreB, scoreA); // vyšší score první
+                        return Integer.compare(scoreB, scoreA);
                     }
 
-                    // Nejmladší – nejpozději registrovaný jako první kandidát k přesunu
                     return b.getTimestamp().compareTo(a.getTimestamp());
                 })
                 .findFirst()
@@ -287,8 +299,8 @@ public class MatchAutoLineupServiceImpl implements MatchAutoLineupService {
     }
 
     /**
-     * Pokud registrace nemá explicitní pozici, bere se primaryPosition hráče.
-     * ANY se ignoruje.
+     * Vrací efektivní pozici hráče v zápase.
+     * Pokud není explicitně nastavena, použije se primaryPosition.
      */
     private PlayerPosition normalizePosition(MatchRegistrationEntity reg) {
         if (reg == null) {

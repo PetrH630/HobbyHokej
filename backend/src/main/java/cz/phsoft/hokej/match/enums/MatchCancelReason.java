@@ -1,35 +1,36 @@
 package cz.phsoft.hokej.match.enums;
 
 /**
- * Důvody zrušení zápasu.
+ * Výčtový typ reprezentující důvody zrušení zápasu.
  *
- * Hodnota se používá spolu se stavem zápasu pro přehledné
- * a strojově zpracovatelné určení, proč byl zápas zrušen.
+ * Používá se ve vazbě na MatchStatus pro jednoznačné
+ * a strojově zpracovatelné určení příčiny zrušení zápasu.
+ * Hodnota je ukládána do databáze jako textový enum.
  */
 public enum MatchCancelReason {
 
     /**
      * Nedostatečný počet přihlášených hráčů.
      */
-    NOT_ENOUGH_PLAYERS,     // málo hráčů
+    NOT_ENOUGH_PLAYERS,
 
     /**
      * Technické problémy, například led, hala nebo doprava.
      */
-    TECHNICAL_ISSUE,        // technické problémy (led, hala, bus…)
+    TECHNICAL_ISSUE,
 
     /**
      * Nepříznivé počasí.
      */
-    WEATHER,                // počasí
+    WEATHER,
 
     /**
      * Rozhodnutí organizátora.
      */
-    ORGANIZER_DECISION,     // rozhodnutí organizátora
+    ORGANIZER_DECISION,
 
     /**
-     * Jiný důvod zrušení, blíže nespecifikovaný.
+     * Jiný, blíže nespecifikovaný důvod.
      */
-    OTHER                   // jiný důvod
+    OTHER
 }

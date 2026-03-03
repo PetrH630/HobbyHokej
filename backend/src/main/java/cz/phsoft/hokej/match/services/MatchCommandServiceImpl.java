@@ -43,11 +43,11 @@ import java.util.Objects;
  * Implementace změnové service vrstvy pro zápasy.
  *
  * Zajišťuje vytváření, úpravu, mazání a změny stavu zápasu.
- * Při úpravách provádí potřebné kontrolní mechanismy nad sezónou
- * a stavem zápasu a zajišťuje side-effects:
- * - přepočet kapacity přes MatchCapacityService,
- * - úpravu pozic hráčů při změně herního systému přes MatchAllocationEngine,
- * - odesílání notifikací hráčům o změně, zrušení a obnovení zápasu.
+ * Při úpravách se provádějí kontrolní mechanismy nad sezónou
+ * a stavem zápasu a zajišťují se side-effects:
+ * přepočet kapacity přes MatchCapacityService,
+ * úprava pozic hráčů při změně herního systému přes MatchAllocationEngine
+ * a odesílání notifikací hráčům o změnách souvisejících se zápasem.
  */
 @Service
 public class MatchCommandServiceImpl implements MatchCommandService {
@@ -71,7 +71,24 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     private final Clock clock;
     private final MatchAllocationEngine matchAllocationEngine;
 
-
+    /**
+     * Vytváří instanci služby pro změnové operace nad zápasy.
+     *
+     * Při vytvoření se injektují závislosti na repository, mappery,
+     * služby pro sezóny, notifikace, uživatele, kapacitu zápasu a
+     * alokační engine pro herní systém.
+     *
+     * @param matchRepository             Repozitář pro perzistenci zápasů.
+     * @param matchRegistrationRepository Repozitář pro perzistenci registrací na zápasy.
+     * @param matchMapper                 Mapper pro převod mezi entitou a DTO zápasu.
+     * @param seasonService               Služba pro práci se sezónami.
+     * @param currentSeasonService        Služba pro držení aktuální sezóny v kontextu aplikace.
+     * @param notificationService         Služba pro odesílání notifikací hráčům.
+     * @param appUserRepository           Repozitář pro uživatele aplikace.
+     * @param matchCapacityService        Služba pro přepočet kapacity zápasu.
+     * @param clock                       Hodiny používané pro časové operace.
+     * @param matchAllocationEngine       Engine pro přepočet rozložení hráčů při změně herního systému.
+     */
     public MatchCommandServiceImpl(
             MatchRepository matchRepository,
             MatchRegistrationRepository matchRegistrationRepository,
@@ -96,10 +113,11 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         this.matchAllocationEngine = matchAllocationEngine;
     }
 
-    
     // COMMANDS
-    
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MatchDTO createMatch(MatchDTO dto) {
         MatchEntity entity = matchMapper.toEntity(dto);
@@ -114,6 +132,9 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         return matchMapper.toDTO(matchRepository.save(entity));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MatchDTO updateMatch(Long id, MatchDTO dto) {
         MatchEntity entity = findMatchOrThrow(id);
@@ -190,6 +211,9 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         return matchMapper.toDTO(saved);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SuccessResponseDTO deleteMatch(Long id) {
         MatchEntity match = findMatchOrThrow(id);
@@ -209,6 +233,9 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public SuccessResponseDTO cancelMatch(Long matchId, MatchCancelReason reason) {
@@ -235,6 +262,9 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public SuccessResponseDTO unCancelMatch(Long matchId) {
@@ -262,19 +292,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     }
 
     /**
-     * Aktualizuje skóre zápasu.
-     *
-     * Metoda nastavuje počet branek pro tým LIGHT a tým DARK.
-     * Skóre se používá pouze pro nezrušené zápasy. U zrušeného zápasu
-     * se změna skóre nepovoluje.
-     *
-     * Při změně skóre se nastaví stav zápasu na UPDATED (pokud již není zrušen),
-     * aby bylo možné odlišit upravený zápas pro případné notifikace nebo UI.
-     *
-     * @param matchId    Identifikátor zápasu, jehož skóre se upravuje.
-     * @param scoreLight Počet branek týmu LIGHT. Hodnota musí být nezáporná.
-     * @param scoreDark  Počet branek týmu DARK. Hodnota musí být nezáporná.
-     * @return DTO se stavem zápasu po uložení změny.
+     * {@inheritDoc}
      */
     @Override
     @Transactional
@@ -331,10 +349,21 @@ public class MatchCommandServiceImpl implements MatchCommandService {
 
         return matchMapper.toDTO(saved);
     }
-    
-    // HELPERY – NOTIFIKACE, SEZÓNA, UŽIVATEL
-    
 
+    // HELPERY – NOTIFIKACE, SEZÓNA, UŽIVATEL
+
+    /**
+     * Odesílá hráčům notifikace o změnách souvisejících se zápasem.
+     *
+     * Podle typu contextu se získá entita zápasu. Následně se vyhledají
+     * registrace na daný zápas a pro hráče se statusem REGISTERED,
+     * RESERVED nebo SUBSTITUTE se podle cílového stavu zápasu odešlou
+     * příslušné notifikace (změna času, zrušení nebo obnovení zápasu).
+     *
+     * @param context     Kontext změny zápasu. Může se jednat o MatchTimeChangeContext
+     *                    při změně času nebo přímo o MatchEntity pro ostatní změny.
+     * @param matchStatus Cílový stav zápasu, podle kterého se volí typ notifikace.
+     */
     private void notifyPlayersAboutMatchChanges(Object context, MatchStatus matchStatus) {
         MatchEntity match;
         if (context instanceof MatchTimeChangeContext mtc) {
@@ -385,6 +414,15 @@ public class MatchCommandServiceImpl implements MatchCommandService {
                 });
     }
 
+    /**
+     * Získává identifikátor aktuálně přihlášeného uživatele.
+     *
+     * Informace se čte z kontextu Spring Security. Pokud není
+     * uživatel autentizován nebo se nepodaří dohledat záznam
+     * v databázi, vrací se null.
+     *
+     * @return Identifikátor přihlášeného uživatele nebo null, pokud není k dispozici.
+     */
     private Long getCurrentUserIdOrNull() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
@@ -397,6 +435,16 @@ public class MatchCommandServiceImpl implements MatchCommandService {
                 .orElse(null);
     }
 
+    /**
+     * Zjišťuje, zda má uživatel roli administrátora nebo manažera.
+     *
+     * Prochází se seznam autorit přihlášeného uživatele a kontroluje se,
+     * zda obsahuje roli ROLE_ADMIN nebo ROLE_MANAGER. Používá se pro
+     * odlišení oprávnění při úpravách zápasu mimo aktivní sezónu.
+     *
+     * @param auth Autentizační objekt aktuálního uživatele.
+     * @return True, pokud má uživatel roli administrátora nebo manažera, jinak false.
+     */
     private boolean hasAdminOrManagerRole(Authentication auth) {
         if (auth == null) {
             return false;
@@ -408,11 +456,29 @@ public class MatchCommandServiceImpl implements MatchCommandService {
                 );
     }
 
+    /**
+     * Vyhledává zápas podle identifikátoru nebo vyhazuje výjimku.
+     *
+     * Používá se všude tam, kde je potřeba mít jistotu, že zápas
+     * existuje. Pokud není zápas nalezen, vyhazuje se MatchNotFoundException.
+     *
+     * @param matchId Identifikátor hledaného zápasu.
+     * @return Entita nalezeného zápasu.
+     */
     private MatchEntity findMatchOrThrow(Long matchId) {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
     }
 
+    /**
+     * Validuje, že datum zápasu spadá do období aktivní sezóny.
+     *
+     * Kontroluje se, zda datum zápasu není dříve než začátek aktivní
+     * sezóny a zároveň není později než konec aktivní sezóny. V opačném
+     * případě se vyhodí InvalidSeasonPeriodDateException.
+     *
+     * @param dateTime Datum a čas zápasu, který se kontroluje.
+     */
     private void validateMatchDateInActiveSeason(LocalDateTime dateTime) {
         var activeSeason = seasonService.getActiveSeason();
         var date = dateTime.toLocalDate();
@@ -427,6 +493,15 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         }
     }
 
+    /**
+     * Získává identifikátor aktuální sezóny z kontextu nebo z aktivní sezóny.
+     *
+     * Nejprve se používá CurrentSeasonService pro získání aktuálního
+     * identifikátoru sezóny. Pokud není k dispozici, použije se identifikátor
+     * aktivní sezóny ze SeasonService.
+     *
+     * @return Identifikátor sezóny, která se má považovat za aktivní v daném kontextu.
+     */
     private Long getCurrentSeasonIdOrActive() {
         Long id = currentSeasonService.getCurrentSeasonIdOrDefault();
         if (id != null) {
@@ -435,6 +510,15 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         return seasonService.getActiveSeason().getId();
     }
 
+    /**
+     * Vrací aktuální datum a čas.
+     *
+     * Používá se Clock injektovaný do služby, aby bylo možné čas
+     * případně mockovat v testech. Slouží jako centrální místo
+     * pro získání aktuálního času v této třídě.
+     *
+     * @return Aktuální datum a čas podle konfigurovaných hodin.
+     */
     private LocalDateTime now() {
         return LocalDateTime.now(clock);
     }

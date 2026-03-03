@@ -143,3 +143,15 @@ export const getAvailableMatchesForPlayerAdmin = async (playerId) => {
     const res = await api.get(`/matches/available-for-player/${playerId}`);
     return res.data; // List<MatchDTO>
 };
+
+/**
+ * Přehled pozic a kapacity pro konkrétní tým v daném zápase.
+ * GET /api/matches/{matchId}/positions/{team}
+ * Role: přihlášený uživatel (isAuthenticated)
+ */
+export const getMatchTeamPositionOverview = async (matchId, team) => {
+    const res = await api.get(`/matches/${matchId}/positions/${team}`, {
+        withCredentials: true,
+    });
+    return res.data; // MatchTeamPositionOverviewDTO
+};

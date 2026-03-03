@@ -3,13 +3,13 @@ package cz.phsoft.hokej.match.dto;
 import cz.phsoft.hokej.player.enums.PlayerPosition;
 
 /**
- * DTO pro přehled kapacity konkrétní pozice v rámci zápasu.
+ * DTO reprezentující kapacitní stav jedné herní pozice v zápase.
  *
- * Obsahuje počet míst pro danou pozici na tým, počty obsazených míst
- * v týmu DARK a LIGHT a z toho odvozené volné sloty.
+ * Obsahuje maximální počet míst pro danou pozici na tým,
+ * počet obsazených míst v týmu DARK a LIGHT
+ * a z toho odvozený počet volných slotů.
  *
- * Používá se v {@link MatchPositionOverviewDTO} pro zobrazení přehledu
- * pozic na ledě.
+ * Objekt se používá jako součást MatchPositionOverviewDTO.
  */
 public class MatchPositionSlotDTO {
 

@@ -1,12 +1,16 @@
 package cz.phsoft.hokej.match.dto;
 
 /**
- * Společné rozhraní pro DTO objekt reprezentující zápas
+ * Společné rozhraní pro DTO reprezentující zápas
  * s přiřazeným pořadovým číslem v rámci sezóny.
  *
- * Rozhraní se používá u více typů DTO (například MatchDTO,
- * MatchDetailDTO, MatchOverviewDTO), aby bylo možné jednotně
- * nastavovat a číst pořadové číslo zápasu vypočítané na serveru.
+ * Rozhraní se používá u více typů DTO
+ * (například MatchDTO, MatchDetailDTO, MatchOverviewDTO),
+ * aby bylo možné jednotně nastavovat a číst
+ * pořadové číslo vypočítané na serveru.
+ *
+ * Pořadové číslo je odvozeno z chronologického
+ * pořadí zápasů v rámci dané sezóny.
  */
 public interface NumberedMatchDTO {
 

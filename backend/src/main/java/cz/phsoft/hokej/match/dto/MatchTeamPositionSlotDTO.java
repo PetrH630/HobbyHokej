@@ -5,11 +5,16 @@ import cz.phsoft.hokej.player.enums.PlayerPosition;
 import java.util.List;
 
 /**
- * DTO pro přehled kapacity konkrétní pozice v rámci zápasu
- * pro jeden tým.
+ * DTO reprezentující kapacitní stav konkrétní pozice
+ * v rámci jednoho týmu a jednoho zápasu.
  *
- * Obsahuje celkový počet slotů pro danou pozici na tým,
- * počet obsazených míst a počet volných slotů.
+ * Objekt obsahuje maximální počet slotů pro danou pozici,
+ * aktuální počet obsazených míst a počet volných slotů.
+ * Současně zahrnuje seznam hráčů aktuálně registrovaných
+ * na dané pozici a seznam náhradníků.
+ *
+ * DTO je vytvářeno servisní vrstvou a slouží
+ * jako výstupní model pro detail obsazení týmu.
  */
 public class MatchTeamPositionSlotDTO {
 

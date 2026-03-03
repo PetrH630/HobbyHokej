@@ -48,8 +48,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * Po startu aplikace se vytváří výchozí administrátor, ukázkoví hráči s uživateli,
  * výchozí nastavení uživatelů a hráčů, sezóny, zápasy a ukázkové registrace.
  *
- * Inicializace se spouští pouze při zapnutí vlastnosti {@code app.seed.enabled=true}.
- * Databázové triggery se v této třídě nevytvářejí, protože se spravují pomocí Flyway migrací.
+ * Inicializace se spouští pouze při zapnutí vlastnosti app.seed.enabled=true.
+ * Databázové triggery se v této třídě nevytvářejí, protože se spravují pomocí
+ * Flyway migrací.
  */
 @Component
 @ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true", matchIfMissing = false)
@@ -70,6 +71,12 @@ public class DataInitializer {
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
+    /**
+     * Vytváří komponentu pro inicializaci dat.
+     *
+     * Všechny závislosti jsou injektovány Spring kontejnerem a používají se
+     * při vytváření ukázkových entit.
+     */
     public DataInitializer(PlayerRepository playerRepository,
                            MatchRepository matchRepository,
                            MatchRegistrationRepository matchRegistrationRepository,
@@ -187,7 +194,7 @@ public class DataInitializer {
 
             player.setPhoneNumber("");
             player.setTeam(i < 5 ? Team.DARK : Team.LIGHT);
-            // TODO Otestovat přidalším spuštění
+            // TODO Otestovat při dalším spuštění
             player.setPrimaryPosition((i % 2 == 0) ? PlayerPosition.FORWARD : PlayerPosition.DEFENSE);
             player.setPlayerStatus(i < 10 ? PlayerStatus.APPROVED : PlayerStatus.PENDING);
 
@@ -397,7 +404,7 @@ public class DataInitializer {
             return;
         }
 
-        // rozpadneme si hráče podle týmů
+        // Rozdělení hráčů podle týmů
         List<PlayerEntity> darkPlayersAll = players.stream()
                 .filter(p -> p.getTeam() == Team.DARK)
                 .toList();
@@ -405,13 +412,13 @@ public class DataInitializer {
                 .filter(p -> p.getTeam() == Team.LIGHT)
                 .toList();
 
-        // potřebujeme minimálně 3 hráče v každém týmu
+        // Potřeba minimálně tří hráčů v každém týmu
         if (darkPlayersAll.size() < 3 || lightPlayersAll.size() < 3) {
             log.info("Not enough players per team for simple registration initialization (need at least 3 DARK and 3 LIGHT). Initialization is skipped.");
             return;
         }
 
-        // pevně dané pozice pro REGISTERED hráče v týmu (3 na 3 bez brankáře)
+        // Pevně dané pozice pro REGISTERED hráče v týmu (3 na 3 bez brankáře)
         PlayerPosition[] positions = new PlayerPosition[]{
                 PlayerPosition.DEFENSE,
                 PlayerPosition.WING_LEFT,
@@ -420,11 +427,11 @@ public class DataInitializer {
 
         for (MatchEntity match : matches) {
 
-            // === DARK tým ===
+            // DARK tým
             List<PlayerEntity> darkCopy = new ArrayList<>(darkPlayersAll);
             Collections.shuffle(darkCopy);
 
-            // prvních 3 → REGISTERED na pozice DEFENSE, WING_LEFT, WING_RIGHT
+            // První tři hráči jako REGISTERED na pozice DEFENSE, WING_LEFT, WING_RIGHT
             List<PlayerEntity> darkRegistered = darkCopy.subList(0, Math.min(3, darkCopy.size()));
 
             for (int i = 0; i < darkRegistered.size(); i++) {
@@ -446,12 +453,12 @@ public class DataInitializer {
                 matchRegistrationRepository.save(reg);
             }
 
-            // zbylí DARK hráči pro EXCUSED a SUBSTITUTE
+            // Zbylí DARK hráči pro EXCUSED a SUBSTITUTE
             List<PlayerEntity> darkRemaining = new ArrayList<>(darkCopy.subList(darkRegistered.size(), darkCopy.size()));
             Collections.shuffle(darkRemaining);
 
             if (!darkRemaining.isEmpty()) {
-                // jeden DARK jako EXCUSED
+                // Jeden hráč z DARK týmu jako EXCUSED
                 PlayerEntity excusedDark = darkRemaining.get(0);
 
                 MatchRegistrationEntity regExcused = new MatchRegistrationEntity();
@@ -470,7 +477,7 @@ public class DataInitializer {
             }
 
             if (darkRemaining.size() > 1) {
-                // jeden DARK jako SUBSTITUTE
+                // Jeden hráč z DARK týmu jako SUBSTITUTE
                 PlayerEntity substituteDark = darkRemaining.get(1);
 
                 MatchRegistrationEntity regSubstitute = new MatchRegistrationEntity();
@@ -488,11 +495,11 @@ public class DataInitializer {
                 matchRegistrationRepository.save(regSubstitute);
             }
 
-            // === LIGHT tým ===
+            // LIGHT tým
             List<PlayerEntity> lightCopy = new ArrayList<>(lightPlayersAll);
             Collections.shuffle(lightCopy);
 
-            // prvních 3 → REGISTERED na pozice DEFENSE, WING_LEFT, WING_RIGHT
+            // První tři hráči jako REGISTERED na pozice DEFENSE, WING_LEFT, WING_RIGHT
             List<PlayerEntity> lightRegistered = lightCopy.subList(0, Math.min(3, lightCopy.size()));
 
             for (int i = 0; i < lightRegistered.size(); i++) {
@@ -514,12 +521,12 @@ public class DataInitializer {
                 matchRegistrationRepository.save(reg);
             }
 
-            // zbylí LIGHT hráči pro EXCUSED a SUBSTITUTE
+            // Zbylí LIGHT hráči pro EXCUSED a SUBSTITUTE
             List<PlayerEntity> lightRemaining = new ArrayList<>(lightCopy.subList(lightRegistered.size(), lightCopy.size()));
             Collections.shuffle(lightRemaining);
 
             if (!lightRemaining.isEmpty()) {
-                // jeden LIGHT jako EXCUSED
+                // Jeden hráč z LIGHT týmu jako EXCUSED
                 PlayerEntity excusedLight = lightRemaining.get(0);
 
                 MatchRegistrationEntity regExcused = new MatchRegistrationEntity();
@@ -538,7 +545,7 @@ public class DataInitializer {
             }
 
             if (lightRemaining.size() > 1) {
-                // jeden LIGHT jako SUBSTITUTE
+                // Jeden hráč z LIGHT týmu jako SUBSTITUTE
                 PlayerEntity substituteLight = lightRemaining.get(1);
 
                 MatchRegistrationEntity regSubstitute = new MatchRegistrationEntity();

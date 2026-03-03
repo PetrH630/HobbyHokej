@@ -1,19 +1,19 @@
 package cz.phsoft.hokej.match.services;
 
+/**
+ * Služba pro automatické přeskupení první lajny.
+ *
+ * Implementace pracuje pouze s již REGISTERED hráči
+ * a nemění jejich tým. Úpravy se týkají pouze pozice
+ * v rámci týmu podle kapacity a preferencí hráče.
+ */
 public interface MatchAutoLineupService {
 
     /**
-     * Automaticky přeskupí pozice hráčů v zápase tak, aby byly
-     * co nejlépe obsazeny všechny posty první lajny pro oba týmy.
+     * Automaticky přeskupí pozice hráčů v zápase tak,
+     * aby byly co nejlépe obsazeny všechny posty první lajny.
      *
-     * Používá:
-     * - konfiguraci pozic z MatchModeLayoutUtil,
-     * - maxPlayers (slotsPerTeam = maxPlayers / 2),
-     * - current REGISTERED hráče v obou týmech,
-     * - preference hráčů (primary/secondary position),
-     * - timestamp registrace (nejmladší = nejpozději registrovaný).
-     *
-     * Nemění tým (DARK/LIGHT), jen pozici v rámci týmu.
+     * @param matchId identifikátor zápasu
      */
     void autoArrangeStartingLineup(Long matchId);
 }

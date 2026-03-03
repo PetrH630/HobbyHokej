@@ -1,25 +1,26 @@
 package cz.phsoft.hokej.match.enums;
 
 /**
- * Stav zápasu z pohledu plánování a změn.
+ * Výčtový typ reprezentující stav zápasu
+ * z pohledu plánování a administrativních změn.
  *
- * Enum se používá k označení, zda je zápas zrušený,
- * znovu aktivovaný nebo zda došlo ke změně jeho termínu.
+ * Hodnota určuje, zda byl zápas zrušen,
+ * znovu aktivován nebo aktualizován.
  */
 public enum MatchStatus {
 
     /**
      * Zápas byl znovu aktivován po předchozím zrušení.
      */
-    UNCANCELED,     // znovu aktivovaný
+    UNCANCELED,
 
     /**
      * Zápas byl zrušen.
      */
-    CANCELED,      // zrušený
+    CANCELED,
 
     /**
-     * Došlo ke změně data nebo času zápasu.
+     * Došlo ke změně termínu nebo jiných parametrů zápasu.
      */
-    UPDATED,        // změna data-času
+    UPDATED
 }

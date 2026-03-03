@@ -7,16 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementace service vrstvy pro přepočet kapacity zápasu.
+ * Implementace servisní vrstvy pro přepočet kapacity zápasu.
  *
- * Třída slouží jako tenká obálka nad {@link MatchAllocationEngine}
- * a zajišťuje, aby se při změně parametru maxPlayers spustil
- * odpovídající přepočet:
- * - při snížení kapacity se provede globální přepočet
- *   stavů registrací,
- * - při navýšení kapacity se nová místa rozdělí mezi týmy
- *   a vhodní kandidáti ze stavu RESERVED se povýší
- *   do stavu REGISTERED.
+ * Třída představuje aplikační vrstvu nad MatchAllocationEngine
+ * a zajišťuje vyhodnocení rozdílu mezi původní a novou kapacitou.
+ *
+ * Samotná doménová logika přepočtu je delegována do MatchAllocationEngine.
  */
 @Service
 public class MatchCapacityServiceImpl implements MatchCapacityService {
@@ -26,43 +22,63 @@ public class MatchCapacityServiceImpl implements MatchCapacityService {
 
     private final MatchAllocationEngine matchAllocationEngine;
 
+    /**
+     * Vytváří službu pro přepočet kapacity zápasu.
+     *
+     * @param matchAllocationEngine doménová služba pro přepočet rozložení hráčů
+     */
     public MatchCapacityServiceImpl(MatchAllocationEngine matchAllocationEngine) {
         this.matchAllocationEngine = matchAllocationEngine;
     }
 
     /**
-     * {@inheritDoc}
+     * Vyhodnocuje změnu kapacity zápasu a deleguje odpovídající logiku.
+     *
+     * Při snížení kapacity se spustí globální přepočet registrací.
+     * Při navýšení kapacity se rozdělí nová místa mezi týmy
+     * a povýší se vhodní kandidáti ze stavu RESERVED.
+     *
+     * Operace je vedena jako transakční, protože může měnit stav registrací.
+     *
+     * @param match entita zápasu po uložení změny
+     * @param oldMaxPlayers původní hodnota maxPlayers
      */
     @Override
     @Transactional
     public void handleCapacityChange(MatchEntity match, Integer oldMaxPlayers) {
+
         if (match == null) {
             return;
         }
 
         Integer newMaxPlayers = match.getMaxPlayers();
-        // Pokud nemáme jedno z čísel, neděláme nic – typicky nový zápas
+
+        // Pokud nemáme jednu z hodnot, typicky jde o nový zápas
         if (newMaxPlayers == null || oldMaxPlayers == null) {
             return;
         }
 
         int diffMaxPlayers = newMaxPlayers - oldMaxPlayers;
+
         if (diffMaxPlayers == 0) {
             return;
         }
 
-        log.debug("handleCapacityChange: matchId={}, oldMax={}, newMax={}, diff={}",
-                match.getId(), oldMaxPlayers, newMaxPlayers, diffMaxPlayers);
+        log.debug(
+                "handleCapacityChange: matchId={}, oldMax={}, newMax={}, diff={}",
+                match.getId(),
+                oldMaxPlayers,
+                newMaxPlayers,
+                diffMaxPlayers
+        );
 
         if (diffMaxPlayers < 0) {
-            // SNÍŽENÍ kapacity – přebyteční hráči se přesunou do RESERVED
-            // a následně se přepočtou pozice podle kapacity postů.
+            // Snížení kapacity – přebyteční hráči se přesunou do RESERVED
             matchAllocationEngine.recomputeForMatch(match.getId());
             return;
         }
 
-        // ZVÝŠENÍ kapacity – nová místa se rozdělí mezi týmy
-        // a vhodní kandidáti ze stavu RESERVED se povýší na REGISTERED.
+        // Navýšení kapacity – rozdělí se nová místa mezi týmy
         matchAllocationEngine.handleCapacityIncrease(match, diffMaxPlayers);
     }
 }

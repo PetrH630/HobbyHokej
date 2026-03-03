@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
@@ -17,11 +17,11 @@ import java.util.Map;
 /**
  * Globální handler výjimek pro REST API.
  *
- * Slouží k centralizovanému zachytávání výjimek z controllerů a service
- * vrstvy, jejich převodu na jednotný JSON formát {@link ApiError} a
- * k nastavení odpovídajících HTTP status kódů.
+ * Slouží k centralizovanému zachytávání výjimek z controllerů a service vrstvy,
+ * jejich převodu na jednotný JSON formát ApiError a k nastavení odpovídajících
+ * HTTP status kódů.
  *
- * Třída neřeší business logiku ani detailní logování. Tyto aspekty lze
+ * Třída neřeší business logiku ani detailní logování. Tyto aspekty se mohou
  * doplnit do jednotlivých handler metod podle potřeby.
  */
 @RestControllerAdvice
@@ -30,10 +30,14 @@ public class GlobalExceptionHandler {
     // 1) Doménové výjimky
 
     /**
-     * Zachytává výjimky typu {@link BusinessException}.
+     * Zachytává výjimky typu BusinessException.
      *
      * Výjimka předává HTTP status, uživatelskou zprávu a další informace,
-     * které se používají při sestavení odpovědi {@link ApiError}.
+     * které se používají při sestavení odpovědi ApiError.
+     *
+     * @param ex      doménová výjimka BusinessException
+     * @param request HTTP požadavek, ze kterého se přebírá cesta a IP adresa
+     * @return odpověď s ApiError a odpovídajícím HTTP statusem
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(
@@ -56,10 +60,14 @@ public class GlobalExceptionHandler {
     // 2) Přístup odepřen (Spring Security)
 
     /**
-     * Zachytává {@link AccessDeniedException} vyhozenou Spring Security.
+     * Zachytává AccessDeniedException vyhozenou Spring Security.
      *
      * Typicky jde o situace, kdy uživatel nemá potřebnou roli pro volání
      * daného endpointu. Vrací se HTTP status 403 Forbidden.
+     *
+     * @param ex      výjimka AccessDeniedException
+     * @param request HTTP požadavek
+     * @return odpověď s ApiError a statusem 403
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex,
@@ -81,10 +89,14 @@ public class GlobalExceptionHandler {
     // 3) Chybné vstupy (IllegalArgumentException)
 
     /**
-     * Zachytává {@link IllegalArgumentException}.
+     * Zachytává IllegalArgumentException.
      *
      * Používá se pro obecné validační chyby vstupů nebo nesprávné
      * parametry předané do service vrstvy. Vrací se HTTP status 400.
+     *
+     * @param ex      výjimka IllegalArgumentException
+     * @param request HTTP požadavek
+     * @return odpověď s ApiError a statusem 400
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex,
@@ -106,10 +118,14 @@ public class GlobalExceptionHandler {
     // 4) Neplatný stav aplikace (IllegalStateException)
 
     /**
-     * Zachytává {@link IllegalStateException}.
+     * Zachytává IllegalStateException.
      *
      * Používá se pro situace, kdy je aplikace v neplatném stavu a
      * daná operace nemůže být provedena. Typicky se vrací HTTP status 409.
+     *
+     * @param ex      výjimka IllegalStateException
+     * @param request HTTP požadavek
+     * @return odpověď s ApiError a statusem 409
      */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiError> handleIllegalState(IllegalStateException ex,
@@ -131,11 +147,15 @@ public class GlobalExceptionHandler {
     // 5) Porušení integrity dat
 
     /**
-     * Zachytává {@link DataIntegrityViolationException} z databázové vrstvy.
+     * Zachytává DataIntegrityViolationException z databázové vrstvy.
      *
      * Typicky jde o porušení unikátních omezení nebo jiné konflikty při
      * ukládání dat. Z bezpečnostních důvodů se nevrací detailní databázová
      * zpráva, ale obecnější chybové hlášení.
+     *
+     * @param ex      výjimka DataIntegrityViolationException
+     * @param request HTTP požadavek
+     * @return odpověď s ApiError a statusem 409
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(
@@ -162,6 +182,10 @@ public class GlobalExceptionHandler {
      *
      * Slouží jako poslední ochrana proti pádu aplikace bez odpovědi
      * a vrací jednotný formát chyby s HTTP statusem 500.
+     *
+     * @param ex      neočekávaná výjimka
+     * @param request HTTP požadavek
+     * @return odpověď s ApiError a statusem 500
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAll(Exception ex,
@@ -183,10 +207,14 @@ public class GlobalExceptionHandler {
     // 7) Validační chyby (@Valid, Bean Validation)
 
     /**
-     * Zachytává validační chyby vyvolané anotací {@code @Valid}.
+     * Zachytává validační chyby vyvolané anotací @Valid.
      *
-     * Do pole {@code details} se ukládá mapa ve tvaru název pole → text
+     * Do pole details se ukládá mapa ve tvaru název pole → text
      * validační chyby. Vrací se HTTP status 400 Bad Request.
+     *
+     * @param ex      validační výjimka MethodArgumentNotValidException
+     * @param request HTTP požadavek
+     * @return odpověď s ApiError, včetně mapy fieldErrors
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationException(

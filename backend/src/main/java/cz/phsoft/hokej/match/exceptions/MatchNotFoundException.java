@@ -6,12 +6,18 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že požadovaný zápas nebyl nalezen.
  *
- * Vyhazuje se při práci s ID zápasu, které neexistuje v databázi.
+ * Vyhazuje se při práci s identifikátorem zápasu,
+ * který neexistuje v databázi.
  *
- * Typicky mapováno na HTTP 404 (Not Found).
+ * Výjimka je mapována na HTTP status 404 Not Found.
  */
 public class MatchNotFoundException extends BusinessException {
 
+    /**
+     * Vytváří výjimku pro nenalezený zápas.
+     *
+     * @param matchId identifikátor nenalezeného zápasu
+     */
     public MatchNotFoundException(Long matchId) {
         super("BE - Zápas s ID " + matchId + " nenalezen.", HttpStatus.NOT_FOUND);
     }

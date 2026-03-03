@@ -5,12 +5,11 @@ import cz.phsoft.hokej.player.enums.Team;
 import jakarta.persistence.Embeddable;
 
 /**
- * Hodnota reprezentující skóre zápasu.
+ * Value object reprezentující skóre zápasu.
  *
- * Uchovává počet vstřelených branek pro tým LIGHT a tým DARK.
- * Třída je používána jako vložený objekt (value object) v entitě MatchEntity.
- *
- * Obsahuje doménovou logiku pro práci se skóre a určení výsledku zápasu.
+ * Objekt je vložen do entit MatchEntity a MatchHistoryEntity.
+ * Obsahuje doménovou logiku pro práci se skóre,
+ * určení výsledku a vítěze zápasu.
  */
 @Embeddable
 public class MatchScore {
@@ -23,6 +22,12 @@ public class MatchScore {
         this.dark = 0;
     }
 
+    /**
+     * Vrací počet branek pro zadaný tým.
+     *
+     * @param team tým, pro který se vrací skóre
+     * @return počet branek nebo null, pokud tým není zadán
+     */
     public Integer getGoals(Team team) {
         if (team == null) {
             return null;
@@ -30,7 +35,16 @@ public class MatchScore {
         return team == Team.LIGHT ? light : dark;
     }
 
+    /**
+     * Nastavuje počet branek pro zadaný tým.
+     *
+     * Hodnota nesmí být záporná.
+     *
+     * @param team tým, pro který se skóre nastavuje
+     * @param value počet branek
+     */
     public void setGoals(Team team, Integer value) {
+
         if (team == null || value == null) {
             return;
         }
@@ -47,9 +61,9 @@ public class MatchScore {
     }
 
     /**
-     * Vrací výsledek zápasu na základě aktuálního skóre.
+     * Určuje výsledek zápasu na základě aktuálního skóre.
      *
-     * @return {@link MatchResult} reprezentující výsledek zápasu.
+     * @return výsledek zápasu
      */
     public MatchResult getResult() {
 
@@ -69,9 +83,9 @@ public class MatchScore {
     }
 
     /**
-     * Vrací vítězný tým.
+     * Určuje vítězný tým na základě výsledku zápasu.
      *
-     * @return Vítězný tým nebo null v případě remízy či nezadaného skóre.
+     * @return vítězný tým nebo null v případě remízy nebo nezadaného skóre
      */
     public Team getWinner() {
 
@@ -84,9 +98,7 @@ public class MatchScore {
         };
     }
 
-    public Integer getLight() {
-        return light;
-    }
+    public Integer getLight() { return light; }
 
     public void setLight(Integer light) {
         if (light != null && light < 0) {
@@ -95,9 +107,7 @@ public class MatchScore {
         this.light = light;
     }
 
-    public Integer getDark() {
-        return dark;
-    }
+    public Integer getDark() { return dark; }
 
     public void setDark(Integer dark) {
         if (dark != null && dark < 0) {

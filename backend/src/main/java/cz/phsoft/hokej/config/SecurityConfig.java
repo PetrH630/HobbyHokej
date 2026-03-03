@@ -1,7 +1,7 @@
 package cz.phsoft.hokej.config;
 
 import cz.phsoft.hokej.player.repositories.PlayerRepository;
-
+import cz.phsoft.hokej.user.services.AppUserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,16 +20,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import cz.phsoft.hokej.user.services.AppUserService;
 
 import java.util.List;
 
 /**
  * Hlavní konfigurace Spring Security pro backend aplikace.
  *
- * Třída zajišťuje nastavení autentizace, autorizace endpointů,
- * login mechanizmu, správy session a CORS.
- * Používá produkční JSON login a rolově řízený přístup.
+ * V této třídě se konfiguruje autentizace uživatelů, autorizace endpointů,
+ * správa HTTP session, CORS politika a napojení vlastního login filtru.
+ * Třída představuje centrální bezpečnostní konfiguraci celé aplikace
+ * a propojuje bezpečnostní infrastrukturu se service vrstvou.
  */
 @Configuration
 @EnableWebSecurity
@@ -40,10 +40,10 @@ public class SecurityConfig {
     private final PlayerRepository playerRepository;
 
     /**
-     * Příznak demo režimu.
+     * Příznak demo režimu aplikace.
      *
-     * Pokud je {@code app.demo-mode=true}, některé operace mohou být
-     * omezeny na úrovni service vrstvy.
+     * Pokud je hodnota nastavena na true, mohou být některé operace
+     * omezeny nebo zpřístupněny pouze v demonstračním režimu.
      */
     @Value("${app.demo-mode:false}")
     private boolean isDemoMode;
@@ -51,23 +51,46 @@ public class SecurityConfig {
     /**
      * Seznam povolených originů pro CORS.
      *
-     * Příklad:
-     * app.cors.allowed-origins=http://localhost:5173,https://hokej.phsoft.cz
+     * Hodnota se načítá z aplikační konfigurace a může obsahovat
+     * více domén oddělených čárkou.
      */
     @Value("${app.cors.allowed-origins:http://localhost:5173,https://hokej.phsoft.cz}")
     private String allowedOrigins;
 
+    /**
+     * Vytváří instanci bezpečnostní konfigurace.
+     *
+     * @param userDetailsService služba pro načítání uživatele z databáze
+     * @param playerRepository   repozitář hráčů používaný v rámci bezpečnostní logiky
+     */
     public SecurityConfig(CustomUserDetailsService userDetailsService,
                           PlayerRepository playerRepository) {
         this.userDetailsService = userDetailsService;
         this.playerRepository = playerRepository;
     }
 
+    /**
+     * Registruje PasswordEncoder používaný pro hashování hesel.
+     *
+     * Používá se algoritmus BCrypt, který je doporučený pro produkční
+     * použití v rámci Spring Security.
+     *
+     * @return instance PasswordEncoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Konfiguruje DaoAuthenticationProvider.
+     *
+     * Provider propojuje Spring Security s implementací UserDetailsService
+     * a zajišťuje ověřování hesel pomocí PasswordEncoder.
+     *
+     * @param passwordEncoder encoder pro porovnávání hesel
+     * @return nakonfigurovaný DaoAuthenticationProvider
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -76,12 +99,32 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    /**
+     * Zpřístupňuje AuthenticationManager z konfigurace Spring Security.
+     *
+     * @param authConfig konfigurace autentizace
+     * @return instance AuthenticationManager
+     * @throws Exception pokud dojde k chybě při získávání manageru
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig)
             throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
+    /**
+     * Hlavní konfigurace bezpečnostního filtračního řetězce.
+     *
+     * V této metodě se nastavují pravidla autorizace endpointů,
+     * správa session, registrace vlastního login filtru a logout logika.
+     *
+     * @param http              konfigurace HttpSecurity
+     * @param authManager       authentication manager
+     * @param appUserService    služba pro práci s uživateli
+     * @param authProvider      poskytovatel autentizace
+     * @return nakonfigurovaný SecurityFilterChain
+     * @throws Exception při chybě konfigurace
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    AuthenticationManager authManager,
@@ -95,14 +138,8 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> {
 
-                    /*
-                     * Povolení CORS preflight requestů.
-                     */
                     auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
-                    /*
-                     * Veřejné endpointy.
-                     */
                     auth.requestMatchers(
                             "/api/auth/register",
                             "/api/auth/verify",
@@ -118,33 +155,21 @@ public class SecurityConfig {
                             "/api/inactivity/admin/me/**"
                     ).permitAll();
 
-                    /*
-                     * DEMO režim: umožní číst demo notifikace bez přihlášení.
-                     */
                     if (isDemoMode) {
                         auth.requestMatchers("/api/demo/notifications/**").permitAll();
                     }
 
-                    /*
-                     * Admin-only endpointy.
-                     */
                     auth.requestMatchers("/api/admin/seasons/**").hasRole("ADMIN");
                     auth.requestMatchers("/api/email/test/**").hasRole("ADMIN");
                     auth.requestMatchers("/api/debug/me").hasRole("ADMIN");
                     auth.requestMatchers("/api/test/**").hasRole("ADMIN");
 
-                    /*
-                     * Admin + Manager endpointy.
-                     */
                     auth.requestMatchers("/api/matches/admin/**").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers("/api/players/admin/**").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers("/api/registrations/admin/**").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers("/api/inactivity/admin/**").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers("/api/notifications/admin/**").hasAnyRole("ADMIN", "MANAGER");
 
-                    /*
-                     * Zbytek API pouze pro přihlášené.
-                     */
                     auth.requestMatchers("/api/**").authenticated();
                     auth.anyRequest().authenticated();
                 })
@@ -157,7 +182,6 @@ public class SecurityConfig {
                         new CustomJsonLoginFilter("/api/auth/login", authManager, appUserService),
                         UsernamePasswordAuthenticationFilter.class
                 )
-
 
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
@@ -176,6 +200,14 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Konfiguruje CORS politiku aplikace.
+     *
+     * Povolené originy se načítají z aplikační konfigurace.
+     * Povolené jsou standardní HTTP metody používané REST API.
+     *
+     * @return konfigurace CORS pro celý backend
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -193,7 +225,6 @@ public class SecurityConfig {
         );
 
         configuration.setAllowCredentials(true);
-
         configuration.setExposedHeaders(List.of("Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source =

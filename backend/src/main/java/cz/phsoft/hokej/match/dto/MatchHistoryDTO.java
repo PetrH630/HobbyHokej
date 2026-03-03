@@ -11,15 +11,12 @@ import java.time.LocalDateTime;
 /**
  * DTO reprezentující historický záznam změny zápasu.
  *
- * Slouží k přenosu dat o změnách zápasu z databázové vrstvy
- * do prezentační vrstvy. Obsahuje kompletní snapshot stavu
- * zápasu v okamžiku provedené změny včetně metavadat o tom,
- * kdy byla změna provedena a jaký typ akce ji vyvolal.
+ * Objekt obsahuje snapshot stavu zápasu v okamžiku provedené změny
+ * včetně metadat o typu akce a času změny. Používá se pro auditní
+ * a administrativní přehled historie úprav.
  *
- * DTO je typicky naplňováno na základě historické entity,
- * která je vytvářena databázovým triggerem. Neobsahuje
- * žádnou business logiku a slouží výhradně jako datový
- * přenosový objekt mezi servisní a prezentační vrstvou.
+ * DTO je naplňováno na základě historické entity ukládané do databáze
+ * a slouží výhradně jako přenosový objekt mezi servisní a prezentační vrstvou.
  */
 public class MatchHistoryDTO {
 

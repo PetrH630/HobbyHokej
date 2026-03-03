@@ -6,12 +6,13 @@ import cz.phsoft.hokej.player.enums.Team;
 import java.util.List;
 
 /**
- * DTO pro přehled pozic a kapacity na ledě v rámci jednoho zápasu
- * pro konkrétní tým.
+ * DTO reprezentující přehled pozic a kapacity pro konkrétní tým v zápase.
  *
- * Obsahuje identifikaci zápasu, použitý MatchMode, maximální počet hráčů,
- * vybraný tým a seznam pozic s kapacitou, obsazeností a volnými sloty
- * pro tento tým.
+ * Objekt obsahuje identifikaci zápasu, použitý MatchMode,
+ * maximální počet hráčů, vybraný tým a seznam pozic
+ * s kapacitou a aktuální obsazeností pouze pro tento tým.
+ *
+ * DTO je určeno pro detailní zobrazení obsazení jednoho týmu.
  */
 public class MatchTeamPositionOverviewDTO {
 

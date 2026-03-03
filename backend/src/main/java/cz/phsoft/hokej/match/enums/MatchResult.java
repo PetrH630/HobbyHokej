@@ -1,9 +1,10 @@
 package cz.phsoft.hokej.match.enums;
 
 /**
- * Výsledek zápasu.
+ * Výčtový typ reprezentující výsledek zápasu.
  *
- * Reprezentuje konečný stav zápasu na základě skóre.
+ * Hodnota je odvozena ze skóre a používá se
+ * pro jednoznačné určení výsledku z pohledu aplikace.
  */
 public enum MatchResult {
 
@@ -23,7 +24,7 @@ public enum MatchResult {
     DRAW,
 
     /**
-     * Skóre zatím není zadáno.
+     * Skóre zatím nebylo zadáno.
      */
     NOT_PLAYED
 }

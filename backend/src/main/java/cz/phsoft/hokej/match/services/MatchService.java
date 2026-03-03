@@ -9,197 +9,188 @@ import cz.phsoft.hokej.match.enums.MatchCancelReason;
 import java.util.List;
 
 /**
- * Rozhraní se používá pro správu zápasů v aplikaci.
+ * Hlavní servisní rozhraní pro správu zápasů.
  *
- * Definuje kontrakt pro práci se zápasy z pohledu business logiky.
- * Zajišťuje vytváření, úpravy, mazání zápasů, získávání přehledů
- * a práci s dostupností zápasů pro konkrétního hráče.
- *
- * Rozhraní je navrženo tak, aby oddělovalo business logiku
- * od persistence vrstvy a poskytovalo jednotný vstupní bod
- * pro controllery a např. plánovače (scheduler).
+ * Rozhraní definuje kompletní business API pro práci se zápasy v aplikaci.
+ * Slouží jako kontrakt mezi controller vrstvou a implementacemi servisní vrstvy.
+ * Implementace typicky využívá rozdělení na čtecí (query) a změnové (command) služby.
  */
 public interface MatchService {
 
     /**
-     * Vrátí seznam všech zápasů v systému.
+     * Vrací seznam všech zápasů v systému.
      *
-     * Metoda se typicky používá pro administrátorské přehledy
-     * nebo pro globální seznam zápasů v rámci vybrané sezóny.
+     * Metoda se používá pro administrativní přehled zápasů bez ohledu na čas konání
+     * a stav zápasu.
      *
-     * @return seznam všech zápasů ve formě {@link MatchDTO}
+     * @return seznam všech zápasů reprezentovaných pomocí MatchDTO
      */
     List<MatchDTO> getAllMatches();
 
     /**
-     * Vrátí seznam všech nadcházejících zápasů.
+     * Vrací seznam všech nadcházejících zápasů.
      *
-     * Za nadcházející zápasy se považují ty, které mají
-     * datum a čas v budoucnosti podle interně zvolených pravidel.
+     * Do výběru jsou zahrnuty pouze zápasy s datem konání v budoucnosti.
      *
-     * @return seznam nadcházejících zápasů
+     * @return seznam nadcházejících zápasů jako MatchDTO
      */
     List<MatchDTO> getUpcomingMatches();
 
     /**
-     * Vrátí seznam všech již odehraných zápasů.
+     * Vrací seznam všech již odehraných zápasů.
      *
-     * Zápasy jsou obvykle řazené od nejnovějšího po nejstarší.
+     * Do výběru jsou zahrnuty zápasy s datem konání v minulosti.
      *
-     * @return seznam minulých zápasů
+     * @return seznam minulých zápasů jako MatchDTO
      */
     List<MatchDTO> getPastMatches();
 
     /**
-     * Vrátí nejbližší nadcházející zápas.
+     * Vrací nejbližší nadcházející zápas.
      *
-     * Metoda se používá například pro zobrazení
-     * „dalšího zápasu“ na dashboardu nebo
-     * pro potřeby notifikací.
+     * Pokud žádný budoucí zápas neexistuje, může být vrácena hodnota null.
      *
-     * @return nejbližší nadcházející zápas nebo {@code null},
-     * pokud žádný neexistuje
+     * @return nejbližší nadcházející zápas jako MatchDTO nebo null
      */
     MatchDTO getNextMatch();
 
     /**
-     * Vrátí základní informace o zápasu podle jeho ID.
+     * Vrací detail zápasu dle jeho identifikátoru v administrativním pohledu.
      *
-     * @param id ID zápasu
-     * @return zápas ve formě {@link MatchDTO}
+     * Metoda nebere v úvahu kontext konkrétního hráče.
+     *
+     * @param id identifikátor zápasu
+     * @return zápas jako MatchDTO
      */
     MatchDTO getMatchById(Long id);
 
     /**
-     * Vytvoří nový zápas.
+     * Vytváří nový zápas na základě vstupního DTO.
      *
-     * Metoda je typicky dostupná pouze pro administrátory
-     * nebo manažery. Implementace zajišťuje validaci
-     * data v rámci aktivní sezóny a přiřazení sezóny k zápasu.
+     * Metoda provádí základní validace a předává data do persistence vrstvy.
      *
-     * @param dto data nového zápasu
-     * @return vytvořený zápas
+     * @param dto vstupní DTO s definicí nového zápasu
+     * @return vytvořený zápas jako MatchDTO včetně přiděleného ID
      */
     MatchDTO createMatch(MatchDTO dto);
 
     /**
-     * Aktualizuje existující zápas.
+     * Aktualizuje existující zápas podle předaného DTO.
      *
-     * Implementace je odpovědná za načtení stávajícího zápasu,
-     * přenesení změn z DTO, validaci a uložení výsledného stavu.
-     *
-     * @param id  ID zápasu, který má být upraven
-     * @param dto nové hodnoty pro zápas
-     * @return aktualizovaný zápas
+     * @param id identifikátor aktualizovaného zápasu
+     * @param dto DTO obsahující nové hodnoty pro zápas
+     * @return aktualizovaný zápas jako MatchDTO
      */
     MatchDTO updateMatch(Long id, MatchDTO dto);
 
     /**
-     * Smaže zápas podle ID.
+     * Odstraňuje zápas ze systému.
      *
-     * Metoda typicky vrací standardizovanou odpověď
-     * s informací o úspěchu operace.
+     * Způsob mazání (hard delete, soft delete) je dán implementací.
      *
-     * @param id ID zápasu, který má být smazán
-     * @return odpověď s výsledkem operace
+     * @param id identifikátor zápasu
+     * @return objekt SuccessResponseDTO s potvrzením operace
      */
     SuccessResponseDTO deleteMatch(Long id);
 
     /**
-     * Vrátí detailní informace o zápasu.
+     * Vrací detail zápasu z pohledu hráče.
      *
-     * Oproti metodě {@link #getMatchById(Long)} může detail
-     * obsahovat rozšířená data, například statistiky,
-     * seznamy hráčů v jednotlivých stavech nebo agregované údaje.
+     * Výstup může obsahovat informace o registracích, týmech a stavu
+     * konkrétního hráče vůči danému zápasu.
      *
-     * @param id ID zápasu
-     * @return detail zápasu
+     * @param id identifikátor zápasu
+     * @return detail zápasu jako MatchDetailDTO
      */
     MatchDetailDTO getMatchDetail(Long id);
 
     /**
-     * Vrátí seznam zápasů, na které se daný hráč může registrovat.
+     * Vrací seznam zápasů dostupných pro registraci konkrétního hráče.
      *
-     * Implementace obvykle filtruje pouze nadcházející zápasy,
-     * kontroluje kapacitu a respektuje pravidla sezóny
-     * a případná další business omezení.
+     * Zohledňují se pravidla pro dostupnost, čas konání a případná omezení
+     * pro daného hráče.
      *
-     * @param playerId ID hráče
-     * @return seznam dostupných zápasů pro hráče
+     * @param playerId identifikátor hráče
+     * @return seznam dostupných zápasů jako MatchDTO
      */
     List<MatchDTO> getAvailableMatchesForPlayer(Long playerId);
 
     /**
-     * Vrátí nadcházející zápasy pro konkrétního hráče.
+     * Vrací seznam nadcházejících zápasů pro konkrétního hráče.
      *
-     * Metoda může zohledňovat, zda je hráč registrovaný,
-     * případně další business pravidla. Výsledek je
-     * určen pro podrobnější zobrazení seznamu zápasů.
+     * Může být filtrováno podle registrace, týmů nebo jiných podmínek
+     * daných implementací.
      *
-     * @param playerId ID hráče
-     * @return seznam nadcházejících zápasů pro daného hráče
+     * @param playerId identifikátor hráče
+     * @return seznam nadcházejících zápasů pro hráče jako MatchDTO
      */
     List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId);
 
     /**
-     * Najde ID hráče podle e-mailu uživatele.
+     * Zjišťuje identifikátor hráče na základě e-mailu uživatele.
      *
-     * Metoda se používá jako pomocný nástroj v situaci,
-     * kdy je k dispozici e-mail přihlášeného uživatele
-     * a je potřeba zjistit navázaného hráče.
+     * Používá se jako pomocná metoda pro navázání identity uživatele
+     * a jeho hráčského profilu.
      *
      * @param email e-mail uživatele
-     * @return ID hráče nebo {@code null}, pokud neexistuje
+     * @return identifikátor hráče nebo null, pokud hráč neexistuje
      */
     Long getPlayerIdByEmail(String email);
 
     /**
-     * Vrátí přehled nadcházejících zápasů pro hráče.
+     * Vrací přehled nadcházejících zápasů pro hráče v přehledové podobě.
      *
-     * Přehled slouží pro zobrazení na dashboardu
-     * nebo v jednoduchých seznamech, kde se zobrazují
-     * základní informace o zápasech včetně stavu
-     * daného hráče.
+     * DTO MatchOverviewDTO je optimalizováno pro zobrazení v seznamech
+     * a přehledech na úvodních obrazovkách.
      *
-     * @param playerId ID hráče
-     * @return přehled nadcházejících zápasů pro daného hráče
+     * @param playerId identifikátor hráče
+     * @return seznam nadcházejících zápasů jako MatchOverviewDTO
      */
     List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId);
 
     /**
-     * Vrátí přehled všech odehraných zápasů pro hráče.
+     * Vrací přehled všech odehraných zápasů daného hráče.
      *
-     * Metoda se používá pro statistiky, historii účasti
-     * a přehled minulých zápasů daného hráče v rámci sezóny.
+     * Používá se pro osobní historii zápasů z pohledu konkrétního hráče.
      *
-     * @param playerId ID hráče
-     * @return přehled všech odehraných zápasů pro daného hráče
+     * @param playerId identifikátor hráče
+     * @return seznam odehraných zápasů jako MatchOverviewDTO
      */
     List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId);
 
     /**
-     * Zruší zápas a nastaví důvod zrušení.
+     * Ruší zápas a nastavuje důvod zrušení.
      *
-     * Zápas je označen jako zrušený včetně uvedeného důvodu.
-     * Implementace může navazovat další logiku, například
-     * odeslání notifikací hráčům.
+     * Implementace provádí kontrolu stavu zápasu, nastavuje MatchStatus a
+     * ukládá důvod zrušení v podobě MatchCancelReason.
      *
-     * @param matchId ID zápasu
-     * @param reason  důvod zrušení
-     * @return odpověď s výsledkem operace
+     * @param matchId identifikátor zápasu
+     * @param reason důvod zrušení zápasu
+     * @return objekt SuccessResponseDTO s potvrzením operace
      */
     SuccessResponseDTO cancelMatch(Long matchId, MatchCancelReason reason);
 
     /**
-     * Obnoví dříve zrušený zápas.
+     * Obnovuje dříve zrušený zápas.
      *
-     * Zápas se vrací do stavu, kdy je opět platný a může se konat,
-     * pokud jsou splněny ostatní podmínky (datum, kapacita a podobně).
+     * Implementace provádí kontrolu původního stavu a nastavuje vhodný
+     * nový stav zápasu.
      *
-     * @param matchId ID zápasu
-     * @return odpověď s výsledkem operace
+     * @param matchId identifikátor zápasu
+     * @return objekt SuccessResponseDTO s potvrzením operace
      */
     SuccessResponseDTO unCancelMatch(Long matchId);
 
+    /**
+     * Aktualizuje skóre zápasu.
+     *
+     * Zadané hodnoty jsou uloženy do entitního modelu a mohou být
+     * použity pro výpočet výsledku a statistik.
+     *
+     * @param matchId identifikátor zápasu
+     * @param scoreLight počet branek týmu LIGHT
+     * @param scoreDark počet branek týmu DARK
+     * @return aktualizovaný zápas jako MatchDTO
+     */
     MatchDTO updateMatchScore(Long matchId, Integer scoreLight, Integer scoreDark);
 }

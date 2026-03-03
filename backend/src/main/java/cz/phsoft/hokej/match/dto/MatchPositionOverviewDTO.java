@@ -1,19 +1,18 @@
 package cz.phsoft.hokej.match.dto;
 
 import cz.phsoft.hokej.match.enums.MatchMode;
-import cz.phsoft.hokej.match.services.MatchPositionService;
 
 import java.util.List;
 
 /**
- * DTO pro přehled pozic a kapacity na ledě v rámci jednoho zápasu.
+ * DTO reprezentující přehled pozic a jejich kapacity v rámci jednoho zápasu.
  *
- * Obsahuje základní identifikaci zápasu, použitý MatchMode, maximální
- * počet hráčů a seznam pozic s kapacitou a obsazeností pro týmy DARK
- * a LIGHT.
+ * Objekt obsahuje identifikaci zápasu, použitý MatchMode,
+ * maximální počet hráčů a seznam pozic s kapacitou
+ * a aktuální obsazeností pro oba týmy.
  *
- * DTO se používá jako výstup z {@link MatchPositionService}
- * a může se přímo mapovat na odpověď pro frontend.
+ * DTO je vytvářeno službou MatchPositionService
+ * a slouží jako výstupní model pro frontend.
  */
 public class MatchPositionOverviewDTO {
 

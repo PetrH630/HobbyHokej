@@ -16,13 +16,14 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 /**
- * DTO, které reprezentuje základní informace o zápasu.
+ * DTO reprezentující základní informace o zápasu.
  *
- * Slouží k přenosu dat o zápasech mezi backendem a klientem,
- * například při vytváření, editaci nebo zobrazování výsledků zápasu.
+ * Slouží k přenosu dat mezi backendem a klientem při vytváření,
+ * editaci a zobrazování zápasů. Obsahuje pouze transportní údaje
+ * bez vazby na entity a bez business logiky.
  *
- * DTO neobsahuje business logiku ani vazby na entity
- * a slouží pouze jako transportní objekt.
+ * Objekt se používá zejména v administrativním kontextu
+ * a v základních přehledech zápasů.
  */
 public class MatchDTO implements NumberedMatchDTO {
 

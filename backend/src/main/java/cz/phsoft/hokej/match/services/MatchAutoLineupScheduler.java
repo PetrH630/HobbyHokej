@@ -5,6 +5,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 
+/**
+ * Plánovač automatického přeskupení první lajny.
+ *
+ * Třída je připravena pro budoucí aktivaci pomocí @Scheduled.
+ * Umožňuje automatické spuštění auto-lineup před začátkem zápasu.
+ */
 @Service
 public class MatchAutoLineupScheduler {
 

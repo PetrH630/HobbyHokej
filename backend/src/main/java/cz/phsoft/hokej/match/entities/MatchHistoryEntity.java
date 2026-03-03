@@ -8,151 +8,78 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentující historický záznam o zápasu.
+ * Entita reprezentující historický záznam změny zápasu.
  *
- * Slouží pro auditní účely a uchovávání změn zápasů v čase.
- * Každý záznam představuje stav zápasu v okamžiku provedení operace
- * nad hlavní entitou MatchEntity.
- *
- * Záznamy jsou typicky vytvářeny databázovým triggerem při operacích
- * INSERT, UPDATE nebo DELETE.
+ * Každý záznam představuje snapshot stavu zápasu
+ * v okamžiku provedení operace nad entitou MatchEntity.
+ * Záznamy jsou typicky vytvářeny databázovým triggerem.
  */
 @Entity
 @Table(name = "matches_history")
 public class MatchHistoryEntity {
 
-    /**
-     * Primární klíč historického záznamu.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Typ provedené operace nad zápasem.
-     *
-     * Typicky se jedná o hodnoty INSERT, UPDATE nebo DELETE.
-     */
     @Column(name = "action", nullable = false)
     private String action;
 
-    /**
-     * Datum a čas provedení změny.
-     *
-     * Udává okamžik vytvoření historického záznamu.
-     */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
-    /**
-     * ID zápasu z hlavní tabulky matches.
-     *
-     * Slouží pro propojení historického záznamu s původní entitou zápasu.
-     */
     @Column(name = "match_id", nullable = false)
     private Long matchId;
 
-    /**
-     * Původní časové razítko zápasu.
-     *
-     * Jedná se o hodnotu sloupce timestamp z MatchEntity
-     * v okamžiku provedení změny.
-     */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
-    /**
-     * Datum a čas konání zápasu v okamžiku změny.
-     */
     @Column(name = "date_time", nullable = false)
     private LocalDateTime dateTime;
 
-    /**
-     * Místo konání zápasu v okamžiku změny.
-     */
     @Column(name = "location", nullable = false)
     private String location;
 
-    /**
-     * Popis zápasu v okamžiku změny.
-     */
     @Column(name = "description")
     private String description;
 
-    /**
-     * Maximální počet hráčů povolených pro zápas v okamžiku změny.
-     */
     @Column(name = "max_players", nullable = false)
     private Integer maxPlayers;
 
-    /**
-     * Cena zápasu v okamžiku změny.
-     */
     @Column(name = "price", nullable = false)
     private Integer price;
 
-    /**
-     * Stav zápasu v okamžiku změny.
-     */
     @Enumerated(EnumType.STRING)
     @Column(name = "match_status")
     private MatchStatus matchStatus;
 
-    /**
-     * Důvod zrušení zápasu v okamžiku změny.
-     */
     @Enumerated(EnumType.STRING)
     @Column(name = "cancel_reason")
     private MatchCancelReason cancelReason;
 
-    /**
-     * Režim zápasu v okamžiku změny.
-     */
     @Enumerated(EnumType.STRING)
     @Column(name = "match_mode", nullable = false)
     private MatchMode matchMode;
 
-    /**
-     * ID sezóny, do které zápas patřil v okamžiku změny.
-     */
     @Column(name = "season_id", nullable = false)
     private Long seasonId;
 
-    /**
-     * ID uživatele, který zápas původně vytvořil.
-     */
     @Column(name = "created_by_user_id")
     private Long createdByUserId;
 
-    /**
-     * ID uživatele, který zápas naposledy změnil před vytvořením
-     * historického záznamu.
-     */
     @Column(name = "last_modified_by_user_id")
     private Long lastModifiedByUserId;
 
     /**
      * Skóre zápasu v okamžiku změny.
-     *
-     * Hodnoty mohou být null, pokud se zápas ještě neodehrál
-     * nebo pokud v době změny nebylo skóre zadáno.
      */
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(
-                    name = "light",
-                    column = @Column(name = "score_light")
-            ),
-            @AttributeOverride(
-                    name = "dark",
-                    column = @Column(name = "score_dark")
-            )
+            @AttributeOverride(name = "light", column = @Column(name = "score_light")),
+            @AttributeOverride(name = "dark", column = @Column(name = "score_dark"))
     })
     private MatchScore score;
 
-    /**
-     * Bezparametrický konstruktor požadovaný JPA.
-     */
     public MatchHistoryEntity() {
     }
 
@@ -204,11 +131,6 @@ public class MatchHistoryEntity {
     public Long getLastModifiedByUserId() { return lastModifiedByUserId; }
     public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
 
-    public MatchScore getScore() {
-        return score;
-    }
-
-    public void setScore(MatchScore score) {
-        this.score = score;
-    }
+    public MatchScore getScore() { return score; }
+    public void setScore(MatchScore score) { this.score = score; }
 }

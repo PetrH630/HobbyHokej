@@ -9,7 +9,8 @@ import PlayerPositionModal from "../matchRegistration/PlayerPositionModal";
 import { PlayerPosition } from "../../constants/playerPosition";
 import BackButton from "../BackButton";
 import MatchRegistrationHistory from "../MatchRegistration/MatchRegistrationHistory";
-import { computeTeamPositionAvailability } from "../../utils/matchPositionUtils";
+// computeTeamPositionAvailability už nepotřebujeme
+// import { computeTeamPositionAvailability } from "../../utils/matchPositionUtils";
 
 const isMatchUpcoming = (match) => {
     if (!match || !match.dateTime) {
@@ -71,19 +72,20 @@ const MatchDetail = ({
 
     const defaultPlayerPosition = PlayerPosition.ANY;
 
-    // Výpočet obsazenosti a plných pozic pro zvolený tým pomocí utilu
-    let positionCountsForPendingTeam = {};
-    let occupiedPositionsForPendingTeam = [];
-    let onlyGoalieLeftForPendingTeam = false;
-
-    if (pendingTeam && match) {
-        const { occupiedCounts, fullPositions, onlyGoalieLeft } =
-            computeTeamPositionAvailability(match, pendingTeam);
-
-        positionCountsForPendingTeam = occupiedCounts;
-        occupiedPositionsForPendingTeam = fullPositions;
-        onlyGoalieLeftForPendingTeam = !!onlyGoalieLeft;
-    }
+    // PŮVODNÍ VÝPOČTY OBSADENOSTI PRO TÝM – UŽ NEJSOU TŘEBA, ŘEŠÍ TO BACKEND
+    //
+    // let positionCountsForPendingTeam = {};
+    // let occupiedPositionsForPendingTeam = [];
+    // let onlyGoalieLeftForPendingTeam = false;
+    //
+    // if (pendingTeam && match) {
+    //     const { occupiedCounts, fullPositions, onlyGoalieLeft } =
+    //         computeTeamPositionAvailability(match, pendingTeam);
+    //
+    //     positionCountsForPendingTeam = occupiedCounts;
+    //     occupiedPositionsForPendingTeam = fullPositions;
+    //     onlyGoalieLeftForPendingTeam = !!onlyGoalieLeft;
+    // }
 
     if (loading) {
         return (
@@ -195,12 +197,10 @@ const MatchDetail = ({
                 isOpen={showPositionModal}
                 onClose={handleClosePositionModal}
                 defaultPosition={defaultPlayerPosition}
-                onSelectPosition={handleSelectPosition}
-                matchModeKey={match.matchMode}
-                occupiedPositions={occupiedPositionsForPendingTeam}
-                positionCounts={positionCountsForPendingTeam}
+                onSelectPosition={handleSelectPosition}                
+                match={match}
+                focusTeam={pendingTeam}
                 isCapacityFull={isCapacityFull}
-                onlyGoalieLeft={onlyGoalieLeftForPendingTeam}
             />
         </div>
     );

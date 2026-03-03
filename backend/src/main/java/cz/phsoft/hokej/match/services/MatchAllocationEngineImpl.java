@@ -23,21 +23,19 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * Implementace engine pro přepočet rozložení hráčů v zápase.
+ * Implementace MatchAllocationEngine.
  *
- * Aktuální verze:
- * - replikuje logiku původní metody recalcStatusesForMatch z
- *   MatchRegistrationCommandServiceImpl,
- * - zpracovává navýšení kapacity obdobně jako původní
- *   MatchCapacityServiceImpl.handleCapacityIncrease,
- * - při změně kapacity přepočítává stavy REGISTERED / RESERVED
- *   a následně upraví pozice podle kapacity postů,
- * - při změně herního módu přemapuje neplatné pozice a
- *   provede rebalance pozic v rámci týmů.
+ * Třída centralizuje doménovou logiku přepočtu kapacity hráčů
+ * a rozložení pozic v zápase.
  *
- * Další fáze:
- * - sjednocení všech scénářů (kapacita, mód, auto-lineup)
- *   do jednoho společného algoritmu.
+ * Zajišťuje:
+ * - přepočet REGISTERED / RESERVED při změně kapacity,
+ * - vyvážení týmů DARK a LIGHT,
+ * - kontrolu a rebalance pozic podle MatchMode,
+ * - povýšení hráčů při navýšení kapacity,
+ * - úpravu pozic při změně herního módu.
+ *
+ * Operace jsou prováděny transakčně.
  */
 @Service
 public class MatchAllocationEngineImpl implements MatchAllocationEngine {
@@ -59,11 +57,21 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         this.matchRegistrationQueryService = matchRegistrationQueryService;
     }
 
-    // SNÍŽENÍ / OBNOVENÍ – GLOBÁLNÍ PŘEPOČET
-
+    /**
+     * Provede globální přepočet registrací pro daný zápas.
+     *
+     * Logika:
+     * - rozdělí kapacitu mezi brankáře a hráče v poli,
+     * - vybalancuje týmy podle cílové kapacity,
+     * - nastaví status REGISTERED / RESERVED,
+     * - provede rebalance pozic podle kapacity postů.
+     *
+     * @param matchId identifikátor zápasu
+     */
     @Override
     @Transactional
     public void recomputeForMatch(Long matchId) {
+
         if (matchId == null) {
             return;
         }
@@ -79,28 +87,21 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
 
         int maxPlayers = maxPlayersObj;
 
-        // Kolik slotů se rezervuje pro brankáře v rámci maxPlayers
         int goalieSlots = getGoalieSlotsForMatch(match);
-        if (goalieSlots < 0) {
-            goalieSlots = 0;
-        }
-        if (goalieSlots > maxPlayers) {
-            goalieSlots = maxPlayers;
-        }
+        goalieSlots = Math.max(0, Math.min(goalieSlots, maxPlayers));
 
         int skaterCapacity = maxPlayers - goalieSlots;
 
-        // Všichni aktuálně REGISTERED, seřazení podle času registrace (starší mají přednost)
-        List<MatchRegistrationEntity> allRegistered = registrationRepository.findByMatchId(matchId).stream()
+        List<MatchRegistrationEntity> allRegistered = registrationRepository
+                .findByMatchId(matchId).stream()
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
-                .sorted((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                .sorted(Comparator.comparing(MatchRegistrationEntity::getTimestamp))
                 .toList();
 
         if (allRegistered.isEmpty()) {
             return;
         }
 
-        // Rozdělení na brankáře a hráče v poli
         List<MatchRegistrationEntity> goalies = allRegistered.stream()
                 .filter(this::isGoalieRegistration)
                 .toList();
@@ -109,16 +110,9 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
                 .filter(r -> !isGoalieRegistration(r))
                 .toList();
 
-        int registeredGoalies = goalies.size();
-        int registeredSkaters = skaters.size();
-
-        // Brankáři – ponechají se REGISTERED pouze do výše goalieSlots,
-        // případní další brankáři se přesunou do RESERVED.
-        int allowedGoalies = Math.min(goalieSlots, maxPlayers);
         int keptGoalies = 0;
-
         for (MatchRegistrationEntity goalieReg : goalies) {
-            if (keptGoalies < allowedGoalies) {
+            if (keptGoalies < goalieSlots) {
                 updateRegistrationStatus(goalieReg, PlayerMatchStatus.REGISTERED);
                 keptGoalies++;
             } else {
@@ -126,18 +120,12 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             }
         }
 
-        if (registeredSkaters <= 0) {
-            // žádní bruslaři – dál není co počítat
-            return;
-        }
-
         int desiredTotal = skaterCapacity;
 
-        // Aktuální rozložení hráčů v poli – využívá se při rozhodování,
-        // který tým dostane případné "liché" extra místo.
         long currentDark = skaters.stream()
                 .filter(r -> r.getTeam() == Team.DARK)
                 .count();
+
         long currentLight = skaters.stream()
                 .filter(r -> r.getTeam() == Team.LIGHT)
                 .count();
@@ -146,11 +134,9 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         int targetLight;
 
         if (desiredTotal % 2 == 0) {
-            // Rovnoměrné rozdělení
             targetDark = desiredTotal / 2;
             targetLight = desiredTotal / 2;
         } else {
-            // Lichý počet – jeden tým má o 1 více, upřednostní se aktuálně větší tým
             if (currentDark >= currentLight) {
                 targetDark = desiredTotal / 2 + 1;
                 targetLight = desiredTotal - targetDark;
@@ -164,10 +150,10 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         int light = 0;
 
         for (MatchRegistrationEntity reg : skaters) {
-            Team team = reg.getTeam();
-            boolean movable = canAutoMoveTeam(reg); // využití PlayerSettings.isPossibleMoveToAnotherTeam()
 
-            // Hráč bez přiřazeného týmu – přiřadí se tam, kde je volno
+            Team team = reg.getTeam();
+            boolean movable = canAutoMoveTeam(reg);
+
             if (team == null) {
                 if (dark < targetDark) {
                     reg.setTeam(Team.DARK);
@@ -184,93 +170,75 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             }
 
             if (team == Team.DARK) {
-                if (!movable) {
-                    if (dark < targetDark) {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
-                        dark++;
-                    } else {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED);
-                    }
+                if (dark < targetDark) {
+                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
+                    dark++;
+                } else if (movable && light < targetLight) {
+                    reg.setTeam(Team.LIGHT);
+                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
+                    light++;
                 } else {
-                    if (dark < targetDark) {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
-                        dark++;
-                    } else if (light < targetLight) {
-                        reg.setTeam(Team.LIGHT);
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
-                        light++;
-                    } else {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED);
-                    }
+                    updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED);
                 }
             } else if (team == Team.LIGHT) {
-                if (!movable) {
-                    if (light < targetLight) {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
-                        light++;
-                    } else {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED);
-                    }
+                if (light < targetLight) {
+                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
+                    light++;
+                } else if (movable && dark < targetDark) {
+                    reg.setTeam(Team.DARK);
+                    updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
+                    dark++;
                 } else {
-                    if (light < targetLight) {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
-                        light++;
-                    } else if (dark < targetDark) {
-                        reg.setTeam(Team.DARK);
-                        updateRegistrationStatus(reg, PlayerMatchStatus.REGISTERED);
-                        dark++;
-                    } else {
-                        updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED);
-                    }
+                    updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED);
                 }
             } else {
-                // Neznámý tým – konzervativně do RESERVED
                 updateRegistrationStatus(reg, PlayerMatchStatus.RESERVED);
             }
         }
 
-        // Po úpravě REGISTERED/RESERVED se ještě přepočítají pozice podle kapacity postů
         rebalancePositionsForMatch(match);
     }
 
-    // NAVÝŠENÍ KAPACITY
-
+    /**
+     * Zpracuje navýšení kapacity zápasu.
+     *
+     * Nové sloty rozdělí mezi týmy a pokusí se povýšit
+     * hráče ze stavu RESERVED na REGISTERED.
+     */
     @Override
     @Transactional
     public void handleCapacityIncrease(MatchEntity match, int totalNewSlots) {
+
         if (match == null || totalNewSlots <= 0) {
             return;
         }
 
         Long matchId = match.getId();
 
-        // Registrace k danému zápasu – stačí DTO z čtecí service
-        List<MatchRegistrationDTO> regsForSlots =
+        List<MatchRegistrationDTO> regs =
                 matchRegistrationQueryService.getRegistrationsForMatch(matchId);
 
-        int registeredDark = (int) regsForSlots.stream()
+        int registeredDark = (int) regs.stream()
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
                 .filter(r -> r.getTeam() == Team.DARK)
                 .count();
 
-        int registeredLight = (int) regsForSlots.stream()
+        int registeredLight = (int) regs.stream()
                 .filter(r -> r.getStatus() == PlayerMatchStatus.REGISTERED)
                 .filter(r -> r.getTeam() == Team.LIGHT)
                 .count();
 
-        // Základ – rovnoměrné rozdělení nových míst
-        int baseSlotsPerTeam = totalNewSlots / 2;
-        int extraSlot = totalNewSlots % 2;
+        int baseSlots = totalNewSlots / 2;
+        int extra = totalNewSlots % 2;
 
-        int darkSlots = baseSlotsPerTeam;
-        int lightSlots = baseSlotsPerTeam;
+        int darkSlots = baseSlots;
+        int lightSlots = baseSlots;
 
-        // Liché extra místo dostane tým, který má aktuálně méně registrovaných hráčů
-        if (extraSlot > 0) {
+        if (extra > 0) {
             if (registeredDark <= registeredLight) {
-                darkSlots += 1;
+                darkSlots++;
             } else {
-                lightSlots += 1;
+                lightSlots++;
             }
         }
 
@@ -283,11 +251,16 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         }
     }
 
-    // ZMĚNA HERNÍHO MÓDU – POZICE
-
+    /**
+     * Zpracuje změnu herního módu.
+     *
+     * Opraví neplatné pozice a následně provede rebalance
+     * kapacity pozic v rámci týmů.
+     */
     @Override
     @Transactional
     public void handleMatchModeChange(MatchEntity match, MatchMode oldMatchMode) {
+
         if (match == null) {
             return;
         }
@@ -297,14 +270,16 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             return;
         }
 
-        // Povolené pozice v novém režimu (stejné pro oba týmy)
-        List<PlayerPosition> icePositions = MatchModeLayoutUtil.getIcePositionsForMode(newMode);
+        List<PlayerPosition> icePositions =
+                MatchModeLayoutUtil.getIcePositionsForMode(newMode);
+
         if (icePositions == null || icePositions.isEmpty()) {
             return;
         }
-        Set<PlayerPosition> allowedPositions = new LinkedHashSet<>(icePositions);
 
-        // Registrace pro daný zápas – budeme upravovat jen REGISTERED / RESERVED
+        Set<PlayerPosition> allowedPositions =
+                new LinkedHashSet<>(icePositions);
+
         List<MatchRegistrationEntity> registrations =
                 registrationRepository.findByMatchId(match.getId());
 
@@ -314,21 +289,19 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
 
         boolean changed = false;
 
-        // Přemapování neplatných pozic na platné v novém módu
         for (MatchRegistrationEntity reg : registrations) {
-            PlayerMatchStatus status = reg.getStatus();
-            if (status != PlayerMatchStatus.REGISTERED
-                    && status != PlayerMatchStatus.RESERVED) {
+
+            if (reg.getStatus() != PlayerMatchStatus.REGISTERED
+                    && reg.getStatus() != PlayerMatchStatus.RESERVED) {
                 continue;
             }
 
-            PlayerPosition currentPosition = reg.getPositionInMatch();
-            if (currentPosition == null || currentPosition == PlayerPosition.ANY) {
+            PlayerPosition current = reg.getPositionInMatch();
+            if (current == null || current == PlayerPosition.ANY) {
                 continue;
             }
 
-            // Pokud je stávající pozice v novém režimu platná, není třeba nic měnit
-            if (allowedPositions.contains(currentPosition)) {
+            if (allowedPositions.contains(current)) {
                 continue;
             }
 
@@ -338,48 +311,47 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             }
 
             var settings = player.getSettings();
-            boolean canChangePosition = settings != null && settings.isPossibleChangePlayerPosition();
+            boolean canChangePosition =
+                    settings != null && settings.isPossibleChangePlayerPosition();
 
             PlayerPosition primary = player.getPrimaryPosition();
             PlayerPosition secondary = player.getSecondaryPosition();
 
             PlayerPosition newPosition = resolvePositionForMatchModeChange(
-                    currentPosition,
+                    current,
                     primary,
                     secondary,
                     allowedPositions,
                     canChangePosition
             );
 
-            if (newPosition != null && newPosition != currentPosition) {
+            if (newPosition != null && newPosition != current) {
                 reg.setPositionInMatch(newPosition);
                 changed = true;
             }
         }
 
-        // Rebalance pozic v rámci týmů podle kapacity postů
-        boolean rebalanced = rebalancePositionsWithinTeams(match, registrations);
-        if (rebalanced) {
-            changed = true;
-        }
+        boolean rebalanced =
+                rebalancePositionsWithinTeams(match, registrations);
 
-        if (changed) {
+        if (changed || rebalanced) {
             registrationRepository.saveAll(registrations);
         }
     }
 
-    // HELPER METODY
-
+    // === Helper metody ===
 
     private void updateRegistrationStatus(MatchRegistrationEntity registration,
                                           PlayerMatchStatus status) {
+
         if (registration == null) {
             return;
         }
+
         if (registration.getStatus() == status) {
-            // žádná změna – nemusíme zbytečně flushovat
             return;
         }
+
         registration.setStatus(status);
         registration.setCreatedBy("system");
         registrationRepository.saveAndFlush(registration);
@@ -403,6 +375,7 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         if (mode == null) {
             return 0;
         }
+
         return switch (mode) {
             case THREE_ON_THREE_WITH_GOALIE,
                  FOUR_ON_FOUR_WITH_GOALIE,
@@ -416,13 +389,8 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             return false;
         }
 
-        PlayerEntity player = registration.getPlayer();
-        var settings = player.getSettings();
-        if (settings == null) {
-            return false;
-        }
-
-        return settings.isPossibleMoveToAnotherTeam();
+        var settings = registration.getPlayer().getSettings();
+        return settings != null && settings.isPossibleMoveToAnotherTeam();
     }
 
     /**

@@ -11,18 +11,17 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Fasádní implementace service vrstvy pro práci se zápasy.
+ * Fasádní implementace servisní vrstvy pro práci se zápasy.
  *
- * Tato třída zachovává původní rozhraní {@link MatchService}, ale veškerou
- * skutečnou logiku deleguje do dvou specializovaných služeb:
+ * Třída implementuje rozhraní MatchService a zachovává jednotné API
+ * pro controller vrstvu. Veškerá business logika je delegována
+ * do specializovaných služeb:
  *
- * - {@link MatchQueryService} pro čtecí operace (seznamy zápasů, detail zápasu,
- *   přehledy pro hráče),
- * - {@link MatchCommandService} pro změnové operace (vytváření, úprava, mazání,
- *   zrušení a obnovení zápasu).
+ * - MatchQueryService pro čtecí operace,
+ * - MatchCommandService pro změnové operace.
  *
- * Díky tomu zůstává API vůči controllerům stabilní, ale interně je logika
- * rozdělená podle principu CQRS (commands vs. queries).
+ * Implementace respektuje princip oddělení čtení a zápisu
+ * podle architektonického přístupu CQRS.
  */
 @Service
 public class MatchServiceImpl implements MatchService {
@@ -30,6 +29,12 @@ public class MatchServiceImpl implements MatchService {
     private final MatchQueryService matchQueryService;
     private final MatchCommandService matchCommandService;
 
+    /**
+     * Vytváří fasádní službu pro práci se zápasy.
+     *
+     * @param matchQueryService služba odpovědná za čtecí operace
+     * @param matchCommandService služba odpovědná za změnové operace
+     */
     public MatchServiceImpl(
             MatchQueryService matchQueryService,
             MatchCommandService matchCommandService
@@ -38,14 +43,12 @@ public class MatchServiceImpl implements MatchService {
         this.matchCommandService = matchCommandService;
     }
 
-    
-    // ZÁKLADNÍ SEZNAMY ZÁPASŮ (READ)
-    
-
     /**
-     * {@inheritDoc}
+     * Vrací seznam všech zápasů v systému.
      *
-     * Deleguje se do {@link MatchQueryService#getAllMatches()}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @return seznam všech zápasů jako MatchDTO
      */
     @Override
     public List<MatchDTO> getAllMatches() {
@@ -53,9 +56,11 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrací seznam všech nadcházejících zápasů.
      *
-     * Deleguje se do {@link MatchQueryService#getUpcomingMatches()}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @return seznam budoucích zápasů jako MatchDTO
      */
     @Override
     public List<MatchDTO> getUpcomingMatches() {
@@ -63,9 +68,11 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrací seznam všech odehraných zápasů.
      *
-     * Deleguje se do {@link MatchQueryService#getPastMatches()}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @return seznam minulých zápasů jako MatchDTO
      */
     @Override
     public List<MatchDTO> getPastMatches() {
@@ -73,9 +80,11 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrací nejbližší nadcházející zápas.
      *
-     * Deleguje se do {@link MatchQueryService#getNextMatch()}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @return nejbližší budoucí zápas nebo null
      */
     @Override
     public MatchDTO getNextMatch() {
@@ -83,23 +92,25 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrací základní informace o zápasu podle jeho ID.
      *
-     * Deleguje se do {@link MatchQueryService#getMatchById(Long)}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @param id identifikátor zápasu
+     * @return zápas jako MatchDTO
      */
     @Override
     public MatchDTO getMatchById(Long id) {
         return matchQueryService.getMatchById(id);
     }
 
-    
-    // COMMANDS – CREATE / UPDATE / DELETE / CANCEL / UN-CANCEL
-    
-
     /**
-     * {@inheritDoc}
+     * Vytváří nový zápas.
      *
-     * Deleguje se do {@link MatchCommandService#createMatch(MatchDTO)}.
+     * Implementace deleguje změnovou operaci do služby MatchCommandService.
+     *
+     * @param dto data nového zápasu
+     * @return vytvořený zápas jako MatchDTO
      */
     @Override
     public MatchDTO createMatch(MatchDTO dto) {
@@ -107,9 +118,13 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Aktualizuje existující zápas.
      *
-     * Deleguje se do {@link MatchCommandService#updateMatch(Long, MatchDTO)}.
+     * Implementace deleguje změnovou operaci do služby MatchCommandService.
+     *
+     * @param id identifikátor zápasu
+     * @param dto nové hodnoty zápasu
+     * @return aktualizovaný zápas jako MatchDTO
      */
     @Override
     public MatchDTO updateMatch(Long id, MatchDTO dto) {
@@ -117,9 +132,12 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Odstraňuje zápas ze systému.
      *
-     * Deleguje se do {@link MatchCommandService#deleteMatch(Long)}.
+     * Implementace deleguje změnovou operaci do služby MatchCommandService.
+     *
+     * @param id identifikátor zápasu
+     * @return potvrzení operace ve formě SuccessResponseDTO
      */
     @Override
     public SuccessResponseDTO deleteMatch(Long id) {
@@ -127,9 +145,15 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Ruší zápas a nastavuje důvod zrušení.
      *
-     * Deleguje se do {@link MatchCommandService#cancelMatch(Long, MatchCancelReason)}.
+     * Operace je vedena jako transakční, protože dochází ke změně
+     * stavu zápasu a případně dalších souvisejících údajů.
+     * Logika je delegována do služby MatchCommandService.
+     *
+     * @param matchId identifikátor zápasu
+     * @param reason důvod zrušení
+     * @return potvrzení operace
      */
     @Override
     @Transactional
@@ -138,9 +162,13 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Obnovuje dříve zrušený zápas.
      *
-     * Deleguje se do {@link MatchCommandService#unCancelMatch(Long)}.
+     * Operace je vedena jako transakční a delegována
+     * do služby MatchCommandService.
+     *
+     * @param matchId identifikátor zápasu
+     * @return potvrzení operace
      */
     @Override
     @Transactional
@@ -148,18 +176,28 @@ public class MatchServiceImpl implements MatchService {
         return matchCommandService.unCancelMatch(matchId);
     }
 
+    /**
+     * Aktualizuje skóre zápasu.
+     *
+     * Implementace deleguje změnovou operaci do služby MatchCommandService.
+     *
+     * @param matchId identifikátor zápasu
+     * @param scoreLight počet branek týmu LIGHT
+     * @param scoreDark počet branek týmu DARK
+     * @return aktualizovaný zápas jako MatchDTO
+     */
     @Override
-    public MatchDTO updateMatchScore(Long matchId, Integer scoreLight, Integer scoreDark){
+    public MatchDTO updateMatchScore(Long matchId, Integer scoreLight, Integer scoreDark) {
         return matchCommandService.updateMatchScore(matchId, scoreLight, scoreDark);
     }
-    
-    // DETAIL ZÁPASU A PŘEHLEDY (READ)
-    
 
     /**
-     * {@inheritDoc}
+     * Vrací detail zápasu.
      *
-     * Deleguje se do {@link MatchQueryService#getMatchDetail(Long)}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @param id identifikátor zápasu
+     * @return detail zápasu jako MatchDetailDTO
      */
     @Override
     public MatchDetailDTO getMatchDetail(Long id) {
@@ -167,9 +205,12 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrací seznam zápasů dostupných pro konkrétního hráče.
      *
-     * Deleguje se do {@link MatchQueryService#getAvailableMatchesForPlayer(Long)}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @param playerId identifikátor hráče
+     * @return seznam dostupných zápasů
      */
     @Override
     public List<MatchDTO> getAvailableMatchesForPlayer(Long playerId) {
@@ -177,9 +218,12 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrací identifikátor hráče podle e-mailu.
      *
-     * Deleguje se do {@link MatchQueryService#getPlayerIdByEmail(String)}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @param email e-mail uživatele
+     * @return identifikátor hráče nebo null
      */
     @Override
     public Long getPlayerIdByEmail(String email) {
@@ -187,10 +231,12 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrací přehled nadcházejících zápasů pro hráče.
      *
-     * Deleguje se do
-     * {@link MatchQueryService#getUpcomingMatchesOverviewForPlayer(Long)}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @param playerId identifikátor hráče
+     * @return seznam přehledových DTO
      */
     @Override
     public List<MatchOverviewDTO> getUpcomingMatchesOverviewForPlayer(Long playerId) {
@@ -198,9 +244,12 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrací nadcházející zápasy pro konkrétního hráče.
      *
-     * Deleguje se do {@link MatchQueryService#getUpcomingMatchesForPlayer(Long)}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @param playerId identifikátor hráče
+     * @return seznam nadcházejících zápasů
      */
     @Override
     public List<MatchDTO> getUpcomingMatchesForPlayer(Long playerId) {
@@ -208,14 +257,15 @@ public class MatchServiceImpl implements MatchService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrací přehled všech odehraných zápasů hráče.
      *
-     * Deleguje se do {@link MatchQueryService#getAllPassedMatchesForPlayer(Long)}.
+     * Implementace deleguje čtecí operaci do služby MatchQueryService.
+     *
+     * @param playerId identifikátor hráče
+     * @return seznam přehledových DTO minulých zápasů
      */
     @Override
     public List<MatchOverviewDTO> getAllPassedMatchesForPlayer(Long playerId) {
         return matchQueryService.getAllPassedMatchesForPlayer(playerId);
     }
-
-
 }

@@ -6,24 +6,37 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.function.Supplier;
 
+/**
+ * Guard služba pro blokování write operací v demo režimu.
+ *
+ * Třída centralizuje kontrolu pravidel demo režimu tak, aby se podmínky
+ * nepsaly opakovaně ve service vrstvě. Při pokusu o nepovolenou operaci
+ * se vyhazuje DemoModeOperationNotAllowedException. Kontrola se vyhodnocuje
+ * na základě DemoModePolicy, která určuje, zda je daný uživatel považován
+ * za chráněného demo uživatele.
+ */
 @Service
 public class DemoModeGuard {
 
     private final DemoModePolicy policy;
 
+    /**
+     * Vytváří guard pro demo režim.
+     *
+     * @param policy politika určující chování aplikace v demo režimu
+     */
     public DemoModeGuard(DemoModePolicy policy) {
         this.policy = policy;
     }
 
     /**
-     * Guard služba, která se používá pro blokování write operací v demo režimu.
+     * Provede kontrolu, zda je write operace v demo režimu povolena.
      *
-     * Třída centralizuje kontrolu pravidel demo režimu tak, aby se podmínky
-     * nepsaly opakovaně v service vrstvách. Při pokusu o nepovolenou operaci
-     * se vyhazuje {@link DemoModeOperationNotAllowedException}.
+     * Pokud je uživatel vyhodnocen jako chráněný demo uživatel, operace se
+     * blokuje vyhozením DemoModeOperationNotAllowedException.
      *
-     * Kontrola se vyhodnocuje na základě {@link DemoModePolicy}, která určuje,
-     * zda je daný uživatel považován za chráněného demo uživatele.
+     * @param userId identifikátor uživatele, pro kterého se kontrola vyhodnocuje
+     * @param message chybová zpráva použitá při blokaci operace
      */
     public void write(Long userId, String message) {
         if (policy.isProtectedDemoUser(userId)) {
@@ -35,11 +48,11 @@ public class DemoModeGuard {
      * Provede write operaci, pokud je v demo režimu povolena.
      *
      * Pokud je uživatel vyhodnocen jako chráněný demo uživatel, operace se
-     * neprovede a vyhodí se {@link DemoModeOperationNotAllowedException}.
+     * neprovede a vyhodí se DemoModeOperationNotAllowedException.
      *
-     * @param userId Identifikátor uživatele, pro kterého se kontrola vyhodnocuje.
-     * @param message Chybová zpráva, která se použije při blokaci operace.
-     * @param action Akce reprezentující write operaci.
+     * @param userId identifikátor uživatele, pro kterého se kontrola vyhodnocuje
+     * @param message chybová zpráva použitá při blokaci operace
+     * @param action akce reprezentující write operaci
      */
     public void write(Long userId, String message, Runnable action) {
         write(userId, message);
@@ -50,13 +63,13 @@ public class DemoModeGuard {
      * Provede write operaci, pokud je v demo režimu povolena, a vrátí její výsledek.
      *
      * Pokud je uživatel vyhodnocen jako chráněný demo uživatel, operace se
-     * neprovede a vyhodí se {@link DemoModeOperationNotAllowedException}.
+     * neprovede a vyhodí se DemoModeOperationNotAllowedException.
      *
-     * @param userId Identifikátor uživatele, pro kterého se kontrola vyhodnocuje.
-     * @param message Chybová zpráva, která se použije při blokaci operace.
-     * @param action Akce reprezentující write operaci vracející výsledek.
-     * @return Výsledek provedené write operace.
-     * @param <T> Typ návratové hodnoty write operace.
+     * @param userId identifikátor uživatele, pro kterého se kontrola vyhodnocuje
+     * @param message chybová zpráva použitá při blokaci operace
+     * @param action akce reprezentující write operaci vracející výsledek
+     * @param <T> typ návratové hodnoty write operace
+     * @return výsledek provedené write operace
      */
     public <T> T write(Long userId, String message, Supplier<T> action) {
         write(userId, message);
@@ -68,15 +81,15 @@ public class DemoModeGuard {
      *
      * Pokud je uživatel vyhodnocen jako chráněný demo uživatel, write operace se neprovede.
      * Následně se provede finalize část v nové transakci a poté se vyhodí
-     * {@link DemoModeOperationNotAllowedException}.
+     * DemoModeOperationNotAllowedException.
      *
      * Metoda se používá pro situace, kdy se má v demo režimu provést úklidová akce,
      * například odstranění reset tokenu, a současně se má volajícímu vrátit chyba.
      *
-     * @param userId Identifikátor uživatele, pro kterého se kontrola vyhodnocuje.
-     * @param message Chybová zpráva, která se použije při blokaci operace.
-     * @param writeAction Akce reprezentující standardní write operaci.
-     * @param finalizeAction Akce reprezentující úklidovou operaci, která se má provést i v demo režimu.
+     * @param userId identifikátor uživatele, pro kterého se kontrola vyhodnocuje
+     * @param message chybová zpráva použitá při blokaci operace
+     * @param writeAction akce reprezentující standardní write operaci
+     * @param finalizeAction akce reprezentující úklidovou operaci, která se má provést i v demo režimu
      */
     public void writeWithFinalize(Long userId,
                                   String message,
@@ -99,7 +112,7 @@ public class DemoModeGuard {
      * Nová transakce se používá pro zajištění, že finalize operace bude provedena
      * nezávisle na transakčním kontextu volající write operace, která je následně blokována.
      *
-     * @param finalizeAction Akce, která se má provést v nové transakci.
+     * @param finalizeAction akce, která se má provést v nové transakci
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected void runFinalizeInNewTransaction(Runnable finalizeAction) {

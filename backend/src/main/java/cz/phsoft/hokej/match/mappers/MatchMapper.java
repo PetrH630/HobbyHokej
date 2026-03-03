@@ -7,10 +7,14 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 /**
- * Mapper pro převod mezi entitou zápasu a DTO.
+ * MapStruct mapper pro převod mezi entitou MatchEntity
+ * a přenosovým objektem MatchDTO.
  *
- * Řídí, jakým způsobem je vazba na sezónu
- * a skóre zápasu reprezentována v API vrstvě.
+ * Mapper definuje způsob reprezentace vazby na sezónu
+ * a způsob převodu vloženého objektu MatchScore
+ * na samostatná pole DTO.
+ *
+ * Mapování je generováno automaticky nástrojem MapStruct.
  */
 @Mapper(componentModel = "spring")
 public interface MatchMapper {
@@ -18,14 +22,12 @@ public interface MatchMapper {
     /**
      * Převede entitu zápasu na DTO.
      *
-     * Vazba na sezónu je reprezentována
-     * pouze pomocí identifikátoru.
-     * Skóre se převádí na samostatná pole
-     * scoreLight a scoreDark, vítěz se odvozuje
-     * z doménové logiky entity.
+     * Vazba na sezónu je reprezentována pouze pomocí identifikátoru.
+     * Skóre je převáděno na samostatná pole scoreLight a scoreDark.
+     * Vítěz a výsledek jsou odvozeny z doménové logiky entity.
      *
      * @param entity entita zápasu
-     * @return DTO zápasu
+     * @return DTO reprezentující zápas
      */
     @Mapping(source = "season.id", target = "seasonId")
     @Mapping(source = "score.light", target = "scoreLight")
@@ -35,14 +37,16 @@ public interface MatchMapper {
     MatchDTO toDTO(MatchEntity entity);
 
     /**
-     * Převede DTO na novou entitu zápasu.
+     * Vytvoří novou entitu zápasu z DTO.
      *
-     * Vazba na sezónu se nastavuje až
-     * v servisní vrstvě.
-     * Skóre se mapuje na vložený objekt MatchScore.
+     * Vazba na sezónu se nenastavuje zde,
+     * ale až v servisní vrstvě.
+     * Auditní pole a timestamp nejsou při mapování nastavovány.
      *
-     * @param dto DTO zápasu
-     * @return entita zápasu
+     * Skóre je mapováno do vloženého objektu MatchScore.
+     *
+     * @param dto zdrojový DTO objekt
+     * @return nová entita zápasu
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "season", ignore = true)
@@ -54,14 +58,14 @@ public interface MatchMapper {
     MatchEntity toEntity(MatchDTO dto);
 
     /**
-     * Aktualizuje existující entitu zápasu.
+     * Aktualizuje existující entitu zápasu podle hodnot v DTO.
      *
-     * Vazba na sezónu se při aktualizaci
-     * nemění. Skóre se aktualizuje podle
-     * hodnot v DTO.
+     * Identifikátor, vazba na sezónu a auditní pole
+     * se při aktualizaci nemění.
+     * Skóre je aktualizováno podle hodnot v DTO.
      *
-     * @param dto    zdrojové DTO
-     * @param entity cílová entita
+     * @param dto zdrojové DTO
+     * @param entity cílová entita, která bude aktualizována
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "season", ignore = true)

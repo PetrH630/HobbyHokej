@@ -10,9 +10,11 @@ import java.util.List;
 /**
  * Implementace servisní vrstvy pro práci s historií zápasů.
  *
- * Zajišťuje převod entit na DTO a volání repozitáře.
- * Nemění ani nevytváří historické záznamy – o to se starají
- * databázové triggery.
+ * Třída zajišťuje:
+ * - načtení historických entit z repozitáře,
+ * - převod entit na DTO pomocí mapperu.
+ *
+ * Nevytváří ani neupravuje historické záznamy.
  */
 @Service
 public class MatchHistoryServiceImpl implements MatchHistoryService {
@@ -28,6 +30,12 @@ public class MatchHistoryServiceImpl implements MatchHistoryService {
         this.mapper = mapper;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Deleguje načtení dat do repozitáře
+     * a převod entit na DTO do mapperu.
+     */
     @Override
     public List<MatchHistoryDTO> getHistoryForMatch(Long matchId) {
         return mapper.toDTOList(

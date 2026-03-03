@@ -16,14 +16,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Detailní DTO reprezentující jeden zápas včetně kontextu hráče
- * a agregovaných statistik.
+ * Detailní DTO reprezentující kompletní stav jednoho zápasu.
  *
- * Používá se zejména na stránce detailu zápasu, pro zobrazení
- * seznamů hráčů podle stavu registrace, pro zobrazení kapacity,
- * ceny a aktuální účasti. Kromě základních informací o zápasu
- * obsahuje i stav přihlášeného hráče a rozdělené seznamy hráčů
- * podle jednotlivých kategorií účasti.
+ * Objekt se používá zejména na stránce detailu zápasu a obsahuje
+ * nejen základní informace o zápasu, ale také agregované statistiky,
+ * seznamy hráčů rozdělené podle stavu registrace a kontext aktuálního hráče.
+ *
+ * DTO je vytvářeno na úrovni servisní vrstvy a slouží jako komplexní
+ * výstupní model pro frontend. Neobsahuje žádnou business logiku.
  */
 public class MatchDetailDTO implements NumberedMatchDTO {
 

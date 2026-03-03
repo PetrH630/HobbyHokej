@@ -16,10 +16,12 @@ import java.time.LocalDateTime;
 /**
  * Přehledové DTO reprezentující zápas v seznamu.
  *
- * Používá se v přehledech nadcházejících a minulých zápasů, v případech,
- * kdy stačí zjednodušený pohled na zápas doplněný o agregované informace
- * a stav aktuálního hráče. Typicky se používá na úvodních obrazovkách,
- * dashboardu nebo v kartách zápasů.
+ * Používá se v přehledech nadcházejících a minulých zápasů,
+ * kde postačuje zjednodušený pohled doplněný o základní
+ * agregační údaje a stav aktuálního hráče.
+ *
+ * Objekt je vytvářen servisní vrstvou a optimalizován
+ * pro zobrazení v kartách nebo tabulkových přehledech.
  */
 public class MatchOverviewDTO implements NumberedMatchDTO {
 

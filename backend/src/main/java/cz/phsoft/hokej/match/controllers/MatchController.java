@@ -1,5 +1,5 @@
 package cz.phsoft.hokej.match.controllers;
-import cz.phsoft.hokej.match.dto.MatchScoreUpdateRequest;
+
 import cz.phsoft.hokej.match.dto.*;
 import cz.phsoft.hokej.match.enums.MatchCancelReason;
 import cz.phsoft.hokej.match.services.MatchAutoLineupService;
@@ -8,28 +8,28 @@ import cz.phsoft.hokej.match.services.MatchPositionService;
 import cz.phsoft.hokej.match.services.MatchService;
 import cz.phsoft.hokej.player.enums.Team;
 import cz.phsoft.hokej.player.services.CurrentPlayerService;
-import cz.phsoft.hokej.match.dto.MatchTeamPositionOverviewDTO;
 import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * REST controller, který se používá pro správu zápasů.
+ * REST controller pro správu zápasů.
  *
- * Zajišťuje administrativní operace nad zápasy pro role ADMIN a MANAGER,
+ * Controller zajišťuje administrativní operace nad zápasy pro role ADMIN a MANAGER,
  * včetně vytváření, aktualizace, mazání, zrušení a obnovení zápasů.
- * Zároveň poskytuje pohled na zápasy z perspektivy aktuálního hráče
- * a detail zápasu včetně informací o registracích.
  *
- * Veškerá business logika se deleguje do {@link MatchService},
- * práce s historií zápasů do {@link MatchHistoryService} a práce
- * s aktuálním hráčem do {@link CurrentPlayerService}.
+ * Současně poskytuje endpointy pro práci v kontextu aktuálního hráče,
+ * například přehled nadcházejících a odehraných zápasů nebo detail zápasu
+ * s informacemi o registracích.
+ *
+ * Veškerá business logika je delegována do service vrstvy, zejména do
+ * MatchService, MatchHistoryService, MatchPositionService,
+ * MatchAutoLineupService a CurrentPlayerService.
  */
 @RestController
 @RequestMapping("/api/matches")
@@ -41,6 +41,15 @@ public class MatchController {
     private final MatchPositionService matchPositionService;
     private final MatchAutoLineupService matchAutoLineupService;
 
+    /**
+     * Vytváří controller pro správu zápasů.
+     *
+     * @param matchService služba pro práci se zápasy
+     * @param currentPlayerService služba pro práci s aktuálním hráčem
+     * @param matchHistoryService služba pro historii změn zápasů
+     * @param matchPositionService služba pro práci s pozicemi v zápase
+     * @param matchAutoLineupService služba pro automatické generování lajny
+     */
     public MatchController(MatchService matchService,
                            CurrentPlayerService currentPlayerService,
                            MatchHistoryService matchHistoryService,
@@ -58,10 +67,10 @@ public class MatchController {
     /**
      * Vrací seznam všech zápasů v systému.
      *
-     * Endpoint je určen pro administrativní přehled zápasů a
-     * je dostupný pro role ADMIN a MANAGER.
+     * Endpoint je určen pro administrativní přehled zápasů
+     * a je dostupný pro role ADMIN a MANAGER.
      *
-     * @return seznam všech zápasů jako {@link MatchDTO}
+     * @return seznam všech zápasů jako MatchDTO
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -72,10 +81,10 @@ public class MatchController {
     /**
      * Vrací seznam všech nadcházejících zápasů.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
-     * k přehledu budoucích zápasů v systému.
+     * Endpoint je dostupný pro role ADMIN a MANAGER
+     * a slouží k přehledu budoucích zápasů v systému.
      *
-     * @return seznam nadcházejících zápasů jako {@link MatchDTO}
+     * @return seznam nadcházejících zápasů jako MatchDTO
      */
     @GetMapping("/upcoming")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -86,10 +95,10 @@ public class MatchController {
     /**
      * Vrací seznam všech již odehraných zápasů.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a používá se
-     * pro přehled historicky odehraných zápasů.
+     * Endpoint je dostupný pro role ADMIN a MANAGER
+     * a používá se pro přehled historicky odehraných zápasů.
      *
-     * @return seznam odehraných zápasů jako {@link MatchDTO}
+     * @return seznam odehraných zápasů jako MatchDTO
      */
     @GetMapping("/past")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -100,12 +109,12 @@ public class MatchController {
     /**
      * Vytváří nový zápas.
      *
-     * Vstupní data jsou validována pomocí bean validation a
-     * vlastní uložení zápasu se deleguje do servisní vrstvy.
-     * Operace je vyhrazena roli ADMIN.
+     * Vstupní data jsou validována pomocí bean validation
+     * a vlastní uložení zápasu je delegováno do service vrstvy.
+     * Operace je dostupná pro role ADMIN a MANAGER.
      *
      * @param matchDTO DTO s daty nového zápasu
-     * @return vytvořený zápas jako {@link MatchDTO}
+     * @return vytvořený zápas jako MatchDTO
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -116,12 +125,10 @@ public class MatchController {
     /**
      * Vrací detail zápasu podle jeho ID v administrativním pohledu.
      *
-     * Jedná se o pohled pro administrátora nebo manažera bez vazby
-     * na konkrétního hráče. Endpoint je vhodný pro editaci zápasu
-     * nebo pro jeho detailní kontrolu.
+     * Jedná se o pohled bez vazby na konkrétního hráče.
      *
-     * @param id ID zápasu
-     * @return {@link MatchDTO} s detaily zápasu
+     * @param id identifikátor zápasu
+     * @return detail zápasu jako MatchDTO
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -132,12 +139,10 @@ public class MatchController {
     /**
      * Vrací historii změn daného zápasu.
      *
-     * Historie slouží pro auditní účely a sledování průběžných
-     * úprav parametrů zápasu. Záznamy jsou získávány ze servisní
-     * vrstvy, která čte historii z databáze.
+     * Historie slouží pro auditní účely a sledování průběžných úprav.
      *
-     * @param id ID zápasu
-     * @return seznam {@link MatchHistoryDTO} představujících historii zápasu
+     * @param id identifikátor zápasu
+     * @return seznam MatchHistoryDTO představujících historii zápasu
      */
     @GetMapping("/{id}/history")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -148,13 +153,11 @@ public class MatchController {
     /**
      * Aktualizuje existující zápas.
      *
-     * Vstupní data jsou validována a následná aktualizace se
-     * deleguje do servisní vrstvy. Endpoint je dostupný pro role
-     * ADMIN a MANAGER.
+     * Aktualizace je delegována do service vrstvy.
      *
-     * @param id  ID zápasu, který má být aktualizován
-     * @param dto DTO s aktualizovanými daty zápasu
-     * @return {@link MatchDTO} s uloženými změnami
+     * @param id identifikátor zápasu
+     * @param dto aktualizovaná data zápasu
+     * @return aktualizovaný zápas jako MatchDTO
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -166,12 +169,10 @@ public class MatchController {
     /**
      * Odstraňuje zápas ze systému.
      *
-     * Odstranění zápasu se používá výjimečně, například při
-     * chybně zadaném zápasu. Operace je vyhrazena pouze pro roli ADMIN
-     * a je realizována prostřednictvím servisní vrstvy.
+     * Operace je vyhrazena pouze pro roli ADMIN.
      *
-     * @param id ID zápasu, který má být odstraněn
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @param id identifikátor zápasu
+     * @return potvrzení úspěšné operace
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -181,32 +182,11 @@ public class MatchController {
     }
 
     /**
-     * Vrací seznam zápasů, které jsou dostupné pro konkrétního hráče.
-     *
-     * Dostupnost zápasů je určována na základě doménových pravidel,
-     * například podle kapacity nebo stavu zápasu. Endpoint je dostupný
-     * pro role ADMIN a MANAGER a slouží zejména pro administrativní práci
-     * s registracemi konkrétního hráče.
-     *
-     * @param playerId ID hráče
-     * @return seznam dostupných zápasů pro daného hráče jako {@link MatchDTO}
-     */
-    @GetMapping("/available-for-player/{playerId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<MatchDTO> getAvailableMatchesForPlayer(@PathVariable Long playerId) {
-        return matchService.getAvailableMatchesForPlayer(playerId);
-    }
-
-    /**
      * Ruší zápas a ukládá důvod zrušení.
      *
-     * Operace je dostupná pro role ADMIN a MANAGER a typicky
-     * spouští navazující proces notifikací pro dotčené hráče.
-     * Důvod zrušení je předáván jako enum {@link MatchCancelReason}.
-     *
-     * @param matchId ID zápasu, který má být zrušen
-     * @param reason  důvod zrušení zápasu
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @param matchId identifikátor zápasu
+     * @param reason důvod zrušení zápasu
+     * @return potvrzení úspěšné operace
      */
     @PatchMapping("/{matchId}/cancel")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -221,12 +201,8 @@ public class MatchController {
     /**
      * Obnovuje dříve zrušený zápas.
      *
-     * Obnovení zápasu vrací zápas do aktivního stavu a umožňuje
-     * další práci s registracemi hráčů. Operace je dostupná pro
-     * role ADMIN a MANAGER a zpracování je delegováno na servisní vrstvu.
-     *
-     * @param matchId ID zápasu, který má být obnoven
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @param matchId identifikátor zápasu
+     * @return potvrzení úspěšné operace
      */
     @PatchMapping("/{matchId}/uncancel")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -240,12 +216,8 @@ public class MatchController {
     /**
      * Vrací detail konkrétního zápasu z pohledu hráče.
      *
-     * Detail obsahuje informace o registracích, volných místech
-     * a možnostech úprav registrace pro aktuálního hráče. Endpoint
-     * je dostupný pro přihlášené uživatele.
-     *
-     * @param id ID zápasu
-     * @return {@link MatchDetailDTO} s detailem zápasu pro hráče
+     * @param id identifikátor zápasu
+     * @return detail zápasu jako MatchDetailDTO
      */
     @GetMapping("/{id}/detail")
     @PreAuthorize("isAuthenticated()")
@@ -254,12 +226,9 @@ public class MatchController {
     }
 
     /**
-     * Vrací nejbližší nadcházející zápas v systému.
+     * Vrací nejbližší nadcházející zápas.
      *
-     * Endpoint se používá například pro zobrazení nejbližšího
-     * zápasu na úvodní stránce aplikace pro přihlášeného uživatele.
-     *
-     * @return {@link MatchDTO} s nejbližším zápasem nebo null, pokud žádný neexistuje
+     * @return nejbližší zápas nebo null, pokud žádný neexistuje
      */
     @GetMapping("/next")
     @PreAuthorize("isAuthenticated()")
@@ -268,89 +237,23 @@ public class MatchController {
     }
 
     /**
-     * Vrací seznam nadcházejících zápasů pro aktuálně zvoleného hráče.
+     * Vrací přehled pozic a kapacity pro daný zápas.
      *
-     * Před voláním služby se vyžaduje, aby byl nastaven aktuální hráč.
-     * Samotné zjištění ID aktuálního hráče se zajišťuje pomocí
-     * {@link CurrentPlayerService}. Endpoint je dostupný pro
-     * přihlášené uživatele.
-     *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam nadcházejících zápasů pro aktuálního hráče jako {@link MatchDTO}
+     * @param matchId identifikátor zápasu
+     * @return přehled pozic pro oba týmy
      */
-    @GetMapping("/me/upcoming")
-    @PreAuthorize("isAuthenticated()")
-    public List<MatchDTO> getUpcomingMatchesForMe(Authentication authentication) {
-        currentPlayerService.requireCurrentPlayer();
-        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
-        return matchService.getUpcomingMatchesForPlayer(currentPlayerId);
-    }
-
-    /**
-     * Vrací přehled nadcházejících zápasů pro aktuálního hráče.
-     *
-     * Přehled je určen zejména pro kompaktní zobrazení zápasů
-     * v uživatelském rozhraní, například v podobě karet. Skutečné
-     * načtení dat se deleguje na servisní vrstvu.
-     *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam {@link MatchOverviewDTO} s nadcházejícími zápasy pro hráče
-     */
-    @GetMapping("/me/upcoming-overview")
-    @PreAuthorize("isAuthenticated()")
-    public List<MatchOverviewDTO> getUpcomingMatchesOverviewForMe(Authentication authentication) {
-        currentPlayerService.requireCurrentPlayer();
-        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
-        return matchService.getUpcomingMatchesOverviewForPlayer(currentPlayerId);
-    }
-
-    /**
-     * Vrací seznam všech již odehraných zápasů pro aktuálního hráče.
-     *
-     * Seznam slouží pro zobrazení historie zápasů daného hráče
-     * v uživatelském rozhraní. Endpoint je dostupný pro přihlášené
-     * uživatele a identita hráče se určuje pomocí {@link CurrentPlayerService}.
-     *
-     * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam {@link MatchOverviewDTO} pro odehrané zápasy aktuálního hráče
-     */
-    // TODO - JEN ZÁPASY OD VYTVOŘENÍ HRÁČE
-    @GetMapping("/me/all-passed")
-    @PreAuthorize("isAuthenticated()")
-    public List<MatchOverviewDTO> getAllMatchesForPlayer(Authentication authentication) {
-        currentPlayerService.requireCurrentPlayer();
-        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
-        return matchService.getAllPassedMatchesForPlayer(currentPlayerId);
-    }
-
-/**
- * Vrací přehled pozic a kapacity pro daný zápas pro oba týmy.
- *
- * Metoda se používá například pro administrátorské zobrazení
- * nebo detail zápasu, kde je potřeba vidět obsazenost DARK i LIGHT
- * současně.
- *
- * @param matchId Identifikátor zápasu.
- * @return Přehled pozic a jejich obsazenosti pro oba týmy.
- */
     @GetMapping("/{matchId}/positions")
     @PreAuthorize("isAuthenticated()")
-    public MatchPositionOverviewDTO getPositionOverview(
-            @PathVariable Long matchId
-    ) {
+    public MatchPositionOverviewDTO getPositionOverview(@PathVariable Long matchId) {
         return matchPositionService.getPositionOverviewForMatch(matchId);
     }
+
     /**
-     * Vrací přehled pozic a kapacity pro konkrétní tým v daném zápase.
+     * Vrací přehled pozic pro konkrétní tým v daném zápase.
      *
-     * Metoda se používá pro zobrazení obsazených a volných pozic na ledě
-     * v rámci jednoho zápasu a jednoho týmu. Výpočet kapacity pozic se
-     * deleguje do MatchModeLayoutUtil, načtení registrací a výpočet
-     * obsazenosti se deleguje do MatchPositionService.
-     *
-     * @param matchId Identifikátor zápasu.
-     * @param team    Tým, pro který se přehled pozic získává.
-     * @return Přehled pozic a jejich obsazenosti pro daný tým.
+     * @param matchId identifikátor zápasu
+     * @param team tým, pro který se přehled získává
+     * @return přehled pozic pro daný tým
      */
     @GetMapping("/{matchId}/positions/{team}")
     @PreAuthorize("isAuthenticated()")
@@ -361,6 +264,14 @@ public class MatchController {
         return matchPositionService.getPositionOverviewForMatchAndTeam(matchId, team);
     }
 
+    /**
+     * Spouští automatické generování první lajny.
+     *
+     * Operace je dostupná pro role ADMIN a MANAGER.
+     *
+     * @param matchId identifikátor zápasu
+     * @return potvrzení úspěšné operace
+     */
     @PostMapping("/{matchId}/auto-lineup")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<SuccessResponseDTO> autoLineup(@PathVariable Long matchId) {
@@ -377,16 +288,9 @@ public class MatchController {
     /**
      * Aktualizuje skóre zápasu.
      *
-     * Endpoint slouží k zadání nebo úpravě výsledku zápasu.
-     * Skóre se zadává jako počet branek pro tým LIGHT a tým DARK.
-     * Operace je dostupná pro role ADMIN a MANAGER.
-     *
-     * Vlastní uložení skóre a validace stavu zápasu
-     * se deleguje do servisní vrstvy.
-     *
-     * @param matchId ID zápasu, jehož skóre se upravuje
+     * @param matchId identifikátor zápasu
      * @param request DTO obsahující skóre pro oba týmy
-     * @return {@link MatchDTO} s aktualizovaným skóre a vítězem
+     * @return aktualizovaný zápas jako MatchDTO
      */
     @PatchMapping("/{matchId}/score")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -400,6 +304,4 @@ public class MatchController {
                 request.getScoreDark()
         );
     }
-
-
 }

@@ -6,27 +6,40 @@ import cz.phsoft.hokej.player.enums.PlayerPosition;
 import java.util.*;
 
 /**
- * Pomocná utilita pro práci s rozložením pozic na ledě
- * a kapacitou pozic pro daný MatchMode.
+ * Utilitní třída pro práci s rozložením herních pozic
+ * a výpočtem kapacity pozic podle zvoleného MatchMode.
+ *
+ * Třída obsahuje čistě statické metody a neudržuje žádný stav.
+ * Slouží jako doménová pomůcka pro servisní vrstvu při výpočtu
+ * teoretického rozložení hráčů na jeden tým.
  */
 public final class MatchModeLayoutUtil {
 
+    /**
+     * Soukromý konstruktor zabraňující vytvoření instance.
+     */
     private MatchModeLayoutUtil() {
-        // utility – žádná instance
+        // utility třída, není určena k instanciaci
     }
 
     /**
-     * Vrací seznam "ice" pozic pro daný MatchMode v pořadí,
-     * v jakém se používají pro rozdělení kapacity.
+     * Vrací seznam herních pozic na ledě pro daný MatchMode.
      *
+     * Pořadí pozic odpovídá pořadí, ve kterém se následně
+     * rozděluje kapacita hráčů. Pokud je předán null,
+     * vrací se výchozí rozložení pozic.
+     *
+     * @param mode herní režim zápasu
+     * @return seznam pozic v pořadí rozdělování kapacity
      */
     public static List<PlayerPosition> getIcePositionsForMode(MatchMode mode) {
         if (mode == null) {
             return defaultPositions();
         }
+
         return switch (mode) {
             case THREE_ON_THREE_NO_GOALIE -> List.of(
-                   PlayerPosition.WING_LEFT,
+                    PlayerPosition.WING_LEFT,
                     PlayerPosition.WING_RIGHT,
                     PlayerPosition.DEFENSE
             );
@@ -62,9 +75,8 @@ public final class MatchModeLayoutUtil {
                     PlayerPosition.CENTER,
                     PlayerPosition.WING_RIGHT,
                     PlayerPosition.DEFENSE_LEFT,
-                   PlayerPosition.DEFENSE_RIGHT
-
-                    );
+                    PlayerPosition.DEFENSE_RIGHT
+            );
             case SIX_ON_SIX_NO_GOALIE -> List.of(
                     PlayerPosition.WING_LEFT,
                     PlayerPosition.CENTER,
@@ -75,6 +87,12 @@ public final class MatchModeLayoutUtil {
             );
         };
     }
+
+    /**
+     * Vrací výchozí rozložení pozic používané při absenci MatchMode.
+     *
+     * @return seznam standardních pozic
+     */
     private static List<PlayerPosition> defaultPositions() {
         return List.of(
                 PlayerPosition.GOALIE,
@@ -87,18 +105,26 @@ public final class MatchModeLayoutUtil {
     }
 
     /**
-     * Backend obdoba buildPositionCapacityForMode(icePositions, slotsPerTeam).
+     * Vypočítá teoretickou kapacitu pozic pro jeden tým
+     * podle zvoleného MatchMode a počtu slotů.
      *
-     * - GOALIE dostane 1 místo, pokud je v icePositions a kapacita > 0,
-     * - zbytek kapacity se cyklicky rozděluje mezi ostatní pozice
-     *   v pořadí dle icePositions bez GOALIE.
+     * Logika výpočtu:
+     * - Pokud je mezi pozicemi GOALIE a je k dispozici alespoň jeden slot,
+     *   brankář získá jeden slot.
+     * - Zbývající sloty jsou cyklicky rozdělovány mezi ostatní pozice
+     *   v pořadí definovaném metodou getIcePositionsForMode.
      *
-     * Používá se pro výpočet teoretické kapacity pozic pro jeden tým.
+     * Výsledkem je mapa pozice → počet míst pro danou pozici.
+     *
+     * @param mode herní režim zápasu
+     * @param slotsPerTeam maximální počet hráčů na jeden tým
+     * @return mapa kapacit pozic
      */
     public static Map<PlayerPosition, Integer> buildPositionCapacityForMode(
             MatchMode mode,
             int slotsPerTeam
     ) {
+
         List<PlayerPosition> icePositions = getIcePositionsForMode(mode);
         Map<PlayerPosition, Integer> capacity = new EnumMap<>(PlayerPosition.class);
 
@@ -114,13 +140,13 @@ public final class MatchModeLayoutUtil {
         boolean hasGoalie = icePositions.contains(PlayerPosition.GOALIE);
         int remainingSlots = totalSlots;
 
-        // 1) Brankář – pokud systém obsahuje GOALIE, dáme mu 1 slot
+        // Brankář získá jeden slot, pokud je součástí režimu
         if (hasGoalie && remainingSlots > 0) {
             capacity.put(PlayerPosition.GOALIE, 1);
             remainingSlots -= 1;
         }
 
-        // 2) Bruslaři – všechny ostatní pozice v pořadí, jak vrací getIcePositionsForMode
+        // Ostatní pozice reprezentují hráče v poli
         List<PlayerPosition> skaterOrder = icePositions.stream()
                 .filter(pos -> pos != PlayerPosition.GOALIE)
                 .toList();
@@ -129,7 +155,7 @@ public final class MatchModeLayoutUtil {
             return capacity;
         }
 
-        // 3) Dokud máme sloty, točíme skaterOrder dokola
+        // Sloty se rozdělují cyklicky mezi pozice hráčů v poli
         int idx = 0;
         while (remainingSlots > 0) {
             PlayerPosition pos = skaterOrder.get(idx % skaterOrder.size());

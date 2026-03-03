@@ -8,16 +8,16 @@ import org.mapstruct.Mapping;
 import java.util.List;
 
 /**
- * Mapper pro převod mezi entitou MatchHistoryEntity
+ * MapStruct mapper pro převod mezi entitou MatchHistoryEntity
  * a přenosovým objektem MatchHistoryDTO.
  *
- * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * Mapper odděluje databázovou reprezentaci historického záznamu
+ * od prezentační vrstvy. Mapování je generováno knihovnou MapStruct
+ * na základě deklarovaných metod a anotací.
  *
- * Mapper je používán servisní vrstvou pro převod historických
- * záznamů zápasu načtených z databáze do DTO objektů,
- * které jsou následně vráceny kontrolerem.
+ * Skóre je převáděno z vloženého objektu MatchScore
+ * na samostatná pole DTO. Vítěz a výsledek jsou
+ * odvozeny z doménové logiky objektu MatchScore.
  */
 @Mapper(componentModel = "spring")
 public interface MatchHistoryMapper {
@@ -25,11 +25,7 @@ public interface MatchHistoryMapper {
     /**
      * Převede entitu historického záznamu zápasu na DTO.
      *
-     * Skóre se mapuje z vloženého objektu MatchScore
-     * na pole scoreLight a scoreDark. Vítěz se odvozuje
-     * z doménové logiky MatchScore.
-     *
-     * @param entity entita reprezentující historický záznam zápasu
+     * @param entity entita reprezentující historický snapshot zápasu
      * @return DTO obsahující data historického záznamu
      */
     @Mapping(source = "score.light", target = "scoreLight")
@@ -42,16 +38,14 @@ public interface MatchHistoryMapper {
             target = "result",
             expression = "java(entity.getScore() != null ? entity.getScore().getResult() : null)"
     )
-
     MatchHistoryDTO toDTO(MatchHistoryEntity entity);
 
     /**
-     * Převede seznam entit historických záznamů zápasu na seznam DTO.
+     * Převede seznam entit historických záznamů
+     * na seznam DTO objektů.
      *
-     * @param entities seznam entit historických záznamů
-     * @return seznam DTO objektů
+     * @param entities seznam entit
+     * @return seznam DTO reprezentací
      */
-    List<MatchHistoryDTO> toDTOList(
-            List<MatchHistoryEntity> entities
-    );
+    List<MatchHistoryDTO> toDTOList(List<MatchHistoryEntity> entities);
 }

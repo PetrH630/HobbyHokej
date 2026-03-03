@@ -13,215 +13,129 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující hokejový zápas.
  *
- * Uchovává základní informace o zápasu, jeho kapacitě,
- * ceně, aktuálním stavu a vazbě na sezónu.
- * Informace o účasti hráčů jsou uloženy v samostatné entitě
- * MatchRegistrationEntity.
+ * Uchovává základní parametry zápasu, jeho kapacitu,
+ * cenu, režim hry, aktuální stav a vazbu na sezónu.
+ * Informace o účasti hráčů jsou spravovány samostatnou
+ * entitou MatchRegistrationEntity.
  *
- * Entita dále obsahuje auditní údaje o vytvoření a poslední
- * úpravě zápasu.
+ * Entita dále obsahuje auditní údaje a vložený objekt
+ * reprezentující skóre zápasu.
  */
 @Entity
 @Table(name = "matches")
 public class MatchEntity {
 
-    /**
-     * Primární klíč zápasu.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Datum a čas konání zápasu.
-     */
     @Column(nullable = false)
     private LocalDateTime dateTime;
 
-    /**
-     * Místo konání zápasu.
-     */
     @Column(nullable = false)
     private String location;
 
-    /**
-     * Volitelný popis zápasu.
-     *
-     * Slouží například pro doplňující informace o organizaci zápasu.
-     */
     private String description;
 
-    /**
-     * Maximální počet hráčů povolených pro zápas.
-     *
-     * Hodnota se používá pro kontrolu kapacity při registraci hráčů.
-     */
     @Column(nullable = false)
     private Integer maxPlayers;
 
-    /**
-     * Celková cena zápasu.
-     *
-     * Hodnota může sloužit pro výpočet podílu jednotlivých hráčů.
-     */
     @Column(nullable = false)
     private Integer price;
 
-    /**
-     * Aktuální stav zápasu.
-     *
-     * Stav určuje, zda je zápas plánovaný, zrušený nebo například odehraný.
-     */
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
-    /**
-     * Režim zápasu (počet hráčů na ledě, s brankářem / bez brankáře).
-     * Ukládá se jako textová hodnota enumu.
-     */
     @Enumerated(EnumType.STRING)
     @Column(name = "match_mode", nullable = false, length = 50)
     private MatchMode matchMode;
 
-    /**
-     * Důvod zrušení zápasu.
-     *
-     * Vyplňuje se pouze v případě, že je zápas zrušen.
-     */
     @Enumerated(EnumType.STRING)
     private MatchCancelReason cancelReason;
 
-    /**
-     * Sezóna, do které zápas patří.
-     *
-     * Každý zápas musí být přiřazen k existující sezóně.
-     */
     @ManyToOne(optional = false)
     @JoinColumn(name = "season_id", nullable = false)
     private SeasonEntity season;
 
     /**
-     * Časové razítko zápasu.
+     * Časové razítko poslední změny zápasu.
      *
-     * Uchovává datum a čas vytvoření nebo poslední změny zápasu.
-     * Hodnota se aktualizuje při každé změně záznamu.
+     * Hodnota se používá zejména pro auditní účely
+     * a pro historizaci změn pomocí databázového triggeru.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
-    /**
-     * ID uživatele, který zápas vytvořil.
-     *
-     * Slouží pro auditní účely.
-     */
     @Column(name = "created_by_user_id")
     private Long createdByUserId;
 
-    /**
-     * ID uživatele, který zápas naposledy změnil.
-     *
-     * Slouží pro auditní účely a sledování odpovědnosti za změny.
-     */
     @Column(name = "last_modified_by_user_id")
     private Long lastModifiedByUserId;
 
     /**
-     * Skóre zápasu.
+     * Vložený objekt reprezentující skóre zápasu.
      *
-     * Uchovává počet vstřelených branek pro tým LIGHT a tým DARK.
-     * Ukládá se jako vložený objekt do tabulky zápasů.
-     * Hodnoty mohou být null, pokud se zápas ještě neodehrál.
+     * Hodnoty mohou být null, pokud zápas ještě nebyl odehrán.
      */
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(
-                    name = "light",
-                    column = @Column(name = "score_light")
-            ),
-            @AttributeOverride(
-                    name = "dark",
-                    column = @Column(name = "score_dark")
-            )
+            @AttributeOverride(name = "light", column = @Column(name = "score_light")),
+            @AttributeOverride(name = "dark", column = @Column(name = "score_dark"))
     })
     private MatchScore score;
 
-    /**
-     * Bezparametrický konstruktor požadovaný JPA.
-     */
     public MatchEntity() {
     }
 
     public Long getId() { return id; }
-
     public void setId(Long id) { this.id = id; }
 
     public LocalDateTime getDateTime() { return dateTime; }
-
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
     public String getLocation() { return location; }
-
     public void setLocation(String location) { this.location = location; }
 
     public String getDescription() { return description; }
-
     public void setDescription(String description) { this.description = description; }
 
     public Integer getMaxPlayers() { return maxPlayers; }
-
     public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 
     public Integer getPrice() { return price; }
-
     public void setPrice(Integer price) { this.price = price; }
 
     public MatchStatus getMatchStatus() { return matchStatus; }
-
     public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
 
     public MatchCancelReason getCancelReason() { return cancelReason; }
-
     public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
 
     public SeasonEntity getSeason() { return season; }
-
     public void setSeason(SeasonEntity season) { this.season = season; }
 
     public LocalDateTime getTimestamp() { return timestamp; }
-
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 
     public Long getCreatedByUserId() { return createdByUserId; }
-
     public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
 
     public Long getLastModifiedByUserId() { return lastModifiedByUserId; }
-
     public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
 
-    public MatchMode getMatchMode() {
-        return matchMode;
-    }
+    public MatchMode getMatchMode() { return matchMode; }
+    public void setMatchMode(MatchMode matchMode) { this.matchMode = matchMode; }
 
-    public void setMatchMode(MatchMode matchMode) {
-        this.matchMode = matchMode;
-    }
-
-    public MatchScore getScore() {
-        return score;
-    }
-
-    public void setScore(MatchScore score) {
-        this.score = score;
-    }
+    public MatchScore getScore() { return score; }
+    public void setScore(MatchScore score) { this.score = score; }
 
     /**
-     * Určuje vítěze zápasu na základě skóre.
+     * Určuje vítězný tým na základě aktuálního skóre.
      *
-     * Pokud není skóre nastaveno nebo je stav nerozhodný,
+     * Pokud skóre není nastaveno nebo je výsledek nerozhodný,
      * vrací se null.
      *
-     * @return Vítězný tým nebo null v případě remízy nebo chybějícího skóre.
+     * @return vítězný tým nebo null
      */
     public Team getWinner() {
         if (score == null) {
@@ -231,10 +145,11 @@ public class MatchEntity {
     }
 
     /**
-     * Vrací výsledek zápasu na základě skóre.
+     * Vrací výsledek zápasu odvozený ze skóre.
      *
-     * @return Výsledek zápasu nebo {@link MatchResult#NOT_PLAYED},
-     * pokud skóre není zadáno.
+     * Pokud skóre není zadáno, vrací se hodnota MatchResult.NOT_PLAYED.
+     *
+     * @return výsledek zápasu
      */
     public MatchResult getResult() {
         if (score == null) {

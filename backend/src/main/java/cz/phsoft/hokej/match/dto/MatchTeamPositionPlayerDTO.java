@@ -1,9 +1,15 @@
 package cz.phsoft.hokej.match.dto;
 
 /**
- * DTO pro základní identifikaci hráče na konkrétní pozici v zápase.
+ * DTO reprezentující základní identifikaci hráče
+ * obsazujícího konkrétní pozici v zápase.
  *
- * Používá se v rámci přehledu pozic pro tým.
+ * Objekt se používá jako součást přehledu pozic
+ * v rámci jednoho týmu a obsahuje pouze
+ * identifikační údaje potřebné pro zobrazení
+ * ve frontendovém rozhraní.
+ *
+ * DTO neobsahuje žádnou business logiku.
  */
 public class MatchTeamPositionPlayerDTO {
 
