@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
  * Entita reprezentující historický záznam o hráči.
  *
  * Slouží pro auditní účely a uchovávání změn hráčů v čase.
- * Každý záznam představuje stav hráče v okamžiku provedení operace
- * nad hlavní entitou PlayerEntity.
+ * Každý záznam představuje kompletní snapshot stavu hráče
+ * v okamžiku provedení operace nad hlavní entitou PlayerEntity.
  *
  * Záznamy jsou typicky vytvářeny databázovým triggerem při změně
- * údajů hráče.
+ * údajů hráče. Entita je mapována na tabulku player_entity_history.
  */
 @Entity
 @Table(name = "player_entity_history")

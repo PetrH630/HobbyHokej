@@ -11,13 +11,7 @@ import java.util.List;
  * a přenosovým objektem MatchRegistrationHistoryDTO.
  *
  * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
- *
- * Mapper je používán servisní vrstvou pro převod historických
- * záznamů registrací načtených z databáze do DTO objektů,
- * které jsou následně vráceny kontrolerem pro auditní
- * a přehledové účely.
+ * Mapování je generováno nástrojem MapStruct.
  */
 @Mapper(componentModel = "spring")
 public interface MatchRegistrationHistoryMapper {
@@ -31,9 +25,9 @@ public interface MatchRegistrationHistoryMapper {
     MatchRegistrationHistoryDTO toDTO(MatchRegistrationHistoryEntity entity);
 
     /**
-     * Převede seznam entit historických záznamů registrací na seznam DTO.
+     * Převede seznam entit historických záznamů na seznam DTO.
      *
-     * @param entities seznam entit historických záznamů registrací
+     * @param entities seznam entit historických záznamů
      * @return seznam DTO objektů
      */
     List<MatchRegistrationHistoryDTO> toDTOList(

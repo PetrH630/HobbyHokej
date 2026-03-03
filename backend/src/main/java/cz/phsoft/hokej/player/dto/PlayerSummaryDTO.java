@@ -8,16 +8,47 @@ import cz.phsoft.hokej.player.enums.Team;
  *
  * Slouží pro přehledové a seznamové pohledy, kde není potřeba kompletní
  * detail hráče ani jeho stavové a notifikační informace. Typicky se používá
- * v seznamech hráčů nebo pro rychlé výběry.
+ * v seznamech hráčů, výběrových komponentech nebo při rychlém načítání
+ * základních údajů o hráči.
+ *
+ * Objekt neobsahuje žádnou business logiku a slouží výhradně jako
+ * datový přenosový objekt mezi servisní a prezentační vrstvou.
  */
 public class PlayerSummaryDTO {
 
+    /**
+     * Jedinečný identifikátor hráče.
+     */
     private Long id;
+
+    /**
+     * Křestní jméno hráče.
+     */
     private String name;
+
+    /**
+     * Příjmení hráče.
+     */
     private String surname;
+
+    /**
+     * Celé jméno hráče.
+     */
     private String fullName;
+
+    /**
+     * Přezdívka hráče.
+     */
     private String nickname;
+
+    /**
+     * Typ hráče, například BASIC, STANDARD nebo VIP.
+     */
     private PlayerType type;
+
+    /**
+     * Tým, ke kterému je hráč přiřazen.
+     */
     private Team team;
 
     public Long getId() { return id; }

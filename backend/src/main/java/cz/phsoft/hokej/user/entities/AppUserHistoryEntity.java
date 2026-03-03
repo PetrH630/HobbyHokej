@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
  * nad hlavní entitou AppUserEntity.
  *
  * Záznamy jsou typicky vytvářeny databázovým triggerem při operacích
- * INSERT, UPDATE nebo DELETE.
+ * INSERT, UPDATE nebo DELETE a používají se v přehledech historie
+ * a při řešení incidentů.
  */
 @Entity
 @Table(name = "app_users_history")
@@ -92,6 +93,8 @@ public class AppUserHistoryEntity {
 
     /**
      * Bezparametrický konstruktor požadovaný JPA.
+     *
+     * Konstruktor se používá frameworkem při načítání entit z databáze.
      */
     public AppUserHistoryEntity() {
     }

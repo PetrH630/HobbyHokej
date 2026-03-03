@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
  * REST controller, který se používá pro práci s aktuálním hráčem
  * přihlášeného uživatele.
  *
- * Aktuální hráč představuje kontext, ve kterém uživatel pracuje
+ * Aktuální hráč představuje kontext, ve kterém uživatel pracuje,
  * například při registraci na zápasy nebo při zobrazení statistik.
  * Controller umožňuje nastavení aktuálního hráče, automatický výběr
  * hráče po přihlášení a získání aktuálně zvoleného hráče.
  *
- * Veškerá business logika se předává do {@link PlayerService}
- * a {@link CurrentPlayerService}.
+ * Veškerá business logika je delegována do PlayerService
+ * a CurrentPlayerService.
  */
 @RestController
 @RequestMapping("/api/current-player")
@@ -28,6 +28,15 @@ public class CurrentPlayerController {
     private final CurrentPlayerService currentPlayerService;
     private final PlayerService playerService;
 
+    /**
+     * Vytváří instanci kontroleru pro práci s aktuálním hráčem.
+     *
+     * Závislosti na servisních třídách se předávají přes konstruktor
+     * a používají se pro delegaci logiky do servisní vrstvy.
+     *
+     * @param currentPlayerService služba pro práci s aktuálním hráčem
+     * @param playerService        služba pro správu hráčů
+     */
     public CurrentPlayerController(CurrentPlayerService currentPlayerService,
                                    PlayerService playerService) {
         this.currentPlayerService = currentPlayerService;
@@ -38,11 +47,12 @@ public class CurrentPlayerController {
      * Nastavuje aktuálního hráče pro přihlášeného uživatele.
      *
      * Metoda se používá zejména v případech, kdy má uživatel přiřazeno
-     * více hráčů a potřebuje mezi nimi ručně přepínat.
+     * více hráčů a potřebuje mezi nimi ručně přepínat. Nastavení aktuálního
+     * hráče je delegováno do PlayerService.
      *
      * @param playerId ID hráče, který má být nastaven jako aktuální
      * @param auth     autentizační kontext přihlášeného uživatele
-     * @return DTO {@link SuccessResponseDTO} s informací o provedené změně
+     * @return SuccessResponseDTO s informací o provedené změně
      */
     @PostMapping("/{playerId}")
     @PreAuthorize("isAuthenticated()")
@@ -58,14 +68,13 @@ public class CurrentPlayerController {
 
     /**
      * Provádí automatický výběr aktuálního hráče pro přihlášeného
-     * uživatele podle nastavení v AppUserSettings.
+     * uživatele podle nastavení v uživatelských preferencích.
      *
-     * Například může být vybrán první hráč podle ID nebo může být
-     * ponechán stav bez vybraného hráče, aby si uživatel vybral hráče
-     * ručně na frontendu.
+     * Logika výběru (například volba prvního hráče podle ID nebo ponechání
+     * stavu bez vybraného hráče) je implementována v PlayerService.
      *
      * @param auth autentizační kontext přihlášeného uživatele
-     * @return DTO {@link SuccessResponseDTO} s výsledkem automatického výběru
+     * @return SuccessResponseDTO s výsledkem automatického výběru
      */
     @PostMapping("/auto-select")
     @PreAuthorize("isAuthenticated()")
@@ -79,9 +88,11 @@ public class CurrentPlayerController {
     /**
      * Vrací aktuálně zvoleného hráče přihlášeného uživatele.
      *
-     * Pokud není aktuální hráč nastaven, vrací se hodnota null.
+     * Pokud není aktuální hráč nastaven, vrací se hodnota null v těle
+     * odpovědi. V případě, že je aktuální hráč k dispozici, jeho data
+     * se načítají z PlayerService.
      *
-     * @return DTO {@link PlayerDTO} s detaily hráče nebo null
+     * @return PlayerDTO s detaily aktuálního hráče nebo null, pokud není nastaven
      */
     @GetMapping
     @PreAuthorize("isAuthenticated()")

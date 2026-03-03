@@ -30,7 +30,8 @@ public interface AppUserMapper {
      * Převede uživatelskou entitu na DTO.
      *
      * Součástí DTO je i seznam hráčů přiřazených
-     * k danému uživateli.
+     * k danému uživateli. Metoda se používá zejména
+     * v dotazovacích (read) operacích controlleru.
      *
      * @param entity entita uživatele
      * @return DTO reprezentace uživatele
@@ -41,8 +42,10 @@ public interface AppUserMapper {
     /**
      * Převede seznam uživatelských entit na seznam DTO.
      *
+     * Mapování probíhá položku po položce pomocí metody toDTO.
+     *
      * @param entities seznam uživatelských entit
-     * @return seznam DTO
+     * @return seznam DTO reprezentací uživatelů
      */
     List<AppUserDTO> toDtoList(List<AppUserEntity> entities);
 
@@ -50,7 +53,8 @@ public interface AppUserMapper {
      * Převede entitu hráče na DTO.
      *
      * Pole fullName se záměrně nemapuje, protože
-     * je skládáno jinde (např. v DTO logice).
+     * je skládáno jinde (například v DTO logice
+     * nebo ve frontendové části aplikace).
      *
      * @param entity entita hráče
      * @return DTO hráče
@@ -62,10 +66,11 @@ public interface AppUserMapper {
      * Převede registrační DTO na novou uživatelskou entitu.
      *
      * Systémová pole nejsou mapována a jejich hodnoty
-     * jsou nastavovány v servisní vrstvě.
+     * jsou nastavovány v servisní vrstvě (například role,
+     * hash hesla, aktivace účtu nebo časová razítka).
      *
      * @param dto registrační DTO
-     * @return nová entita uživatele
+     * @return nová entita uživatele připravená k uložení
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
@@ -81,11 +86,12 @@ public interface AppUserMapper {
      * Aktualizuje existující entitu uživatele
      * hodnotami z DTO.
      *
-     * Identita, role, heslo a vazby na hráče
-     * nejsou z DTO přebírány.
+     * Identita, role, heslo, vazby na hráče a systémová
+     * časová pole nejsou z DTO přebírány a nadále se
+     * spravují výhradně na backendu v servisní vrstvě.
      *
-     * @param dto    zdrojové DTO
-     * @param entity cílová entita
+     * @param dto    zdrojové DTO s novými hodnotami
+     * @param entity cílová entita, která má být aktualizována
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)

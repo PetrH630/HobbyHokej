@@ -9,10 +9,16 @@ import org.springframework.http.HttpStatus;
  * Vyhazuje se při práci s ID období neaktivity, které neexistuje
  * v databázi.
  *
- * Typicky mapováno na HTTP 404 (Not Found).
+ * Výjimka je mapována na HTTP status 404 Not Found.
  */
 public class InactivityPeriodNotFoundException extends BusinessException {
 
+    /**
+     * Vytváří výjimku s chybovou zprávou obsahující ID
+     * nenalezeného období neaktivity.
+     *
+     * @param id identifikátor období neaktivity
+     */
     public InactivityPeriodNotFoundException(Long id) {
         super("BE - Období neaktivity s ID " + id + " neexistuje.", HttpStatus.NOT_FOUND);
     }

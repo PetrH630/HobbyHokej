@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
- * REST controller, který se používá pro poskytování informací o aktuálním režimu aplikace.
+ * REST controller poskytující informaci o aktuálním režimu aplikace.
  *
- * Slouží k informování frontendové části o tom, zda je aplikace spuštěna
- * v demo režimu nebo ve standardním produkčním režimu. Na základě této
- * informace může frontend podmíněně zobrazovat nebo omezovat určitou
- * funkcionalitu.
+ * Controller slouží pro veřejné zjištění, zda aplikace běží
+ * v demo režimu nebo ve standardním provozním režimu.
+ * Na základě této informace může frontend upravovat
+ * chování uživatelského rozhraní nebo omezovat určité operace.
  *
- * Veškerá logika vyhodnocení režimu aplikace se deleguje na {@link DemoModeService}.
+ * Vyhodnocení režimu aplikace je delegováno do DemoModeService.
  */
 @RestController
 @RequestMapping("/api/public")
@@ -23,6 +23,11 @@ public class AppModeController {
 
     private final DemoModeService demoModeService;
 
+    /**
+     * Vytvoří instanci controlleru.
+     *
+     * @param demoModeService service zajišťující vyhodnocení demo režimu
+     */
     public AppModeController(DemoModeService demoModeService) {
         this.demoModeService = demoModeService;
     }

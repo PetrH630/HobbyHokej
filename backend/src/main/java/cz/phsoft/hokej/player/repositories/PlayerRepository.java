@@ -20,21 +20,21 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      * Najde hráče podle jeho ID.
      *
      * Překrývá základní metodu z JpaRepository tak,
-     * aby bylo možné vracet Optional.
+     * aby bylo možné pracovat s Optional.
      *
-     * @param id ID hráče
+     * @param id identifikátor hráče
      * @return hráč zabalený v Optional, pokud existuje
      */
     Optional<PlayerEntity> findById(Long id);
 
     /**
-     * Vrátí všechny hráče, jejichž ID není obsaženo
+     * Vrací všechny hráče, jejichž ID není obsaženo
      * v zadaném seznamu.
      *
      * Používá se například při filtrování dostupných hráčů.
      *
      * @param ids seznam ID hráčů, které mají být vyloučeny
-     * @return seznam hráčů
+     * @return seznam hráčů nesplňujících uvedená ID
      */
     List<PlayerEntity> findByIdNotIn(List<Long> ids);
 
@@ -46,7 +46,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
      *
      * @param name    jméno hráče
      * @param surname příjmení hráče
-     * @return true, pokud hráč existuje
+     * @return true, pokud hráč s danou kombinací existuje
      */
     boolean existsByNameAndSurname(String name, String surname);
 
@@ -72,7 +72,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
     Optional<PlayerEntity> findByUserEmail(String email);
 
     /**
-     * Vrátí všechny hráče patřící danému uživateli.
+     * Vrací všechny hráče patřící danému uživateli.
      *
      * @param email e-mail uživatele
      * @return seznam hráčů uživatele
@@ -80,24 +80,32 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
     List<PlayerEntity> findAllByUserEmail(String email);
 
     /**
-     * Vrátí všechny hráče uživatele seřazené
+     * Vrací všechny hráče uživatele seřazené
      * podle ID vzestupně.
      *
      * Používá se pro konzistentní výpis hráčů
      * v uživatelském rozhraní.
      *
      * @param email e-mail uživatele
-     * @return seznam hráčů uživatele
+     * @return seznam hráčů uživatele seřazený podle ID
      */
     List<PlayerEntity> findByUser_EmailOrderByIdAsc(String email);
 
     /**
      * Vrací všechny hráče v daném stavu.
+     *
+     * @param playerStatus stav hráče
+     * @return seznam hráčů s daným statusem
      */
     List<PlayerEntity> findByPlayerStatus(PlayerStatus playerStatus);
 
     /**
-     * Pohodlná metoda pro všechny schválené hráče.
+     * Vrací všechny hráče ve stavu APPROVED.
+     *
+     * Slouží jako pohodlná obalová metoda nad dotazem
+     * podle PlayerStatus.
+     *
+     * @return seznam schválených hráčů
      */
     default List<PlayerEntity> findApprovedPlayers() {
         return findByPlayerStatus(PlayerStatus.APPROVED);

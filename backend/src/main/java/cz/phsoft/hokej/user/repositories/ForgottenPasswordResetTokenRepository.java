@@ -18,6 +18,9 @@ public interface ForgottenPasswordResetTokenRepository
     /**
      * Vyhledá resetovací token podle jeho hodnoty.
      *
+     * Metoda se používá při zpracování odkazu na reset hesla,
+     * který uživatel obdržel e-mailem.
+     *
      * @param token hodnota resetovacího tokenu
      * @return token zabalený v Optional, pokud existuje
      */
@@ -27,7 +30,8 @@ public interface ForgottenPasswordResetTokenRepository
      * Smaže všechny resetovací tokeny daného uživatele.
      *
      * Typicky se používá po úspěšném nastavení nového hesla
-     * nebo při vynulování procesu resetu.
+     * nebo při vynulování procesu resetu, aby nebylo možné
+     * použít staré tokeny.
      *
      * @param user uživatel, jehož tokeny mají být smazány
      */

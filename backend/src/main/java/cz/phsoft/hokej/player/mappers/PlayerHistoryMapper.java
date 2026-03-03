@@ -11,13 +11,12 @@ import java.util.List;
  * a přenosovým objektem PlayerHistoryDTO.
  *
  * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * Implementace mapování je generována knihovnou MapStruct
+ * na základě definovaných metod tohoto rozhraní.
  *
- * Mapper je používán servisní vrstvou pro převod historických
- * záznamů hráče načtených z databáze do DTO objektů,
- * které jsou následně vráceny kontrolerem pro auditní
- * a přehledové účely.
+ * Mapper je používán servisní vrstvou při načítání
+ * historických záznamů hráče z databáze a jejich převodu
+ * na DTO objekty vracené controllerem.
  */
 @Mapper(componentModel = "spring")
 public interface PlayerHistoryMapper {
@@ -36,7 +35,5 @@ public interface PlayerHistoryMapper {
      * @param entities seznam entit historických záznamů hráče
      * @return seznam DTO objektů
      */
-    List<PlayerHistoryDTO> toDTOList(
-            List<PlayerHistoryEntity> entities
-    );
+    List<PlayerHistoryDTO> toDTOList(List<PlayerHistoryEntity> entities);
 }

@@ -11,25 +11,81 @@ import java.time.LocalDateTime;
  * DTO reprezentující historický záznam o registraci hráče k zápasu.
  *
  * Slouží pro auditní a přehledové účely. Obsahuje informace o tom,
- * jak se registrace v čase měnila, včetně původního časového razítka,
- * akce, autora změny a stavů registrace.
+ * jak se registrace v čase měnila, včetně časového razítka změny,
+ * typu provedené akce, autora změny a výsledného stavu registrace.
  *
- * Datový model odpovídá záznamu v tabulce historie registrací.
+ * Datová struktura odpovídá záznamu uloženému v tabulce historie
+ * registrací. Objekt neobsahuje business logiku a používá se pouze
+ * pro přenos dat mezi backendem a klientem.
  */
 public class MatchRegistrationHistoryDTO {
 
+    /**
+     * Jednoznačný identifikátor historického záznamu.
+     */
     private Long id;
+
+    /**
+     * Typ akce, která byla nad registrací provedena.
+     * Může reprezentovat například vytvoření, změnu nebo zrušení registrace.
+     */
     private String action;
+
+    /**
+     * Interní administrátorská poznámka zaznamenaná v okamžiku změny.
+     */
     private String adminNote;
+
+    /**
+     * Datum a čas, kdy došlo ke změně registrace.
+     */
     private LocalDateTime changedAt;
+
+    /**
+     * Identifikace subjektu, který změnu provedl.
+     * Slouží k rozlišení uživatelských a systémových zásahů.
+     */
     private String createdBy;
+
+    /**
+     * Textová poznámka k omluvě evidovaná v okamžiku změny.
+     */
     private String excuseNote;
+
+    /**
+     * Důvod omluvy hráče platný v okamžiku změny.
+     */
     private ExcuseReason excuseReason;
+
+    /**
+     * Identifikátor zápasu, ke kterému se historický záznam vztahuje.
+     */
     private Long matchId;
+
+    /**
+     * Identifikátor původní registrace, ke které historický záznam náleží.
+     */
     private Long matchRegistrationId;
+
+    /**
+     * Původní časové razítko registrace před provedením změny.
+     * Slouží pro detailní auditní rekonstrukci vývoje dat.
+     */
     private LocalDateTime originalTimestamp;
+
+    /**
+     * Identifikátor hráče, jehož registrace byla změněna.
+     */
     private Long playerId;
+
+    /**
+     * Stav registrace v okamžiku zaznamenané změny.
+     */
     private PlayerMatchStatus status;
+
+    /**
+     * Tým, do kterého byl hráč v daném okamžiku přiřazen.
+     */
     private Team team;
 
     /**

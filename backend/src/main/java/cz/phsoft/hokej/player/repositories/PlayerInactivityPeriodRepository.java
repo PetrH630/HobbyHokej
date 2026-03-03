@@ -12,7 +12,8 @@ import java.util.List;
  * Repozitář pro práci s entitou PlayerInactivityPeriodEntity.
  *
  * Slouží k evidenci a vyhledávání období neaktivity hráčů,
- * zejména pro ověření dostupnosti hráče v konkrétním čase.
+ * zejména pro ověření dostupnosti hráče v konkrétním čase
+ * a pro kontrolu překryvů jednotlivých období.
  */
 @Repository
 public interface PlayerInactivityPeriodRepository
@@ -27,7 +28,7 @@ public interface PlayerInactivityPeriodRepository
      * @param player hráč, jehož neaktivita se ověřuje
      * @param from   začátek kontrolovaného intervalu
      * @param to     konec kontrolovaného intervalu
-     * @return true, pokud hráč spadá do období neaktivity
+     * @return true, pokud alespoň jedno období neaktivity zasahuje do intervalu
      */
     boolean existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
             PlayerEntity player,
@@ -36,7 +37,7 @@ public interface PlayerInactivityPeriodRepository
     );
 
     /**
-     * Vrátí všechna období neaktivity hráče, která
+     * Vrací všechna období neaktivity hráče, která
      * se překrývají se zadaným časovým intervalem.
      *
      * Používá se zejména při validaci vytváření
@@ -55,11 +56,11 @@ public interface PlayerInactivityPeriodRepository
     );
 
     /**
-     * Vrátí všechna období neaktivity daného hráče
+     * Vrací všechna období neaktivity daného hráče
      * seřazená vzestupně podle začátku neaktivity.
      *
      * @param player hráč
-     * @return seznam období neaktivity hráče
+     * @return seznam období neaktivity hráče seřazený podle inactiveFrom
      */
     List<PlayerInactivityPeriodEntity>
     findByPlayerOrderByInactiveFromAsc(PlayerEntity player);

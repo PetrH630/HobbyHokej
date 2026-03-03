@@ -5,7 +5,7 @@ import cz.phsoft.hokej.match.dto.MatchDetailDTO;
 import cz.phsoft.hokej.match.dto.MatchOverviewDTO;
 import cz.phsoft.hokej.match.enums.MatchCancelReason;
 import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

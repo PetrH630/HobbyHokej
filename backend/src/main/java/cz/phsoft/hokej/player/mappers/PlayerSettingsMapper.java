@@ -9,13 +9,10 @@ import org.mapstruct.*;
  * a přenosovým objektem PlayerSettingsDTO.
  *
  * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * Implementace mapování je generována knihovnou MapStruct.
  *
  * Mapper je používán servisní vrstvou při načítání
- * a aktualizaci hráčských nastavení. Při aktualizaci
- * jsou null hodnoty ignorovány, aby nedošlo k nechtěnému
- * přepsání existujících dat.
+ * a aktualizaci hráčských nastavení.
  */
 @Mapper(componentModel = "spring")
 public interface PlayerSettingsMapper {

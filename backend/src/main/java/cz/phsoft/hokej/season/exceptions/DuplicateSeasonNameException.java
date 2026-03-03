@@ -8,8 +8,11 @@ import org.springframework.http.HttpStatus;
  * s duplicitním názvem.
  *
  * Používá se v servisní vrstvě při porušení pravidla jedinečnosti
- * názvu sezóny. Výjimka je následně zpracována globálním
- * exception handlerem a vrací HTTP status CONFLICT.
+ * názvu sezóny. Výjimka reprezentuje porušení doménového pravidla,
+ * podle kterého musí být název sezóny v systému jedinečný.
+ *
+ * Výjimka je následně zpracována globálním exception handlerem
+ * a mapována na HTTP status CONFLICT.
  *
  * Dědí z BusinessException, která zapouzdřuje aplikační chyby
  * reprezentující porušení doménových pravidel.

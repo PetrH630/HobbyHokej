@@ -1,22 +1,29 @@
 package cz.phsoft.hokej.player.services;
 
-
 import cz.phsoft.hokej.player.dto.PlayerHistoryDTO;
 
 import java.util.List;
 
 /**
- * Servisní rozhraní pro práci s historií hráčů.
+ * Rozhraní servisní vrstvy pro práci s historií hráčů.
  *
- * Slouží pouze pro čtení auditních záznamů.
+ * Definuje kontrakt pro čtení auditních záznamů změn nad hráči.
+ * Rozhraní neposkytuje žádné změnové operace a slouží výhradně
+ * pro přístup k historickým datům.
+ *
+ * Implementace zajišťuje načtení historických záznamů
+ * z perzistentní vrstvy a jejich převod do DTO reprezentace.
  */
 public interface PlayerHistoryService {
 
     /**
-     * Vrátí historii daného hráče.
+     * Vrátí historii změn daného hráče.
      *
-     * @param playerId ID hráče
-     * @return seznam historických záznamů od nejnovějšího po nejstarší
+     * Historické záznamy jsou vráceny v pořadí
+     * od nejnovější změny po nejstarší.
+     *
+     * @param playerId identifikátor hráče
+     * @return seznam historických záznamů ve formě PlayerHistoryDTO
      */
     List<PlayerHistoryDTO> getHistoryForPlayer(Long playerId);
 }

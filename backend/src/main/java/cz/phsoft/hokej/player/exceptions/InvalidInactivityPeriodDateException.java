@@ -6,13 +6,18 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující neplatné datumové rozmezí období neaktivity.
  *
- * Typicky se používá, pokud datum "od" je po datu "do"
+ * Používá se v případě, kdy datum začátku je po datu konce
  * nebo jinak nesplňuje logická validační pravidla.
  *
- * Typicky mapováno na HTTP 400 (Bad Request).
+ * Výjimka je mapována na HTTP status 400 Bad Request.
  */
 public class InvalidInactivityPeriodDateException extends BusinessException {
 
+    /**
+     * Vytváří výjimku s vlastní chybovou zprávou.
+     *
+     * @param message text chybové zprávy
+     */
     public InvalidInactivityPeriodDateException(String message) {
         super(message, HttpStatus.BAD_REQUEST);
     }

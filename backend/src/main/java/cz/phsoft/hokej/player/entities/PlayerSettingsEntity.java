@@ -5,20 +5,29 @@ import jakarta.persistence.*;
 /**
  * Entita uchovávající nastavení konkrétního hráče.
  *
- * Odděluje identitu hráče (PlayerEntity) od jeho kontaktních údajů
- * a detailních notifikačních preferencí. Nastavení se využívá
- * při rozhodování o tom, zda a jak budou hráči doručovány notifikace.
+ * Odděluje identitu hráče reprezentovanou entitou PlayerEntity
+ * od jeho kontaktních údajů a detailních notifikačních preferencí.
+ * Nastavení se využívá při rozhodování o tom, zda a jak budou
+ * hráči doručovány notifikace, a také při automatických herních
+ * přesunech mezi týmy nebo pozicemi.
+ *
+ * Entita je mapována na tabulku player_settings a je v relaci
+ * jedna ku jedné s entitou PlayerEntity.
  */
 @Entity
 @Table(name = "player_settings")
 public class PlayerSettingsEntity {
 
+    /**
+     * Primární klíč nastavení hráče.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Hráč, ke kterému toto nastavení patří.
+     *
      * Pro jednoho hráče existuje právě jeden záznam nastavení.
      */
     @OneToOne(fetch = FetchType.LAZY)
@@ -27,7 +36,8 @@ public class PlayerSettingsEntity {
 
     /**
      * Volitelný email hráče.
-     * Pokud není vyplněn, může se použít email uživatele (AppUserEntity).
+     *
+     * Pokud není vyplněn, může se použít email uživatele.
      */
     @Column(name = "contact_email", length = 255)
     private String contactEmail;
@@ -96,9 +106,6 @@ public class PlayerSettingsEntity {
     /**
      * Příznak, zda může být hráč automaticky přesunut
      * do druhého týmu při uvolnění místa.
-     *
-     * Používá se při výběru náhradníka z RESERVED
-     * pro obsazení volného slotu v opačném týmu.
      */
     @Column(name = "possible_move_to_another_team", nullable = false)
     private boolean possibleMoveToAnotherTeam = false;
@@ -106,17 +113,16 @@ public class PlayerSettingsEntity {
     /**
      * Příznak, zda může být hráči automaticky změněna
      * herní pozice mezi obranou a útokem.
-     *
-     * Používá se při výběru náhradníka z RESERVED
-     * pro obsazení volného slotu na jiné než preferované
-     * pozici. Na pozici brankáře se tímto příznakem
-     * přesun nepovoluje.
      */
     @Column(name = "possible_change_player_position", nullable = false)
     private boolean possibleChangePlayerPosition = false;
 
     /**
      * Určuje, zda jsou povoleny notifikace týkající se registrací.
+     *
+     * Metoda je pomocná a není perzistentní.
+     *
+     * @return true, pokud jsou notifikace registrací povoleny
      */
     @Transient
     public boolean isRegistrationNotificationsEnabled() {
@@ -125,6 +131,10 @@ public class PlayerSettingsEntity {
 
     /**
      * Určuje, zda jsou povoleny notifikace týkající se omluv.
+     *
+     * Metoda je pomocná a není perzistentní.
+     *
+     * @return true, pokud jsou notifikace omluv povoleny
      */
     @Transient
     public boolean isExcuseNotificationsEnabled() {
@@ -134,6 +144,10 @@ public class PlayerSettingsEntity {
     /**
      * Určuje, zda jsou povoleny notifikace týkající se informací o zápase,
      * například změn a připomínek.
+     *
+     * Metoda je pomocná a není perzistentní.
+     *
+     * @return true, pokud je alespoň jeden typ zápasové notifikace povolen
      */
     @Transient
     public boolean isMatchInfoNotificationsEnabled() {
@@ -145,6 +159,10 @@ public class PlayerSettingsEntity {
     /**
      * Určuje, zda jsou povoleny systémové notifikace,
      * například o platbách.
+     *
+     * Metoda je pomocná a není perzistentní.
+     *
+     * @return true, pokud jsou systémové notifikace povoleny
      */
     @Transient
     public boolean isSystemNotificationsEnabled() {

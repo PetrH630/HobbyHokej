@@ -23,18 +23,42 @@ import java.util.List;
  * Umožňuje registraci, odhlášení, evidenci omluv a neomluvené neúčasti
  * a také přehled registrací napříč zápasy.
  *
- * Veškerá business logika se deleguje do {@link MatchRegistrationService},
- * informace o aktuálním hráči se získávají z {@link CurrentPlayerService}
- * a související doménová logika může být částečně řešena také v {@link MatchService}.
+ * Veškerá business logika se deleguje do MatchRegistrationService.
+ * Informace o aktuálním hráči se získávají z CurrentPlayerService
+ * a související doménová logika může být částečně řešena také v MatchService.
  */
 @RestController
 @RequestMapping("/api/registrations")
 public class MatchRegistrationController {
 
+    /**
+     * Service vrstva pro práci s registracemi hráčů na zápasy.
+     * Zodpovídá za vytváření, aktualizaci a čtení registrací.
+     */
     private final MatchRegistrationService matchRegistrationService;
+
+    /**
+     * Service vrstva pro práci s aktuálně přihlášeným hráčem.
+     * Zodpovídá za určení identity hráče nad aktuálním uživatelem.
+     */
     private final CurrentPlayerService currentPlayerService;
+
+    /**
+     * Service vrstva pro práci se zápasy.
+     * Může být využita pro související doménovou logiku navázanou na registrace.
+     */
     private final MatchService matchService;
 
+    /**
+     * Vytváří instanci controlleru pro správu registrací.
+     *
+     * Zajišťuje injektování potřebných service tříd pro práci s registracemi,
+     * aktuálním hráčem a zápasy.
+     *
+     * @param matchRegistrationService service pro správu registrací
+     * @param currentPlayerService     service pro práci s aktuálním hráčem
+     * @param matchService             service pro práci se zápasy
+     */
     public MatchRegistrationController(MatchRegistrationService matchRegistrationService,
                                        CurrentPlayerService currentPlayerService,
                                        MatchService matchService) {
@@ -51,7 +75,7 @@ public class MatchRegistrationController {
      * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
      * k přehledové správě registrací napříč celým systémem.
      *
-     * @return seznam všech registrací jako {@link MatchRegistrationDTO}
+     * @return seznam všech registrací jako MatchRegistrationDTO
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -66,7 +90,7 @@ public class MatchRegistrationController {
      * nebo při ruční úpravě registrací ze strany administrátora či manažera.
      *
      * @param matchId ID zápasu
-     * @return seznam registrací pro daný zápas jako {@link MatchRegistrationDTO}
+     * @return seznam registrací pro daný zápas jako MatchRegistrationDTO
      */
     @GetMapping("/match/{matchId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -81,7 +105,7 @@ public class MatchRegistrationController {
      * typicky v administrativním rozhraní.
      *
      * @param playerId ID hráče
-     * @return seznam registrací daného hráče jako {@link MatchRegistrationDTO}
+     * @return seznam registrací daného hráče jako MatchRegistrationDTO
      */
     @GetMapping("/player/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -97,7 +121,7 @@ public class MatchRegistrationController {
      * následnou komunikaci ze strany manažera.
      *
      * @param matchId ID zápasu
-     * @return seznam hráčů bez reakce jako {@link PlayerDTO}
+     * @return seznam hráčů bez reakce jako PlayerDTO
      */
     @GetMapping("/match/{matchId}/no-response")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -114,7 +138,7 @@ public class MatchRegistrationController {
      *
      * @param playerId ID hráče, za kterého se operace provádí
      * @param request  požadavek na změnu registrace
-     * @return {@link MatchRegistrationDTO} s výsledným stavem registrace
+     * @return MatchRegistrationDTO s výsledným stavem registrace
      */
     @PostMapping("/upsert/{playerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -134,7 +158,7 @@ public class MatchRegistrationController {
      * @param matchId   ID zápasu
      * @param playerId  ID hráče
      * @param adminNote volitelná interní poznámka k záznamu
-     * @return {@link MatchRegistrationDTO} s aktualizovaným stavem registrace
+     * @return MatchRegistrationDTO s aktualizovaným stavem registrace
      */
     @PatchMapping("/match/{matchId}/players/{playerId}/no-excused")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -157,7 +181,7 @@ public class MatchRegistrationController {
      * @param playerId     ID hráče
      * @param excuseReason důvod omluvy
      * @param excuseNote   poznámka k omluvě
-     * @return {@link MatchRegistrationDTO} s aktualizovaným stavem registrace
+     * @return MatchRegistrationDTO s aktualizovaným stavem registrace
      */
     @PatchMapping("/match/{matchId}/players/{playerId}/cancel-no-excused")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -171,12 +195,14 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Mění team u přihlášeného hráče ke konkrétní registraci na opačný team.
+     * Mění tým u registrace aktuálně přihlášeného hráče na opačný tým.
      *
-     *Aktuální hráč se získává
-     *      * z {@link CurrentPlayerService}.
-     * @param matchId   ID zápasu     *
-     * @return {@link MatchRegistrationDTO} s aktualizovaným stavem registrace
+     * Aktuální hráč se získává z CurrentPlayerService. Endpoint je dostupný
+     * pro přihlášené uživatele a slouží pro rychlou změnu týmu v konkrétním
+     * zápase, pokud to pravidla registrace umožňují.
+     *
+     * @param matchId ID zápasu, ve kterém se mění tým registrace
+     * @return MatchRegistrationDTO s aktualizovaným stavem registrace
      */
     @PatchMapping("/me/{matchId}/change-team")
     @PreAuthorize("isAuthenticated()")
@@ -189,11 +215,15 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Mění team u hráče dle jeho id na opačný team.
+     * Mění tým registrace u hráče podle jeho ID v konkrétním zápase.
      *
-     * @param playerId  ID hráče
-     * @param matchId   ID zápasu     *
-     * @return {@link MatchRegistrationDTO} s aktualizovaným stavem registrace
+     * Endpoint je určen pro administrátory a manažery. Slouží k ruční úpravě
+     * přiřazení hráče do týmu, typicky v případech, kdy je nutné vyrovnat
+     * sestavy nebo opravit chybnou registraci.
+     *
+     * @param playerId ID hráče, jehož tým se mění
+     * @param matchId  ID zápasu, ve kterém se mění tým registrace
+     * @return MatchRegistrationDTO s aktualizovaným stavem registrace
      */
     @PatchMapping("/{playerId}/{matchId}/change-team")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -205,12 +235,16 @@ public class MatchRegistrationController {
     }
 
     /**
-     * Mění pozici u hráče dle jeho id v konkrétním zápase.
+     * Mění pozici hráče v konkrétním zápase.
      *
-     * @param playerId  ID hráče
-     * @param matchId   ID zápasu
-     * @param positionInMatch   pozice hráče
-     * @return mění pozici hráče v aktuálním zápasu
+     * Endpoint je určen pro role ADMIN a MANAGER. Slouží k ruční úpravě
+     * pozice hráče v rámci registrace na daný zápas, například při změně
+     * rozestavení nebo doplnění sestavy.
+     *
+     * @param matchId         ID zápasu
+     * @param playerId        ID hráče
+     * @param positionInMatch cílová pozice hráče v zápase
+     * @return MatchRegistrationDTO s aktualizovaným nastavením pozice hráče
      */
     @PatchMapping("/{matchId}/players/{playerId}/position")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -227,13 +261,13 @@ public class MatchRegistrationController {
     /**
      * Spravuje registraci aktuálního hráče na zápas.
      *
-     * Podle obsahu {@link MatchRegistrationRequest} se provádí registrace,
+     * Podle obsahu MatchRegistrationRequest se provádí registrace,
      * odhlášení, omluva nebo nastavení náhradníka. Aktuální hráč se získává
-     * z {@link CurrentPlayerService}. V případě, že aktuální hráč není zvolen,
-     * vyhazuje se {@link CurrentPlayerNotSelectedException}.
+     * z CurrentPlayerService. V případě, že aktuální hráč není zvolen,
+     * vyhazuje se CurrentPlayerNotSelectedException.
      *
      * @param request požadavek na změnu registrace
-     * @return {@link MatchRegistrationDTO} s výsledným stavem registrace
+     * @return MatchRegistrationDTO s výsledným stavem registrace
      */
     @PostMapping("/me/upsert")
     @PreAuthorize("isAuthenticated()")
@@ -255,9 +289,9 @@ public class MatchRegistrationController {
      *
      * Endpoint se používá pro uživatelské zobrazení historie a stavu
      * registrací hráče napříč zápasy. Identita hráče se získává z
-     * {@link CurrentPlayerService}.
+     * CurrentPlayerService.
      *
-     * @return seznam {@link MatchRegistrationDTO} pro aktuálního hráče
+     * @return seznam MatchRegistrationDTO pro aktuálního hráče
      */
     @GetMapping("/me/for-current-player")
     @PreAuthorize("isAuthenticated()")

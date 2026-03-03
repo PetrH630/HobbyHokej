@@ -12,11 +12,12 @@ import java.util.Set;
  * Entita reprezentující uživatelský účet aplikace.
  *
  * Slouží pro autentizaci a autorizaci uživatelů v systému.
- * Uchovává základní identifikační údaje, přihlašovací informace,
- * roli uživatele a stav aktivace účtu.
+ * Uchovávají se základní identifikační údaje, přihlašovací informace,
+ * role uživatele a stav aktivace účtu.
  *
  * Jeden uživatel může mít přiřazeno více hráčů. Detailní uživatelské
  * preference a nastavení jsou odděleny do entity AppUserSettingsEntity.
+ * Entita se používá jako hlavní zdroj pravdy pro uživatelské účty.
  */
 @Entity
 @Table(name = "app_users")
@@ -24,6 +25,8 @@ public class AppUserEntity {
 
     /**
      * Primární klíč uživatele.
+     *
+     * Hodnota odpovídá identifikátoru uživatele v databázi.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,6 +40,7 @@ public class AppUserEntity {
 
     /**
      * Příjmení uživatele.
+     *
      * Při uložení je převáděno na velká písmena.
      */
     @Column(nullable = false)
@@ -50,6 +54,7 @@ public class AppUserEntity {
 
     /**
      * Hash hesla uživatele.
+     *
      * Heslo se nikdy neukládá v otevřené podobě.
      */
     @Column(nullable = false)
@@ -57,6 +62,7 @@ public class AppUserEntity {
 
     /**
      * Role uživatele v systému.
+     *
      * Určuje oprávnění uživatele při přístupu k jednotlivým endpointům.
      */
     @Enumerated(EnumType.STRING)
@@ -65,7 +71,8 @@ public class AppUserEntity {
 
     /**
      * Příznak aktivace účtu.
-     * Nastavuje se například po úspěšné e-mailové aktivaci účtu.
+     *
+     * Hodnota se nastavuje například po úspěšné e-mailové aktivaci účtu.
      */
     @Column(nullable = false)
     private boolean enabled = false;
@@ -135,14 +142,17 @@ public class AppUserEntity {
 
     /**
      * Uchovává čas předposledního přihlášení uživatele.
-     * Používá se pro výpočet notifikací od posledního přihlášení.
+     *
+     * Hodnota se používá především pro výpočet notifikací
+     * od posledního přihlášení.
      */
     @Column(name = "last_login_at")
     private Instant lastLoginAt;
 
     /**
      * Uchovává čas posledního přihlášení uživatele.
-     * Aktualizuje se při každém úspěšném přihlášení.
+     *
+     * Hodnota se aktualizuje při každém úspěšném přihlášení.
      */
     @Column(name = "current_login_at")
     private Instant currentLoginAt;
@@ -183,7 +193,11 @@ public class AppUserEntity {
     public AppUserSettingsEntity getSettings() { return settings; }
 
     /**
-     * Nastavuje uživatelské nastavení a zároveň zajišťuje obousměrnou vazbu.
+     * Nastavuje uživatelské nastavení a zároveň udržuje obousměrnou vazbu.
+     *
+     * Při přiřazení nastavení se do dané instance AppUserSettingsEntity
+     * nastavuje odkaz na tohoto uživatele. Metoda se používá v servisní
+     * vrstvě a entity tak zůstávají konzistentní z obou stran vztahu.
      *
      * @param settings instance nastavení uživatele
      */

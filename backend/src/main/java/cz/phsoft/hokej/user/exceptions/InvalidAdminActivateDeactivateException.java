@@ -13,9 +13,6 @@ import org.springframework.http.HttpStatus;
  *
  * Výjimka je zpracována globálním exception handlerem
  * a vrací HTTP status METHOD_NOT_ALLOWED.
- *
- * Dědí z BusinessException, která reprezentuje
- * porušení doménových pravidel aplikace.
  */
 public class InvalidAdminActivateDeactivateException extends BusinessException {
 

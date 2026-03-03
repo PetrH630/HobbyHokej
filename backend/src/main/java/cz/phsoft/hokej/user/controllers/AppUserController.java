@@ -16,12 +16,11 @@ import java.util.List;
 /**
  * REST controller, který se používá pro správu uživatelských účtů.
  *
- * Zajišťuje práci s přihlášeným uživatelem, včetně zobrazení profilu, historie změn
- * a změny hesla, a také administrativní správu uživatelů, která je vyhrazena roli
- * ADMIN/MANAGER.
+ * Zajišťuje práci s přihlášeným uživatelem, včetně zobrazení profilu,
+ * historie změn a změny hesla, a také administrativní správu uživatelů,
+ * která je vyhrazena rolím ADMIN a MANAGER.
  *
- *
- * Veškerá business logika se předává do {@link AppUserService}.
+ * Veškerá business logika se deleguje do AppUserService a AppUserHistoryService.
  */
 @RestController
 @RequestMapping("/api/users")
@@ -30,6 +29,16 @@ public class AppUserController {
     private final AppUserService appUserService;
     private final AppUserHistoryService appUserHistoryService;
 
+    /**
+     * Vytváří instanci controlleru pro správu uživatelských účtů.
+     *
+     * Vstupní služby se používají pro práci s daty uživatelů a jejich historií.
+     * Controller pouze přijímá HTTP požadavky, provádí základní validace
+     * a deleguje zpracování do service vrstvy.
+     *
+     * @param appUserService služba pro správu uživatelských účtů
+     * @param appUserHistoryService služba pro práci s historií uživatelů
+     */
     public AppUserController(AppUserService appUserService,
                              AppUserHistoryService appUserHistoryService) {
         this.appUserService = appUserService;
@@ -40,7 +49,8 @@ public class AppUserController {
      * Vrací detail aktuálně přihlášeného uživatele.
      *
      * Identifikace uživatele se provádí podle e-mailu (username),
-     * který je získán z objektu {@link Authentication}.
+     * který je získán z objektu Authentication. Metoda deleguje
+     * načtení údajů do AppUserService.
      *
      * @param authentication autentizační kontext přihlášeného uživatele
      * @return DTO s detaily přihlášeného uživatele
@@ -53,6 +63,9 @@ public class AppUserController {
 
     /**
      * Aktualizuje údaje aktuálně přihlášeného uživatele.
+     *
+     * Metoda získá e-mail přihlášeného uživatele z autentizačního kontextu
+     * a deleguje aktualizaci údajů do AppUserService.
      *
      * @param authentication autentizační kontext přihlášeného uživatele
      * @param dto            DTO s aktualizovanými údaji uživatele
@@ -73,7 +86,8 @@ public class AppUserController {
      * Mění heslo aktuálně přihlášeného uživatele.
      *
      * Staré heslo, nové heslo a potvrzení nového hesla se předává
-     * prostřednictvím DTO {@link ChangePasswordDTO}.
+     * prostřednictvím DTO ChangePasswordDTO. Kontrola starého hesla
+     * a uložení nového hesla se provádí v AppUserService.
      *
      * @param authentication autentizační kontext přihlášeného uživatele
      * @param dto            DTO obsahující staré a nové heslo
@@ -100,9 +114,10 @@ public class AppUserController {
     /**
      * Vrací seznam všech uživatelů v systému.
      *
-     * Endpoint je dostupný pouze pro roli ADMIN.
+     * Endpoint je dostupný pouze pro role ADMIN nebo MANAGER.
+     * Metoda deleguje načtení seznamu uživatelů do AppUserService.
      *
-     * @return seznam uživatelů jako {@link AppUserDTO}
+     * @return seznam uživatelů jako AppUserDTO
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -113,7 +128,8 @@ public class AppUserController {
     /**
      * Vrací detail uživatele podle jeho ID.
      *
-     * Endpoint je dostupný pouze pro roli ADMIN.
+     * Endpoint je dostupný pouze pro role ADMIN nebo MANAGER.
+     * Metoda deleguje načtení detailu uživatele do AppUserService.
      *
      * @param id ID uživatele
      * @return DTO s detaily vybraného uživatele
@@ -128,6 +144,8 @@ public class AppUserController {
      * Resetuje heslo uživatele na výchozí hodnotu.
      *
      * Operace je vyhrazena pouze pro roli ADMIN.
+     * Vlastní reset hesla včetně nastavení nové hodnoty
+     * se provádí v AppUserService.
      *
      * @param id ID uživatele, kterému se má heslo resetovat
      * @return HTTP odpověď s informací o úspěšném resetu hesla
@@ -143,6 +161,7 @@ public class AppUserController {
      * Aktivuje účet uživatele.
      *
      * Operace je vyhrazena pouze pro roli ADMIN.
+     * Aktualizace stavu účtu se provádí v AppUserService.
      *
      * @param id ID uživatele, který má být aktivován
      * @return HTTP odpověď s informací o úspěšné aktivaci
@@ -158,6 +177,7 @@ public class AppUserController {
      * Deaktivuje účet uživatele.
      *
      * Operace je vyhrazena pouze pro roli ADMIN.
+     * Aktualizace stavu účtu se provádí v AppUserService.
      *
      * @param id ID uživatele, který má být deaktivován
      * @return HTTP odpověď s informací o úspěšné deaktivaci
@@ -170,31 +190,35 @@ public class AppUserController {
     }
 
     /**
-     * Vrací historii uživatele dle id.
+     * Vrací historii vybraného uživatele podle jeho ID.
      *
      * Operace je vyhrazena pouze pro roli ADMIN.
+     * Metoda deleguje načtení historie do AppUserHistoryService.
      *
      * @param id ID uživatele
-     * @return historie uživatele jako {@link List<AppUserHistoryDTO>}
+     * @return historie uživatele jako seznam AppUserHistoryDTO
      */
     @GetMapping("/{id}/history")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<AppUserHistoryDTO> getUserHistory(@PathVariable Long id
-            ) {
+    public List<AppUserHistoryDTO> getUserHistory(@PathVariable Long id) {
         return appUserHistoryService.getHistoryForUser(id);
     }
 
     /**
      * Vrací historii aktuálně přihlášeného uživatele.
      *
+     * Uživatel se identifikuje pomocí e-mailu získaného z
+     * autentizačního kontextu. Načtení historie se deleguje
+     * do AppUserHistoryService.
+     *
      * @param authentication autentizační kontext přihlášeného uživatele
-     * @return historie uživatele jako {@link List<AppUserHistoryDTO>}
+     * @return historie uživatele jako seznam AppUserHistoryDTO
      */
     @GetMapping("/me/history")
     @PreAuthorize("isAuthenticated()")
     public List<AppUserHistoryDTO> getMyUserHistory(
             Authentication authentication
-            ) {
+    ) {
 
         String email = authentication.getName();
         return appUserHistoryService.getHistoryForUser(email);

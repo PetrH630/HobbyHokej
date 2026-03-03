@@ -8,10 +8,10 @@ import java.util.List;
 /**
  * Rozhraní pro správu sezón v aplikaci.
  *
- * Odpovědnosti:
+ * Odpovědnosti rozhraní jsou zejména:
  * - definovat kontrakt pro práci se sezónami jako časovým rámcem pro zápasy a statistiky,
  * - poskytovat operace pro vytvoření, úpravu a načtení sezón,
- * - určovat aktivní sezónu, která se používá v ostatních službách (např. MatchServiceImpl).
+ * - určovat aktivní sezónu, která se používá v ostatních službách (například ve službě pro správu zápasů).
  *
  * Architektura:
  * - většina operací pracuje s {@link SeasonDTO} jako přenosovým objektem,
@@ -23,9 +23,10 @@ public interface SeasonService {
     /**
      * Vytvoří novou sezónu.
      *
-     * Odpovědnost implementace:
+     * Odpovědnost implementace je zejména:
      * - validovat datumové rozmezí sezóny,
-     * - zajistit, aby se období sezóny nepřekrývalo s jinými sezónami.
+     * - zajistit, aby se období sezóny nepřekrývalo s jinými sezónami,
+     * - ověřit jedinečnost názvu sezóny.
      *
      * @param season data nové sezóny
      * @return vytvořená sezóna ve formě {@link SeasonDTO}
@@ -38,6 +39,7 @@ public interface SeasonService {
      * Implementace typicky:
      * - ověřuje existenci sezóny,
      * - validuje datumové rozmezí a překryvy,
+     * - kontroluje jedinečnost názvu sezóny,
      * - aplikuje změny z DTO do entity.
      *
      * @param id     ID sezóny, která má být aktualizována
@@ -50,8 +52,8 @@ public interface SeasonService {
      * Vrátí aktuálně aktivní sezónu.
      *
      * Aktivní sezóna představuje časový rámec, ve kterém se považují
-     * zápasy a jejich statistiky za „platné“. Hodnota se používá
-     * v dalších službách, například v {@code MatchServiceImpl}.
+     * zápasy a jejich statistiky za platné. Hodnota se používá
+     * v dalších službách, například ve službě pro správu zápasů.
      *
      * @return aktivní sezóna jako entita {@link SeasonEntity}
      */
@@ -61,7 +63,7 @@ public interface SeasonService {
      * Vrátí seznam všech sezón v systému.
      *
      * Metoda se typicky používá v administrátorských přehledech
-     * a v UI pro správu sezón.
+     * a v uživatelském rozhraní pro správu sezón.
      *
      * @return seznam všech sezón ve formě {@link SeasonDTO}
      */

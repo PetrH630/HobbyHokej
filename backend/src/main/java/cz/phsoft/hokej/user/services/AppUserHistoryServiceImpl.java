@@ -27,6 +27,10 @@ public class AppUserHistoryServiceImpl implements AppUserHistoryService {
     /**
      * Vytvoří instanci servisní třídy.
      *
+     * Závislosti jsou předány pomocí konstruktoru a používají se
+     * pro načítání historických záznamů z databáze a jejich mapování
+     * do přehledové DTO podoby.
+     *
      * @param repository repozitář pro přístup k historickým záznamům uživatelů
      * @param mapper mapper pro převod entit na DTO objekty
      */
@@ -43,6 +47,7 @@ public class AppUserHistoryServiceImpl implements AppUserHistoryService {
      *
      * Záznamy jsou načteny z databáze v sestupném pořadí
      * podle času změny a následně převedeny na DTO objekty.
+     * Metoda se používá při zobrazení historie účtu na základě e-mailu.
      *
      * @param email e-mailová adresa uživatele
      * @return seznam historických záznamů uživatele
@@ -59,6 +64,7 @@ public class AppUserHistoryServiceImpl implements AppUserHistoryService {
      *
      * Záznamy jsou načteny z databáze v sestupném pořadí
      * podle času změny a následně převedeny na DTO objekty.
+     * Metoda se používá při zobrazení historie účtu na základě interního ID.
      *
      * @param id identifikátor uživatele
      * @return seznam historických záznamů uživatele

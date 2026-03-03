@@ -23,8 +23,8 @@ public interface SeasonHistoryService {
      * provádí agregace nebo výpočty podle business pravidel
      * a výsledek převádí do seznamu {@link SeasonHistoryDTO}.
      *
-     * @param seasonId Identifikátor sezóny, pro kterou se historie načítá.
-     * @return Seznam historických záznamů sezóny ve formě DTO.
+     * @param seasonId identifikátor sezóny, pro kterou se historie načítá
+     * @return seznam historických záznamů sezóny ve formě DTO
      */
     List<SeasonHistoryDTO> getHistoryForSeason(Long seasonId);
 }

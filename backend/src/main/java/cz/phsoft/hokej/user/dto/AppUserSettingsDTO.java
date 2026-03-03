@@ -6,7 +6,8 @@ package cz.phsoft.hokej.user.dto;
  * Reprezentuje datový model entity AppUserSettingsEntity na úrovni API.
  * Slouží pro přenos preferencí uživatele mezi backendem a frontendem,
  * zejména v oblasti výběru hráče, globálních notifikací a uživatelského
- * rozhraní.
+ * rozhraní. DTO je používáno v controllerech, které umožňují čtení a
+ * aktualizaci těchto nastavení pro aktuálně přihlášeného uživatele.
  */
 public class AppUserSettingsDTO {
 
@@ -26,7 +27,9 @@ public class AppUserSettingsDTO {
      * Globální úroveň notifikací pro uživatele.
      *
      * Hodnoty odpovídají enumu GlobalNotificationLevel,
-     * například ALL, IMPORTANT_ONLY nebo NONE.
+     * například ALL, IMPORTANT_ONLY nebo NONE. Nastavení
+     * určuje, jaké typy zpráv budou uživateli standardně
+     * zasílány.
      */
     private String globalNotificationLevel;
 
@@ -45,19 +48,28 @@ public class AppUserSettingsDTO {
 
     /**
      * Určuje, zda má uživatel dostávat kopie všech notifikací
-     * svých hráčů na svůj email.
+     * svých hráčů na svůj e-mail.
+     *
+     * Příznak slouží k zapnutí nebo vypnutí přeposílání zpráv
+     * na úrovni uživatelského účtu.
      */
     private boolean copyAllPlayerNotificationsToUserEmail;
 
     /**
      * Určuje, zda má uživatel dostávat notifikace i za hráče,
-     * kteří mají vlastní email.
+     * kteří mají vlastní e-mail.
+     *
+     * Pokud je nastaveno na true, notifikace se neposílají pouze
+     * hráči, ale také uživateli, který hráče spravuje.
      */
     private boolean receiveNotificationsForPlayersWithOwnEmail;
 
     /**
      * Určuje, zda je aktivní denní souhrn e-mailů místo
      * jednotlivých notifikací.
+     *
+     * Při zapnutí jsou notifikace agregovány do jednoho
+     * souhrnného e-mailu odesílaného v definovaný čas.
      */
     private boolean emailDigestEnabled;
 
@@ -65,6 +77,8 @@ public class AppUserSettingsDTO {
      * Čas pro odeslání souhrnného e-mailu, pokud je denní digest aktivní.
      *
      * Hodnota se zadává jako řetězec, například "20:00".
+     * Backend je odpovědný za interpretaci a použití této hodnoty
+     * v plánovači odesílání e-mailů.
      */
     private String emailDigestTime;
 
@@ -73,11 +87,15 @@ public class AppUserSettingsDTO {
     /**
      * Preferovaný jazyk uživatelského rozhraní,
      * například "cs" nebo "en".
+     *
+     * Hodnota ovlivňuje lokalizaci textů na frontendové straně.
      */
     private String uiLanguage;
 
     /**
      * Časová zóna uživatele, například "Europe/Prague".
+     *
+     * Používá se pro správné zobrazování časových údajů v aplikaci.
      */
     private String timezone;
 
@@ -86,14 +104,12 @@ public class AppUserSettingsDTO {
      *
      * Hodnota odpovídá enumu LandingPage na backendu.
      * Je přenášena jako řetězec, například "DASHBOARD",
-     * "MATCHES" nebo "PLAYERS".
-     *
-     * Na backendu je hodnota převáděna na enum a ukládána
-     * jako typ LandingPage.
+     * "MATCHES" nebo "PLAYERS". Na backendu je hodnota
+     * převáděna na enum a ukládána jako typ LandingPage.
      */
     private String defaultLandingPage;
 
-     public String getPlayerSelectionMode() {
+    public String getPlayerSelectionMode() {
         return playerSelectionMode;
     }
 

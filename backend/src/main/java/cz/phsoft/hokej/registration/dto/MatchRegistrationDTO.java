@@ -14,21 +14,28 @@ import jakarta.validation.constraints.Positive;
  * Slouží k přenosu informací o stavu účasti hráče na konkrétním zápase
  * mezi backendem a klientem. Používá se při registraci, odhlášení,
  * omluvě hráče, v přehledech registrací a v administraci účasti.
+ *
+ * Objekt neobsahuje žádnou business logiku a slouží pouze jako
+ * datový přenosový model.
  */
 public class MatchRegistrationDTO {
 
     /**
-     * ID registrace.
-     *
-     * Při vytváření nové registrace může být hodnota null.
-     * Hodnota se generuje na serveru.
+     * Jednoznačný identifikátor registrace.
+     * Hodnota je generována serverem.
      */
     private Long id;
 
+    /**
+     * Identifikátor zápasu, ke kterému se registrace vztahuje.
+     */
     @NotNull(message = "ID zápasu je povinné.")
     @Positive(message = "ID zápasu musí být kladné.")
     private Long matchId;
 
+    /**
+     * Identifikátor hráče, který je k zápasu registrován.
+     */
     @NotNull(message = "ID hráče je povinné.")
     @Positive(message = "ID hráče musí být kladné.")
     private Long playerId;
@@ -59,30 +66,38 @@ public class MatchRegistrationDTO {
     private Team team;
 
     /**
-     * Informace o původu registrace.
-     *
-     * Typicky se používají hodnoty jako "user" pro akce hráče
-     * a "system" pro automatické změny provedené systémem.
+     * Identifikace původu registrace.
+     * Udává, zda byla změna provedena uživatelem nebo systémem.
      */
     @NotNull
     private String createdBy;
 
     /**
      * Pozice hráče v tomto konkrétním zápase.
-     *
-     * Slouží pro prezentaci rozložení hráčů na ledě
-     * a pro statistiky podle postů.
      */
     private PlayerPosition positionInMatch;
 
     /**
-     * Detail hráče. Používá se pro prezentační účely v přehledech
-     * registrací, aby nebylo nutné dělat další dotazy na hráče.
+     * Detail hráče pro prezentační účely.
      */
     private PlayerDTO playerDTO;
 
+    /**
+     * Vytváří prázdnou instanci DTO.
+     */
     public MatchRegistrationDTO() {}
 
+    /**
+     * Vytváří instanci DTO s vybranými základními údaji.
+     *
+     * @param id           identifikátor registrace
+     * @param playerId     identifikátor hráče
+     * @param status       stav registrace
+     * @param excuseReason důvod omluvy
+     * @param excuseNote   poznámka k omluvě
+     * @param adminNote    interní poznámka administrátora
+     * @param team         tým hráče v zápase
+     */
     public MatchRegistrationDTO(Long id,
                                 Long playerId,
                                 PlayerMatchStatus status,

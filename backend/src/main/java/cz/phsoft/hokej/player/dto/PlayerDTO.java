@@ -69,9 +69,9 @@ public class PlayerDTO {
     private PlayerPosition primaryPosition;
 
     /**
-     * Sekundární (alternativní) pozice hráče.
+     * Sekundární pozice hráče na ledě.
      *
-     * Může být null, pokud hráč žádnou preferovanou sekundární pozici nemá.
+     * Může být null, pokud hráč žádnou alternativní pozici nemá.
      */
     private PlayerPosition secondaryPosition;
 
@@ -84,15 +84,39 @@ public class PlayerDTO {
 
     /**
      * Časové razítko hráče.
-     * Používá se pro určení data a času u vytvoření a změn uživatele.
+     *
+     * Používá se pro určení data a času vytvoření nebo poslední změny hráče.
      */
     private LocalDateTime timestamp;
 
+    /**
+     * Vytváří prázdnou instanci DTO hráče.
+     *
+     * Nastavují se výchozí hodnoty typu hráče a primární pozice.
+     */
     public PlayerDTO() {
         this.type = PlayerType.BASIC;
         this.primaryPosition = PlayerPosition.ANY;
     }
 
+    /**
+     * Vytváří instanci DTO hráče se zadanými hodnotami.
+     *
+     * Pokud nejsou některé hodnoty zadány, nastavují se výchozí
+     * hodnoty podle aplikační logiky. Po inicializaci se aktualizuje
+     * odvozené pole fullName.
+     *
+     * @param id                ID hráče
+     * @param name              křestní jméno hráče
+     * @param surname           příjmení hráče
+     * @param nickname          přezdívka hráče
+     * @param type              typ hráče
+     * @param phoneNumber       telefonní číslo hráče
+     * @param team              tým hráče
+     * @param playerStatus      stav hráče v systému
+     * @param primaryPosition   primární pozice hráče
+     * @param secondaryPosition sekundární pozice hráče
+     */
     public PlayerDTO(Long id,
                      String name,
                      String surname,

@@ -5,21 +5,22 @@ import cz.phsoft.hokej.player.entities.PlayerEntity;
 /**
  * Thread-local kontext pro uchování aktuálně zvoleného hráče.
  *
- * Slouží k uložení instance PlayerEntity, která je považována
+ * Třída slouží k uložení instance PlayerEntity, která je považována
  * za aktuálního hráče v rámci jednoho HTTP requestu.
  *
  * Kontext je:
  * - nastaven na začátku requestu ve filtru CurrentPlayerFilter,
- * - dostupný v celém call stacku (controller, service, helper),
+ * - dostupný v celém call stacku, například v controlleru a service vrstvě,
  * - vyčištěn po dokončení zpracování requestu.
  *
  * Použití ThreadLocal zajišťuje, že každý HTTP request
  * má vlastní instanci kontextu a nedochází ke sdílení dat
  * mezi paralelně zpracovávanými požadavky.
  *
- * ThreadLocal musí být vždy vyčištěn metodou clear,
- * jinak hrozí únik paměti a nechtěné přenášení dat
- * mezi jednotlivými requesty.
+ * Kontext musí být vždy vyčištěn metodou clear,
+ * jinak hrozí únik paměti a přenášení dat mezi jednotlivými requesty.
+ *
+ * Třída je navržena jako utilitní a nelze ji instancovat.
  */
 public final class CurrentPlayerContext {
 
@@ -29,6 +30,11 @@ public final class CurrentPlayerContext {
      */
     private static final ThreadLocal<PlayerEntity> currentPlayer = new ThreadLocal<>();
 
+    /**
+     * Soukromý konstruktor brání vytvoření instance třídy.
+     *
+     * Třída slouží výhradně jako statický kontext.
+     */
     private CurrentPlayerContext() {
         // Utility třída, instanci nelze vytvořit
     }
@@ -48,8 +54,10 @@ public final class CurrentPlayerContext {
     /**
      * Vrátí aktuálního hráče pro právě zpracovávaný request.
      *
-     * @return instance PlayerEntity nebo null,
-     * pokud nebyl hráč pro request zvolen
+     * Pokud hráč nebyl v rámci requestu nastaven,
+     * je vrácena hodnota null.
+     *
+     * @return instance PlayerEntity nebo null
      */
     public static PlayerEntity get() {
         return currentPlayer.get();
@@ -62,7 +70,7 @@ public final class CurrentPlayerContext {
      * typicky ve finally bloku filtru.
      *
      * Použití ThreadLocal.remove uvolňuje referenci
-     * a zabraňuje memory leakům při opakovaném použití vláken.
+     * a zabraňuje únikům paměti při opakovaném použití vláken.
      */
     public static void clear() {
         currentPlayer.remove();

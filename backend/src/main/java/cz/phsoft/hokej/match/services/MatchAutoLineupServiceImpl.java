@@ -12,7 +12,7 @@ import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
 import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
 import cz.phsoft.hokej.registration.repositories.MatchRegistrationRepository;
 import cz.phsoft.hokej.registration.util.PlayerPositionUtil;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

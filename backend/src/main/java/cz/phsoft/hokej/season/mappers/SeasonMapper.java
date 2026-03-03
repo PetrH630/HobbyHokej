@@ -25,6 +25,9 @@ public interface SeasonMapper {
     /**
      * Převede entitu sezóny na DTO.
      *
+     * Metoda se používá při vracení dat z backendu
+     * směrem ke klientovi.
+     *
      * @param entity entita sezóny
      * @return DTO reprezentující sezónu
      */
@@ -49,7 +52,8 @@ public interface SeasonMapper {
      * Aktualizuje existující entitu sezóny hodnotami z DTO.
      *
      * Identifikátor, časové razítko a informace o uživateli,
-     * který sezónu vytvořil, zůstávají beze změny.
+     * který sezónu vytvořil, zůstávají beze změny a nejsou
+     * touto operací ovlivněny.
      *
      * @param dto přenosový objekt obsahující nové hodnoty
      * @param entity existující entita určená k aktualizaci

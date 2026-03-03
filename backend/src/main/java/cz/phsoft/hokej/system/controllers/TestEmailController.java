@@ -8,10 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Testovací REST controller pro odeslání e-mailu.
  *
- * Slouží k ověření konfigurace e-mailové služby v prostředí,
- * například při vývoji nebo testování.
- *
- * Veškerá logika odesílání e-mailů se předává do {@link EmailService}.
+ * Slouží k ověření konfigurace e-mailové služby
+ * například ve vývojovém nebo testovacím prostředí.
+ * Samotné odesílání je delegováno do EmailService.
  */
 @RestController
 @RequestMapping("/api/email/test")
@@ -19,15 +18,20 @@ public class TestEmailController {
 
     private final EmailService emailService;
 
+    /**
+     * Vytvoří instanci controlleru.
+     *
+     * @param emailService služba pro odesílání e-mailů
+     */
     public TestEmailController(EmailService emailService) {
         this.emailService = emailService;
     }
 
     /**
-     * Odesílá testovací e-mail na pevně danou adresu.
+     * Odesílá testovací e-mail na předdefinovanou adresu.
      *
-     * Endpoint se používá pro ověření, že e-mailová služba je správně
-     * nakonfigurována a že lze e-maily z backendu odesílat.
+     * Endpoint se používá pro ověření,
+     * že e-mailová služba je správně nakonfigurována.
      *
      * @return textová zpráva o odeslání e-mailu
      */

@@ -9,54 +9,88 @@ import java.time.LocalDateTime;
  * Entita reprezentující historický záznam o sezóně.
  *
  * Slouží pro auditní účely a sledování změn sezón v čase.
+ * Každý záznam představuje snapshot hodnot sezóny
+ * v okamžiku provedení operace.
+ *
+ * Entita je mapována na tabulku season_history a je
+ * naplňována typicky databázovým triggerem nebo
+ * aplikační logikou při změně SeasonEntity.
  */
 @Entity
 @Table(name = "season_history")
 public class SeasonHistoryEntity {
 
+    /**
+     * Primární klíč historického záznamu.
+     *
+     * Hodnota je generována databází.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Typ provedené operace (INSERT, UPDATE, DELETE).
+     * Typ provedené operace nad sezónou.
+     *
+     * Obvykle se jedná o hodnoty INSERT, UPDATE nebo DELETE.
      */
     @Column(nullable = false)
     private String action;
 
     /**
      * Datum a čas provedení změny.
+     *
+     * Představuje okamžik, kdy byla změna zaznamenána.
      */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
     /**
      * ID sezóny z hlavní tabulky season.
+     *
+     * Slouží jako referenční vazba na původní entitu.
      */
     @Column(name = "season_id", nullable = false)
     private Long seasonId;
 
     /**
      * Původní časové razítko sezóny.
+     *
+     * Umožňuje dohledat konkrétní verzi záznamu,
+     * která byla předmětem změny.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
+    /**
+     * Název sezóny v okamžiku provedení změny.
+     */
     @Column(nullable = false)
     private String name;
 
+    /**
+     * Datum začátku sezóny v okamžiku provedení změny.
+     */
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
+    /**
+     * Datum konce sezóny v okamžiku provedení změny.
+     */
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    /**
+     * Příznak aktivní sezóny v době provedení změny.
+     */
     @Column(nullable = false)
     private boolean active;
 
     /**
      * ID uživatele, který sezónu vytvořil.
-     * Zkopírováno z pole createdByUserId v SeasonEntity.
+     *
+     * Hodnota je zkopírována z pole createdByUserId
+     * v entitě SeasonEntity.
      */
     @Column(name = "created_by_user_id")
     private Long createdByUserId;

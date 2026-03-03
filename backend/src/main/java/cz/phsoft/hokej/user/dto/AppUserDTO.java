@@ -13,15 +13,22 @@ import java.time.Instant;
 /**
  * DTO, které reprezentuje uživatelský účet aplikace.
  *
- * Slouží k přenosu uživatelských dat mezi backendem a klientem.
- * Používá se například při správě uživatelů, zobrazení profilu
- * nebo při přihlášení a načítání základních informací o účtu.
+ * Slouží k přenosu uživatelských dat mezi entitou a prezentační vrstvou,
+ * zejména v rámci controllerů odpovědných za práci s uživatelskými účty.
+ * Používá se při správě uživatelů, zobrazení profilu a při načítání
+ * základních informací o účtu po přihlášení.
  *
- * DTO neobsahuje heslo. Pro změnu hesla se používá samostatné DTO.
- *
+ * DTO neobsahuje heslo ani jiné citlivé autentizační údaje.
+ * Pro změnu hesla se používá samostatné DTO, které je zpracováváno
+ * v odpovídajících service třídách.
  */
 public class AppUserDTO {
 
+    /**
+     * Jednoznačný identifikátor uživatele.
+     *
+     * Hodnota odpovídá primárnímu klíči entity uživatele v databázi.
+     */
     private Long id;
 
     @NotBlank(message = "Křestní jméno je povinné.")
@@ -33,7 +40,10 @@ public class AppUserDTO {
     private String surname;
 
     /**
-     * Email uživatele, který se používá jako přihlašovací identifikátor.
+     * E-mail uživatele, který se používá jako přihlašovací identifikátor.
+     *
+     * Hodnota je validována anotacemi a slouží jako login jméno
+     * v autentizačním procesu.
      */
     @NotBlank(message = "Email je povinný.")
     @Email(message = "Email není ve správném formátu.")
@@ -43,6 +53,7 @@ public class AppUserDTO {
      * Role uživatele v systému.
      *
      * Ovlivňuje oprávnění k jednotlivým endpointům a funkcím.
+     * Hodnota odpovídá enumu Role v doménové vrstvě.
      */
     private Role role;
 
@@ -50,6 +61,7 @@ public class AppUserDTO {
      * Příznak, zda je uživatelský účet aktivní.
      *
      * Neaktivní účet se nemůže přihlásit do aplikace.
+     * Hodnota se nastavuje na backendu v rámci správy účtů.
      */
     private boolean enabled;
 
@@ -58,16 +70,16 @@ public class AppUserDTO {
      *
      * Jedná se o datový pohled využívaný pro prezentační účely
      * na straně klienta. DTO nenese zodpovědnost za správu tohoto
-     * vztahu v databázi.
+     * vztahu v databázi, pouze jej zobrazuje.
      */
     private Set<PlayerDTO> players;
 
     /**
      * Časové razítko uživatele.
-     * Používá se pro zobrazení data a času vytvoření nebo
-     * poslední změny uživatelského účtu.
      *
-     * Hodnota je spravována na backendu (entitou a triggery)
+     * Používá se pro zobrazení data a času vytvoření nebo
+     * poslední změny uživatelského účtu. Hodnota je spravována
+     * na backendu (entitou a případně databázovými triggery)
      * a klient ji pouze zobrazuje.
      */
     private LocalDateTime timestamp;
@@ -75,15 +87,17 @@ public class AppUserDTO {
     /**
      * Čas předposledního přihlášení uživatele.
      *
-     * Hodnota je nastavována při úspěšném přihlášení.
-     * Pokud je null, uživatel se ještě nepřihlásil.
+     * Hodnota je nastavována při úspěšném přihlášení v autentizační
+     * logice. Pokud je null, uživatel se ještě nepřihlásil.
+     * Slouží například pro zobrazení bezpečnostní informace uživateli.
      */
     private Instant lastLoginAt;
 
     /**
      * Čas posledního (aktuálního) přihlášení uživatele.
      *
-     * Hodnota je nastavována při úspěšném přihlášení.
+     * Hodnota je nastavována při úspěšném přihlášení a typicky se
+     * používá pro auditní a informační účely na frontendové straně.
      */
     private Instant currentLoginAt;
 

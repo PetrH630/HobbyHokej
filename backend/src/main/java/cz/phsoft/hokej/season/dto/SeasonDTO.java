@@ -14,21 +14,42 @@ import java.time.LocalDateTime;
  * například při správě sezón nebo výběru aktivní sezóny. Sezóna vymezuje
  * časové období, ve kterém se konají zápasy a ke kterému se vztahují
  * statistiky a přehledy.
+ *
+ * Třída je používána především ve vrstvách controller a service
+ * jako přenosový objekt oddělující interní entitu od veřejného API.
  */
 public class SeasonDTO {
 
+    /**
+     * Jednoznačný identifikátor sezóny.
+     *
+     * Hodnota je generována na straně databáze.
+     */
     private Long id;
 
     /**
      * Název sezóny, například "2024/2025".
+     *
+     * Musí být neprázdný a slouží k jednoznačné identifikaci sezóny
+     * v uživatelském rozhraní.
      */
     @NotBlank(message = "např. 2025/2026")
     private String name;
 
+    /**
+     * Datum začátku sezóny.
+     *
+     * Určuje první den, od kterého je sezóna platná.
+     */
     @NotNull(message = "datum sezony OD musí být zadán")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
+    /**
+     * Datum konce sezóny.
+     *
+     * Určuje poslední den, do kterého je sezóna platná.
+     */
     @NotNull(message = "datum sezony DO musí být zadán")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
@@ -37,18 +58,35 @@ public class SeasonDTO {
      * Příznak, zda je sezóna aktuálně aktivní.
      *
      * V systému může být v daném okamžiku aktivní nejvýše jedna sezóna.
+     * Hodnota je nastavována prostřednictvím administrativních operací.
      */
     private boolean active;
 
     /**
      * Časové razítko sezóny.
-     * Slouží pro zobrazení data a času vytvoření / poslední změny sezóny.
-     * Hodnota je spravována na backendu.
+     *
+     * Slouží pro zobrazení data a času vytvoření nebo poslední změny sezóny.
+     * Hodnota je spravována na backendu a nemá být nastavována klientem.
      */
     private LocalDateTime timestamp;
 
+    /**
+     * Bezparametrický konstruktor používaný při serializaci
+     * a deserializaci objektu.
+     */
     public SeasonDTO() {}
 
+    /**
+     * Konstruktor pro vytvoření DTO s vyplněnými základními údaji.
+     *
+     * Používá se zejména při mapování entity na DTO.
+     *
+     * @param id identifikátor sezóny
+     * @param name název sezóny
+     * @param startDate datum začátku sezóny
+     * @param endDate datum konce sezóny
+     * @param active příznak aktivní sezóny
+     */
     public SeasonDTO(Long id,
                      String name,
                      LocalDate startDate,

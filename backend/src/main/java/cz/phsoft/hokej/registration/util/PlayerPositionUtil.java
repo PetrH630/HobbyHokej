@@ -6,16 +6,21 @@ import cz.phsoft.hokej.player.enums.PlayerPositionCategory;
 /**
  * Pomocná utilita pro práci s herními pozicemi hráče.
  *
- * Centralizuje mapování enumu PlayerPosition do kategorií
- * a poskytuje metody pro zjištění typu pozice
- * (brankář, obránce, útočník).
+ * Centralizuje mapování enumu PlayerPosition do vyšších kategorií
+ * reprezentovaných enumem PlayerPositionCategory a poskytuje
+ * pomocné metody pro vyhodnocení typu pozice.
  *
- * Tato utilita se používá v business logice zápasů a registrací
- * pro rozhodování o automatických přesunech hráčů mezi pozicemi
- * a řadami.
+ * Třída je bezstavová a obsahuje pouze statické metody.
+ * Používá se v business logice zápasů a registrací
+ * pro rozhodování o přesunech hráčů mezi pozicemi
+ * a pro kontrolu kompatibility pozic.
  */
 public final class PlayerPositionUtil {
 
+    /**
+     * Soukromý konstruktor zabraňující vytvoření instance.
+     * Třída je určena pouze pro statické použití.
+     */
     private PlayerPositionUtil() {
         // utility class – nevytváří se instance
     }
@@ -23,13 +28,15 @@ public final class PlayerPositionUtil {
     /**
      * Určuje kategorii herní pozice hráče.
      *
-     * Používá se zejména při rozhodování, zda je změna pozice
-     * v rámci stejné kategorie (obrana / útok / brankář),
-     * nebo zda se jedná o přechod mezi kategoriemi.
+     * Metoda převádí konkrétní herní pozici na obecnější kategorii,
+     * která se používá například při rozhodování, zda je změna pozice
+     * v rámci stejné skupiny rolí nebo mezi různými kategoriemi.
      *
-     * @param position Herní pozice hráče.
-     * @return Kategorie pozice nebo null, pokud není kategorie definována
-     *         (např. ANY nebo null).
+     * Pokud je předána hodnota null nebo pozice ANY,
+     * není kategorie definována a vrací se null.
+     *
+     * @param position herní pozice hráče
+     * @return kategorie pozice nebo null, pokud není určena
      */
     public static PlayerPositionCategory getCategory(PlayerPosition position) {
         if (position == null || position == PlayerPosition.ANY) {
@@ -55,8 +62,8 @@ public final class PlayerPositionUtil {
     /**
      * Ověřuje, zda pozice patří do kategorie brankář.
      *
-     * @param position Herní pozice.
-     * @return true, pokud jde o brankáře, jinak false.
+     * @param position herní pozice
+     * @return true, pokud pozice spadá do kategorie brankář
      */
     public static boolean isGoalie(PlayerPosition position) {
         return getCategory(position) == PlayerPositionCategory.GOALIE;
@@ -65,8 +72,8 @@ public final class PlayerPositionUtil {
     /**
      * Ověřuje, zda pozice patří do kategorie obránce.
      *
-     * @param position Herní pozice.
-     * @return true, pokud jde o obránce, jinak false.
+     * @param position herní pozice
+     * @return true, pokud pozice spadá do kategorie obránce
      */
     public static boolean isDefense(PlayerPosition position) {
         return getCategory(position) == PlayerPositionCategory.DEFENSE;
@@ -75,23 +82,22 @@ public final class PlayerPositionUtil {
     /**
      * Ověřuje, zda pozice patří do kategorie útočník.
      *
-     * @param position Herní pozice.
-     * @return true, pokud jde o útočníka, jinak false.
+     * @param position herní pozice
+     * @return true, pokud pozice spadá do kategorie útočník
      */
     public static boolean isForward(PlayerPosition position) {
         return getCategory(position) == PlayerPositionCategory.FORWARD;
     }
 
     /**
-     * Ověřuje, zda dvě pozice patří do stejné kategorie
-     * (například obě obránci nebo oba útočníci).
+     * Ověřuje, zda dvě pozice patří do stejné kategorie.
      *
-     * Pozice bez kategorie (ANY, null) se považují
-     * za nekompatibilní.
+     * Pozice bez definované kategorie, například ANY nebo null,
+     * se považují za nekompatibilní a metoda vrací false.
      *
-     * @param a První pozice.
-     * @param b Druhá pozice.
-     * @return true, pokud obě pozice spadají do stejné kategorie, jinak false.
+     * @param a první pozice
+     * @param b druhá pozice
+     * @return true, pokud obě pozice spadají do stejné kategorie
      */
     public static boolean isSameCategory(PlayerPosition a, PlayerPosition b) {
         PlayerPositionCategory ca = getCategory(a);

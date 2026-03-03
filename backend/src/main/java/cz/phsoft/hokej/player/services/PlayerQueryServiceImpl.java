@@ -10,14 +10,16 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Query služba pro čtecí operace nad hráči.
+ * Implementace čtecí servisní vrstvy pro práci s hráči.
  *
- * Odpovědnosti:
- * - poskytování seznamu všech hráčů,
- * - načtení hráče podle ID,
- * - načtení hráčů podle uživatele.
+ * Třída zajišťuje výhradně čtecí operace nad entitou hráče.
+ * Neprovádí žádné změny stavu systému, neobsahuje zápisovou logiku
+ * a nevyvolává žádné notifikace.
  *
- * Neprovádí žádné změny stavu systému ani neodesílá notifikace.
+ * Odpovědnost:
+ * - načítání hráčů z repository vrstvy,
+ * - převod entit na DTO pomocí mapperu,
+ * - vyhazování doménových výjimek při nenalezení hráče.
  */
 @Service
 public class PlayerQueryServiceImpl implements PlayerQueryService {
@@ -25,12 +27,28 @@ public class PlayerQueryServiceImpl implements PlayerQueryService {
     private final PlayerRepository playerRepository;
     private final PlayerMapper playerMapper;
 
+    /**
+     * Vytvoří instanci query služby pro práci s hráči.
+     *
+     * Závislosti jsou injektovány konstruktorově.
+     *
+     * @param playerRepository repository pro přístup k hráčům
+     * @param playerMapper mapper pro převod entity na DTO
+     */
     public PlayerQueryServiceImpl(PlayerRepository playerRepository,
                                   PlayerMapper playerMapper) {
         this.playerRepository = playerRepository;
         this.playerMapper = playerMapper;
     }
 
+    /**
+     * Vrátí seznam všech hráčů evidovaných v systému.
+     *
+     * Metoda načte všechny entity hráčů z databáze
+     * a provede jejich převod na DTO reprezentaci.
+     *
+     * @return seznam hráčů ve formě PlayerDTO
+     */
     @Override
     public List<PlayerDTO> getAllPlayers() {
         return playerRepository.findAll().stream()
@@ -38,6 +56,15 @@ public class PlayerQueryServiceImpl implements PlayerQueryService {
                 .toList();
     }
 
+    /**
+     * Vrátí detail hráče podle jeho identifikátoru.
+     *
+     * Pokud hráč s daným identifikátorem neexistuje,
+     * je vyhozena výjimka PlayerNotFoundException.
+     *
+     * @param id identifikátor hráče
+     * @return hráč ve formě PlayerDTO
+     */
     @Override
     public PlayerDTO getPlayerById(Long id) {
         PlayerEntity player = playerRepository.findById(id)
@@ -45,6 +72,16 @@ public class PlayerQueryServiceImpl implements PlayerQueryService {
         return playerMapper.toDTO(player);
     }
 
+    /**
+     * Vrátí seznam hráčů přiřazených ke konkrétnímu uživateli.
+     *
+     * Hráči jsou vráceni seřazeni podle identifikátoru vzestupně.
+     * Metoda načítá hráče podle vazby na uživatelský účet
+     * a provádí jejich převod na DTO reprezentaci.
+     *
+     * @param email e-mail uživatele
+     * @return seznam hráčů daného uživatele ve formě PlayerDTO
+     */
     @Override
     public List<PlayerDTO> getPlayersByUser(String email) {
         return playerRepository.findByUser_EmailOrderByIdAsc(email).stream()

@@ -10,12 +10,14 @@ import java.util.List;
 /**
  * Implementace service vrstvy používaná pro poskytování historických dat sezóny.
  *
- * Třída zajišťuje načtení záznamů historie sezóny z repository vrstvy a jejich převod do DTO.
- * Načítání dat se deleguje do {@link SeasonHistoryRepository} a mapování entit na DTO se deleguje
+ * Třída zajišťuje načtení záznamů historie sezóny z repository vrstvy
+ * a jejich převod do DTO. Načítání dat se deleguje do
+ * {@link SeasonHistoryRepository} a mapování entit na DTO se deleguje
  * do {@link SeasonHistoryMapper}.
  *
- * Implementace neposkytuje zápisovou logiku a slouží pouze pro čtení a prezentaci historie sezóny
- * vyšším vrstvám aplikace, typicky controller vrstvě.
+ * Implementace neposkytuje zápisovou logiku a slouží pouze pro čtení
+ * a prezentaci historie sezóny vyšším vrstvám aplikace, typicky
+ * controller vrstvě.
  */
 @Service
 public class SeasonHistoryServiceImpl implements SeasonHistoryService {
@@ -23,6 +25,12 @@ public class SeasonHistoryServiceImpl implements SeasonHistoryService {
     private final SeasonHistoryRepository repository;
     private final SeasonHistoryMapper mapper;
 
+    /**
+     * Vytváří instanci služby pro práci s historií sezón.
+     *
+     * @param repository repozitář pro čtení historických záznamů sezóny
+     * @param mapper mapper pro převod entit historie sezóny na DTO
+     */
     public SeasonHistoryServiceImpl(
             SeasonHistoryRepository repository,
             SeasonHistoryMapper mapper
@@ -37,8 +45,8 @@ public class SeasonHistoryServiceImpl implements SeasonHistoryService {
      * Data se načítají z repository vrstvy filtrováním podle identifikátoru sezóny.
      * Výsledek se převádí do {@link SeasonHistoryDTO} pomocí mapper vrstvy.
      *
-     * @param seasonId Identifikátor sezóny, pro kterou se historie načítá.
-     * @return Seznam historických záznamů sezóny ve formě DTO seřazený sestupně podle času změny.
+     * @param seasonId identifikátor sezóny, pro kterou se historie načítá
+     * @return seznam historických záznamů sezóny ve formě DTO seřazený sestupně podle času změny
      */
     @Override
     public List<SeasonHistoryDTO> getHistoryForSeason(Long seasonId) {

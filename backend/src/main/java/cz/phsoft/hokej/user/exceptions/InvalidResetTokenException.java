@@ -11,6 +11,10 @@ import org.springframework.http.HttpStatus;
  */
 public class InvalidResetTokenException extends BusinessException {
 
+    /**
+     * Vytvoří výjimku s předdefinovanou chybovou zprávou
+     * a HTTP statusem NOT_FOUND.
+     */
     public InvalidResetTokenException() {
         super("BE - Resetovací odkaz je neplatný nebo expirovaný.", HttpStatus.NOT_FOUND);
     }
@@ -18,7 +22,11 @@ public class InvalidResetTokenException extends BusinessException {
     /**
      * Alternativní konstruktor s vlastním textem zprávy.
      *
-     * V tomto případě je použit HTTP status 410 (Gone).
+     * V tomto případě je použit HTTP status GONE,
+     * který signalizuje, že zdroj byl dříve dostupný,
+     * ale již není platný.
+     *
+     * @param message vlastní chybová zpráva
      */
     public InvalidResetTokenException(String message) {
         super(message, HttpStatus.GONE);

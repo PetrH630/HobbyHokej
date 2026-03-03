@@ -8,37 +8,52 @@ import java.time.LocalDateTime;
  *
  * Slouží k bezpečnému nastavení nového hesla uživatele.
  * Token je časově omezený a navázaný na konkrétního uživatele.
- * Volitelné pole usedAt umožňuje evidovat okamžik použití tokenu.
+ * Volitelné pole usedAt umožňuje evidovat okamžik použití tokenu
+ * a zabraňuje jeho opakovanému použití.
  */
 @Entity
 @Table(name = "forgotten_password_reset_token_entity")
 public class ForgottenPasswordResetTokenEntity {
 
+    /**
+     * Primární klíč tokenu.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Unikátní resetovací token.
+     *
+     * Hodnota se používá v odkazu zasílaném uživateli pro nastavení
+     * nového hesla.
      */
     @Column(nullable = false, unique = true, length = 128)
     private String token;
 
     /**
      * Uživatel, ke kterému token patří.
+     *
+     * Jeden uživatel může mít více tokenů v čase, například při
+     * opakovaných požadavcích na reset hesla.
      */
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private AppUserEntity user;
 
     /**
      * Datum a čas expirace tokenu.
+     *
+     * Po uplynutí této hodnoty se token považuje za neplatný
+     * a neměl by být dále akceptován.
      */
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
     /**
      * Datum a čas, kdy byl token použit.
-     * Hodnota je volitelná a slouží pro auditní účely.
+     *
+     * Hodnota je volitelná a slouží pro auditní účely a pro
+     * zajištění, že token nebude použit opakovaně.
      */
     private LocalDateTime usedAt;
 

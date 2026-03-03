@@ -8,16 +8,19 @@ import java.util.List;
 /**
  * Repozitář pro čtení historických záznamů hráčů.
  *
- * Slouží pro auditní a přehledové účely.
- * Zápis do historie zajišťují databázové triggery.
+ * Slouží pro auditní a přehledové účely. Zápis do historie
+ * zajišťují databázové triggery, tento repozitář řeší pouze
+ * čtení historických dat.
  */
 public interface PlayerHistoryRepository
         extends JpaRepository<PlayerHistoryEntity, Long> {
 
     /**
-     * Vrátí všechny historické záznamy pro daného hráče,
+     * Vrací všechny historické záznamy pro daného hráče
      * seřazené od nejnovější změny po nejstarší.
+     *
+     * @param playerId identifikátor hráče
+     * @return seznam historických záznamů hráče seřazený sestupně podle času změny
      */
-    List<PlayerHistoryEntity>
-    findByPlayerIdOrderByChangedAtDesc(Long playerId);
+    List<PlayerHistoryEntity> findByPlayerIdOrderByChangedAtDesc(Long playerId);
 }

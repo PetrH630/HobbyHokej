@@ -42,6 +42,16 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
      */
     private final PlayerRepository playerRepository;
 
+    /**
+     * Vytvoří instanci služby pro správu aktuálního hráče.
+     *
+     * Závislosti jsou injektovány konstruktorově. Identifikátor aktuálního
+     * hráče se ukládá do session přihlášeného uživatele a následně se
+     * využívá v dalších částech aplikace.
+     *
+     * @param session HTTP session přihlášeného uživatele
+     * @param playerRepository repository pro přístup k entitám hráčů
+     */
     public CurrentPlayerServiceImpl(HttpSession session,
                                     PlayerRepository playerRepository) {
         this.session = session;
@@ -114,11 +124,7 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
     public void clear() {
         session.removeAttribute(SessionKeys.CURRENT_PLAYER_ID);
     }
-
-    
     // Helper metody
-    
-
     /**
      * Najde hráče podle ID nebo vyhodí výjimku.
      *
@@ -130,7 +136,6 @@ public class CurrentPlayerServiceImpl implements CurrentPlayerService {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
     }
-
     /**
      * Ověří, zda může být hráč zvolen jako aktuální.
      *

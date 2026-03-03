@@ -8,9 +8,10 @@ import org.springframework.http.HttpStatus;
  *
  * Vyhazuje se v případě, kdy se uživatel pokouší přihlásit
  * nebo používat funkce vyžadující aktivovaný účet, aniž by
- * dokončil aktivaci přes odkaz v e-mailu.
+ * dokončil aktivaci prostřednictvím odkazu v e-mailu.
  *
- * Typicky mapováno na HTTP 403 (Forbidden).
+ * Výjimka je mapována na HTTP status FORBIDDEN a představuje
+ * porušení aplikačního pravidla týkajícího se životního cyklu účtu.
  */
 public class AccountNotActivatedException extends BusinessException {
 

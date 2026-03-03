@@ -17,6 +17,9 @@ public interface AppUserSettingsRepository extends JpaRepository<AppUserSettings
     /**
      * Vyhledá nastavení podle uživatele.
      *
+     * Metoda se používá tam, kde je k dispozici entita uživatele
+     * a je potřeba zjistit, zda má uložená specifická nastavení.
+     *
      * @param user uživatelský účet
      * @return nastavení zabalené v Optional, pokud existuje
      */
@@ -25,6 +28,10 @@ public interface AppUserSettingsRepository extends JpaRepository<AppUserSettings
     /**
      * Vyhledá nastavení podle e-mailu uživatele.
      *
+     * Umožňuje načíst nastavení i v situaci, kdy není k dispozici
+     * přímo entita AppUserEntity, ale pouze e-mail aktuálně
+     * přihlášeného uživatele.
+     *
      * @param email e-mail uživatele
      * @return nastavení zabalené v Optional, pokud existuje
      */
@@ -32,6 +39,9 @@ public interface AppUserSettingsRepository extends JpaRepository<AppUserSettings
 
     /**
      * Ověří, zda existuje záznam nastavení pro daného uživatele.
+     *
+     * Používá se například při inicializaci výchozích nastavení
+     * nebo při rozhodování, zda vytvořit nový záznam.
      *
      * @param user uživatelský účet
      * @return true, pokud nastavení existuje

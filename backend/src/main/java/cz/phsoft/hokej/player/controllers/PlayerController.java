@@ -24,9 +24,10 @@ import java.util.List;
  * včetně vytváření, aktualizace, mazání a schvalování hráčů, a také
  * správu hráčů z pohledu přihlášeného uživatele pod endpointy s prefixem /me.
  *
- * Veškerá business logika se deleguje do {@link PlayerService}.
- * Historie změn hráčů se získává pomocí {@link PlayerHistoryService}
- * a práce s aktuálním hráčem se zajišťuje přes {@link CurrentPlayerService}.
+ * Veškerá business logika je delegována do PlayerService.
+ * Historie změn hráčů se získává pomocí PlayerHistoryService
+ * a práce s aktuálním hráčem se zajišťuje přes CurrentPlayerService.
+ * Statistické údaje o hráčích se poskytují pomocí PlayerStatsService.
  */
 @RestController
 @RequestMapping("/api/players")
@@ -37,6 +38,17 @@ public class PlayerController {
     private final PlayerHistoryService playerHistoryService;
     private final PlayerStatsService playerStatsService;
 
+    /**
+     * Vytváří instanci kontroleru pro správu hráčů.
+     *
+     * Všechny závislosti se předávají přes konstruktor a
+     * používají se pro delegaci logiky do servisní vrstvy.
+     *
+     * @param playerService        služba pro správu hráčů
+     * @param currentPlayerService služba pro práci s aktuálním hráčem
+     * @param playerHistoryService služba pro čtení historie hráčů
+     * @param playerStatsService   služba pro čtení statistik hráčů
+     */
     public PlayerController(PlayerService playerService,
                             CurrentPlayerService currentPlayerService,
                             PlayerHistoryService playerHistoryService,
@@ -52,10 +64,11 @@ public class PlayerController {
     /**
      * Vrací seznam všech hráčů v systému.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
-     * pro přehledovou správu hráčů v administraci.
+     * Endpoint je dostupný pro role ADMIN a MANAGER a používá se
+     * pro přehledovou administrativní správu hráčů.
+     * Data se získávají z PlayerService.
      *
-     * @return seznam všech hráčů jako {@link PlayerDTO}
+     * @return seznam všech hráčů jako PlayerDTO
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -66,11 +79,12 @@ public class PlayerController {
     /**
      * Vrací detail hráče podle jeho ID.
      *
-     * Endpoint je určen pro administrativní pohled na hráče,
-     * například pro úpravu jeho údajů.
+     * Endpoint je určen pro administrativní pohled na konkrétního hráče,
+     * typicky pro zobrazení a úpravu jeho údajů. Data se načítají
+     * z PlayerService.
      *
      * @param id ID hráče
-     * @return {@link PlayerDTO} s detailem hráče
+     * @return PlayerDTO s detailem hráče
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -82,10 +96,11 @@ public class PlayerController {
      * Vrací historii hráče podle jeho ID.
      *
      * Historie obsahuje záznamy o změnách provedených nad daným hráčem
-     * a slouží pro auditní a přehledové účely.
+     * a používá se pro auditní a přehledové účely. Data se získávají
+     * z PlayerHistoryService.
      *
      * @param id ID hráče
-     * @return seznam {@link PlayerHistoryDTO} představujících historii hráče
+     * @return seznam PlayerHistoryDTO představujících historii hráče
      */
     @GetMapping("/{id}/history")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -96,11 +111,11 @@ public class PlayerController {
     /**
      * Vytváří nového hráče administrátorem nebo manažerem.
      *
-     * Operace se používá při ručním zakládání hráče v systému,
-     * typicky pro dodatečné doplnění hráčů mimo uživatelské rozhraní.
+     * Operace se používá při ručním zakládání hráče v systému
+     * v administrativním rozhraní. Vytvoření se deleguje do PlayerService.
      *
      * @param playerDTO DTO s daty nového hráče
-     * @return vytvořený hráč jako {@link PlayerDTO}
+     * @return vytvořený hráč jako PlayerDTO
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -111,12 +126,13 @@ public class PlayerController {
     /**
      * Aktualizuje údaje hráče v administrativním rozhraní.
      *
-     * Endpoint je dostupný pro role ADMIN a MANAGER a slouží
-     * k úpravě existujících údajů hráče.
+     * Endpoint je dostupný pro role ADMIN a MANAGER a používá se
+     * k úpravě existujících údajů hráče. Aktualizace je delegována
+     * do PlayerService.
      *
      * @param id  ID hráče
      * @param dto DTO s aktualizovanými daty hráče
-     * @return aktualizovaný hráč jako {@link PlayerDTO}
+     * @return aktualizovaný hráč jako PlayerDTO
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -129,11 +145,11 @@ public class PlayerController {
      * Odstraňuje hráče ze systému.
      *
      * Operace je dostupná pro role ADMIN a MANAGER a používá se
-     * pouze ve výjimečných situacích, například při chybném založení
-     * hráče. Samotné odstranění se provádí v servisní vrstvě.
+     * ve výjimečných situacích, například při chybném založení
+     * hráče. Samotné odstranění se provádí v PlayerService.
      *
      * @param id ID hráče
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @return SuccessResponseDTO s výsledkem operace
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -146,11 +162,11 @@ public class PlayerController {
      * Schvaluje hráče a nastavuje jeho stav na APPROVED.
      *
      * Endpoint se používá po kontrole údajů hráče administrátorem
-     * nebo manažerem. Schválení umožňuje hráči plnohodnotné využití
-     * systému.
+     * nebo manažerem. Schválení umožňuje hráči plnohodnotné využívání
+     * systému. Změna stavu je provedena v PlayerService.
      *
      * @param id ID hráče
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @return SuccessResponseDTO s výsledkem operace
      */
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -164,9 +180,10 @@ public class PlayerController {
      *
      * Endpoint se používá v situacích, kdy hráč nesplňuje podmínky
      * pro schválení, například z hlediska validity údajů.
+     * Změna stavu je provedena v PlayerService.
      *
      * @param id ID hráče
-     * @return {@link SuccessResponseDTO} s výsledkem operace
+     * @return SuccessResponseDTO s výsledkem operace
      */
     @PutMapping("/{id}/reject")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -178,9 +195,9 @@ public class PlayerController {
     /**
      * Mění přiřazení hráče k aplikačnímu uživateli.
      *
-     * Operace je určena pro roli ADMIN nebo MANAGER a používá se,
+     * Operace je určena pro role ADMIN a MANAGER a používá se,
      * pokud je potřeba hráče převést k jinému uživateli, například
-     * při změně vlastníka účtu.
+     * při změně vlastníka účtu. Změna přiřazení se provádí v PlayerService.
      *
      * @param playerId ID hráče
      * @param request  požadavek obsahující ID nového uživatele
@@ -204,11 +221,12 @@ public class PlayerController {
      * Vytváří nového hráče pro přihlášeného uživatele.
      *
      * Nový hráč se automaticky přiřazuje k uživatelskému účtu
-     * odvozenému z e-mailové adresy v objektu {@link Authentication}.
+     * odvozenému z e-mailové adresy v objektu Authentication.
+     * Vytvoření je delegováno do PlayerService.
      *
      * @param playerDTO      DTO s daty nového hráče
      * @param authentication autentizační kontext přihlášeného uživatele
-     * @return vytvořený hráč jako {@link PlayerDTO}
+     * @return vytvořený hráč jako PlayerDTO
      */
     @PostMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -224,10 +242,11 @@ public class PlayerController {
      * Vrací seznam všech hráčů patřících přihlášenému uživateli.
      *
      * Hráči se identifikují na základě e-mailové adresy uživatele
-     * získané z autentizačního kontextu.
+     * získané z autentizačního kontextu. Data se načítají
+     * z PlayerService.
      *
      * @param authentication autentizační kontext přihlášeného uživatele
-     * @return seznam {@link PlayerDTO} patřících danému uživateli
+     * @return seznam PlayerDTO patřících danému uživateli
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -237,14 +256,14 @@ public class PlayerController {
     }
 
     /**
-     * Aktualizuje údaje aktuálně zvoleného hráče.
+     * Aktualizuje údaje aktuálně zvoleného hráče přihlášeného uživatele.
      *
      * Před provedením aktualizace se vyžaduje, aby byl nastaven
-     * aktuální hráč v {@link CurrentPlayerService}. Aktualizace
-     * se následně deleguje do {@link PlayerService}.
+     * aktuální hráč v CurrentPlayerService. Po získání ID aktuálního
+     * hráče se aktualizace deleguje do PlayerService.
      *
      * @param dto DTO s aktualizovanými daty hráče
-     * @return aktualizovaný hráč jako {@link PlayerDTO}
+     * @return aktualizovaný hráč jako PlayerDTO
      */
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -257,10 +276,11 @@ public class PlayerController {
     /**
      * Vrací historii pro aktuálně zvoleného hráče přihlášeného uživatele.
      *
-     * Identita hráče se získává z {@link CurrentPlayerService}. Endpoint
-     * je určen pro uživatelské zobrazení historie změn nad vlastním hráčem.
+     * Identita hráče se získává z CurrentPlayerService. Endpoint
+     * se používá pro zobrazení historie změn nad vlastním hráčem
+     * v uživatelském rozhraní.
      *
-     * @return seznam {@link PlayerHistoryDTO} představujících historii aktuálního hráče
+     * @return seznam PlayerHistoryDTO představujících historii aktuálního hráče
      */
     @GetMapping("/me/history")
     @PreAuthorize("isAuthenticated()")
@@ -270,14 +290,14 @@ public class PlayerController {
         return playerHistoryService.getHistoryForPlayer(currentPlayerId);
     }
 
-
     /**
      * Vrací statistiky pro aktuálně zvoleného hráče přihlášeného uživatele.
      *
-     * Identita hráče se získává z {@link CurrentPlayerService}. Endpoint
-     * je určen pro zobrazení statistik k zápasům vlastním hráčem.
+     * Identita hráče se získává z CurrentPlayerService. Endpoint
+     * se používá pro zobrazení statistik k zápasům aktuálního hráče.
+     * Výpočet a agregace statistik jsou zajištěny v PlayerStatsService.
      *
-     * @return seznam {@link PlayerStatsDTO} představujících statistiky aktuálního hráče
+     * @return PlayerStatsDTO představující statistiky aktuálního hráče
      */
     @GetMapping("/me/stats")
     @PreAuthorize("isAuthenticated()")
@@ -288,18 +308,19 @@ public class PlayerController {
     }
 
     /**
-     * Vrací statistiky pro aktuálně zvoleného hráče přihlášeného uživatele.
+     * Vrací statistiky pro hráče podle jeho ID.
      *
-     * je určen pro zobrazení statistik k zápasům hráče dle jeho ide.
+     * Endpoint je určen pro role ADMIN a MANAGER a používá se
+     * pro zobrazení statistik k zápasům libovolného hráče.
+     * Výpočet a agregace statistik jsou zajištěny v PlayerStatsService.
+     *
      * @param playerId ID hráče
-     * @return seznam {@link PlayerStatsDTO} představujících statistiky hráče dle id
+     * @return PlayerStatsDTO představující statistiky hráče dle ID
      */
     @GetMapping("/{playerId}/stats")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public PlayerStatsDTO getPlayerStats(@PathVariable Long playerId) {
         return playerStatsService.getPlayerStats(playerId);
     }
-
-
 
 }

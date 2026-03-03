@@ -3,12 +3,12 @@ package cz.phsoft.hokej.shared.exceptions;
 import org.springframework.http.HttpStatus;
 
 /**
- * Základní doménová výjimka pro business chyby v aplikaci.
+ * Základní doménová výjimka pro business chyby aplikace.
  *
  * Slouží jako společný předek pro aplikační výjimky,
  * které nesou informaci o odpovídajícím HTTP status kódu.
  * Tento status je následně použit v globálním handleru
- * výjimek pro tvorbu jednotné chybové odpovědi.
+ * výjimek pro vytvoření jednotné chybové odpovědi.
  */
 public class BusinessException extends RuntimeException {
 
@@ -18,10 +18,10 @@ public class BusinessException extends RuntimeException {
     private final HttpStatus status;
 
     /**
-     * Vytvoří novou business výjimku s danou zprávou a HTTP statusem.
+     * Vytvoří novou business výjimku.
      *
-     * @param message chybová zpráva určená typicky přímo pro uživatele
-     * @param status  HTTP status kód odpovídající dané chybě
+     * @param message chybová zpráva určená pro klienta
+     * @param status HTTP status kód odpovídající dané chybě
      */
     protected BusinessException(String message, HttpStatus status) {
         super(message);

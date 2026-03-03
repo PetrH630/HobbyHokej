@@ -9,8 +9,10 @@ import java.util.Map;
  * Datový přenosový objekt reprezentující statistiku hráče
  * za aktuální sezónu.
  *
- * Objekt slouží pro přenos agregovaných dat z service vrstvy
- * do controlleru a následně do klientské aplikace.
+ * Objekt slouží pro přenos agregovaných dat ze servisní vrstvy
+ * do kontroleru a následně do klientské aplikace. Neobsahuje
+ * žádnou business logiku a reprezentuje pouze výsledky výpočtů
+ * provedených v PlayerStatsService.
  */
 public class PlayerStatsDTO {
 
@@ -25,7 +27,8 @@ public class PlayerStatsDTO {
     private int allMatchesInSeason;
 
     /**
-     * Celkový počet odehraných zápasů dostupných pro hráče v aktuální sezóně.
+     * Celkový počet zápasů v aktuální sezóně,
+     * které byly pro daného hráče dostupné.
      */
     private int allMatchesInSeasonForPlayer;
 
@@ -45,7 +48,7 @@ public class PlayerStatsDTO {
     private int excused;
 
     /**
-     * Počet zápasů, ve kterých byl hráč jako možná budu.
+     * Počet zápasů, ve kterých byl hráč veden jako náhradník.
      */
     private int substituted;
 
@@ -60,7 +63,8 @@ public class PlayerStatsDTO {
     private int noResponse;
 
     /**
-     * Počet zápasů, ve kterých nebyl hráč omluven a zároveň nenastoupil.
+     * Počet zápasů, ve kterých nebyl hráč omluven
+     * a zároveň nenastoupil.
      */
     private int noExcused;
 
@@ -81,6 +85,8 @@ public class PlayerStatsDTO {
 
     /**
      * Počty registrací hráče podle týmu pro status REGISTERED.
+     *
+     * Klíčem je tým a hodnotou počet registrací.
      */
     private Map<Team, Integer> registeredByTeam;
 

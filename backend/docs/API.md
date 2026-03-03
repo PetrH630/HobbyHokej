@@ -47,6 +47,8 @@
 Typické použití:
 - Frontend po přihlášení pracuje se session cookie automaticky, není potřeba posílat tokeny v hlavičkách.
 
+
+
 ### 1.3 Formát dat
 
 - MIME typ:
@@ -767,7 +769,26 @@ Odpověď:
 - HTTP 200
 - `SuccessResponseDTO`
 
-## 12.10 Detail zápasu z pohledu hráče
+## 12.10 Automatické vygenerování první lajny (ADMIN/MANAGER)
+
+Endpoint: `POST /api/matches/{matchId}/auto-lineup`
+
+Role: `ADMIN` nebo `MANAGER`
+
+Odpověď:
+- HTTP 200
+- `SuccessResponseDTO`
+
+## 12.11 Aktualizace skóre zápasu (ADMIN/MANAGER)
+
+Endpoint: `PATCH /api/matches/{matchId}/score`  
+Role: `ADMIN` nebo `MANAGER`
+
+Odpověď:
+- HTTP 200
+- `MatchDTO` s aktualizovným skóre
+- 
+## 12.12 Detail zápasu z pohledu hráče
 
 Endpoint: `GET /api/matches/{id}/detail`  
 Role: přihlášený uživatel
@@ -776,7 +797,7 @@ Odpověď:
 - HTTP 200
 - `MatchDetailDTO`
 
-## 12.11 Nejbližší zápas
+## 12.13 Nejbližší nadcházející zápas pro hráče
 
 Endpoint: `GET /api/matches/next`  
 Role: přihlášený uživatel
@@ -785,7 +806,7 @@ Odpověď:
 - HTTP 200
 - `MatchDTO` nebo `null`
 
-## 12.12 Nadcházející zápasy aktuálního hráče
+## 12.14 Nadcházející zápasy aktuálního hráče
 
 Endpoint: `GET /api/matches/me/upcoming`  
 Role: přihlášený uživatel + vybraný current player
@@ -794,7 +815,7 @@ Odpověď:
 - HTTP 200
 - seznam `MatchDTO`
 
-## 12.13 Přehled nadcházejících zápasů (overview)
+## 12.15 Přehled nadcházejících zápasů (overview)
 
 Endpoint: `GET /api/matches/me/upcoming-overview`  
 Role: přihlášený uživatel + vybraný current player
@@ -803,7 +824,7 @@ Odpověď:
 - HTTP 200
 - seznam `MatchOverviewDTO`
 
-## 12.14 Všechny odehrané zápasy aktuálního hráče
+## 12.16 Všechny odehrané zápasy aktuálního hráče
 
 Endpoint: `GET /api/matches/me/all-passed`  
 Role: přihlášený uživatel + vybraný current player
@@ -811,6 +832,24 @@ Role: přihlášený uživatel + vybraný current player
 Odpověď:
 - HTTP 200
 - seznam `MatchOverviewDTO`
+
+## 12.17 Přehled pozic pro zápas
+
+Endpoint: `GET /api/matches/{matchId}/positions`  
+Role: přihlášený uživatel
+
+Odpověď:
+- HTTP 200
+- `MatchPositionOverviewDTO` - přehled pozic a kapacit pro oba týmy v daném zápase
+
+## 12.18 Přehled pozic pro konkrétní tým
+
+Endpoint: `GET /api/matches/{matchId}/positions/{team}`  
+Role: přihlášený uživatel
+
+Odpověď:
+- HTTP 200
+- `MatchTeamPositionOverviewDTO` - přehled pozic a kapacit pro tým v daném zápase
 
 ---
 
@@ -897,6 +936,41 @@ Odpověď:
 - HTTP 200
 - seznam `MatchRegistrationDTO`
 
+## 13.9 Změna týmu registrace – aktuální hráč
+
+Endpoint: `PATCH /api/registrations/me/{matchId}/change-team`  
+Role: přihlášený uživatel + vybraný current player
+
+Chování: Pro aktuálního hráče přepne tým registrace v daném zápase na opačný (DARK/LIGHT),
+pokud to pravidla dovolují.
+
+Odpověď:
+- HTTP 200
+- `MatchRegistrationDTO`
+
+## 13.10 Změna týmu registrace – administrativní změna (ADMIN/MANAGER)
+
+Endpoint: `PATCH /api/registrations/{playerId}/{matchId}/change-team`  
+Role: `ADMIN` nebo `MANAGER`
+
+Odpověď:
+- HTTP 200
+- `MatchRegistrationDTO`
+
+## 13.11 Změna pozice hráče v zápase (ADMIN/MANAGER)
+
+Endpoint: `PATCH /api/registrations/{matchId}/players/{playerId}/position?position=...`  
+Role: `ADMIN` nebo `MANAGER`
+
+Parametry: 
+- matchId – ID zápasu
+- playerId – ID hráče
+- position – hodnota enumu PlayerPosition (např. DEFENSE, WING_LEFT, WING_RIGHT, ...)
+
+Odpověď:
+- HTTP 200
+- `MatchRegistrationDTO`
+
 ---
 
 # 14. Historie registrací (MatchRegistrationHistoryController)
@@ -923,23 +997,90 @@ Odpověď:
 
 ---
 
-# 15. Uživatelský kontext (MeController)
+# 15. Notifikace pro uživatele (NotificationController)
 
-Základní prefix: `/api/me`
+Základní prefix: `/api/notifications`
 
-## 15.1 Informace o impersonaci
+## 15.1 Badge notifikací
 
-Endpoint: `GET /api/me/impersonation`  
-Role: přihlášení (v praxi; controller nemá anotaci, ale endpoint předpokládá security)
+Endpoint: `GET /api/notifications/badge`  
+Role: přihlášený uživatel
+
+Chování:
+- Vrací souhrnnou informaci o notifikacích pro aktuálně přihlášeného uživatele
+- (např. počet nepřečtených notifikací, příznak důležitých zpráv).
 
 Odpověď:
 - HTTP 200
-- `ImpersonationInfoDTO`
-```json
-{ "impersonating": true, "playerId": 123, "playerName": "Jan Novák" }
-```
+- `NotificationBadgeDTO`
+
+## 15.2 Notifikace od posledního přihlášení
+
+Endpoint: `GET /api/notifications/since-last-login`  
+Role: přihlášený uživatel
+
+Chování:
+- Vrací notifikace vytvořené po posledním přihlášení uživatele.
+- Pokud není čas posledního přihlášení k dispozici, použije se výchozí časové okno definované v servisní vrstvě.
+
+Odpověď:
+- HTTP 200
+- seznam `NotificationDTO`
+
+## 15.3 Poslední notifikace (recent)
+
+Endpoint: `GET /api/notifications/recent?limit=50`  
+Role: přihlášený uživatel
+
+Parametry:
+- limit – maximální počet vrácených záznamů (volitelný, default 50)
+
+Odpověď:
+- HTTP 200
+- seznam `NotificationDTO`
+
+## 15.4 Označení notifikace jako přečtené
+
+Endpoint: `POST /api/notifications/{id}/read`  
+Role: přihlášený uživatel
+
+Parametry:
+- id – ID notifikace
+
+Chování:
+- Operace je idempotentní; pokud notifikace neexistuje nebo je již přečtená, nevyhazuje chybu.
+
+Odpověď:
+- HTTP 204 (bez těla)
+
+## 15.5 Označení všech notifikací jako přečtené
+
+Endpoint: `POST /api/notifications/read-all`  
+Role: přihlášený uživatel
+
+
+
+Chování:
+- Označí všechny notifikace uživatele jako přečtené.
+
+Odpověď:
+- HTTP 204 (bez těla)
+
+## 15.6 Přehled všech notifikací v systému (ADMIN/MANAGER)
+
+Endpoint: `GET /api/notifications/admin/all?limit=500`  
+Role: `ADMIN` nebo `MANAGER`
+
+Parametry:
+- limit – maximální počet vrácených záznamů (volitelný, default 500)
+
+Odpověď:
+- HTTP 200
+- seznam `NotificationDTO`
 
 ---
+
+// // TODO ADMINISTRACE NOTIFIKACÍ ==================
 
 # 16. Demo notifikace (DemoNotificationController)
 

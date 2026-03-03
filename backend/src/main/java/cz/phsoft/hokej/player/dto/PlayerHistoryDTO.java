@@ -22,21 +22,84 @@ import java.time.LocalDateTime;
  */
 public class PlayerHistoryDTO {
 
+    /**
+     * Jedinečný identifikátor historického záznamu.
+     */
     private Long id;
+
+    /**
+     * Identifikátor uživatele, který změnu provedl.
+     */
     private Long userId;
+
+    /**
+     * Identifikátor hráče, ke kterému se historický záznam vztahuje.
+     */
     private Long playerId;
+
+    /**
+     * Typ provedené akce, například CREATE, UPDATE nebo DELETE.
+     */
     private String action;
+
+    /**
+     * Datum a čas provedení změny.
+     */
     private LocalDateTime changedAt;
+
+    /**
+     * Křestní jméno hráče v okamžiku změny.
+     */
     private String name;
+
+    /**
+     * Příjmení hráče v okamžiku změny.
+     */
     private String surname;
+
+    /**
+     * Přezdívka hráče v okamžiku změny.
+     */
     private String nickname;
+
+    /**
+     * Celé jméno hráče v okamžiku změny.
+     */
     private String fullName;
+
+    /**
+     * Telefonní číslo hráče v okamžiku změny.
+     */
     private String phoneNumber;
+
+    /**
+     * Typ hráče v okamžiku změny.
+     */
     private PlayerType type;
+
+    /**
+     * Tým hráče v okamžiku změny.
+     */
     private Team team;
+
+    /**
+     * Primární pozice hráče v okamžiku změny.
+     */
     private PlayerPosition primaryPosition;
+
+    /**
+     * Sekundární pozice hráče v okamžiku změny.
+     */
     private PlayerPosition secondaryPosition;
+
+    /**
+     * Stav hráče v systému v okamžiku změny.
+     */
     private PlayerStatus playerStatus;
+
+    /**
+     * Původní časové razítko hráče z hlavní tabulky.
+     */
     private LocalDateTime originalTimestamp;
 
     public Long getId() { return id; }

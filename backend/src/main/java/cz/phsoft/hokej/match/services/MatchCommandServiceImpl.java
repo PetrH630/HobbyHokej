@@ -26,7 +26,7 @@ import cz.phsoft.hokej.season.services.SeasonService;
 import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
 import cz.phsoft.hokej.user.entities.AppUserEntity;
 import cz.phsoft.hokej.user.repositories.AppUserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

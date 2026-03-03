@@ -9,16 +9,21 @@ import org.springframework.http.HttpStatus;
  * Vyhazuje se v případě, kdy nové období neaktivity koliduje
  * s již existujícím obdobím téhož hráče.
  *
- * Typicky mapováno na HTTP 409 (Conflict).
+ * Výjimka je mapována na HTTP status 409 Conflict.
  */
 public class InactivityPeriodOverlapException extends BusinessException {
 
+    /**
+     * Vytváří výjimku s výchozí chybovou zprávou.
+     */
     public InactivityPeriodOverlapException() {
         super("BE - Nové období se překrývá s existujícím obdobím neaktivity hráče.", HttpStatus.CONFLICT);
     }
 
     /**
-     * Alternativní konstruktor s vlastní chybovou zprávou.
+     * Vytváří výjimku s vlastní chybovou zprávou.
+     *
+     * @param message text chybové zprávy
      */
     public InactivityPeriodOverlapException(String message) {
         super(message, HttpStatus.CONFLICT);

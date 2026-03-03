@@ -13,21 +13,28 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující registraci hráče k zápasu.
  *
- * Uchovává informace o účasti hráče, jeho aktuálním stavu,
- * případné omluvě a administrativních poznámkách. Samostatná
- * entita umožňuje sledovat změny registrace a pracovat
- * s historií účasti.
+ * Uchovává informace o účasti hráče na konkrétním zápase,
+ * jeho aktuálním stavu registrace, případné omluvě,
+ * administrativních poznámkách a přiřazení do týmu.
+ *
+ * Samostatná entita umožňuje evidenci změn registrace,
+ * práci s historií účasti a podporu plánovaných úloh
+ * souvisejících s notifikacemi.
  */
 @Entity
 @Table(name = "match_registrations")
 public class MatchRegistrationEntity {
 
+    /**
+     * Jednoznačný identifikátor registrace.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Zápas, ke kterému se registrace vztahuje.
+     * Vztah je povinný a reprezentuje vlastnickou stranu registrace.
      */
     @ManyToOne
     @JoinColumn(name = "match_id", nullable = false)
@@ -35,6 +42,7 @@ public class MatchRegistrationEntity {
 
     /**
      * Hráč, kterého se registrace týká.
+     * Každá registrace náleží právě jednomu hráči.
      */
     @ManyToOne
     @JoinColumn(name = "player_id", nullable = false)
@@ -42,29 +50,31 @@ public class MatchRegistrationEntity {
 
     /**
      * Aktuální stav registrace hráče k zápasu.
+     * Hodnota je ukládána jako textová reprezentace výčtového typu.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlayerMatchStatus status;
 
     /**
-     * Důvod omluvy hráče, pokud je hráč omluven.
+     * Důvod omluvy hráče, pokud je registrace ve stavu omluvené účasti.
      */
     @Enumerated(EnumType.STRING)
     private ExcuseReason excuseReason;
 
     /**
-     * Volitelná poznámka k omluvě hráče.
+     * Volitelná textová poznámka k omluvě hráče.
      */
     private String excuseNote;
 
     /**
      * Administrativní poznámka k registraci.
+     * Slouží pro interní evidenci nebo zaznamenání porušení pravidel.
      */
     private String adminNote;
 
     /**
-     * Tým, do kterého je hráč pro zápas zařazen.
+     * Tým, do kterého je hráč pro daný zápas zařazen.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "team")
@@ -72,35 +82,39 @@ public class MatchRegistrationEntity {
 
     /**
      * Časové razítko registrace.
-     * Používá se například pro určení pořadí přihlášení.
+     * Používá se například pro určení pořadí přihlášení
+     * nebo pro auditní účely.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
-     * Původ vytvoření registrace.
-     * Typické hodnoty jsou například "user" nebo "system".
+     * Původ vytvoření nebo změny registrace.
+     * Typické hodnoty reprezentují uživatelskou nebo systémovou akci.
      */
     @Column(nullable = false, updatable = true)
     private String createdBy;
 
     /**
      * Pozice hráče v tomto konkrétním zápase.
+     * Ukládá se jako textová reprezentace výčtového typu.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "position_in_match", length = 30)
     private PlayerPosition positionInMatch;
 
     /**
-     * Příznak, že připomínka MATCH_REMINDER už byla
-     * pro tuto registraci odeslána.
+     * Příznak určující, zda již byla odeslána připomínka k zápasu.
      *
-     * Slouží k tomu, aby plánovač neposílal připomínku
-     * stejnému hráči pro stejný zápas vícekrát.
+     * Slouží k zabránění opakovaného odeslání notifikace
+     * stejnému hráči pro stejný zápas.
      */
     @Column(name = "reminder_already_sent", nullable = false)
     private boolean reminderAlreadySent = false;
 
+    /**
+     * Vytváří prázdnou instanci entity.
+     */
     public MatchRegistrationEntity() {
     }
 

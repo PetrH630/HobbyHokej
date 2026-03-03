@@ -3,24 +3,59 @@ package cz.phsoft.hokej.registration.dto;
 import java.time.LocalDateTime;
 
 /**
- * DTO pro náhled připomínek NO_RESPONSE.
+ * DTO pro náhled připomínek hráčům ve stavu bez reakce.
  *
- * Slouží pouze pro admin/test endpoint, aby bylo vidět,
- * kterým hráčům by se připomínka poslala, aniž by se reálně
- * odeslaly notifikace.
+ * Slouží pro administrativní nebo testovací endpoint,
+ * který umožňuje zobrazit, kterým hráčům by byla odeslána
+ * připomínka k registraci, aniž by došlo k reálnému odeslání
+ * notifikací.
+ *
+ * Objekt obsahuje základní identifikační údaje o zápase
+ * a hráči potřebné pro zobrazení přehledu plánovaných
+ * připomínek.
  */
 public class NoResponseReminderPreviewDTO {
 
+    /**
+     * Identifikátor zápasu, ke kterému se připomínka vztahuje.
+     */
     private Long matchId;
+
+    /**
+     * Datum a čas konání zápasu.
+     */
     private LocalDateTime matchDateTime;
 
+    /**
+     * Identifikátor hráče, kterému by byla připomínka odeslána.
+     */
     private Long playerId;
+
+    /**
+     * Celé jméno hráče pro prezentační účely.
+     */
     private String playerFullName;
+
+    /**
+     * Telefonní číslo hráče, na které by byla připomínka odeslána.
+     */
     private String playerPhoneNumber;
 
+    /**
+     * Vytváří prázdnou instanci DTO.
+     */
     public NoResponseReminderPreviewDTO() {
     }
 
+    /**
+     * Vytváří instanci DTO s kompletními údaji pro náhled připomínky.
+     *
+     * @param matchId           identifikátor zápasu
+     * @param matchDateTime     datum a čas zápasu
+     * @param playerId          identifikátor hráče
+     * @param playerFullName    celé jméno hráče
+     * @param playerPhoneNumber telefonní číslo hráče
+     */
     public NoResponseReminderPreviewDTO(Long matchId,
                                         LocalDateTime matchDateTime,
                                         Long playerId,

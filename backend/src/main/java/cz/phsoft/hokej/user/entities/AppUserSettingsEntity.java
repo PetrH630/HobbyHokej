@@ -12,20 +12,27 @@ import java.time.LocalTime;
  * Entita uchovávající nastavení uživatelského účtu.
  *
  * Odděluje identitu uživatele (AppUserEntity) od jeho preferencí
- * a chování v systému (AppUserSettingsEntity). Slouží zejména
- * pro nastavení výběru hráče, globální úrovně notifikací a
- * preferencí souvisejících s uživatelským rozhraním.
+ * a chování v systému. Slouží zejména pro nastavení výběru hráče,
+ * globální úrovně notifikací a preferencí souvisejících
+ * s uživatelským rozhraním.
+ *
+ * Entita se používá v logice, která načítá a ukládá uživatelská
+ * nastavení na základě požadavků z API vrstvy.
  */
 @Entity
 @Table(name = "app_user_settings")
 public class AppUserSettingsEntity {
 
+    /**
+     * Primární klíč záznamu nastavení.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Uživatel, ke kterému tato nastavení patří.
+     *
      * Pro jednoho uživatele existuje právě jeden záznam nastavení.
      */
     @OneToOne(fetch = FetchType.LAZY)
@@ -42,6 +49,7 @@ public class AppUserSettingsEntity {
 
     /**
      * Globální úroveň notifikací pro uživatele.
+     *
      * Určuje, kolik notifikací bude uživatel dostávat
      * bez ohledu na nastavení konkrétních hráčů.
      */
@@ -101,14 +109,16 @@ public class AppUserSettingsEntity {
 
     /**
      * Preferovaný jazyk uživatelského rozhraní.
-     * Například "cs" nebo "en".
+     *
+     * Typickým příkladem je hodnota "cs" nebo "en".
      */
     @Column(name = "ui_language", length = 10)
     private String uiLanguage = "cs";
 
     /**
      * Časová zóna uživatele.
-     * Například "Europe/Prague".
+     *
+     * Příkladem hodnoty je "Europe/Prague".
      */
     @Column(name = "timezone", length = 50)
     private String timezone = "Europe/Prague";
@@ -208,14 +218,24 @@ public class AppUserSettingsEntity {
     }
 
     /**
-     * Vrací výchozí landing page jako String (pro DTO / MapStruct).
+     * Vrací výchozí landing page pro uživatele.
+     *
+     * Hodnota se používá v logice přesměrování po přihlášení
+     * a při mapování na DTO objekt.
+     *
+     * @return výchozí landing page
      */
     public LandingPage getDefaultLandingPage() {
         return defaultLandingPage;
     }
 
     /**
-     * Nastavuje výchozí landing page ze Stringu (pro DTO / MapStruct).
+     * Nastavuje výchozí landing page pro uživatele.
+     *
+     * Hodnota se předává z aplikační logiky nebo z mapovací vrstvy
+     * zodpovědné za transformaci DTO na entitu.
+     *
+     * @param defaultLandingPage výchozí landing page
      */
     public void setDefaultLandingPage(LandingPage defaultLandingPage) {
         this.defaultLandingPage = defaultLandingPage;

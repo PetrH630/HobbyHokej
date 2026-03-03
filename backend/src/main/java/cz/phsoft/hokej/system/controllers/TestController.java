@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Jednoduchý testovací REST controller.
  *
- * Slouží k ověření, že backend aplikace běží a že funguje
- * zabezpečení pro roli ADMIN.
+ * Slouží k ověření, že backend aplikace běží
+ * a že je správně nastaveno zabezpečení pro roli ADMIN.
  */
 @RestController
 @RequestMapping("/api/test")
@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     /**
-     * Vrací jednoduchou textovou zprávu pro ověření, že backend je online.
+     * Vrací textovou zprávu potvrzující dostupnost backendu.
      *
-     * @return textová zpráva potvrzující běh backendu
+     * @return textová zpráva o běhu aplikace
      */
     @GetMapping
     public String hello() {

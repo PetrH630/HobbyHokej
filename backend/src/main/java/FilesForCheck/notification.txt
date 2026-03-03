@@ -1595,7 +1595,7 @@ package cz.phsoft.hokej.models.services.notification;
 
 import cz.phsoft.hokej.notifications.entities.NotificationEntity;
 import cz.phsoft.hokej.notifications.repositories.NotificationRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

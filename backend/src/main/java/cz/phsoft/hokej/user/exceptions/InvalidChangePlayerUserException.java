@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
  * Vyhazuje se v případě, kdy se aplikace pokusí přiřadit hráče
  * ke stejnému uživateli, ke kterému již patří.
  *
- * Typicky mapováno na HTTP 409 (Conflict).
+ * Výjimka je mapována na HTTP status CONFLICT.
  */
 public class InvalidChangePlayerUserException extends BusinessException {
 

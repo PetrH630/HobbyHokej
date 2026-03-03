@@ -1,24 +1,23 @@
 package cz.phsoft.hokej.player.services;
 
-import cz.phsoft.hokej.match.services.MatchServiceImpl;
+import cz.phsoft.hokej.player.dto.PlayerInactivityPeriodDTO;
 import cz.phsoft.hokej.player.entities.PlayerEntity;
 import cz.phsoft.hokej.player.entities.PlayerInactivityPeriodEntity;
-import cz.phsoft.hokej.player.repositories.PlayerInactivityPeriodRepository;
-import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import cz.phsoft.hokej.player.exceptions.InactivityPeriodNotFoundException;
 import cz.phsoft.hokej.player.exceptions.InactivityPeriodOverlapException;
 import cz.phsoft.hokej.player.exceptions.InvalidInactivityPeriodDateException;
 import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.player.dto.PlayerInactivityPeriodDTO;
 import cz.phsoft.hokej.player.mappers.PlayerInactivityPeriodMapper;
-import jakarta.transaction.Transactional;
+import cz.phsoft.hokej.player.repositories.PlayerInactivityPeriodRepository;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Service implementace pro správu období neaktivity hráčů.
+ * Implementace servisní vrstvy pro správu období neaktivity hráčů.
  *
  * Obchodní význam:
  * - určuje, zda je hráč v daném čase aktivní nebo neaktivní,
@@ -31,14 +30,15 @@ import java.util.List;
  * - při registraci hráče na zápas.
  *
  * Klíčové pravidlo:
- * - hráč nesmí mít překrývající se období neaktivity
- *   (překryv je považován za chybu dat).
+ * - hráč nesmí mít překrývající se období neaktivity;
+ *   překryv je považován za chybu dat.
  *
- * Tato service:
- * - řeší pouze doménová pravidla pro neaktivitu,
+ * Třída:
+ * - řeší pouze doménová pravidla pro neaktivitu hráče,
  * - neřeší bezpečnost, role ani notifikace,
- * - využívá mapper {@link PlayerInactivityPeriodMapper}
- *   pro převod mezi entitami a DTO.
+ * - používá PlayerInactivityPeriodMapper pro převod mezi entitami a DTO,
+ * - spolupracuje s PlayerInactivityPeriodRepository a PlayerRepository
+ *   pro přístup k perzistentní vrstvě.
  */
 @Service
 public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriodService {
@@ -47,6 +47,16 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     private final PlayerRepository playerRepository;
     private final PlayerInactivityPeriodMapper mapper;
 
+    /**
+     * Vytvoří instanci služby pro správu období neaktivity hráčů.
+     *
+     * Závislosti jsou injektovány konstruktorově. Třída poté slouží
+     * jako centrální místo pro práci s obdobími neaktivity v doméně hráče.
+     *
+     * @param inactivityRepository repository pro práci s obdobími neaktivity
+     * @param playerRepository repository pro přístup k hráčům
+     * @param mapper mapper pro převod mezi entitou a DTO
+     */
     public PlayerInactivityPeriodServiceImpl(
             PlayerInactivityPeriodRepository inactivityRepository,
             PlayerRepository playerRepository,
@@ -57,15 +67,15 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         this.mapper = mapper;
     }
 
-    
+
     // READ OPERACE
-    
+
 
     /**
      * Vrátí všechna období neaktivity všech hráčů.
      *
-     * Používá se zejména v administrátorských přehledech
-     * nebo interních reportech.
+     * Metoda se používá zejména v administrátorských přehledech
+     * nebo interních reportech, které pracují s kompletním seznamem.
      *
      * @return seznam všech období neaktivity ve formě DTO
      */
@@ -77,9 +87,12 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     }
 
     /**
-     * Vrátí konkrétní období neaktivity podle ID.
+     * Vrátí konkrétní období neaktivity podle identifikátoru.
      *
-     * @param id ID období neaktivity
+     * Pokud záznam neexistuje, je vyhozena výjimka
+     * InactivityPeriodNotFoundException.
+     *
+     * @param id identifikátor období neaktivity
      * @return DTO reprezentace období neaktivity
      * @throws InactivityPeriodNotFoundException pokud záznam neexistuje
      */
@@ -92,10 +105,12 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
     }
 
     /**
-     * Vrátí všechna období neaktivity konkrétního hráče,
-     * seřazená podle začátku neaktivity od nejstaršího.
+     * Vrátí všechna období neaktivity konkrétního hráče.
      *
-     * @param playerId ID hráče
+     * Období jsou seřazena podle začátku neaktivity od nejstaršího.
+     * Před načtením období se ověřuje, zda daný hráč existuje.
+     *
+     * @param playerId identifikátor hráče
      * @return seznam období neaktivity ve formě DTO
      * @throws PlayerNotFoundException pokud hráč neexistuje
      */
@@ -109,9 +124,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
                 .toList();
     }
 
-    
+
     // CREATE
-    
+
 
     /**
      * Vytvoří nové období neaktivity hráče.
@@ -120,6 +135,9 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
      * - existence hráče,
      * - platnost dat (od/do),
      * - nepřekrývání s jinými obdobími neaktivity daného hráče.
+     *
+     * Při zjištěném překryvu je vyhozena výjimka
+     * InactivityPeriodOverlapException.
      *
      * @param dto data nového období neaktivity
      * @return nově vytvořené období neaktivity ve formě DTO
@@ -136,7 +154,6 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
 
         validateDates(dto);
 
-        // kontrola překryvu existujících období pro daného hráče
         boolean overlaps = !inactivityRepository
                 .findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
                         player,
@@ -154,17 +171,19 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         return mapper.toDTO(saved);
     }
 
-    
+
     // UPDATE
-    
+
 
     /**
      * Aktualizuje existující období neaktivity.
      *
-     * Oproti vytvoření nového období se při kontrole překryvu
-     * ignoruje aktuální záznam (aby nebyl považován za kolizi sám se sebou).
+     * Při aktualizaci se ověřuje platnost dat a kontroluje se překryv
+     * s ostatními obdobími neaktivity daného hráče. Aktuální záznam
+     * se při kontrole překryvu ignoruje, aby nebyl považován za kolizi
+     * sám se sebou.
      *
-     * @param id  ID upravovaného období
+     * @param id  identifikátor upravovaného období
      * @param dto nové hodnoty období neaktivity
      * @return aktualizované období neaktivity ve formě DTO
      * @throws InactivityPeriodNotFoundException     pokud záznam neexistuje
@@ -180,7 +199,6 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
 
         validateDates(dto);
 
-        // kontrola překryvu – existující záznamy kromě aktuálního ID
         boolean overlaps = inactivityRepository
                 .findByPlayerAndInactiveToGreaterThanEqualAndInactiveFromLessThanEqual(
                         entity.getPlayer(),
@@ -203,14 +221,18 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         return mapper.toDTO(saved);
     }
 
-    
+
     // DELETE
-    
+
 
     /**
-     * Smaže období neaktivity podle ID.
+     * Smaže období neaktivity podle identifikátoru.
      *
-     * @param id ID období neaktivity
+     * Pokud záznam neexistuje, je vyhozena výjimka
+     * InactivityPeriodNotFoundException. Po úspěšném smazání
+     * není vrácena žádná hodnota.
+     *
+     * @param id identifikátor období neaktivity
      * @throws InactivityPeriodNotFoundException pokud záznam neexistuje
      */
     @Override
@@ -222,28 +244,29 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
         inactivityRepository.delete(entity);
     }
 
-    
+
     // AKTIVITA HRÁČE
-    
+
 
     /**
      * Ověří, zda je hráč v daném čase aktivní.
      *
      * Hráč je považován za neaktivního, pokud existuje období neaktivity,
-     * které daný časový okamžik zahrnuje. Metoda vrací negaci této podmínky.
+     * které daný časový okamžik zahrnuje. Metoda vrací negaci této podmínky,
+     * tedy true pouze v případě, že hráč není v daném čase v žádném období
+     * neaktivity.
      *
      * Typické použití:
-     * - v {@link MatchServiceImpl} při filtrování dostupných zápasů,
+     * - v MatchServiceImpl při filtrování dostupných zápasů,
      * - v přístupové logice k detailu zápasu,
-     * - při posuzování, zda má hráč „nárok“ na účast v zápase.
+     * - při posuzování, zda má hráč nárok na účast v zápase.
      *
-     * @param player   hráč, jehož aktivita se ověřuje
+     * @param player hráč, jehož aktivita se ověřuje
      * @param dateTime časový okamžik, pro který se aktivita kontroluje
      * @return true, pokud hráč není v daném čase v žádném období neaktivity, jinak false
      */
     @Override
     public boolean isActive(PlayerEntity player, LocalDateTime dateTime) {
-        // pokud existuje záznam pokrývající daný čas → hráč je neaktivní
         return !inactivityRepository
                 .existsByPlayerAndInactiveFromLessThanEqualAndInactiveToGreaterThanEqual(
                         player,
@@ -252,16 +275,19 @@ public class PlayerInactivityPeriodServiceImpl implements PlayerInactivityPeriod
                 );
     }
 
-    
+
     // PRIVÁTNÍ VALIDACE
-    
+
 
     /**
      * Validuje časový rozsah období neaktivity.
      *
      * Kontroluje se:
-     * - že datum od i do není null,
-     * - že datum od je před datem do.
+     * - že datum od i datum do není null,
+     * - že datum od je skutečně před datem do.
+     *
+     * Při neplatném rozsahu je vyhozena výjimka
+     * InvalidInactivityPeriodDateException s popisnou zprávou.
      *
      * @param dto DTO s daty období neaktivity
      * @throws InvalidInactivityPeriodDateException při neplatném rozsahu dat

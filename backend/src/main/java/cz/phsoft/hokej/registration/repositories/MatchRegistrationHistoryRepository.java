@@ -9,7 +9,7 @@ import java.util.List;
  * Repozitář pro práci s entitou MatchRegistrationHistoryEntity.
  *
  * Slouží k načítání historických záznamů změn
- * registrací hráčů k zápasům.
+ * registrací hráčů k zápasům pro auditní a přehledové účely.
  */
 public interface MatchRegistrationHistoryRepository
         extends JpaRepository<MatchRegistrationHistoryEntity, Long> {
@@ -17,20 +17,14 @@ public interface MatchRegistrationHistoryRepository
     /**
      * Vrátí historii změn konkrétní registrace.
      *
-     * Záznamy jsou seřazeny sestupně podle času změny,
-     * takže nejnovější změna je na prvním místě.
-     *
      * @param matchRegistrationId ID původní registrace
-     * @return seznam historických záznamů
+     * @return seznam historických záznamů seřazených sestupně podle času změny
      */
     List<MatchRegistrationHistoryEntity>
     findByMatchRegistrationIdOrderByChangedAtDesc(Long matchRegistrationId);
 
     /**
      * Vrátí historii všech změn registrací pro daný zápas.
-     *
-     * Používá se například pro administrativní přehledy
-     * nebo auditní kontrolu zápasu.
      *
      * @param matchId ID zápasu
      * @return seznam historických záznamů
@@ -41,8 +35,6 @@ public interface MatchRegistrationHistoryRepository
     /**
      * Vrátí historii změn registrací konkrétního hráče.
      *
-     * Záznamy jsou seřazeny sestupně podle času změny.
-     *
      * @param playerId ID hráče
      * @return seznam historických záznamů
      */
@@ -50,7 +42,7 @@ public interface MatchRegistrationHistoryRepository
     findByPlayerIdOrderByChangedAtDesc(Long playerId);
 
     /**
-     * Vrátí historii všech změn registrací konkrétního hráče
+     * Vrátí historii změn registrací konkrétního hráče
      * v konkrétním zápase.
      *
      * @param matchId  ID zápasu

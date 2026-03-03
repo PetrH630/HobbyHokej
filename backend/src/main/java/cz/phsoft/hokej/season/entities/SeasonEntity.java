@@ -12,6 +12,10 @@ import java.time.LocalDateTime;
  * a související statistiky. V systému může být v jednom okamžiku
  * označena právě jedna sezóna jako aktivní.
  *
+ * Entita je perzistentní reprezentací doménového objektu sezóny
+ * a je mapována na tabulku season. Slouží jako zdroj dat
+ * pro service vrstvu a následné mapování na DTO.
+ *
  * Entita dále obsahuje auditní údaje o vytvoření a poslední
  * změně záznamu.
  */
@@ -21,6 +25,8 @@ public class SeasonEntity {
 
     /**
      * Primární klíč sezóny.
+     *
+     * Hodnota je generována databází.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +36,7 @@ public class SeasonEntity {
      * Název sezóny.
      *
      * Například hodnota ve formátu "2024/2025".
+     * Slouží k identifikaci sezóny v uživatelském rozhraní.
      */
     @Column(nullable = false)
     private String name;
@@ -55,7 +62,7 @@ public class SeasonEntity {
      * Příznak, zda je sezóna aktuálně aktivní.
      *
      * Aktivní sezóna se používá jako výchozí při vytváření
-     * nových zápasů a při filtrování dat.
+     * nových zápasů a při filtrování dat v dalších částech systému.
      */
     private boolean active;
 
@@ -80,7 +87,8 @@ public class SeasonEntity {
     /**
      * Metoda volaná před prvním uložením entity.
      *
-     * Nastavuje aktuální časové razítko.
+     * Nastavuje aktuální časové razítko před vložením
+     * nového záznamu do databáze.
      */
     @PrePersist
     public void prePersist() {
@@ -90,7 +98,8 @@ public class SeasonEntity {
     /**
      * Metoda volaná před aktualizací entity.
      *
-     * Aktualizuje časové razítko.
+     * Aktualizuje časové razítko před provedením změny
+     * existujícího záznamu v databázi.
      */
     @PreUpdate
     public void preUpdate() {

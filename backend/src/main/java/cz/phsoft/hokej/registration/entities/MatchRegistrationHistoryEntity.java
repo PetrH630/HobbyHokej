@@ -11,83 +11,93 @@ import java.time.LocalDateTime;
 /**
  * Entita reprezentující historický záznam změn registrace hráče k zápasu.
  *
- * Slouží k auditování změn registrací, včetně vytvoření, úprav a zrušení.
- * Uchovává stav registrace v okamžiku změny a základní údaje o původu
- * provedené operace.
+ * Slouží k auditování změn registrací, včetně jejich vytvoření,
+ * úprav nebo zrušení. Uchovává kompletní stav registrace
+ * v okamžiku změny a základní informace o původu operace.
+ *
+ * Entita je typicky plněna automatizovaným mechanismem,
+ * například databázovým triggerem nebo aplikační logikou,
+ * a slouží výhradně pro čtecí a auditní účely.
  */
 @Entity
 @Table(name = "match_registration_history")
 public class MatchRegistrationHistoryEntity {
 
+    /**
+     * Jednoznačný identifikátor historického záznamu.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Typ provedené operace nad registrací.
-     * Typicky hodnoty INSERT, UPDATE nebo DELETE.
+     * Obvykle reprezentuje hodnoty jako INSERT, UPDATE nebo DELETE.
      */
     @Column(name = "action", nullable = false)
     private String action;
 
     /**
-     * Administrativní poznámka vztahující se k registraci.
+     * Administrativní poznámka vztahující se k registraci
+     * v okamžiku provedení změny.
      */
     @Column(name = "admin_note")
     private String adminNote;
 
     /**
-     * Datum a čas provedení změny.
+     * Datum a čas provedení změny registrace.
      */
     @Column(name = "changed_at", nullable = false)
     private LocalDateTime changedAt;
 
     /**
-     * Původ vytvoření nebo změny registrace.
-     * Typicky hodnoty jako "user" nebo "system".
+     * Identifikace subjektu, který změnu provedl.
+     * Slouží k rozlišení uživatelských a systémových zásahů.
      */
     @Column(name = "created_by", nullable = false)
     private String createdBy;
 
     /**
-     * Textová poznámka k omluvě hráče.
+     * Textová poznámka k omluvě hráče evidovaná
+     * v okamžiku zaznamenané změny.
      */
     @Column(name = "excuse_note")
     private String excuseNote;
 
     /**
-     * Důvod omluvy hráče, pokud byl stav omluvený.
+     * Důvod omluvy hráče, pokud byl stav registrace omluvený.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "excuse_reason")
     private ExcuseReason excuseReason;
 
     /**
-     * ID zápasu, ke kterému se historický záznam vztahuje.
+     * Identifikátor zápasu, ke kterému se historický záznam vztahuje.
      */
     @Column(name = "match_id", nullable = false)
     private Long matchId;
 
     /**
-     * ID původní registrace z hlavní tabulky registrací.
+     * Identifikátor původní registrace z hlavní tabulky registrací.
      */
     @Column(name = "match_registration_id", nullable = false)
     private Long matchRegistrationId;
 
     /**
-     * Původní časové razítko registrace.
+     * Původní časové razítko registrace evidované
+     * před provedením dané změny.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
     /**
-     * ID hráče, kterého se historický záznam týká.
+     * Identifikátor hráče, jehož registrace byla změněna.
      */
     @Column(name = "player_id", nullable = false)
     private Long playerId;
 
     /**
-     * Stav registrace v okamžiku změny.
+     * Stav registrace v okamžiku zaznamenané změny.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -101,23 +111,27 @@ public class MatchRegistrationHistoryEntity {
     private Team team;
 
     /**
-     * Pozice hráče v tomto konkrétním zápase v okamžiku změny.
+     * Pozice hráče v tomto konkrétním zápase
+     * v okamžiku zaznamenané změny.
      *
-     * Slouží k auditování přiřazení hráče na konkrétní pozice.
+     * Slouží k auditování přiřazení hráče na konkrétní pozici.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "position_in_match", length = 30)
     private PlayerPosition positionInMatch;
 
     /**
-     * Příznak, že připomínka MATCH_REMINDER již byla
+     * Příznak, že připomínka k zápasu již byla
      * pro danou registraci odeslána v okamžiku této změny.
      *
-     * Slouží k auditování chování plánovače připomínek.
+     * Umožňuje auditovat chování plánovače notifikací.
      */
     @Column(name = "reminder_already_sent", nullable = false)
     private boolean reminderAlreadySent;
 
+    /**
+     * Vytváří prázdnou instanci historické entity.
+     */
     public MatchRegistrationHistoryEntity() {
     }
 

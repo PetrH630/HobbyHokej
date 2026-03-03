@@ -5,53 +5,54 @@ import cz.phsoft.hokej.player.entities.PlayerSettingsEntity;
 import cz.phsoft.hokej.player.dto.PlayerSettingsDTO;
 
 /**
- * Service rozhraní pro práci s nastavením hráče ({@link PlayerSettingsEntity}).
+ * Servisní rozhraní pro práci s nastavením hráče.
  *
- * Odpovědnosti:
- * - poskytovat přístup k nastavení konkrétního hráče,
- * - vytvářet výchozí nastavení hráče,
- * - aktualizovat existující nastavení hráče na základě DTO.
+ * Odpovědnost:
+ * - poskytování přístupu k nastavení konkrétního hráče,
+ * - vytváření výchozího nastavení hráče,
+ * - aktualizace existujícího nastavení hráče na základě DTO objektu.
  *
  * Architektura:
- * - pracuje s {@link PlayerSettingsDTO} jako přenosovým objektem mezi backendem a frontendem,
- * - nezajišťuje autorizaci ani kontrolu vlastnictví hráče,
- *   tyto kontroly se provádějí v controlleru nebo ve vyšší servisní vrstvě.
+ * - pracuje s objektem PlayerSettingsDTO jako přenosovou reprezentací
+ *   mezi backendem a frontendem,
+ * - neprovádí autorizaci ani kontrolu vlastnictví hráče; tyto kontroly
+ *   se provádějí ve vyšších vrstvách (controller nebo jiná service).
  */
 public interface PlayerSettingsService {
 
     /**
-     * Vrátí nastavení pro hráče podle jeho ID.
+     * Vrátí nastavení pro hráče podle jeho identifikátoru.
      *
      * Pokud nastavení ještě neexistuje, vytvoří se z výchozích hodnot
-     * a uloží se pro daného hráče. Tím se zajišťuje, že volající vždy
-     * obdrží platné nastavení.
+     * a uloží se pro daného hráče. Volající tak vždy obdrží platné
+     * nastavení hráče.
      *
-     * @param playerId ID hráče
-     * @return nastavení hráče ve formě {@link PlayerSettingsDTO}
+     * @param playerId identifikátor hráče
+     * @return nastavení hráče ve formě PlayerSettingsDTO
      */
     PlayerSettingsDTO getSettingsForPlayer(Long playerId);
 
     /**
-     * Aktualizuje nastavení pro hráče podle jeho ID.
+     * Aktualizuje nastavení pro hráče podle jeho identifikátoru.
      *
-     * Pokud hráč ještě nemá nastavení, vytvoří se výchozí nastavení
-     * a následně se na něj aplikují hodnoty z DTO.
+     * Pokud hráč ještě nemá nastavení, vytvoří se nejprve výchozí
+     * nastavení a následně se na něj aplikují hodnoty z DTO objektu.
      *
-     * @param playerId ID hráče
-     * @param dto      nové hodnoty nastavení
-     * @return aktualizované nastavení ve formě {@link PlayerSettingsDTO}
+     * @param playerId identifikátor hráče
+     * @param dto nové hodnoty nastavení hráče
+     * @return aktualizované nastavení ve formě PlayerSettingsDTO
      */
     PlayerSettingsDTO updateSettingsForPlayer(Long playerId, PlayerSettingsDTO dto);
 
     /**
      * Vytvoří výchozí nastavení pro hráče.
      *
-     * Metoda pouze vytváří instanci {@link PlayerSettingsEntity}
-     * s nastavovanými default hodnotami. Uložení do databáze
-     * je odpovědností volajícího kódu.
+     * Metoda pouze vytvoří novou instanci PlayerSettingsEntity
+     * s nastavenými defaultními hodnotami. Uložení této entity
+     * do databáze je odpovědností volajícího kódu.
      *
-     * @param player hráč, ke kterému budou defaultní hodnoty přiřazeny
-     * @return nová instance {@link PlayerSettingsEntity} s výchozím nastavením
+     * @param player hráč, ke kterému budou výchozí hodnoty přiřazeny
+     * @return nová instance PlayerSettingsEntity s výchozím nastavením
      */
     PlayerSettingsEntity createDefaultSettingsForPlayer(PlayerEntity player);
 }

@@ -25,6 +25,15 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
      */
     Optional<AppUserEntity> findByEmail(String email);
 
+    /**
+     * Vrátí seznam všech aktivních uživatelů.
+     *
+     * Aktivita je určena příznakem enabled v entitě AppUserEntity.
+     * Metoda se používá například pro výpis uživatelů, kteří se mohou
+     * přihlásit do aplikace nebo jim mohou být zasílány notifikace.
+     *
+     * @return seznam aktivních uživatelů
+     */
     List<AppUserEntity> findByEnabledTrue();
 
 }

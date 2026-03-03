@@ -29,7 +29,8 @@ public interface EmailVerificationTokenRepository
      * Smaže všechny ověřovací tokeny daného uživatele.
      *
      * Typicky se používá po úspěšné aktivaci účtu
-     * nebo při opakovaném posílání aktivačního e-mailu.
+     * nebo při opakovaném posílání aktivačního e-mailu,
+     * aby nezůstávaly staré tokeny v databázi.
      *
      * @param user uživatel, jehož tokeny mají být smazány
      */

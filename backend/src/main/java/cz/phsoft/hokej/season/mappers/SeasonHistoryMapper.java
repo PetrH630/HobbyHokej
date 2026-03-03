@@ -33,6 +33,9 @@ public interface SeasonHistoryMapper {
     /**
      * Převede seznam entit historických záznamů sezóny na seznam DTO.
      *
+     * Metoda se používá při vracení kompletní historie sezóny
+     * směrem ke klientovi.
+     *
      * @param entities seznam entit historických záznamů sezóny
      * @return seznam DTO objektů
      */

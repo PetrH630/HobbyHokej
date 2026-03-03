@@ -16,13 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
- * REST controller, který se používá pro autentizaci a registraci uživatelů.
+ * REST controller zajišťující autentizační a registrační operace.
  *
- * Zajišťuje registraci nových uživatelů, aktivaci účtů pomocí ověřovacího
- * tokenu, práci s přihlášeným uživatelem a proces zapomenutého hesla
- * včetně vystavení tokenu a nastavení nového hesla.
- *
- * Veškerá business logika se předává do {@link AppUserService}.
+ * Controller zprostředkovává registraci uživatelů, aktivaci účtů,
+ * práci s přihlášeným uživatelem a proces zapomenutého hesla.
+ * Veškerá aplikační logika je delegována do servisní vrstvy
+ * reprezentované rozhraním AppUserService.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -31,14 +30,19 @@ public class AuthController {
     private final AppUserService appUserService;
 
     /**
-     * Základní URL frontendové SPA aplikace (React/Vite).
+     * Základní URL frontendové SPA aplikace.
      *
-     * Tato hodnota se používá pro přesměrování uživatele při procesu
-     * resetu hesla, aby mohl být otevřen správný route na frontend aplikaci.
+     * Hodnota se používá při přesměrování uživatele
+     * během procesu resetu hesla.
      */
     @Value("${app.frontend-base-url}")
     private String frontendBaseUrl;
 
+    /**
+     * Vytvoří instanci controlleru.
+     *
+     * @param appUserService servisní vrstva pro práci s uživateli
+     */
     public AuthController(AppUserService appUserService) {
         this.appUserService = appUserService;
     }
@@ -46,8 +50,8 @@ public class AuthController {
     /**
      * Registruje nového uživatele.
      *
-     * Po úspěšné registraci se vytváří aktivační token a odesílá se
-     * aktivační e-mail s odkazem na aktivaci účtu.
+     * Po úspěšné registraci je vytvořen aktivační token
+     * a je odeslána notifikace s aktivačním odkazem.
      *
      * @param dto registrační údaje nového uživatele
      * @return HTTP odpověď s informací o úspěšné registraci
@@ -79,9 +83,8 @@ public class AuthController {
     /**
      * Aktivuje uživatelský účet na základě ověřovacího tokenu.
      *
-     * Token se získává z aktivačního odkazu zaslaného po registraci
-     * a má omezenou platnost. V případě neplatného nebo expirovaného
-     * tokenu se vrací chyba 400.
+     * Token je získán z aktivačního odkazu zaslaného po registraci.
+     * V případě neplatného nebo expirovaného tokenu je vrácena chyba 400.
      *
      * @param token aktivační token
      * @return textová informace o výsledku aktivace účtu
@@ -100,15 +103,13 @@ public class AuthController {
     }
 
     /**
-     * Přesměrovává uživatele z odkazu v e-mailu na frontendovou stránku
-     * pro nastavení nového hesla.
+     * Přesměrovává uživatele na frontendovou stránku pro reset hesla.
      *
-     * Backend provádí redirect na odpovídající route frontendové SPA
-     * a předává reset token jako query parametr. Samotná změna hesla
-     * se následně provádí pomocí REST endpointů pro zapomenuté heslo.
+     * Backend vrací HTTP 302 a předává reset token jako parametr,
+     * zatímco samotné nastavení nového hesla probíhá přes REST endpoint.
      *
      * @param token reset token pro zapomenuté heslo
-     * @return HTTP 302 s hlavičkou Location na frontendovou URL
+     * @return HTTP odpověď s hlavičkou Location
      */
     @GetMapping("/reset-password")
     public ResponseEntity<Void> redirectResetPassword(@RequestParam String token) {
@@ -123,8 +124,8 @@ public class AuthController {
     /**
      * Vytváří požadavek na reset zapomenutého hesla.
      *
-     * Na základě zadané e-mailové adresy se vytvoří reset token
-     * a odešle se e-mail s odkazem pro nastavení nového hesla.
+     * Pro zadanou e-mailovou adresu je vytvořen reset token
+     * a je odeslána notifikace s odkazem pro nastavení nového hesla.
      *
      * @param dto DTO s e-mailovou adresou uživatele
      * @return HTTP odpověď 200 v případě úspěchu
@@ -136,10 +137,10 @@ public class AuthController {
     }
 
     /**
-     * Vrací informaci o e-mailu, ke kterému přísluší daný reset token.
+     * Vrací e-mailovou adresu svázanou s reset tokenem.
      *
-     * Endpoint se používá například pro zobrazení e-mailové adresy
-     * na frontendové stránce pro reset hesla.
+     * Endpoint se používá například pro zobrazení
+     * informace o účtu na stránce resetu hesla.
      *
      * @param token reset token
      * @return mapování obsahující e-mail navázaný na token
@@ -151,10 +152,10 @@ public class AuthController {
     }
 
     /**
-     * Provádí nastavení nového hesla na základě reset tokenu.
+     * Nastaví nové heslo na základě reset tokenu.
      *
-     * Informace o tokenu, novém hesle a jeho potvrzení se předává
-     * prostřednictvím {@link ForgottenPasswordResetDTO}.
+     * Informace o tokenu a novém hesle jsou předány
+     * prostřednictvím ForgottenPasswordResetDTO.
      *
      * @param dto DTO obsahující token a nové heslo
      * @return HTTP odpověď 200 v případě úspěchu

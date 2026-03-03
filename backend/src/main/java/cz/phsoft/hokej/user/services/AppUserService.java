@@ -165,5 +165,15 @@ public interface AppUserService {
      */
     void forgottenPasswordReset(ForgottenPasswordResetDTO dto);
 
+    /**
+     * Aktualizuje časová razítka přihlášení uživatele.
+     *
+     * Metoda se volá po úspěšném přihlášení. Původní čas aktuálního přihlášení
+     * se přesune do lastLoginAt a currentLoginAt se nastaví na aktuální čas.
+     * Slouží jako podklad pro zobrazení informací o posledním přihlášení
+     * a pro práci s notifikacemi.
+     *
+     * @param email e-mailová adresa přihlášeného uživatele
+     */
     void onSuccessfulLogin(String email);
 }

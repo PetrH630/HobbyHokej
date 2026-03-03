@@ -10,7 +10,10 @@ import java.time.LocalDateTime;
  * Slouží k evidenci časových úseků, ve kterých se hráč
  * neúčastní zápasů, například z důvodu zranění nebo dovolené.
  * Období neaktivity se používá při vyhodnocování dostupnosti
- * hráče pro jednotlivé zápasy.
+ * hráče pro jednotlivé zápasy v servisní vrstvě.
+ *
+ * Entita je mapována na tabulku player_inactivity_period
+ * a obsahuje povinnou vazbu na entitu PlayerEntity.
  */
 @Entity
 @Table(name = "player_inactivity_period")

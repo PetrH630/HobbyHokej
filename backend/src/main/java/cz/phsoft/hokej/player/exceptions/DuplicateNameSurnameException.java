@@ -9,10 +9,18 @@ import org.springframework.http.HttpStatus;
  * Používá se při vytváření nebo registraci hráče, pokud by došlo
  * k duplicitě podle kombinace jméno a příjmení.
  *
- * Typicky mapováno na HTTP 409 (Conflict).
+ * Výjimka je mapována na HTTP status 409 Conflict
+ * prostřednictvím nadřazené třídy BusinessException.
  */
 public class DuplicateNameSurnameException extends BusinessException {
 
+    /**
+     * Vytváří výjimku s detailní chybovou zprávou obsahující
+     * jméno a příjmení duplicitního hráče.
+     *
+     * @param name    křestní jméno hráče
+     * @param surname příjmení hráče
+     */
     public DuplicateNameSurnameException(String name, String surname) {
         super("BE - Hráč se jménem " + name + " " + surname + " již existuje.", HttpStatus.CONFLICT);
     }

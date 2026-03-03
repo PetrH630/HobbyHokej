@@ -25,7 +25,7 @@ public interface PlayerSettingsRepository extends JpaRepository<PlayerSettingsEn
     /**
      * Vyhledá nastavení podle ID hráče.
      *
-     * @param playerId ID hráče
+     * @param playerId identifikátor hráče
      * @return nastavení zabalené v Optional, pokud existuje
      */
     Optional<PlayerSettingsEntity> findByPlayerId(Long playerId);

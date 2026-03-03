@@ -16,8 +16,11 @@ public interface AppUserSettingsService {
 
     /**
      * Vrátí nastavení pro uživatele identifikovaného e-mailem.
+     *
      * Pokud nastavení neexistuje, vytvoří se nový záznam
      * s výchozími hodnotami a uloží se k danému uživateli.
+     * Volající část tak vždy získá konzistentní a úplný objekt
+     * nastavení vhodný pro zobrazení ve formuláři.
      *
      * Metoda se typicky používá v controlleru pro načtení
      * dat do formuláře na frontendu.
@@ -29,8 +32,11 @@ public interface AppUserSettingsService {
 
     /**
      * Aktualizuje nastavení pro uživatele identifikovaného e-mailem.
+     *
      * Pokud uživatel nemá dosud žádné nastavení, vytvoří se nejprve
      * výchozí záznam a poté se na něj aplikují hodnoty z DTO.
+     * Metoda představuje hlavní vstupní bod pro ukládání
+     * uživatelských preferencí z frontendu.
      *
      * Metoda se obvykle volá z controlleru po odeslání formuláře
      * s uživatelskými preferencemi.

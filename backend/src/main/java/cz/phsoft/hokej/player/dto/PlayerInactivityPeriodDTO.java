@@ -9,22 +9,38 @@ import java.time.LocalDateTime;
  *
  * Slouží k přenosu informací o časovém intervalu, ve kterém se hráč
  * neúčastní zápasů, například z důvodu zranění nebo dlouhodobé absence.
+ * DTO je využíváno mezi prezentační a servisní vrstvou a neobsahuje
+ * žádnou business logiku.
  */
 public class PlayerInactivityPeriodDTO {
 
+    /**
+     * Jedinečný identifikátor období neaktivity.
+     */
     private Long id;
+
+    /**
+     * Identifikátor hráče, ke kterému se období neaktivity vztahuje.
+     */
     private Long playerId;
 
+    /**
+     * Datum a čas začátku neaktivity.
+     */
     @NotNull(message = "Datum začátku neaktivity je povinné.")
     private LocalDateTime inactiveFrom;
 
+    /**
+     * Datum a čas konce neaktivity.
+     */
     @NotNull(message = "Datum konce neaktivity je povinné.")
     private LocalDateTime inactiveTo;
 
+    /**
+     * Textový důvod neaktivity hráče.
+     */
     @NotNull(message = "Duvod neaktivity je povinný.")
     private String inactivityReason;
-
-
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

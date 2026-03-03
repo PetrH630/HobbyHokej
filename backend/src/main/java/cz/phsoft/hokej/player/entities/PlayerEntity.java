@@ -13,16 +13,26 @@ import java.time.LocalDateTime;
  * Entita reprezentující hráče v systému.
  *
  * Hráč představuje sportovní identitu používanou při registracích
- * na zápasy, notifikacích a vyhodnocování účasti.
+ * na zápasy, notifikacích a vyhodnocování účasti. Entita je mapována
+ * na databázovou tabulku player_entity a slouží jako hlavní zdroj
+ * dat o hráči v perzistentní vrstvě.
+ *
+ * Obsahuje vazbu na uživatele aplikace a na nastavení hráče.
  */
 @Entity
 @Table(name = "player_entity")
 public class PlayerEntity {
 
+    /**
+     * Jedinečný identifikátor hráče.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Křestní jméno hráče.
+     */
     @Column(nullable = false)
     private String name;
 
@@ -73,7 +83,7 @@ public class PlayerEntity {
     private PlayerPosition primaryPosition;
 
     /**
-     * Sekundární (alternativní) pozice hráče.
+     * Sekundární pozice hráče.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "secondary_position")
@@ -86,19 +96,39 @@ public class PlayerEntity {
     @Column(nullable = false)
     private PlayerStatus playerStatus = PlayerStatus.PENDING;
 
+    /**
+     * Vazba na uživatele aplikace, ke kterému je hráč přiřazen.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private AppUserEntity user;
 
+    /**
+     * Nastavení hráče.
+     *
+     * Vazba je obousměrná a životní cyklus nastavení je
+     * navázán na životní cyklus hráče.
+     */
     @OneToOne(mappedBy = "player",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             orphanRemoval = true)
     private PlayerSettingsEntity settings;
 
+    /**
+     * Časové razítko vytvoření hráče.
+     *
+     * Hodnota je nastavena při vytvoření entity a dále se nemění.
+     */
     @Column(nullable = false, updatable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
 
+    /**
+     * Inicializační metoda volaná před persistencí entity.
+     *
+     * Zajišťuje nastavení výchozích hodnot časového razítka
+     * a primární pozice hráče, pokud nebyly explicitně nastaveny.
+     */
     @PrePersist
     protected void onCreate() {
         if (this.timestamp == null) {
@@ -109,11 +139,29 @@ public class PlayerEntity {
         }
     }
 
+    /**
+     * Vytváří prázdnou instanci hráče s výchozími hodnotami.
+     *
+     * Nastavuje výchozí typ hráče a primární pozici.
+     */
     public PlayerEntity() {
         this.type = PlayerType.BASIC;
         this.primaryPosition = PlayerPosition.ANY;
     }
 
+    /**
+     * Vytváří instanci hráče se zadanými hodnotami.
+     *
+     * Po nastavení základních údajů se aktualizuje odvozené pole fullName.
+     *
+     * @param name         křestní jméno hráče
+     * @param surname      příjmení hráče
+     * @param nickname     přezdívka hráče
+     * @param type         typ hráče
+     * @param phoneNumber  telefonní číslo hráče
+     * @param team         tým hráče
+     * @param playerStatus stav hráče v systému
+     */
     public PlayerEntity(String name,
                         String surname,
                         String nickname,
@@ -137,12 +185,21 @@ public class PlayerEntity {
     public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
+
+    /**
+     * Nastavuje křestní jméno hráče a aktualizuje celé jméno.
+     */
     public void setName(String name) {
         this.name = name;
         updateFullName();
     }
 
     public String getSurname() { return surname; }
+
+    /**
+     * Nastavuje příjmení hráče ve formátu velkých písmen
+     * a aktualizuje celé jméno.
+     */
     public void setSurname(String surname) {
         this.surname = surname.toUpperCase();
         updateFullName();
@@ -163,11 +220,18 @@ public class PlayerEntity {
     public void setTeam(Team team) { this.team = team; }
 
     public PlayerPosition getPrimaryPosition() { return primaryPosition; }
+
+    /**
+     * Nastavuje primární pozici hráče.
+     *
+     * Pokud je hodnota null, nastavuje se výchozí pozice ANY.
+     */
     public void setPrimaryPosition(PlayerPosition primaryPosition) {
         this.primaryPosition = primaryPosition != null ? primaryPosition : PlayerPosition.ANY;
     }
 
     public PlayerPosition getSecondaryPosition() { return secondaryPosition; }
+
     public void setSecondaryPosition(PlayerPosition secondaryPosition) {
         this.secondaryPosition = secondaryPosition;
     }
@@ -180,6 +244,12 @@ public class PlayerEntity {
 
     public PlayerSettingsEntity getSettings() { return settings; }
 
+    /**
+     * Nastavuje nastavení hráče a synchronizuje obousměrnou vazbu.
+     *
+     * Pokud je nastavení neprázdné, nastaví se zpětná reference
+     * na tuto entitu hráče.
+     */
     public void setSettings(PlayerSettingsEntity settings) {
         this.settings = settings;
         if (settings != null) {
@@ -187,6 +257,9 @@ public class PlayerEntity {
         }
     }
 
+    /**
+     * Aktualizuje odvozené pole fullName na základě jména a příjmení.
+     */
     private void updateFullName() {
         this.fullName = name + " " + surname;
     }

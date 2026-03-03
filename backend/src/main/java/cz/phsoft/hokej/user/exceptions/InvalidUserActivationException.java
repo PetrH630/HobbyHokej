@@ -8,11 +8,11 @@ import org.springframework.http.HttpStatus;
  * aktivačního stavu uživatelského účtu.
  *
  * Typicky se vyhazuje v situacích, kdy:
- * - je uživatel již aktivní a pokusí se o další aktivaci,
- * - je uživatel neaktivní a operace neodpovídá jeho stavu,
- * - dojde k porušení pravidel životního cyklu uživatele.
+ * je uživatel již aktivní a pokusí se o další aktivaci,
+ * je uživatel neaktivní a operace neodpovídá jeho stavu,
+ * nebo dojde k porušení pravidel životního cyklu uživatele.
  *
- * Typicky mapováno na HTTP 409 (Conflict).
+ * Výjimka je mapována na HTTP status CONFLICT.
  */
 public class InvalidUserActivationException extends BusinessException {
 

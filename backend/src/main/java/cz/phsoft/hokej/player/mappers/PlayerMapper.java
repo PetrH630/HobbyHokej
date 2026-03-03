@@ -13,14 +13,12 @@ import java.util.List;
  * a přenosovým objektem PlayerDTO.
  *
  * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * Implementace mapování je generována knihovnou MapStruct.
  *
  * Mapper je používán servisní vrstvou při vytváření,
- * aktualizaci a načítání hráčů. Některé vlastnosti
- * nejsou mapovány automaticky, protože jsou odvozené
- * nebo řízené aplikační logikou (např. fullName,
- * timestamp, vazba na uživatele).
+ * aktualizaci a načítání hráčů. Některé vlastnosti nejsou
+ * mapovány automaticky, protože jsou odvozené nebo řízené
+ * aplikační logikou.
  */
 @Mapper(componentModel = "spring")
 public interface PlayerMapper {
@@ -29,11 +27,7 @@ public interface PlayerMapper {
      * Převede entitu hráče na DTO.
      *
      * Odvozená vlastnost fullName není mapována,
-     * protože je sestavována aplikační logikou
-     * (v PlayerDTO.updateFullName / PlayerEntity.updateFullName).
-     *
-     * Ostatní vlastnosti (včetně primaryPosition a secondaryPosition)
-     * se mapují přímo podle názvu.
+     * protože je sestavována aplikační logikou.
      *
      * @param entity entita hráče
      * @return DTO reprezentující hráče
@@ -44,12 +38,9 @@ public interface PlayerMapper {
     /**
      * Převede DTO na novou entitu hráče.
      *
-     * Vazba na uživatele není mapována a je nastavována
-     * servisní vrstvou. Stav hráče je při vytvoření
-     * implicitně nastaven na hodnotu PENDING.
+     * Vazba na uživatele není mapována a je nastavována servisní vrstvou.
+     * Stav hráče je při vytvoření implicitně nastaven na hodnotu PENDING.
      * Časové razítko je řízeno databází nebo aplikační logikou.
-     *
-     * Primární a sekundární pozice se mapují podle názvu vlastnosti.
      *
      * @param dto přenosový objekt hráče
      * @return nová entita hráče

@@ -16,7 +16,9 @@ import java.util.List;
  * Mapper pro převod registrací hráčů na zápasy
  * mezi entitním a DTO modelem.
  *
- * Zajišťuje konzistentní přenos stavu registrace,
+ * Mapování je generováno nástrojem MapStruct.
+ * Slouží k oddělení databázové vrstvy od prezentační
+ * a k zajištění konzistentního přenosu stavu registrace,
  * omluv a administrativních metadat.
  */
 @Mapper(componentModel = "spring")
@@ -25,8 +27,18 @@ public interface MatchRegistrationMapper {
     /**
      * Vytvoří novou entitu registrace.
      *
-     * Systémová metadata jsou nastavena
-     * automaticky při mapování.
+     * Identifikátor entity je ignorován a časové razítko
+     * je nastaveno na aktuální čas při mapování.
+     *
+     * @param match        entita zápasu
+     * @param player       entita hráče
+     * @param status       stav registrace
+     * @param excuseReason důvod omluvy
+     * @param excuseNote   poznámka k omluvě
+     * @param team         tým hráče
+     * @param adminNote    administrativní poznámka
+     * @param createdBy    identifikace původu registrace
+     * @return nová entita registrace
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "timestamp", expression = "java(java.time.LocalDateTime.now())")
@@ -44,6 +56,9 @@ public interface MatchRegistrationMapper {
     /**
      * Převede entitu registrace na DTO.
      *
+     * Identifikátory zápasu a hráče jsou získány
+     * z navázaných entit.
+     *
      * @param entity entita registrace
      * @return DTO registrace
      */
@@ -52,7 +67,7 @@ public interface MatchRegistrationMapper {
     MatchRegistrationDTO toDTO(MatchRegistrationEntity entity);
 
     /**
-     * Převede seznam registrací na seznam DTO.
+     * Převede seznam entit registrací na seznam DTO.
      *
      * @param entities seznam entit
      * @return seznam DTO

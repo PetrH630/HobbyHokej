@@ -9,38 +9,42 @@ import jakarta.validation.constraints.Positive;
 /**
  * Request DTO pro změnu registrace hráče na zápas.
  *
- * Slouží jako vstupní objekt pro operace:
- * - přihlášení hráče na zápas,
- * - odhlášení hráče ze zápasu,
- * - omluvení hráče,
- * - administrátorské zásahy do registrace.
- *
- * Typ a kombinace vyplněných polí určují,
+ * Slouží jako vstupní objekt pro operace přihlášení hráče,
+ * odhlášení hráče, omluvení hráče nebo administrátorské zásahy
+ * do registrace. Typ a kombinace vyplněných polí určují,
  * jaká operace se v servisní vrstvě provede.
- * Tento request je zpracováván metodou
- * MatchRegistrationService.upsertRegistration.
  *
- * Ne všechna pole jsou povinná. Jejich význam a validace
- * závisí na konkrétní operaci a business logice služby.
+ * Objekt je zpracováván metodou MatchRegistrationService.upsertRegistration.
+ * Ne všechna pole jsou povinná. Jejich význam a validace závisí
+ * na konkrétní operaci a business pravidlech implementovaných
+ * v servisní vrstvě.
+ *
+ * Třída neobsahuje žádnou aplikační logiku a slouží pouze
+ * jako přenosový objekt z klienta do backendu.
  */
 public class MatchRegistrationRequest {
 
+    /**
+     * Identifikátor zápasu, ke kterému se požadavek vztahuje.
+     */
     @NotNull
     @Positive
     private Long matchId;
 
+    /**
+     * Identifikátor hráče, pokud je požadavek prováděn administrátorem.
+     * U uživatelských operací se identita hráče určuje z kontextu přihlášení.
+     */
     private Long playerId;
 
     /**
-     * Tým, do kterého je hráč přiřazen (například DARK nebo LIGHT).
-     *
+     * Tým, do kterého má být hráč přiřazen.
      * Používá se při nastavování nebo změně rozdělení týmů.
      */
     private Team team;
 
     /**
      * Důvod omluvy hráče.
-     *
      * Používá se u operací, které představují omluvu
      * nebo odhlášení se zdůvodněním.
      */
@@ -48,42 +52,36 @@ public class MatchRegistrationRequest {
 
     /**
      * Volitelná textová poznámka k omluvě od hráče.
-     *
      * Umožňuje doplnit detailnější vysvětlení
-     * nad rámec strukturovaného ExcuseReason.
+     * nad rámec strukturovaného důvodu omluvy.
      */
     private String excuseNote;
 
     /**
      * Administrátorská poznámka k registraci.
-     *
-     * Používá se například pro označení no-show,
-     * interních komentářů nebo dalších technických poznámek.
+     * Používá se například pro označení neúčasti bez omluvy
+     * nebo pro interní evidenční účely.
      */
     private String adminNote;
 
     /**
-     * Příznak, že má dojít k odhlášení hráče ze zápasu.
-     *
-     * Pokud je true, request reprezentuje akci odhlášení
-     * (UNREGISTER) bez ohledu na ostatní volitelná pole.
+     * Příznak určující, že má dojít k odhlášení hráče ze zápasu.
+     * Pokud je nastaven na true, požadavek reprezentuje akci
+     * odhlášení bez ohledu na ostatní volitelná pole.
      */
     private boolean unregister;
 
     /**
-     * Příznak, že jde o registraci náhradníka.
-     *
-     * Pokud je true, request reprezentuje akci SUBSTITUTE,
-     * tedy stav, kdy hráč projevil zájem, ale jeho účast
-     * není jistá (čeká se na uvolnění místa nebo potvrzení).
+     * Příznak určující, že jde o registraci náhradníka.
+     * Pokud je nastaven na true, požadavek reprezentuje stav,
+     * kdy hráč projevil zájem o účast, ale čeká na uvolnění místa.
      */
     private boolean substitute;
 
     /**
      * Pozice hráče v tomto konkrétním zápase.
-     *
-     * Umožňuje specifikovat, na jaké pozici má hráč v zápase nastoupit,
-     * pokud to logika zápasu a rozdělení týmů podporuje.
+     * Umožňuje specifikovat, na jaké pozici má hráč nastoupit,
+     * pokud to pravidla zápasu a rozdělení týmů umožňují.
      */
     private PlayerPosition positionInMatch;
 
@@ -119,6 +117,11 @@ public class MatchRegistrationRequest {
         return substitute;
     }
 
+    /**
+     * Nastavuje příznak registrace náhradníka.
+     *
+     * @param substitute hodnota příznaku náhradníka
+     */
     public void setSubstitute(boolean substitute) {
         this.substitute = substitute;
     }
@@ -127,6 +130,11 @@ public class MatchRegistrationRequest {
         return positionInMatch;
     }
 
+    /**
+     * Nastavuje pozici hráče v konkrétním zápase.
+     *
+     * @param positionInMatch cílová pozice hráče
+     */
     public void setPositionInMatch(PlayerPosition positionInMatch) {
         this.positionInMatch = positionInMatch;
     }

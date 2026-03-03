@@ -6,81 +6,90 @@ import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
 import java.util.List;
 
 /**
- * Rozhraní pro správu hráčů v aplikaci.
+ * Rozhraní pro správu hráčů v aplikační vrstvě.
  *
- * Rozhraní definuje kontrakt pro práci s hráči z pohledu business logiky,
- * včetně jejich vytváření, úprav, schvalování a vazby na uživatele.
+ * Definuje kontrakt business logiky nad entitou hráče.
+ * Odpovídá za řízení životního cyklu hráče, správu jeho vazby
+ * na uživatelský účet a za řízení stavů hráče v systému.
  *
- * Odpovědnosti:
- * - správa životního cyklu hráčů (vytvoření, úprava, smazání),
- * - správa vazby hráčů na uživatelské účty,
- * - řízení stavu hráče (čekající, schválený, zamítnutý),
- * - správa „aktuálního hráče“ v kontextu uživatele.
+ * Rozhraní je využíváno především controllery a dalšími service
+ * třídami, které pracují s hráči na úrovni DTO objektů.
  *
- * Rozhraní se používá:
- * - v controllerech pro hráče a administraci,
- * - v dalších service třídách, které potřebují pracovat s hráči na DTO úrovni.
+ * Implementace rozhraní zajišťuje validaci vstupních dat,
+ * komunikaci s repository vrstvou a případné vyvolání dalších
+ * doménových služeb.
  */
 public interface PlayerService {
 
     /**
-     * Vrátí seznam všech hráčů v systému.
+     * Vrátí seznam všech hráčů evidovaných v systému.
      *
-     * Metoda se používá typicky v administrátorských přehledech.
+     * Metoda se používá zejména v administrátorských přehledech.
+     * Implementace zajišťuje načtení dat z perzistentní vrstvy
+     * a jejich převod do DTO reprezentace.
      *
-     * @return seznam všech hráčů ve formě {@link PlayerDTO}
+     * @return seznam všech hráčů ve formě PlayerDTO
      */
     List<PlayerDTO> getAllPlayers();
 
     /**
-     * Vrátí hráče podle jeho ID.
+     * Vrátí detail hráče podle jeho identifikátoru.
      *
-     * @param id ID hráče
-     * @return hráč ve formě {@link PlayerDTO}
+     * Implementace zajišťuje ověření existence hráče
+     * a jeho převod do DTO reprezentace.
+     *
+     * @param id identifikátor hráče
+     * @return hráč ve formě PlayerDTO
      */
     PlayerDTO getPlayerById(Long id);
 
     /**
-     * Vytvoří nového hráče bez explicitní vazby na uživatele.
+     * Vytvoří nového hráče bez explicitní vazby na uživatelský účet.
      *
-     * Typicky se používá v administraci pro ruční založení hráče.
+     * Metoda se používá typicky v administraci při ručním založení hráče.
+     * Implementace zajišťuje validaci vstupních dat, vytvoření entity
+     * a její uložení do databáze.
      *
      * @param player data nového hráče
-     * @return vytvořený hráč ve formě {@link PlayerDTO}
+     * @return vytvořený hráč ve formě PlayerDTO
      */
     PlayerDTO createPlayer(PlayerDTO player);
 
     /**
      * Vytvoří nového hráče a přiřadí jej ke konkrétnímu uživateli.
      *
-     * Metoda se používá v případech, kdy je hráč vytvářen
-     * v kontextu již existujícího uživatelského účtu.
+     * Metoda se používá v situacích, kdy je hráč zakládán
+     * v kontextu existujícího uživatelského účtu.
+     * Implementace zajišťuje ověření existence uživatele,
+     * vytvoření hráče a nastavení vazby hráč–uživatel.
      *
-     * @param dto       data nového hráče
-     * @param userEmail email uživatele, ke kterému má být hráč přiřazen
-     * @return vytvořený hráč ve formě {@link PlayerDTO}
+     * @param dto data nového hráče
+     * @param userEmail e-mail uživatele, ke kterému má být hráč přiřazen
+     * @return vytvořený hráč ve formě PlayerDTO
      */
     PlayerDTO createPlayerForUser(PlayerDTO dto, String userEmail);
 
     /**
      * Aktualizuje údaje existujícího hráče.
      *
-     * Metoda aktualizuje základní identifikační a kontaktní údaje
-     * i parametry hráče (typ, tým, status).
+     * Implementace provádí načtení hráče, aktualizaci jeho
+     * identifikačních, kontaktních a doménových údajů
+     * a následné uložení změn do perzistentní vrstvy.
      *
-     * @param id     ID hráče, který má být aktualizován
+     * @param id identifikátor hráče, který má být aktualizován
      * @param player nové hodnoty hráče
-     * @return aktualizovaný hráč ve formě {@link PlayerDTO}
+     * @return aktualizovaný hráč ve formě PlayerDTO
      */
     PlayerDTO updatePlayer(Long id, PlayerDTO player);
 
     /**
      * Odstraní hráče ze systému.
      *
-     * Typicky se používá v administraci. Návratová hodnota informuje
-     * o úspěchu operace ve formě {@link SuccessResponseDTO}.
+     * Operace je určena zejména pro administrátorské použití.
+     * Implementace zajišťuje ověření existence hráče
+     * a jeho odstranění z databáze.
      *
-     * @param id ID hráče, který má být odstraněn
+     * @param id identifikátor hráče, který má být odstraněn
      * @return odpověď s výsledkem operace
      */
     SuccessResponseDTO deletePlayer(Long id);
@@ -88,10 +97,12 @@ public interface PlayerService {
     /**
      * Vrátí seznam hráčů přiřazených ke konkrétnímu uživateli.
      *
-     * Metoda se používá například při zobrazení hráčů přihlášeného uživatele.
+     * Metoda se používá například při zobrazení hráčů
+     * přihlášeného uživatele v uživatelském rozhraní.
+     * Implementace načítá hráče podle vazby na uživatelský účet.
      *
-     * @param email email uživatele
-     * @return seznam hráčů daného uživatele ve formě {@link PlayerDTO}
+     * @param email e-mail uživatele
+     * @return seznam hráčů daného uživatele ve formě PlayerDTO
      */
     List<PlayerDTO> getPlayersByUser(String email);
 
@@ -99,9 +110,10 @@ public interface PlayerService {
      * Schválí hráče.
      *
      * Po schválení je hráč považován za aktivního
-     * a může se účastnit zápasů podle dalších pravidel aplikace.
+     * a může se účastnit zápasů podle pravidel aplikace.
+     * Implementace mění stav hráče a ukládá změnu do databáze.
      *
-     * @param id ID hráče
+     * @param id identifikátor hráče
      * @return odpověď s výsledkem operace
      */
     SuccessResponseDTO approvePlayer(Long id);
@@ -109,10 +121,11 @@ public interface PlayerService {
     /**
      * Zamítne hráče.
      *
-     * Zamítnutý hráč se nepovažuje za aktivního
+     * Zamítnutý hráč není považován za aktivního
      * a nemůže se účastnit zápasů.
+     * Implementace mění stav hráče a ukládá změnu do databáze.
      *
-     * @param id ID hráče
+     * @param id identifikátor hráče
      * @return odpověď s výsledkem operace
      */
     SuccessResponseDTO rejectPlayer(Long id);
@@ -120,24 +133,27 @@ public interface PlayerService {
     /**
      * Nastaví aktuálního hráče pro konkrétního uživatele.
      *
-     * Metoda slouží k explicitnímu výběru hráče v případě,
+     * Metoda umožňuje explicitní výběr hráče v případě,
      * že má uživatel přiřazeno více hráčů.
+     * Implementace ověřuje vazbu hráče na uživatele
+     * a aktualizuje nastavení aktuálního hráče.
      *
-     * @param userEmail email uživatele
-     * @param playerId  ID hráče, který má být nastaven jako aktuální
+     * @param userEmail e-mail uživatele
+     * @param playerId identifikátor hráče, který má být nastaven jako aktuální
      * @return odpověď s výsledkem operace
      */
     SuccessResponseDTO setCurrentPlayerForUser(String userEmail, Long playerId);
 
     /**
      * Automaticky zvolí aktuálního hráče pro daného uživatele
-     * podle jeho nastavení (AppUserSettings.playerSelectionMode).
+     * podle jeho nastavení výběru hráče.
      *
-     * Typické použití:
-     * - po přihlášení uživatele,
-     * - při explicitním volání z frontendu (například tlačítko „Vybrat výchozího hráče“).
+     * Metoda se používá například po přihlášení uživatele
+     * nebo při explicitním vyvolání z uživatelského rozhraní.
+     * Implementace vyhodnocuje uživatelské nastavení
+     * a nastavuje odpovídajícího hráče jako aktuálního.
      *
-     * @param userEmail email přihlášeného uživatele
+     * @param userEmail e-mail přihlášeného uživatele
      * @return odpověď s výsledkem operace
      */
     SuccessResponseDTO autoSelectCurrentPlayerForUser(String userEmail);
@@ -145,16 +161,13 @@ public interface PlayerService {
     /**
      * Změní přiřazeného uživatele k existujícímu hráči.
      *
-     * Metoda slouží k administrátorské úpravě vazby mezi hráčem a
-     * uživatelským účtem, například při opravě chybného přiřazení
-     * nebo převodu hráče pod jiný uživatelský účet.
+     * Metoda je určena pro administrátorské zásahy
+     * do vazby mezi hráčem a uživatelským účtem.
+     * Implementace mění pouze vazbu hráč–uživatel.
+     * Ostatní navazující business logika je ponechána volající vrstvě.
      *
-     * Implementace mění pouze vazbu hráč → uživatel,
-     * ostatní business logika (například změna current player)
-     * je ponechána volajícímu.
-     *
-     * @param id        ID hráče, kterému se má změnit přiřazený uživatel
-     * @param newUserId ID nového uživatele, ke kterému má být hráč přiřazen
+     * @param id identifikátor hráče, kterému má být změněn uživatel
+     * @param newUserId identifikátor nového uživatele
      */
     void changePlayerUser(Long id, Long newUserId);
 

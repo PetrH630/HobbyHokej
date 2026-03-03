@@ -43,6 +43,13 @@ public class CurrentSeasonServiceImpl implements CurrentSeasonService {
      */
     private final SeasonService seasonService;
 
+    /**
+     * Vytváří instanci služby pro správu aktuální sezóny
+     * v rámci HTTP session.
+     *
+     * @param session HTTP session aktuálně přihlášeného uživatele
+     * @param seasonService service pro práci se sezónami a jejich aktivním stavem
+     */
     public CurrentSeasonServiceImpl(HttpSession session,
                                     SeasonService seasonService) {
         this.session = session;
@@ -55,6 +62,8 @@ public class CurrentSeasonServiceImpl implements CurrentSeasonService {
      * Nejprve se zohlední sezóna explicitně zvolená uživatelem.
      * Pokud taková volba neexistuje, použije se globálně aktivní sezóna.
      * Při automatickém nastavení se identifikátor sezóny uloží do session.
+     *
+     * Pokud není k dispozici žádná aktivní sezóna, metoda vrací null.
      *
      * @return ID aktuální sezóny nebo null, pokud není k dispozici žádná aktivní sezóna
      */

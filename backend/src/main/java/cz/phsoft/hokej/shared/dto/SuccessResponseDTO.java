@@ -5,8 +5,12 @@ package cz.phsoft.hokej.shared.dto;
  *
  * Používá se jako návratová hodnota u operací, které provedly změnu
  * stavu systému, například při vytvoření, aktualizaci, smazání
- * nebo schválení entity. Umožňuje vrátit textovou zprávu, ID
- * dotčené entity a čas vzniku odpovědi.
+ * nebo schválení entity. Objekt umožňuje jednotným způsobem
+ * předat textovou zprávu, identifikátor dotčené entity
+ * a čas vzniku odpovědi.
+ *
+ * Třída je neměnná. Hodnoty jsou nastaveny prostřednictvím
+ * konstruktoru a následně již nejsou měněny.
  */
 public class SuccessResponseDTO {
 
@@ -30,6 +34,13 @@ public class SuccessResponseDTO {
      */
     private final String timestamp;
 
+    /**
+     * Vytvoří instanci standardizované úspěšné odpovědi.
+     *
+     * @param message textová zpráva popisující výsledek operace
+     * @param id identifikátor entity, které se operace týkala, nebo null
+     * @param timestamp čas vytvoření odpovědi ve formátu ISO-8601
+     */
     public SuccessResponseDTO(String message, Long id, String timestamp) {
         this.message = message;
         this.id = id;

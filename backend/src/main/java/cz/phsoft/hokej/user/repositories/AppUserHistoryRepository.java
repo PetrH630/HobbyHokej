@@ -16,10 +16,23 @@ public interface AppUserHistoryRepository extends JpaRepository<AppUserHistoryEn
     /**
      * Vrátí všechny historické záznamy pro daného uživatele,
      * seřazené od nejnovější změny po nejstarší.
+     *
+     * @param userId ID uživatele z hlavní tabulky app_users
+     * @return seznam historických záznamů daného uživatele
      */
     List<AppUserHistoryEntity> findByUserIdOrderByChangedAtDesc(Long userId);
 
+    /**
+     * Vrátí všechny historické záznamy pro daný e-mail,
+     * seřazené od nejnovější změny po nejstarší.
+     *
+     * Umožňuje dohledat historii změn i v případě, kdy
+     * není k dispozici ID uživatele nebo se změnila vazba
+     * mezi e-mailem a účtem.
+     *
+     * @param email e-mail uživatele
+     * @return seznam historických záznamů pro daný e-mail
+     */
     List<AppUserHistoryEntity> findByEmailOrderByChangedAtDesc(String email);
-
 
 }

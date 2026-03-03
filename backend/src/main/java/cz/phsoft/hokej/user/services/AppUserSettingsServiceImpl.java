@@ -108,9 +108,8 @@ public class AppUserSettingsServiceImpl implements AppUserSettingsService {
         return mapper.toDTO(saved);
     }
 
-    
+
     // Helper metody
-    
 
     /**
      * Najde uživatele podle e-mailu nebo vyhodí výjimku.

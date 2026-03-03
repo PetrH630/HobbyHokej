@@ -12,15 +12,15 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Implementace rozhraní MatchRegistrationHistoryService.
+ * Implementace služby pro práci s historickými záznamy registrací hráčů k zápasům.
  *
- * Třída zajišťuje načítání historických záznamů registrací hráčů
- * k zápasům z databáze a jejich převod do DTO. Odpovědností je
- * ověření existence zápasu, provedení dotazu do historie a mapování
- * výsledků do podoby vhodné pro controller a frontend.
+ * Tato třída zajišťuje načítání auditních záznamů registrací z databáze
+ * a jejich převod do přenosových objektů DTO. Odpovědností je ověření existence
+ * zápasu, provedení dotazů nad historickými daty a mapování výsledků do podoby
+ * vhodné pro controller vrstvu a frontend.
  *
- * Třída neprovádí žádné změny stavu systému. Slouží jako read-only
- * vrstva nad auditními daty a nenahrazuje hlavní logiku registrací.
+ * Třída neprovádí žádné změny stavu systému. Používá se jako read-only vrstva
+ * nad auditními daty a nenahrazuje hlavní logiku registrací.
  */
 @Service
 public class MatchRegistrationHistoryServiceImpl implements MatchRegistrationHistoryService {
@@ -62,16 +62,17 @@ public class MatchRegistrationHistoryServiceImpl implements MatchRegistrationHis
     }
 
     /**
-     * Načte historii registrací aktuálně přihlášeného hráče pro daný zápas.
+     * Načítá historii registrací aktuálně přihlášeného hráče pro daný zápas.
      *
-     * Nejprve se ověří, že zápas existuje. Poté se ověří,
-     * že je nastaven aktuální hráč, a získá se jeho identifikátor.
-     * Následně se načtou auditní záznamy pro kombinaci daného zápasu
-     * a aktuálního hráče. Výsledky jsou mapovány do DTO.
+     * Nejprve se ověřuje, že zápas s daným identifikátorem existuje.
+     * Následně se pomocí CurrentPlayerService zajistí, že je k dispozici
+     * aktuální hráč, a získá se jeho identifikátor. Poté se načtou auditní
+     * záznamy pro kombinaci daného zápasu a aktuálního hráče a výsledky
+     * se převedou do DTO objektů.
      *
-     * @param matchId ID zápasu
+     * @param matchId identifikátor zápasu
      * @return seznam historických záznamů registrace aktuálního hráče k zápasu
-     * @throws MatchNotFoundException pokud zápas s daným ID neexistuje
+     * @throws MatchNotFoundException pokud zápas s daným identifikátorem neexistuje
      */
     @Override
     public List<MatchRegistrationHistoryDTO> getHistoryForCurrentPlayerAndMatch(Long matchId) {
@@ -88,17 +89,18 @@ public class MatchRegistrationHistoryServiceImpl implements MatchRegistrationHis
     }
 
     /**
-     * Načte historii registrací zadaného hráče pro daný zápas.
+     * Načítá historii registrací zadaného hráče pro daný zápas.
      *
-     * Metoda je vhodná pro administrativní a auditní endpointy,
-     * kde se nepracuje s kontextem aktuálního hráče, ale s konkrétním
-     * hráčem určeným parametrem. Nejprve se ověří existence zápasu,
-     * poté se načtou odpovídající historické záznamy a převedou se do DTO.
+     * Metoda se používá zejména pro administrativní a auditní účely,
+     * kde se nepracuje s kontextem aktuálního hráče, ale s hráčem určeným
+     * parametrem. Nejprve se ověřuje existence zápasu a následně se načtou
+     * odpovídající historické záznamy pro zadaného hráče. Výsledky se převádějí
+     * do přenosových objektů DTO.
      *
-     * @param matchId  ID zápasu
-     * @param playerId ID hráče
+     * @param matchId identifikátor zápasu
+     * @param playerId identifikátor hráče
      * @return seznam historických záznamů registrace hráče k zápasu
-     * @throws MatchNotFoundException pokud zápas s daným ID neexistuje
+     * @throws MatchNotFoundException pokud zápas s daným identifikátorem neexistuje
      */
     @Override
     public List<MatchRegistrationHistoryDTO> getHistoryForPlayerAndMatch(Long matchId, Long playerId) {

@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
  * v anotacích typu PreAuthorize.
  *
  * Slouží k jemnozrnné autorizaci nad entitou PlayerEntity,
- * zejména v případech, kdy se pracuje s konkrétním ID hráče.
+ * zejména v případech, kdy se pracuje s konkrétním identifikátorem hráče.
+ * Kontrola probíhá na základě porovnání e-mailu přihlášeného uživatele
+ * s vlastníkem hráče v databázi.
  */
 @Component("playerSecurity")
 public class PlayerSecurity {
@@ -24,6 +26,11 @@ public class PlayerSecurity {
 
     private final PlayerRepository playerRepository;
 
+    /**
+     * Vytvoří instanci bezpečnostního helperu.
+     *
+     * @param playerRepository repozitář pro načítání hráčů z databáze
+     */
     public PlayerSecurity(PlayerRepository playerRepository) {
         this.playerRepository = playerRepository;
     }
@@ -32,12 +39,16 @@ public class PlayerSecurity {
      * Ověří, zda je aktuálně přihlášený uživatel
      * vlastníkem zadaného hráče.
      *
-     * Při jakékoli chybě nebo nesrovnalosti
-     * je přístup zamítnut a metoda vrací false.
+     * Metoda je určena pro použití v bezpečnostních výrazech.
+     * Pokud autentizace neexistuje, není platná,
+     * nebo hráč neexistuje, vrací se hodnota false.
      *
-     * @param authentication aktuální autentizace
-     * @param playerId ID hráče
-     * @return true, pokud je uživatel vlastníkem hráče
+     * V případě neoprávněného přístupu je událost zaznamenána do logu.
+     * Při neočekávané chybě je přístup zamítnut a chyba je zalogována.
+     *
+     * @param authentication aktuální autentizační kontext
+     * @param playerId identifikátor hráče
+     * @return true, pokud je přihlášený uživatel vlastníkem hráče
      */
     public boolean isOwner(Authentication authentication, Long playerId) {
 

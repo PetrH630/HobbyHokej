@@ -21,6 +21,9 @@ public interface AppUserHistoryService {
     /**
      * Vrátí historii změn uživatele podle jeho e-mailové adresy.
      *
+     * Metoda se používá pro zobrazení auditní stopy nad účtem
+     * v administraci nebo uživatelském detailu.
+     *
      * @param email e-mailová adresa uživatele
      * @return seznam historických záznamů uživatele
      */
@@ -28,6 +31,9 @@ public interface AppUserHistoryService {
 
     /**
      * Vrátí historii změn uživatele podle jeho identifikátoru.
+     *
+     * Metoda se používá v situacích, kdy je účet jednoznačně
+     * identifikován interním ID a není vhodné pracovat s e-mailem.
      *
      * @param id identifikátor uživatele
      * @return seznam historických záznamů uživatele

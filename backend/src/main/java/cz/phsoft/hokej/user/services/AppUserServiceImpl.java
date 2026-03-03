@@ -19,7 +19,7 @@ import cz.phsoft.hokej.notifications.services.NotificationService;
 import cz.phsoft.hokej.notifications.services.UserActivationContext;
 import cz.phsoft.hokej.demo.DemoModeGuard;
 import cz.phsoft.hokej.user.exceptions.*;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,6 +92,8 @@ public class AppUserServiceImpl implements AppUserService {
      * @param appUserSettingsService servis pro správu uživatelských nastavení
      * @param notificationService servis pro odesílání notifikací
      * @param forgottenPasswordResetTokenRepository repozitář pro resetovací tokeny
+     * @param demoModeGuard guard pro omezení zápisu v demo režimu
+     * @param clock zdroj aktuálního času používaný pro časová razítka
      */
     public AppUserServiceImpl(AppUserRepository userRepository,
                               PasswordEncoder passwordEncoder,
@@ -530,9 +532,9 @@ public class AppUserServiceImpl implements AppUserService {
     /**
      * Aktualizuje časová razítka přihlášení uživatele.
      *
-     * Při úspěšném přihlášení se původní hodnota currentLoginAt
-     * uloží do lastLoginAt a currentLoginAt se nastaví na aktuální čas.
-     * Metoda se používá v bezpečnostní vrstvě po úspěšné autentizaci.
+     * Předchozí hodnota currentLoginAt je přesunuta do lastLoginAt
+     * a currentLoginAt se nastaví na aktuální čas získaný z Clock.
+     * Metoda se volá po úspěšné autentizaci uživatele.
      *
      * @param email e-mailová adresa přihlášeného uživatele
      */
@@ -551,23 +553,56 @@ public class AppUserServiceImpl implements AppUserService {
                 email, user.getLastLoginAt(), user.getCurrentLoginAt());
     }
 
-    
-    // HELPER METODY
-    
 
+    // HELPER METODY
+
+    /**
+     * Sestaví aktivační odkaz pro ověření e-mailu uživatele.
+     *
+     * Odkaz míří na frontendovou část aplikace, kde je zpracováno ověření
+     * a aktivace účtu na základě tokenu.
+     *
+     * @param token ověřovací token při registraci uživatele
+     * @return URL aktivačního odkazu
+     */
     private String buildActivationLink(EmailVerificationTokenEntity token) {
         return frontendBasUrl + "/verify?token=" + token.getToken();
     }
 
+    /**
+     * Sestaví odkaz pro reset hesla na základě resetovacího tokenu.
+     *
+     * Odkaz míří na backendový endpoint, který slouží k provedení
+     * operace resetu hesla.
+     *
+     * @param token resetovací token pro zapomenuté heslo
+     * @return URL odkazu pro reset hesla
+     */
     private String buildResetPasswordlink(ForgottenPasswordResetTokenEntity token) {
         return baseUrl + "/api/auth/reset-password?token=" + token.getToken();
     }
 
+    /**
+     * Vyhledá uživatele podle e-mailové adresy.
+     *
+     * Pokud uživatel neexistuje, je vyhozena výjimka UserNotFoundException.
+     *
+     * @param email e-mailová adresa uživatele
+     * @return nalezená entita uživatele
+     */
     private AppUserEntity findUserByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
     }
 
+    /**
+     * Vyhledá uživatele podle identifikátoru.
+     *
+     * Pokud uživatel neexistuje, je vyhozena výjimka UserNotFoundException.
+     *
+     * @param id identifikátor uživatele
+     * @return nalezená entita uživatele
+     */
     private AppUserEntity findUserByIdOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));

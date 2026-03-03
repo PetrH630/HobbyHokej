@@ -10,13 +10,11 @@ import org.mapstruct.*;
  * a přenosovým objektem PlayerInactivityPeriodDTO.
  *
  * Slouží k oddělení databázové vrstvy od prezentační vrstvy.
- * Mapování je generováno knihovnou MapStruct na základě
- * definovaných metod tohoto rozhraní.
+ * Implementace mapování je generována knihovnou MapStruct.
  *
  * Mapper je používán servisní vrstvou při vytváření,
  * aktualizaci a načítání období neaktivity hráče.
- * Navázání entity na konkrétního hráče je zajištěno
- * pomocí kontextového parametru.
+ * Vazba na hráče je předávána prostřednictvím kontextového parametru.
  */
 @Mapper(componentModel = "spring")
 public interface PlayerInactivityPeriodMapper {
@@ -35,9 +33,8 @@ public interface PlayerInactivityPeriodMapper {
     /**
      * Převede DTO na novou entitu období neaktivity.
      *
-     * Identifikátor entity je ignorován, protože se vytváří
-     * nový záznam. Vazba na hráče je nastavena pomocí
-     * kontextového parametru.
+     * Identifikátor entity je ignorován, protože se vytváří nový záznam.
+     * Vazba na hráče je nastavena pomocí kontextového parametru.
      *
      * @param dto přenosový objekt období neaktivity
      * @param player entita hráče předaná jako kontext
@@ -52,7 +49,7 @@ public interface PlayerInactivityPeriodMapper {
      * Aktualizuje existující entitu období neaktivity
      * hodnotami z DTO.
      *
-     * Vazba na hráče se nemění a není mapována.
+     * Vazba na hráče zůstává beze změny.
      *
      * @param dto přenosový objekt obsahující nové hodnoty
      * @param entity existující entita určená k aktualizaci

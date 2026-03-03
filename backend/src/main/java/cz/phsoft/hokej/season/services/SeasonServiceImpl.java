@@ -6,7 +6,7 @@ import cz.phsoft.hokej.user.repositories.AppUserRepository;
 import cz.phsoft.hokej.season.repositories.SeasonRepository;
 import cz.phsoft.hokej.season.dto.SeasonDTO;
 import cz.phsoft.hokej.season.mappers.SeasonMapper;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import cz.phsoft.hokej.user.entities.AppUserEntity;
@@ -19,14 +19,21 @@ import java.util.List;
 /**
  * Implementace service vrstvy používaná pro správu sezón.
  *
- * Třída zajišťuje vytváření a úpravy sezón včetně validace datumového rozsahu, kontroly překryvů a kontroly duplicity názvu.
- * Současně se zajišťuje správa aktivní sezóny tak, aby byl v systému v jeden okamžik aktivní právě jeden záznam.
+ * Třída zajišťuje vytváření a úpravy sezón včetně:
+ * - validace datumového rozsahu,
+ * - kontroly překryvů období,
+ * - kontroly duplicity názvu,
+ * - správy aktivní sezóny tak, aby byl v systému
+ *   v jeden okamžik aktivní právě jeden záznam.
  *
- * Načítání a ukládání dat se deleguje do {@link SeasonRepository} a převod mezi entitou a DTO se deleguje do {@link SeasonMapper}.
- * Identifikátor autora vytvoření sezóny se odvozuje z bezpečnostního kontextu a dohledává se přes {@link AppUserRepository}.
+ * Načítání a ukládání dat se deleguje do {@link SeasonRepository}
+ * a převod mezi entitou a DTO se deleguje do {@link SeasonMapper}.
+ * Identifikátor autora vytvoření sezóny se odvozuje z bezpečnostního
+ * kontextu a dohledává se přes {@link AppUserRepository}.
  *
- * Třída neřeší autorizaci endpointů, protože kontrola oprávnění se předpokládá v controller vrstvě.
- * Zároveň se zde neodesílají notifikace a řeší se pouze konzistence doménového stavu sezón.
+ * Třída neřeší autorizaci endpointů, protože kontrola oprávnění
+ * se předpokládá v controller vrstvě. Zároveň se zde neodesílají
+ * notifikace a řeší se pouze konzistence doménového stavu sezón.
  */
 @Service
 public class SeasonServiceImpl implements SeasonService {
@@ -35,6 +42,13 @@ public class SeasonServiceImpl implements SeasonService {
     private final SeasonMapper mapper;
     private final AppUserRepository appUserRepository;
 
+    /**
+     * Vytváří instanci služby pro správu sezón.
+     *
+     * @param seasonRepository repozitář pro práci se sezónami
+     * @param mapper mapper pro převod mezi entitou a SeasonDTO
+     * @param appUserRepository repozitář pro práci s uživateli
+     */
     public SeasonServiceImpl(SeasonRepository seasonRepository,
                              SeasonMapper mapper,
                              AppUserRepository appUserRepository) {
@@ -48,18 +62,23 @@ public class SeasonServiceImpl implements SeasonService {
     /**
      * Vytváří novou sezónu.
      *
-     * Před uložením se provádí validace datumového rozmezí, kontrola překryvu s existujícími sezónami a kontrola duplicity názvu.
-     * Následně se DTO převede na entitu a uloží se přes repository vrstvu. Do entity se doplní identifikátor uživatele,
-     * který sezónu vytvořil, pokud je možné jej odvodit z autentizace.
+     * Před uložením se provádí validace datumového rozmezí,
+     * kontrola překryvu s existujícími sezónami a kontrola
+     * duplicity názvu. Následně se DTO převede na entitu
+     * a uloží se přes repozitářovou vrstvu. Do entity se doplní
+     * identifikátor uživatele, který sezónu vytvořil, pokud je možné
+     * jej odvodit z autentizace.
      *
-     * Po uložení se vynucuje invariant aktivní sezóny. Pokud je nová sezóna označena jako aktivní, nastaví se jako jediná aktivní.
-     * Pokud aktivní sezóna v systému neexistuje, nastaví se vytvořená sezóna jako aktivní automaticky.
+     * Po uložení se vynucuje invariant aktivní sezóny. Pokud je nová
+     * sezóna označena jako aktivní, nastaví se jako jediná aktivní.
+     * Pokud aktivní sezóna v systému neexistuje, nastaví se vytvořená
+     * sezóna jako aktivní automaticky.
      *
-     * @param seasonDTO Vstupní data sezóny.
-     * @return Vytvořená sezóna ve formě {@link SeasonDTO}.
-     * @throws InvalidSeasonPeriodDateException Pokud jsou neplatná data od a do.
-     * @throws SeasonPeriodOverlapException Pokud se sezóna překrývá s existující sezónou.
-     * @throws DuplicateSeasonNameException Pokud již existuje sezóna se stejným názvem.
+     * @param seasonDTO vstupní data sezóny
+     * @return vytvořená sezóna ve formě {@link SeasonDTO}
+     * @throws InvalidSeasonPeriodDateException pokud jsou neplatná data od a do
+     * @throws SeasonPeriodOverlapException pokud se sezóna překrývá s existující sezónou
+     * @throws DuplicateSeasonNameException pokud již existuje sezóna se stejným názvem
      */
     @Override
     @Transactional
@@ -69,7 +88,7 @@ public class SeasonServiceImpl implements SeasonService {
 
         SeasonEntity entity = mapper.toEntity(seasonDTO);
 
-        // *** NOVÉ *** – nastavíme ID uživatele, který sezónu vytvořil
+        // Nově se nastavuje identifikátor uživatele, který sezónu vytvořil.
         Long currentUserId = getCurrentUserIdOrNull();
         entity.setCreatedByUserId(currentUserId);
 
@@ -91,22 +110,27 @@ public class SeasonServiceImpl implements SeasonService {
     /**
      * Aktualizuje existující sezónu.
      *
-     * Nejprve se ověří existence sezóny podle identifikátoru. Poté se zvaliduje datumové rozmezí a překryvy s ostatními sezónami
-     * s tím, že upravovaná sezóna se při kontrole překryvů ignoruje. Současně se kontroluje duplicita názvu sezóny.
+     * Nejprve se ověří existence sezóny podle identifikátoru.
+     * Poté se zvaliduje datumové rozmezí a překryvy s ostatními
+     * sezónami s tím, že upravovaná sezóna se při kontrole překryvů
+     * ignoruje. Současně se kontroluje duplicita názvu sezóny.
      *
-     * Při pokusu o deaktivaci aktivní sezóny se ověřuje, že v systému zůstane alespoň jedna aktivní sezóna.
-     * Následně se změny z DTO promítnou do entity pomocí mapper vrstvy a sezóna se uloží přes repository vrstvu.
+     * Při pokusu o deaktivaci aktivní sezóny se ověřuje, že v systému
+     * zůstane alespoň jedna aktivní sezóna. Následně se změny z DTO
+     * promítnou do entity pomocí mapper vrstvy a sezóna se uloží
+     * přes repozitářovou vrstvu.
      *
-     * Pokud se sezóna stane nově aktivní, nastaví se jako jediná aktivní sezóna a ostatní sezóny se deaktivují.
+     * Pokud se sezóna stane nově aktivní, nastaví se jako jediná
+     * aktivní sezóna a ostatní sezóny se deaktivují.
      *
-     * @param id Identifikátor upravované sezóny.
-     * @param seasonDTO Nové hodnoty sezóny.
-     * @return Aktualizovaná sezóna ve formě {@link SeasonDTO}.
-     * @throws SeasonNotFoundException Pokud sezóna s daným ID neexistuje.
-     * @throws InvalidSeasonPeriodDateException Pokud jsou neplatná data od a do.
-     * @throws SeasonPeriodOverlapException Pokud se sezóna překrývá s jinou sezónou.
-     * @throws InvalidSeasonStateException Pokud se pokouší deaktivovat jediná aktivní sezóna.
-     * @throws DuplicateSeasonNameException Pokud již existuje sezóna se stejným názvem.
+     * @param id identifikátor upravované sezóny
+     * @param seasonDTO nové hodnoty sezóny
+     * @return aktualizovaná sezóna ve formě {@link SeasonDTO}
+     * @throws SeasonNotFoundException pokud sezóna s daným ID neexistuje
+     * @throws InvalidSeasonPeriodDateException pokud jsou neplatná data od a do
+     * @throws SeasonPeriodOverlapException pokud se sezóna překrývá s jinou sezónou
+     * @throws InvalidSeasonStateException pokud se pokouší deaktivovat jediná aktivní sezóna
+     * @throws DuplicateSeasonNameException pokud již existuje sezóna se stejným názvem
      */
     @Override
     @Transactional
@@ -145,11 +169,14 @@ public class SeasonServiceImpl implements SeasonService {
     /**
      * Vrací aktuálně aktivní sezónu jako entitu.
      *
-     * Metoda se používá v service vrstvě jako zdroj pravdy pro aktuální sezónu, typicky pro filtrování zápasů nebo dalších dat.
-     * Načtení se deleguje do {@link SeasonRepository}. Pokud aktivní sezóna není nastavena, vyhazuje se {@link SeasonNotFoundException}.
+     * Metoda se používá ve service vrstvě jako zdroj pravdy
+     * pro aktuální sezónu, typicky pro filtrování zápasů
+     * nebo dalších dat. Načtení se deleguje do {@link SeasonRepository}.
+     * Pokud aktivní sezóna není nastavena, vyhazuje se
+     * {@link SeasonNotFoundException}.
      *
-     * @return Aktuálně aktivní sezóna jako {@link SeasonEntity}.
-     * @throws SeasonNotFoundException Pokud není nastavena žádná aktivní sezóna.
+     * @return aktuálně aktivní sezóna jako {@link SeasonEntity}
+     * @throws SeasonNotFoundException pokud není nastavena žádná aktivní sezóna
      */
     @Override
     public SeasonEntity getActiveSeason() {
@@ -162,10 +189,13 @@ public class SeasonServiceImpl implements SeasonService {
     /**
      * Vrací aktuálně aktivní sezónu ve formě DTO nebo null.
      *
-     * Metoda se používá v místech, kde je absence aktivní sezóny akceptovatelná a nemá být považována za chybový stav.
-     * Načtení se deleguje do {@link SeasonRepository} a mapování se deleguje do {@link SeasonMapper}.
+     * Metoda se používá v místech, kde je absence aktivní sezóny
+     * akceptovatelná a nemá být považována za chybový stav.
+     * Načtení se deleguje do {@link SeasonRepository} a mapování
+     * se deleguje do {@link SeasonMapper}.
      *
-     * @return Aktivní sezóna ve formě {@link SeasonDTO}, nebo null pokud aktivní sezóna neexistuje.
+     * @return aktivní sezóna ve formě {@link SeasonDTO} nebo null,
+     * pokud aktivní sezóna neexistuje
      */
     @Override
     public SeasonDTO getActiveSeasonOrNull() {
@@ -177,12 +207,13 @@ public class SeasonServiceImpl implements SeasonService {
     /**
      * Vrací sezónu podle identifikátoru ve formě DTO.
      *
-     * Sezóna se načítá z repository vrstvy. Pokud sezóna neexistuje, vyhazuje se {@link SeasonNotFoundException}.
+     * Sezóna se načítá z repozitářové vrstvy. Pokud sezóna
+     * neexistuje, vyhazuje se {@link SeasonNotFoundException}.
      * Mapování entity na DTO se deleguje do {@link SeasonMapper}.
      *
-     * @param id Identifikátor sezóny.
-     * @return Sezóna ve formě {@link SeasonDTO}.
-     * @throws SeasonNotFoundException Pokud sezóna s daným ID neexistuje.
+     * @param id identifikátor sezóny
+     * @return sezóna ve formě {@link SeasonDTO}
+     * @throws SeasonNotFoundException pokud sezóna s daným ID neexistuje
      */
     @Override
     public SeasonDTO getSeasonById(Long id) {
@@ -196,10 +227,12 @@ public class SeasonServiceImpl implements SeasonService {
     /**
      * Vrací všechny sezóny seřazené podle začátku vzestupně.
      *
-     * Načtení se deleguje do {@link SeasonRepository} a mapování na DTO se deleguje do {@link SeasonMapper}.
-     * Metoda se používá pro administrativní přehledy a pro zobrazení seznamu sezón v uživatelském rozhraní.
+     * Načtení se deleguje do {@link SeasonRepository} a mapování
+     * na DTO se deleguje do {@link SeasonMapper}. Metoda se používá
+     * pro administrativní přehledy a pro zobrazení seznamu sezón
+     * v uživatelském rozhraní.
      *
-     * @return Seznam všech sezón ve formě {@link SeasonDTO}.
+     * @return seznam všech sezón ve formě {@link SeasonDTO}
      */
     @Override
     public List<SeasonDTO> getAllSeasons() {
@@ -214,11 +247,13 @@ public class SeasonServiceImpl implements SeasonService {
     /**
      * Nastavuje konkrétní sezónu jako aktivní.
      *
-     * Nejprve se ověřuje existence sezóny podle identifikátoru. Následně se provede nastavení sezóny jako jediné aktivní
-     * pomocí interní metody {@link #setOnlyActiveSeason(Long)}, která současně deaktivuje všechny ostatní sezóny.
+     * Nejprve se ověřuje existence sezóny podle identifikátoru.
+     * Následně se provede nastavení sezóny jako jediné aktivní
+     * pomocí interní metody {@link #setOnlyActiveSeason(Long)},
+     * která současně deaktivuje všechny ostatní sezóny.
      *
-     * @param seasonId Identifikátor sezóny, která má být nastavena jako aktivní.
-     * @throws SeasonNotFoundException Pokud sezóna s daným ID neexistuje.
+     * @param seasonId identifikátor sezóny, která má být nastavena jako aktivní
+     * @throws SeasonNotFoundException pokud sezóna s daným ID neexistuje
      */
     @Override
     @Transactional
@@ -232,16 +267,21 @@ public class SeasonServiceImpl implements SeasonService {
     // PRIVÁTNÍ VALIDACE DAT
 
     /**
-     * Validuje datumové rozmezí sezóny a kontroluje překryv s ostatními sezónami.
+     * Validuje datumové rozmezí sezóny a kontroluje překryv
+     * s ostatními sezónami.
      *
-     * Kontroluje se, že datum začátku a konce není null, že datum začátku předchází datu konce a že rozsah sezóny
-     * není v překryvu s jinou sezónou. Při aktualizaci se z kontroly překryvu vynechává sezóna s identifikátorem
+     * Kontroluje se, že datum začátku a konce není null,
+     * že datum začátku předchází datu konce a že rozsah sezóny
+     * není v překryvu s jinou sezónou. Při aktualizaci se
+     * z kontroly překryvu vynechává sezóna s identifikátorem
      * currentSeasonId.
      *
-     * @param seasonDTO DTO s daty sezóny.
-     * @param currentSeasonId Identifikátor aktuální sezóny při aktualizaci, nebo null při vytváření.
-     * @throws InvalidSeasonPeriodDateException Pokud jsou data neplatná.
-     * @throws SeasonPeriodOverlapException Pokud se sezóna překrývá s jinou sezónou.
+     * @param seasonDTO DTO s daty sezóny
+     * @param currentSeasonId identifikátor aktuální sezóny při aktualizaci,
+     *                        nebo null při vytváření
+     * @throws InvalidSeasonPeriodDateException pokud jsou data neplatná
+     * @throws SeasonPeriodOverlapException pokud se sezóna překrývá
+     *                                      s jinou sezónou
      */
     private void validateDates(SeasonDTO seasonDTO, Long currentSeasonId) {
         LocalDate start = seasonDTO.getStartDate();
@@ -275,12 +315,16 @@ public class SeasonServiceImpl implements SeasonService {
     /**
      * Validuje název sezóny kontrolou duplicity vůči ostatním sezónám.
      *
-     * Při vytváření se ověřuje existence názvu vůči všem sezónám. Při aktualizaci se kontrola provádí vůči všem sezónám
-     * s tím, že sezóna s identifikátorem currentSeasonId se z kontroly vynechává.
+     * Při vytváření se ověřuje existence názvu vůči všem sezónám.
+     * Při aktualizaci se kontrola provádí vůči všem sezónám
+     * s tím, že sezóna s identifikátorem currentSeasonId se
+     * z kontroly vynechává.
      *
-     * @param seasonDTO DTO s daty sezóny.
-     * @param currentSeasonId Identifikátor aktuální sezóny při aktualizaci, nebo null při vytváření.
-     * @throws DuplicateSeasonNameException Pokud již existuje sezóna se stejným názvem.
+     * @param seasonDTO DTO s daty sezóny
+     * @param currentSeasonId identifikátor aktuální sezóny při aktualizaci,
+     *                        nebo null při vytváření
+     * @throws DuplicateSeasonNameException pokud již existuje sezóna
+     *                                      se stejným názvem
      */
     private void checkSeasonName(SeasonDTO seasonDTO, Long currentSeasonId) {
         String seasonName = seasonDTO.getName().trim();
@@ -302,11 +346,15 @@ public class SeasonServiceImpl implements SeasonService {
     /**
      * Nastavuje zadanou sezónu jako jedinou aktivní.
      *
-     * Všechny sezóny se načtou z repository vrstvy a následně se u sezóny se zadaným identifikátorem nastaví active na true,
-     * zatímco u všech ostatních sezón se active nastaví na false. Změny se uloží hromadně přes {@link SeasonRepository}.
-     * Tím se vynucuje invariant, že v systému existuje v jeden okamžik právě jedna aktivní sezóna.
+     * Všechny sezóny se načtou z repozitářové vrstvy a následně se
+     * u sezóny se zadaným identifikátorem nastaví příznak active na true,
+     * zatímco u všech ostatních sezón se active nastaví na false.
+     * Změny se uloží hromadně přes {@link SeasonRepository}.
+     * Tím se vynucuje invariant, že v systému existuje v jeden okamžik
+     * právě jedna aktivní sezóna.
      *
-     * @param activeSeasonId Identifikátor sezóny, která má být nastavena jako jediná aktivní.
+     * @param activeSeasonId identifikátor sezóny, která má být nastavena
+     *                       jako jediná aktivní
      */
     private void setOnlyActiveSeason(Long activeSeasonId) {
         List<SeasonEntity> all = seasonRepository.findAll();
@@ -317,13 +365,17 @@ public class SeasonServiceImpl implements SeasonService {
     }
 
     /**
-     * Vrací identifikátor aktuálně přihlášeného uživatele nebo null, pokud není možné uživatele určit.
+     * Vrací identifikátor aktuálně přihlášeného uživatele nebo null,
+     * pokud není možné uživatele určit.
      *
-     * Identifikátor se odvozuje z autentizace v bezpečnostním kontextu. Jako klíč se používá e-mail uživatele
-     * a dohledání se provádí přes {@link AppUserRepository}. Pokud autentizace neexistuje, uživatel není přihlášen
-     * nebo záznam uživatele nelze dohledat, vrací se null.
+     * Identifikátor se odvozuje z autentizace v bezpečnostním kontextu.
+     * Jako klíč se používá e-mail uživatele a dohledání se provádí
+     * přes {@link AppUserRepository}. Pokud autentizace neexistuje,
+     * uživatel není přihlášen nebo záznam uživatele nelze dohledat,
+     * vrací se null.
      *
-     * @return Identifikátor aktuálního uživatele, nebo null pokud jej nelze určit.
+     * @return identifikátor aktuálního uživatele nebo null,
+     * pokud jej nelze určit
      */
     private Long getCurrentUserIdOrNull() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

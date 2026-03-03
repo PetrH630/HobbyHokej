@@ -6,14 +6,19 @@ import org.springframework.http.HttpStatus;
 /**
  * Výjimka signalizující, že není zvolen aktuální hráč.
  *
- * Vyhazuje se v situaci, kdy klient volá endpoint, který vyžaduje
- * nastaveného "current player", ale žádný hráč není pro daného
- * uživatele vybrán.
+ * Vyhazuje se v situaci, kdy je volán endpoint nebo servisní metoda,
+ * která vyžaduje nastaveného aktuálního hráče, ale pro daného
+ * uživatele není žádný hráč vybrán.
  *
- * Typicky mapováno na HTTP 400 (Bad Request).
+ * Výjimka je mapována na HTTP status 400 Bad Request
+ * prostřednictvím nadřazené třídy BusinessException.
  */
 public class CurrentPlayerNotSelectedException extends BusinessException {
 
+    /**
+     * Vytváří výjimku s předdefinovanou chybovou zprávou
+     * a HTTP statusem BAD_REQUEST.
+     */
     public CurrentPlayerNotSelectedException() {
         super("BE - Není zvolen aktuální hráč.", HttpStatus.BAD_REQUEST);
     }

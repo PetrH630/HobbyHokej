@@ -7,12 +7,19 @@ import org.springframework.http.HttpStatus;
  * Výjimka signalizující překryv období mezi sezónami.
  *
  * Vyhazuje se při vytváření nebo úpravě sezóny, pokud její období
- * zasahuje do období jiné existující sezóny.
+ * zasahuje do období jiné existující sezóny. Reprezentuje porušení
+ * doménového pravidla, podle kterého se jednotlivé sezóny
+ * nesmí časově překrývat.
  *
- * Typicky mapováno na HTTP 409 (Conflict).
+ * Výjimka je typicky mapována na HTTP status CONFLICT.
  */
 public class SeasonPeriodOverlapException extends BusinessException {
 
+    /**
+     * Vytvoří výjimku s detailní zprávou popisující překryv období.
+     *
+     * @param message detailní popis kolize období
+     */
     public SeasonPeriodOverlapException(String message) {
         super(message, HttpStatus.CONFLICT);
     }

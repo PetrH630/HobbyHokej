@@ -13,17 +13,19 @@ import java.io.IOException;
 
 /**
  * HTTP filtr zajišťující dostupnost aktuálního hráče
- * v průběhu zpracování requestu.
+ * v průběhu zpracování jednoho requestu.
  *
  * Filtr:
- * - načítá ID aktuálního hráče z HTTP session,
+ * - načítá identifikátor aktuálního hráče ze session prostřednictvím CurrentPlayerService,
  * - ověřuje existenci hráče v databázi,
- * - ukládá hráče do CurrentPlayerContext,
+ * - ukládá nalezenou entitu do CurrentPlayerContext,
  * - po dokončení requestu kontext vždy vyčistí.
  *
- * Filtr umožňuje, aby servisní a controller vrstvy
- * pracovaly s aktuálním hráčem bez nutnosti
- * přímého přístupu k HttpSession.
+ * Díky tomu mohou servisní a controller vrstvy pracovat
+ * s aktuálním hráčem bez přímé závislosti na HttpSession.
+ *
+ * Třída rozšiřuje OncePerRequestFilter, takže je garantováno,
+ * že bude provedena maximálně jednou za HTTP request.
  */
 @Component
 public class CurrentPlayerFilter extends OncePerRequestFilter {
@@ -31,6 +33,12 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
     private final PlayerRepository playerRepository;
     private final CurrentPlayerService currentPlayerService;
 
+    /**
+     * Vytvoří instanci filtru.
+     *
+     * @param playerRepository repozitář pro načítání hráčů z databáze
+     * @param currentPlayerService service zajišťující přístup k aktuálnímu hráči ze session
+     */
     public CurrentPlayerFilter(PlayerRepository playerRepository,
                                CurrentPlayerService currentPlayerService) {
         this.playerRepository = playerRepository;
@@ -38,14 +46,23 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Filtrační metoda volaná jednou pro každý HTTP request.
+     * Zpracuje HTTP request a nastaví aktuálního hráče do thread-local kontextu.
      *
      * Postup zpracování:
-     * - načte ID aktuálního hráče ze session,
-     * - ověří existenci hráče v databázi,
-     * - uloží hráče do thread-local kontextu,
-     * - předá řízení dalším filtrům,
-     * - v závěru vždy vyčistí kontext.
+     * - načte identifikátor aktuálního hráče,
+     * - pokud je identifikátor přítomen, ověří existenci hráče v databázi,
+     * - uloží entitu hráče do CurrentPlayerContext,
+     * - předá řízení dalším filtrům v řetězci,
+     * - po dokončení zpracování vždy vyčistí kontext.
+     *
+     * Vyčištění kontextu je provedeno ve finally bloku,
+     * aby bylo zajištěno korektní uvolnění ThreadLocal i v případě výjimky.
+     *
+     * @param request aktuální HTTP request
+     * @param response aktuální HTTP response
+     * @param filterChain řetězec dalších filtrů
+     * @throws ServletException v případě chyby servletového zpracování
+     * @throws IOException v případě I/O chyby
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,

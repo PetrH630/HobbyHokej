@@ -9,10 +9,15 @@ import org.springframework.http.HttpStatus;
  * Používá se při změně nebo vyhodnocování stavu hráče, pokud
  * požadovaná operace není v daném stavu povolena.
  *
- * Typicky mapováno na HTTP 400 (Bad Request).
+ * Výjimka je mapována na HTTP status 400 Bad Request.
  */
 public class InvalidPlayerStatusException extends BusinessException {
 
+    /**
+     * Vytváří výjimku s vlastní chybovou zprávou.
+     *
+     * @param message text chybové zprávy
+     */
     public InvalidPlayerStatusException(String message) {
         super(message, HttpStatus.BAD_REQUEST);
     }
