@@ -1080,16 +1080,85 @@ Odpověď:
 
 ---
 
-// // TODO ADMINISTRACE NOTIFIKACÍ ==================
+# 16 Speciální notifikace (AdminNotificationController)
 
-# 16. Demo notifikace (DemoNotificationController)
+Základní prefix: /api/notifications/admin
+
+## 16.1 Odeslání speciální notifikace (ADMIN/MANAGER)
+
+Endpoint: `POST /api/notifications/admin/special`
+Role: `ADMIN` nebo `MANAGER`
+
+Tělo požadavku: SpecialNotificationRequestDTO
+- definice cílových uživatelů / hráčů
+- typ a obsah zprávy (e-mail/SMS/notifikace)
+
+Chování:
+- Vytvoří a odešle speciální notifikaci na základě vstupních dat.
+
+Odpověď:
+- HTTP 200
+- typicky textová nebo prázdná odpověď (dle implementace služby)
+
+
+## 16.2 Dostupné cíle pro speciální notifikaci (ADMIN/MANAGER)
+
+Endpoint: `GET /api/notifications/admin/special/targets`
+Role: `ADMIN` nebo `MANAGER`
+
+Odpověď:
+- HTTP 200 
+- seznam `SpecialNotificationTargetDTO`
+
+## 16.3 Plánovače připomínek zápasů (MatchReminderAdminController)
+
+Základní prefix: /api/admin/match-reminders
+Role: `ADMIN` nebo `MANAGER` (třída je anotována @PreAuthorize)
+
+## 16.4 Manuální spuštění připomínek zápasů
+
+Endpoint: `GET /api/admin/match-reminders/run`
+
+Chování: 
+- Spustí MatchReminderScheduler pro odeslání plánovaných připomínek zápasů.
+
+Odpověď:
+- HTTP 200
+- textová zpráva (např. "MatchReminderScheduler spuštěn.")
+
+## 16.5 Manuální spuštění připomínek NO_RESPONSE
+
+Endpoint: `GET /api/admin/match-reminders/no-response/run`
+
+Chování:
+- Spustí NoResponseReminderScheduler pro odeslání připomínek hráčům, kteří dosud nereagovali na pozvánku k zápasu.
+
+Odpověď:
+- HTTP 200
+- textová zpráva (např. "NoResponseReminderScheduler spuštěn.")
+
+## 16.6 Náhled připomínek NO_RESPONSE
+
+Endpoint: `GET /api/admin/match-reminders/no-response/preview`
+
+Chování:
+- Vrátí náhled dat, komu by byly NO_RESPONSE připomínky odeslány, bez jejich skutečného odeslání.
+
+Odpověď:
+HTTP 200
+
+- seznam `NoResponseReminderPreviewDTO`
+
+---
+
+# 17. Demo notifikace (DemoNotificationController)
 
 Základní prefix: `/api/demo/notifications`
 
 > Controller je aktivní pouze v demo režimu (`app.demo-mode=true`).  
 > Pokud demo režim není aktivní, endpointy nejsou registrovány a typicky vrací 404.
 
-## 16.1 Načtení a vymazání zachycených demo notifikací
+## 17.1 Načtení a vymazání zachycených demo notifikací
 
 Endpoint: `GET /api/demo/notifications`  
 Role: dle zabezpečení aplikace (controller nemá `@PreAuthorize`)
@@ -1098,7 +1167,7 @@ Odpověď:
 - HTTP 200
 - `DemoNotificationsDTO`
 
-## 16.2 Vymazání demo notifikací
+## 17.2 Vymazání demo notifikací
 
 Endpoint: `DELETE /api/demo/notifications`  
 Role: dle zabezpečení aplikace (controller nemá `@PreAuthorize`)
@@ -1108,9 +1177,9 @@ Odpověď:
 
 ---
 
-# 17. Ladicí a testovací endpointy
+# 18. Ladicí a testovací endpointy
 
-## 17.1 Debug – zobrazení Authentication (DebugController)
+## 18.1 Debug – zobrazení Authentication (DebugController)
 
 Endpoint: `GET /api/debug/me`
 
@@ -1118,7 +1187,7 @@ Odpověď:
 - HTTP 200
 - JSON s obsahem `Authentication`
 
-## 17.2 Test backendu (TestController)
+## 18.2 Test backendu (TestController)
 
 Endpoint: `GET /api/test`  
 Role: `ADMIN`
@@ -1127,7 +1196,7 @@ Odpověď:
 - HTTP 200
 - text `"Backend je online!"`
 
-## 17.3 Test e-mailu (TestEmailController)
+## 18.3 Test e-mailu (TestEmailController)
 
 Endpoint: `POST /api/email/test/send-mail`
 
@@ -1137,23 +1206,26 @@ Odpověď:
 
 ---
 
-# 18. Přehled hlavních DTO a enumů
+# 19. Přehled hlavních DTO a enumů
 
 Tato kapitola je orientační. Konkrétní struktury polí se řídí aktuálními DTO třídami na backendu.
 
-## 18.1 DTO – uživatel
+## 19.1 DTO – uživatel
 
-- `AppUserDTO`
-- `AppUserHistoryDTO`
-- `AppUserSettingsDTO`
-- `ChangePasswordDTO`
-- `RegisterUserDTO`
-- `ForgottenPasswordResetDTO`
-- `EmailDTO`
-- `ImpersonationInfoDTO`
-- `DemoNotificationsDTO`
+`AppUserDTO`
+`AppUserHistoryDTO`
+`AppUserSettingsDTO`
+`ChangePasswordDTO`
+`RegisterUserDTO`
+`ForgottenPasswordResetDTO`
+`EmailDTO`
+`NotificationDTO`
+`NotificationBadgeDTO`
+`SpecialNotificationRequestDTO`
+`SpecialNotificationTargetDTO`
+`DemoNotificationsDTO`
 
-## 18.2 DTO – hráč
+## 19.2 DTO – hráč
 
 - `PlayerDTO`
 - `PlayerHistoryDTO`
@@ -1161,27 +1233,37 @@ Tato kapitola je orientační. Konkrétní struktury polí se řídí aktuální
 - `PlayerSettingsDTO`
 - `PlayerInactivityPeriodDTO`
 - `PlayerSummaryDTO`
+- `ChangePlayerUserRequest`
 
-## 18.3 DTO – zápasy a registrace
+## 19.3 DTO – zápasy a registrace
 
 - `MatchDTO`
 - `MatchDetailDTO`
 - `MatchOverviewDTO`
+- `NumberedMatchDTO`
 - `MatchHistoryDTO`
+- `MatchPositionOverviewDTO`
+- `MatchTeamPositionOverviewDTO`
+- `MatchScoreUpdateRequest`
 - `MatchRegistrationDTO`
 - `MatchRegistrationHistoryDTO`
-- `NumberedMatchDTO`
-- `SeasonDTO`
-- `SeasonHistoryDTO`
+- `MatchRegistrationRequest`
+- `NoResponseReminderPreviewDTO`
 - `SuccessResponseDTO`
 
 
-## 18.4 Enumy – přehled
+## 19.4 Enumy – přehled
 
 - `Role`: `ROLE_PLAYER`, `ROLE_MANAGER`, `ROLE_ADMIN`
 - `PlayerMatchStatus`: `REGISTERED`, `UNREGISTERED`, `EXCUSED`, `RESERVED`, `NO_RESPONSE`, `SUBSTITUTE`, `NO_EXCUSED`
+- `PlayerPosition` : `GOALIE`, `DEFENSE_LEFT`, `DEFENSE_RIGHT`, `DEFENSE`, `CENTER`, `WING_RIGHT`, `WING_LEFT`, `FORWARD`, `ANY`
+- `PlayerPositionCategory`: `GOALIE`,`DEFENSE`,`FORWARD` 
 - `MatchStatus`: `UNCANCELED`, `CANCELED`, `UPDATED`
 - `MatchCancelReason`: `NOT_ENOUGH_PLAYERS`, `TECHNICAL_ISSUE`, `WEATHER`, `ORGANIZER_DECISION`, `OTHER`
+- `MatchMode` : `THREE_ON_THREE_NO_GOALIE`, `THREE_ON_THREE_WITH_GOALIE`,
+  `FOUR_ON_FOUR_WITH_GOALIE`, `FIVE_ON_FIVE_NO_GOALIE`, `FIVE_ON_FIVE_WITH_GOALIE`,
+  `SIX_ON_SIX_NO_GOALIE`
+- `MatchResult` : `LIGHT_WIN`, `DARK_WIN`, `DRAW`, `NOT_PLAYED`
 - `ExcuseReason`: `NEMOC`, `PRACE`, `NECHE_SE_MI`, `JINE`
 - `PlayerStatus`: `PENDING`, `APPROVED`, `REJECTED`, `ARCHIVED`
 - `PlayerType`: `VIP`, `STANDARD`, `BASIC`
