@@ -134,7 +134,7 @@ public class DataInitializer {
                     admin.setName("admin");
                     admin.setSurname("admin");
                     admin.setEmail("admin@example.com");
-                    admin.setPassword(encoder.encode("Administrator123"));
+                    admin.setPassword(encoder.encode("Admin123"));
                     admin.setRole(Role.ROLE_ADMIN);
                     admin.setEnabled(true);
 

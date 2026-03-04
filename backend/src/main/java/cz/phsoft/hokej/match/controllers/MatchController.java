@@ -12,6 +12,7 @@ import cz.phsoft.hokej.shared.dto.SuccessResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -211,6 +212,23 @@ public class MatchController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Vrací seznam zápasů, které jsou dostupné pro konkrétního hráče.
+     *
+     * Dostupnost zápasů je určována na základě doménových pravidel,
+     * například podle kapacity nebo stavu zápasu. Endpoint je dostupný
+     * pro role ADMIN a MANAGER a slouží zejména pro administrativní práci
+     * s registracemi konkrétního hráče.
+     *
+     * @param playerId ID hráče
+     * @return seznam dostupných zápasů pro daného hráče jako {@link MatchDTO}
+     */
+    @GetMapping("/available-for-player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<MatchDTO> getAvailableMatchesForPlayer(@PathVariable Long playerId) {
+        return matchService.getAvailableMatchesForPlayer(playerId);
+    }
+
     // Hráč – endpointy v kontextu aktuálního hráče
 
     /**
@@ -234,6 +252,62 @@ public class MatchController {
     @PreAuthorize("isAuthenticated()")
     public MatchDTO getNextMatch() {
         return matchService.getNextMatch();
+    }
+
+    /**
+     * Vrací seznam nadcházejících zápasů pro aktuálně zvoleného hráče.
+     *
+     * Před voláním služby se vyžaduje, aby byl nastaven aktuální hráč.
+     * Samotné zjištění ID aktuálního hráče se zajišťuje pomocí
+     * {@link CurrentPlayerService}. Endpoint je dostupný pro
+     * přihlášené uživatele.
+     *
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @return seznam nadcházejících zápasů pro aktuálního hráče jako {@link MatchDTO}
+     */
+    @GetMapping("/me/upcoming")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchDTO> getUpcomingMatchesForMe(Authentication authentication) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return matchService.getUpcomingMatchesForPlayer(currentPlayerId);
+    }
+
+    /**
+     * Vrací přehled nadcházejících zápasů pro aktuálního hráče.
+     *
+     * Přehled je určen zejména pro kompaktní zobrazení zápasů
+     * v uživatelském rozhraní, například v podobě karet. Skutečné
+     * načtení dat se deleguje na servisní vrstvu.
+     *
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @return seznam {@link MatchOverviewDTO} s nadcházejícími zápasy pro hráče
+     */
+    @GetMapping("/me/upcoming-overview")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchOverviewDTO> getUpcomingMatchesOverviewForMe(Authentication authentication) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return matchService.getUpcomingMatchesOverviewForPlayer(currentPlayerId);
+    }
+
+    /**
+     * Vrací seznam všech již odehraných zápasů pro aktuálního hráče.
+     *
+     * Seznam slouží pro zobrazení historie zápasů daného hráče
+     * v uživatelském rozhraní. Endpoint je dostupný pro přihlášené
+     * uživatele a identita hráče se určuje pomocí {@link CurrentPlayerService}.
+     *
+     * @param authentication autentizační kontext přihlášeného uživatele
+     * @return seznam {@link MatchOverviewDTO} pro odehrané zápasy aktuálního hráče
+     */
+    // TODO - JEN ZÁPASY OD VYTVOŘENÍ HRÁČE
+    @GetMapping("/me/all-passed")
+    @PreAuthorize("isAuthenticated()")
+    public List<MatchOverviewDTO> getAllMatchesForPlayer(Authentication authentication) {
+        currentPlayerService.requireCurrentPlayer();
+        Long currentPlayerId = currentPlayerService.getCurrentPlayerId();
+        return matchService.getAllPassedMatchesForPlayer(currentPlayerId);
     }
 
     /**

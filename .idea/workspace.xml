@@ -7,12 +7,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Opraven API.md dle aktuálních endpointu">
-      <change afterPath="$PROJECT_DIR$/backend/docs/ARCHITECTURE-OLD.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Upravedno API, ARCHITECTURE, README .. .md">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/docs/ARCHITECTURE.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/ARCHITECTURE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/package-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/package-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/logs/application.log" beforeDir="false" afterPath="$PROJECT_DIR$/backend/logs/application.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/DataInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/DataInitializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/controllers/MatchController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/controllers/MatchController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchPositionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchPositionServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,14 +130,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770146408763</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Doplněno - Historie hráče + triggery">
-      <option name="closed" value="true" />
-      <created>1770625072875</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1770625072875</updated>
     </task>
     <task id="LOCAL-00007" summary="Doplněno - Historie zápasu, Sezon, Uživatele - Entity, DTO, Mapper, Service">
       <option name="closed" value="true" />
@@ -522,7 +515,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772552996957</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="Upravedno API, ARCHITECTURE, README .. .md">
+      <option name="closed" value="true" />
+      <created>1772558569069</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1772558569070</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -539,7 +540,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Na FE - Doplněna stránka přehledu pro Administrátora a Managera" />
     <MESSAGE value="Doplněny statistiky hráče k zápasům v sezóně - PlayerStatsDTO, PlayerStatsService" />
     <MESSAGE value="Doplněn endpoint do PlayerController pro stats" />
     <MESSAGE value="Upraven Stats na FE" />
@@ -564,6 +564,7 @@
     <MESSAGE value="Doplněny všechny komentáře a uprava zprávy - přidána pozice hráče" />
     <MESSAGE value="Opraven" />
     <MESSAGE value="Opraven API.md dle aktuálních endpointu" />
-    <option name="LAST_COMMIT_MESSAGE" value="Opraven API.md dle aktuálních endpointu" />
+    <MESSAGE value="Upravedno API, ARCHITECTURE, README .. .md" />
+    <option name="LAST_COMMIT_MESSAGE" value="Upravedno API, ARCHITECTURE, README .. .md" />
   </component>
 </project>
