@@ -85,6 +85,9 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
                 throw new BadCredentialsException("BE - Chybí přihlašovací údaje");
             }
 
+            System.out.println("LOGIN contentType=" + request.getContentType());
+            System.out.println("LOGIN email='" + email + "'");
+
             UsernamePasswordAuthenticationToken authRequest =
                     new UsernamePasswordAuthenticationToken(email, password);
 
@@ -154,7 +157,7 @@ public class CustomJsonLoginFilter extends UsernamePasswordAuthenticationFilter 
         } else {
             result.put("message", "BE - Chyba při přihlášení");
         }
-
+        failed.printStackTrace();
         objectMapper.writeValue(response.getWriter(), result);
     }
 }

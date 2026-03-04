@@ -861,14 +861,18 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
         boolean canMoveTeam =
                 settings != null && settings.isPossibleMoveToAnotherTeam();
 
+        boolean canChangePosition =
+                settings != null && settings.isPossibleChangePlayerPosition();
+
         Team currentTeam = candidate.getTeam();
         PlayerPosition currentPositionInMatch = candidate.getPositionInMatch();
         PlayerPosition primaryPosition = player.getPrimaryPosition();
+        PlayerPosition secondaryPosition = player.getSecondaryPosition();
 
         PlayerPosition effectiveCurrentPosition =
                 (currentPositionInMatch != null) ? currentPositionInMatch : primaryPosition;
 
-        // Cílový tým – buď zůstane, nebo se přesune, pokud to dovolí nastavení
+        // Cílový tým
         Team targetTeam;
         if (requestedTeam == null || currentTeam == requestedTeam) {
             targetTeam = currentTeam;
@@ -879,21 +883,103 @@ public class MatchAllocationEngineImpl implements MatchAllocationEngine {
             targetTeam = requestedTeam;
         }
 
-        // Cílová pozice – při navýšení kapacity ji neměníme
+        // 1) pokus o povýšení beze změny pozice
         PlayerPosition targetPosition = effectiveCurrentPosition;
 
-        // Kontrola kapacity pozice – pokud není volno, kandidát se NEpovýší.
-        if (!isPositionSlotAvailableForTeam(match, targetTeam, targetPosition)) {
+        if (isPositionSlotAvailableForTeam(match, targetTeam, targetPosition)) {
+            candidate.setTeam(targetTeam);
+            candidate.setPositionInMatch(targetPosition);
+            updateRegistrationStatus(candidate, PlayerMatchStatus.REGISTERED);
+            return true;
+        }
+
+        // 2) pokud není volno, zkusíme najít alternativní pozici
+        if (!canChangePosition) {
             return false;
         }
 
-        // Provést změnu týmu/pozice a statusu na REGISTERED
-        candidate.setTeam(targetTeam);
-        candidate.setPositionInMatch(targetPosition);
-        updateRegistrationStatus(candidate, PlayerMatchStatus.REGISTERED);
+        PlayerPosition alternative = pickAlternativeAvailablePositionForPromotion(
+                match,
+                targetTeam,
+                effectiveCurrentPosition,
+                primaryPosition,
+                secondaryPosition
+        );
 
-        // Notifikace zde engine neposílá – řeší se ve vyšších vrstvách, pokud je potřeba.
+        if (alternative == null) {
+            return false;
+        }
+
+        candidate.setTeam(targetTeam);
+        candidate.setPositionInMatch(alternative);
+        updateRegistrationStatus(candidate, PlayerMatchStatus.REGISTERED);
         return true;
+    }
+
+    private PlayerPosition pickAlternativeAvailablePositionForPromotion(
+            MatchEntity match,
+            Team team,
+            PlayerPosition current,
+            PlayerPosition primary,
+            PlayerPosition secondary
+    ) {
+        Integer maxPlayers = match.getMaxPlayers();
+        MatchMode mode = match.getMatchMode();
+        if (maxPlayers == null || maxPlayers <= 0 || mode == null || team == null) {
+            return null;
+        }
+
+        // Kapacita pro skater pozice per team (bez goalie)
+        int goalieSlotsTotal = getGoalieSlotsForMatch(match);
+        goalieSlotsTotal = Math.max(0, Math.min(goalieSlotsTotal, maxPlayers));
+        int skaterSlotsPerTeam = (maxPlayers - goalieSlotsTotal) / 2;
+
+        Map<PlayerPosition, Integer> perTeamCapacity =
+                MatchModeLayoutUtil.buildPositionCapacityForMode(mode, skaterSlotsPerTeam);
+
+        if (perTeamCapacity == null || perTeamCapacity.isEmpty()) {
+            return null;
+        }
+
+        // 1) stejná kategorie jako current (DEF/ATT) – nejvyšší priorita
+        PlayerPositionCategory currentCat = PlayerPositionUtil.getCategory(current);
+
+        // Kandidátní pořadí preference:
+        // 1) stejné kategorie, 2) primary, 3) secondary, 4) cokoliv volného
+        LinkedHashSet<PlayerPosition> unique = new LinkedHashSet<>();
+
+        if (currentCat != null) {
+            perTeamCapacity.keySet().stream()
+                    .filter(p -> PlayerPositionUtil.getCategory(p) == currentCat)
+                    .forEach(unique::add);
+        }
+
+        if (primary != null && primary != PlayerPosition.ANY) {
+            unique.add(primary);
+        }
+
+        if (secondary != null && secondary != PlayerPosition.ANY) {
+            unique.add(secondary);
+        }
+
+        perTeamCapacity.keySet().forEach(unique::add);
+
+        for (PlayerPosition pos : unique) {
+            if (pos == null || pos == PlayerPosition.ANY) {
+                continue;
+            }
+
+            Integer cap = perTeamCapacity.get(pos);
+            if (cap == null || cap <= 0) {
+                continue;
+            }
+
+            if (isPositionSlotAvailableForTeam(match, team, pos)) {
+                return pos;
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -181,6 +181,7 @@ public class SecurityConfig {
                 .addFilterAt(
                         new CustomJsonLoginFilter("/api/auth/login", authManager, appUserService),
                         UsernamePasswordAuthenticationFilter.class
+
                 )
 
                 .logout(logout -> logout
@@ -214,14 +215,14 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         List<String> origins = List.of(allowedOrigins.split("\\s*,\\s*"));
-        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedOriginPatterns(origins);
 
         configuration.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         );
 
         configuration.setAllowedHeaders(
-                List.of("Content-Type", "Authorization", "X-Requested-With")
+                List.of("*")
         );
 
         configuration.setAllowCredentials(true);

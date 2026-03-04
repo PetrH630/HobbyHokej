@@ -31,10 +31,12 @@ public class MatchHistoryServiceImpl implements MatchHistoryService {
     }
 
     /**
-     * {@inheritDoc}
+     * Vrátí historii daného zápasu podle jeho ID.
      *
-     * Deleguje načtení dat do repozitáře
-     * a převod entit na DTO do mapperu.
+     * Záznamy jsou vráceny od nejnovější změny po nejstarší.
+     *
+     * @param matchId identifikátor zápasu z hlavní tabulky
+     * @return seznam historických záznamů
      */
     @Override
     public List<MatchHistoryDTO> getHistoryForMatch(Long matchId) {

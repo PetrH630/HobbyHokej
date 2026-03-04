@@ -37,9 +37,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -194,8 +192,8 @@ public class DataInitializer {
 
             player.setPhoneNumber("");
             player.setTeam(i < 5 ? Team.DARK : Team.LIGHT);
-            // TODO Otestovat při dalším spuštění
-            player.setPrimaryPosition((i % 2 == 0) ? PlayerPosition.FORWARD : PlayerPosition.DEFENSE);
+
+            assignRandomPositions(player);
             player.setPlayerStatus(i < 10 ? PlayerStatus.APPROVED : PlayerStatus.PENDING);
 
             user.setRole(i == 0 ? Role.ROLE_MANAGER : Role.ROLE_PLAYER);
@@ -605,5 +603,30 @@ public class DataInitializer {
 
         long randomEpoch = ThreadLocalRandom.current().nextLong(fromEpoch, toEpoch + 1);
         return LocalDateTime.ofEpochSecond(randomEpoch, 0, ZoneOffset.UTC);
+    }
+
+    /**
+     * Vygeneruje náhodnou pozici dle ENUM PlayerPosition.
+     *
+     * vynechá GOALIE a ANY
+     */
+    private void assignRandomPositions(PlayerEntity player) {
+
+        List<PlayerPosition> positions = Arrays.stream(PlayerPosition.values())
+                .filter(p -> p != PlayerPosition.GOALIE && p != PlayerPosition.ANY
+                && p!=PlayerPosition.FORWARD)
+                .toList();
+
+        Random random = new Random();
+
+        PlayerPosition primary = positions.get(random.nextInt(positions.size()));
+
+        PlayerPosition secondary;
+        do {
+            secondary = positions.get(random.nextInt(positions.size()));
+        } while (secondary == primary);
+
+        player.setPrimaryPosition(primary);
+        player.setSecondaryPosition(secondary);
     }
 }
