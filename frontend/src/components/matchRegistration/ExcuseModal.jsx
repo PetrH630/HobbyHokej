@@ -1,9 +1,26 @@
-// src/components/matchRegistraion/ExcuseModal.jsx
 import React from "react";
 import { EXCUSE_REASON_OPTIONS } from "../../constants/excuseReason";
 import { useGlobalModal } from "../../hooks/useGlobalModal";
 
-
+/**
+ * ExcuseModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Umožňuje zavření stiskem klávesy Escape.
+ * Při otevření blokuje scroll pozadí pomocí useGlobalModal.
+ *
+ * Props:
+ * @param {boolean} props.show určuje, zda je dialog otevřený.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ * @param {Object} props.isUnregisterFlow vstupní hodnota komponenty. [default: false]
+ * @param {Object} props.selectedReason vstupní hodnota komponenty.
+ * @param {Object} props.excuseNote vstupní hodnota komponenty.
+ * @param {Object} props.onChangeReason vstupní hodnota komponenty.
+ * @param {Object} props.onChangeNote vstupní hodnota komponenty.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onSubmit callback pro předání akce do nadřazené vrstvy.
+ */
 const ExcuseModal = ({
     show,
     saving = false,
@@ -15,7 +32,7 @@ const ExcuseModal = ({
     onClose,
     onSubmit,
 }) => {
- 
+
 
     if (!show) return null;
 
@@ -31,6 +48,7 @@ const ExcuseModal = ({
         ? "Odeslat odhlášení"
         : "Odeslat omluvu";
 
+    
     const handleBackdropClick = () => {
         if (!saving) onClose?.();
     };

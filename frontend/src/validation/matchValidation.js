@@ -1,4 +1,3 @@
-// src/validation/matchValidation.js
 
 /**
  * Frontend validace pro MatchDTO.

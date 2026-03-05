@@ -1,6 +1,18 @@
-// src/components/MatchActions.jsx
 import "./MatchActions.css";
 
+/**
+ * MatchActions
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * Props:
+ * @param {string} props.playerMatchStatus data vybraného zápasu.
+ * @param {Function} props.onRegister vstupní hodnota komponenty.
+ * @param {Function} props.onUnregister vstupní hodnota komponenty.
+ * @param {Object} props.onExcuse vstupní hodnota komponenty.
+ * @param {Object} props.onSubstitute vstupní hodnota komponenty.
+ * @param {boolean} props.disabled Příznak, zda jsou ovládací prvky dočasně zakázány.
+ */
 const MatchActions = ({
     playerMatchStatus,
     onRegister,

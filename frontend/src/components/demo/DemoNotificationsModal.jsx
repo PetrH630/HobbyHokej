@@ -1,7 +1,21 @@
-// src/components/demo/DemoNotificationsModal.jsx
 import "./DemoNotificationsModal.css";
 import { useGlobalModal } from "../../hooks/useGlobalModal";
 
+/**
+ * DemoNotificationsModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Umožňuje zavření stiskem klávesy Escape.
+ * Při otevření blokuje scroll pozadí pomocí useGlobalModal.
+ *
+ * Props:
+ * @param {boolean} props.show určuje, zda je dialog otevřený.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.notifications vstupní hodnota komponenty.
+ * @param {boolean} props.loading Příznak, že probíhá načítání dat a UI má zobrazit stav načítání.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ */
 const DemoNotificationsModal = ({
     show,
     onClose,
@@ -18,7 +32,7 @@ const DemoNotificationsModal = ({
 
     return (
         <>
-            {/* Klik mimo obsah zavře modal */}
+
             <div
                 className="modal fade show d-block"
                 tabIndex="-1"

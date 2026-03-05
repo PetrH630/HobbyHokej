@@ -35,6 +35,22 @@ const playerPassesFilter = (player, isInactive, filter) => {
     }
 };
 
+/**
+ * AdminPlayersTable
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.players data hráče nebo identifikátor aktuálního hráče.
+ * @param {boolean} props.loading Příznak, že probíhá načítání dat a UI má zobrazit stav načítání.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ * @param {Function} props.onApprove vstupní hodnota komponenty.
+ * @param {Function} props.onReject vstupní hodnota komponenty.
+ * @param {Function} props.onEdit vstupní hodnota komponenty.
+ * @param {Function} props.onDelete vstupní hodnota komponenty.
+ * @param {Function} props.onChangeUser vstupní hodnota komponenty.
+ */
+
 const AdminPlayersTable = ({
     players,
     loading,
@@ -111,7 +127,12 @@ const AdminPlayersTable = ({
         });
     }
 
-    const isPlayerInactiveNow = (playerId) => inactivityMap.get(playerId) === true;
+    
+/**
+ * Určí, zda je hráč v okamžiku zobrazení v období neaktivity.
+ */
+
+const isPlayerInactiveNow = (playerId) => inactivityMap.get(playerId) === true;
 
     // základní řazení podle příjmení
     const sortedPlayers = players

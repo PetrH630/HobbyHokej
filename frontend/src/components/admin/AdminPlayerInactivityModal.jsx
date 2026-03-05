@@ -31,6 +31,20 @@ const parseLocalDate = (val) => {
 const toBackendStartOfDay = (dateStr) => (dateStr ? `${dateStr}T00:00:00` : null);
 const toBackendEndOfDay = (dateStr) => (dateStr ? `${dateStr}T23:59:59` : null);
 
+/**
+ * AdminPlayerInactivityModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Umožňuje zavření stiskem klávesy Escape.
+ * Při otevření blokuje scroll pozadí pomocí useGlobalModal.
+ *
+ * Props:
+ * @param {import("../../types/dto").PlayerDTO} props.player Data hráče používaná pro zobrazení nebo administraci.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.onSaved vstupní hodnota komponenty.
+ */
+
 const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
     useGlobalModal(true);
 
@@ -142,7 +156,12 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
         setFieldErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
-    const validate = useMemo(() => {
+    
+/**
+ * Prověří povinná pole a vrátí textovou chybu nebo null pro validní stav.
+ */
+
+const validate = useMemo(() => {
         return (values, allPeriods, editingPeriod) => {
             const nextErrors = {
                 inactiveFrom: "",
@@ -197,7 +216,12 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
 
     const hasAnyError = (errs) => Object.values(errs).some((v) => !!v);
 
-    const handleSubmit = async (e) => {
+    
+/**
+ * Zpracuje odeslání formuláře a zavolá příslušný callback nadřazené komponenty.
+ */
+
+const handleSubmit = async (e) => {
         e.preventDefault();
 
         setTouched({
@@ -269,7 +293,12 @@ const AdminPlayerInactivityModal = ({ player, onClose, onSaved }) => {
         }
     };
 
-    const formatDate = (dt) => {
+    
+/**
+ * Naformátuje datum do čitelné podoby pro administraci.
+ */
+
+const formatDate = (dt) => {
         const v = toLocalDateValue(dt);
         const d = parseLocalDate(v);
         return d ? d.toLocaleDateString("cs-CZ") : v;

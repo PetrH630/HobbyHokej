@@ -1,4 +1,3 @@
-// src/components/matches/MatchDetail.jsx
 import { useState } from "react";
 import MatchHeader from "./MatchHeader";
 import PlayerMatchStatus from "../players/PlayerMatchStatus";
@@ -9,8 +8,7 @@ import PlayerPositionModal from "../matchRegistration/PlayerPositionModal";
 import { PlayerPosition } from "../../constants/playerPosition";
 import BackButton from "../BackButton";
 import MatchRegistrationHistory from "../MatchRegistration/MatchRegistrationHistory";
-// computeTeamPositionAvailability už nepotřebujeme
-// import { computeTeamPositionAvailability } from "../../utils/matchPositionUtils";
+
 
 const isMatchUpcoming = (match) => {
     if (!match || !match.dateTime) {
@@ -37,6 +35,27 @@ const isMatchUpcoming = (match) => {
     return matchDate > now;
 };
 
+/**
+ * MatchDetail
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ * @param {string} props.playerMatchStatus data vybraného zápasu.
+ * @param {Object} props.matchStatus data vybraného zápasu.
+ * @param {boolean} props.loading Příznak, že probíhá načítání dat a UI má zobrazit stav načítání.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ * @param {Object} props.actionError vstupní hodnota komponenty.
+ * @param {Function} props.onRegister vstupní hodnota komponenty.
+ * @param {Function} props.onUnregister vstupní hodnota komponenty.
+ * @param {Object} props.onExcuse vstupní hodnota komponenty.
+ * @param {Object} props.onSubstitute vstupní hodnota komponenty.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ * @param {Object} props.isPast vstupní hodnota komponenty.
+ * @param {Object} props.defaultTeam vstupní hodnota komponenty.
+ * @param {Function} props.onRefresh Callback, který se volá po úspěšné změně pro znovunačtení dat.
+ */
 const MatchDetail = ({
     match,
     playerMatchStatus,
@@ -66,26 +85,12 @@ const MatchDetail = ({
     const [showTeamModal, setShowTeamModal] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
 
-    // dvoukrokový výběr: tým → pozice
+
     const [showPositionModal, setShowPositionModal] = useState(false);
     const [pendingTeam, setPendingTeam] = useState(null);
 
     const defaultPlayerPosition = PlayerPosition.ANY;
 
-    // PŮVODNÍ VÝPOČTY OBSADENOSTI PRO TÝM – UŽ NEJSOU TŘEBA, ŘEŠÍ TO BACKEND
-    //
-    // let positionCountsForPendingTeam = {};
-    // let occupiedPositionsForPendingTeam = [];
-    // let onlyGoalieLeftForPendingTeam = false;
-    //
-    // if (pendingTeam && match) {
-    //     const { occupiedCounts, fullPositions, onlyGoalieLeft } =
-    //         computeTeamPositionAvailability(match, pendingTeam);
-    //
-    //     positionCountsForPendingTeam = occupiedCounts;
-    //     occupiedPositionsForPendingTeam = fullPositions;
-    //     onlyGoalieLeftForPendingTeam = !!onlyGoalieLeft;
-    // }
 
     if (loading) {
         return (
@@ -113,11 +118,13 @@ const MatchDetail = ({
 
     const isUpcoming = isMatchUpcoming(match);
 
+    
     const handleRegisterClick = () => {
         console.log("MatchDetail: klik na Přijdu → otevírám TeamSelectModal");
         setShowTeamModal(true);
     };
 
+    
     const handleSelectTeam = (team) => {
         console.log("MatchDetail: vybraný tým z modalu:", team);
         setPendingTeam(team);
@@ -125,6 +132,7 @@ const MatchDetail = ({
         setShowPositionModal(true);
     };
 
+    
     const handleSelectPosition = async (position) => {
         if (onRegister && pendingTeam) {
             await onRegister(pendingTeam, position);
@@ -134,6 +142,7 @@ const MatchDetail = ({
         setShowPositionModal(false);
     };
 
+    
     const handleClosePositionModal = () => {
         setShowPositionModal(false);
         setPendingTeam(null);
@@ -197,7 +206,7 @@ const MatchDetail = ({
                 isOpen={showPositionModal}
                 onClose={handleClosePositionModal}
                 defaultPosition={defaultPlayerPosition}
-                onSelectPosition={handleSelectPosition}                
+                onSelectPosition={handleSelectPosition}
                 match={match}
                 focusTeam={pendingTeam}
                 isCapacityFull={isCapacityFull}

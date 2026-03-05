@@ -2,6 +2,15 @@
 import { usePlayerHistoryAdmin } from "../../hooks/usePlayerHistoryAdmin";
 import AdminPlayerHistoryCard from "./AdminPlayerHistoryCard";
 
+/**
+ * AdminPlayerHistory
+ *
+ * Komponenta pro zobrazení historických záznamů a filtrování přehledu.
+ *
+ * Props:
+ * @param {number} props.playerId data hráče nebo identifikátor aktuálního hráče.
+ */
+
 const AdminPlayerHistory = ({ playerId }) => {
     const { history, loading, error } = usePlayerHistoryAdmin(playerId);
 

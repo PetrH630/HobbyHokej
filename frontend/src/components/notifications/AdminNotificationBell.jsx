@@ -1,14 +1,13 @@
-// src/components/notifications/AdminNotificationBell.jsx
 import { NavLink } from "react-router-dom";
 import { useNotificationBadge } from "../../hooks/useNotificationBadge";
 import { Bell } from "react-bootstrap-icons";
 
 /**
- * Zvonek pro admin/manager sekci.
+ * AdminNotificationBell
  *
- * - stejný badge (počet nepřečtených uživatelských notifikací),
- * - jiný vzhled (třeba warning),
- * - odkazuje na admin přehled notifikací.
+ * Komponenta pro zobrazení notifikací a práci se stavem přečtení.
+ *
+ * @param {Object} props vstupní hodnoty komponenty.
  */
 const AdminNotificationBell = () => {
     const { badge } = useNotificationBadge() || {};

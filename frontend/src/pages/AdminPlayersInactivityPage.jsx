@@ -25,6 +25,13 @@ const FILTERS = {
     NON_CURRENT: "NON_CURRENT",
 };
 
+/**
+ * AdminPlayersInactivityPage
+ *
+ * hráč – UI komponenta.
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const AdminPlayersInactivityPage = () => {
     const {
         periods,

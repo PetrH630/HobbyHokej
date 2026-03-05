@@ -2,6 +2,16 @@ import { useState } from "react";
 import RoleGuard from "../RoleGuard";
 import { PLAYER_POSITION_OPTIONS } from "../../constants/playerPosition";
 
+/**
+ * CreatePlayerForm
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Function} props.onSubmit callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onCancel callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.submitting vstupní hodnota komponenty.
+ */
 const CreatePlayerForm = ({ onSubmit, onCancel, submitting }) => {
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
@@ -12,6 +22,7 @@ const CreatePlayerForm = ({ onSubmit, onCancel, submitting }) => {
     const [primaryPosition, setPrimaryPosition] = useState("");
     const [secondaryPosition, setSecondaryPosition] = useState("");
 
+    
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -89,7 +100,6 @@ const CreatePlayerForm = ({ onSubmit, onCancel, submitting }) => {
                 </select>
             </div>
 
-            {/* POST – stejné chování jako v PlayerProfileForm */}
             <div className="mb-3">
                 <label className="form-label">Post</label>
                 <div className="row g-2">

@@ -1,4 +1,3 @@
-// src/hooks/useCurrentPlayer.js
 import { createContext, useContext, useEffect, useState } from "react";
 import {
     getCurrentPlayer,
@@ -8,6 +7,12 @@ import {
 
 const CurrentPlayerContext = createContext(null);
 
+/**
+ * useCurrentPlayer
+ *
+ * Hook pro získání aktuálně zvoleného hráče (profil, se kterým uživatel pracuje).
+ * Zodpovídá za načtení hráče z backendu a sjednocení stavu pro UI (loading/error).
+ */
 export const CurrentPlayerProvider = ({ children }) => {
     const [currentPlayer, setCurrentPlayerState] = useState(null);
     const [players, setPlayers] = useState([]);

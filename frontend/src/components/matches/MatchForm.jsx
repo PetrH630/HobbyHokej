@@ -1,7 +1,17 @@
-// src/components/matches/MatchForm.jsx
 import DateTimePicker from "../forms/DateTimePicker";
 
+/**
+ * MatchForm
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * Props:
+ * @param {Object} props.values Aktuální hodnoty formuláře.
+ * @param {Function} props.onChange callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.errors Validační chyby formuláře po jednotlivých polích.
+ */
 const MatchForm = ({ values, onChange, errors = {} }) => {
+    
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         onChange({ [name]: value });
@@ -63,7 +73,6 @@ const MatchForm = ({ values, onChange, errors = {} }) => {
                 )}
             </div>
 
-            {/* POPIS */}
             <div className="mb-3">
                 <label className="form-label" htmlFor="match-description">
                     Popis (volitelné)
@@ -84,7 +93,6 @@ const MatchForm = ({ values, onChange, errors = {} }) => {
                 )}
             </div>
 
-            {/* MAX PLAYERS */}
             <div className="mb-3">
                 <label className="form-label" htmlFor="match-maxPlayers">
                     Maximální počet hráčů
@@ -105,7 +113,6 @@ const MatchForm = ({ values, onChange, errors = {} }) => {
                 )}
             </div>
 
-            {/* PRICE */}
             <div className="mb-3">
                 <label className="form-label" htmlFor="match-price">
                     Cena (celkem)

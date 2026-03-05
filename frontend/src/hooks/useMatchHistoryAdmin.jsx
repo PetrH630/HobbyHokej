@@ -1,7 +1,12 @@
-// src/hooks/useMatchHistoryAdmin.js
 import { useEffect, useState } from "react";
 import { getMatchHistoryAdmin } from "../api/matchApi";
 
+/**
+ * useMatchHistoryAdmin
+ *
+ * Admin hook pro načtení historie změn zápasu (audit / timeline).
+ * Používá se v administraci pro dohledání, kdo a kdy upravil stav nebo parametry zápasu.
+ */
 export const useMatchHistoryAdmin = (matchId) => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);

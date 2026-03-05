@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "cookie_consent_accepted";
 
+/**
+ * CookieConsentBanner
+ *
+ * Banner komponenta pro zobrazování krátkých oznámení nebo souhlasů uživatele.
+ *
+ * @param {Object} props vstupní hodnoty komponenty.
+ */
 const CookieConsentBanner = () => {
     const [visible, setVisible] = useState(false);
 
@@ -12,6 +19,7 @@ const CookieConsentBanner = () => {
         }
     }, []);
 
+    
     const handleAccept = () => {
         localStorage.setItem(STORAGE_KEY, "true");
         setVisible(false);

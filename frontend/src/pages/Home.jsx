@@ -4,6 +4,13 @@ import Players from "../components/players/Players";
 import { useMyUpcomingMatches } from "../hooks/useMyUpcomingMatches";
 import { useAuth } from "../hooks/useAuth";
 
+/**
+ * Home
+ *
+ * UI komponenta.
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const Home = () => {
     const { matches, loading, error } = useMyUpcomingMatches();
     const { user } = useAuth();

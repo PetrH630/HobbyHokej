@@ -9,6 +9,16 @@ const hasAnyDemoItems = (demo) => {
     return (demo.emails?.length ?? 0) > 0 || (demo.sms?.length ?? 0) > 0;
 };
 
+/**
+ * ForgottenPasswordRequestPage
+ *
+ * Bootstrap modal.
+ *
+ * Vedlejší efekty:
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const ForgottenPasswordRequestPage = () => {
     const [email, setEmail] = useState("");
     const [submitting, setSubmitting] = useState(false);

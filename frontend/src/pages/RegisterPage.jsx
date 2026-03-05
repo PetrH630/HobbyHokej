@@ -10,6 +10,17 @@ const hasAnyDemoItems = (demo) => {
   return (demo.emails?.length ?? 0) > 0 || (demo.sms?.length ?? 0) > 0;
 };
 
+/**
+ * RegisterPage
+ *
+ * registrace – Bootstrap modal.
+ *
+ * Vedlejší efekty:
+ * - může provádět navigaci v aplikaci
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const RegisterPage = () => {
   const navigate = useNavigate();
 

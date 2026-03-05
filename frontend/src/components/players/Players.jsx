@@ -1,4 +1,3 @@
-// src/components/Players.jsx
 import { usePlayers } from "../../hooks/usePlayers";
 import PlayerCard from "./PlayerCard";
 import { setCurrentPlayer } from "../../api/playerApi";
@@ -7,12 +6,20 @@ import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
 
 import "./Players.css";
 
+/**
+ * Players
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * @param {Object} props vstupní hodnoty komponenty.
+ */
 const Players = () => {
     const { players, loading, error } = usePlayers();
     const navigate = useNavigate();
 
     const { currentPlayer, refreshCurrentPlayer } = useCurrentPlayer();
 
+    
     const handleSelectPlayer = async (playerId) => {
         try {
             await setCurrentPlayer(playerId);
@@ -73,7 +80,7 @@ const Players = () => {
                                 )}
 
                                 <PlayerCard
-                                    player={p}                                    
+                                    player={p}
                                     isActive={false}
                                     onSelect={() => handleSelectPlayer(p.id)}
                                     disabledTooltip={disabledTooltip}

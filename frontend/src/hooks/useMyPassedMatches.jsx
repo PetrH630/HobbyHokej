@@ -1,9 +1,14 @@
-// src/hooks/useMyPassedMatches.js
 import { useEffect, useState } from "react";
 import { getMyPassedMatchesOverview } from "../api/matchApi";
 import { useSeason } from "./useSeason";
 import { useCurrentPlayer } from "./useCurrentPlayer";
 
+/**
+ * useMyPassedMatches
+ *
+ * Hook pro načtení minulých zápasů relevantních pro aktuálního hráče.
+ * Používá se na stránkách historie a statistik.
+ */
 export const useMyPassedMatches = () => {
     const { currentSeasonId } = useSeason();
     const { currentPlayer } = useCurrentPlayer(); // 👈 přidáno

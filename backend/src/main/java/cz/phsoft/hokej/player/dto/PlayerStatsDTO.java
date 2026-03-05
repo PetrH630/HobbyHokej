@@ -1,8 +1,9 @@
 package cz.phsoft.hokej.player.dto;
 
-import cz.phsoft.hokej.player.enums.Team;
 import cz.phsoft.hokej.player.enums.PlayerPosition;
+import cz.phsoft.hokej.player.enums.Team;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -90,6 +91,16 @@ public class PlayerStatsDTO {
      */
     private Map<Team, Integer> registeredByTeam;
 
+    /**
+     * Výsledky zápasů, ve kterých byl hráč registrován.
+     *
+     * Kolekce obsahuje výsledek zápasu a skóre obou týmů.
+     * Zahrnuty jsou pouze zápasy, kde měl hráč status REGISTERED.
+     */
+    private List<PlayerMatchResultDTO> registeredMatchResults;
+
+
+
     public Long getPlayerId() { return playerId; }
     public void setPlayerId(Long playerId) { this.playerId = playerId; }
 
@@ -133,4 +144,10 @@ public class PlayerStatsDTO {
 
     public Map<Team, Integer> getRegisteredByTeam() { return registeredByTeam; }
     public void setRegisteredByTeam(Map<Team, Integer> registeredByTeam) { this.registeredByTeam = registeredByTeam; }
+
+    public List<PlayerMatchResultDTO> getRegisteredMatchResults() { return registeredMatchResults; }
+    public void setRegisteredMatchResults(List<PlayerMatchResultDTO> registeredMatchResults) {
+        this.registeredMatchResults = registeredMatchResults;
+    }
+
 }

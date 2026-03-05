@@ -1,4 +1,3 @@
-// src/validation/seasonValidation.js
 
 /**
  * Frontend validace pro SeasonDTO.

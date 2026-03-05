@@ -1,6 +1,11 @@
-// src/validation/playerValidation.js
 
 // Frontend validace dle PlayerDTO
+/**
+ * playerValidation
+ *
+ * Validace formulářových hodnot pro hráče.
+ * Používá se při vytváření a editaci hráčských profilů v administraci.
+ */
 export const validatePlayerProfile = (values) => {
     const errors = {};
 

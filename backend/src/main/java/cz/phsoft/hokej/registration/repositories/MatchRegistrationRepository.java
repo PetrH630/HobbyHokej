@@ -104,4 +104,10 @@ public interface MatchRegistrationRepository
             Long matchId,
             PlayerMatchStatus status
     );
+
+    List<MatchRegistrationEntity> findByMatchIdAndStatusIn(
+            Long matchId,
+            List<PlayerMatchStatus> statuses
+    );
+
 }

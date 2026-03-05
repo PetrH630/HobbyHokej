@@ -31,6 +31,17 @@ const hasAnyDemoItems = (demo) => {
     return (demo.emails?.length ?? 0) > 0 || (demo.sms?.length ?? 0) > 0;
 };
 
+/**
+ * AdminMatchesPage
+ *
+ * zápas – Bootstrap modal.
+ *
+ * Vedlejší efekty:
+ * - při zobrazení registruje a po zavření uklízí event listenery nebo synchronizuje stav
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const AdminMatchesPage = () => {
     const { currentSeasonId } = useSeason();
     const { matches, loading, error, reload } = useAllMatchesAdmin(currentSeasonId);

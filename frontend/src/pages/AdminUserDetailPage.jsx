@@ -3,6 +3,18 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { userApi } from '../api/userApi';
 
+/**
+ * AdminUserDetailPage
+ *
+ * UI komponenta.
+ *
+ * Vedlejší efekty:
+ * - při zobrazení registruje a po zavření uklízí event listenery nebo synchronizuje stav
+ * - může provádět navigaci v aplikaci
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 function AdminUserDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();

@@ -10,6 +10,17 @@ const formatDate = (value) => {
     }
 };
 
+/**
+ * AdminSeasonCard
+ *
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
+ *
+ * Props:
+ * @param {import("../../types/dto").SeasonDTO} props.season Data sezóny používaná ve správě sezón.
+ * @param {Function} props.onEdit vstupní hodnota komponenty.
+ * @param {Object} props.onSetActive vstupní hodnota komponenty.
+ */
+
 const AdminSeasonCard = ({ season, onEdit, onSetActive }) => {
     const isActive = season.active === true;
 

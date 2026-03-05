@@ -1,8 +1,13 @@
-// src/context/NotificationContext.jsx
 import { createContext, useContext, useState } from "react";
 
 const NotificationContext = createContext(null);
 
+/**
+ * NotificationContext
+ *
+ * Lehký React kontext pro sdílení notifikací a akcí nad nimi napříč aplikací.
+ * Komponenty jej používají přes `useNotificationContext()` místo prop-drillingu.
+ */
 export const NotificationProvider = ({ children }) => {
     const [notification, setNotification] = useState(null);
 

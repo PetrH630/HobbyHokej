@@ -1,15 +1,13 @@
-// src/components/notifications/NotificationBell.jsx
 import { useNavigate } from "react-router-dom";
 import { FaBell } from "react-icons/fa";
 import { useNotificationBadge } from "../../hooks/useNotificationBadge";
 
 /**
- * Zvoneček s badge pro nové nepřečtené notifikace od posledního přihlášení.
+ * NotificationBell
  *
- * Hodnota se bere z badge.unreadCountSinceLastLogin,
- * kterou by měl dodat backend / API.
+ * Komponenta pro zobrazení notifikací a práci se stavem přečtení.
  *
- * Slouží zároveň jako odkaz na stránku /app/notifications.
+ * @param {Object} props vstupní hodnoty komponenty.
  */
 const NotificationBell = () => {
     const navigate = useNavigate();
@@ -18,12 +16,12 @@ const NotificationBell = () => {
     const newUnreadCount = badge?.unreadCountSinceLastLogin ?? 0;
     const displayCount = newUnreadCount > 99 ? "99+" : newUnreadCount;
 
+    
     const handleClick = () => {
         navigate("/app/notifications");
     };
 
-    // Když se badge ještě načítá / chyba, pořád zobrazujeme zvonek
-    // jen bez/nebo s nulovým badge
+
     return (
         <button
             type="button"

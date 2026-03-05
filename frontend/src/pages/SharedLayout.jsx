@@ -5,6 +5,13 @@ import HeaderTop from "../components/HeaderTop";
 import { useNotification } from "../context/NotificationContext";
 import CookieConsentBanner from "../components/CookieConsentBanner";
 
+/**
+ * SharedLayout
+ *
+ * UI komponenta.
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const SharedLayout = () => {
     const { notification } = useNotification();
 

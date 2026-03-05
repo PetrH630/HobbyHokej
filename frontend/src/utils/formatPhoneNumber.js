@@ -1,4 +1,9 @@
-// src/utils/formatPhoneNumber.js
+/**
+ * formatPhoneNumber
+ *
+ * Normalizuje a formátuje telefonní číslo pro zobrazení v UI.
+ * Používá se v administraci i v profilu hráče, aby se číslo zobrazovalo konzistentně.
+ */
 export const formatPhoneNumber = (phone) => {
     if (!phone) return "";
 

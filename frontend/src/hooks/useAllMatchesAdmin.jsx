@@ -1,7 +1,12 @@
-// src/hooks/useAllMatchesAdmin.jsx
 import { useEffect, useState, useCallback } from "react";
 import { getAllMatchesAdmin } from "../api/matchApi";
 
+/**
+ * useAllMatchesAdmin
+ *
+ * Admin hook pro načtení seznamu zápasů pro přehled a správu v administraci.
+ * Zapojuje volání backendu a vrací data a stav načítání.
+ */
 export const useAllMatchesAdmin = (seasonId) => {
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);

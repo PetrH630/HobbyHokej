@@ -1,229 +1,276 @@
 ﻿Balíček (složka): entities
-Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\entities
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\entities
 
 Seznam souborů:
-MatchEntity.java
-MatchHistoryEntity.java
+AppUserEntity.java
+AppUserHistoryEntity.java
+AppUserSettingsEntity.java
+EmailVerificationTokenEntity.java
+ForgottenPasswordResetTokenEntity.java
 
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\entities\MatchEntity.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\entities\AppUserEntity.java
 -----
-package cz.phsoft.hokej.match.entities;
+package cz.phsoft.hokej.user.entities;
 
-import cz.phsoft.hokej.season.entities.SeasonEntity;
-import cz.phsoft.hokej.match.enums.MatchCancelReason;
-import cz.phsoft.hokej.match.enums.MatchMode;
-import cz.phsoft.hokej.match.enums.MatchStatus;
+import cz.phsoft.hokej.user.enums.Role;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
- * Entita reprezentujĂ­cĂ­ hokejovĂ˝ zĂˇpas.
+ * Entita reprezentujĂ­cĂ­ uĹľivatelskĂ˝ ĂşÄŤet aplikace.
  *
- * UchovĂˇvĂˇ zĂˇkladnĂ­ informace o zĂˇpasu, jeho kapacitÄ›,
- * cenÄ›, aktuĂˇlnĂ­m stavu a vazbÄ› na sezĂłnu.
- * Informace o ĂşÄŤasti hrĂˇÄŤĹŻ jsou uloĹľeny v samostatnĂ© entitÄ›
- * MatchRegistrationEntity.
+ * SlouĹľĂ­ pro autentizaci a autorizaci uĹľivatelĹŻ v systĂ©mu.
+ * UchovĂˇvajĂ­ se zĂˇkladnĂ­ identifikaÄŤnĂ­ Ăşdaje, pĹ™ihlaĹˇovacĂ­ informace,
+ * role uĹľivatele a stav aktivace ĂşÄŤtu.
  *
- * Entita dĂˇle obsahuje auditnĂ­ Ăşdaje o vytvoĹ™enĂ­ a poslednĂ­
- * ĂşpravÄ› zĂˇpasu.
+ * Jeden uĹľivatel mĹŻĹľe mĂ­t pĹ™iĹ™azeno vĂ­ce hrĂˇÄŤĹŻ. DetailnĂ­ uĹľivatelskĂ©
+ * preference a nastavenĂ­ jsou oddÄ›leny do entity AppUserSettingsEntity.
+ * Entita se pouĹľĂ­vĂˇ jako hlavnĂ­ zdroj pravdy pro uĹľivatelskĂ© ĂşÄŤty.
  */
 @Entity
-@Table(name = "matches")
-public class MatchEntity {
+@Table(name = "app_users")
+public class AppUserEntity {
 
     /**
-     * PrimĂˇrnĂ­ klĂ­ÄŤ zĂˇpasu.
+     * PrimĂˇrnĂ­ klĂ­ÄŤ uĹľivatele.
+     *
+     * Hodnota odpovĂ­dĂˇ identifikĂˇtoru uĹľivatele v databĂˇzi.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Datum a ÄŤas konĂˇnĂ­ zĂˇpasu.
+     * KĹ™estnĂ­ jmĂ©no uĹľivatele.
      */
     @Column(nullable = false)
-    private LocalDateTime dateTime;
+    private String name;
 
     /**
-     * MĂ­sto konĂˇnĂ­ zĂˇpasu.
+     * PĹ™Ă­jmenĂ­ uĹľivatele.
+     *
+     * PĹ™i uloĹľenĂ­ je pĹ™evĂˇdÄ›no na velkĂˇ pĂ­smena.
      */
     @Column(nullable = false)
-    private String location;
+    private String surname;
 
     /**
-     * VolitelnĂ˝ popis zĂˇpasu.
-     *
-     * SlouĹľĂ­ napĹ™Ă­klad pro doplĹujĂ­cĂ­ informace o organizaci zĂˇpasu.
+     * UnikĂˇtnĂ­ e-mail uĹľivatele slouĹľĂ­cĂ­ pro pĹ™ihlĂˇĹˇenĂ­ do systĂ©mu.
      */
-    private String description;
+    @Column(nullable = false, unique = true)
+    private String email;
 
     /**
-     * MaximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ povolenĂ˝ch pro zĂˇpas.
+     * Hash hesla uĹľivatele.
      *
-     * Hodnota se pouĹľĂ­vĂˇ pro kontrolu kapacity pĹ™i registraci hrĂˇÄŤĹŻ.
-     */
-    @Column(nullable = false)
-    private Integer maxPlayers;
-
-    /**
-     * CelkovĂˇ cena zĂˇpasu.
-     *
-     * Hodnota mĹŻĹľe slouĹľit pro vĂ˝poÄŤet podĂ­lu jednotlivĂ˝ch hrĂˇÄŤĹŻ.
+     * Heslo se nikdy neuklĂˇdĂˇ v otevĹ™enĂ© podobÄ›.
      */
     @Column(nullable = false)
-    private Integer price;
+    private String password;
 
     /**
-     * AktuĂˇlnĂ­ stav zĂˇpasu.
+     * Role uĹľivatele v systĂ©mu.
      *
-     * Stav urÄŤuje, zda je zĂˇpas plĂˇnovanĂ˝, zruĹˇenĂ˝ nebo napĹ™Ă­klad odehranĂ˝.
+     * UrÄŤuje oprĂˇvnÄ›nĂ­ uĹľivatele pĹ™i pĹ™Ă­stupu k jednotlivĂ˝m endpointĹŻm.
      */
     @Enumerated(EnumType.STRING)
-    private MatchStatus matchStatus;
+    @Column(nullable = false)
+    private Role role;
 
     /**
-     * ReĹľim zĂˇpasu (poÄŤet hrĂˇÄŤĹŻ na ledÄ›, s brankĂˇĹ™em / bez brankĂˇĹ™e).
-     * UklĂˇdĂˇ se jako textovĂˇ hodnota enumu.
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "match_mode", nullable = false, length = 50)
-    private MatchMode matchMode;
-
-    /**
-     * DĹŻvod zruĹˇenĂ­ zĂˇpasu.
+     * PĹ™Ă­znak aktivace ĂşÄŤtu.
      *
-     * VyplĹuje se pouze v pĹ™Ă­padÄ›, Ĺľe je zĂˇpas zruĹˇen.
+     * Hodnota se nastavuje napĹ™Ă­klad po ĂşspÄ›ĹˇnĂ© e-mailovĂ© aktivaci ĂşÄŤtu.
      */
-    @Enumerated(EnumType.STRING)
-    private MatchCancelReason cancelReason;
+    @Column(nullable = false)
+    private boolean enabled = false;
 
     /**
-     * SezĂłna, do kterĂ© zĂˇpas patĹ™Ă­.
+     * HrĂˇÄŤi pĹ™iĹ™azenĂ­ k tomuto uĹľivateli.
      *
-     * KaĹľdĂ˝ zĂˇpas musĂ­ bĂ˝t pĹ™iĹ™azen k existujĂ­cĂ­ sezĂłnÄ›.
+     * Vztah je typu one-to-many, kdy jeden uĹľivatel mĹŻĹľe mĂ­t vĂ­ce hrĂˇÄŤĹŻ.
+     * Ĺ˝ivotnĂ­ cyklus hrĂˇÄŤĹŻ je navĂˇzĂˇn na uĹľivatele.
      */
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "season_id", nullable = false)
-    private SeasonEntity season;
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private Set<PlayerEntity> players;
 
     /**
-     * ÄŚasovĂ© razĂ­tko zĂˇpasu.
+     * NastavenĂ­ uĹľivatele.
      *
-     * UchovĂˇvĂˇ datum a ÄŤas vytvoĹ™enĂ­ nebo poslednĂ­ zmÄ›ny zĂˇpasu.
-     * Hodnota se aktualizuje pĹ™i kaĹľdĂ© zmÄ›nÄ› zĂˇznamu.
+     * Obsahuje napĹ™Ă­klad zpĹŻsob vĂ˝bÄ›ru aktuĂˇlnĂ­ho hrĂˇÄŤe,
+     * nastavenĂ­ notifikacĂ­ a dalĹˇĂ­ preference.
+     * Jeden uĹľivatel mĂˇ prĂˇvÄ› jedno nastavenĂ­.
+     */
+    @OneToOne(mappedBy = "user",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true)
+    private AppUserSettingsEntity settings;
+
+    /**
+     * ÄŚasovĂ© razĂ­tko uĹľivatele.
+     *
+     * UchovĂˇvĂˇ datum a ÄŤas poslednĂ­ zmÄ›ny entity.
+     * Hodnota se aktualizuje pĹ™i vytvoĹ™enĂ­ i pĹ™i kaĹľdĂ© ĂşpravÄ› zĂˇznamu.
      */
     @Column(nullable = false, updatable = true)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
-     * ID uĹľivatele, kterĂ˝ zĂˇpas vytvoĹ™il.
+     * Metoda volanĂˇ pĹ™ed prvnĂ­m uloĹľenĂ­m entity.
      *
-     * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely.
+     * Nastavuje aktuĂˇlnĂ­ ÄŤasovĂ© razĂ­tko a pĹ™evĂˇdĂ­ pĹ™Ă­jmenĂ­
+     * na velkĂˇ pĂ­smena.
      */
-    @Column(name = "created_by_user_id")
-    private Long createdByUserId;
-
-    /**
-     * ID uĹľivatele, kterĂ˝ zĂˇpas naposledy zmÄ›nil.
-     *
-     * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely a sledovĂˇnĂ­ odpovÄ›dnosti za zmÄ›ny.
-     */
-    @Column(name = "last_modified_by_user_id")
-    private Long lastModifiedByUserId;
-
-
-
-    /**
-     * BezparametrickĂ˝ konstruktor poĹľadovanĂ˝ JPA.
-     */
-    public MatchEntity() {
+    @PrePersist
+    public void prePersist() {
+        this.timestamp = LocalDateTime.now();
+        if (surname != null) {
+            this.surname = this.surname.toUpperCase();
+        }
     }
+
+    /**
+     * Metoda volanĂˇ pĹ™ed aktualizacĂ­ entity.
+     *
+     * Aktualizuje ÄŤasovĂ© razĂ­tko a pĹ™evĂˇdĂ­ pĹ™Ă­jmenĂ­
+     * na velkĂˇ pĂ­smena.
+     */
+    @PreUpdate
+    public void preUpdate() {
+        this.timestamp = LocalDateTime.now();
+        if (surname != null) {
+            this.surname = this.surname.toUpperCase();
+        }
+    }
+
+    /**
+     * UchovĂˇvĂˇ ÄŤas pĹ™edposlednĂ­ho pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     *
+     * Hodnota se pouĹľĂ­vĂˇ pĹ™edevĹˇĂ­m pro vĂ˝poÄŤet notifikacĂ­
+     * od poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­.
+     */
+    @Column(name = "last_login_at")
+    private Instant lastLoginAt;
+
+    /**
+     * UchovĂˇvĂˇ ÄŤas poslednĂ­ho pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
+     *
+     * Hodnota se aktualizuje pĹ™i kaĹľdĂ©m ĂşspÄ›ĹˇnĂ©m pĹ™ihlĂˇĹˇenĂ­.
+     */
+    @Column(name = "current_login_at")
+    private Instant currentLoginAt;
+
 
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
 
-    public LocalDateTime getDateTime() { return dateTime; }
+    public String getName() { return name; }
 
-    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+    public void setName(String name) { this.name = name; }
 
-    public String getLocation() { return location; }
+    public String getSurname() { return surname; }
 
-    public void setLocation(String location) { this.location = location; }
+    public void setSurname(String surname) { this.surname = surname.toUpperCase(); }
 
-    public String getDescription() { return description; }
+    public String getEmail() { return email; }
 
-    public void setDescription(String description) { this.description = description; }
+    public void setEmail(String email) { this.email = email; }
 
-    public Integer getMaxPlayers() { return maxPlayers; }
+    public String getPassword() { return password; }
 
-    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
+    public void setPassword(String password) { this.password = password; }
 
-    public Integer getPrice() { return price; }
+    public Role getRole() { return role; }
 
-    public void setPrice(Integer price) { this.price = price; }
+    public void setRole(Role role) { this.role = role; }
 
-    public MatchStatus getMatchStatus() { return matchStatus; }
+    public boolean isEnabled() { return enabled; }
 
-    public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public MatchCancelReason getCancelReason() { return cancelReason; }
+    public Set<PlayerEntity> getPlayers() { return players; }
 
-    public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
+    public void setPlayers(Set<PlayerEntity> players) { this.players = players; }
 
-    public SeasonEntity getSeason() { return season; }
+    public AppUserSettingsEntity getSettings() { return settings; }
 
-    public void setSeason(SeasonEntity season) { this.season = season; }
-
-    public LocalDateTime getTimestamp() { return timestamp; }
-
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
-
-    public Long getCreatedByUserId() { return createdByUserId; }
-
-    public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
-
-    public Long getLastModifiedByUserId() { return lastModifiedByUserId; }
-
-    public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
-
-    public MatchMode getMatchMode() {
-        return matchMode;
+    /**
+     * Nastavuje uĹľivatelskĂ© nastavenĂ­ a zĂˇroveĹ udrĹľuje obousmÄ›rnou vazbu.
+     *
+     * PĹ™i pĹ™iĹ™azenĂ­ nastavenĂ­ se do danĂ© instance AppUserSettingsEntity
+     * nastavuje odkaz na tohoto uĹľivatele. Metoda se pouĹľĂ­vĂˇ v servisnĂ­
+     * vrstvÄ› a entity tak zĹŻstĂˇvajĂ­ konzistentnĂ­ z obou stran vztahu.
+     *
+     * @param settings instance nastavenĂ­ uĹľivatele
+     */
+    public void setSettings(AppUserSettingsEntity settings) {
+        this.settings = settings;
+        if (settings != null) {
+            settings.setUser(this);
+        }
     }
 
-    public void setMatchMode(MatchMode matchMode) {
-        this.matchMode = matchMode;
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public Instant getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(Instant lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
+    public Instant getCurrentLoginAt() {
+        return currentLoginAt;
+    }
+
+    public void setCurrentLoginAt(Instant currentLoginAt) {
+        this.currentLoginAt = currentLoginAt;
     }
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\entities\MatchHistoryEntity.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\entities\AppUserHistoryEntity.java
 -----
-package cz.phsoft.hokej.match.entities;
+package cz.phsoft.hokej.user.entities;
 
-import cz.phsoft.hokej.match.enums.MatchCancelReason;
-import cz.phsoft.hokej.match.enums.MatchStatus;
-import cz.phsoft.hokej.match.enums.MatchMode;
+import cz.phsoft.hokej.user.enums.Role;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 /**
- * Entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam o zĂˇpasu.
+ * Entita reprezentujĂ­cĂ­ historickĂ˝ zĂˇznam o uĹľivateli.
  *
- * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely a uchovĂˇvĂˇnĂ­ zmÄ›n zĂˇpasĹŻ v ÄŤase.
- * KaĹľdĂ˝ zĂˇznam pĹ™edstavuje stav zĂˇpasu v okamĹľiku provedenĂ­ operace
- * nad hlavnĂ­ entitou MatchEntity.
+ * SlouĹľĂ­ pro auditnĂ­ ĂşÄŤely a uchovĂˇvĂˇnĂ­ zmÄ›n uĹľivatelskĂ©ho ĂşÄŤtu v ÄŤase.
+ * KaĹľdĂ˝ zĂˇznam pĹ™edstavuje stav uĹľivatele v okamĹľiku provedenĂ­ operace
+ * nad hlavnĂ­ entitou AppUserEntity.
  *
  * ZĂˇznamy jsou typicky vytvĂˇĹ™eny databĂˇzovĂ˝m triggerem pĹ™i operacĂ­ch
- * INSERT, UPDATE nebo DELETE.
+ * INSERT, UPDATE nebo DELETE a pouĹľĂ­vajĂ­ se v pĹ™ehledech historie
+ * a pĹ™i Ĺ™eĹˇenĂ­ incidentĹŻ.
  */
 @Entity
-@Table(name = "matches_history")
-public class MatchHistoryEntity {
+@Table(name = "app_users_history")
+public class AppUserHistoryEntity {
 
     /**
      * PrimĂˇrnĂ­ klĂ­ÄŤ historickĂ©ho zĂˇznamu.
@@ -233,7 +280,7 @@ public class MatchHistoryEntity {
     private Long id;
 
     /**
-     * Typ provedenĂ© operace nad zĂˇpasem.
+     * Typ provedenĂ© operace.
      *
      * Typicky se jednĂˇ o hodnoty INSERT, UPDATE nebo DELETE.
      */
@@ -249,96 +296,59 @@ public class MatchHistoryEntity {
     private LocalDateTime changedAt;
 
     /**
-     * ID zĂˇpasu z hlavnĂ­ tabulky matches.
+     * ID uĹľivatele z hlavnĂ­ tabulky app_users.
      *
-     * SlouĹľĂ­ pro propojenĂ­ historickĂ©ho zĂˇznamu s pĹŻvodnĂ­ entitou zĂˇpasu.
+     * SlouĹľĂ­ pro propojenĂ­ historickĂ©ho zĂˇznamu s pĹŻvodnĂ­ entitou uĹľivatele.
      */
-    @Column(name = "match_id", nullable = false)
-    private Long matchId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     /**
-     * PĹŻvodnĂ­ ÄŤasovĂ© razĂ­tko zĂˇpasu.
+     * PĹŻvodnĂ­ ÄŤasovĂ© razĂ­tko uĹľivatele.
      *
-     * JednĂˇ se o hodnotu sloupce timestamp z MatchEntity
-     * v okamĹľiku provedenĂ­ zmÄ›ny.
+     * JednĂˇ se o hodnotu timestamp z AppUserEntity v okamĹľiku zmÄ›ny.
+     * UmoĹľĹuje dohledat pĹ™esnĂ˝ stav uĹľivatele pĹ™i konkrĂ©tnĂ­ operaci.
      */
     @Column(name = "original_timestamp", nullable = false)
     private LocalDateTime originalTimestamp;
 
     /**
-     * Datum a ÄŤas konĂˇnĂ­ zĂˇpasu v okamĹľiku zmÄ›ny.
+     * JmĂ©no uĹľivatele v okamĹľiku zmÄ›ny.
      */
-    @Column(name = "date_time", nullable = false)
-    private LocalDateTime dateTime;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     /**
-     * MĂ­sto konĂˇnĂ­ zĂˇpasu v okamĹľiku zmÄ›ny.
+     * PĹ™Ă­jmenĂ­ uĹľivatele v okamĹľiku zmÄ›ny.
      */
-    @Column(name = "location", nullable = false)
-    private String location;
+    @Column(name = "surname", nullable = false)
+    private String surname;
 
     /**
-     * Popis zĂˇpasu v okamĹľiku zmÄ›ny.
+     * E-mail uĹľivatele v okamĹľiku zmÄ›ny.
      */
-    @Column(name = "description")
-    private String description;
+    @Column(name = "email", nullable = false)
+    private String email;
 
     /**
-     * MaximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ povolenĂ˝ch pro zĂˇpas v okamĹľiku zmÄ›ny.
-     */
-    @Column(name = "max_players", nullable = false)
-    private Integer maxPlayers;
-
-    /**
-     * Cena zĂˇpasu v okamĹľiku zmÄ›ny.
-     */
-    @Column(name = "price", nullable = false)
-    private Integer price;
-
-    /**
-     * Stav zĂˇpasu v okamĹľiku zmÄ›ny.
+     * Role uĹľivatele v okamĹľiku zmÄ›ny.
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "match_status")
-    private MatchStatus matchStatus;
+    @Column(name = "role", nullable = false)
+    private Role role;
 
     /**
-     * DĹŻvod zruĹˇenĂ­ zĂˇpasu v okamĹľiku zmÄ›ny.
+     * Stav aktivace ĂşÄŤtu v okamĹľiku zmÄ›ny.
      */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "cancel_reason")
-    private MatchCancelReason cancelReason;
-
-    /**
-     * ReĹľim zĂˇpasu v okamĹľiku zmÄ›ny.
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "match_mode", nullable = false)
-    private MatchMode matchMode;
-
-    /**
-     * ID sezĂłny, do kterĂ© zĂˇpas patĹ™il v okamĹľiku zmÄ›ny.
-     */
-    @Column(name = "season_id", nullable = false)
-    private Long seasonId;
-
-    /**
-     * ID uĹľivatele, kterĂ˝ zĂˇpas pĹŻvodnÄ› vytvoĹ™il.
-     */
-    @Column(name = "created_by_user_id")
-    private Long createdByUserId;
-
-    /**
-     * ID uĹľivatele, kterĂ˝ zĂˇpas naposledy zmÄ›nil pĹ™ed vytvoĹ™enĂ­m
-     * historickĂ©ho zĂˇznamu.
-     */
-    @Column(name = "last_modified_by_user_id")
-    private Long lastModifiedByUserId;
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled;
 
     /**
      * BezparametrickĂ˝ konstruktor poĹľadovanĂ˝ JPA.
+     *
+     * Konstruktor se pouĹľĂ­vĂˇ frameworkem pĹ™i naÄŤĂ­tĂˇnĂ­ entit z databĂˇze.
      */
-    public MatchHistoryEntity() {
+    public AppUserHistoryEntity() {
     }
 
     public Long getId() { return id; }
@@ -350,42 +360,424 @@ public class MatchHistoryEntity {
     public LocalDateTime getChangedAt() { return changedAt; }
     public void setChangedAt(LocalDateTime changedAt) { this.changedAt = changedAt; }
 
-    public Long getMatchId() { return matchId; }
-    public void setMatchId(Long matchId) { this.matchId = matchId; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
     public LocalDateTime getOriginalTimestamp() { return originalTimestamp; }
     public void setOriginalTimestamp(LocalDateTime originalTimestamp) { this.originalTimestamp = originalTimestamp; }
 
-    public LocalDateTime getDateTime() { return dateTime; }
-    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public Integer getMaxPlayers() { return maxPlayers; }
-    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
-    public Integer getPrice() { return price; }
-    public void setPrice(Integer price) { this.price = price; }
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+}
 
-    public MatchStatus getMatchStatus() { return matchStatus; }
-    public void setMatchStatus(MatchStatus matchStatus) { this.matchStatus = matchStatus; }
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\entities\AppUserSettingsEntity.java
+-----
+package cz.phsoft.hokej.user.entities;
 
-    public MatchCancelReason getCancelReason() { return cancelReason; }
-    public void setCancelReason(MatchCancelReason cancelReason) { this.cancelReason = cancelReason; }
+import cz.phsoft.hokej.user.enums.PlayerSelectionMode;
+import cz.phsoft.hokej.notifications.enums.GlobalNotificationLevel;
+import cz.phsoft.hokej.user.enums.LandingPage;
 
-    public MatchMode getMatchMode() { return matchMode; }
-    public void setMatchMode(MatchMode matchMode) { this.matchMode = matchMode; }
+import jakarta.persistence.*;
 
-    public Long getSeasonId() { return seasonId; }
-    public void setSeasonId(Long seasonId) { this.seasonId = seasonId; }
+import java.time.LocalTime;
 
-    public Long getCreatedByUserId() { return createdByUserId; }
-    public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
+/**
+ * Entita uchovĂˇvajĂ­cĂ­ nastavenĂ­ uĹľivatelskĂ©ho ĂşÄŤtu.
+ *
+ * OddÄ›luje identitu uĹľivatele (AppUserEntity) od jeho preferencĂ­
+ * a chovĂˇnĂ­ v systĂ©mu. SlouĹľĂ­ zejmĂ©na pro nastavenĂ­ vĂ˝bÄ›ru hrĂˇÄŤe,
+ * globĂˇlnĂ­ ĂşrovnÄ› notifikacĂ­ a preferencĂ­ souvisejĂ­cĂ­ch
+ * s uĹľivatelskĂ˝m rozhranĂ­m.
+ *
+ * Entita se pouĹľĂ­vĂˇ v logice, kterĂˇ naÄŤĂ­tĂˇ a uklĂˇdĂˇ uĹľivatelskĂˇ
+ * nastavenĂ­ na zĂˇkladÄ› poĹľadavkĹŻ z API vrstvy.
+ */
+@Entity
+@Table(name = "app_user_settings")
+public class AppUserSettingsEntity {
 
-    public Long getLastModifiedByUserId() { return lastModifiedByUserId; }
-    public void setLastModifiedByUserId(Long lastModifiedByUserId) { this.lastModifiedByUserId = lastModifiedByUserId; }
+    /**
+     * PrimĂˇrnĂ­ klĂ­ÄŤ zĂˇznamu nastavenĂ­.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * UĹľivatel, ke kterĂ©mu tato nastavenĂ­ patĹ™Ă­.
+     *
+     * Pro jednoho uĹľivatele existuje prĂˇvÄ› jeden zĂˇznam nastavenĂ­.
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private AppUserEntity user;
+
+    /**
+     * ZpĹŻsob automatickĂ©ho vĂ˝bÄ›ru hrĂˇÄŤe po pĹ™ihlĂˇĹˇenĂ­
+     * nebo pĹ™i auto-select logice.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "player_selection_mode", nullable = false, length = 50)
+    private PlayerSelectionMode playerSelectionMode = PlayerSelectionMode.FIRST_PLAYER;
+
+    /**
+     * GlobĂˇlnĂ­ ĂşroveĹ notifikacĂ­ pro uĹľivatele.
+     *
+     * UrÄŤuje, kolik notifikacĂ­ bude uĹľivatel dostĂˇvat
+     * bez ohledu na nastavenĂ­ konkrĂ©tnĂ­ch hrĂˇÄŤĹŻ.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "global_notification_level", nullable = false, length = 50)
+    private GlobalNotificationLevel globalNotificationLevel = GlobalNotificationLevel.ALL;
+
+    /**
+     * ĂšroveĹ notifikacĂ­, kterĂ© mĂˇ uĹľivatel dostĂˇvat v roli manaĹľera.
+     *
+     * Hodnota se pouĹľĂ­vĂˇ pĹ™i rozhodovĂˇnĂ­, zda majĂ­ bĂ˝t zasĂ­lĂˇny
+     * kopie notifikacĂ­ na e-mail uĹľivatele, pokud mĂˇ zĂˇroveĹ
+     * roli manaĹľera. NastavenĂ­ ovlivĹuje pouze manaĹľerskĂ© kopie,
+     * nikoliv notifikace urÄŤenĂ© pĹ™Ă­mo tomuto uĹľivateli nebo hrĂˇÄŤĹŻm.
+     *
+     * Pokud je hodnota null, pouĹľĂ­vĂˇ se hodnota globalNotificationLevel
+     * jako vĂ˝chozĂ­ chovĂˇnĂ­.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "manager_notification_level", length = 50)
+    private GlobalNotificationLevel managerNotificationLevel;
+
+    /**
+     * UrÄŤuje, zda mĂˇ uĹľivatel dostĂˇvat kopie vĹˇech notifikacĂ­,
+     * kterĂ© chodĂ­ jeho hrĂˇÄŤĹŻm.
+     *
+     * PĹ™Ă­klad:
+     * true: rodiÄŤ chce mĂ­t pĹ™ehled o vĹˇem, co se dÄ›je u dÄ›tĂ­.
+     * false: spolĂ©hĂˇ se pouze na notifikace hrĂˇÄŤĹŻ.
+     */
+    @Column(name = "copy_all_player_notifications_to_user_email", nullable = false)
+    private boolean copyAllPlayerNotificationsToUserEmail = true;
+
+    /**
+     * UrÄŤuje, zda mĂˇ uĹľivatel dostĂˇvat notifikace i za hrĂˇÄŤe,
+     * kteĹ™Ă­ majĂ­ vlastnĂ­ email (contactEmail v PlayerSettings).
+     *
+     * PĹ™Ă­klad:
+     * false: pokud mĂˇ hrĂˇÄŤ vlastnĂ­ email, chodĂ­ notifikace pouze jemu.
+     * true: uĹľivatel dostĂˇvĂˇ kopie notifikacĂ­ i v tomto pĹ™Ă­padÄ›.
+     */
+    @Column(name = "receive_notifications_for_players_with_own_email", nullable = false)
+    private boolean receiveNotificationsForPlayersWithOwnEmail = false;
+
+    /**
+     * UrÄŤuje, zda mĂˇ bĂ˝t pouĹľĂ­vĂˇn dennĂ­ souhrn (digest) mĂ­sto
+     * jednotlivĂ˝ch notifikacĂ­ bÄ›hem dne.
+     */
+    @Column(name = "email_digest_enabled", nullable = false)
+    private boolean emailDigestEnabled = false;
+
+    /**
+     * ÄŚas, kdy mĂˇ chodit souhrnnĂ˝ email, pokud je digest zapnutĂ˝.
+     */
+    @Column(name = "email_digest_time")
+    private LocalTime emailDigestTime;
+
+    /**
+     * PreferovanĂ˝ jazyk uĹľivatelskĂ©ho rozhranĂ­.
+     *
+     * TypickĂ˝m pĹ™Ă­kladem je hodnota "cs" nebo "en".
+     */
+    @Column(name = "ui_language", length = 10)
+    private String uiLanguage = "cs";
+
+    /**
+     * ÄŚasovĂˇ zĂłna uĹľivatele.
+     *
+     * PĹ™Ă­kladem hodnoty je "Europe/Prague".
+     */
+    @Column(name = "timezone", length = 50)
+    private String timezone = "Europe/Prague";
+
+    /**
+     * VĂ˝chozĂ­ obrazovka po pĹ™ihlĂˇĹˇenĂ­.
+     *
+     * V databĂˇzi je uloĹľena jako Ĺ™etÄ›zcovĂˇ hodnota ENUM (VARCHAR),
+     * v aplikaÄŤnĂ­ logice se pouĹľĂ­vĂˇ enum LandingPage.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "default_landing_page", nullable = false, length = 50)
+    private LandingPage defaultLandingPage = LandingPage.DASHBOARD;
+
+    public Long getId() {
+        return id;
+    }
+
+    public AppUserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(AppUserEntity user) {
+        this.user = user;
+    }
+
+    public PlayerSelectionMode getPlayerSelectionMode() {
+        return playerSelectionMode;
+    }
+
+    public void setPlayerSelectionMode(PlayerSelectionMode playerSelectionMode) {
+        this.playerSelectionMode = playerSelectionMode;
+    }
+
+    public GlobalNotificationLevel getGlobalNotificationLevel() {
+        return globalNotificationLevel;
+    }
+
+    public void setGlobalNotificationLevel(GlobalNotificationLevel globalNotificationLevel) {
+        this.globalNotificationLevel = globalNotificationLevel;
+    }
+
+    public GlobalNotificationLevel getManagerNotificationLevel() {
+        return managerNotificationLevel;
+    }
+
+    public void setManagerNotificationLevel(GlobalNotificationLevel managerNotificationLevel) {
+        this.managerNotificationLevel = managerNotificationLevel;
+    }
+
+    public boolean isCopyAllPlayerNotificationsToUserEmail() {
+        return copyAllPlayerNotificationsToUserEmail;
+    }
+
+    public void setCopyAllPlayerNotificationsToUserEmail(boolean copyAllPlayerNotificationsToUserEmail) {
+        this.copyAllPlayerNotificationsToUserEmail = copyAllPlayerNotificationsToUserEmail;
+    }
+
+    public boolean isReceiveNotificationsForPlayersWithOwnEmail() {
+        return receiveNotificationsForPlayersWithOwnEmail;
+    }
+
+    public void setReceiveNotificationsForPlayersWithOwnEmail(boolean receiveNotificationsForPlayersWithOwnEmail) {
+        this.receiveNotificationsForPlayersWithOwnEmail = receiveNotificationsForPlayersWithOwnEmail;
+    }
+
+    public boolean isEmailDigestEnabled() {
+        return emailDigestEnabled;
+    }
+
+    public void setEmailDigestEnabled(boolean emailDigestEnabled) {
+        this.emailDigestEnabled = emailDigestEnabled;
+    }
+
+    public LocalTime getEmailDigestTime() {
+        return emailDigestTime;
+    }
+
+    public void setEmailDigestTime(LocalTime emailDigestTime) {
+        this.emailDigestTime = emailDigestTime;
+    }
+
+    public String getUiLanguage() {
+        return uiLanguage;
+    }
+
+    public void setUiLanguage(String uiLanguage) {
+        this.uiLanguage = uiLanguage;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
+
+    /**
+     * VracĂ­ vĂ˝chozĂ­ landing page pro uĹľivatele.
+     *
+     * Hodnota se pouĹľĂ­vĂˇ v logice pĹ™esmÄ›rovĂˇnĂ­ po pĹ™ihlĂˇĹˇenĂ­
+     * a pĹ™i mapovĂˇnĂ­ na DTO objekt.
+     *
+     * @return vĂ˝chozĂ­ landing page
+     */
+    public LandingPage getDefaultLandingPage() {
+        return defaultLandingPage;
+    }
+
+    /**
+     * Nastavuje vĂ˝chozĂ­ landing page pro uĹľivatele.
+     *
+     * Hodnota se pĹ™edĂˇvĂˇ z aplikaÄŤnĂ­ logiky nebo z mapovacĂ­ vrstvy
+     * zodpovÄ›dnĂ© za transformaci DTO na entitu.
+     *
+     * @param defaultLandingPage vĂ˝chozĂ­ landing page
+     */
+    public void setDefaultLandingPage(LandingPage defaultLandingPage) {
+        this.defaultLandingPage = defaultLandingPage;
+    }
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\entities\EmailVerificationTokenEntity.java
+-----
+package cz.phsoft.hokej.user.entities;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+/**
+ * Entita reprezentujĂ­cĂ­ ovÄ›Ĺ™ovacĂ­ token pro emailovou aktivaci uĹľivatele.
+ *
+ * SlouĹľĂ­ k ovÄ›Ĺ™enĂ­ emailovĂ© adresy a aktivaci uĹľivatelskĂ©ho ĂşÄŤtu.
+ * Token je ÄŤasovÄ› omezenĂ˝ a navĂˇzanĂ˝ na konkrĂ©tnĂ­ho uĹľivatele.
+ * Entita se pouĹľĂ­vĂˇ v procesu registrace a aktivace ĂşÄŤtu.
+ */
+@Entity
+@Table(name = "email_verification_tokens")
+public class EmailVerificationTokenEntity {
+
+    /**
+     * PrimĂˇrnĂ­ klĂ­ÄŤ tokenu.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * UnikĂˇtnĂ­ ovÄ›Ĺ™ovacĂ­ token.
+     *
+     * Hodnota se pouĹľĂ­vĂˇ v aktivaÄŤnĂ­m odkazu zasĂ­lanĂ©m uĹľivateli.
+     */
+    @Column(nullable = false, unique = true, length = 64)
+    private String token;
+
+    /**
+     * Datum a ÄŤas expirace tokenu.
+     *
+     * Po uplynutĂ­ tĂ©to hodnoty se token povaĹľuje za neplatnĂ˝.
+     */
+    @Column(nullable = false)
+    private LocalDateTime expiresAt;
+
+    /**
+     * UĹľivatel, ke kterĂ©mu je token pĹ™iĹ™azen.
+     *
+     * Token je svĂˇzĂˇn s jednĂ­m konkrĂ©tnĂ­m uĹľivatelem,
+     * jehoĹľ ĂşÄŤet mĂˇ bĂ˝t aktivovĂˇn.
+     */
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private AppUserEntity user;
+
+    public Long getId() { return id; }
+
+    public void setId(Long id) { this.id = id; }
+
+    public String getToken() { return token; }
+
+    public void setToken(String token) { this.token = token; }
+
+    public LocalDateTime getExpiresAt() { return expiresAt; }
+
+    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+
+    public AppUserEntity getUser() { return user; }
+
+    public void setUser(AppUserEntity user) { this.user = user; }
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\entities\ForgottenPasswordResetTokenEntity.java
+-----
+package cz.phsoft.hokej.user.entities;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+/**
+ * Entita reprezentujĂ­cĂ­ token pro reset zapomenutĂ©ho hesla.
+ *
+ * SlouĹľĂ­ k bezpeÄŤnĂ©mu nastavenĂ­ novĂ©ho hesla uĹľivatele.
+ * Token je ÄŤasovÄ› omezenĂ˝ a navĂˇzanĂ˝ na konkrĂ©tnĂ­ho uĹľivatele.
+ * VolitelnĂ© pole usedAt umoĹľĹuje evidovat okamĹľik pouĹľitĂ­ tokenu
+ * a zabraĹuje jeho opakovanĂ©mu pouĹľitĂ­.
+ */
+@Entity
+@Table(name = "forgotten_password_reset_token_entity")
+public class ForgottenPasswordResetTokenEntity {
+
+    /**
+     * PrimĂˇrnĂ­ klĂ­ÄŤ tokenu.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * UnikĂˇtnĂ­ resetovacĂ­ token.
+     *
+     * Hodnota se pouĹľĂ­vĂˇ v odkazu zasĂ­lanĂ©m uĹľivateli pro nastavenĂ­
+     * novĂ©ho hesla.
+     */
+    @Column(nullable = false, unique = true, length = 128)
+    private String token;
+
+    /**
+     * UĹľivatel, ke kterĂ©mu token patĹ™Ă­.
+     *
+     * Jeden uĹľivatel mĹŻĹľe mĂ­t vĂ­ce tokenĹŻ v ÄŤase, napĹ™Ă­klad pĹ™i
+     * opakovanĂ˝ch poĹľadavcĂ­ch na reset hesla.
+     */
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private AppUserEntity user;
+
+    /**
+     * Datum a ÄŤas expirace tokenu.
+     *
+     * Po uplynutĂ­ tĂ©to hodnoty se token povaĹľuje za neplatnĂ˝
+     * a nemÄ›l by bĂ˝t dĂˇle akceptovĂˇn.
+     */
+    @Column(nullable = false)
+    private LocalDateTime expiresAt;
+
+    /**
+     * Datum a ÄŤas, kdy byl token pouĹľit.
+     *
+     * Hodnota je volitelnĂˇ a slouĹľĂ­ pro auditnĂ­ ĂşÄŤely a pro
+     * zajiĹˇtÄ›nĂ­, Ĺľe token nebude pouĹľit opakovanÄ›.
+     */
+    private LocalDateTime usedAt;
+
+    public Long getId() { return id; }
+
+    public void setId(Long id) { this.id = id; }
+
+    public String getToken() { return token; }
+
+    public void setToken(String token) { this.token = token; }
+
+    public AppUserEntity getUser() { return user; }
+
+    public void setUser(AppUserEntity user) { this.user = user; }
+
+    public LocalDateTime getExpiresAt() { return expiresAt; }
+
+    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+
+    public LocalDateTime getUsedAt() { return usedAt; }
+
+    public void setUsedAt(LocalDateTime usedAt) { this.usedAt = usedAt; }
 }

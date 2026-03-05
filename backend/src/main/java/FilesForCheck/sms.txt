@@ -1,5 +1,5 @@
 ﻿Balíček (složka): sms
-Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\sms
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\sms
 
 Seznam souborů:
 package-info.java
@@ -9,23 +9,25 @@ SmsTextBeeService.java
 
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\sms\package-info.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\sms\package-info.java
 -----
 /**
  * SMS subsystĂ©m aplikace.
  *
- * Obsahuje tĹ™Ă­dy zodpovÄ›dnĂ© za sklĂˇdĂˇnĂ­ textĹŻ SMS zprĂˇv
- * a jejich odesĂ­lĂˇnĂ­ prostĹ™ednictvĂ­m SMS brĂˇny.
+ * BalĂ­ÄŤek obsahuje:
+ * - builder pro sestavovĂˇnĂ­ textu SMS zprĂˇv,
+ * - rozhranĂ­ pro odesĂ­lĂˇnĂ­ SMS,
+ * - konkrĂ©tnĂ­ implementaci komunikujĂ­cĂ­ s externĂ­ SMS brĂˇnou.
  *
- * Tento balĂ­ÄŤek je pouĹľĂ­vĂˇn servisnĂ­ vrstvou pĹ™i odesĂ­lĂˇnĂ­
- * notifikacĂ­ hrĂˇÄŤĹŻm a uĹľivatelĹŻm formou SMS.
+ * Tento balĂ­ÄŤek je vyuĹľĂ­vĂˇn notifikaÄŤnĂ­ vrstvou aplikace
+ * pĹ™i doruÄŤovĂˇnĂ­ zprĂˇv hrĂˇÄŤĹŻm a uĹľivatelĹŻm prostĹ™ednictvĂ­m SMS.
  */
-package cz.phsoft.hokej.models.services.sms;
+package cz.phsoft.hokej.notifications.sms;
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsMessageBuilder.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\sms\SmsMessageBuilder.java
 -----
-package cz.phsoft.hokej.models.services.sms;
+package cz.phsoft.hokej.notifications.sms;
 
 import cz.phsoft.hokej.match.entities.MatchEntity;
 import cz.phsoft.hokej.registration.entities.MatchRegistrationEntity;
@@ -43,20 +45,12 @@ import org.springframework.stereotype.Component;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Builder pro generovĂˇnĂ­ textĹŻ SMS zprĂˇv.
+ * Komponenta pro generovĂˇnĂ­ textovĂ©ho obsahu SMS zprĂˇv.
  *
- * OdpovÄ›dnosti:
- * - sestavenĂ­ lidsky ÄŤitelnĂ©ho obsahu SMS pro rĹŻznĂ© typy notifikacĂ­,
- * - centralizace formĂˇtovĂˇnĂ­ SMS zprĂˇv (princip DRY),
- * - oddÄ›lenĂ­ textovĂ© logiky od business logiky a schedulingu.
+ * TĹ™Ă­da centralizuje textovou logiku SMS notifikacĂ­
+ * a oddÄ›luje ji od business logiky notifikaÄŤnĂ­ sluĹľby.
  *
- * Tato tĹ™Ă­da se pouĹľĂ­vĂˇ zejmĂ©na v NotificationServiceImpl a SmsService
- * jako zdroj vĂ˝slednĂ©ho textu SMS zprĂˇv.
- *
- * TĹ™Ă­da neĹ™eĹˇĂ­:
- * - odesĂ­lĂˇnĂ­ SMS (to zajiĹˇĹĄuje SmsService),
- * - zmÄ›ny v databĂˇzi,
- * - oprĂˇvnÄ›nĂ­ ani validace vstupĹŻ (pĹ™edpoklĂˇdĂˇ se, Ĺľe vstupy jsou zvalidovanĂ© dĹ™Ă­ve).
+ * NeprovĂˇdĂ­ odesĂ­lĂˇnĂ­ SMS ani ĹľĂˇdnĂ© zmÄ›ny v databĂˇzi.
  */
 @Component
 public class SmsMessageBuilder {
@@ -96,9 +90,9 @@ public class SmsMessageBuilder {
         this.playerRepository = playerRepository;
     }
 
-
+    
     // HLAVNĂŤ VSTUPNĂŤ METODA PRO NotificationServiceImpl
-
+    
 
     /**
      * SestavĂ­ SMS text pro hrĂˇÄŤe podle typu notifikace a kontextu.
@@ -199,9 +193,9 @@ public class SmsMessageBuilder {
         return (T) context;
     }
 
-
+    
     // REGISTRACE / ODHLĂĹ ENĂŤ / OMLUVA
-
+    
 
     /**
      * VytvoĹ™Ă­ SMS zprĂˇvu po zmÄ›nÄ› registrace hrĂˇÄŤe na zĂˇpas.
@@ -277,9 +271,9 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
-
+    
     // NO RESPONSE â€“ HRĂÄŚ JEĹ TÄš NEREAGOVAL
-
+    
 
     /**
      * VytvoĹ™Ă­ SMS zprĂˇvu pro hrĂˇÄŤe, kteĹ™Ă­ dosud nereagovali na zĂˇpas.
@@ -315,9 +309,9 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
-
+    
     // ZMÄšNY STAVU ZĂPASU
-
+    
 
     /**
      * VytvoĹ™Ă­ SMS zprĂˇvu s informacĂ­ o zmÄ›nÄ› stavu zĂˇpasu.
@@ -371,9 +365,9 @@ public class SmsMessageBuilder {
         return sb.toString();
     }
 
-
+    
     // FINĂLNĂŤ SMS â€“ DEN ZĂPASU
-
+    
 
     /**
      * VytvoĹ™Ă­ finĂˇlnĂ­ SMS zprĂˇvu v den zĂˇpasu
@@ -451,51 +445,31 @@ public class SmsMessageBuilder {
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsService.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\sms\SmsService.java
 -----
-package cz.phsoft.hokej.models.services.sms;
+package cz.phsoft.hokej.notifications.sms;
 
 /**
- * RozhranĂ­ definujĂ­cĂ­ kontrakt pro odesĂ­lĂˇnĂ­ SMS zprĂˇv v aplikaci.
+ * RozhranĂ­ definujĂ­cĂ­ kontrakt pro odesĂ­lĂˇnĂ­ SMS zprĂˇv.
  *
- * RozhranĂ­ slouĹľĂ­ jako jednotnĂ˝ vstupnĂ­ bod pro odesĂ­lĂˇnĂ­ SMS
- * bez vazby na konkrĂ©tnĂ­ technickou implementaci nebo poskytovatele sluĹľby.
- * Business logika aplikace pracuje vĂ˝hradnÄ› s tĂ­mto rozhranĂ­m
- * a nenĂ­ zĂˇvislĂˇ na detailech odesĂ­lĂˇnĂ­ zprĂˇv.
- *
- * OdpovÄ›dnost rozhranĂ­:
- * - definovĂˇnĂ­ operace pro odeslĂˇnĂ­ SMS zprĂˇvy,
- * - oddÄ›lenĂ­ business logiky od technickĂ© implementace,
- * - umoĹľnÄ›nĂ­ snadnĂ© vĂ˝mÄ›ny nebo rozĹˇĂ­Ĺ™enĂ­ SMS providerĹŻ.
- *
- * RozhranĂ­ je typicky pouĹľĂ­vĂˇno ve sluĹľbĂˇch aplikaÄŤnĂ­ vrstvy,
- * napĹ™Ă­klad v notifikaÄŤnĂ­ch sluĹľbĂˇch nebo plĂˇnovanĂ˝ch schedulerech.
+ * Business vrstva aplikace pracuje vĂ˝hradnÄ› s tĂ­mto rozhranĂ­m
+ * a nenĂ­ zĂˇvislĂˇ na konkrĂ©tnĂ­m poskytovateli SMS sluĹľby.
  */
 public interface SmsService {
 
     /**
      * OdesĂ­lĂˇ SMS zprĂˇvu na zadanĂ© telefonnĂ­ ÄŤĂ­slo.
      *
-     * Metoda pĹ™edstavuje abstraktnĂ­ operaci odeslĂˇnĂ­ SMS
-     * a nezaruÄŤuje jejĂ­ skuteÄŤnĂ© doruÄŤenĂ­ koncovĂ©mu pĹ™Ă­jemci.
-     * ZpĹŻsob odeslĂˇnĂ­, prĂˇce s externĂ­ sluĹľbou a pĹ™Ă­padnĂ© chyby
-     * jsou plnÄ› v odpovÄ›dnosti konkrĂ©tnĂ­ implementace rozhranĂ­.
-     *
-     * OÄŤekĂˇvanĂ© chovĂˇnĂ­ implementace:
-     * - selhĂˇnĂ­ odeslĂˇnĂ­ SMS nesmĂ­ ovlivnit chod aplikace,
-     * - technickĂ© chyby by mÄ›ly bĂ˝t zachyceny a zalogovĂˇny,
-     * - odesĂ­lĂˇnĂ­ SMS je povaĹľovĂˇno za best-effort operaci.
-     *
-     * @param phoneNumber telefonnĂ­ ÄŤĂ­slo pĹ™Ă­jemce SMS zprĂˇvy
+     * @param phoneNumber telefonnĂ­ ÄŤĂ­slo pĹ™Ă­jemce
      * @param message text SMS zprĂˇvy
      */
     void sendSms(String phoneNumber, String message);
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\sms\SmsTextBeeService.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\sms\SmsTextBeeService.java
 -----
-package cz.phsoft.hokej.models.services.sms;
+package cz.phsoft.hokej.notifications.sms;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -511,21 +485,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementace rozhranĂ­ SmsService vyuĹľĂ­vajĂ­cĂ­ externĂ­ SMS sluĹľbu TextBee.
+ * Implementace SmsService vyuĹľĂ­vajĂ­cĂ­ externĂ­ sluĹľbu TextBee.
  *
- * TĹ™Ă­da pĹ™edstavuje technickou implementaci odesĂ­lĂˇnĂ­ SMS zprĂˇv.
- * Business vrstvy aplikace pracujĂ­ vĂ˝hradnÄ› s rozhranĂ­m SmsService
- * a nejsou zĂˇvislĂ© na konkrĂ©tnĂ­m SMS providerovi ani na detailech
- * HTTP komunikace.
- *
- * OdpovÄ›dnost tĹ™Ă­dy:
- * - odesĂ­lĂˇnĂ­ SMS zprĂˇv prostĹ™ednictvĂ­m TextBee API,
- * - respektovĂˇnĂ­ globĂˇlnĂ­ho nastavenĂ­ zapnutĂ­ nebo vypnutĂ­ SMS,
- * - jednotnĂ© logovĂˇnĂ­ ĂşspÄ›ĹˇnĂ˝ch i neĂşspÄ›ĹˇnĂ˝ch pokusĹŻ o odeslĂˇnĂ­,
- * - zajiĹˇtÄ›nĂ­, Ĺľe technickĂ© selhĂˇnĂ­ SMS neovlivnĂ­ business logiku aplikace.
- *
- * TĹ™Ă­da je navrĹľena tak, aby byla snadno nahraditelnĂˇ jinou implementacĂ­
- * SmsService bez zĂˇsahu do vyĹˇĹˇĂ­ch vrstev aplikace.
+ * TĹ™Ă­da zapouzdĹ™uje HTTP komunikaci s SMS API
+ * a zajiĹˇĹĄuje, Ĺľe pĹ™Ă­padnĂ© chyby pĹ™i odesĂ­lĂˇnĂ­
+ * neovlivnĂ­ chod business vrstvy.
  */
 @Service
 public class SmsTextBeeService implements SmsService {
@@ -533,82 +497,29 @@ public class SmsTextBeeService implements SmsService {
     private static final Logger log =
             LoggerFactory.getLogger(SmsTextBeeService.class);
 
-    /**
-     * GlobĂˇlnĂ­ pĹ™epĂ­naÄŤ pro zapnutĂ­ nebo vypnutĂ­ odesĂ­lĂˇnĂ­ SMS.
-     *
-     * Hodnota se naÄŤĂ­tĂˇ z konfiguraÄŤnĂ­ch properties aplikace.
-     * V produkÄŤnĂ­m prostĹ™edĂ­ je obvykle nastavena na true,
-     * v lokĂˇlnĂ­m vĂ˝voji nebo testech mĹŻĹľe bĂ˝t nastavena na false.
-     */
     @Value("${sms.enabled:true}")
     private boolean smsEnabled;
 
-    /**
-     * URL endpointu TextBee API.
-     *
-     * PouĹľĂ­vĂˇ se jako cĂ­lovĂˇ adresa pro HTTP POST poĹľadavky
-     * pĹ™i odesĂ­lĂˇnĂ­ SMS zprĂˇv.
-     */
     @Value("${textbee.api-url}")
     private String apiUrl;
 
-    /**
-     * API klĂ­ÄŤ pro autentizaci vĹŻÄŤi sluĹľbÄ› TextBee.
-     *
-     * KlĂ­ÄŤ se odesĂ­lĂˇ v HTTP hlaviÄŤce kaĹľdĂ©ho poĹľadavku
-     * a slouĹľĂ­ k autorizaci aplikace vĹŻÄŤi externĂ­ sluĹľbÄ›.
-     */
     @Value("${textbee.api-key}")
     private String apiKey;
 
-    /**
-     * HTTP klient pouĹľĂ­vanĂ˝ pro komunikaci s TextBee API.
-     *
-     * Pro jednoduchost je instancovĂˇn pĹ™Ă­mo v tĂ©to tĹ™Ă­dÄ›.
-     * V pĹ™Ă­padÄ› potĹ™eby lze tuto implementaci nahradit
-     * konfigurovanĂ˝m Beanem nebo WebClientem.
-     */
     private final RestTemplate restTemplate = new RestTemplate();
 
-    /**
-     * OdesĂ­lĂˇ SMS zprĂˇvu na zadanĂ© telefonnĂ­ ÄŤĂ­slo.
-     *
-     * Metoda nejprve ovÄ›Ĺ™uje globĂˇlnĂ­ nastavenĂ­ odesĂ­lĂˇnĂ­ SMS.
-     * Pokud jsou SMS vypnutĂ©, zprĂˇva se neodesĂ­lĂˇ a udĂˇlost se pouze zaloguje.
-     * Pokud jsou SMS povolenĂ©, vytvoĹ™Ă­ se HTTP POST poĹľadavek
-     * a odeĹˇle se na TextBee API.
-     *
-     * VeĹˇkerĂ© vĂ˝jimky vzniklĂ© bÄ›hem odesĂ­lĂˇnĂ­ jsou zachyceny
-     * a nejsou propagovĂˇny do vyĹˇĹˇĂ­ch vrstev aplikace.
-     * OdesĂ­lĂˇnĂ­ SMS je povaĹľovĂˇno za best-effort operaci,
-     * jejĂ­Ĺľ selhĂˇnĂ­ nesmĂ­ ohrozit stabilitu systĂ©mu.
-     *
-     * @param phoneNumber cĂ­lovĂ© telefonnĂ­ ÄŤĂ­slo pĹ™Ă­jemce
-     * @param message text SMS zprĂˇvy
-     */
     @Override
     public void sendSms(String phoneNumber, String message) {
 
-        // OvÄ›Ĺ™enĂ­ globĂˇlnĂ­ho nastavenĂ­ odesĂ­lĂˇnĂ­ SMS.
         if (!smsEnabled) {
-            log.info(
-                    "SMS jsou globĂˇlnÄ› vypnutĂ©. ZprĂˇva nebyla odeslĂˇna. Tel: {}, msg: {}",
-                    phoneNumber, message
-            );
-
-            System.out.println(
-                    "SMS disabled (global), message not sent: "
-                            + phoneNumber + " -> " + message
-            );
+            log.info("SMS jsou vypnutĂ©. ZprĂˇva nebyla odeslĂˇna na {}", phoneNumber);
             return;
         }
 
-        // PĹ™Ă­prava HTTP hlaviÄŤek poĹľadavku.
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("x-api-key", apiKey);
 
-        // PĹ™Ă­prava tÄ›la poĹľadavku dle specifikace TextBee API.
         Map<String, Object> body = Map.of(
                 "recipients", List.of(phoneNumber),
                 "message", message
@@ -618,31 +529,13 @@ public class SmsTextBeeService implements SmsService {
                 new HttpEntity<>(body, headers);
 
         try {
-            // OdeslĂˇnĂ­ HTTP POST poĹľadavku na TextBee API.
             ResponseEntity<String> response =
                     restTemplate.postForEntity(apiUrl, request, String.class);
 
-            log.info(
-                    "SMS ĂşspÄ›ĹˇnÄ› odeslĂˇna pĹ™es TextBee na {}, response: {}",
-                    phoneNumber, response.getBody()
-            );
-
-            System.out.println(
-                    "SMS odeslĂˇna (TextBee) na " + phoneNumber +
-                            ", response: " + response.getBody()
-            );
+            log.info("SMS odeslĂˇna na {}, response: {}", phoneNumber, response.getBody());
 
         } catch (Exception e) {
-            // SelhĂˇnĂ­ odeslĂˇnĂ­ SMS nesmĂ­ ovlivnit chod aplikace.
-            log.error(
-                    "Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS pĹ™es TextBee na {}: {}",
-                    phoneNumber, e.getMessage(), e
-            );
-
-            System.err.println(
-                    "Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS pĹ™es TextBee na "
-                            + phoneNumber + ": " + e.getMessage()
-            );
+            log.error("Chyba pĹ™i odesĂ­lĂˇnĂ­ SMS na {}: {}", phoneNumber, e.getMessage(), e);
         }
     }
 }

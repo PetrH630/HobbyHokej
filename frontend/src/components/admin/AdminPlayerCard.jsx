@@ -32,6 +32,22 @@ const statusBadgeClassMap = {
     APPROVED: "bg-success",
 };
 
+/**
+ * AdminPlayerCard
+ *
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
+ *
+ * Props:
+ * @param {import("../../types/dto").PlayerDTO} props.player Data hráče používaná pro zobrazení nebo administraci.
+ * @param {Object} props.isInactive vstupní hodnota komponenty.
+ * @param {Function} props.onApprove vstupní hodnota komponenty.
+ * @param {Function} props.onReject vstupní hodnota komponenty.
+ * @param {Function} props.onEdit vstupní hodnota komponenty.
+ * @param {Function} props.onDelete vstupní hodnota komponenty.
+ * @param {Function} props.onChangeUser vstupní hodnota komponenty.
+ * @param {Object} props.onInactivityChanged vstupní hodnota komponenty.
+ */
+
 const AdminPlayerCard = ({
     player,
     isInactive,

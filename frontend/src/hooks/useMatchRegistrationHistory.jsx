@@ -1,8 +1,12 @@
-// src/hooks/useMatchRegistrationHistory.jsx
 import { useEffect, useState } from "react";
 import { getMyMatchRegistrationHistory } from "../api/matchRegistrationHistoryApi";
 
 
+/**
+ * useMatchRegistrationHistory
+ *
+ * Hook pro načtení historie registrací k zápasu (kdo se kdy přihlásil/odhlásil, změna týmu/pozice).
+ */
 export const useMyMatchRegistrationHistory = (matchId) => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);

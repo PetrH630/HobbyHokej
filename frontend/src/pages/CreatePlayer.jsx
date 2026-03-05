@@ -3,6 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { createPlayer } from "../api/playerApi";
 import CreatePlayerForm from "../components/players/CreatePlayerForm";
 
+/**
+ * CreatePlayer
+ *
+ * UI komponenta.
+ *
+ * Vedlejší efekty:
+ * - může provádět navigaci v aplikaci
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const CreatePlayer = () => {
     const navigate = useNavigate();
     const [submitting, setSubmitting] = useState(false);

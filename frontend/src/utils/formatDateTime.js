@@ -1,4 +1,9 @@
-//src/utils/formatDateTime
+/**
+ * formatDateTime
+ *
+ * Pomocná funkce pro formátování data a času do českého formátu.
+ * Vrací prázdný řetězec, pokud je vstup prázdný nebo neplatný.
+ */
 export const formatDateTime = (value) => {
     if (!value) return "";
     const date = new Date(value);

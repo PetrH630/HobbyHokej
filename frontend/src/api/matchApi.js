@@ -1,3 +1,10 @@
+/**
+ * matchApi
+ *
+ * Modul pro komunikaci s backendovým REST API.
+ * Obsahuje pomocné funkce pro volání endpointů a sjednocení práce s axios klientem.
+ */
+
 // src/api/matchApi.js
 import api from "./axios";
 
@@ -154,4 +161,30 @@ export const getMatchTeamPositionOverview = async (matchId, team) => {
         withCredentials: true,
     });
     return res.data; // MatchTeamPositionOverviewDTO
+};
+
+/**
+ * Spustí automatické generování první lajny.
+ * POST /api/matches/{matchId}/auto-lineup
+ * Role: ADMIN, MANAGER
+ */
+export const autoLineupAdmin = async (matchId) => {
+    const res = await api.post(`/matches/${matchId}/auto-lineup`, null, {
+        withCredentials: true,
+    });
+    return res.data; // SuccessResponseDTO
+};
+
+/**
+ * Aktualizuje skóre zápasu.
+ * PATCH /api/matches/{matchId}/score
+ * Role: ADMIN, MANAGER
+ */
+export const updateMatchScoreAdmin = async (matchId, scoreLight, scoreDark) => {
+    const res = await api.patch(
+        `/matches/${matchId}/score`,
+        { scoreLight, scoreDark },
+        { withCredentials: true }
+    );
+    return res.data; // MatchDTO
 };

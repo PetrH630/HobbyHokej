@@ -1,23 +1,38 @@
-// src/components/settings/UserSettings.jsx
 import RoleGuard from "../RoleGuard";
 import { useBootstrapTooltip } from "../../hooks/useBootstrapTooltip";
 
+/**
+ * UserSettings
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.values Aktuální hodnoty formuláře.
+ * @param {Function} props.onChange callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onSubmit callback pro předání akce do nadřazené vrstvy.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ * @param {boolean} props.success vstupní hodnota komponenty.
+ */
 const UserSettings = ({ values, onChange, onSubmit, saving, error, success }) => {
-    //  inicializace tooltipů (Bootstrap)
+
     useBootstrapTooltip();
 
     const safeValues = values || {};
 
+    
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         onChange({ [name]: value });
     };
 
+    
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
         onChange({ [name]: checked });
     };
 
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit();
@@ -87,7 +102,6 @@ const UserSettings = ({ values, onChange, onSubmit, saving, error, success }) =>
 
             <hr />
 
-            {/* === Globální notifikace === */}
             <h2 className="h5 mb-3">Globální notifikace</h2>
 
             <div className="mb-3">
@@ -154,7 +168,6 @@ const UserSettings = ({ values, onChange, onSubmit, saving, error, success }) =>
                 </label>
             </div>
 
-            {/* === Notifikace pro manažera === */}
             <RoleGuard roles={["ROLE_MANAGER"]}>
                 <div className="border rounded p-3 mb-3">
                     <h3 className="h5 mb-3">Notifikace pro manažera</h3>
@@ -233,7 +246,6 @@ const UserSettings = ({ values, onChange, onSubmit, saving, error, success }) =>
 
             <hr />
 
-            {/* === Uživatelské rozhraní === */}
             <h2 className="h5 mb-3">Uživatelské rozhraní</h2>
 
             <div className="mb-3">

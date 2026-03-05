@@ -1,11 +1,11 @@
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 
-// 0% = red (0°), 100% = green (120°)
+
 const percentToColor = (p) => {
     const percent = Math.round(clamp(p, 0, 1) * 100);
 
-    // zaokrouhlení na desítky
+
     const bucket = Math.floor(percent / 10) * 10;
 
     const colorScale = {
@@ -25,17 +25,27 @@ const percentToColor = (p) => {
     return colorScale[bucket] || "#2eb82e";
 };
 
-
+/**
+ * CapacityRing
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {string} props.value Aktuální hodnota ovládacího prvku.
+ * @param {Object} props.max vstupní hodnota komponenty. [default: 0]
+ * @param {Object} props.size vstupní hodnota komponenty. [default: 34]
+ * @param {Object} props.stroke vstupní hodnota komponenty. [default: 6]
+ */
 const CapacityRing = ({
     value = 0,
     max = 0,
-    size = 34,      // větší
-    stroke = 6,     // tloušťka progress
+    size = 34,
+    stroke = 6,
 }) => {
     const safeMax = max > 0 ? max : 0;
     const ratio = safeMax > 0 ? clamp(value / safeMax, 0, 1) : 0;
 
-    const r = (size - stroke - 4) / 2; // -4 kvůli outline
+    const r = (size - stroke - 4) / 2;
     const c = 2 * Math.PI * r;
     const dashOffset = c * (1 - ratio);
     const center = size / 2;
@@ -49,7 +59,7 @@ const CapacityRing = ({
             viewBox={`0 0 ${size} ${size}`}
             className="capacity-ring"
         >
-            {/* 1️⃣ Vnější černý okraj */}
+
             <circle
                 cx={center}
                 cy={center}
@@ -59,7 +69,6 @@ const CapacityRing = ({
                 strokeWidth="1"
             />
 
-            {/* 2️⃣ Bílá neobsazená část (pozadí) */}
             <circle
                 cx={center}
                 cy={center}
@@ -69,7 +78,6 @@ const CapacityRing = ({
                 strokeWidth={stroke}
             />
 
-            {/* 3️⃣ Barevná obsazená část */}
             <circle
                 cx={center}
                 cy={center}
@@ -86,7 +94,6 @@ const CapacityRing = ({
                 }}
             />
 
-            {/* 4️⃣ Vnitřní černý okraj */}
             <circle
                 cx={center}
                 cy={center}

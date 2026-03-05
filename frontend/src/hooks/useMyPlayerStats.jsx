@@ -1,4 +1,3 @@
-// src/hooks/useMyPlayerStats.js
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getMyPlayerStats } from "../api/playerApi";
 import { useCurrentPlayer } from "./useCurrentPlayer";
@@ -15,6 +14,11 @@ import { useSeason } from "./useSeason";
  * Statistiky se automaticky obnovují při změně:
  *  - aktuálního hráče (CurrentPlayerContext)
  *  - aktuální sezóny (SeasonContext)
+ */
+/**
+ * useMyPlayerStats
+ *
+ * Hook pro načtení statistik aktuálního hráče (např. účasti, výsledky, skóre dle toho, co backend poskytuje).
  */
 export const useMyPlayerStats = (options = {}) => {
     const { enabled = true } = options;

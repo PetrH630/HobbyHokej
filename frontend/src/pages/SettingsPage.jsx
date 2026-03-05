@@ -126,6 +126,17 @@ const validateChangePassword = (values) => {
     return errors;
 };
 
+/**
+ * SettingsPage
+ *
+ * hráč – Bootstrap modal.
+ *
+ * Vedlejší efekty:
+ * - při zobrazení registruje a po zavření uklízí event listenery nebo synchronizuje stav
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const SettingsPage = () => {
     const [activeTab, setActiveTab] = useState("player"); // "player" | "user"
 

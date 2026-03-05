@@ -18,6 +18,19 @@ import {
     ArrowCounterclockwise,
 } from "react-bootstrap-icons";
 
+/**
+ * AdminMatchCard
+ *
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ * @param {Function} props.onEdit vstupní hodnota komponenty.
+ * @param {Function} props.onDelete vstupní hodnota komponenty.
+ * @param {Function} props.onCancel callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onUnCancel vstupní hodnota komponenty. 
+ */
+
 const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
     const [showHistory, setShowHistory] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
@@ -34,14 +47,24 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
 
     const isCanceled = match.matchStatus === "CANCELED";
 
-    const parseDateTime = (dt) => {
+    
+/**
+ * Bezpečně převede řetězec data a času z backendu na instanci Date pro účely formátování v UI.
+ */
+
+const parseDateTime = (dt) => {
         if (!dt) return null;
         const safe = dt.replace(" ", "T");
         const d = new Date(safe);
         return Number.isNaN(d.getTime()) ? null : d;
     };
 
-    const formatWithDay = (dt) => {
+    
+/**
+ * Vrátí textovou reprezentaci data a času včetně dne v týdnu pro zobrazení v administraci.
+ */
+
+const formatWithDay = (dt) => {
         const d = parseDateTime(dt);
         if (!d) return { day: "-", dateTime: "-" };
 
@@ -95,7 +118,12 @@ const AdminMatchCard = ({ match, onEdit, onDelete, onCancel, onUnCancel }) => {
                 ? "bg-danger bg-opacity-10"
                 : "");
 
-    const buildMatchTitle = () =>
+    
+/**
+ * Sestaví krátký popisek zápasu pro záhlaví karty na základě dostupných údajů.
+ */
+
+const buildMatchTitle = () =>
         `#${match.matchNumber ?? match.id} – ${formatted.dateTime}`;
 
     return (

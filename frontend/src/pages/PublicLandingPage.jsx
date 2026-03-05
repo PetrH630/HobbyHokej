@@ -1,5 +1,12 @@
 import { Link } from "react-router-dom";
 
+/**
+ * PublicLandingPage
+ *
+ * registrace hráč – UI komponenta.
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const PublicLandingPage = () => {
     return (
         <div className="min-vh-100 d-flex flex-column bg-light">
@@ -86,6 +93,11 @@ const PublicLandingPage = () => {
                                 </h1>
 
                                 <p className="lead text-muted mb-4">
+                                    Už žádné nekonečné zprávy ve skupině, dohady kdo přijde a kdo bude hrát za který tým.
+                                    <p></p>
+                                    HobbyHokej je webová aplikace, která zjednodušuje organizaci pravidelných amatérských hokejových zápasů.
+                                    Hráči se sami registrují na konkrétní termín zápasu a vybírají si z neobsazených pozic.
+                                    <p></p>
                                     Evidence zápasů, přihlášek, omluvenek, neaktivit a automatických notifikací.
                                     Podpora rolí hráčů, manažerů i administrátorů.
                                 </p>
@@ -122,7 +134,7 @@ const PublicLandingPage = () => {
                                                 <div className="card-body">
                                                     <h6 className="fw-semibold">Registrace na zápas</h6>
                                                     <p className="small text-muted mb-0">
-                                                        Účast, náhradník, omluva, automatické přepočty.
+                                                        Účast, náhradník, omluva, automatické přepočty, výběr pozice.
                                                     </p>
                                                 </div>
                                             </div>
@@ -133,7 +145,8 @@ const PublicLandingPage = () => {
                                                 <div className="card-body">
                                                     <h6 className="fw-semibold">Notifikace</h6>
                                                     <p className="small text-muted mb-0">
-                                                        E-mail a SMS dle uživatelského nastavení.
+                                                        E-mail a SMS dle uživatelského nastavení. Notifikace 
+                                                        v aplikaci pomocí badge.
                                                     </p>
                                                 </div>
                                             </div>
@@ -186,11 +199,11 @@ const PublicLandingPage = () => {
                                                 <span className="badge bg-dark">Admin</span>
                                             </div>
                                             <div className="small text-muted mb-2">
-                                                Kompletní správa systému – uživatelé, hráči, sezóny, zápasy.
+                                                Kompletní správa systému - uživatelé, hráči, sezóny, zápasy.
                                             </div>
                                             <div className="small">
                                                 <strong>Email:</strong> admin@example.com<br />
-                                                <strong>Heslo:</strong> administrator123
+                                                <strong>Heslo:</strong> admin123
                                             </div>
                                         </div>
 
@@ -223,7 +236,7 @@ const PublicLandingPage = () => {
                                         </div>
 
                                         <div className="border-top pt-3 mt-3 small text-muted text-center">
-                                            ⚠ Pouze pro DEMO účely – nepoužívej reálné osobní údaje.
+                                            ⚠ Pouze pro DEMO účely - nepoužívej reálné osobní údaje.
                                         </div>
                                     </div>
                                 </div>

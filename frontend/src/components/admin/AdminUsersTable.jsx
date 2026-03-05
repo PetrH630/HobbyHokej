@@ -1,6 +1,21 @@
 // src/components/admin/AdminUsersTable.jsx
 import AdminUserCard from "./AdminUserCard";
 
+/**
+ * AdminUsersTable
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.users vstupní hodnota komponenty.
+ * @param {boolean} props.loading Příznak, že probíhá načítání dat a UI má zobrazit stav načítání.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ * @param {Function} props.onEdit vstupní hodnota komponenty.
+ * @param {Function} props.onResetPassword vstupní hodnota komponenty.
+ * @param {Function} props.onActivate vstupní hodnota komponenty.
+ * @param {Function} props.onDeactivate vstupní hodnota komponenty.
+ */
+
 const AdminUsersTable = ({
     users,
     loading,

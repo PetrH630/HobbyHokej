@@ -1,21 +1,18 @@
-// src/components/notifications/AdminSpecialNotificationModal.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useSpecialNotificationTargets } from "../../hooks/useSpecialNotificationTargets";
 import { sendSpecialNotification } from "../../api/notificationsApi";
 
 /**
- * Modal pro odeslání speciální zprávy vybraným uživatelům / hráčům.
+ * AdminSpecialNotificationModal
  *
- * Vlastnosti:
- * - Načítá možné cíle přes /api/notifications/admin/special/targets.
- * - Umožňuje výběr více cílů (checkboxy, včetně "Vybrat vše").
- * - Odesílá speciální zprávu přes /api/notifications/admin/special.
- * - V DEMO režimu zobrazuje náhled zachycených e-mailů a SMS.
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
  *
- * @param {Object} props
- * @param {boolean} props.show Určuje, zda je modal zobrazen.
- * @param {Function} props.onClose Handler pro zavření modalu.
- * @param {Function} [props.onSent] Volitelný callback po úspěšném odeslání (payload, demoResult).
+ * Umožňuje zavření stiskem klávesy Escape.
+ *
+ * Props:
+ * @param {boolean} props.show určuje, zda je dialog otevřený.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.onSent vstupní hodnota komponenty.
  */
 const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
     const { targets, loading, error, reload } = useSpecialNotificationTargets(show);
@@ -33,17 +30,17 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
 
     const [demoPreview, setDemoPreview] = useState(null);
 
-    // příznak, že odeslání proběhlo úspěšně – potom už nepůjde znovu odeslat
+
     const [sent, setSent] = useState(false);
 
-    // Pomocná funkce pro jednoznačný klíč cíle
+
     const makeKey = (target) =>
         `${target.userId ?? "null"}-${target.playerId ?? "null"}`;
 
-    // Reset stavu při zavření/otevření modalu
+
     useEffect(() => {
         if (!show) {
-            // Po zavření modal kompletně vyčistit stav
+
             setSelectedKeys(new Set());
             setTitle("");
             setMessage("");
@@ -54,7 +51,7 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
             setDemoPreview(null);
             setSent(false);
         } else {
-            // Při otevření jen zrušit případné staré hlášky
+
             setSubmitError(null);
             setSubmitSuccess(null);
             setDemoPreview(null);
@@ -62,7 +59,7 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
         }
     }, [show]);
 
-    // Odvozené seznamy
+
     const selectedTargets = useMemo(
         () => targets.filter((t) => selectedKeys.has(makeKey(t))),
         [targets, selectedKeys]
@@ -79,8 +76,9 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
         message.trim().length > 0 &&
         hasSelection &&
         !submitting &&
-        !sent; // po úspěšném odeslání už nepůjde znovu odeslat
+        !sent;
 
+    
     const handleToggleOne = (target) => {
         const key = makeKey(target);
         setSelectedKeys((prev) => {
@@ -94,17 +92,19 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
         });
     };
 
+    
     const handleToggleAll = () => {
         if (allSelected) {
-            // Zrušit vše
+
             setSelectedKeys(new Set());
         } else {
-            // Vybrat vše
+
             const all = new Set(targets.map((t) => makeKey(t)));
             setSelectedKeys(all);
         }
     };
 
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -129,7 +129,7 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
             sendSms,
             targets: selectedTargets.map((t) => ({
                 userId: t.userId,
-                playerId: t.playerId, // může být null
+                playerId: t.playerId,
             })),
         };
 
@@ -138,13 +138,13 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
             const demoResult = await sendSpecialNotification(payload);
 
             if (demoResult) {
-                // DEMO režim – backend vrací DemoNotificationsDTO
+
                 setDemoPreview(demoResult);
                 setSubmitSuccess(
                     "Zpráva byla odeslána (DEMO režim – e-maily a SMS se fyzicky neodeslaly)."
                 );
             } else {
-                // Produkce – 204 No Content
+
                 setSubmitSuccess("Zpráva byla odeslána vybraným příjemcům.");
             }
 
@@ -165,6 +165,7 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
         }
     };
 
+    
     const handleCloseClick = () => {
         if (submitting) {
             return;
@@ -176,7 +177,7 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
         return null;
     }
 
-    // Pokusíme se vytáhnout první e-mail z DemoNotificationsDTO pro pěkný náhled
+
     const emailPreview =
         demoPreview &&
             Array.isArray(demoPreview.emails) &&
@@ -229,7 +230,6 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
                                 </div>
                             )}
 
-                            {/* Úspěch */}
                             {submitSuccess && (
                                 <div className="alert alert-success">
                                     {submitSuccess}
@@ -432,7 +432,6 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
                                 </div>
                             </div>
 
-                            {/* DEMO náhled (pokud backend vrátí DemoNotificationsDTO) */}
                             {demoPreview && (
                                 <div className="mt-3">
                                     <h6>Zpráva byla odeslána (DEMO náhled)</h6>
@@ -486,7 +485,6 @@ const AdminSpecialNotificationModal = ({ show, onClose, onSent }) => {
                 </div>
             </div>
 
-            {/* Bootstrap backdrop */}
             <div
                 className="modal-backdrop fade show"
                 onClick={handleCloseClick}

@@ -1,4 +1,3 @@
-// src/components/MatchRegistration/MatchRegistrationHistory.jsx
 import { useMyMatchRegistrationHistory } from "../../hooks/useMatchRegistrationHistory";
 import {
     excuseReasonLabel,
@@ -7,6 +6,14 @@ import {
     teamLabel
 } from "../../utils/registrationFormatter";
 
+/**
+ * MatchRegistrationHistory
+ *
+ * Komponenta pro zobrazení historických záznamů a filtrování přehledu.
+ *
+ * Props:
+ * @param {number} props.matchId Identifikátor zápasu, pro který se provádí akce nebo načítají data.
+ */
 const MatchRegistrationHistory = ({ matchId }) => {
     const { history, loading, error } = useMyMatchRegistrationHistory(matchId);
 
@@ -22,8 +29,7 @@ const MatchRegistrationHistory = ({ matchId }) => {
         (a, b) => new Date(a.changedAt) - new Date(b.changedAt)
     );
 
-    // 2) Vytvoření mapy změn: pro každou položku (kromě první)
-    //    se zjistí, co se změnilo oproti předchozí položce.
+
     const diffMap = {};
 
     for (let i = 1; i < historyAsc.length; i++) {
@@ -52,7 +58,7 @@ const MatchRegistrationHistory = ({ matchId }) => {
         };
     }
 
-    // 3) Pro zobrazení použijeme původní směr – od nejnovější po nejstarší
+
     const sortedHistory = [...historyAsc].sort(
         (a, b) => new Date(b.changedAt) - new Date(a.changedAt)
     );
@@ -85,7 +91,6 @@ const MatchRegistrationHistory = ({ matchId }) => {
 
                             <div className="row g-2">
 
-                                {/* STATUS */}
                                 <div className="col-12 col-md-4">
                                     <div className={getHighlightClass(diffs.statusChanged)}>
                                         <span className="fw-semibold">Status:</span>{" "}
@@ -93,7 +98,6 @@ const MatchRegistrationHistory = ({ matchId }) => {
                                     </div>
                                 </div>
 
-                                {/* TÝM */}
                                 <div className="col-12 col-md-4">
                                     <div className={getHighlightClass(diffs.teamChanged)}>
                                         <span className="fw-semibold">Tým:</span>{" "}
@@ -109,7 +113,6 @@ const MatchRegistrationHistory = ({ matchId }) => {
                                     </div>
                                 </div>
 
-                                {/* POZNÁMKA */}
                                 <div className="col-12">
                                     <div className={getHighlightClass(diffs.noteChanged)}>
                                         <span className="fw-semibold">Poznámka:</span>{" "}

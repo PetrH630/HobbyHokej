@@ -1,13 +1,24 @@
-// src/components/settings/PlayerProfileForm.jsx
 import RoleGuard from "../RoleGuard";
 import { PLAYER_POSITION_OPTIONS } from "../../constants/playerPosition";
 
+/**
+ * PlayerProfileForm
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.values Aktuální hodnoty formuláře.
+ * @param {Function} props.onChange callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.errors Validační chyby formuláře po jednotlivých polích.
+ * @param {Object} props.playerSettings data hráče nebo identifikátor aktuálního hráče.
+ */
 const PlayerProfileForm = ({
     values,
     onChange,
     errors = {},
-    playerSettings, // 🔹 nové: herní / notifikační nastavení hráče (PlayerSettingsDTO)
+    playerSettings,
 }) => {
+    
     const handleInputChange = (e) => {
         const { name, type, value, checked } = e.target;
         onChange({
@@ -21,7 +32,7 @@ const PlayerProfileForm = ({
     const phoneClass =
         "form-control" + (errors.phoneNumber ? " is-invalid" : "");
 
-    // 🔹 hodnoty bereme z playerSettings, NE z values
+
     const canMoveTeam = !!playerSettings?.possibleMoveToAnotherTeam;
     const canChangePosition = !!playerSettings?.possibleChangePlayerPosition;
 

@@ -1,132 +1,234 @@
 ﻿Balíček (složka): repositories
-Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\repositories
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\repositories
 
 Seznam souborů:
-MatchHistoryRepository.java
-MatchRepository.java
+AppUserHistoryRepository.java
+AppUserRepository.java
+AppUserSettingsRepository.java
+EmailVerificationTokenRepository.java
+ForgottenPasswordResetTokenRepository.java
 
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\repositories\MatchHistoryRepository.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\repositories\AppUserHistoryRepository.java
 -----
-package cz.phsoft.hokej.match.repositories;
+package cz.phsoft.hokej.user.repositories;
 
-import cz.phsoft.hokej.match.entities.MatchHistoryEntity;
+import cz.phsoft.hokej.user.entities.AppUserHistoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
 /**
- * RepozitĂˇĹ™ pro ÄŤtenĂ­ historickĂ˝ch zĂˇznamĹŻ zĂˇpasĹŻ.
+ * RepozitĂˇĹ™ pro ÄŤtenĂ­ historickĂ˝ch zĂˇznamĹŻ uĹľivatelĹŻ.
  *
  * SlouĹľĂ­ pro auditnĂ­ a pĹ™ehledovĂ© ĂşÄŤely. ZĂˇpis do historie
  * zajiĹˇĹĄujĂ­ databĂˇzovĂ© triggery, nikoliv tento repozitĂˇĹ™.
  */
-public interface MatchHistoryRepository extends JpaRepository<MatchHistoryEntity, Long> {
+public interface AppUserHistoryRepository extends JpaRepository<AppUserHistoryEntity, Long> {
 
     /**
-     * VrĂˇtĂ­ vĹˇechny historickĂ© zĂˇznamy pro danĂ˝ zĂˇpas,
+     * VrĂˇtĂ­ vĹˇechny historickĂ© zĂˇznamy pro danĂ©ho uĹľivatele,
      * seĹ™azenĂ© od nejnovÄ›jĹˇĂ­ zmÄ›ny po nejstarĹˇĂ­.
+     *
+     * @param userId ID uĹľivatele z hlavnĂ­ tabulky app_users
+     * @return seznam historickĂ˝ch zĂˇznamĹŻ danĂ©ho uĹľivatele
      */
-    List<MatchHistoryEntity> findByMatchIdOrderByChangedAtDesc(Long matchId);
+    List<AppUserHistoryEntity> findByUserIdOrderByChangedAtDesc(Long userId);
+
+    /**
+     * VrĂˇtĂ­ vĹˇechny historickĂ© zĂˇznamy pro danĂ˝ e-mail,
+     * seĹ™azenĂ© od nejnovÄ›jĹˇĂ­ zmÄ›ny po nejstarĹˇĂ­.
+     *
+     * UmoĹľĹuje dohledat historii zmÄ›n i v pĹ™Ă­padÄ›, kdy
+     * nenĂ­ k dispozici ID uĹľivatele nebo se zmÄ›nila vazba
+     * mezi e-mailem a ĂşÄŤtem.
+     *
+     * @param email e-mail uĹľivatele
+     * @return seznam historickĂ˝ch zĂˇznamĹŻ pro danĂ˝ e-mail
+     */
+    List<AppUserHistoryEntity> findByEmailOrderByChangedAtDesc(String email);
+
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\repositories\MatchRepository.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\repositories\AppUserRepository.java
 -----
-package cz.phsoft.hokej.match.repositories;
+package cz.phsoft.hokej.user.repositories;
 
-import cz.phsoft.hokej.match.entities.MatchEntity;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * RepozitĂˇĹ™ pro prĂˇci s entitou MatchEntity.
+ * RepozitĂˇĹ™ pro prĂˇci s entitou AppUserEntity.
  *
- * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ zĂˇpasĹŻ podle ÄŤasu konĂˇnĂ­ a sezĂłny,
- * zejmĂ©na pro pĹ™ehledy nadchĂˇzejĂ­cĂ­ch a odehranĂ˝ch zĂˇpasĹŻ.
+ * SlouĹľĂ­ k perzistenci a naÄŤĂ­tĂˇnĂ­ uĹľivatelskĂ˝ch ĂşÄŤtĹŻ
+ * z databĂˇze pomocĂ­ Spring Data JPA.
  */
-public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
-
-    // ZĂˇpasy podle data (nezĂˇvisle na sezĂłnÄ›)
+public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
 
     /**
-     * VrĂˇtĂ­ vĹˇechny zĂˇpasy konajĂ­cĂ­ se po zadanĂ©m ÄŤase.
+     * VyhledĂˇ uĹľivatele podle e-mailovĂ© adresy.
      *
-     * ZĂˇpasy jsou seĹ™azeny vzestupnÄ› podle data a ÄŤasu konĂˇnĂ­,
-     * nejbliĹľĹˇĂ­ zĂˇpas je na prvnĂ­m mĂ­stÄ›.
+     * E-mail slouĹľĂ­ jako unikĂˇtnĂ­ identifikĂˇtor uĹľivatele
+     * pĹ™i pĹ™ihlĂˇĹˇenĂ­ do aplikace.
      *
-     * @param dateTime referenÄŤnĂ­ datum a ÄŤas
-     * @return seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ
+     * @param email e-mail uĹľivatele
+     * @return uĹľivatel zabalenĂ˝ v Optional, pokud existuje
      */
-    List<MatchEntity> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
+    Optional<AppUserEntity> findByEmail(String email);
 
     /**
-     * VrĂˇtĂ­ vĹˇechny zĂˇpasy konajĂ­cĂ­ se pĹ™ed zadanĂ˝m ÄŤasem.
+     * VrĂˇtĂ­ seznam vĹˇech aktivnĂ­ch uĹľivatelĹŻ.
      *
-     * ZĂˇpasy jsou seĹ™azeny sestupnÄ› podle data a ÄŤasu konĂˇnĂ­,
-     * nejnovÄ›jĹˇĂ­ odehranĂ˝ zĂˇpas je na prvnĂ­m mĂ­stÄ›.
+     * Aktivita je urÄŤena pĹ™Ă­znakem enabled v entitÄ› AppUserEntity.
+     * Metoda se pouĹľĂ­vĂˇ napĹ™Ă­klad pro vĂ˝pis uĹľivatelĹŻ, kteĹ™Ă­ se mohou
+     * pĹ™ihlĂˇsit do aplikace nebo jim mohou bĂ˝t zasĂ­lĂˇny notifikace.
      *
-     * @param dateTime referenÄŤnĂ­ datum a ÄŤas
-     * @return seznam odehranĂ˝ch zĂˇpasĹŻ
+     * @return seznam aktivnĂ­ch uĹľivatelĹŻ
      */
-    List<MatchEntity> findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime dateTime);
+    List<AppUserEntity> findByEnabledTrue();
 
-    // ZĂˇpasy v konkrĂ©tnĂ­ sezĂłnÄ›
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\repositories\AppUserSettingsRepository.java
+-----
+package cz.phsoft.hokej.user.repositories;
+
+import cz.phsoft.hokej.user.entities.AppUserSettingsEntity;
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou AppUserSettingsEntity.
+ *
+ * SlouĹľĂ­ k naÄŤĂ­tĂˇnĂ­ a uklĂˇdĂˇnĂ­ nastavenĂ­ uĹľivatelskĂ˝ch ĂşÄŤtĹŻ,
+ * oddÄ›lenĂ˝ch od samotnĂ˝ch uĹľivatelĹŻ.
+ */
+public interface AppUserSettingsRepository extends JpaRepository<AppUserSettingsEntity, Long> {
 
     /**
-     * VrĂˇtĂ­ vĹˇechny zĂˇpasy v danĂ© sezĂłnÄ› seĹ™azenĂ©
-     * vzestupnÄ› podle data a ÄŤasu konĂˇnĂ­.
+     * VyhledĂˇ nastavenĂ­ podle uĹľivatele.
      *
-     * @param seasonId ID sezĂłny
-     * @return seznam zĂˇpasĹŻ v sezĂłnÄ›
+     * Metoda se pouĹľĂ­vĂˇ tam, kde je k dispozici entita uĹľivatele
+     * a je potĹ™eba zjistit, zda mĂˇ uloĹľenĂˇ specifickĂˇ nastavenĂ­.
+     *
+     * @param user uĹľivatelskĂ˝ ĂşÄŤet
+     * @return nastavenĂ­ zabalenĂ© v Optional, pokud existuje
      */
-    List<MatchEntity> findAllBySeasonIdOrderByDateTimeAsc(Long seasonId);
+    Optional<AppUserSettingsEntity> findByUser(AppUserEntity user);
 
     /**
-     * VrĂˇtĂ­ vĹˇechny zĂˇpasy v danĂ© sezĂłnÄ› seĹ™azenĂ©
-     * sestupnÄ› podle data a ÄŤasu konĂˇnĂ­.
+     * VyhledĂˇ nastavenĂ­ podle e-mailu uĹľivatele.
      *
-     * @param seasonId ID sezĂłny
-     * @return seznam zĂˇpasĹŻ v sezĂłnÄ›
+     * UmoĹľĹuje naÄŤĂ­st nastavenĂ­ i v situaci, kdy nenĂ­ k dispozici
+     * pĹ™Ă­mo entita AppUserEntity, ale pouze e-mail aktuĂˇlnÄ›
+     * pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele.
+     *
+     * @param email e-mail uĹľivatele
+     * @return nastavenĂ­ zabalenĂ© v Optional, pokud existuje
      */
-    List<MatchEntity> findAllBySeasonIdOrderByDateTimeDesc(Long seasonId);
-
-    // ZĂˇpasy v sezĂłnÄ› s ÄŤasovĂ˝m omezenĂ­m
+    Optional<AppUserSettingsEntity> findByUserEmail(String email);
 
     /**
-     * VrĂˇtĂ­ zĂˇpasy v danĂ© sezĂłnÄ›, kterĂ© se konajĂ­
-     * po zadanĂ©m ÄŤase.
+     * OvÄ›Ĺ™Ă­, zda existuje zĂˇznam nastavenĂ­ pro danĂ©ho uĹľivatele.
      *
-     * PouĹľĂ­vĂˇ se zejmĂ©na pro naÄŤĂ­tĂˇnĂ­ nadchĂˇzejĂ­cĂ­ch
-     * zĂˇpasĹŻ v aktivnĂ­ sezĂłnÄ›.
+     * PouĹľĂ­vĂˇ se napĹ™Ă­klad pĹ™i inicializaci vĂ˝chozĂ­ch nastavenĂ­
+     * nebo pĹ™i rozhodovĂˇnĂ­, zda vytvoĹ™it novĂ˝ zĂˇznam.
      *
-     * @param seasonId ID sezĂłny
-     * @param from     referenÄŤnĂ­ datum a ÄŤas
-     * @return seznam nadchĂˇzejĂ­cĂ­ch zĂˇpasĹŻ v sezĂłnÄ›
+     * @param user uĹľivatelskĂ˝ ĂşÄŤet
+     * @return true, pokud nastavenĂ­ existuje
      */
-    List<MatchEntity> findBySeasonIdAndDateTimeAfterOrderByDateTimeAsc(
-            Long seasonId,
-            LocalDateTime from
-    );
+    Boolean existsByUser(AppUserEntity user);
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\repositories\EmailVerificationTokenRepository.java
+-----
+package cz.phsoft.hokej.user.repositories;
+
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.EmailVerificationTokenEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou EmailVerificationTokenEntity.
+ *
+ * SlouĹľĂ­ k uklĂˇdĂˇnĂ­ a vyhledĂˇvĂˇnĂ­ ovÄ›Ĺ™ovacĂ­ch tokenĹŻ
+ * pouĹľĂ­vanĂ˝ch pĹ™i aktivaci uĹľivatelskĂ˝ch ĂşÄŤtĹŻ.
+ */
+public interface EmailVerificationTokenRepository
+        extends JpaRepository<EmailVerificationTokenEntity, Long> {
 
     /**
-     * VrĂˇtĂ­ zĂˇpasy v danĂ© sezĂłnÄ›, kterĂ© se konaly
-     * pĹ™ed zadanĂ˝m ÄŤasem.
+     * VyhledĂˇ ovÄ›Ĺ™ovacĂ­ token podle jeho hodnoty.
      *
-     * PouĹľĂ­vĂˇ se zejmĂ©na pro pĹ™ehled odehranĂ˝ch
-     * zĂˇpasĹŻ v sezĂłnÄ›.
+     * PouĹľĂ­vĂˇ se pĹ™i ovÄ›Ĺ™ovĂˇnĂ­ aktivaÄŤnĂ­ho odkazu uĹľivatele.
      *
-     * @param seasonId ID sezĂłny
-     * @param to       referenÄŤnĂ­ datum a ÄŤas
-     * @return seznam odehranĂ˝ch zĂˇpasĹŻ v sezĂłnÄ›
+     * @param token hodnota ovÄ›Ĺ™ovacĂ­ho tokenu
+     * @return token zabalenĂ˝ v Optional, pokud existuje
      */
-    List<MatchEntity> findBySeasonIdAndDateTimeBeforeOrderByDateTimeDesc(
-            Long seasonId,
-            LocalDateTime to
-    );
+    Optional<EmailVerificationTokenEntity> findByToken(String token);
 
-    List<MatchEntity> findByDateTimeBetween(LocalDateTime from, LocalDateTime to);
+    /**
+     * SmaĹľe vĹˇechny ovÄ›Ĺ™ovacĂ­ tokeny danĂ©ho uĹľivatele.
+     *
+     * Typicky se pouĹľĂ­vĂˇ po ĂşspÄ›ĹˇnĂ© aktivaci ĂşÄŤtu
+     * nebo pĹ™i opakovanĂ©m posĂ­lĂˇnĂ­ aktivaÄŤnĂ­ho e-mailu,
+     * aby nezĹŻstĂˇvaly starĂ© tokeny v databĂˇzi.
+     *
+     * @param user uĹľivatel, jehoĹľ tokeny majĂ­ bĂ˝t smazĂˇny
+     */
+    void deleteByUser(AppUserEntity user);
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\repositories\ForgottenPasswordResetTokenRepository.java
+-----
+package cz.phsoft.hokej.user.repositories;
+
+import cz.phsoft.hokej.user.entities.AppUserEntity;
+import cz.phsoft.hokej.user.entities.ForgottenPasswordResetTokenEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+/**
+ * RepozitĂˇĹ™ pro prĂˇci s entitou ForgottenPasswordResetTokenEntity.
+ *
+ * SlouĹľĂ­ k uklĂˇdĂˇnĂ­ a vyhledĂˇvĂˇnĂ­ resetovacĂ­ch tokenĹŻ
+ * pouĹľĂ­vanĂ˝ch pĹ™i obnovÄ› zapomenutĂ©ho hesla.
+ */
+public interface ForgottenPasswordResetTokenRepository
+        extends JpaRepository<ForgottenPasswordResetTokenEntity, Long> {
+
+    /**
+     * VyhledĂˇ resetovacĂ­ token podle jeho hodnoty.
+     *
+     * Metoda se pouĹľĂ­vĂˇ pĹ™i zpracovĂˇnĂ­ odkazu na reset hesla,
+     * kterĂ˝ uĹľivatel obdrĹľel e-mailem.
+     *
+     * @param token hodnota resetovacĂ­ho tokenu
+     * @return token zabalenĂ˝ v Optional, pokud existuje
+     */
+    Optional<ForgottenPasswordResetTokenEntity> findByToken(String token);
+
+    /**
+     * SmaĹľe vĹˇechny resetovacĂ­ tokeny danĂ©ho uĹľivatele.
+     *
+     * Typicky se pouĹľĂ­vĂˇ po ĂşspÄ›ĹˇnĂ©m nastavenĂ­ novĂ©ho hesla
+     * nebo pĹ™i vynulovĂˇnĂ­ procesu resetu, aby nebylo moĹľnĂ©
+     * pouĹľĂ­t starĂ© tokeny.
+     *
+     * @param user uĹľivatel, jehoĹľ tokeny majĂ­ bĂ˝t smazĂˇny
+     */
+    void deleteByUser(AppUserEntity user);
 }

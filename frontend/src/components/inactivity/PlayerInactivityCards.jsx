@@ -1,4 +1,3 @@
-// src/components/inactivity/PlayerInactivityCards.jsx
 import React from "react";
 
 const formatDateTime = (iso) => {
@@ -17,6 +16,16 @@ const formatDateTime = (iso) => {
     }
 };
 
+/**
+ * PlayerInactivityCards
+ *
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
+ *
+ * Props:
+ * @param {Object} props.periods vstupní hodnota komponenty.
+ * @param {boolean} props.loading Příznak, že probíhá načítání dat a UI má zobrazit stav načítání.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ */
 const PlayerInactivityCards = ({ periods, loading, error }) => {
     if (loading) {
         return <p>Načítám období neaktivity…</p>;

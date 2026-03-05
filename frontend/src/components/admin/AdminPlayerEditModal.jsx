@@ -3,6 +3,21 @@ import { useEffect, useState } from "react";
 import PlayerProfileForm from "../settings/PlayerProfileForm";
 import { validatePlayerProfile } from "../../validation/playerValidation";
 
+/**
+ * AdminPlayerEditModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Umožňuje zavření stiskem klávesy Escape.
+ *
+ * Props:
+ * @param {import("../../types/dto").PlayerDTO} props.player Data hráče používaná pro zobrazení nebo administraci.
+ * @param {boolean} props.show určuje, zda je dialog otevřený.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onSave vstupní hodnota komponenty.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ */
+
 const AdminPlayerEditModal = ({ player, show, onClose, onSave, saving }) => {
     if (!show || !player) {
         return null;
@@ -47,7 +62,12 @@ const AdminPlayerEditModal = ({ player, show, onClose, onSave, saving }) => {
         });
     };
 
-    const handleSubmit = (e) => {
+    
+/**
+ * Zpracuje odeslání formuláře a zavolá příslušný callback nadřazené komponenty.
+ */
+
+const handleSubmit = (e) => {
         e.preventDefault();
 
         const validationErrors = validatePlayerProfile(values);
@@ -73,7 +93,12 @@ const AdminPlayerEditModal = ({ player, show, onClose, onSave, saving }) => {
         onSave(payload);
     };
 
-    const handleClose = () => {
+    
+/**
+ * Zajistí konzistentní zavření modalu a vrácení lokálního stavu do výchozího nastavení.
+ */
+
+const handleClose = () => {
         if (!saving) {
             onClose();
         }

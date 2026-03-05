@@ -4,6 +4,15 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 
+/**
+ * RequireAuth
+ *
+ * UI komponenta.
+ *
+ * Props:
+ * @param {Object} props vstupní hodnoty komponenty
+ * @param {*} props.children vstupní hodnota komponenty
+ */
 const RequireAuth = ({ children }) => {
     const { user, loading } = useAuth();
 

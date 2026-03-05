@@ -5,6 +5,11 @@ import { VscJersey } from "react-icons/vsc";
 import { IoShirt, IoShirtOutline } from "react-icons/io5";
 import { FaCircle } from "react-icons/fa";
 
+/**
+ * PlayerIcons
+ *
+ * Soubor obsahuje sdílené UI pomocné prvky používané napříč aplikací.
+ */
 export const PhoneIcon = (props) => <FaPhone {...props} />;
 export const UserIcon = (props) => <FaUser {...props} />;
 export const AdminIcon = (props) => <FaShieldAlt {...props} />;

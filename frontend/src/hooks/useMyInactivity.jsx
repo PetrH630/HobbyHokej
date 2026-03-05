@@ -1,7 +1,12 @@
-// src/hooks/useMyInactivity.js
 import { useEffect, useState } from "react";
 import { getMyInactivity } from "../api/playerInactivityApi";
 
+/**
+ * useMyInactivity
+ *
+ * Hook pro načtení období neaktivity aktuálního hráče (např. zranění, dovolená).
+ * UI podle toho může omezit registrace nebo zobrazit informaci o nedostupnosti.
+ */
 const normalizeDate = (value) => {
     if (!value) return null;
 

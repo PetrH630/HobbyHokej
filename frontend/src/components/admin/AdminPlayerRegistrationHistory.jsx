@@ -8,6 +8,16 @@ import {
     teamLabel,
 } from "../../utils/registrationFormatter";
 
+/**
+ * AdminPlayerRegistrationHistory
+ *
+ * Komponenta pro zobrazení historických záznamů a filtrování přehledu.
+ *
+ * Props:
+ * @param {number} props.matchId Identifikátor zápasu, pro který se provádí akce nebo načítají data.
+ * @param {number} props.playerId data hráče nebo identifikátor aktuálního hráče.
+ */
+
 const AdminPlayerRegistrationHistory = ({ matchId, playerId }) => {
     const { history, loading, error } =
         usePlayerRegistrationHistoryAdmin(matchId, playerId);

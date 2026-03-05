@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import "./ScrollToTopButton.css";
 
+/**
+ * ScrollToTopButton
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * @param {Object} props vstupní hodnoty komponenty.
+ */
 const ScrollToTopButton = () => {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
+        
         const handleScroll = () => {
-            // zobrazit až po scrollnutí 100px
+
             setVisible(window.scrollY > 100);
         };
 

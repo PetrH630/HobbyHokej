@@ -199,6 +199,7 @@ Podrobnosti viz:
 - Spring Mail
 - SMS integrace (TextBee)
 - Spring Scheduler
+- InAppNotifikace
 
 ---
 

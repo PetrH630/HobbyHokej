@@ -7,13 +7,214 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Upravedno API, ARCHITECTURE, README .. .md">
+    <list default="true" id="02a86524-5ee3-48ee-8557-b0a0b0c8eb4e" name="Changes" comment="Opraveny komentáře - bez inheritDoc a do datainitializeru přidány náhodné pozice primary, secondary pro hráče. Nastaveno i localhost pro testování z mobilu">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/player/dto/PlayerMatchResultDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/application-test.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/test/java/cz/phsoft/hokej/it/AbstractIntegrationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/logs/application.log" beforeDir="false" afterPath="$PROJECT_DIR$/backend/logs/application.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/DataInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/config/DataInitializer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/controllers/MatchController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/controllers/MatchController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchPositionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchPositionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/config.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/config.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/controllers.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/controllers.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/demo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/demo.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/dto.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/dto.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/email.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/email.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/entities.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/entities.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/enums.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/enums.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/exceptions.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/exceptions.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/hokej.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/hokej.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/mappers.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/mappers.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/migration.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/migration.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/repositories.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/repositories.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/security.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/security.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/services.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/services.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/sms.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/FilesForCheck/sms.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/dto/MatchOverviewDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/dto/MatchOverviewDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchAutoLineupServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchAutoLineupServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchQueryServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/match/services/MatchQueryServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/player/dto/PlayerStatsDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/player/dto/PlayerStatsDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/player/services/PlayerStatsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/player/services/PlayerStatsServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/registration/repositories/MatchRegistrationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/cz/phsoft/hokej/registration/repositories/MatchRegistrationRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/RequireAuth.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/RequireAuth.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/adminPlayersApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/adminPlayersApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/authApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/authApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/axios.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/axios.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/demoApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/demoApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/demoNotificationsApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/demoNotificationsApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/matchApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/matchApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/matchRegistrationApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/matchRegistrationApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/matchRegistrationHistoryApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/matchRegistrationHistoryApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/modeApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/modeApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/notificationsApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/notificationsApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/playerApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/playerApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/playerInactivityApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/playerInactivityApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/playerSettingsApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/playerSettingsApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/seasonApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/seasonApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/userApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/userApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/userSettingsApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/userSettingsApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/BackButton.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/BackButton.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/CookieConsentBanner.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/CookieConsentBanner.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Footer.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Footer.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Footer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/HeaderTop.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/HeaderTop.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/HeaderTop.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/HeaderTop.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Navbar.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/RoleGuard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/RoleGuard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ScrollToTop.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ScrollToTop.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ScrollToTopButton.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ScrollToTopButton.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ScrollToTopButton.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ScrollToTopButton.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/TestConnection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/TestConnection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminCancelNoExcuseModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminCancelNoExcuseModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchDetailInline.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchDetailInline.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchHistory.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchHistory.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchHistoryCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchHistoryCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchInfo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchRegistrationInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchRegistrationInfo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchesTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminMatchesTable.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminNoExcuseModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminNoExcuseModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerEditModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerEditModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerHistory.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerHistory.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerHistoryCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerHistoryCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerInactivityModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerInactivityModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRegistrationHistory.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRegistrationHistory.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRegistrationHistoryModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRegistrationHistoryModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRow.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayerRow.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayersTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminPlayersTable.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminSeasonCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminSeasonCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminSeasonModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminSeasonModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminSeasonsTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminSeasonsTable.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminUserCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminUserCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminUserEditModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminUserEditModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/AdminUsersTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/AdminUsersTable.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/CancelMatchModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/CancelMatchModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/common/ConfirmActionModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/common/ConfirmActionModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/common/SuccessModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/common/SuccessModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/demo/DemoNotificationsModal.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/demo/DemoNotificationsModal.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/demo/DemoNotificationsModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/demo/DemoNotificationsModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/forms/DatePicker.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/forms/DatePicker.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/forms/DateTimePicker.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/forms/DateTimePicker.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/inactivity/PlayerInactivityCards.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/inactivity/PlayerInactivityCards.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/ExcuseModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/ExcuseModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationHistory.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationHistory.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/MatchRegistrationInfo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matchRegistration/TeamSelectModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/CapacityRing.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/CapacityRing.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchActions.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchActions.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchActions.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchActions.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchHeader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchHeader.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchInfo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/MatchOverview.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/MatchOverview.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/PastMatches.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/PastMatches.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/PastMatches.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/PastMatches.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/UpcomingMatches.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/UpcomingMatches.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/matches/UpcomingMatches.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/matches/UpcomingMatches.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationBell.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationBell.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/notifications/AdminNotificationList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/notifications/AdminSpecialNotificationModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/notifications/AdminSpecialNotificationModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/notifications/NotificationBell.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/notifications/NotificationBell.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/notifications/NotificationCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/notifications/NotificationCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/notifications/NotificationsList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/notifications/NotificationsList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/CreatePlayerForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/CreatePlayerForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/PlayerCard.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerCard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/PlayerCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/PlayerMatchStatus.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerMatchStatus.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/PlayerMatchStatus.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerMatchStatus.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/PlayerStats.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerStats.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/PlayerStatsCharts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/PlayerStatsCharts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/Players.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/Players.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/players/Players.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/players/Players.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/seasons/SeasonForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/seasons/SeasonForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/seasons/seasonSelect.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/seasons/seasonSelect.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/settings/ChangePasswordForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/settings/ChangePasswordForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/settings/PlayerProfileForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/settings/PlayerProfileForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/settings/PlayerSettings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/settings/PlayerSettings.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/settings/UserProfileForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/settings/UserProfileForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/settings/UserSettings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/settings/UserSettings.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/context/AppModeContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/context/AppModeContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/context/AuthContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/context/AuthContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/context/NotificationBadgeContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/context/NotificationBadgeContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/context/NotificationContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/context/NotificationContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useAllMatchesAdmin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useAllMatchesAdmin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useAllPlayersAdmin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useAllPlayersAdmin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useAllPlayersAdminWithUsers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useAllPlayersAdminWithUsers.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useAllSeasonsAdmin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useAllSeasonsAdmin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useAllUsersAdmin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useAllUsersAdmin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useAuth.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useAuth.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useBootstrapTooltip.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useBootstrapTooltip.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useCurrentPlayer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useCurrentPlayer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useDemoMode.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useDemoMode.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useDemoNotifications.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useDemoNotifications.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useGlobalDim.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useGlobalDim.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useGlobalModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useGlobalModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useMatchDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useMatchDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useMatchHistoryAdmin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useMatchHistoryAdmin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useMatchRegistrationHistory.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useMatchRegistrationHistory.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useMyInactivity.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useMyInactivity.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useMyPassedMatches.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useMyPassedMatches.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useMyPlayerStats.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useMyPlayerStats.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useMyUpcomingMatches.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useMyUpcomingMatches.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useNotificationBadge.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useNotificationBadge.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useNotifications.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useNotifications.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/usePlayerHistoryAdmin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/usePlayerHistoryAdmin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/usePlayerInactivityPeriodsAdmin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/usePlayerInactivityPeriodsAdmin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/usePlayerRegistrationHistoryAdmin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/usePlayerRegistrationHistoryAdmin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/usePlayerSettings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/usePlayerSettings.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/usePlayerStatsAdmin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/usePlayerStatsAdmin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/usePlayers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/usePlayers.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/usePostLoginRedirect.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/usePostLoginRedirect.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useSeason.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useSeason.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useSpecialNotificationTargets.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useSpecialNotificationTargets.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useUserProfile.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useUserProfile.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/hooks/useUserSettings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/hooks/useUserSettings.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/icons/NavigationIcons.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/icons/NavigationIcons.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/icons/OtherIcons.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/icons/OtherIcons.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/icons/PlayerIcons.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/icons/PlayerIcons.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/icons/StatusIcons.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/icons/StatusIcons.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/icons/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/icons/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminHomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminHomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminMatchesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminMatchesPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminPlayersInactivityPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminPlayersInactivityPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminSeasonsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminSeasonsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminUserDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminUserDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/CreatePlayer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/CreatePlayer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/ForgottenPasswordRequestPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/ForgottenPasswordRequestPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/ForgottenPasswordResetPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/ForgottenPasswordResetPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Home.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/HomeDecider.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/HomeDecider.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/LoginPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/MatchDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MatchDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/MyInactivityPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MyInactivityPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/NotificationsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/NotificationsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/PlayersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/PlayersPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/PublicLandingPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/PublicLandingPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/PublicLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/PublicLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/RegisterPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/RegisterPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/SettingsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SettingsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/SharedLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SharedLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/VerifyEmailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/VerifyEmailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/utils/formatDate.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/utils/formatDate.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/utils/formatDateTime.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/utils/formatDateTime.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/utils/formatPhoneNumber.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/utils/formatPhoneNumber.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/utils/matchFormatter.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/utils/matchFormatter.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/utils/registrationFormatter.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/utils/registrationFormatter.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/utils/smoothScrollTo.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/utils/smoothScrollTo.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/validation/matchValidation.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/validation/matchValidation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/validation/playerValidation.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/validation/playerValidation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/validation/seasonValidation.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/validation/seasonValidation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,9 +234,9 @@
       <list>
         <option value="Exception" />
         <option value="Interface" />
-        <option value="Class" />
         <option value="Enum" />
         <option value="package-info" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -76,25 +277,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.HobbyHokej.executor": "Run",
-    "Application.HobbyHokejApplication.executor": "Run",
-    "Maven.HobbyHokej [clean].executor": "Run",
-    "Maven.HobbyHokej [install].executor": "Run",
-    "Maven.HobbyHokej [package].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/ProjektyPrace/HobbyHokej/backend/src/main/java",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "editor.preferences.import"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.HobbyHokej.executor&quot;: &quot;Run&quot;,
+    &quot;Application.HobbyHokejApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.HobbyHokej [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.HobbyHokej [install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.HobbyHokej [package].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/ProjektyPrace/HobbyHokej/backend/src/main/java&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.import&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\ProjektyPrace\HobbyHokej\backend\src\main\java" />
@@ -130,22 +331,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770146408763</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Doplněno - Historie zápasu, Sezon, Uživatele - Entity, DTO, Mapper, Service">
-      <option name="closed" value="true" />
-      <created>1770631615369</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1770631615369</updated>
-    </task>
-    <task id="LOCAL-00008" summary="Do controlleru - player, Match, AppUser doplněny endpointy">
-      <option name="closed" value="true" />
-      <created>1770640493913</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1770640493913</updated>
     </task>
     <task id="LOCAL-00009" summary="Přidáno ověřování duplicity názvu sezony">
       <option name="closed" value="true" />
@@ -523,7 +708,23 @@
       <option name="project" value="LOCAL" />
       <updated>1772558569070</updated>
     </task>
-    <option name="localTasksCounter" value="56" />
+    <task id="LOCAL-00056" summary="Oprava metod u zápasu a registrací - omylem byly smazané">
+      <option name="closed" value="true" />
+      <created>1772612889137</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1772612889138</updated>
+    </task>
+    <task id="LOCAL-00057" summary="Opraveny komentáře - bez inheritDoc a do datainitializeru přidány náhodné pozice primary, secondary pro hráče. Nastaveno i localhost pro testování z mobilu">
+      <option name="closed" value="true" />
+      <created>1772645088379</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1772645088381</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -540,8 +741,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Doplněny statistiky hráče k zápasům v sezóně - PlayerStatsDTO, PlayerStatsService" />
-    <MESSAGE value="Doplněn endpoint do PlayerController pro stats" />
     <MESSAGE value="Upraven Stats na FE" />
     <MESSAGE value="Upraven DateTimePicker na FE, ještě zkontrolovat sezony" />
     <MESSAGE value="Odstraněn Impersonate na FE" />
@@ -565,6 +764,8 @@
     <MESSAGE value="Opraven" />
     <MESSAGE value="Opraven API.md dle aktuálních endpointu" />
     <MESSAGE value="Upravedno API, ARCHITECTURE, README .. .md" />
-    <option name="LAST_COMMIT_MESSAGE" value="Upravedno API, ARCHITECTURE, README .. .md" />
+    <MESSAGE value="Oprava metod u zápasu a registrací - omylem byly smazané" />
+    <MESSAGE value="Opraveny komentáře - bez inheritDoc a do datainitializeru přidány náhodné pozice primary, secondary pro hráče. Nastaveno i localhost pro testování z mobilu" />
+    <option name="LAST_COMMIT_MESSAGE" value="Opraveny komentáře - bez inheritDoc a do datainitializeru přidány náhodné pozice primary, secondary pro hráče. Nastaveno i localhost pro testování z mobilu" />
   </component>
 </project>

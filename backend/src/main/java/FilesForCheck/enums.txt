@@ -1,136 +1,94 @@
 ﻿Balíček (složka): enums
-Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\enums
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\enums
 
 Seznam souborů:
-MatchCancelReason.java
-MatchMode.java
-MatchStatus.java
+LandingPage.java
+PlayerSelectionMode.java
+Role.java
 
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\enums\MatchCancelReason.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\enums\LandingPage.java
 -----
-package cz.phsoft.hokej.match.enums;
+package cz.phsoft.hokej.user.enums;
 
 /**
- * DĹŻvody zruĹˇenĂ­ zĂˇpasu.
+ * Enum reprezentujĂ­cĂ­ vĂ˝chozĂ­ obrazovku po pĹ™ihlĂˇĹˇenĂ­ uĹľivatele.
  *
- * Hodnota se pouĹľĂ­vĂˇ spolu se stavem zĂˇpasu pro pĹ™ehlednĂ©
- * a strojovÄ› zpracovatelnĂ© urÄŤenĂ­, proÄŤ byl zĂˇpas zruĹˇen.
+ * Hodnota se pouĹľĂ­vĂˇ v nastavenĂ­ uĹľivatele (AppUserSettingsEntity)
+ * a urÄŤuje, na jakou sekci aplikace mĂˇ bĂ˝t uĹľivatel po pĹ™ihlĂˇĹˇenĂ­
+ * pĹ™esmÄ›rovĂˇn.
  */
-public enum MatchCancelReason {
+public enum LandingPage {
 
     /**
-     * NedostateÄŤnĂ˝ poÄŤet pĹ™ihlĂˇĹˇenĂ˝ch hrĂˇÄŤĹŻ.
+     * PĹ™ehledovĂˇ obrazovka (dashboard) s ĂşvodnĂ­mi informacemi.
      */
-    NOT_ENOUGH_PLAYERS,     // mĂˇlo hrĂˇÄŤĹŻ
+    DASHBOARD,
 
     /**
-     * TechnickĂ© problĂ©my, napĹ™Ă­klad led, hala nebo doprava.
+     * Sekce s pĹ™ehledem hrĂˇÄŤĹŻ.
      */
-    TECHNICAL_ISSUE,        // technickĂ© problĂ©my (led, hala, busâ€¦)
+    PLAYERS,
 
     /**
-     * NepĹ™Ă­znivĂ© poÄŤasĂ­.
+     * Sekce s pĹ™ehledem zĂˇpasĹŻ.
      */
-    WEATHER,                // poÄŤasĂ­
-
-    /**
-     * RozhodnutĂ­ organizĂˇtora.
-     */
-    ORGANIZER_DECISION,     // rozhodnutĂ­ organizĂˇtora
-
-    /**
-     * JinĂ˝ dĹŻvod zruĹˇenĂ­, blĂ­Ĺľe nespecifikovanĂ˝.
-     */
-    OTHER                   // jinĂ˝ dĹŻvod
+    MATCHES
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\enums\MatchMode.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\enums\PlayerSelectionMode.java
 -----
-package cz.phsoft.hokej.match.enums;
+package cz.phsoft.hokej.user.enums;
 
-public enum MatchMode {
-    THREE_ON_THREE_NO_GOALIE(3, false),  //  3 na 3 bez brankĂˇĹ™e - 12
-    THREE_ON_THREE_WITH_GOALIE(3, true),  //  3 na 3 s brankĂˇĹ™em - 14
-    FOUR_ON_FOUR_NO_GOALIE(4, false), // 4 na 4 bez brankĂˇĹ™e - 16
-    FOUR_ON_FOUR_WITH_GOALIE(4, true),  // 4 na 4 s brankĂˇĹ™em - 18
-    FIVE_ON_FIVE_NO_GOALIE(5, false), // 5 na 5 bez brankĂˇĹ™e - 20
-    FIVE_ON_FIVE_WITH_GOALIE(5, true), // 5 na 5 s brankĂˇĹ™em - 22
-    SIX_ON_SIX_NO_GOALIE(6, false); // 6 na 6 bez brankĂˇĹ™e - 24
-
-    /**
-     * PoÄŤet hrĂˇÄŤĹŻ v poli na ledÄ› na jeden tĂ˝m.
-     */
-    private final int skatersPerTeam;
+/**
+ * ZpĹŻsob automatickĂ©ho vĂ˝bÄ›ru hrĂˇÄŤe pro uĹľivatele.
+ *
+ * PouĹľĂ­vĂˇ se pĹ™i pĹ™ihlĂˇĹˇenĂ­ uĹľivatele nebo pĹ™i volĂˇnĂ­ auto-select
+ * logiky na backendu. OvlivĹuje, jakĂ˝ hrĂˇÄŤ bude pĹ™edvybrĂˇn v UI.
+ */
+public enum PlayerSelectionMode {
 
     /**
-     * Indikuje, zda je souÄŤĂˇstĂ­ sestavy brankĂˇĹ™.
+     * Automaticky se vybere prvnĂ­ hrĂˇÄŤ uĹľivatele podle ID.
+     *
+     * Typicky se jednĂˇ o nejstarĹˇĂ­ho (prvnÄ› zaloĹľenĂ©ho) hrĂˇÄŤe
+     * danĂ©ho uĹľivatele.
      */
-    private final boolean goalieIncluded;
-
-    MatchMode(int skatersPerTeam, boolean goalieIncluded) {
-        this.skatersPerTeam = skatersPerTeam;
-        this.goalieIncluded = goalieIncluded;
-    }
+    FIRST_PLAYER,
 
     /**
-     * VracĂ­ poÄŤet hrĂˇÄŤĹŻ v poli na ledÄ›.
+     * Po pĹ™ihlĂˇĹˇenĂ­ se ĹľĂˇdnĂ˝ hrĂˇÄŤ automaticky nevybere.
+     *
+     * UĹľivatel si musĂ­ hrĂˇÄŤe zvolit ruÄŤnÄ›, obvykle z nabĂ­dky
+     * na frontendu.
      */
-    public int getSkatersPerTeam() {
-        return skatersPerTeam;
-    }
-
-    /**
-     * VracĂ­ informaci, zda je zahrnut brankĂˇĹ™.
-     */
-    public boolean isGoalieIncluded() {
-        return goalieIncluded;
-    }
-
-    /**
-     * VracĂ­ maximĂˇlnĂ­ poÄŤet hrĂˇÄŤĹŻ na jeden tĂ˝m.
-     * HrĂˇÄŤi v poli majĂ­ stĹ™Ă­dĂˇnĂ­ (2x),
-     * brankĂˇĹ™ se nestĹ™Ă­dĂˇ.
-     */
-    public int getPlayersPerTeam() {
-        return (skatersPerTeam * 2) + (goalieIncluded ? 1 : 0);
-    }
-
-    /**
-     * VracĂ­ celkovĂ˝ poÄŤet hrĂˇÄŤĹŻ v zĂˇpase (oba tĂ˝my).
-     */
-    public int getTotalPlayers() {
-        return getPlayersPerTeam() * 2;
-    }
+    ALWAYS_CHOOSE
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\match\enums\MatchStatus.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\user\enums\Role.java
 -----
-package cz.phsoft.hokej.match.enums;
+package cz.phsoft.hokej.user.enums;
 
 /**
- * Stav zĂˇpasu z pohledu plĂˇnovĂˇnĂ­ a zmÄ›n.
+ * Role aplikaÄŤnĂ­ho uĹľivatele.
  *
- * Enum se pouĹľĂ­vĂˇ k oznaÄŤenĂ­, zda je zĂˇpas zruĹˇenĂ˝,
- * znovu aktivovanĂ˝ nebo zda doĹˇlo ke zmÄ›nÄ› jeho termĂ­nu.
+ * Hodnoty se typicky mapujĂ­ na autorizaÄŤnĂ­ systĂ©m Spring Security
+ * (GrantedAuthority) a urÄŤujĂ­, k jakĂ˝m funkcĂ­m mĂˇ uĹľivatel pĹ™Ă­stup.
  */
-public enum MatchStatus {
-
+public enum Role {
     /**
-     * ZĂˇpas byl znovu aktivovĂˇn po pĹ™edchozĂ­m zruĹˇenĂ­.
+     * BÄ›ĹľnĂ˝ uĹľivatel zamÄ›Ĺ™enĂ˝ na prĂˇci s vlastnĂ­mi hrĂˇÄŤi a zĂˇpasy.
      */
-    UNCANCELED,     // znovu aktivovanĂ˝
-
+    ROLE_PLAYER,
     /**
-     * ZĂˇpas byl zruĹˇen.
+     * ManaĹľer tĂ˝mu s rozĹˇĂ­Ĺ™enĂ˝mi oprĂˇvnÄ›nĂ­mi pro sprĂˇvu hrĂˇÄŤĹŻ a zĂˇpasĹŻ.
      */
-    CANCELED,      // zruĹˇenĂ˝
-
+    ROLE_MANAGER,
     /**
-     * DoĹˇlo ke zmÄ›nÄ› data nebo ÄŤasu zĂˇpasu.
+     * AdministrĂˇtor aplikace s plnĂ˝mi oprĂˇvnÄ›nĂ­mi.
      */
-    UPDATED,        // zmÄ›na data-ÄŤasu
+    ROLE_ADMIN
 }

@@ -2,6 +2,15 @@
 import { useMatchHistoryAdmin } from "../../hooks/useMatchHistoryAdmin";
 import AdminMatchHistoryCard from "./AdminMatchHistoryCard";
 
+/**
+ * AdminMatchHistory
+ *
+ * Komponenta pro zobrazení historických záznamů a filtrování přehledu.
+ *
+ * Props:
+ * @param {number} props.matchId Identifikátor zápasu, pro který se provádí akce nebo načítají data.
+ */
+
 const AdminMatchHistory = ({ matchId }) => {
     const { history, loading, error } = useMatchHistoryAdmin(matchId);
 

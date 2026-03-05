@@ -1,4 +1,3 @@
-// src/hooks/useNotifications.js
 import { useCallback, useEffect, useState } from "react";
 import {
     fetchNotificationsSinceLastLogin,
@@ -19,6 +18,12 @@ import {
  * @param {Object} options Konfigurační volby.
  * @param {"sinceLastLogin"|"recent"|"adminAll"} [options.mode="sinceLastLogin"] Režim načítání.
  * @param {number} [options.limit] Maximální počet záznamů (používá se pro recent/adminAll).
+ */
+/**
+ * useNotifications
+ *
+ * Hook pro načtení notifikací a práci s jejich stavem (označení jako přečtené apod.).
+ * Vrací seznam notifikací a akce, které UI používá v notifikačním centru.
  */
 export const useNotifications = ({ mode = "sinceLastLogin", limit } = {}) => {
     const [notifications, setNotifications] = useState([]);

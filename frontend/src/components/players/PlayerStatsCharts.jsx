@@ -1,4 +1,3 @@
-// src/components/players/PlayerStatsCharts.jsx
 import React, { useMemo } from "react";
 import {
     ResponsiveContainer,
@@ -14,19 +13,26 @@ import {
     CartesianGrid,
 } from "recharts";
 
-/**
- * Barvy dle statusů (sjednocené s UI kartami).
- */
+
 const STATUS_COLORS = {
-    registered: "#29d158",    // match-registered
-    unregistered: "#ffe066",  // match-unregistered (border)
-    excused: "#27c3f3",       // match-excused (vychází z modré)
-    substituted: "#ffd43b",   // "možná" – žlutá (nemáš v kartě explicitně, dává smysl)
-    reserved: "#0d6efd",      // reserved (ikonka je modrá)
-    noResponse: "#adb5bd",    // no-response šedá
-    noExcused: "#dc3545",     // no-excused červená
+    registered: "#29d158",
+    unregistered: "#ffe066",
+    excused: "#27c3f3",
+    substituted: "#ffd43b",
+    reserved: "#0d6efd",
+    noResponse: "#adb5bd",
+    noExcused: "#dc3545",
 };
 
+/**
+ * PlayerStatsCharts
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.totals vstupní hodnota komponenty.
+ * @param {boolean} props.loading Příznak, že probíhá načítání dat a UI má zobrazit stav načítání.
+ */
 const PlayerStatsCharts = ({ totals, loading }) => {
     const safeNum = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
@@ -38,11 +44,11 @@ const PlayerStatsCharts = ({ totals, loading }) => {
             { key: "substituted", label: "Dal možná", value: safeNum(totals?.substituted) },
             { key: "reserved", label: "Čekal místo", value: safeNum(totals?.reserved) },
             { key: "noResponse", label: "Nereagoval", value: safeNum(totals?.noResponse) },
-            // pokud chceš i do grafu:
-            // { key: "noExcused", label: "Neomluven", value: safeNum(totals?.noExcused) },
+
+
         ];
 
-        // do grafů necpeme nuly (čistší grafy)
+
         return items
             .filter((i) => i.value > 0)
             .map((i) => ({
@@ -59,7 +65,7 @@ const PlayerStatsCharts = ({ totals, loading }) => {
     const TooltipBox = ({ active, payload }) => {
         if (!active || !payload || payload.length === 0) return null;
 
-        // u Pie i u Bar tohle typicky sedí
+
         const p = payload[0]?.payload;
         if (!p) return null;
 
@@ -143,7 +149,6 @@ const PlayerStatsCharts = ({ totals, loading }) => {
                 </div>
             </div>
 
-            {/* Bar */}
             <div className="col-12 col-lg-6">
                 <div className="card shadow-sm h-100">
                     <div className="card-header bg-white fw-semibold">
@@ -162,7 +167,6 @@ const PlayerStatsCharts = ({ totals, loading }) => {
                                     <YAxis allowDecimals={false} />
                                     <Tooltip content={<TooltipBox />} />
 
-                                    {/* fill je fallback, konkrétní barvy dáváme přes Cell */}
                                     <Bar dataKey="value" fill="#0d6efd">
                                         {series.map((s) => (
                                             <Cell key={s.key} fill={s.color} />

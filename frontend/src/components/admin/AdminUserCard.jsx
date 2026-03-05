@@ -1,6 +1,19 @@
 // src/components/admin/AdminUserCard.jsx
 import RoleGuard from "../RoleGuard";
 
+/**
+ * AdminUserCard
+ *
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
+ *
+ * Props:
+ * @param {import("../../types/dto").AppUserDTO} props.user Data uživatele používaná ve správě účtů nebo nastavení.
+ * @param {Function} props.onEdit vstupní hodnota komponenty.
+ * @param {Function} props.onResetPassword vstupní hodnota komponenty.
+ * @param {Function} props.onActivate vstupní hodnota komponenty.
+ * @param {Function} props.onDeactivate vstupní hodnota komponenty.
+ */
+
 const AdminUserCard = ({
     user,
     onEdit,

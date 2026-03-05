@@ -1,6 +1,21 @@
 import React, { useState } from "react";
 import { useGlobalModal } from "../../hooks/useGlobalModal";
 
+/**
+ * AdminCancelNoExcuseModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Umožňuje zavření stiskem klávesy Escape.
+ * Při otevření blokuje scroll pozadí pomocí useGlobalModal.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ * @param {Function} props.onConfirm callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ */
+
 const AdminCancelNoExcuseModal = ({ match, saving, onConfirm, onClose }) => {
 
 
@@ -9,7 +24,12 @@ const AdminCancelNoExcuseModal = ({ match, saving, onConfirm, onClose }) => {
 
     const noExcused = match?.noExcusedPlayers ?? [];
 
-    const handleSubmit = (e) => {
+    
+/**
+ * Zpracuje odeslání formuláře a zavolá příslušný callback nadřazené komponenty.
+ */
+
+const handleSubmit = (e) => {
         e.preventDefault();
         if (!selectedPlayerId) return;
         onConfirm(Number(selectedPlayerId), note);

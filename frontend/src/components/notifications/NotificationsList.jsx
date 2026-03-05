@@ -1,4 +1,3 @@
-// src/components/notifications/NotificationsList.jsx
 import { useEffect, useMemo, useState } from "react";
 import NotificationCard from "./NotificationCard";
 import {
@@ -8,33 +7,28 @@ import {
 } from "../../api/notificationsApi";
 import { useNotificationBadge } from "../../hooks/useNotificationBadge";
 import {
-    Stars, // Nové
-    EnvelopeExclamation, // Nepřečtené
-    EnvelopeOpen, // Přečtené
+    Stars,
+    EnvelopeExclamation,
+    EnvelopeOpen,
 } from "react-bootstrap-icons";
 
 /**
- * Komponenta se seznamem notifikací.
+ * NotificationsList
  *
- * Načítá:
- * - lastLoginAt z NotificationBadgeContext (badge),
- * - poslední notifikace přes /notifications/recent.
+ * React komponenta používaná ve frontend aplikaci.
  *
- * Filtry:
- * - Nové       = nepřečtené notifikace od posledního přihlášení
- * - Nepřečtené = všechny nepřečtené notifikace z recent seznamu
- * - Přečtené   = všechny přečtené notifikace z recent seznamu
+ * @param {Object} props vstupní hodnoty komponenty.
  */
 const NotificationsList = () => {
     const [notifications, setNotifications] = useState([]);
-    const [activeFilter, setActiveFilter] = useState("NEW"); // NEW | UNREAD | READ
+    const [activeFilter, setActiveFilter] = useState("NEW");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // 🔔 badge z contextu – badge.lastLoginAt + refetch pro zvonek
+
     const { badge, refetch: refetchBadge } = useNotificationBadge() || {};
 
-    // helper na převod na Date
+
     const toDate = (value) => {
         if (!value) return null;
         if (value instanceof Date) return value;
@@ -48,14 +42,15 @@ const NotificationsList = () => {
         return null;
     };
 
-    // lastLoginAt bereme přímo z badge DTO
+
     const lastLoginDate = useMemo(
         () => toDate(badge?.lastLoginAt ?? null),
         [badge]
     );
 
-    // inicializační načtení seznamu notifikací
+
     useEffect(() => {
+        
         const load = async () => {
             try {
                 setLoading(true);
@@ -74,7 +69,7 @@ const NotificationsList = () => {
         load();
     }, []);
 
-    // 🔹 Detekce, zda je notifikace přečtená
+
     const isNotificationRead = (n) => {
         if (n.read === true) return true;
         if (n.read === "true") return true;
@@ -82,7 +77,7 @@ const NotificationsList = () => {
         return false;
     };
 
-    // 🔹 Notifikace vznikla po posledním přihlášení
+
     const isCreatedAfterLastLogin = (n) => {
         if (!lastLoginDate) return false;
         const created = toDate(
@@ -92,7 +87,7 @@ const NotificationsList = () => {
         return created >= lastLoginDate;
     };
 
-    // 🔹 Počty pro badge na stránce
+
     const counts = useMemo(() => {
         let newCount = 0;
         let unreadCount = 0;
@@ -112,7 +107,7 @@ const NotificationsList = () => {
                         newCount++;
                     }
                 } else {
-                    // když neznáme lastLogin, bereme všechny nepřečtené jako "nové"
+
                     newCount++;
                 }
             }
@@ -125,7 +120,7 @@ const NotificationsList = () => {
         };
     }, [notifications, lastLoginDate]);
 
-    // 🔹 Filtrovaný seznam
+
     const filteredNotifications = useMemo(() => {
         switch (activeFilter) {
             case "NEW":
@@ -155,7 +150,8 @@ const NotificationsList = () => {
         }
     }, [notifications, activeFilter, lastLoginDate]);
 
-    // 🔹 Označit jednu jako přečtenou
+
+    
     const handleMarkOneAsRead = async (id) => {
         try {
             await markNotificationAsRead(id);
@@ -180,7 +176,8 @@ const NotificationsList = () => {
         }
     };
 
-    // 🔹 Označit všechny jako přečtené
+
+    
     const handleMarkAllAsRead = async () => {
         try {
             await markAllNotificationsAsRead();

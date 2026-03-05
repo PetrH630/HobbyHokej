@@ -2,7 +2,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { format } from 'date-fns';
 
-
+/**
+ * MatchOverview
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ */
 const MatchOverview = ({ match }) => {
     if (!match) return null;
 

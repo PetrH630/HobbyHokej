@@ -1,4 +1,3 @@
-// src/hooks/useAllUsersAdmin.js
 import { useEffect, useState } from "react";
 import { userApi } from "../api/userApi";
 
@@ -11,6 +10,11 @@ import { userApi } from "../api/userApi";
  *  - loading: true, dokud se načítá
  *  - error: text chyby nebo null
  *  - reload(): znovu načte data (po editaci / aktivaci / deaktivaci / resetu hesla)
+ */
+/**
+ * useAllUsersAdmin
+ *
+ * Admin hook pro načtení uživatelů pro správu rolí, aktivace a dalších administrativních operací.
  */
 export const useAllUsersAdmin = () => {
     const [users, setUsers] = useState([]);

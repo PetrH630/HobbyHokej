@@ -82,6 +82,21 @@ const matchPassesFilter = (match, filter) => {
     }
 };
 
+/**
+ * AdminMatchesTable
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * Props:
+ * @param {Object} props.matches data vybraného zápasu.
+ * @param {boolean} props.loading Příznak, že probíhá načítání dat a UI má zobrazit stav načítání.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ * @param {Function} props.onEdit vstupní hodnota komponenty.
+ * @param {Function} props.onDelete vstupní hodnota komponenty.
+ * @param {Function} props.onCancel callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onUnCancel vstupní hodnota komponenty.
+ */
+
 const AdminMatchesTable = ({
     matches,
     loading,

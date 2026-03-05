@@ -1,4 +1,3 @@
-// src/hooks/usePostLoginRedirect.jsx
 import { useNavigate } from "react-router-dom";
 import {
     autoSelectCurrentPlayer,
@@ -8,6 +7,12 @@ import { fetchCurrentUser } from "../api/authApi";
 import { getUserSettings } from "../api/userSettingsApi";
 
 // malý helper na vytažení roli z různých tvarů objektu
+/**
+ * usePostLoginRedirect
+ *
+ * Hook, který po úspěšném přihlášení provede přesměrování uživatele na vhodnou stránku.
+ * Obvykle zohledňuje uloženou původní URL nebo výchozí dashboard.
+ */
 const extractRoles = (user) => {
     if (!user) return [];
 

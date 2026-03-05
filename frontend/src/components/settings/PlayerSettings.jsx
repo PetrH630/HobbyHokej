@@ -1,4 +1,19 @@
-// src/components/settings/PlayerSettings.jsx
+
+
+/**
+ * PlayerSettings
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.values Aktuální hodnoty formuláře.
+ * @param {Function} props.onChange callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onSubmit callback pro předání akce do nadřazené vrstvy.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ * @param {boolean} props.success vstupní hodnota komponenty.
+ * @param {Object} props.errors Validační chyby formuláře po jednotlivých polích.
+ */
 const PlayerSettings = ({
     values,
     onChange,
@@ -6,18 +21,21 @@ const PlayerSettings = ({
     saving,
     error,
     success,
-    errors = {}, // field-level chyby z SettingsPage
+    errors = {},
 }) => {
+    
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         onChange({ [name]: value });
     };
 
+    
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
         onChange({ [name]: checked });
     };
 
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit();
@@ -31,7 +49,6 @@ const PlayerSettings = ({
             <h2 className="mb-3">Nastavení notifikací</h2>
             <h2 className="h5 mb-3">Kontaktní údaje</h2>
 
-            {/* Kontaktní e-mail */}
             <div className="mb-3">
                 <label className="form-label" htmlFor="contactEmail">
                     Kontaktní e-mail - pokud chceš používat tento, dej jen
@@ -231,7 +248,6 @@ const PlayerSettings = ({
 
             <hr />
 
-            {/* 🔹 Herní preference z PlayerSettingsDTO */}
             <h2 className="h5 mb-3">Herní preference (automatické přesuny)</h2>
 
             <div className="form-check mb-2">

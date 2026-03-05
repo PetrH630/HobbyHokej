@@ -1,7 +1,15 @@
-// src/components/notifications/NotificationCard.jsx
 import { formatDistanceToNow } from "date-fns";
 import { cs } from "date-fns/locale";
 
+/**
+ * NotificationCard
+ *
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
+ *
+ * Props:
+ * @param {Object} props.notification vstupní hodnota komponenty.
+ * @param {Object} props.onMarkRead vstupní hodnota komponenty.
+ */
 const NotificationCard = ({ notification, onMarkRead }) => {
     if (!notification) return null;
 
@@ -88,13 +96,11 @@ const NotificationCard = ({ notification, onMarkRead }) => {
                         )}
                     </div>
 
-                    {/* Badge vpravo na ≥ sm */}
                     <div className="text-end ms-2 d-none d-sm-block">
                         {renderBadges()}
                     </div>
                 </div>
 
-                {/* Spodní řádek */}
                 <div className="d-flex justify-content-between align-items-center mt-2">
                     <div className="text-muted small">
                         {createdRelative

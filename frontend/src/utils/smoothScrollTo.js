@@ -1,5 +1,10 @@
-// src/utils/smoothScroll.js
 
+/**
+ * smoothScrollTo
+ *
+ * Bezpečný helper pro plynulé odscrollování na konkrétní pozici nebo element.
+ * Používá se při návratu na seznamy (např. po detailu zápasu) a pro lepší UX na mobilu.
+ */
 export const smoothScrollTo = (targetY, duration = 800) => {
     const startY = window.scrollY;
     const diff = targetY - startY;

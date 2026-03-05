@@ -13,7 +13,16 @@ import { useNotification } from "../context/NotificationContext";
 import BackButton from "../components/BackButton";
 import ConfirmActionModal from "../components/common/ConfirmActionModal";
 
-
+/**
+ * AdminSeasonsPage
+ *
+ * UI komponenta.
+ *
+ * Vedlejší efekty:
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const AdminSeasonsPage = () => {
     const { seasons, loading, error, reload } = useAllSeasonsAdmin();
     const { showNotification } = useNotification();

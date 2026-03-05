@@ -1,41 +1,55 @@
 ﻿Balíček (složka): demo
-Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\demo
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\demo
 
 Seznam souborů:
 DemoModeGuard.java
+DemoModeOperationNotAllowedException.java
 DemoModePolicy.java
+package-info.java
 
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\demo\DemoModeGuard.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\demo\DemoModeGuard.java
 -----
-package cz.phsoft.hokej.models.services.demo;
+package cz.phsoft.hokej.demo;
 
-import cz.phsoft.hokej.demo.DemoModeOperationNotAllowedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.function.Supplier;
 
+/**
+ * Guard sluĹľba pro blokovĂˇnĂ­ write operacĂ­ v demo reĹľimu.
+ *
+ * TĹ™Ă­da centralizuje kontrolu pravidel demo reĹľimu tak, aby se podmĂ­nky
+ * nepsaly opakovanÄ› ve service vrstvÄ›. PĹ™i pokusu o nepovolenou operaci
+ * se vyhazuje DemoModeOperationNotAllowedException. Kontrola se vyhodnocuje
+ * na zĂˇkladÄ› DemoModePolicy, kterĂˇ urÄŤuje, zda je danĂ˝ uĹľivatel povaĹľovĂˇn
+ * za chrĂˇnÄ›nĂ©ho demo uĹľivatele.
+ */
 @Service
 public class DemoModeGuard {
 
     private final DemoModePolicy policy;
 
+    /**
+     * VytvĂˇĹ™Ă­ guard pro demo reĹľim.
+     *
+     * @param policy politika urÄŤujĂ­cĂ­ chovĂˇnĂ­ aplikace v demo reĹľimu
+     */
     public DemoModeGuard(DemoModePolicy policy) {
         this.policy = policy;
     }
 
     /**
-     * Guard sluĹľba, kterĂˇ se pouĹľĂ­vĂˇ pro blokovĂˇnĂ­ write operacĂ­ v demo reĹľimu.
+     * Provede kontrolu, zda je write operace v demo reĹľimu povolena.
      *
-     * TĹ™Ă­da centralizuje kontrolu pravidel demo reĹľimu tak, aby se podmĂ­nky
-     * nepsaly opakovanÄ› v service vrstvĂˇch. PĹ™i pokusu o nepovolenou operaci
-     * se vyhazuje {@link DemoModeOperationNotAllowedException}.
+     * Pokud je uĹľivatel vyhodnocen jako chrĂˇnÄ›nĂ˝ demo uĹľivatel, operace se
+     * blokuje vyhozenĂ­m DemoModeOperationNotAllowedException.
      *
-     * Kontrola se vyhodnocuje na zĂˇkladÄ› {@link DemoModePolicy}, kterĂˇ urÄŤuje,
-     * zda je danĂ˝ uĹľivatel povaĹľovĂˇn za chrĂˇnÄ›nĂ©ho demo uĹľivatele.
+     * @param userId identifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje
+     * @param message chybovĂˇ zprĂˇva pouĹľitĂˇ pĹ™i blokaci operace
      */
     public void write(Long userId, String message) {
         if (policy.isProtectedDemoUser(userId)) {
@@ -47,11 +61,11 @@ public class DemoModeGuard {
      * Provede write operaci, pokud je v demo reĹľimu povolena.
      *
      * Pokud je uĹľivatel vyhodnocen jako chrĂˇnÄ›nĂ˝ demo uĹľivatel, operace se
-     * neprovede a vyhodĂ­ se {@link DemoModeOperationNotAllowedException}.
+     * neprovede a vyhodĂ­ se DemoModeOperationNotAllowedException.
      *
-     * @param userId IdentifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje.
-     * @param message ChybovĂˇ zprĂˇva, kterĂˇ se pouĹľije pĹ™i blokaci operace.
-     * @param action Akce reprezentujĂ­cĂ­ write operaci.
+     * @param userId identifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje
+     * @param message chybovĂˇ zprĂˇva pouĹľitĂˇ pĹ™i blokaci operace
+     * @param action akce reprezentujĂ­cĂ­ write operaci
      */
     public void write(Long userId, String message, Runnable action) {
         write(userId, message);
@@ -62,13 +76,13 @@ public class DemoModeGuard {
      * Provede write operaci, pokud je v demo reĹľimu povolena, a vrĂˇtĂ­ jejĂ­ vĂ˝sledek.
      *
      * Pokud je uĹľivatel vyhodnocen jako chrĂˇnÄ›nĂ˝ demo uĹľivatel, operace se
-     * neprovede a vyhodĂ­ se {@link DemoModeOperationNotAllowedException}.
+     * neprovede a vyhodĂ­ se DemoModeOperationNotAllowedException.
      *
-     * @param userId IdentifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje.
-     * @param message ChybovĂˇ zprĂˇva, kterĂˇ se pouĹľije pĹ™i blokaci operace.
-     * @param action Akce reprezentujĂ­cĂ­ write operaci vracejĂ­cĂ­ vĂ˝sledek.
-     * @return VĂ˝sledek provedenĂ© write operace.
-     * @param <T> Typ nĂˇvratovĂ© hodnoty write operace.
+     * @param userId identifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje
+     * @param message chybovĂˇ zprĂˇva pouĹľitĂˇ pĹ™i blokaci operace
+     * @param action akce reprezentujĂ­cĂ­ write operaci vracejĂ­cĂ­ vĂ˝sledek
+     * @param <T> typ nĂˇvratovĂ© hodnoty write operace
+     * @return vĂ˝sledek provedenĂ© write operace
      */
     public <T> T write(Long userId, String message, Supplier<T> action) {
         write(userId, message);
@@ -80,15 +94,15 @@ public class DemoModeGuard {
      *
      * Pokud je uĹľivatel vyhodnocen jako chrĂˇnÄ›nĂ˝ demo uĹľivatel, write operace se neprovede.
      * NĂˇslednÄ› se provede finalize ÄŤĂˇst v novĂ© transakci a potĂ© se vyhodĂ­
-     * {@link DemoModeOperationNotAllowedException}.
+     * DemoModeOperationNotAllowedException.
      *
      * Metoda se pouĹľĂ­vĂˇ pro situace, kdy se mĂˇ v demo reĹľimu provĂ©st ĂşklidovĂˇ akce,
      * napĹ™Ă­klad odstranÄ›nĂ­ reset tokenu, a souÄŤasnÄ› se mĂˇ volajĂ­cĂ­mu vrĂˇtit chyba.
      *
-     * @param userId IdentifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje.
-     * @param message ChybovĂˇ zprĂˇva, kterĂˇ se pouĹľije pĹ™i blokaci operace.
-     * @param writeAction Akce reprezentujĂ­cĂ­ standardnĂ­ write operaci.
-     * @param finalizeAction Akce reprezentujĂ­cĂ­ Ăşklidovou operaci, kterĂˇ se mĂˇ provĂ©st i v demo reĹľimu.
+     * @param userId identifikĂˇtor uĹľivatele, pro kterĂ©ho se kontrola vyhodnocuje
+     * @param message chybovĂˇ zprĂˇva pouĹľitĂˇ pĹ™i blokaci operace
+     * @param writeAction akce reprezentujĂ­cĂ­ standardnĂ­ write operaci
+     * @param finalizeAction akce reprezentujĂ­cĂ­ Ăşklidovou operaci, kterĂˇ se mĂˇ provĂ©st i v demo reĹľimu
      */
     public void writeWithFinalize(Long userId,
                                   String message,
@@ -111,7 +125,7 @@ public class DemoModeGuard {
      * NovĂˇ transakce se pouĹľĂ­vĂˇ pro zajiĹˇtÄ›nĂ­, Ĺľe finalize operace bude provedena
      * nezĂˇvisle na transakÄŤnĂ­m kontextu volajĂ­cĂ­ write operace, kterĂˇ je nĂˇslednÄ› blokovĂˇna.
      *
-     * @param finalizeAction Akce, kterĂˇ se mĂˇ provĂ©st v novĂ© transakci.
+     * @param finalizeAction akce, kterĂˇ se mĂˇ provĂ©st v novĂ© transakci
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected void runFinalizeInNewTransaction(Runnable finalizeAction) {
@@ -120,9 +134,36 @@ public class DemoModeGuard {
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\demo\DemoModePolicy.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\demo\DemoModeOperationNotAllowedException.java
 -----
-package cz.phsoft.hokej.models.services.demo;
+package cz.phsoft.hokej.demo;
+
+import cz.phsoft.hokej.shared.exceptions.BusinessException;
+import org.springframework.http.HttpStatus;
+
+/**
+ * VĂ˝jimka signalizujĂ­cĂ­, Ĺľe operace nenĂ­ v demo reĹľimu povolena.
+ *
+ * PouĹľĂ­vĂˇ se pro zakĂˇzĂˇnĂ­ destruktivnĂ­ch operacĂ­ v demo instanci aplikace,
+ * napĹ™Ă­klad zmÄ›ny hesla nebo mazĂˇnĂ­ dat. UmoĹľĹuje vrĂˇtit uĹľivatelsky
+ * pĹ™Ă­vÄ›tivou chybovou zprĂˇvu na frontend ve standardnĂ­m formĂˇtu BusinessException.
+ */
+public class DemoModeOperationNotAllowedException extends BusinessException {
+
+    /**
+     * VytvĂˇĹ™Ă­ vĂ˝jimku pro nepovolenou operaci v demo reĹľimu.
+     *
+     * @param message chybovĂˇ zprĂˇva urÄŤenĂˇ pro zobrazenĂ­ uĹľivateli
+     */
+    public DemoModeOperationNotAllowedException(String message) {
+        super(message, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+}
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\demo\DemoModePolicy.java
+-----
+package cz.phsoft.hokej.demo;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -153,7 +194,7 @@ public class DemoModePolicy {
      *
      * Metoda se pouĹľĂ­vĂˇ zejmĂ©na pro podmĂ­nÄ›nĂ© chovĂˇnĂ­ ve service vrstvÄ›.
      *
-     * @return True, pokud je demo reĹľim aktivnĂ­, jinak false.
+     * @return true, pokud je demo reĹľim aktivnĂ­, jinak false
      */
     public boolean isDemoMode() {
         return demoMode;
@@ -166,10 +207,33 @@ public class DemoModePolicy {
      * v demo reĹľimu a jeho identifikĂˇtor spadĂˇ do definovanĂ©ho rozsahu.
      * Tato metoda se pouĹľĂ­vĂˇ pro blokovĂˇnĂ­ write operacĂ­ nad demonstraÄŤnĂ­mi daty.
      *
-     * @param userId IdentifikĂˇtor uĹľivatele, kterĂ˝ mĂˇ bĂ˝t vyhodnocen.
-     * @return True, pokud je uĹľivatel chrĂˇnÄ›nĂ˝ v demo reĹľimu, jinak false.
+     * @param userId identifikĂˇtor uĹľivatele, kterĂ˝ mĂˇ bĂ˝t vyhodnocen
+     * @return true, pokud je uĹľivatel chrĂˇnÄ›nĂ˝ v demo reĹľimu, jinak false
      */
     public boolean isProtectedDemoUser(Long userId) {
         return demoMode && userId != null && userId <= 10;
     }
 }
+
+-----
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\demo\package-info.java
+-----
+/**
+ * BalĂ­ÄŤek obsahujĂ­cĂ­ podporu pro DEMO reĹľim aplikace.
+ *
+ * Tento balĂ­ÄŤek sdruĹľuje komponenty, kterĂ© umoĹľĹujĂ­ provoz aplikace
+ * v demonstraÄŤnĂ­m reĹľimu bez reĂˇlnĂ©ho provĂˇdÄ›nĂ­ vybranĂ˝ch operacĂ­,
+ * zejmĂ©na odesĂ­lĂˇnĂ­ externĂ­ komunikace nebo provĂˇdÄ›nĂ­ nevratnĂ˝ch zmÄ›n.
+ *
+ * OdpovÄ›dnosti modulu zahrnujĂ­ zejmĂ©na:
+ * - detekci a Ĺ™Ă­zenĂ­ bÄ›hu aplikace v DEMO reĹľimu,
+ * - nĂˇhradu reĂˇlnĂ˝ch externĂ­ch integracĂ­ jejich demonstraÄŤnĂ­mi verzemi,
+ * - uklĂˇdĂˇnĂ­ simulovanĂ˝ch e-mailĹŻ a SMS zprĂˇv do doÄŤasnĂ©ho ĂşloĹľiĹˇtÄ›,
+ * - omezenĂ­ nebo blokovĂˇnĂ­ vybranĂ˝ch operacĂ­ nevhodnĂ˝ch pro demo prostĹ™edĂ­.
+ *
+ * DEMO reĹľim je navrĹľen tak, aby bylo moĹľnĂ© prezentovat funkÄŤnost systĂ©mu
+ * bez rizika odesĂ­lĂˇnĂ­ skuteÄŤnĂ˝ch zprĂˇv nebo zĂˇsahu do produkÄŤnĂ­ch dat.
+ * JednotlivĂ© sluĹľby kontrolujĂ­ stav DEMO reĹľimu a podle nÄ›j upravujĂ­
+ * svĂ© chovĂˇnĂ­.
+ */
+package cz.phsoft.hokej.demo;

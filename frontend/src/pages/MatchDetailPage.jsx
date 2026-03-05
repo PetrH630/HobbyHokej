@@ -17,6 +17,18 @@ import { tryClearDemoNotifications } from "../api/demoApi";
 
 import ExcuseModal from "../components/matchRegistration/ExcuseModal";
 
+/**
+ * MatchDetailPage
+ *
+ * zápas – Bootstrap modal.
+ *
+ * Vedlejší efekty:
+ * - při zobrazení registruje a po zavření uklízí event listenery nebo synchronizuje stav
+ * - může provádět navigaci v aplikaci
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const MatchDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();

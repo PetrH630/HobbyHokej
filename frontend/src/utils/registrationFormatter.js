@@ -1,5 +1,10 @@
-// src/utils/registrationFormatters.js
 
+/**
+ * registrationFormatter
+ *
+ * Helpery pro převod registračních stavů hráčů do textů/ikon pro UI.
+ * Zajišťuje jednotné popisky napříč seznamy registrací a kartami zápasů.
+ */
 export const formatDateTime = (value) => {
     if (!value) return "";
     return new Date(value).toLocaleString("cs-CZ");

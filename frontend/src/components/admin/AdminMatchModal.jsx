@@ -27,6 +27,22 @@ const toBackendDateTime = (valueString) => {
     return valueString;
 };
 
+/**
+ * AdminMatchModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Umožňuje zavření stiskem klávesy Escape.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ * @param {boolean} props.show určuje, zda je dialog otevřený.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onSave vstupní hodnota komponenty.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ * @param {string} props.serverError Chybová zpráva vrácená ze serveru.
+ */
+
 const AdminMatchModal = ({
     match,
     show,
@@ -139,7 +155,12 @@ const AdminMatchModal = ({
         });
     };
 
-    const handleSubmit = async (e) => {
+    
+/**
+ * Zpracuje odeslání formuláře a zavolá příslušný callback nadřazené komponenty.
+ */
+
+const handleSubmit = async (e) => {
         e.preventDefault();
 
         const validationErrors = validateMatch(values);
@@ -165,7 +186,12 @@ const AdminMatchModal = ({
         onSave(payload);
     };
 
-    const handleClose = () => {
+    
+/**
+ * Zajistí konzistentní zavření modalu a vrácení lokálního stavu do výchozího nastavení.
+ */
+
+const handleClose = () => {
         if (!saving) onClose();
     };
 

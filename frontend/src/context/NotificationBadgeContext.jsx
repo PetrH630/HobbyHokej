@@ -1,10 +1,15 @@
-// src/context/NotificationBadgeContext.jsx
 import { createContext, useCallback, useEffect, useState } from "react";
 import {
     fetchNotificationBadge,
     fetchNotificationsSinceLastLogin,
 } from "../api/notificationsApi";
 
+/**
+ * NotificationBadgeContext
+ *
+ * Kontext pro stav notifikační „badge“ (počet nových notifikací) a související načítání.
+ * Používá se pro zobrazení indikátoru v navigaci a pro aktualizaci po přihlášení / zobrazení notifikací.
+ */
 export const NotificationBadgeContext = createContext({
     badge: null,
     loading: false,

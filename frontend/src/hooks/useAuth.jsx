@@ -1,10 +1,20 @@
-// src/hooks/useAuth.jsx
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { fetchCurrentUser, logoutUser } from "../api/authApi";
 
 const AuthContext = createContext(null);
 
+/**
+ * AuthProvider a useAuth
+ *
+ * Centrální autentizační vrstva frontendu.
+ * Provider drží v paměti přihlášeného uživatele a stav načítání a poskytuje API pro:
+ * - načtení aktuálního uživatele z backendu (`updateUser`)
+ * - odhlášení (`logout`)
+ *
+ * Vedlejší efekty:
+ * - při mountu provideru se jednorázově volá `fetchCurrentUser()` a naplní se `user`
+ */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -35,7 +45,7 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             console.error("Logout error:", err);
         } finally {
-            // DŮLEŽITÉ: po odhlášení user = null
+            // Po odhlášení se lokální stav uživatele vynuluje, aby se UI okamžitě přepnulo do anonymního režimu.
             setUser(null);
         }
     };

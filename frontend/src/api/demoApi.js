@@ -1,3 +1,10 @@
+/**
+ * demoApi
+ *
+ * Modul pro komunikaci s backendovým REST API.
+ * Obsahuje pomocné funkce pro volání endpointů a sjednocení práce s axios klientem.
+ */
+
 // api/demoApi.js
 import api from "./axios"; // tvůj axios instance
 

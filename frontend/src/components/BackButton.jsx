@@ -1,5 +1,13 @@
 import { useNavigate } from "react-router-dom";
 
+/**
+ * BackButton
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.label vstupní hodnota komponenty. [default: "Zpět"]
+ */
 const BackButton = ({ label = "Zpět" }) => {
     const navigate = useNavigate();
 

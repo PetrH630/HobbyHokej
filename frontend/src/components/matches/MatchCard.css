@@ -1,14 +1,31 @@
+/*
+ * Styly pro komponenty administrační části aplikace.
+ *
+ * Soubor obsahuje lokální pravidla stylování a má minimalizovat globální selektory.
+ *
+ * Cesta: matches/MatchCard.css
+ * Generováno: 2026-03-04
+ */
+
+/*
+ * Styly pro administrační část aplikace.
+ *
+ * Cíl je udržet deklarace přehledné a minimalizovat vedlejší dopady na ostatní komponenty.
+ *
+ * Cesta: matches/MatchCard.css
+ * Generováno: 2026-03-04
+ */
 .match-card {
     position: relative;
     padding: 16px;
     border: 2px solid #dee2e6;
     border-radius: 12px;
-   
+
     width: 100%;
     max-width: 100%;
 
     overflow: hidden;
-    /* aby nic nevylezlo z karty */
+
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -18,14 +35,14 @@
     }
 }
 
-/* condensed varianta – používá se pro uplynulé zápasy v seznamu */
+
 .match-card--condensed {
     width: 100%;
-    /* karta přes celou šířku řádku */
+
     max-width: 100%;
 }
 
-/* klikatelnost karty */
+
 .match-card.clickable {
     cursor: pointer;
 }
@@ -35,7 +52,7 @@
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* zakázaná karta (tooltip overlay) */
+
 .match-card--disabled {
     opacity: 1;
     cursor: not-allowed;
@@ -111,9 +128,6 @@
     margin-right: 15px;
 }
 
-/* =========================================
-   STAV HRÁČE V ZÁPASE – IKONA + TEXT
-   ========================================= */
 
 .player-match-status {
     display: inline-flex;
@@ -134,47 +148,42 @@
     margin: 0;
 }
 
-/* =========================================
-   BARVY KARTY DLE PLAYER_MATCH_STATUS
-   ========================================= */
 
-/* 🟢 REGISTERED */
 .match-registered {
     background-color: #29d158;
     border-color: #09772f;
 }
 
-/* ⚪ UNREGISTERED */
+
 .match-unregistered {
     background-color: #fff9db;
     border-color: #ffe066;
 }
 
-/* 🔵 EXCUSED */
+
 .match-excused {
     background-color: #27c3f39c;
     border-color: #b6d4fe;
 }
 
-/* 🟠 RESERVED */
+
 .match-reserved {
     background-color: #fff4e5;
     border-color: #ffd8a8;
 }
 
-/* 🟡 NO_RESPONSE */
+
 .match-no-response {
     background-color: #f8f9fa;
     border-color: #dee2e6;
 }
 
-/* 🔴 NO_EXCUSED */
+
 .match-no-excused {
     background-color: #fdecea;
     border-color: #f5c2c7;
 }
 
-/* ===== BARVY DLE PLAYER_MATCH_STATUS (modifier) ===== */
 
 .player-match-status--registered .player-match-status-icon {
     color: #018520;
@@ -224,33 +233,30 @@
     color: #750b16;
 }
 
-/* základ – na mobilu jsou bloky pod sebou */
+
 .match-card__body {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
 }
 
-/* =========================
-   CONDENSED – TABLET (768–991)
-   grid v řádku, ikona nad textem, menší status
-   ========================= */
+
 @media (min-width: 768px) and (max-width: 991px) {
     .match-card--condensed .match-card__body {
         display: grid;
         grid-template-columns:
             110px
-            /* Pátek - X + stav zápasu*/
+
             150px
-            /* datum+čas */
+
             100px
-            /* aréna */
+
             100px
-           /* herní systém */
+
             180px
-            /* hráči */
+
             130px;
-        /* status */
+
         align-items: center;
         column-gap: 0.75rem;
         text-align: left;
@@ -262,7 +268,7 @@
         justify-content: center;
     }
 
-    /* hráči – ikona + počet vedle sebe, centrované */
+
     .match-card--condensed .players-count {
         flex-direction: row;
         align-items: center;
@@ -271,7 +277,7 @@
         text-align: center;
     }
 
-    /* status buňka vycentrovaná v posledním sloupci */
+
     .match-card--condensed .status-cell {
         display: flex;
         align-items: center;
@@ -279,7 +285,7 @@
         text-align: center;
     }
 
-    /* na tabletu: ikona NAD textem + menší písmo */
+
     .match-card--condensed .player-match-status {
         flex-direction: column;
         gap: 0.15rem;
@@ -294,7 +300,7 @@
         font-weight: 600;
     }
 
-    /* bez přebytečných spodních mezer */
+
     .match-card--condensed p,
     .match-card--condensed .match-day,
     .match-card--condensed .match-date {
@@ -302,26 +308,23 @@
     }
 }
 
-/* =========================
-   CONDENSED – DESKTOP (≥ 992)
-   grid v jednom řádku, status klasicky vedle sebe
-   ========================= */
+
 @media (min-width: 992px) {
     .match-card--condensed .match-card__body {
         display: grid;
         grid-template-columns:
             110px
-            /* Pátek - X a pod tím stav zápasu*/
+
             160px
-            /* datum+čas */
+
             1fr
-            /* aréna */
+
             100px
-            /* herní systém */
+
             180px
-            /* hráči */
+
             130px;
-        /* status */
+
         align-items: center;
         column-gap: 1rem;
         text-align: left;
@@ -347,7 +350,7 @@
         text-align: center;
     }
 
-    /* na desktopu: ikona + text vedle sebe, větší */
+
     .match-card--condensed .player-match-status {
         flex-direction: row;
         gap: 0.35rem;
@@ -386,45 +389,38 @@
     flex: 0 0 auto;
 }
 
-/* =========================================
-   BARVY STAVU ZÁPASU (matchStatus)
-   ========================================= */
 
-/* 🔥 ZRUŠENÝ */
 .match-card__match-status--canceled strong {
     color: #c00000;
-    /* rudě červená */
+
 }
 
-/* 🟠 OBNOVENÝ */
+
 .match-card__match-status--uncanceled strong {
     color: #880576;
-    /* sytě oranžová */
+
 }
 
-/* 🔵 ZMĚNĚNÝ */
+
 .match-card__match-status--updated strong {
     color: #0a2a88;
-    /* tmavě modrá */
+
 }
 
-/* DEFAULT (Odehraný, Plánovaný) – beze změny */
+
 .match-card__match-status--default strong {
     color: inherit;
 }
 
-/* =========================================
-   ZRUŠENÝ ZÁPAS – DIAGONÁLNÍ PŘEŠKRTNUTÍ
-   ========================================= */
 
 .match-card--canceled {
     cursor: default;
     background-color: #f1f3f5;
     border-color: #ced4da;
-    
+
 }
 
-/* červený diagonální pruh */
+
 .match-card--canceled::before {
     content: "";
     position: absolute;
@@ -438,7 +434,7 @@
     transition: opacity 0.2s ease;
 }
 
-/* text ZRUŠENÝ */
+
 .match-card--canceled::after {
     content: "ZRUŠENÝ";
     position: absolute;
@@ -460,15 +456,27 @@
     transition: opacity 0.2s ease;
 }
 
-/* zruší hover efekt přiblížení */
+
 .match-card--canceled:hover {
     transform: none !important;
     box-shadow: none !important;
 }
 
-/* 💥 při hoveru schovat diagonální pruh i text */
+
 .match-card--canceled:hover::before,
 .match-card--canceled:hover::after {
     opacity: 0;
 }
 
+.match-reg-team-icon-dark {
+    font-size: 20px;
+    flex-shrink: 0;
+    color: rgb(4, 59, 163);
+    margin: 0px 10px
+}
+
+.match-reg-team-icon-light {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin: 0px 10px
+}

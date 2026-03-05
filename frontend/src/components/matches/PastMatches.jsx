@@ -22,9 +22,7 @@ const MATCHES_KEYS = {
     disableAutoScrollOnce: "matches.disableAutoScrollOnce",
 };
 
-/**
- * Vrátí true, pokud daný zápas odpovídá zvolenému filtru.
- */
+
 const matchPassesFilter = (match, filter) => {
     const status = match.playerMatchStatus;
 
@@ -41,6 +39,13 @@ const matchPassesFilter = (match, filter) => {
     }
 };
 
+/**
+ * PastMatches
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * @param {Object} props vstupní hodnoty komponenty.
+ */
 const PastMatches = () => {
     const { matches, loading, error } = useMyPassedMatches();
     const { currentPlayer } = useCurrentPlayer();
@@ -49,7 +54,7 @@ const PastMatches = () => {
 
     const [highlightedId, setHighlightedId] = useState(null);
 
-    
+
     const [filter, setFilter] = useState(() => {
         const saved = sessionStorage.getItem(STORAGE_KEYS.filter);
         return saved && Object.values(FILTERS).includes(saved) ? saved : FILTERS.ALL;
@@ -72,12 +77,12 @@ const PastMatches = () => {
         return sortedMatches.filter((m) => matchPassesFilter(m, filter));
     }, [sortedMatches, filter]);
 
-    
+
     useEffect(() => {
         sessionStorage.setItem(STORAGE_KEYS.filter, filter);
     }, [filter]);
 
-    
+
     useEffect(() => {
         if (loading) return;
         if (error) return;
@@ -108,7 +113,7 @@ const PastMatches = () => {
         }
     }, [location.key, loading, error, filteredMatches.length]);
 
-    
+
     useEffect(() => {
         if (highlightedId == null) return;
 
@@ -290,9 +295,9 @@ const PastMatches = () => {
                         <MatchCard
                             match={m}
                             onClick={() => {
-                              
+
                                 sessionStorage.setItem(MATCHES_KEYS.disableAutoScrollOnce, "1");
-                              
+
                                 sessionStorage.setItem(STORAGE_KEYS.scrollY, String(window.scrollY));
                                 sessionStorage.setItem(STORAGE_KEYS.filter, filter);
                                 sessionStorage.setItem(STORAGE_KEYS.lastMatchId, String(m.id));

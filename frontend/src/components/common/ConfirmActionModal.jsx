@@ -1,6 +1,19 @@
-// src/components/common/ConfirmActionModal
 import React from "react";
 
+/**
+ * ConfirmActionModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Props:
+ * @param {boolean} props.show určuje, zda je dialog otevřený.
+ * @param {string} props.title titulek zobrazený v hlavičce.
+ * @param {string} props.message obsah zprávy zobrazený uživateli.
+ * @param {Object} props.confirmText vstupní hodnota komponenty. [default: "Potvrdit"]
+ * @param {Object} props.confirmVariant vstupní hodnota komponenty. [default: "primary"]
+ * @param {Function} props.onConfirm callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ */
 const ConfirmActionModal = ({
     show,
     title,

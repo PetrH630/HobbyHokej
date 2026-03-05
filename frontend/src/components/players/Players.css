@@ -1,6 +1,21 @@
-/* =========================
-   KONTEJNER SEZNAMU HRÁČŮ
-   ========================= */
+/*
+ * Styly pro komponenty administrační části aplikace.
+ *
+ * Soubor obsahuje lokální pravidla stylování a má minimalizovat globální selektory.
+ *
+ * Cesta: players/Players.css
+ * Generováno: 2026-03-04
+ */
+
+/*
+ * Styly pro komponenty uživatelského rozhraní.
+ *
+ * Cílem je zapouzdřit vizuální chování komponent
+ * a minimalizovat vedlejší dopady na ostatní části aplikace.
+ *
+ * Cesta: players/Players.css
+ * Generováno: 2026-03-04
+ */
 .player-list {
     display: flex;
     flex-wrap: wrap;
@@ -13,9 +28,7 @@
     max-width: 360px;
 }
 
-/* =========================
-   ZVÝRAZNĚNÍ VYBRANÉHO HRÁČE
-   ========================= */
+
 .selected-player-frame {
     position: relative;
     border-radius: 16px;

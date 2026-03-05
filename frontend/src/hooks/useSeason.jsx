@@ -1,4 +1,3 @@
-// src/hooks/useSeason.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import {
     fetchSeasonsForUser,
@@ -9,6 +8,11 @@ import { useAuth } from "./useAuth";
 
 const SeasonContext = createContext(null);
 
+/**
+ * useSeason
+ *
+ * Hook pro načtení detailu sezóny nebo aktivní sezóny a práci s ní v UI.
+ */
 export const SeasonProvider = ({ children }) => {
     const { user } = useAuth();
     const [seasons, setSeasons] = useState([]);

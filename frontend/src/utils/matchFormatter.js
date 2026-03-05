@@ -1,5 +1,10 @@
-// src/utils/matchFormatter.js
 
+/**
+ * matchFormatter
+ *
+ * Sada helperů pro formátování a prezentaci zápasů v UI.
+ * Obsahuje převody hodnot z backendu do textových popisků vhodných pro karty a seznamy zápasů.
+ */
 export const formatDateTime = (value) => {
     if (!value) return "";
     const date = new Date(value);

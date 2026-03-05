@@ -1,4 +1,3 @@
-// src/hooks/useAllSeasonsAdmin.js
 import { useEffect, useState } from "react";
 import { getAllSeasonsAdmin } from "../api/seasonApi";
 
@@ -11,6 +10,11 @@ import { getAllSeasonsAdmin } from "../api/seasonApi";
  *  - loading: true, dokud se načítá
  *  - error: text chyby nebo null
  *  - reload(): znovu načte data (po create/update/delete)
+ */
+/**
+ * useAllSeasonsAdmin
+ *
+ * Admin hook pro načtení sezón pro správu (list, editace, aktivní sezóna).
  */
 export const useAllSeasonsAdmin = () => {
     const [seasons, setSeasons] = useState([]);

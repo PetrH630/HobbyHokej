@@ -3,6 +3,22 @@
 import { useState, useEffect } from "react";
 import { MATCH_CANCEL_REASON_OPTIONS } from "../../constants/matchCancelReason";
 
+/**
+ * CancelMatchModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Umožňuje zavření stiskem klávesy Escape.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ * @param {boolean} props.show určuje, zda je dialog otevřený.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onConfirm callback pro předání akce do nadřazené vrstvy.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ * @param {string} props.serverError Chybová zpráva vrácená ze serveru.
+ */
+
 const CancelMatchModal = ({
     match,
     show,
@@ -25,7 +41,12 @@ const CancelMatchModal = ({
         return null;
     }
 
-    const formatDateTime = (dt) => {
+    
+/**
+ * Naformátuje datum a čas do čitelné podoby pro potvrzovací dialog.
+ */
+
+const formatDateTime = (dt) => {
         if (!dt) return "-";
         try {
             const safe = dt.replace(" ", "T");
@@ -37,7 +58,12 @@ const CancelMatchModal = ({
         }
     };
 
-    const handleSubmit = (e) => {
+    
+/**
+ * Zpracuje odeslání formuláře a zavolá příslušný callback nadřazené komponenty.
+ */
+
+const handleSubmit = (e) => {
         e.preventDefault();
 
         if (!reason) {

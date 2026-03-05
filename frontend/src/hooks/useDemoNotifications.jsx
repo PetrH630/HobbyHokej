@@ -1,7 +1,12 @@
-// src/hooks/useDemoNotifications.js
 import { useCallback, useState } from "react";
 import { getDemoNotifications } from "../api/demoNotificationsApi";
 
+/**
+ * useDemoNotifications
+ *
+ * Hook pro notifikace související s demo režimem.
+ * Používá se k zobrazení vysvětlujících hlášek, pokud je některá akce v demo módu omezená.
+ */
 export const useDemoNotifications = () => {
     const [notifications, setNotifications] = useState({
         emails: [],

@@ -378,6 +378,7 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         PlayerEntity player = findPlayerOrThrow(playerId);
 
         LocalDateTime playerCreatedDate = player.getTimestamp();
+        record PlayerRegistrationSnapshot(PlayerMatchStatus status, Team team) {}
 
         List<MatchEntity> availableMatches =
                 findPastMatchesForCurrentSeason().stream()
@@ -396,12 +397,12 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         List<MatchRegistrationDTO> allRegistrations =
                 registrationService.getRegistrationsForMatches(matchIds);
 
-        var statusMap = allRegistrations.stream()
+        var registrationMap = allRegistrations.stream()
                 .collect(Collectors.groupingBy(
                         MatchRegistrationDTO::getMatchId,
                         Collectors.toMap(
                                 MatchRegistrationDTO::getPlayerId,
-                                MatchRegistrationDTO::getStatus,
+                                r -> new PlayerRegistrationSnapshot(r.getStatus(), r.getTeam()),
                                 (a, b) -> a
                         )
                 ));
@@ -409,10 +410,43 @@ public class MatchQueryServiceImpl implements MatchQueryService {
         List<MatchOverviewDTO> overviews = availableMatches.stream()
                 .map(match -> {
                     MatchOverviewDTO overview = toOverviewDTO(match);
-                    PlayerMatchStatus playerMatchStatus = Optional.ofNullable(statusMap.get(match.getId()))
-                            .map(m -> normalizePlayerStatus(m.get(playerId)))
-                            .orElse(PlayerMatchStatus.NO_RESPONSE);
+
+                    PlayerRegistrationSnapshot snapshot = Optional.ofNullable(registrationMap.get(match.getId()))
+                            .map(m -> m.get(playerId))
+                            .orElse(null);
+
+                    PlayerMatchStatus playerMatchStatus = snapshot != null
+                            ? normalizePlayerStatus(snapshot.status())
+                            : PlayerMatchStatus.NO_RESPONSE;
+
                     overview.setPlayerMatchStatus(playerMatchStatus);
+
+                    // tým, za který byl hráč v zápase veden (pokud existuje registrace)
+                    if (snapshot != null) {
+                        overview.setPlayerTeam(snapshot.team());
+                    }
+
+                    // vyhodnocení výsledku pro hráče: jen když byl REGISTERED a existuje result
+                    if (playerMatchStatus == PlayerMatchStatus.REGISTERED && overview.getResult() != null) {
+                        boolean isDraw = overview.getResult() == cz.phsoft.hokej.match.enums.MatchResult.DRAW;
+                        overview.setDraw(isDraw);
+
+                        if (isDraw) {
+                            overview.setPlayerWon(false);
+                        } else if (snapshot != null && snapshot.team() != null) {
+                            boolean won =
+                                    (snapshot.team() == Team.DARK && overview.getResult() == cz.phsoft.hokej.match.enums.MatchResult.DARK_WIN)
+                                            || (snapshot.team() == Team.LIGHT && overview.getResult() == cz.phsoft.hokej.match.enums.MatchResult.LIGHT_WIN);
+                            overview.setPlayerWon(won);
+                        } else {
+                            // pokud není tým, nedává se playerWon
+                            overview.setPlayerWon(null);
+                        }
+                    } else {
+                        overview.setDraw(null);
+                        overview.setPlayerWon(null);
+                    }
+
                     return overview;
                 })
                 .toList();
@@ -759,15 +793,17 @@ public class MatchQueryServiceImpl implements MatchQueryService {
     private MatchOverviewDTO toOverviewDTO(MatchEntity match, Long playerId) {
         MatchOverviewDTO dto = toOverviewDTO(match);
 
-        PlayerMatchStatus playerMatchStatus = registrationService
-                .getRegistrationsForMatch(match.getId()).stream()
+        registrationService.getRegistrationsForMatch(match.getId()).stream()
                 .filter(r -> r.getPlayerId().equals(playerId))
-                .map(MatchRegistrationDTO::getStatus)
                 .findFirst()
-                .map(this::normalizePlayerStatus)
-                .orElse(PlayerMatchStatus.NO_RESPONSE);
+                .ifPresent(r -> {
+                    dto.setPlayerMatchStatus(normalizePlayerStatus(r.getStatus()));
+                    dto.setPlayerTeam(r.getTeam());
+                });
 
-        dto.setPlayerMatchStatus(playerMatchStatus);
+        if (dto.getPlayerMatchStatus() == null) {
+            dto.setPlayerMatchStatus(PlayerMatchStatus.NO_RESPONSE);
+        }
         return dto;
     }
 

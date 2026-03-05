@@ -1,4 +1,3 @@
-// src/context/AppModeContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { fetchAppMode } from "../api/modeApi";
 import { useAuth } from "../hooks/useAuth";
@@ -9,6 +8,14 @@ const AppModeContext = createContext({
     error: null,
 });
 
+/**
+ * AppModeContext
+ *
+ * React context zodpovědný za načtení a sdílení režimu aplikace (např. DEMO/PROD).
+ * Kontext se po přihlášení uživatele pokusí načíst režim z backendu a ukládá výsledek do lokálního stavu.
+ *
+ * Poskytuje helper `refresh()` pro opětovné načtení stavu a `loading` pro řízení UI během inicializace.
+ */
 export const AppModeProvider = ({ children }) => {
     const [demoMode, setDemoMode] = useState(false);
     const [loading, setLoading] = useState(true);

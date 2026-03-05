@@ -1,7 +1,12 @@
-// src/hooks/usePlayerInactivityPeriodsAdmin.js
 import { useEffect, useState, useCallback } from "react";
 import { getAllPlayerInactivityPeriodsAdmin } from "../api/playerInactivityApi";
 
+/**
+ * usePlayerInactivityPeriodsAdmin
+ *
+ * Admin hook pro správu a načtení období neaktivity hráčů.
+ * Používá se pro plánování a pro kontrolu dostupnosti hráčů v čase.
+ */
 export const usePlayerInactivityPeriodsAdmin = () => {
     const [periods, setPeriods] = useState([]);
     const [loading, setLoading] = useState(true);

@@ -1,10 +1,15 @@
-// src/hooks/useMatchDetail.jsx
 import { useEffect, useState, useCallback } from "react";
 import { getMatchDetail } from "../api/matchApi";
 
 /**
  * Namapuje jednu registraci (MatchRegistrationDTO) na objekt,
  * se kterým se dobře pracuje na FE (MatchDetail, PlayerPositionModal).
+ */
+/**
+ * useMatchDetail
+ *
+ * Hook pro načtení detailu jednoho zápasu podle `matchId`.
+ * Používá se na stránkách detailu zápasu a poskytuje jednotný stav (data/loading/error) pro UI.
  */
 const mapRegistrationToPlayer = (reg) => {
     if (!reg) return null;

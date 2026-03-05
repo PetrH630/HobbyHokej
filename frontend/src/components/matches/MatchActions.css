@@ -1,14 +1,26 @@
-/* src/components/MatchActions.css */
+/*
+ * Styly pro komponenty administrační části aplikace.
+ *
+ * Soubor obsahuje lokální pravidla stylování a má minimalizovat globální selektory.
+ *
+ * Cesta: matches/MatchActions.css
+ * Generováno: 2026-03-04
+ */
 
-/* Jeden společný wrapper pro všechna tlačítka:
-   - mobil: pod sebou, uprostřed, full width
-   - >= sm: vedle sebe, uprostřed */
+/*
+ * Styly pro administrační část aplikace.
+ *
+ * Cíl je udržet deklarace přehledné a minimalizovat vedlejší dopady na ostatní komponenty.
+ *
+ * Cesta: matches/MatchActions.css
+ * Generováno: 2026-03-04
+ */
 .match-actions {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     align-items: stretch;
-    /* mobil: tlačítka přes celou šířku */
+
     justify-content: center;
     width: 100%;
 }
@@ -16,14 +28,14 @@
 @media (min-width: 576px) {
     .match-actions {
         flex-direction: row;
-        /* desktop: vedle sebe */
+
         align-items: center;
         justify-content: center;
-        /* desktop: uprostřed */
+
     }
 }
 
-/* společný styl akčních tlačítek */
+
 .action-btn {
     min-width: 140px;
     font-size: 1.2rem;
@@ -31,7 +43,7 @@
     padding: 0.6rem 1rem;
 }
 
-/* mobil: full width (díky align-items:stretch bude hezky sedět) */
+
 @media (max-width: 575.98px) {
     .action-btn {
         width: 100%;

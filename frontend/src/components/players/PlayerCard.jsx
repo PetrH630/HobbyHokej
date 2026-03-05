@@ -1,4 +1,3 @@
-// src/components/PlayerCard.jsx
 import RoleGuard from "../RoleGuard";
 import { PhoneIcon, TeamDarkIcon, TeamLightIcon, PlayerIcon } from "../../icons";
 import { formatPhoneNumber } from "../../utils/formatPhoneNumber";
@@ -17,6 +16,17 @@ const statusTextMap = {
     APPROVED: "schváleno",
 };
 
+/**
+ * PlayerCard
+ *
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
+ *
+ * Props:
+ * @param {import("../../types/dto").PlayerDTO} props.player Data hráče používaná pro zobrazení nebo administraci.
+ * @param {Object} props.onSelect callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.isActive vstupní hodnota komponenty.
+ * @param {Object} props.disabledTooltip vstupní hodnota komponenty.
+ */
 const PlayerCard = ({ player, onSelect, isActive, disabledTooltip }) => {
     const playerStatus = player.playerStatus ?? "PENDING";
 
@@ -31,7 +41,7 @@ const PlayerCard = ({ player, onSelect, isActive, disabledTooltip }) => {
 
     const isClickable = isApproved && !!onSelect && !isDisabled;
 
-    // Primární pozice hráče – mapování přes konstantu
+
     const primaryPositionLabel = getPlayerPositionLabel(
         player.primaryPosition
     );
@@ -56,7 +66,7 @@ const PlayerCard = ({ player, onSelect, isActive, disabledTooltip }) => {
                     : undefined
             }
         >
-            {/* Indikátor aktivního hráče v pravém horním rohu */}
+
             <PlayerIcon
                 className={`active-indicator ${isActive ? "active" : "inactive"
                     }`}
@@ -77,7 +87,6 @@ const PlayerCard = ({ player, onSelect, isActive, disabledTooltip }) => {
                     </div>
                 </div>
 
-                {/* Primární pozice hráče – viditelná všem */}
                 {player.primaryPosition && (
                     <p className="card-text text-center mb-2">
                         <strong>Post:</strong>{" "}

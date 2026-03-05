@@ -19,21 +19,22 @@ import cz.phsoft.hokej.player.entities.PlayerEntity;
 /**
  * Thread-local kontext pro uchovĂˇnĂ­ aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
  *
- * SlouĹľĂ­ k uloĹľenĂ­ instance PlayerEntity, kterĂˇ je povaĹľovĂˇna
+ * TĹ™Ă­da slouĹľĂ­ k uloĹľenĂ­ instance PlayerEntity, kterĂˇ je povaĹľovĂˇna
  * za aktuĂˇlnĂ­ho hrĂˇÄŤe v rĂˇmci jednoho HTTP requestu.
  *
  * Kontext je:
  * - nastaven na zaÄŤĂˇtku requestu ve filtru CurrentPlayerFilter,
- * - dostupnĂ˝ v celĂ©m call stacku (controller, service, helper),
+ * - dostupnĂ˝ v celĂ©m call stacku, napĹ™Ă­klad v controlleru a service vrstvÄ›,
  * - vyÄŤiĹˇtÄ›n po dokonÄŤenĂ­ zpracovĂˇnĂ­ requestu.
  *
  * PouĹľitĂ­ ThreadLocal zajiĹˇĹĄuje, Ĺľe kaĹľdĂ˝ HTTP request
  * mĂˇ vlastnĂ­ instanci kontextu a nedochĂˇzĂ­ ke sdĂ­lenĂ­ dat
  * mezi paralelnÄ› zpracovĂˇvanĂ˝mi poĹľadavky.
  *
- * ThreadLocal musĂ­ bĂ˝t vĹľdy vyÄŤiĹˇtÄ›n metodou clear,
- * jinak hrozĂ­ Ăşnik pamÄ›ti a nechtÄ›nĂ© pĹ™enĂˇĹˇenĂ­ dat
- * mezi jednotlivĂ˝mi requesty.
+ * Kontext musĂ­ bĂ˝t vĹľdy vyÄŤiĹˇtÄ›n metodou clear,
+ * jinak hrozĂ­ Ăşnik pamÄ›ti a pĹ™enĂˇĹˇenĂ­ dat mezi jednotlivĂ˝mi requesty.
+ *
+ * TĹ™Ă­da je navrĹľena jako utilitnĂ­ a nelze ji instancovat.
  */
 public final class CurrentPlayerContext {
 
@@ -43,6 +44,11 @@ public final class CurrentPlayerContext {
      */
     private static final ThreadLocal<PlayerEntity> currentPlayer = new ThreadLocal<>();
 
+    /**
+     * SoukromĂ˝ konstruktor brĂˇnĂ­ vytvoĹ™enĂ­ instance tĹ™Ă­dy.
+     *
+     * TĹ™Ă­da slouĹľĂ­ vĂ˝hradnÄ› jako statickĂ˝ kontext.
+     */
     private CurrentPlayerContext() {
         // Utility tĹ™Ă­da, instanci nelze vytvoĹ™it
     }
@@ -62,8 +68,10 @@ public final class CurrentPlayerContext {
     /**
      * VrĂˇtĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe pro prĂˇvÄ› zpracovĂˇvanĂ˝ request.
      *
-     * @return instance PlayerEntity nebo null,
-     * pokud nebyl hrĂˇÄŤ pro request zvolen
+     * Pokud hrĂˇÄŤ nebyl v rĂˇmci requestu nastaven,
+     * je vrĂˇcena hodnota null.
+     *
+     * @return instance PlayerEntity nebo null
      */
     public static PlayerEntity get() {
         return currentPlayer.get();
@@ -76,7 +84,7 @@ public final class CurrentPlayerContext {
      * typicky ve finally bloku filtru.
      *
      * PouĹľitĂ­ ThreadLocal.remove uvolĹuje referenci
-     * a zabraĹuje memory leakĹŻm pĹ™i opakovanĂ©m pouĹľitĂ­ vlĂˇken.
+     * a zabraĹuje ĂşnikĹŻm pamÄ›ti pĹ™i opakovanĂ©m pouĹľitĂ­ vlĂˇken.
      */
     public static void clear() {
         currentPlayer.remove();
@@ -101,17 +109,19 @@ import java.io.IOException;
 
 /**
  * HTTP filtr zajiĹˇĹĄujĂ­cĂ­ dostupnost aktuĂˇlnĂ­ho hrĂˇÄŤe
- * v prĹŻbÄ›hu zpracovĂˇnĂ­ requestu.
+ * v prĹŻbÄ›hu zpracovĂˇnĂ­ jednoho requestu.
  *
  * Filtr:
- * - naÄŤĂ­tĂˇ ID aktuĂˇlnĂ­ho hrĂˇÄŤe z HTTP session,
+ * - naÄŤĂ­tĂˇ identifikĂˇtor aktuĂˇlnĂ­ho hrĂˇÄŤe ze session prostĹ™ednictvĂ­m CurrentPlayerService,
  * - ovÄ›Ĺ™uje existenci hrĂˇÄŤe v databĂˇzi,
- * - uklĂˇdĂˇ hrĂˇÄŤe do CurrentPlayerContext,
+ * - uklĂˇdĂˇ nalezenou entitu do CurrentPlayerContext,
  * - po dokonÄŤenĂ­ requestu kontext vĹľdy vyÄŤistĂ­.
  *
- * Filtr umoĹľĹuje, aby servisnĂ­ a controller vrstvy
- * pracovaly s aktuĂˇlnĂ­m hrĂˇÄŤem bez nutnosti
- * pĹ™Ă­mĂ©ho pĹ™Ă­stupu k HttpSession.
+ * DĂ­ky tomu mohou servisnĂ­ a controller vrstvy pracovat
+ * s aktuĂˇlnĂ­m hrĂˇÄŤem bez pĹ™Ă­mĂ© zĂˇvislosti na HttpSession.
+ *
+ * TĹ™Ă­da rozĹˇiĹ™uje OncePerRequestFilter, takĹľe je garantovĂˇno,
+ * Ĺľe bude provedena maximĂˇlnÄ› jednou za HTTP request.
  */
 @Component
 public class CurrentPlayerFilter extends OncePerRequestFilter {
@@ -119,6 +129,12 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
     private final PlayerRepository playerRepository;
     private final CurrentPlayerService currentPlayerService;
 
+    /**
+     * VytvoĹ™Ă­ instanci filtru.
+     *
+     * @param playerRepository repozitĂˇĹ™ pro naÄŤĂ­tĂˇnĂ­ hrĂˇÄŤĹŻ z databĂˇze
+     * @param currentPlayerService service zajiĹˇĹĄujĂ­cĂ­ pĹ™Ă­stup k aktuĂˇlnĂ­mu hrĂˇÄŤi ze session
+     */
     public CurrentPlayerFilter(PlayerRepository playerRepository,
                                CurrentPlayerService currentPlayerService) {
         this.playerRepository = playerRepository;
@@ -126,14 +142,23 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
     }
 
     /**
-     * FiltraÄŤnĂ­ metoda volanĂˇ jednou pro kaĹľdĂ˝ HTTP request.
+     * Zpracuje HTTP request a nastavĂ­ aktuĂˇlnĂ­ho hrĂˇÄŤe do thread-local kontextu.
      *
      * Postup zpracovĂˇnĂ­:
-     * - naÄŤte ID aktuĂˇlnĂ­ho hrĂˇÄŤe ze session,
-     * - ovÄ›Ĺ™Ă­ existenci hrĂˇÄŤe v databĂˇzi,
-     * - uloĹľĂ­ hrĂˇÄŤe do thread-local kontextu,
-     * - pĹ™edĂˇ Ĺ™Ă­zenĂ­ dalĹˇĂ­m filtrĹŻm,
-     * - v zĂˇvÄ›ru vĹľdy vyÄŤistĂ­ kontext.
+     * - naÄŤte identifikĂˇtor aktuĂˇlnĂ­ho hrĂˇÄŤe,
+     * - pokud je identifikĂˇtor pĹ™Ă­tomen, ovÄ›Ĺ™Ă­ existenci hrĂˇÄŤe v databĂˇzi,
+     * - uloĹľĂ­ entitu hrĂˇÄŤe do CurrentPlayerContext,
+     * - pĹ™edĂˇ Ĺ™Ă­zenĂ­ dalĹˇĂ­m filtrĹŻm v Ĺ™etÄ›zci,
+     * - po dokonÄŤenĂ­ zpracovĂˇnĂ­ vĹľdy vyÄŤistĂ­ kontext.
+     *
+     * VyÄŤiĹˇtÄ›nĂ­ kontextu je provedeno ve finally bloku,
+     * aby bylo zajiĹˇtÄ›no korektnĂ­ uvolnÄ›nĂ­ ThreadLocal i v pĹ™Ă­padÄ› vĂ˝jimky.
+     *
+     * @param request aktuĂˇlnĂ­ HTTP request
+     * @param response aktuĂˇlnĂ­ HTTP response
+     * @param filterChain Ĺ™etÄ›zec dalĹˇĂ­ch filtrĹŻ
+     * @throws ServletException v pĹ™Ă­padÄ› chyby servletovĂ©ho zpracovĂˇnĂ­
+     * @throws IOException v pĹ™Ă­padÄ› I/O chyby
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -160,16 +185,22 @@ public class CurrentPlayerFilter extends OncePerRequestFilter {
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\security\package-info.java
 -----
 /**
- * BezpeÄŤnostnĂ­ vrstva aplikace.
+ * BalĂ­ÄŤek security obsahuje bezpeÄŤnostnĂ­ a kontextovĂ© komponenty aplikace.
  *
- * Obsahuje konfiguraci a komponenty pro:
- * - autentizaci a autorizaci uĹľivatelĹŻ,
- * - integraci Spring Security,
- * - prĂˇci s uĹľivatelskĂ˝mi rolemi a oprĂˇvnÄ›nĂ­mi.
+ * SouÄŤĂˇstĂ­ balĂ­ÄŤku jsou:
+ * - pomocnĂ© tĹ™Ă­dy pro prĂˇci s bezpeÄŤnostnĂ­m kontextem,
+ * - filtry navĂˇzanĂ© na ĹľivotnĂ­ cyklus HTTP requestu,
+ * - ThreadLocal kontexty pouĹľĂ­vanĂ© bÄ›hem zpracovĂˇnĂ­ poĹľadavku,
+ * - bezpeÄŤnostnĂ­ helpery urÄŤenĂ© pro pouĹľitĂ­ v PreAuthorize vĂ˝razech,
+ * - konstanty pro prĂˇci s HTTP session.
  *
- * Tato vrstva:
- * - neobsahuje business logiku domĂ©ny,
- * - urÄŤuje pĹ™Ă­stupovĂˇ pravidla k API a zdrojĹŻm.
+ * TĹ™Ă­dy v tomto balĂ­ÄŤku doplĹujĂ­ standardnĂ­ konfiguraci Spring Security
+ * o aplikaÄŤnÄ› specifickou logiku, napĹ™Ă­klad prĂˇci s aktuĂˇlnÄ› zvolenĂ˝m
+ * hrĂˇÄŤem nebo kontrolu vlastnictvĂ­ entit.
+ *
+ * PrimĂˇrnĂ­ autentizace a autorizace je Ĺ™eĹˇena konfiguracĂ­ Spring Security,
+ * zatĂ­mco tento balĂ­ÄŤek poskytuje nadstavbovĂ© mechanismy
+ * pro jemnozrnnou kontrolu pĹ™Ă­stupu a kontext requestu.
  */
 package cz.phsoft.hokej.security;
 
@@ -178,7 +209,6 @@ package cz.phsoft.hokej.security;
 -----
 package cz.phsoft.hokej.security;
 
-import cz.phsoft.hokej.player.entities.PlayerEntity;
 import cz.phsoft.hokej.player.repositories.PlayerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,7 +223,9 @@ import org.springframework.stereotype.Component;
  * v anotacĂ­ch typu PreAuthorize.
  *
  * SlouĹľĂ­ k jemnozrnnĂ© autorizaci nad entitou PlayerEntity,
- * zejmĂ©na v pĹ™Ă­padech, kdy se pracuje s konkrĂ©tnĂ­m ID hrĂˇÄŤe.
+ * zejmĂ©na v pĹ™Ă­padech, kdy se pracuje s konkrĂ©tnĂ­m identifikĂˇtorem hrĂˇÄŤe.
+ * Kontrola probĂ­hĂˇ na zĂˇkladÄ› porovnĂˇnĂ­ e-mailu pĹ™ihlĂˇĹˇenĂ©ho uĹľivatele
+ * s vlastnĂ­kem hrĂˇÄŤe v databĂˇzi.
  */
 @Component("playerSecurity")
 public class PlayerSecurity {
@@ -203,6 +235,11 @@ public class PlayerSecurity {
 
     private final PlayerRepository playerRepository;
 
+    /**
+     * VytvoĹ™Ă­ instanci bezpeÄŤnostnĂ­ho helperu.
+     *
+     * @param playerRepository repozitĂˇĹ™ pro naÄŤĂ­tĂˇnĂ­ hrĂˇÄŤĹŻ z databĂˇze
+     */
     public PlayerSecurity(PlayerRepository playerRepository) {
         this.playerRepository = playerRepository;
     }
@@ -211,12 +248,16 @@ public class PlayerSecurity {
      * OvÄ›Ĺ™Ă­, zda je aktuĂˇlnÄ› pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel
      * vlastnĂ­kem zadanĂ©ho hrĂˇÄŤe.
      *
-     * PĹ™i jakĂ©koli chybÄ› nebo nesrovnalosti
-     * je pĹ™Ă­stup zamĂ­tnut a metoda vracĂ­ false.
+     * Metoda je urÄŤena pro pouĹľitĂ­ v bezpeÄŤnostnĂ­ch vĂ˝razech.
+     * Pokud autentizace neexistuje, nenĂ­ platnĂˇ,
+     * nebo hrĂˇÄŤ neexistuje, vracĂ­ se hodnota false.
      *
-     * @param authentication aktuĂˇlnĂ­ autentizace
-     * @param playerId ID hrĂˇÄŤe
-     * @return true, pokud je uĹľivatel vlastnĂ­kem hrĂˇÄŤe
+     * V pĹ™Ă­padÄ› neoprĂˇvnÄ›nĂ©ho pĹ™Ă­stupu je udĂˇlost zaznamenĂˇna do logu.
+     * PĹ™i neoÄŤekĂˇvanĂ© chybÄ› je pĹ™Ă­stup zamĂ­tnut a chyba je zalogovĂˇna.
+     *
+     * @param authentication aktuĂˇlnĂ­ autentizaÄŤnĂ­ kontext
+     * @param playerId identifikĂˇtor hrĂˇÄŤe
+     * @return true, pokud je pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel vlastnĂ­kem hrĂˇÄŤe
      */
     public boolean isOwner(Authentication authentication, Long playerId) {
 
@@ -267,23 +308,28 @@ package cz.phsoft.hokej.security;
 /**
  * CentrĂˇlnĂ­ definice klĂ­ÄŤĹŻ pouĹľĂ­vanĂ˝ch v HTTP session.
  *
- * SlouĹľĂ­ jako jednotnĂ© mĂ­sto pro nĂˇzvy session atributĹŻ,
+ * TĹ™Ă­da slouĹľĂ­ jako jednotnĂ© mĂ­sto pro nĂˇzvy session atributĹŻ,
  * aby se zabrĂˇnilo duplicitĂˇm, pĹ™eklepĹŻm a nekonzistenci
  * napĹ™Ă­ÄŤ aplikacĂ­.
  *
- * TĹ™Ă­da je urÄŤena vĂ˝hradnÄ› jako drĹľĂˇk konstant
- * a neobsahuje ĹľĂˇdnou logiku.
+ * Neobsahuje ĹľĂˇdnou aplikaÄŤnĂ­ logiku a je urÄŤena vĂ˝hradnÄ›
+ * jako drĹľĂˇk konstant.
  */
 public final class SessionKeys {
 
     /**
-     * KlĂ­ÄŤ session atributu pro ID aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
+     * KlĂ­ÄŤ session atributu pro identifikĂˇtor aktuĂˇlnÄ› zvolenĂ©ho hrĂˇÄŤe.
      *
-     * Hodnota pĹ™edstavuje identifikĂˇtor hrĂˇÄŤe,
-     * se kterĂ˝m pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel prĂˇvÄ› pracuje.
+     * Hodnota pĹ™edstavuje ID hrĂˇÄŤe, se kterĂ˝m pĹ™ihlĂˇĹˇenĂ˝ uĹľivatel
+     * prĂˇvÄ› pracuje v rĂˇmci aktuĂˇlnĂ­ session.
      */
     public static final String CURRENT_PLAYER_ID = "CURRENT_PLAYER_ID";
 
+    /**
+     * SoukromĂ˝ konstruktor brĂˇnĂ­ vytvoĹ™enĂ­ instance tĹ™Ă­dy.
+     *
+     * TĹ™Ă­da je navrĹľena jako utilitnĂ­ a obsahuje pouze konstanty.
+     */
     private SessionKeys() {
         // Utility tĹ™Ă­da, instanci nelze vytvoĹ™it
     }

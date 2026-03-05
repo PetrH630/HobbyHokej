@@ -6,6 +6,23 @@ import { useGlobalModal } from "../../hooks/useGlobalModal";
 import ConfirmActionModal from "../common/ConfirmActionModal";
 import SuccessModal from "../common/SuccessModal";
 
+/**
+ * AdminPlayerRegistrationHistoryModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Při otevření blokuje scroll pozadí pomocí useGlobalModal.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ * @param {import("../../types/dto").PlayerDTO} props.player Data hráče používaná pro zobrazení nebo administraci.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.onMarkNoExcuse vstupní hodnota komponenty.
+ * @param {Object} props.onCancelNoExcuse vstupní hodnota komponenty.
+ * @param {Object} props.onChangeTeam vstupní hodnota komponenty.
+ */
+
 const AdminPlayerRegistrationHistoryModal = ({
     match,
     player,
@@ -121,16 +138,7 @@ const AdminPlayerRegistrationHistoryModal = ({
                                         >
                                             Označit jako bez omluvy
                                         </button>
-
-                                        {/* TODO: Změnit tým – admin akce s confirm + success */}
-                                        <button
-                                            type="button"
-                                            className="btn btn-sm btn-outline-primary"
-                                            disabled={saving}
-                                            onClick={handleChangeTeamClick}
-                                        >
-                                            Změnit tým
-                                        </button>
+                                      
                                     </>
                                 )}
 

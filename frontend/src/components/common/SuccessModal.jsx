@@ -1,11 +1,20 @@
-//src/components/common/SuccessModal.jsx
 import { useEffect } from "react";
 import { useGlobalModal } from "../../hooks/useGlobalModal";
 
 /**
- * Univerzální informační modal pro potvrzení úspěšné akce.
+ * SuccessModal
  *
- * Zobrazuje nadpis a zprávu. Zavření je možné tlačítkem i klávesou Escape.
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Umožňuje zavření stiskem klávesy Escape.
+ * Při otevření blokuje scroll pozadí pomocí useGlobalModal.
+ *
+ * Props:
+ * @param {boolean} props.show určuje, zda je dialog otevřený.
+ * @param {string} props.title titulek zobrazený v hlavičce. [default: "Hotovo"]
+ * @param {string} props.message obsah zprávy zobrazený uživateli.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.closeLabel vstupní hodnota komponenty. [default: "Zavřít"]
  */
 const SuccessModal = ({
     show,
@@ -14,12 +23,13 @@ const SuccessModal = ({
     onClose,
     closeLabel = "Zavřít",
 }) => {
-    // zamkne scroll body při otevřeném modalu (sjednocení chování s ostatními modaly)
+
     useGlobalModal(show === true);
 
     useEffect(() => {
         if (!show) return;
 
+        
         const onKeyDown = (e) => {
             if (e.key === "Escape") onClose?.();
         };
@@ -32,10 +42,9 @@ const SuccessModal = ({
 
     return (
         <>
-            {/* Backdrop */}
+
             <div className="modal-backdrop fade show" />
 
-            {/* Modal */}
             <div className="modal d-block" tabIndex="-1" role="dialog" aria-modal="true">
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content shadow">

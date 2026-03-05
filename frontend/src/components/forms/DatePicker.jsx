@@ -1,4 +1,3 @@
-// src/components/forms/DatePicker.jsx
 import React, { useMemo, useRef } from "react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
@@ -6,10 +5,22 @@ import "flatpickr/dist/themes/material_blue.css";
 import { Czech } from "flatpickr/dist/l10n/cs.js";
 
 /**
- * Date picker pro Bootstrap formuláře.
+ * DatePicker
  *
- * value: string ve formátu "YYYY-MM-DD"
- * onChange: (valueString) => void
+ * Formulářová komponenta pro výběr data a času s validací a normalizací hodnot.
+ *
+ * Props:
+ * @param {number} props.id vstupní hodnota komponenty. [default: "date"]
+ * @param {string} props.name vstupní hodnota komponenty.
+ * @param {string} props.value Aktuální hodnota ovládacího prvku.
+ * @param {Function} props.onChange callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onBlur vstupní hodnota komponenty.
+ * @param {string} props.placeholder vstupní hodnota komponenty. [default: "Vyber datum…"]
+ * @param {Object} props.required vstupní hodnota komponenty. [default: false]
+ * @param {boolean} props.disabled Příznak, zda jsou ovládací prvky dočasně zakázány.
+ * @param {string} props.minDate vstupní hodnota komponenty.
+ * @param {string} props.maxDate vstupní hodnota komponenty.
+ * @param {string} props.className vstupní hodnota komponenty. [default: "form-control"]
  */
 const DatePicker = ({
     id = "date",
@@ -74,10 +85,10 @@ const DatePicker = ({
                 const formatted = fp ? fp.formatDate(d, "Y-m-d") : "";
                 onChange?.(formatted);
 
-                // jistota zavření po výběru (eliminace "2 kliků" u některých kombinací)
+
                 fp?.close?.();
             }}
-            // ✅ originální input schováme (viditelný je jen altInput)
+
             render={({ defaultValue }, ref) => (
                 <input
                     ref={ref}

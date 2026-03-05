@@ -1,8 +1,17 @@
-// src/components/players/PlayerStats.jsx
 import React, { useMemo } from "react";
 import SeasonSelect from "../seasons/seasonSelect";
 import PlayerStatsCharts from "./PlayerStatsCharts";
+import {
+    TeamDarkIcon,
+    TeamLightIcon,
+} from "../../icons";
 
+/**
+ * PlayerStats
+ *
+ * React komponenta zobrazující statistiky přihlášeného hráče pro vybranou sezónu.
+ * Data pochází z endpointu /api/players/me/stats.
+ */
 const PlayerStats = ({ stats, loading, error, onReload, onSeasonChange }) => {
     const safeNum = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
@@ -30,17 +39,59 @@ const PlayerStats = ({ stats, loading, error, onReload, onSeasonChange }) => {
         const responseRate = denominator > 0 ? Math.round((responded / denominator) * 100) : 0;
         const noResponseRate = denominator > 0 ? Math.round((noResponse / denominator) * 100) : 0;
 
-        // registrace (REGISTERED) podle týmu
         const registeredByTeam = stats?.registeredByTeam ?? {};
-        const registeredLight = safeNum(registeredByTeam?.LIGHT);
-        const registeredDark = safeNum(registeredByTeam?.DARK);
+        const registeredDark = safeNum(registeredByTeam.DARK);
+        const registeredLight = safeNum(registeredByTeam.LIGHT);
 
-        // domácí tým
         const homeTeam = stats?.homeTeam ?? null;
+
+        const registeredMatchResults = Array.isArray(stats?.registeredMatchResults)
+            ? stats.registeredMatchResults
+            : [];
+
+        let darkWins = 0;
+        let darkLosses = 0;
+        let darkDraws = 0;
+
+        let lightWins = 0;
+        let lightLosses = 0;
+        let lightDraws = 0;
+
+        let sumScoreDark = 0;
+        let sumScoreLight = 0;
+
+        registeredMatchResults.forEach((m) => {
+            const team = m?.playerTeam;
+            const result = m?.result;
+
+            sumScoreDark += safeNum(m?.scoreDark);
+            sumScoreLight += safeNum(m?.scoreLight);
+
+            if (team === "DARK") {
+                if (result === "DARK_WIN") darkWins += 1;
+                else if (result === "LIGHT_WIN") darkLosses += 1;
+                else if (result === "DRAW") darkDraws += 1;
+            }
+
+            if (team === "LIGHT") {
+                if (result === "LIGHT_WIN") lightWins += 1;
+                else if (result === "DARK_WIN") lightLosses += 1;
+                else if (result === "DRAW") lightDraws += 1;
+            }
+        });
+
+        const playedWithResult =
+            darkWins +
+            darkLosses +
+            darkDraws +
+            lightWins +
+            lightLosses +
+            lightDraws;
 
         return {
             allMatchesInSeason,
             allMatchesInSeasonForPlayer,
+
             registered,
             unregistered,
             excused,
@@ -48,14 +99,28 @@ const PlayerStats = ({ stats, loading, error, onReload, onSeasonChange }) => {
             reserved,
             noResponse,
             noExcused,
+
             responded,
+            denominator,
             responseRate,
             noResponseRate,
-            denominator,
 
             homeTeam,
-            registeredLight,
             registeredDark,
+            registeredLight,
+
+            darkWins,
+            darkLosses,
+            darkDraws,
+
+            lightWins,
+            lightLosses,
+            lightDraws,
+
+            playedWithResult,
+
+            sumScoreDark,
+            sumScoreLight,
         };
     }, [stats]);
 
@@ -71,7 +136,7 @@ const PlayerStats = ({ stats, loading, error, onReload, onSeasonChange }) => {
         </div>
     );
 
-    const Row = ({ label, value, total, badge }) => {
+    const Row = ({ label, value, total }) => {
         const v = safeNum(value);
         const t = safeNum(total);
         const pct = t > 0 ? Math.round((v / t) * 100) : 0;
@@ -79,10 +144,7 @@ const PlayerStats = ({ stats, loading, error, onReload, onSeasonChange }) => {
         return (
             <div className="mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-1">
-                    <div className="d-flex align-items-center gap-2">
-                        <span className="fw-semibold">{label}</span>
-                        {badge ? <span className={`badge ${badge}`}> </span> : null}
-                    </div>
+                    <span className="fw-semibold">{label}</span>
                     <div className="text-muted small">
                         {loading ? "…" : `${v} / ${t}`}{" "}
                         <span className="ms-2">{loading ? "" : `${pct}%`}</span>
@@ -109,7 +171,7 @@ const PlayerStats = ({ stats, loading, error, onReload, onSeasonChange }) => {
                     Statistiky hráče - pouze pro již proběhlé zápasy
                 </div>
 
-                <div className="d-flex flex-wrap gap-2 align-items-center w-100 w-md-auto justify-content-start justify-content-md-end">
+                <div className="d-flex flex-wrap gap-2 align-items-center">
                     <SeasonSelect
                         onSeasonChange={async (id) => {
                             await onSeasonChange?.(id);
@@ -117,99 +179,107 @@ const PlayerStats = ({ stats, loading, error, onReload, onSeasonChange }) => {
                         }}
                     />
 
-                    {onReload ? (
+                    {onReload && (
                         <button
                             type="button"
                             className="btn btn-sm btn-outline-secondary"
                             onClick={onReload}
                             disabled={loading}
-                            title="Znovu načíst statistiky"
                         >
                             Obnovit
                         </button>
-                    ) : null}
+                    )}
                 </div>
             </div>
 
-
             <div className="card-body">
-                {error ? (
+                {error && (
                     <div className="alert alert-danger mb-3" role="alert">
                         {error}
                     </div>
-                ) : null}
+                )}
 
-                {!loading && !error && !stats ? (
-                    <div className="text-muted">Statistiky nejsou k dispozici.</div>
-                ) : null}
-
-                {/* Metriky */}
+                {/* základní metriky */}
                 <div className="row g-3 mb-3">
-                    <StatCard
-                        label="Zápasy v sezóně"
-                        value={totals.allMatchesInSeason}
-                        helper="Celkový počet v aktuální sezóně"
-                    />
-                    <StatCard
-                        label="Zápasy pro hráče"
-                        value={totals.allMatchesInSeasonForPlayer}
-                        helper="Dostupné pro aktuálního hráče"
-                    />
-                    <StatCard
-                        label="Míra reakcí"
-                        value={loading ? "…" : `${totals.responseRate}%`}
-                        helper="Reakce (ano/ne/omluva/…) vs. dostupné zápasy"
-                    />
-                    <StatCard
-                        label="Bez reakce"
-                        value={loading ? "…" : `${totals.noResponseRate}%`}
-                        helper="Podíl zápasů bez odpovědi"
-                    />
-                </div>
+                    <StatCard label="Zápasy v sezóně" value={totals.allMatchesInSeason} />
+                    <StatCard label="Zápasy pro hráče" value={totals.allMatchesInSeasonForPlayer} />
+                    <StatCard label="Míra reakcí" value={`${totals.responseRate}%`} />
+                    <StatCard label="Bez reakce" value={`${totals.noResponseRate}%`} />
 
-                {/* ✅ Grafy: donut + bar */}
-                <PlayerStatsCharts totals={totals} loading={loading} />
+                    {/* výsledky */}
+                    <div className="col-12">
+                        <div className="card border shadow-sm">
+                            <div className="card-body">
 
-                {/* Týmové info */}
-                <div className="alert alert-light border mb-3">
-                    <div className="d-flex flex-column flex-md-row justify-content-between gap-2">
-                        <div>
-                            <div className="fw-semibold">Domácí tým</div>
-                            <div className="text-muted small">
-                                Tým uložený u hráče v profilu.
+                                <div className="fw-semibold mb-2">Hrál za <TeamDarkIcon className="match-reg-team-icon-dark" /></div>
+                                <div className="mb-2">
+                                    Výhry: {totals.darkWins} | Prohry: {totals.darkLosses} | Remízy: {totals.darkDraws}
+                                </div>
+
+                                <div className="fw-semibold mb-2">Hrál za <TeamLightIcon className="match-reg-team-icon-light" /></div>
+                                <div className="mb-2">
+                                    Výhry: {totals.lightWins} | Prohry: {totals.lightLosses} | Remízy: {totals.lightDraws}
+                                </div>
+
+                                <div className="fw-semibold mt-3">
+                                    Score: <TeamDarkIcon className="match-reg-team-icon-dark" /> {totals.sumScoreDark} : {totals.sumScoreLight} <TeamLightIcon className="match-reg-team-icon-light" />
+                                </div>
+
+                                <div className="text-muted small mt-1">
+                                    Započítáno: {totals.playedWithResult}
+                                </div>
+
                             </div>
                         </div>
-                        <div className="fs-5 fw-semibold">
-                            {loading ? "…" : teamLabel(totals.homeTeam)}
+                    </div>
+                </div>
+
+                <PlayerStatsCharts totals={totals} loading={loading} />
+
+                <div className="alert alert-light border mb-3">
+                    <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div className="fw-semibold">Domácí tým</div>
+                            <div className="text-muted small">Tým uložený u hráče</div>
+                        </div>
+
+                        <div className="fs-5 fw-semibold d-flex align-items-center gap-2">
+                            {totals.homeTeam === "DARK" && (
+                                <TeamDarkIcon className="match-reg-team-icon-dark" />
+                            )}
+                            {totals.homeTeam === "LIGHT" && (
+                                <TeamLightIcon className="match-reg-team-icon-light" />
+                            )}
+
+                            {teamLabel(totals.homeTeam)}
                         </div>
                     </div>
 
-                    <hr className="my-3" />
+                    <hr />
 
-                    <div className="d-flex flex-column flex-md-row justify-content-between gap-2">
+                    <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <div className="fw-semibold">Za který tým hrál v sezóně</div>
-                            <div className="text-muted small">
-                                Počet účastí na odehraných zápasech podle týmu.
-                            </div>
+                            <div className="fw-semibold">Za který tým hrál</div>
                         </div>
-                        <div className="fs-6">
-                            {loading ? (
-                                "…"
-                            ) : (
-                                <>
-                                    <span className="fw-semibold">Light:</span> {totals.registeredLight}
-                                    <span className="mx-2">/</span>
-                                    <span className="fw-semibold">Dark:</span> {totals.registeredDark}
-                                </>
-                            )}
+
+                        <div className="d-flex align-items-center gap-3">
+                            <span className="d-flex align-items-center gap-1">
+                                <TeamDarkIcon className="match-reg-team-icon-dark" />
+                                {totals.registeredDark} {" - "}
+                            </span>
+                            
+                            <span className="d-flex align-items-center gap-1">
+                                <TeamLightIcon className="match-reg-team-icon-light" />
+                                {totals.registeredLight}
+                            </span>
+
+                            
                         </div>
                     </div>
                 </div>
 
                 <hr />
 
-                {/* Detail */}
                 <div className="fw-semibold mb-2">Historie zápasu hráče</div>
 
                 <Row label="Byl" value={totals.registered} total={totals.denominator} />
@@ -220,14 +290,11 @@ const PlayerStats = ({ stats, loading, error, onReload, onSeasonChange }) => {
                 <Row label="Nereagoval" value={totals.noResponse} total={totals.denominator} />
 
                 <div className="alert alert-light border mt-3 mb-0">
-                    <div className="d-flex justify-content-between align-items-center">
+                    <div className="d-flex justify-content-between">
                         <div>
                             <div className="fw-semibold">Neomluvená neúčast</div>
-                            <div className="text-muted small">
-                                Zápasy, kde hráč nenastoupil a nebyl omluven.
-                            </div>
                         </div>
-                        <div className="fs-4">{loading ? "…" : totals.noExcused}</div>
+                        <div className="fs-4">{totals.noExcused}</div>
                     </div>
                 </div>
             </div>

@@ -1,4 +1,3 @@
-// src/hooks/useSpecialNotificationTargets.js
 import { useEffect, useState, useCallback } from "react";
 import { fetchSpecialNotificationTargets } from "../api/notificationsApi";
 
@@ -20,6 +19,12 @@ import { fetchSpecialNotificationTargets } from "../api/notificationsApi";
  *   error: string | null,
  *   reload: () => Promise<void>
  * }}
+ */
+/**
+ * useSpecialNotificationTargets
+ *
+ * Hook pro načtení speciálních cílů notifikací (např. vybraná zařízení/stanice, role, skupiny).
+ * Používá se v administraci při konfiguraci rozesílání notifikací.
  */
 export const useSpecialNotificationTargets = (autoLoad = true) => {
     const [targets, setTargets] = useState([]);

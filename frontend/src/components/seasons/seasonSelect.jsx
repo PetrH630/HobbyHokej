@@ -1,7 +1,14 @@
-// src/components/seasons/SeasonSelect.jsx
 import { useEffect, useState } from "react";
 import { useSeason } from "../../hooks/useSeason";
 
+/**
+ * SeasonSelect
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.onSeasonChange vstupní hodnota komponenty.
+ */
 const SeasonSelect = ({ onSeasonChange }) => {
     const { seasons, currentSeasonId, changeSeason, loading } = useSeason();
     const [value, setValue] = useState(currentSeasonId ?? "");
@@ -10,6 +17,7 @@ const SeasonSelect = ({ onSeasonChange }) => {
         setValue(currentSeasonId ?? "");
     }, [currentSeasonId]);
 
+    
     const handleChange = async (e) => {
         const seasonId = Number(e.target.value);
         setValue(seasonId);

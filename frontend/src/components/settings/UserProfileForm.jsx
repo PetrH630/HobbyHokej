@@ -1,6 +1,15 @@
-// src/components/settings/UserProfileForm.jsx
-
+/**
+ * UserProfileForm
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.values Aktuální hodnoty formuláře.
+ * @param {Function} props.onChange callback pro předání akce do nadřazené vrstvy.
+ * @param {Object} props.errors Validační chyby formuláře po jednotlivých polích.
+ */
 const UserProfileForm = ({ values, onChange, errors = {} }) => {
+    
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         onChange({ [name]: value });

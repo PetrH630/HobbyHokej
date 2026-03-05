@@ -29,6 +29,13 @@ const FILTERS = {
     NON_CURRENT: "NON_CURRENT",
 };
 
+/**
+ * MyInactivityPage
+ *
+ * UI komponenta.
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const MyInactivityPage = () => {
     const { periods, loading, error, reload } = useMyInactivity();
     const { currentPlayer } = useCurrentPlayer();

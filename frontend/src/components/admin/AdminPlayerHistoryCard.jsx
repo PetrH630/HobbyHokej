@@ -42,6 +42,16 @@ const teamLabel = (team) => {
 const getHighlightClass = (changed) =>
     changed ? "p-1 rounded bg-warning bg-opacity-25" : "";
 
+/**
+ * AdminPlayerHistoryCard
+ *
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
+ *
+ * Props:
+ * @param {Object} props.item vstupní hodnota komponenty.
+ * @param {Object} props.previousItem vstupní hodnota komponenty.
+ */
+
 const AdminPlayerHistoryCard = ({ item, previousItem }) => {
     // Výchozí hodnoty – pokud není previousItem, nic se nezvýrazňuje
     const diffs = {

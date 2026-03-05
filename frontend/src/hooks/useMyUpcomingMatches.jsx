@@ -1,9 +1,14 @@
-// src/hooks/useMyUpcomingMatches.js
 import { useEffect, useState } from "react";
 import { getMyUpcomingMatchesOverview } from "../api/matchApi";
 import { useSeason } from "./useSeason";
 import { useCurrentPlayer } from "./useCurrentPlayer";
 
+/**
+ * useMyUpcomingMatches
+ *
+ * Hook pro načtení nadcházejících zápasů aktuálního hráče.
+ * Používá se pro dashboard a rychlý přehled registrací.
+ */
 export const useMyUpcomingMatches = () => {
     const { currentSeasonId } = useSeason();
     const { currentPlayer } = useCurrentPlayer(); // 👈 přidáno

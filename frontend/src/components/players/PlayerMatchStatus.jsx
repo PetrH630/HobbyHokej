@@ -9,9 +9,7 @@ import {
     NoExcusedIcon,
 } from "../../icons";
 
-/**
- * Ikony pro STAV HRÁČE v zápase
- */
+
 const PLAYER_MATCH_STATUS_ICON_MAP = {
     REGISTERED: RegisteredIcon,
     UNREGISTERED: UnregisteredIcon,
@@ -22,9 +20,7 @@ const PLAYER_MATCH_STATUS_ICON_MAP = {
     NO_EXCUSED: NoExcusedIcon,
 };
 
-/**
- * Texty – nadcházející zápas
- */
+
 const PLAYER_MATCH_STATUS_TEXT_UPCOMING = {
     REGISTERED: "přihlášen",
     UNREGISTERED: "odhlášen",
@@ -35,9 +31,7 @@ const PLAYER_MATCH_STATUS_TEXT_UPCOMING = {
     NO_EXCUSED: "neomluven",
 };
 
-/**
- * Texty – uplynulý zápas
- */
+
 const PLAYER_MATCH_STATUS_TEXT_PAST = {
     REGISTERED: "byl jsem",
     UNREGISTERED: "nebyl jsem",
@@ -48,11 +42,20 @@ const PLAYER_MATCH_STATUS_TEXT_PAST = {
     NO_EXCUSED: "nepřišel jsem",
 };
 
+/**
+ * PlayerMatchStatus
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * Props:
+ * @param {string} props.playerMatchStatus data vybraného zápasu.
+ * @param {Object} props.variant vstupní hodnota komponenty. [default: "upcoming"]
+ */
 const PlayerMatchStatus = ({
     playerMatchStatus,
     variant = "upcoming",
 }) => {
-    // 🔹 sjednocení – vždy pracujeme s jednou proměnnou
+
     const normalizedStatus = playerMatchStatus ?? "NO_RESPONSE";
 
     const StatusIcon = PLAYER_MATCH_STATUS_ICON_MAP[normalizedStatus];
@@ -64,7 +67,7 @@ const PlayerMatchStatus = ({
 
     const text = textMap[normalizedStatus] ?? normalizedStatus;
 
-    const modifier = normalizedStatus.toLowerCase(); // REGISTERED -> registered, NO_RESPONSE -> no_response
+    const modifier = normalizedStatus.toLowerCase();
 
     return (
         <div className="text-center mb-3">

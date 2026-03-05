@@ -51,7 +51,7 @@ public class HobbyHokejApplication {
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\package-info.java
 -----
 /**
- * KoĹ™enovĂ˝ balĂ­ÄŤek aplikace Hokej â€“ StarĂˇ Garda.
+ * KoĹ™enovĂ˝ balĂ­ÄŤek aplikace HobbyHokej.
  *
  * Obsahuje hlavnĂ­ spouĹˇtÄ›cĂ­ tĹ™Ă­du aplikace a nadĹ™azenĂ© balĂ­ÄŤky
  * pro jednotlivĂ© vrstvy systĂ©mu, jako jsou konfiguraÄŤnĂ­ tĹ™Ă­dy,

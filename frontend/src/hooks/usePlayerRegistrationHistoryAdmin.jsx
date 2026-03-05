@@ -1,8 +1,13 @@
-// src/hooks/usePlayerRegistationHistoryAdmin.jsx
 
 import { useEffect, useState } from "react";
 import { getPlayerRegistrationHistoryAdmin } from "../api/matchRegistrationHistoryApi";
 
+/**
+ * usePlayerRegistrationHistoryAdmin
+ *
+ * Admin hook pro načtení historie registrací vybraného hráče.
+ * Pomáhá dohledat změny týmů/pozic a aktivitu hráče v průběhu sezóny.
+ */
 export const usePlayerRegistrationHistoryAdmin = (matchId, playerId) => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);

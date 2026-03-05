@@ -1,4 +1,3 @@
-// src/hooks/useUserSettings.js
 import { useEffect, useState, useCallback } from "react";
 import { getUserSettings, updateUserSettings } from "../api/userSettingsApi";
 
@@ -14,6 +13,11 @@ const emptyUserSettings = {
     defaultLandingPage: "MATCHES",
 };
 
+/**
+ * useUserSettings
+ *
+ * Hook pro práci s uživatelskými nastaveními (např. preference UI, notifikace, jazykové volby).
+ */
 export const useUserSettings = () => {
     const [settings, setSettings] = useState(emptyUserSettings);
     const [loading, setLoading] = useState(true);

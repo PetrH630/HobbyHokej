@@ -1,4 +1,3 @@
-// src/components/forms/DateTimePicker.jsx
 import React, { useMemo, useRef } from "react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
@@ -6,10 +5,23 @@ import "flatpickr/dist/themes/material_blue.css";
 import { Czech } from "flatpickr/dist/l10n/cs.js";
 
 /**
- * DateTime picker pro Bootstrap formuláře.
+ * DateTimePicker
  *
- * value: string ve formátu "YYYY-MM-DDTHH:mm" (stejně jako datetime-local)
- * onChange: (valueString) => void
+ * Formulářová komponenta pro výběr data a času s validací a normalizací hodnot.
+ *
+ * Props:
+ * @param {number} props.id vstupní hodnota komponenty. [default: "dateTime"]
+ * @param {string} props.name vstupní hodnota komponenty.
+ * @param {string} props.value Aktuální hodnota ovládacího prvku.
+ * @param {Function} props.onChange callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onBlur vstupní hodnota komponenty.
+ * @param {string} props.placeholder vstupní hodnota komponenty. [default: "Vyber datum a čas…"]
+ * @param {Object} props.required vstupní hodnota komponenty. [default: false]
+ * @param {boolean} props.disabled Příznak, zda jsou ovládací prvky dočasně zakázány.
+ * @param {string} props.minDate vstupní hodnota komponenty.
+ * @param {string} props.maxDate vstupní hodnota komponenty.
+ * @param {string} props.className vstupní hodnota komponenty. [default: "form-control"]
+ * @param {Object} props.minuteIncrement vstupní hodnota komponenty. [default: 5]
  */
 const DateTimePicker = ({
     id = "dateTime",
@@ -27,11 +39,11 @@ const DateTimePicker = ({
 }) => {
     const fpRef = useRef(null);
 
-    // ✅ string -> Date pro zobrazení ve flatpickru
+
     const parsedValue = useMemo(() => {
         if (!value) return null;
 
-        // value je "YYYY-MM-DDTHH:mm" -> JS to bere jako "local"
+
         const d = new Date(value);
         return Number.isNaN(d.getTime()) ? null : d;
     }, [value]);
@@ -42,7 +54,7 @@ const DateTimePicker = ({
             enableTime: true,
             time_24hr: true,
 
-            // ✅ zobrazujeme česky přímo v inputu (bez altInput => žádný druhý input)
+
             dateFormat: "d.m.Y H:i",
 
             minuteIncrement,
@@ -71,7 +83,7 @@ const DateTimePicker = ({
 
                 const fp = fpRef.current;
 
-                // ✅ do stavu posíláme stabilní ISO-local string (datetime-local)
+
                 const formatted = fp ? fp.formatDate(d, "Y-m-d\\TH:i") : "";
                 onChange?.(formatted);
             }}

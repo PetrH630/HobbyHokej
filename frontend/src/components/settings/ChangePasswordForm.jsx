@@ -1,5 +1,19 @@
-// src/components/settings/ChangePasswordForm.jsx
 
+
+/**
+ * ChangePasswordForm
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.values Aktuální hodnoty formuláře.
+ * @param {Object} props.errors Validační chyby formuláře po jednotlivých polích.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ * @param {boolean} props.success vstupní hodnota komponenty.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ * @param {Function} props.onChange callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onSubmit callback pro předání akce do nadřazené vrstvy.
+ */
 const ChangePasswordForm = ({
     values,
     errors = {},
@@ -9,11 +23,13 @@ const ChangePasswordForm = ({
     onChange,
     onSubmit,
 }) => {
+    
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         onChange({ [name]: value });
     };
 
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit();

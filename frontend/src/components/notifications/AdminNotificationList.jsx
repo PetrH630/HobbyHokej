@@ -1,28 +1,22 @@
-// src/components/notifications/AdminNotificationsList.jsx
 import { useEffect, useMemo, useState } from "react";
 import AdminNotificationCard from "./AdminNotificationCard";
 import { fetchAllNotificationsAdmin } from "../../api/notificationsApi";
 import {
-    Bell,                // Vše
-    EnvelopeExclamation, // Nepřečtené
-    EnvelopeOpen,        // Přečtené
+    Bell,
+    EnvelopeExclamation,
+    EnvelopeOpen,
 } from "react-bootstrap-icons";
 
 /**
- * Admin/Manager přehled všech notifikací v systému.
+ * AdminNotificationsList
  *
- * Vlastnosti:
- * - Načítá notifikace přes /api/notifications/admin/all.
- * - Jen read-only (admin nesahá na readAt uživatelů).
- * - Filtry: Vše, Nepřečtené, Přečtené.
+ * React komponenta používaná ve frontend aplikaci.
  *
- * Nově:
- * - Notifikace se seskupují do "událostí" (stejný typ + text + časové okno).
- * - V jedné kartě je pak seznam uživatelů a jejich stav (přečteno/nepřečteno).
+ * @param {Object} props vstupní hodnoty komponenty.
  */
 const AdminNotificationsList = () => {
     const [notifications, setNotifications] = useState([]);
-    const [activeFilter, setActiveFilter] = useState("ALL"); // ALL | UNREAD | READ
+    const [activeFilter, setActiveFilter] = useState("ALL");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -33,13 +27,10 @@ const AdminNotificationsList = () => {
         return false;
     };
 
-    // časové okno pro sloučení duplicitních notifikací do jedné události
-    const GROUP_TIME_WINDOW_MS = 1000; // 1 sekunda
 
-    /**
-     * Klíč pro seskupení notifikací do "událostí".
-     * Používá se typ + text (krátká / dlouhá zpráva).
-     */
+    const GROUP_TIME_WINDOW_MS = 1000;
+
+
     const makeGroupKey = (n) => {
         const type = String(n.type || "").toLowerCase();
         const text = (
@@ -60,6 +51,7 @@ const AdminNotificationsList = () => {
     };
 
     useEffect(() => {
+        
         const load = async () => {
             try {
                 setLoading(true);
@@ -78,24 +70,13 @@ const AdminNotificationsList = () => {
         load();
     }, []);
 
-    /**
-     * Seskupené notifikace do "událostí".
-     *
-     * Každá skupina má tvar:
-     * {
-     *   key: string,
-     *   createdAt: string | null,
-     *   createdMs: number | null,
-     *   important: boolean,
-     *   notifications: NotificationDTO[]
-     * }
-     */
+
     const groupedNotifications = useMemo(() => {
         if (!Array.isArray(notifications) || notifications.length === 0) {
             return [];
         }
 
-        // Normalizace – doplnění key a timestampu
+
         const normalized = notifications
             .map((n) => {
                 const key = makeGroupKey(n);
@@ -119,7 +100,7 @@ const AdminNotificationsList = () => {
             })
             .filter(Boolean);
 
-        // Seřadíme od nejnovějších (podle createdMs, fallback 0)
+
         normalized.sort(
             (a, b) => (b.createdMs ?? 0) - (a.createdMs ?? 0)
         );
@@ -129,17 +110,17 @@ const AdminNotificationsList = () => {
         for (const item of normalized) {
             const { key, createdMs, createdAt, notification } = item;
 
-            // Zkusíme najít existující skupinu se stejným klíčem a v časovém okně
+
             let existingGroup = groups.find((g) => {
                 if (g.key !== key) return false;
 
-                // Pokud u obou máme timestamp, hlídat časové okno
+
                 if (g.createdMs != null && createdMs != null) {
                     const diff = Math.abs(g.createdMs - createdMs);
                     return diff <= GROUP_TIME_WINDOW_MS;
                 }
 
-                // Pokud timestamp chybí, seskupujeme jen podle klíče
+
                 return true;
             });
 
@@ -153,7 +134,7 @@ const AdminNotificationsList = () => {
                 };
                 groups.push(existingGroup);
             } else {
-                // Uložíme nejnovější čas a "important", pokud některá z notifikací je důležitá
+
                 if (
                     createdMs != null &&
                     (existingGroup.createdMs == null ||

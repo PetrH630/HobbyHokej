@@ -2,6 +2,11 @@
 import { useState, useEffect } from "react";
 import { getMyPlayers } from "../api/playerApi";
 
+/**
+ * usePlayers
+ *
+ * Hook pro načtení seznamu hráčů dostupných v UI (např. pro výběr profilu, přehled členů).
+ */
 export const usePlayers = () => {
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);

@@ -4,6 +4,13 @@ import { useAuth } from "../hooks/useAuth";
 import Home from "./Home";
 import AdminHomePage from "./AdminHomePage";
 
+/**
+ * HomeDecider
+ *
+ * UI komponenta.
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const HomeDecider = () => {
     const { user, loading } = useAuth();
 

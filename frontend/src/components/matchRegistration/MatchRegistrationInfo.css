@@ -1,5 +1,21 @@
+/*
+ * Styly pro komponenty administrační části aplikace.
+ *
+ * Soubor obsahuje lokální pravidla stylování a má minimalizovat globální selektory.
+ *
+ * Cesta: matchRegistration/MatchRegistrationInfo.css
+ * Generováno: 2026-03-04
+ */
 
-/* wrapper dvou sloupců */
+/*
+ * Styly pro komponenty uživatelského rozhraní.
+ *
+ * Cílem je zapouzdřit vizuální chování komponent
+ * a minimalizovat vedlejší dopady na ostatní části aplikace.
+ *
+ * Cesta: matchRegistration/MatchRegistrationInfo.css
+ * Generováno: 2026-03-04
+ */
 .match-reg-info {
     display: flex;
     flex-wrap: wrap;
@@ -7,26 +23,26 @@
     margin-top: 1rem;
 }
 
-/* jednotlivý sloupec */
+
 .match-reg-team-col {
     flex: 1;
     border: 1px solid #aaa7a7;
     border-radius: 0.5rem;
-    padding: 0.8rem;
+    padding: 0.5rem;
     background: #fafafa;
-    
+
 }
 
-/* hlavička sloupce – ikona + počet */
+
 .match-reg-team-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.75rem;
-    
+
 }
 
-/* ikona týmu – vlastní className, aby se to nebilo s .team-icon jinde */
+
 .match-reg-team-icon-dark {
     font-size: 32px;
     flex-shrink: 0;
@@ -38,26 +54,26 @@
     flex-shrink: 0;
 }
 
-/* počet hráčů */
+
 .match-reg-team-count {
     font-weight: bold;
 }
 
-/* seznam hráčů pod sebou */
+
 .match-reg-player-list {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-/* každý hráč na vlastní řádek */
+
 .match-reg-player-item {
     display: block;
     padding: 0;
     margin: 0;
 }
 
-/* text pro prázdný seznam */
+
 .match-reg-player-empty {
     color: #888;
     font-style: italic;
@@ -68,36 +84,36 @@
     width: 100%;
 }
 
-/*REGISTERED */
+
 .match-registered-r {
     color: #018520;
 }
 
-/*  UNREGISTERED */
+
 .match-unregistered-r {
     color: #f17108;
 }
 
-/*  EXCUSED */
+
 .match-excused-r {
     color: #ffc107;
 }
 
-/*  RESERVED */
+
 .match-reserved-r {
 color: #0d6efd;
 }
 
-/*  NO_RESPONSE */
+
 .match-no-response-r {
 color: #ffc107;
 }
 
-/*  NO_EXCUSED */
+
 .match-no-excused-r {
     color: #dc3545;
 }
-/*  SUBSTITUTED */
+
 .match-substituted-r {
     color: #ffc107;
 }
@@ -105,7 +121,7 @@ color: #ffc107;
 .match-reg-switch-btn .match-reg-player-name {
     font-weight: 700;
     font-size: 1.05rem;
-    /* nebo 1.1rem jak se ti bude líbit */
+
 }
 
 @media (max-width: 768px) {
@@ -113,4 +129,8 @@ color: #ffc107;
         flex-direction: column;
     }
 }
-
+@media (max-width: 576px) {
+    .card {
+        padding: 0.3rem;
+    }
+}

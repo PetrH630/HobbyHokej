@@ -3,6 +3,15 @@ import MatchHeader from "../matches/MatchHeader";
 import AdminMatchInfo from "../admin/AdminMatchInfo";
 import { useMatchDetail } from "../../hooks/useMatchDetail";
 
+/**
+ * AdminMatchDetailInline
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * Props:
+ * @param {number} props.matchId Identifikátor zápasu, pro který se provádí akce nebo načítají data.
+ */
+
 const AdminMatchDetailInline = ({ matchId }) => {
     const { match, loading, error, reload } = useMatchDetail(matchId);
 

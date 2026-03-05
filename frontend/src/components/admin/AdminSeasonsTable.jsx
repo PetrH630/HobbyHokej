@@ -1,6 +1,19 @@
 // src/components/admin/AdminSeasonsTable.jsx
 import AdminSeasonCard from "./AdminSeasonCard";
 
+/**
+ * AdminSeasonsTable
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {Object} props.seasons vstupní hodnota komponenty.
+ * @param {boolean} props.loading Příznak, že probíhá načítání dat a UI má zobrazit stav načítání.
+ * @param {string} props.error Chybová zpráva určená k zobrazení uživateli.
+ * @param {Function} props.onEdit vstupní hodnota komponenty.
+ * @param {Object} props.onSetActive vstupní hodnota komponenty.
+ */
+
 const AdminSeasonsTable = ({
     seasons,
     loading,

@@ -25,6 +25,20 @@ const statusTextMap = {
     APPROVED: "schváleno",
 };
 
+/**
+ * AdminPlayerRow
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * Props:
+ * @param {import("../../types/dto").PlayerDTO} props.player Data hráče používaná pro zobrazení nebo administraci.
+ * @param {Function} props.onApprove vstupní hodnota komponenty.
+ * @param {Function} props.onReject vstupní hodnota komponenty.
+ * @param {Function} props.onEdit vstupní hodnota komponenty.
+ * @param {Function} props.onDelete vstupní hodnota komponenty.
+ * @param {Function} props.onChangeUser vstupní hodnota komponenty.
+ */
+
 const AdminPlayerRow = ({
     player,
     onApprove,

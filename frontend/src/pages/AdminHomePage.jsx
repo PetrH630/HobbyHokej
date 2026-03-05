@@ -10,6 +10,16 @@ import { useAuth } from "../hooks/useAuth";
 import { useNotifications } from "../hooks/useNotifications";
 import AdminSpecialNotificationModal from "../components/notifications/AdminSpecialNotificationModal";
 
+/**
+ * AdminHomePage
+ *
+ * zápas registrace – Bootstrap modal.
+ *
+ * Vedlejší efekty:
+ * - může provádět navigaci v aplikaci
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const AdminHomePage = () => {
     const navigate = useNavigate();
     const { user } = useAuth();

@@ -14,6 +14,18 @@ const hasAnyDemoItems = (demo) => {
     return (demo.emails?.length ?? 0) > 0 || (demo.sms?.length ?? 0) > 0;
 };
 
+/**
+ * ForgottenPasswordResetPage
+ *
+ * Bootstrap modal.
+ *
+ * Vedlejší efekty:
+ * - při zobrazení registruje a po zavření uklízí event listenery nebo synchronizuje stav
+ * - může provádět navigaci v aplikaci
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const ForgottenPasswordResetPage = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();

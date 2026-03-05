@@ -1,4 +1,3 @@
-// src/hooks/usePlayerSettings.js
 import { useEffect, useState, useCallback } from "react";
 import {
     getCurrentPlayerSettings,
@@ -25,6 +24,11 @@ const emptySettings = {
     possibleChangePlayerPosition: false,
 };
 
+/**
+ * usePlayerSettings
+ *
+ * Hook pro načtení a uložení uživatelských nastavení vztahujících se k hráči (např. preferované pozice, notifikace).
+ */
 export const usePlayerSettings = (playerId = null) => {
     const [settings, setSettings] = useState(emptySettings);
     const [loading, setLoading] = useState(true);

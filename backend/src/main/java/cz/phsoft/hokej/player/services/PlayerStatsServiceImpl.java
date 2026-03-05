@@ -1,20 +1,23 @@
 package cz.phsoft.hokej.player.services;
 
 import cz.phsoft.hokej.match.entities.MatchEntity;
-import cz.phsoft.hokej.season.services.CurrentSeasonService;
-import cz.phsoft.hokej.registration.services.MatchRegistrationService;
-import cz.phsoft.hokej.season.services.SeasonService;
-import cz.phsoft.hokej.player.entities.PlayerEntity;
-import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
-import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.match.enums.MatchResult;
 import cz.phsoft.hokej.match.repositories.MatchRepository;
-import cz.phsoft.hokej.player.repositories.PlayerRepository;
-import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
-import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.player.dto.PlayerMatchResultDTO;
 import cz.phsoft.hokej.player.dto.PlayerStatsDTO;
+import cz.phsoft.hokej.player.entities.PlayerEntity;
+import cz.phsoft.hokej.player.enums.Team;
+import cz.phsoft.hokej.player.exceptions.PlayerNotFoundException;
+import cz.phsoft.hokej.player.repositories.PlayerRepository;
+import cz.phsoft.hokej.registration.dto.MatchRegistrationDTO;
+import cz.phsoft.hokej.registration.enums.PlayerMatchStatus;
+import cz.phsoft.hokej.registration.services.MatchRegistrationService;
+import cz.phsoft.hokej.season.services.CurrentSeasonService;
+import cz.phsoft.hokej.season.services.SeasonService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +128,8 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
             registeredByTeam.put(t, 0);
         }
 
+        List<PlayerMatchResultDTO> registeredMatchResults = new ArrayList<>();
+
         if (availableMatches.isEmpty()) {
             statsDTO.setRegisteredByTeam(registeredByTeam);
             return statsDTO;
@@ -168,6 +173,21 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
                 if (team != null) {
                     registeredByTeam.merge(team, 1, Integer::sum);
                 }
+
+                MatchResult result = match.getScore().getResult();
+                Team winner = match.getScore().getWinner();
+
+                PlayerMatchResultDTO item = new PlayerMatchResultDTO();
+                item.setMatchId(match.getId());
+                item.setPlayerTeam(team);
+                item.setResult(result);
+                item.setScoreDark(match.getScore().getDark());
+                item.setScoreLight(match.getScore().getLight());
+
+                item.setDraw(result == MatchResult.DRAW);
+                item.setPlayerWon(team != null && winner != null && winner == team);
+
+                registeredMatchResults.add(item);
             }
         }
 
@@ -179,6 +199,7 @@ public class PlayerStatsServiceImpl implements PlayerStatsService {
         statsDTO.setNoResponse(counts.getOrDefault(PlayerMatchStatus.NO_RESPONSE, 0));
         statsDTO.setNoExcused(counts.getOrDefault(PlayerMatchStatus.NO_EXCUSED, 0));
         statsDTO.setRegisteredByTeam(registeredByTeam);
+        statsDTO.setRegisteredMatchResults(registeredMatchResults);
 
         return statsDTO;
     }

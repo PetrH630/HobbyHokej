@@ -6,6 +6,17 @@ import { useNavigate, Link } from "react-router-dom";
 import usePostLoginRedirect from "../hooks/usePostLoginRedirect";
 import "../App.css";
 
+/**
+ * LoginPage
+ *
+ * registrace – UI komponenta.
+ *
+ * Vedlejší efekty:
+ * - může provádět navigaci v aplikaci
+ * - načítá nebo odesílá data přes API
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const LoginPage = () => {
     const navigate = useNavigate();
     const { updateUser } = useAuth();
@@ -49,7 +60,7 @@ const LoginPage = () => {
                         <h5 className="text-center mb-3">přístupy:</h5>
                         <p>
                             admin@example.com - Role Admin<br />
-                            "Administrator123"
+                            "Admin123"
                         </p>
                         <p>
                             player1@example.com - Role Manažer<br />

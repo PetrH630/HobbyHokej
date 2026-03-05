@@ -1,4 +1,3 @@
-// src/hooks/useUserProfile.js
 import { useEffect, useState } from "react";
 import { userApi } from "../api/userApi";
 
@@ -6,6 +5,11 @@ import { userApi } from "../api/userApi";
  * Práce s profilem přihlášeného uživatele (AppUserDTO).
  *
  * Načítá /api/users/me a ukládá přes /api/users/me/update.
+ */
+/**
+ * useUserProfile
+ *
+ * Hook pro načtení a uložení profilu přihlášeného uživatele (uživatelský účet, nikoliv hráčský profil).
  */
 export const useUserProfile = () => {
     const [profile, setProfile] = useState(null); // AppUserDTO

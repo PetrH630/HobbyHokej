@@ -3,6 +3,21 @@ import { useEffect, useState } from "react";
 import { useGlobalModal } from "../../hooks/useGlobalModal";
 
 
+/**
+ * AdminUserEditModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Při otevření blokuje scroll pozadí pomocí useGlobalModal.
+ *
+ * Props:
+ * @param {import("../../types/dto").AppUserDTO} props.user Data uživatele používaná ve správě účtů nebo nastavení.
+ * @param {boolean} props.show určuje, zda je dialog otevřený.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {Function} props.onSave vstupní hodnota komponenty.
+ * @param {boolean} props.saving Příznak, že probíhá ukládání a akce mají být dočasně blokovány.
+ */
+
 const AdminUserEditModal = ({ user, show, onClose, onSave, saving }) => {
   
 
@@ -42,7 +57,12 @@ const AdminUserEditModal = ({ user, show, onClose, onSave, saving }) => {
         });
     };
 
-    const validate = () => {
+    
+/**
+ * Prověří povinná pole a vrátí textovou chybu nebo null pro validní stav.
+ */
+
+const validate = () => {
         const errs = {};
 
         if (!values.name || !values.name.trim()) {
@@ -60,7 +80,12 @@ const AdminUserEditModal = ({ user, show, onClose, onSave, saving }) => {
         return errs;
     };
 
-    const handleSubmit = (e) => {
+    
+/**
+ * Zpracuje odeslání formuláře a zavolá příslušný callback nadřazené komponenty.
+ */
+
+const handleSubmit = (e) => {
         e.preventDefault();
 
         const validationErrors = validate();
@@ -80,7 +105,12 @@ const AdminUserEditModal = ({ user, show, onClose, onSave, saving }) => {
         onSave(payload);
     };
 
-    const handleClose = () => {
+    
+/**
+ * Zajistí konzistentní zavření modalu a vrácení lokálního stavu do výchozího nastavení.
+ */
+
+const handleClose = () => {
         if (!saving) {
             onClose();
         }

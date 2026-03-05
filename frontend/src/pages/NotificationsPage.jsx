@@ -3,6 +3,13 @@ import { useNotifications } from "../hooks/useNotifications";
 import NotificationsList from "../components/notifications/NotificationsList";
 import BackButton from "../components/BackButton";
 
+/**
+ * NotificationsPage
+ *
+ * UI komponenta.
+ *
+ * @param {Object} props vstupní hodnoty komponenty
+ */
 const NotificationsPage = () => {
     const {
         notifications,

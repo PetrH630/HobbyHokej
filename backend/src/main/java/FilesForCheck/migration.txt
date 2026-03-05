@@ -83,6 +83,7 @@ CREATE TABLE `forgotten_password_reset_token_entity` (
   `user_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- >>> UPRAVENO â€“ pĹ™idĂˇno score_light / score_dark <<<
 CREATE TABLE `matches` (
   `id` bigint(20) NOT NULL,
   `cancel_reason` enum('NOT_ENOUGH_PLAYERS','TECHNICAL_ISSUE','WEATHER','ORGANIZER_DECISION','OTHER') DEFAULT NULL,
@@ -103,10 +104,13 @@ CREATE TABLE `matches` (
   ) NOT NULL,
   `max_players` int(11) NOT NULL,
   `price` int(11) NOT NULL,
+  `score_light` int(11) DEFAULT NULL,
+  `score_dark` int(11) DEFAULT NULL,
   `timestamp` datetime(6) NOT NULL,
   `season_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- >>> UPRAVENO â€“ pĹ™idĂˇno score_light / score_dark <<<
 CREATE TABLE `matches_history` (
   `id` bigint(20) NOT NULL,
   `action` varchar(255) NOT NULL,
@@ -131,6 +135,8 @@ CREATE TABLE `matches_history` (
   `max_players` int(11) NOT NULL,
   `original_timestamp` datetime(6) NOT NULL,
   `price` int(11) NOT NULL,
+  `score_light` int(11) DEFAULT NULL,
+  `score_dark` int(11) DEFAULT NULL,
   `season_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -536,6 +542,8 @@ BEGIN
          description,
          max_players,
          price,
+         score_light,
+         score_dark,
          match_status,
          match_mode,
          cancel_reason,
@@ -552,13 +560,15 @@ BEGIN
          NEW.description,
          NEW.max_players,
          NEW.price,
+         NEW.score_light,
+         NEW.score_dark,
          NEW.match_status,
          NEW.match_mode,
          NEW.cancel_reason,
          NEW.season_id,
          NEW.created_by_user_id,
          NEW.last_modified_by_user_id);
-END;
+END
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_06__trg_match_delete.sql
@@ -577,6 +587,8 @@ BEGIN
          description,
          max_players,
          price,
+         score_light,
+         score_dark,
          match_status,
          match_mode,
          cancel_reason,
@@ -593,13 +605,15 @@ BEGIN
          OLD.description,
          OLD.max_players,
          OLD.price,
+         OLD.score_light,
+         OLD.score_dark,
          OLD.match_status,
          OLD.match_mode,
          OLD.cancel_reason,
          OLD.season_id,
          OLD.created_by_user_id,
          OLD.last_modified_by_user_id);
-END;
+END
 
 -----
 # Soubor: C:\ProjektyPrace\HobbyHokej\backend\target\classes\db\migration\V5_07__trg_match_reg_insert.sql

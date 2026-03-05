@@ -8,6 +8,11 @@ import {
 } from "react-icons/fa";
 
 
+/**
+ * StatusIcons
+ *
+ * Soubor obsahuje sdílené UI pomocné prvky používané napříč aplikací.
+ */
 export const RegisteredIcon = (props) => <FaCheck {...props} 
     fill="currentColor"
     stroke="black"

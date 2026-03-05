@@ -1,15 +1,17 @@
-// src/components/MatchInfo.jsx
 import { useState } from "react";
 import MatchRegistrationInfo from "../MatchRegistration/MatchRegistrationInfo";
 import RoleGuard from "../RoleGuard";
 import { useNotification } from "../../context/NotificationContext";
 import {
     markNoExcusedAdmin,
-    cancelNoExcusedAdmin, 
+    cancelNoExcusedAdmin,
 } from "../../api/matchRegistrationApi";
 import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
 import "./MatchInfo.css";
-
+import {    
+    TeamDarkIcon,
+    TeamLightIcon,
+} from "../../icons";
 
 const parseDateTime = (dt) => {
     if (!dt) return null;
@@ -17,7 +19,16 @@ const parseDateTime = (dt) => {
     const d = new Date(safe);
     return Number.isNaN(d.getTime()) ? null : d;
 };
- 
+
+/**
+ * MatchInfo
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ * @param {Function} props.onRefresh Callback, který se volá po úspěšné změně pro znovunačtení dat.
+ */
 const MatchInfo = ({ match, onRefresh }) => {
     const { showNotification } = useNotification();
     const { currentPlayer } = useCurrentPlayer();
@@ -26,7 +37,6 @@ const MatchInfo = ({ match, onRefresh }) => {
     const [showCancelNoExcuseModal, setShowCancelNoExcuseModal] =
         useState(false);
     const [saving, setSaving] = useState(false);
-
 
 
     const matchDate = parseDateTime(match?.dateTime);
@@ -39,30 +49,25 @@ const MatchInfo = ({ match, onRefresh }) => {
         DRAW: "Remíza",
     };
 
-    // skóre je považováno za zadané, pokud nejsou null/undefined
+
     const hasScore =
         match?.scoreDark !== null &&
         match?.scoreDark !== undefined &&
         match?.scoreLight !== null &&
         match?.scoreLight !== undefined;
 
-    // volitelně – pokud ti backend posílá nějaký text výsledku
+
     const resultKey = match.result || null;
     const resultLabel = resultKey
         ? matchResultLabelMap[resultKey] ?? resultKey
         : null;
-    
-    // seznamy hráčů pro výběr
+
+
     const registeredPlayers = match?.registeredPlayers ?? [];
     const noExcusedPlayers = match?.noExcusedPlayers ?? [];
 
-    /**
-     * Callback volaný z MatchRegistrationInfo po úspěšné změně týmu.
-     *
-     * @param {string} targetTeam - cílový tým ("DARK" / "LIGHT")
-     * @param {object} player - hráč, kterému byl tým změněn
-     * @param {object} updatedRegistration - aktualizovaná registrace z backendu
-     */
+
+    
     const handleSwitchTeam = async (targetTeam, player, updatedRegistration) => {
         console.log("Team successfully changed:", {
             targetTeam,
@@ -91,6 +96,7 @@ const MatchInfo = ({ match, onRefresh }) => {
         }
     };
 
+    
     const handleMarkNoExcuse = async (playerId, adminNote) => {
         try {
             setSaving(true);
@@ -117,6 +123,7 @@ const MatchInfo = ({ match, onRefresh }) => {
         }
     };
 
+    
     const handleCancelNoExcuse = async (playerId, excuseNote) => {
         try {
             setSaving(true);
@@ -148,10 +155,8 @@ const MatchInfo = ({ match, onRefresh }) => {
 
     return (
         <div className="card">
-            {/* přidal jsem vlastní třídu match-info-body */}
-            <div className="card-body match-info-body">
-                {/* HLAVIČKA – vlevo info o zápase, vpravo admin tlačítka */}
-                <div className="d-flex justify-content-between align-items-start mb-3">
+                <div className="card-body match-info-body">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         {match.description && (
                             <p className="card-text mb-2">
@@ -166,17 +171,26 @@ const MatchInfo = ({ match, onRefresh }) => {
                         </p>
 
                         <p className="card-text mb-2">
-                            <strong>Dark: </strong>
+                            <TeamDarkIcon className="match-reg-team-icon-dark" />
                             {match.inGamePlayersDark} /{" "}
-                            <strong>Light: </strong>
-                            {match.inGamePlayersLight}
+                            {match.inGamePlayersLight} <TeamLightIcon className="match-reg-team-icon-light" /> 
+                            
                         </p>
                         {isPastMatch && hasScore && (
-                            <p className="card-text mb-2">
+                            <p className="card-text mb-2"> 
                                 <strong>Skóre: </strong>
                                 {match.scoreDark} : {match.scoreLight}
                                 {resultLabel && (
-                                    <span className="ms-1">– {resultLabel}</span>
+                                    <span className="ms-1">
+                                        – {" výhráli "}
+                                        {resultLabel === "výhra DARK" ? (
+                                            <TeamDarkIcon className="match-reg-team-icon-dark" />
+                                        ) : resultLabel === "výhra LIGHT" ? (
+                                            <TeamLightIcon className="match-reg-team-icon-light" />
+                                        ) : resultLabel === "DRAW" ? (
+                                                    Remíza
+                                        ) : null}
+                                    </span>
                                 )}
                             </p>
                         )}
@@ -188,7 +202,7 @@ const MatchInfo = ({ match, onRefresh }) => {
                                 {match.pricePerRegisteredPlayer.toFixed(0)} Kč
                             </p>
                         )}
-                       
+
                     </div>
                 </div>
 
@@ -210,7 +224,6 @@ const MatchInfo = ({ match, onRefresh }) => {
                 />
             )}
 
-            {/* MODAL – ZRUŠIT NEOMLUVENÍ */}
             {showCancelNoExcuseModal && (
                 <CancelNoExcuseModal
                     match={match}
@@ -231,6 +244,7 @@ const NoExcuseModal = ({ match, saving, onConfirm, onClose }) => {
     const [note, setNote] = useState("Nepřišel bez omluvy");
     const registered = match?.registeredPlayers ?? [];
 
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!selectedPlayerId) return;
@@ -339,6 +353,7 @@ const CancelNoExcuseModal = ({ match, saving, onConfirm, onClose }) => {
 
     const noExcused = match?.noExcusedPlayers ?? [];
 
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!selectedPlayerId) return;

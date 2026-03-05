@@ -1,4 +1,3 @@
-// src/hooks/useAllPlayersAdmin.js
 import { useEffect, useState } from "react";
 import { getAllPlayersAdmin } from "../api/playerApi";
 
@@ -11,6 +10,11 @@ import { getAllPlayersAdmin } from "../api/playerApi";
  *  - loading: true, dokud se načítá
  *  - error: text chyby nebo null
  *  - reload(): znovu načte data (po approve/reject/update/delete)
+ */
+/**
+ * useAllPlayersAdmin
+ *
+ * Admin hook pro načtení seznamu hráčů (bez vazby na uživatele) pro správu v administraci.
  */
 export const useAllPlayersAdmin = () => {
     const [players, setPlayers] = useState([]);

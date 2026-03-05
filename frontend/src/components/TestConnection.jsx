@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-
+/**
+ * App
+ *
+ * React komponenta používaná ve frontend aplikaci.
+ *
+ * @param {Object} props vstupní hodnoty komponenty.
+ */
 const App = () => {
   const [message, setMessage] = useState("");
 

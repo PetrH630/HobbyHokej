@@ -1,4 +1,3 @@
-// src/components/matches/UpcomingMatches.jsx
 import { useEffect, useRef } from "react";
 import { useMyUpcomingMatches } from "../../hooks/useMyUpcomingMatches";
 import { useCurrentPlayer } from "../../hooks/useCurrentPlayer";
@@ -7,6 +6,13 @@ import { useNavigate } from "react-router-dom";
 
 import "./UpcomingMatches.css";
 
+/**
+ * UpcomingMatches
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * @param {Object} props vstupní hodnoty komponenty.
+ */
 const UpcomingMatches = () => {
   const { matches, loading, error } = useMyUpcomingMatches();
   const { currentPlayer } = useCurrentPlayer();
@@ -20,13 +26,13 @@ const UpcomingMatches = () => {
     if (!currentPlayer) return;
     if (!Array.isArray(matches) || matches.length === 0) return;
 
-    // jen jednou po načtení
+
     if (hasAutoScrolledRef.current) return;
 
     const isSmallDevice = window.matchMedia("(max-width: 767.98px)").matches;
     if (!isSmallDevice) return;
 
-    // auto-scroll jen pokud je uživatel "nahoře" (nezlobíme, když už scrolluje)
+
     const isNearTop = window.scrollY < 200;
     if (!isNearTop) return;
 

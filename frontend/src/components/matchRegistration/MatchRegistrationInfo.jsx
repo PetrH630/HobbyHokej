@@ -1,4 +1,3 @@
-// src/components/MatchRegistration/MatchRegistrationInfo.jsx
 import React, { useState, useEffect } from "react";
 import {
     RegisteredIcon,
@@ -19,6 +18,16 @@ import { changeMyRegistrationTeam } from "../../api/matchRegistrationApi";
 import * as bootstrap from "bootstrap";
 import PositionModalView from "./PositionModalView";
 
+/**
+ * MatchRegistrationInfo
+ *
+ * Komponenta související se zápasy, registracemi a jejich zobrazením.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ * @param {import("../../types/dto").PlayerDTO} props.currentPlayer Aktuálně zvolený hráč (přihlášený nebo vybraný v aplikaci).
+ * @param {Object} props.onSwitchTeam callback pro předání akce do nadřazené vrstvy.
+ */
 const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
     const darkPlayers = match?.registeredDarkPlayers ?? [];
     const lightPlayers = match?.registeredLightPlayers ?? [];
@@ -32,13 +41,13 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
 
     const registered = match?.registeredPlayers ?? [];
 
-    // Zkusíme pokrýt různé možné názvy ID
+
     const currentPlayerId =
         currentPlayer?.id ?? currentPlayer?.playerId ?? null;
     const currentUserId = currentPlayer?.userId ?? null;
 
     const isSamePlayer = (p) => {
-        // sjednocení typů – string/number
+
         const pId = p.id ?? p.playerId ?? null;
         const pUserId = p.userId ?? null;
 
@@ -55,7 +64,6 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
         return sameById || sameByUserId;
     };
 
-    // --- NOVÉ: výpočet, zda je zápas v minulosti a zda má hráč roli PLAYER ---
 
     const parseDateTime = (dt) => {
         if (!dt) return null;
@@ -70,31 +78,23 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
 
     const isSwitchDisabled = isPastMatch;
 
-    /**
-     * Stav pro potvrzení změny týmu.
-     * - matchId: ID zápasu
-     * - currentTeam: aktuální tým ("DARK" / "LIGHT")
-     * - targetTeam: cílový tým (opačný než currentTeam)
-     */
+
     const [pendingTeamChange, setPendingTeamChange] = useState(null);
 
-    /**
-     * Stav pro SuccessModal.
-     */
+
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
 
-    /**
-     * NOVÉ: Stav pro modal s rozložením hráčů.
-     */
+
     const [showLayoutModal, setShowLayoutModal] = useState(false);
     const [layoutFocusTeam, setLayoutFocusTeam] = useState(null);
 
+    
     const handleSwitchTeamClick = (team, player) => {
-        // Tlačítko je viditelné jen pro "já", ale pro jistotu:
+
         if (!currentPlayer || !match) return;
 
-        // bezpečnostně: když je to v minulosti a role je PLAYER, nic nedělat
+
         if (isSwitchDisabled) return;
 
         const matchId = match.id ?? match.matchId ?? null;
@@ -114,6 +114,7 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
         });
     };
 
+    
     const handleConfirmChangeTeam = async () => {
         if (!pendingTeamChange) return;
 
@@ -126,21 +127,23 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
             setSuccessMessage(`Tým byl úspěšně změněn na ${targetTeam}.`);
             setShowSuccessModal(true);
 
-            // Volitelně: callback pro rodiče (např. refetch dat)
+
             if (typeof onSwitchTeam === "function") {
                 onSwitchTeam(targetTeam, currentPlayer, updatedRegistration);
             }
         } catch (error) {
             console.error("Chyba při změně týmu:", error);
-            // Později můžeš nahradit globálním toastem
+
             alert("Nepodařilo se změnit tým. Zkus to prosím znovu.");
         }
     };
 
+    
     const handleCloseConfirmModal = () => {
         setPendingTeamChange(null);
     };
 
+    
     const handleCloseSuccessModal = () => {
         setShowSuccessModal(false);
     };
@@ -155,17 +158,15 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
     }, [match]);
 
 
-
-
     return (
         <>
             <div className="match-reg-info">
-                {/* DARK */}
+
                 <div className="match-reg-team-col">
                     <div className="match-reg-team-header">
                         <TeamDarkIcon className="match-reg-team-icon-dark" />
                         <span className="match-reg-team-count">
-                            {match.inGamePlayersDark}
+                            {match.inGamePlayersDark} {" / "} {match.maxPlayers / 2}
                         </span>
 
                         {/* NOVÉ: tlačítko pro zobrazení rozložení hráčů */}
@@ -173,9 +174,7 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                             type="button"
                             className="btn btn-sm btn-outline-secondary ms-2 match-reg-layout-btn"
                             onClick={() => { setLayoutFocusTeam("DARK"); setShowLayoutModal(true); }}
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="top"
-                            title="Zobrazit rozložení hráčů">
+                            >
                             Grafika
                         </button>
                     </div>
@@ -198,17 +197,8 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                                         <button
                                             type="button"
                                             className="btn btn-sm btn-outline-primary w-100 text-start match-reg-switch-btn"
-                                            onClick={() =>
-                                                handleSwitchTeamClick("DARK", p)
-                                            }
-                                            disabled={isSwitchDisabled}
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            title={
-                                                isSwitchDisabled
-                                                    ? "Tým nelze měnit po odehrání zápasu"
-                                                    : "Klikni pro změnu týmu"
-                                            }
+                                            onClick={() => handleSwitchTeamClick("DARK", p)}
+                                            disabled
                                         >
                                             <span className="match-reg-player-name">
                                                 {p.fullName}{" "}
@@ -228,7 +218,7 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                     <div className="match-reg-team-header">
                         <TeamLightIcon className="match-reg-team-icon-light" />
                         <span className="match-reg-team-count">
-                            {match.inGamePlayersLight}
+                            {match.inGamePlayersLight} {" / "} {match.maxPlayers / 2}
                         </span>
 
                         {/* NOVÉ: tlačítko pro zobrazení rozložení hráčů */}
@@ -236,9 +226,7 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                             type="button"
                             className="btn btn-sm btn-outline-secondary ms-2 match-reg-layout-btn"
                             onClick={() => { setLayoutFocusTeam("LIGHT"); setShowLayoutModal(true); }}
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="top"
-                            title="Zobrazit rozložení hráčů">
+                            >
                             Grafika
                         </button>
                     </div>
@@ -261,20 +249,8 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                                         <button
                                             type="button"
                                             className="btn btn-sm btn-outline-primary w-100 text-start match-reg-switch-btn"
-                                            onClick={() =>
-                                                handleSwitchTeamClick(
-                                                    "LIGHT",
-                                                    p
-                                                )
-                                            }
-                                            disabled={isSwitchDisabled}
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            title={
-                                                isSwitchDisabled
-                                                    ? "Tým nelze měnit po odehrání zápasu"
-                                                    : "Klikni pro změnu týmu"
-                                            }
+                                            onClick={() => handleSwitchTeamClick("LIGHT", p)}
+                                            disabled
                                         >
                                             <span className="match-reg-player-name">
                                                 {p.fullName}{" "}
@@ -293,7 +269,6 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                 <h5>Ostatní statusy:</h5>
                 <div className="match-reg-other-col"></div>
 
-                {/* Odhlášení */}
                 <div className="match-reg-team-col">
                     <div className="match-reg-team-header">
                         <UnregisteredIcon className="match-unregistered-r" />
@@ -320,7 +295,6 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                     </ul>
                 </div>
 
-                {/* Omluvení */}
                 <div className="match-reg-team-col">
                     <div className="match-reg-team-header">
                         <ExcusedIcon className="match-excused-r" />
@@ -347,7 +321,6 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                     </ul>
                 </div>
 
-                {/* Náhradníci */}
                 <div className="match-reg-team-col">
                     <div className="match-reg-team-header">
                         <ReservedIcon className="match-reserved-r" />
@@ -403,7 +376,6 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                     </ul>
                 </div>
 
-                {/* Bez reakce */}
                 <div className="match-reg-team-col">
                     <div className="match-reg-team-header">
                         <NoResponseIcon className="match-no-response-r" />
@@ -431,7 +403,6 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                     </ul>
                 </div>
 
-                {/* Bez omluvy */}
                 <div className="match-reg-team-col">
                     <div className="match-reg-team-header">
                         <NoExcusedIcon className="match-no-excused-r" />
@@ -472,7 +443,6 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                 onClose={handleCloseConfirmModal}
             />
 
-            {/* Success modal po úspěšné změně */}
             <SuccessModal
                 show={showSuccessModal}
                 title="Tým změněn"
@@ -481,7 +451,6 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                 closeLabel="OK"
             />
 
-            {/* NOVÉ: Info modal pro rozložení hráčů (zatím placeholder) */}
             <ConfirmActionModal
                 show={showLayoutModal}
                 title="Rozložení hráčů"
@@ -499,6 +468,7 @@ const MatchRegistrationInfo = ({ match, currentPlayer, onSwitchTeam }) => {
                 onClose={() => setShowLayoutModal(false)}
                 match={match}
                 focusTeam={layoutFocusTeam}
+                currentPlayer={currentPlayer}
             />
         </>
     );

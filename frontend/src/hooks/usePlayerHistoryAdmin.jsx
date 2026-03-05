@@ -1,7 +1,12 @@
-// src/hooks/usePlayerHistoryAdmin.jsx
 import { useEffect, useState } from "react";
 import { getPlayerHistoryAdmin } from "../api/playerApi";
 
+/**
+ * usePlayerHistoryAdmin
+ *
+ * Admin hook pro načtení historie změn hráče (audit).
+ * Používá se v administraci při řešení problémů a dohledávání změn v profilu hráče.
+ */
 export const usePlayerHistoryAdmin = (playerId) => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);

@@ -1,5 +1,5 @@
 ﻿Balíček (složka): email
-Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\email
+Cesta: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\email
 
 Seznam souborů:
 EmailMessageBuilder.java
@@ -9,9 +9,9 @@ package-info.java
 
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\email\EmailMessageBuilder.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\email\EmailMessageBuilder.java
 -----
-package cz.phsoft.hokej.models.services.email;
+package cz.phsoft.hokej.notifications.email;
 
 import cz.phsoft.hokej.user.entities.AppUserEntity;
 import cz.phsoft.hokej.match.entities.MatchEntity;
@@ -30,41 +30,47 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 /**
- * Builder pro sestavovĂˇnĂ­ obsahu emailovĂ˝ch notifikacĂ­.
+ * Komponenta pro sestavovĂˇnĂ­ obsahu e-mailovĂ˝ch notifikacĂ­.
  *
- * TĹ™Ă­da slouĹľĂ­ k centralizaci veĹˇkerĂ˝ch textĹŻ emailovĂ˝ch zprĂˇv
- * pouĹľĂ­vanĂ˝ch v aplikaci. Na zĂˇkladÄ› typu notifikace a kontextu
- * sestavuje pĹ™edmÄ›t a tÄ›lo emailu, vÄŤetnÄ› rozhodnutĂ­, zda se jednĂˇ
- * o HTML nebo plain text zprĂˇvu.
+ * TĹ™Ă­da centralizuje texty a strukturu vĹˇech e-mailovĂ˝ch zprĂˇv
+ * pouĹľĂ­vanĂ˝ch v aplikaci. Na zĂˇkladÄ› NotificationType a kontextu
+ * sestavuje pĹ™edmÄ›t a tÄ›lo zprĂˇvy a urÄŤuje, zda se jednĂˇ o HTML
+ * nebo textovĂ˝ obsah.
  *
  * OdpovÄ›dnost tĹ™Ă­dy:
- * - sestavenĂ­ pĹ™edmÄ›tu a tÄ›la emailu podle NotificationType,
- * - rozliĹˇenĂ­ cĂ­lovĂ©ho pĹ™Ă­jemce (uĹľivatel, hrĂˇÄŤ, manaĹľer),
- * - sjednocenĂ­ formĂˇtu a struktury emailovĂ˝ch zprĂˇv.
+ * - sestavenĂ­ pĹ™edmÄ›tu a tÄ›la e-mailu,
+ * - rozliĹˇenĂ­ typu pĹ™Ă­jemce (uĹľivatel, hrĂˇÄŤ, manaĹľer),
+ * - sjednocenĂ­ formĂˇtu vĹˇech e-mailovĂ˝ch Ĺˇablon.
  *
  * TĹ™Ă­da neĹ™eĹˇĂ­:
- * - samotnĂ© odesĂ­lĂˇnĂ­ emailĹŻ,
- * - rozhodovĂˇnĂ­, komu mĂˇ bĂ˝t notifikace doruÄŤena,
- * - oprĂˇvnÄ›nĂ­, validaci vstupĹŻ ani naÄŤĂ­tĂˇnĂ­ entit.
+ * - samotnĂ© odesĂ­lĂˇnĂ­ e-mailĹŻ,
+ * - vĂ˝bÄ›r pĹ™Ă­jemcĹŻ,
+ * - bezpeÄŤnostnĂ­ oprĂˇvnÄ›nĂ­,
+ * - perzistenci dat.
  */
 @Component
 public class EmailMessageBuilder {
 
     private final MatchRegistrationRepository registrationRepository;
-
+    /**
+     * VytvĂˇĹ™Ă­ instanci builderu pro e-mailovĂ© zprĂˇvy.
+     *
+     * @param registrationRepository repozitĂˇĹ™ registracĂ­,
+     *                               pouĹľĂ­vanĂ˝ pro vĂ˝poÄŤet poÄŤtu pĹ™ihlĂˇĹˇenĂ˝ch hrĂˇÄŤĹŻ
+     */
     public EmailMessageBuilder(MatchRegistrationRepository registrationRepository) {
         this.registrationRepository = registrationRepository;
     }
 
     /**
-     * DatovĂ˝ nosiÄŤ pro obsah emailovĂ© zprĂˇvy.
+     * DatovĂ˝ nosiÄŤ sestavenĂ©ho e-mailu.
      *
-     * SlouĹľĂ­ jako nĂˇvratovĂˇ hodnota builderu a je nĂˇslednÄ›
-     * pĹ™edĂˇvĂˇna do EmailService k odeslĂˇnĂ­.
+     * SlouĹľĂ­ jako nĂˇvratovĂˇ hodnota builderu
+     * a je nĂˇslednÄ› pĹ™edĂˇn do implementace EmailService.
      *
-     * @param subject pĹ™edmÄ›t emailu
-     * @param body    tÄ›lo emailu
-     * @param html    pĹ™Ă­znak HTML obsahu
+     * @param subject pĹ™edmÄ›t e-mailu
+     * @param body tÄ›lo e-mailu
+     * @param html pĹ™Ă­znak, zda je obsah ve formĂˇtu HTML
      */
     public record EmailContent(String subject, String body, boolean html) {
     }
@@ -176,9 +182,9 @@ public class EmailMessageBuilder {
 
         // logika switch zĹŻstĂˇvĂˇ beze zmÄ›ny
         return switch (type) {
-
+            
             // PLAYER â€“ vazba hrĂˇÄŤe na uĹľivatele
-
+            
             case PLAYER_CREATED -> {
                 String subject = "HrĂˇÄŤ vytvoĹ™en";
 
@@ -280,9 +286,9 @@ public class EmailMessageBuilder {
                 yield new EmailContent(subject, html, true);
             }
 
-
+            
             // USER â€“ udĂˇlosti kolem uĹľivatelskĂ©ho ĂşÄŤtu
-
+            
 
             case USER_CREATED -> {
                 String subject = "UĹľivatel vytvoĹ™en";
@@ -495,9 +501,9 @@ public class EmailMessageBuilder {
                 ? playerEmail
                 : "(neuvedeno)";
         return switch (type) {
-
+            
             // REGISTRATION
-
+            
             case PLAYER_CHANGE_USER -> {
                 String subject = "HrĂˇÄŤ pĹ™iĹ™azen novĂ©mu uĹľivateli";
 
@@ -705,9 +711,9 @@ public class EmailMessageBuilder {
                 yield new EmailContent(subject, html, true);
             }
 
-
+            
             // EXCUSE
-
+            
 
             case PLAYER_EXCUSED -> {
                 String subject = "Omluva ze zĂˇpasu potvrzena";
@@ -751,9 +757,9 @@ public class EmailMessageBuilder {
                 yield new EmailContent(subject, html, true);
             }
 
-
+            
             // MATCH_INFO
-
+            
 
             case MATCH_REMINDER -> {
                 String subject = "PĹ™ipomenutĂ­ zĂˇpasu";
@@ -869,7 +875,10 @@ public class EmailMessageBuilder {
     // PomocnĂ© metody
 
     /**
-     * SestavĂ­ celĂ© jmĂ©no uĹľivatele v bezpeÄŤnĂ© podobÄ›.
+     * VracĂ­ celĂ© jmĂ©no uĹľivatele v bezpeÄŤnĂ© podobÄ›.
+     *
+     * Pokud nenĂ­ k dispozici jmĂ©no ani pĹ™Ă­jmenĂ­,
+     * pouĹľije se e-mail nebo vĂ˝chozĂ­ text.
      */
     private String fullUserName(AppUserEntity user) {
         if (user == null) return "(neznĂˇmĂ˝ uĹľivatel)";
@@ -884,6 +893,9 @@ public class EmailMessageBuilder {
 
     /**
      * VracĂ­ zobrazitelnĂ© jmĂ©no hrĂˇÄŤe.
+     *
+     * Pokud nenĂ­ jmĂ©no k dispozici,
+     * vracĂ­ se vĂ˝chozĂ­ text.
      */
     private String fullPlayerName(PlayerEntity player) {
         if (player == null) return "(neznĂˇmĂ˝ hrĂˇÄŤ)";
@@ -896,13 +908,24 @@ public class EmailMessageBuilder {
     private String safe(String s) {
         return s == null ? "" : s;
     }
-
+    /**
+     * Escapuje zĂˇkladnĂ­ HTML znaky.
+     *
+     * PouĹľĂ­vĂˇ se pro ochranu proti vloĹľenĂ­
+     * nechtÄ›nĂ©ho HTML obsahu do zprĂˇvy.
+     */
     private String escape(String s) {
         if (s == null) return "";
         return s.replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
     }
+    /**
+     * BezpeÄŤnÄ› pĹ™etypuje kontext na oÄŤekĂˇvanĂ˝ typ.
+     *
+     * Pokud kontext neodpovĂ­dĂˇ oÄŤekĂˇvanĂ©mu typu,
+     * vracĂ­ null.
+     */
     @SuppressWarnings("unchecked")
     private <T> T castContext(Object context, Class<T> expected) {
         if (context == null) {
@@ -913,7 +936,11 @@ public class EmailMessageBuilder {
         }
         return (T) context;
     }
-
+    /**
+     * VracĂ­ formĂˇtovanĂ˝ datum a ÄŤas zĂˇpasu.
+     *
+     * Pokud nenĂ­ datum dostupnĂ©, vracĂ­ prĂˇzdnĂ˝ Ĺ™etÄ›zec.
+     */
     private String formatMatchDateTime(MatchEntity match) {
         if (match == null || match.getDateTime() == null) {
             return "";
@@ -922,7 +949,8 @@ public class EmailMessageBuilder {
     }
 
     /**
-     * SpoÄŤĂ­tĂˇ poÄŤet pĹ™ihlĂˇĹˇenĂ˝ch hrĂˇÄŤĹŻ k danĂ©mu zĂˇpasu.
+     * SpoÄŤĂ­tĂˇ poÄŤet hrĂˇÄŤĹŻ registrovanĂ˝ch na zĂˇpas
+     * se statusem REGISTERED.
      */
     private long countRegisteredPlayers(MatchEntity match) {
         if (match == null || match.getId() == null) {
@@ -933,6 +961,12 @@ public class EmailMessageBuilder {
                 PlayerMatchStatus.REGISTERED
         );
     }
+    /**
+     * SestavĂ­ jednoduchou HTML Ĺˇablonu e-mailu.
+     *
+     * PouĹľĂ­vĂˇ jednotnou strukturu obsahujĂ­cĂ­ pozdrav,
+     * hlavnĂ­ obsah a patiÄŤku.
+     */
     private String buildSimpleHtml(String title,
                                    String greeting,
                                    String mainBody,
@@ -961,7 +995,10 @@ public class EmailMessageBuilder {
     }
 
     /**
-     * Z kontextu urÄŤĂ­ aplikaÄŤnĂ­ho uĹľivatele relevantnĂ­ho pro notifikaci.
+     * Z kontextu extrahuje entitu zĂˇpasu.
+     *
+     * Podporuje kontext typu MatchRegistrationEntity,
+     * MatchEntity nebo MatchTimeChangeContext.
      */
     private MatchEntity extractMatch(Object context) {
         if (context instanceof MatchRegistrationEntity reg) {
@@ -975,7 +1012,10 @@ public class EmailMessageBuilder {
         }
         return null;
     }
-
+    /**
+     * Z kontextu extrahuje registraci na zĂˇpas,
+     * pokud je dostupnĂˇ.
+     */
     private MatchRegistrationEntity extractMatchRegistration(Object context) {
         if (context instanceof MatchRegistrationEntity reg) {
             return reg;
@@ -983,11 +1023,13 @@ public class EmailMessageBuilder {
         return null;
     }
     /**
-     * ZjistĂ­ AppUserEntity:
-     * 1) z UserActivationContext (USER_CREATED / USER_ACTIVATED),
-     * 2) z ForgottenPasswordResetContext (forgotten password reset),
-     * 3) pĹ™Ă­mo z AppUserEntity v contextu,
-     * 4) nebo z player.getUser().
+     * Z kontextu urÄŤĂ­ relevantnĂ­ho aplikaÄŤnĂ­ho uĹľivatele.
+     *
+     * Priorita:
+     * 1) UserActivationContext,
+     * 2) ForgottenPasswordResetContext,
+     * 3) pĹ™Ă­mo AppUserEntity,
+     * 4) vazba pĹ™es hrĂˇÄŤe.
      */
     private AppUserEntity resolveUser(PlayerEntity player, Object context) {
         if (context instanceof UserActivationContext uac && uac.user() != null) {
@@ -1015,7 +1057,6 @@ public class EmailMessageBuilder {
         return null;
     }
 
-    // v EmailMessageBuilder.java â€“ nÄ›kam ke konci tĹ™Ă­dy
 
     /**
      * Sestavuje e-mail pro speciĂˇlnĂ­ zprĂˇvu od administrĂˇtora.
@@ -1082,7 +1123,9 @@ public class EmailMessageBuilder {
     // pomocnĂ© metody
     /**
      * VracĂ­ ÄŤitelnĂ˝ popis dĹŻvodu zruĹˇenĂ­ zĂˇpasu.
-     * Pokud nenĂ­ dĹŻvod nastaven, vracĂ­ prĂˇzdnĂ˝ Ĺ™etÄ›zec.
+     *
+     * Pokud dĹŻvod nenĂ­ nastaven,
+     * vracĂ­ prĂˇzdnĂ˝ Ĺ™etÄ›zec.
      */
     private String assignMatchCancelReason(MatchEntity match) {
         if (match == null || match.getCancelReason() == null) {
@@ -1120,59 +1163,65 @@ public class EmailMessageBuilder {
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\email\EmailService.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\email\EmailService.java
 -----
-package cz.phsoft.hokej.models.services.email;
-
+package cz.phsoft.hokej.notifications.email;
 /**
- * RozhranĂ­ definujĂ­cĂ­ kontrakt pro odesĂ­lĂˇnĂ­ emailovĂ˝ch zprĂˇv.
+ * RozhranĂ­ definujĂ­cĂ­ kontrakt pro odesĂ­lĂˇnĂ­ e-mailovĂ˝ch zprĂˇv.
  *
- * SlouĹľĂ­ jako abstrahovanĂˇ vrstva nad konkrĂ©tnĂ­ implementacĂ­
- * emailovĂ©ho providera. UmoĹľĹuje oddÄ›lit business logiku
- * notifikacĂ­ od technickĂ©ho zpĹŻsobu odesĂ­lĂˇnĂ­ emailĹŻ.
+ * SlouĹľĂ­ jako abstraktnĂ­ vrstva nad konkrĂ©tnĂ­m poskytovatelem e-mailovĂ© sluĹľby.
+ * OddÄ›luje business logiku notifikacĂ­ od technickĂ©ho zpĹŻsobu odesĂ­lĂˇnĂ­.
  *
- * Implementace rozhranĂ­:
- * - nesmĂ­ propagovat chyby do business vrstvy,
- * - mĹŻĹľe odesĂ­lat emaily asynchronnÄ›,
- * - mĂˇ fungovat v reĹľimu best-effort.
+ * Implementace:
+ * - nesmĂ­ propagovat vĂ˝jimky do business vrstvy,
+ * - mĹŻĹľe odesĂ­lat zprĂˇvy asynchronnÄ›,
+ * - funguje v reĹľimu best-effort.
  */
 public interface EmailService {
 
     /**
-     * OdeĹˇle jednoduchĂ˝ textovĂ˝ email.
+     * OdeĹˇle jednoduchĂ˝ textovĂ˝ e-mail.
+     *
+     * @param to e-mailovĂˇ adresa pĹ™Ă­jemce
+     * @param subject pĹ™edmÄ›t zprĂˇvy
+     * @param text textovĂ˝ obsah zprĂˇvy
      */
     void sendSimpleEmail(String to, String subject, String text);
 
     /**
-     * OdeĹˇle email s HTML obsahem.
+     * OdeĹˇle e-mail s HTML obsahem.
+     *
+     * @param to e-mailovĂˇ adresa pĹ™Ă­jemce
+     * @param subject pĹ™edmÄ›t zprĂˇvy
+     * @param htmlContent HTML obsah zprĂˇvy
      */
     void sendHtmlEmail(String to, String subject, String htmlContent);
 
     /**
-     * OdeĹˇle textovĂ˝ aktivaÄŤnĂ­ email.
+     * OdeĹˇle aktivaÄŤnĂ­ e-mail v textovĂ© podobÄ›.
      */
     void sendActivationEmail(String to, String greetings, String activationLink);
 
     /**
-     * OdeĹˇle HTML aktivaÄŤnĂ­ email.
+     * OdeĹˇle aktivaÄŤnĂ­ e-mail v HTML podobÄ›.
      */
     void sendActivationEmailHTML(String to, String greetings, String activationLink);
 
     /**
-     * OdeĹˇle textovĂ˝ email o ĂşspÄ›ĹˇnĂ© aktivaci ĂşÄŤtu.
+     * OdeĹˇle potvrzenĂ­ o ĂşspÄ›ĹˇnĂ© aktivaci ĂşÄŤtu v textovĂ© podobÄ›.
      */
     void sendSuccesActivationEmail(String to, String greetings);
 
     /**
-     * OdeĹˇle HTML email o ĂşspÄ›ĹˇnĂ© aktivaci ĂşÄŤtu.
+     * OdeĹˇle potvrzenĂ­ o ĂşspÄ›ĹˇnĂ© aktivaci ĂşÄŤtu v HTML podobÄ›.
      */
     void sendSuccesActivationEmailHTML(String to, String greetings);
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\email\EmailWedosService.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\email\EmailWedosService.java
 -----
-package cz.phsoft.hokej.models.services.email;
+package cz.phsoft.hokej.notifications.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -1186,13 +1235,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementace EmailService pro odesĂ­lĂˇnĂ­ emailĹŻ pĹ™es SMTP (WEDOS).
+ * Implementace EmailService pro odesĂ­lĂˇnĂ­ e-mailĹŻ pĹ™es SMTP server (WEDOS).
  *
- * TĹ™Ă­da zapouzdĹ™uje prĂˇci s JavaMailSenderem a pĹ™edstavuje
- * centrĂˇlnĂ­ mĂ­sto pro veĹˇkerou emailovou komunikaci aplikace.
+ * TĹ™Ă­da zapouzdĹ™uje prĂˇci s JavaMailSender
+ * a pĹ™edstavuje centrĂˇlnĂ­ mĂ­sto pro technickĂ© odesĂ­lĂˇnĂ­ e-mailĹŻ.
  *
- * OdesĂ­lĂˇnĂ­ emailĹŻ probĂ­hĂˇ asynchronnÄ› a je moĹľnĂ© jej globĂˇlnÄ›
- * vypnout pomocĂ­ konfiguraÄŤnĂ­ vlastnosti.
+ * OdesĂ­lĂˇnĂ­ probĂ­hĂˇ asynchronnÄ›.
+ * FunkÄŤnost lze globĂˇlnÄ› vypnout pomocĂ­ konfiguraÄŤnĂ­ vlastnosti email.enabled.
+ *
+ * VĂ˝jimky pĹ™i odesĂ­lĂˇnĂ­ nejsou propagovĂˇny do vyĹˇĹˇĂ­ch vrstev.
  */
 @Service
 public class EmailWedosService implements EmailService {
@@ -1207,7 +1258,11 @@ public class EmailWedosService implements EmailService {
 
     @Value("${email.enabled:true}")
     private boolean emailEnabled;
-
+    /**
+     * VytvĂˇĹ™Ă­ instanci sluĹľby pro odesĂ­lĂˇnĂ­ e-mailĹŻ.
+     *
+     * @param mailSender komponenta Spring pro prĂˇci s SMTP serverem
+     */
     public EmailWedosService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -1327,7 +1382,7 @@ public class EmailWedosService implements EmailService {
 }
 
 -----
-# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\models\services\email\package-info.java
+# Soubor: C:\ProjektyPrace\HobbyHokej\backend\src\main\java\cz\phsoft\hokej\notifications\email\package-info.java
 -----
 /**
  * EmailovĂ˝ subsystĂ©m aplikace.
@@ -1342,4 +1397,4 @@ public class EmailWedosService implements EmailService {
  * - neĹ™eĹˇĂ­ odeslĂˇnĂ­ SMS,
  * - pouĹľĂ­vĂˇ se z notifikaÄŤnĂ­ho subsystĂ©mu a service vrstev.
  */
-package cz.phsoft.hokej.models.services.email;
+package cz.phsoft.hokej.notifications.email;

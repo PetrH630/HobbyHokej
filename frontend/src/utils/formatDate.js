@@ -1,4 +1,9 @@
-// src/utils/formatDate.js
+/**
+ * formatDate
+ *
+ * Pomocná funkce pro formátování data do uživatelsky čitelné podoby.
+ * Vrací prázdný řetězec, pokud je vstup neplatný nebo chybí.
+ */
 export const formatDate = (value) => {
     if (!value) return "";
 

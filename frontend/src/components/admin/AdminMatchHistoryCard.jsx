@@ -9,6 +9,16 @@ import {
 const getHighlightClass = (changed) =>
     changed ? "p-1 rounded bg-warning bg-opacity-25" : "";
 
+/**
+ * AdminMatchHistoryCard
+ *
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
+ *
+ * Props:
+ * @param {Object} props.item vstupní hodnota komponenty.
+ * @param {Object} props.previousItem vstupní hodnota komponenty.
+ */
+
 const AdminMatchHistoryCard = ({ item, previousItem }) => {
     const statusText = matchStatusLabel(item.matchStatus);
     const cancelReasonText = matchCancelReasonLabel(item.cancelReason);

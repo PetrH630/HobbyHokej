@@ -1,9 +1,18 @@
+/*
+ * Styly pro komponenty uživatelského rozhraní.
+ *
+ * Soubor obsahuje lokální pravidla stylování a má minimalizovat globální selektory.
+ *
+ * Cesta: Footer.css
+ * Generováno: 2026-03-04
+ */
+
 .footer {
     width: 100%;
     text-align: center;
       padding: 20px 0;
     background-color: #b0d4e6;
-  
+
 }
 
 footer p {

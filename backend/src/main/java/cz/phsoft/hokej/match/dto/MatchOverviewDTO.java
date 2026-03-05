@@ -104,6 +104,14 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private MatchResult result;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Team playerTeam;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Boolean playerWon;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Boolean draw;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -191,4 +199,13 @@ public class MatchOverviewDTO implements NumberedMatchDTO {
     public Integer getMatchNumber() {
         return matchNumber;
     }
+
+    public Team getPlayerTeam() { return playerTeam; }
+    public void setPlayerTeam(Team playerTeam) { this.playerTeam = playerTeam; }
+
+    public Boolean getPlayerWon() { return playerWon; }
+    public void setPlayerWon(Boolean playerWon) { this.playerWon = playerWon; }
+
+    public Boolean getDraw() { return draw; }
+    public void setDraw(Boolean draw) { this.draw = draw; }
 }

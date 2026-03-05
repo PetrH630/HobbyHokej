@@ -1,12 +1,28 @@
-/* =========================
-   KARTA HRÁČE – ZÁKLAD
-   ========================= */
+/*
+ * Styly pro komponenty administrační části aplikace.
+ *
+ * Soubor obsahuje lokální pravidla stylování a má minimalizovat globální selektory.
+ *
+ * Cesta: players/PlayerCard.css
+ * Generováno: 2026-03-04
+ */
+
+/*
+ * Styly pro komponenty uživatelského rozhraní.
+ *
+ * Cílem je zapouzdřit vizuální chování komponent
+ * a minimalizovat vedlejší dopady na ostatní části aplikace.
+ *
+ * Cesta: players/PlayerCard.css
+ * Generováno: 2026-03-04
+ */
 .player-card {
     position: relative;
 
     width: 100%;
+    min-width: 250px;
     max-width: 250px;
-    flex: 1 1 250px;
+    flex: 0 0 250px;
 
     margin-top: 20px;
     padding: 20px;
@@ -20,6 +36,7 @@
 
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
 
+
     transition:
         transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -27,13 +44,11 @@
 
 .player-card--active {
     border: 3px solid #0d6efd;
-    /* Bootstrap primary */
+
     box-shadow: 0 0 0 4px #0e489e;
 }
 
-/* =========================
-   OVERLAY TOOLTIP
-   ========================= */
+
 .player-card-tooltip {
     position: absolute;
     inset: 0;
@@ -51,14 +66,12 @@
     transition: opacity 0.2s ease;
 }
 
-/* zobrazit overlay po najetí */
+
 .player-card--disabled:hover .player-card-tooltip {
     opacity: 1;
 }
 
-/* =========================
-   Kolečko u vybraného hráče
-   ========================= */
+
 .active-indicator {
     position: absolute;
     top: 8px;
@@ -66,19 +79,17 @@
     font-size: 1.5rem;
 }
 
-/* aktivní hráč */
+
 .active-indicator.active {
     color: #1329a1;
 }
 
-/* neaktivní hráč */
+
 .active-indicator.inactive {
     color: #a0a5aa;
 }
 
-/* =========================
-   INTERAKCE – JEN APPROVED
-   ========================= */
+
 .player-card.clickable {
     cursor: pointer;
 }
@@ -96,9 +107,7 @@
     box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.4);
 }
 
-/* =========================
-   ZAKÁZANÉ KARTY
-   ========================= */
+
 .player-card--disabled {
     cursor: not-allowed;
     opacity: 0.85;
@@ -111,9 +120,7 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* =========================
-   STAVY HRÁČE (BARVY)
-   ========================= */
+
 .player-approved {
     background-color: #64e98a;
     border-color: #3da361;
@@ -129,9 +136,7 @@
     border-color: #f5c2c7;
 }
 
-/* =========================
-   IKONA TÝMU (OVERLAY)
-   ========================= */
+
 .team-icon-wrapper {
     position: relative;
     display: inline-block;
@@ -156,27 +161,23 @@
     color: #001833;
 }
 
-/* DARK tým */
+
 .team-icon-wrapper.team-dark .team-icon.base {
     color: #045ee6;
 }
 
-/* LIGHT tým */
+
 .team-icon-wrapper.team-light .team-icon.base {
     color: #ffffff;
 }
 
-/* =========================
-   TELEFON
-   ========================= */
+
 .phone-icon {
     color: #0d6efd;
     margin-right: 6px;
 }
 
-/* =========================
-   RESPONSIVE
-   ========================= */
+
 @media (max-width: 576px) {
     .player-card {
             .player-card {

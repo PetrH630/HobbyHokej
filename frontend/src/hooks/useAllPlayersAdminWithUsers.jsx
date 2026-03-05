@@ -1,4 +1,3 @@
-// src/hooks/useAllPlayersAdminWithUsers.js
 import { useEffect, useMemo, useState } from "react";
 import { useAllPlayersAdmin } from "./useAllPlayersAdmin";
 import { userApi } from "../api/userApi";
@@ -15,6 +14,12 @@ import { userApi } from "../api/userApi";
  *  - loading
  *  - error
  *  - reload()
+ */
+/**
+ * useAllPlayersAdminWithUsers
+ *
+ * Admin hook pro načtení hráčů včetně informací o propojených uživatelských účtech.
+ * Používá se tam, kde je potřeba řešit mapování uživatel ↔ hráč.
  */
 export const useAllPlayersAdminWithUsers = () => {
     const {

@@ -1,10 +1,24 @@
-// src/components/matchRegistration/TeamSelectModal.jsx
 import React from "react";
 import { TeamDarkIcon, TeamLightIcon } from "../../icons";
 import "./TeamSelectModal.css";
 import { useGlobalModal } from "../../hooks/useGlobalModal";
 import { computeTeamPositionAvailability } from "../../utils/matchPositionUtils";
 
+/**
+ * TeamSelectModal
+ *
+ * Bootstrap modal komponenta pro práci s modálním dialogem v aplikaci.
+ *
+ * Při otevření blokuje scroll pozadí pomocí useGlobalModal.
+ *
+ * Props:
+ * @param {boolean} props.isOpen určuje, zda je dialog otevřený.
+ * @param {Function} props.onClose callback pro předání akce do nadřazené vrstvy.
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ * @param {Object} props.defaultTeam vstupní hodnota komponenty. [default: "LIGHT"]
+ * @param {Object} props.onSelectTeam vstupní hodnota komponenty.
+ * @param {Object} props.onBeforeSelectTeam vstupní hodnota komponenty.
+ */
 const TeamSelectModal = ({
     isOpen,
     onClose,
@@ -20,16 +34,15 @@ const TeamSelectModal = ({
     const lightCount = match?.inGamePlayersLight ?? 0;
     const darkCount = match?.inGamePlayersDark ?? 0;
 
-    // původní max hodnoty z match
+
     const rawLightMax = match?.maxPlayersLight ?? match?.maxPlayers ?? 0;
     const rawDarkMax = match?.maxPlayersDark ?? match?.maxPlayers ?? 0;
 
-    // v UI se doposud zobrazovalo "Hráči: X / (max / 2)"
-    // → kapacita na tým (jak ji uživatel vidí) = rawMax / 2
+
     const lightCap = rawLightMax > 0 ? rawLightMax / 2 : 0;
     const darkCap = rawDarkMax > 0 ? rawDarkMax / 2 : 0;
 
-    // celková kapacita zápasu
+
     const totalMaxPlayers = match?.maxPlayers ?? 0;
     const totalInGamePlayers =
         match?.inGamePlayers ?? lightCount + darkCount;
@@ -37,24 +50,25 @@ const TeamSelectModal = ({
     const isLightFull = lightCap > 0 && lightCount >= lightCap;
     const isDarkFull = darkCap > 0 && darkCount >= darkCap;
 
-    // dosažení celkové kapacity zápasu
+
     const isTotalFull =
         totalMaxPlayers > 0 && totalInGamePlayers >= totalMaxPlayers;
 
     const isLightDefault = defaultTeam === "LIGHT";
     const isDarkDefault = defaultTeam === "DARK";
 
-    // NOVĚ: zjistíme, zda je v týmu volno už jen pro brankáře
+
     const lightAvailability = computeTeamPositionAvailability(match, "LIGHT");
     const darkAvailability = computeTeamPositionAvailability(match, "DARK");
 
     const onlyGoalieLeftLight = lightAvailability.onlyGoalieLeft;
     const onlyGoalieLeftDark = darkAvailability.onlyGoalieLeft;
 
-    // helper: kdy ukázat info o registraci jako náhradník pro daný tým
+
     const showReserveNoteDark = isDarkFull || isTotalFull;
     const showReserveNoteLight = isLightFull || isTotalFull;
 
+    
     const handleSelect = async (team) => {
         if (!onSelectTeam) return;
 
@@ -62,7 +76,7 @@ const TeamSelectModal = ({
             await onBeforeSelectTeam();
         }
 
-        // registrace se provede až po výběru pozice v dalším modalu
+
         onSelectTeam(team);
     };
 
@@ -130,7 +144,6 @@ const TeamSelectModal = ({
                                 </div>
                             </div>
 
-                            {/* LIGHT */}
                             <div
                                 className={
                                     "card team-card text-center " +

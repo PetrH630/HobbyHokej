@@ -1,20 +1,13 @@
-// src/components/notifications/AdminNotificationCard.jsx
 import { formatDistanceToNow } from "date-fns";
 import { cs } from "date-fns/locale";
 
 /**
- * Admin karta s notifikací – read-only přehled jedné "události".
+ * AdminNotificationCard
  *
- * Zobrazuje:
- * - krátkou a dlouhou zprávu (jednou za událost),
- * - seznam příjemců (uživatelů) a jejich hráčů,
- * - pro každého příjemce info, zda a kdy notifikaci přečetl,
- * - čas vytvoření události,
- * - příznak důležitosti.
+ * Karta pro zobrazení přehledových informací a akcí nad konkrétní entitou.
  *
- * @param {Object} props
- * @param {Object} props.group Seskupená notifikační událost:
- *                             { key, createdAt, important, notifications: NotificationDTO[] }
+ * Props:
+ * @param {Object} props.group vstupní hodnota komponenty.
  */
 const AdminNotificationCard = ({ group }) => {
     if (!group) return null;
@@ -59,8 +52,7 @@ const AdminNotificationCard = ({ group }) => {
                 ? "border-danger"
                 : "border-primary");
 
-    // Připravíme si seznam příjemců:
-    // Hráč, emailTo, smsTo, stav přečtení
+
     const recipients = notifications.map((n) => {
         const { player, readAt, emailTo, smsTo } = n;
 
@@ -114,10 +106,10 @@ const AdminNotificationCard = ({ group }) => {
     return (
         <div className={rootClass}>
             <div className="card-body">
-                {/* Hlavička – text notifikace + badge stavu / důležitost */}
+
                 <div className="d-flex justify-content-between align-items-start mb-2">
                     <div className="me-3 flex-grow-1">
-                        {/* 🟦 Na malém zařízení badge nad messageShort */}
+
                         <div className="d-sm-none mb-1 text-end">
                             {renderStatusBadges()}
                         </div>
@@ -133,13 +125,11 @@ const AdminNotificationCard = ({ group }) => {
                         )}
                     </div>
 
-                    {/* 🟦 Na ≥ sm zařízení badge vpravo jako dřív */}
                     <div className="text-end ms-2 d-none d-sm-block">
                         {renderStatusBadges()}
                     </div>
                 </div>
 
-                {/* Seznam příjemců */}
                 <div className="mt-2">
                     <div className="small text-muted mb-1">
                         Příjemci ({recipients.length}):
@@ -193,7 +183,6 @@ const AdminNotificationCard = ({ group }) => {
                     </ul>
                 </div>
 
-                {/* Spodní řádek – kdy byla událost vytvořena */}
                 <div className="d-flex justify-content-between align-items-center mt-3">
                     <div className="text-muted small">
                         {createdRelative

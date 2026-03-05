@@ -1,4 +1,3 @@
-// src/hooks/usePlayerStatsAdmin.js
 import { useCallback, useEffect, useState } from "react";
 import { getPlayerStatsAdmin } from "../api/playerApi";
 
@@ -6,6 +5,11 @@ import { getPlayerStatsAdmin } from "../api/playerApi";
  * Hook pro načtení statistik vybraného hráče (ADMIN/MANAGER).
  *
  * Data se načítají z backendu přes GET /api/players/{playerId}/stats.
+ */
+/**
+ * usePlayerStatsAdmin
+ *
+ * Admin hook pro načtení statistik hráčů pro přehledy a reporty v administraci.
  */
 export const usePlayerStatsAdmin = (playerId, options = {}) => {
     const { enabled = true } = options;

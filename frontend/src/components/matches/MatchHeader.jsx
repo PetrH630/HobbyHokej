@@ -1,5 +1,3 @@
-// src/components/MatchHeader.jsx
-//import "./MatchHeader.css";
 import { MATCH_MODE_CONFIG } from "../../constants/matchModeConfig";
 
 const formatDateTime = (dateTime) => {
@@ -29,6 +27,14 @@ const formatDateTime = (dateTime) => {
     };
 };
 
+/**
+ * MatchHeader
+ *
+ * Hlavičkový prvek stránky se zobrazením základních informací a navigačních prvků.
+ *
+ * Props:
+ * @param {import("../../types/dto").MatchDTO} props.match Data vybraného zápasu načtená z backendu.
+ */
 const MatchHeader = ({ match }) => {
     const formatted = formatDateTime(match?.dateTime);
     const matchModeLabel =
@@ -49,13 +55,13 @@ const MatchHeader = ({ match }) => {
 
             <p className="match-header-location">
                 {match.location}
-            </p>         
+            </p>
             {matchModeLabel && (
                 <p className="match-header-mode mb-0">
                     <strong>{matchModeLabel}</strong>
                 </p>
             )}
-            
+
         </div>
     );
 };

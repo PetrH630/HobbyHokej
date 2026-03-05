@@ -1,3 +1,12 @@
+/*
+ * Styly pro komponenty uživatelského rozhraní.
+ *
+ * Soubor obsahuje lokální pravidla stylování a má minimalizovat globální selektory.
+ *
+ * Cesta: ScrollToTopButton.css
+ * Generováno: 2026-03-04
+ */
+
 .scroll-to-top-btn {
     position: fixed;
     bottom: 30px;
@@ -13,7 +22,7 @@
     cursor: pointer;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
-    z-index: 1050;   
+    z-index: 1050;
 }
 
 .scroll-to-top-btn:hover {
